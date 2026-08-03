@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/incompatible-library */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState } from "react";
@@ -25,7 +27,7 @@ import {
 
 const SummaryCard = ({ label, value, icon: Icon, bgColor, textColor }: { label: string, value: string | number, icon: any, bgColor: string, textColor: string }) => (
   <div className="bg-[#0A0A0A] border border-white/20 rounded-[20px] p-5 flex items-center gap-4 flex-1">
-    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${bgColor} bg-opacity-20 border border-white/20 flex-shrink-0`}>
+    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${bgColor} bg-opacity-20 border border-white/20 shrink-0`}>
       {Icon && <Icon size={24} className={`${textColor} opacity-100`} stroke={2} />}
     </div>
     <div className="space-y-0.5">
@@ -258,7 +260,7 @@ export const SuccessStory = () => {
               {/* Media container */}
               <div 
                 onClick={() => setSelectedMedia({ mediaType: story.mediaType, mediaFile: story.mediaFile })}
-                className="aspect-video w-full bg-black relative overflow-hidden flex-shrink-0 flex items-center justify-center cursor-zoom-in"
+                className="aspect-video w-full bg-black relative overflow-hidden shrink-0 flex items-center justify-center cursor-zoom-in"
               >
                 {story.mediaType === "image" ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -276,7 +278,7 @@ export const SuccessStory = () => {
               </div>
               
               {/* Text details */}
-              <div className="p-6 flex flex-col gap-3 flex-grow bg-[#111111]">
+              <div className="p-6 flex flex-col gap-3 grow bg-[#111111]">
                 <h3 className="text-lg font-bold text-white leading-tight font-orbitron uppercase group-hover:text-[#E31B23] transition-colors">{story.title}</h3>
                 <p className="text-xs text-white/50 leading-relaxed line-clamp-4">{story.description}</p>
               </div>
@@ -305,7 +307,7 @@ export const SuccessStory = () => {
               <input 
                 type="text" 
                 placeholder="Enter title (e.g. Under-17 Championship Victory)" 
-                className="w-full h-12 bg-white/[0.02] border border-white/10 rounded-xl px-4 text-sm font-bold text-white focus:outline-none focus:border-[#E31B23]/50 transition-all placeholder:text-gray-600"
+                className="w-full h-12 bg-white/2 border border-white/10 rounded-xl px-4 text-sm font-bold text-white focus:outline-none focus:border-[#E31B23]/50 transition-all placeholder:text-gray-600"
                 {...register("title", { required: "Title is required", minLength: { value: 3, message: "Title must be at least 3 characters" } })}
               />
               {errors.title && <p className="text-xs text-red-500 font-bold">{errors.title.message}</p>}
@@ -316,7 +318,7 @@ export const SuccessStory = () => {
               <label className="text-xs font-bold text-white/60 uppercase tracking-widest block">Description</label>
               <textarea 
                 placeholder="Share the details of this success story..." 
-                className="w-full h-28 bg-white/[0.02] border border-white/10 rounded-xl p-4 text-sm font-bold text-white focus:outline-none focus:border-[#E31B23]/50 transition-all placeholder:text-gray-600 resize-none"
+                className="w-full h-28 bg-white/2 border border-white/10 rounded-xl p-4 text-sm font-bold text-white focus:outline-none focus:border-[#E31B23]/50 transition-all placeholder:text-gray-600 resize-none"
                 {...register("description", { required: "Description is required", minLength: { value: 10, message: "Description must be at least 10 characters" } })}
               />
               {errors.description && <p className="text-xs text-red-500 font-bold">{errors.description.message}</p>}
@@ -356,7 +358,7 @@ export const SuccessStory = () => {
                 <input 
                   type="file" 
                   accept={watch("mediaType") === "image" ? "image/*" : "video/*"}
-                  className="w-full text-sm text-gray-500 file:mr-4 file:file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:bg-white/5 file:text-white hover:file:bg-white/10 file:transition-all cursor-pointer"
+                  className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:bg-white/5 file:text-white hover:file:bg-white/10 file:transition-all cursor-pointer"
                   onChange={handleFileChange}
                 />
               </div>
