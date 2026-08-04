@@ -21,6 +21,7 @@ const REDIRECT_MAP: Record<string, string> = {
   "club@gmail.com": "/dashboard/club",
   "agent@gmail.com": "/dashboard/agent",
   "admin@gmail.com": "/dashboard/admin",
+  "parent@gmail.com": "/dashboard/parent",
 };
 
 export default function LoginPage() {
