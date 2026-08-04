@@ -22,7 +22,7 @@ export function Navbar() {
   ]
 
   return (
-    <nav className="bg-[#080808]">
+    <nav className="sticky top-0 z-50 bg-[#080808]/90 backdrop-blur-md border-b border-white/5">
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -55,7 +55,9 @@ export function Navbar() {
                 Login
               </Button>
             </Link>
-            <ButtonPrimary text="Join Now"  />
+            <Link href="/register">
+              <ButtonPrimary text="Join Now" />
+            </Link>
 
             {/* Mobile Menu Button */}
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -101,7 +103,9 @@ export function Navbar() {
                         Login
                       </Button>
                     </Link>
-                    <ButtonPrimary text="Join Now" className="w-full" />
+                    <Link href="/register" onClick={() => setIsOpen(false)}>
+                      <ButtonPrimary text="Join Now" className="w-full" />
+                    </Link>
                   </div>
                 </div>
               </SheetContent>

@@ -73,7 +73,7 @@ export default function ForgotPasswordPage() {
         {/* Send Button */}
         <Button
           type="submit"
-          className="w-full !bg-my-primary py-6 rounded-lg text-lg font-semibold text-white hover:bg-my-primary/90 transition-colors"
+          className="w-full bg-my-primary! py-6 rounded-lg text-lg font-semibold text-white hover:bg-my-primary/90 transition-colors"
         >
           Send
         </Button>

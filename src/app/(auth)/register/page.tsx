@@ -405,7 +405,7 @@ export default function RegisterPage() {
                       <input
                         type="date"
                         {...register("dob", { required: "Date of Birth is required" })}
-                        className="w-full px-4 py-3.5 rounded-xl border border-white/5 bg-black/40 text-white focus:outline-none focus:border-primary/50 transition-all text-sm [color-scheme:dark]"
+                        className="w-full px-4 py-3.5 rounded-xl border border-white/5 bg-black/40 text-white focus:outline-none focus:border-primary/50 transition-all text-sm scheme-dark"
                       />
                       {errors.dob && (
                         <p className="text-red-500 text-[10px] font-bold tracking-wide mt-1 ml-1 uppercase">

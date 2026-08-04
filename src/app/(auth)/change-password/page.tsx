@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/incompatible-library */
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -165,7 +166,7 @@ export default function ChangePasswordPage() {
         {/* Update Button */}
         <Button
           type="submit"
-          className="w-full !bg-my-primary text-white hover:!bg-my-primary/90"
+          className="w-full bg-my-primary! text-white hover:bg-my-primary/90!"
           size="lg"
         >
           Update Password
