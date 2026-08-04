@@ -15,6 +15,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
     const isAuthPage =
       pathname.startsWith("/login") ||
+      pathname.startsWith("/register") ||
       pathname.startsWith("/forgot-password") ||
       pathname.startsWith("/reset-password") ||
       pathname.startsWith("/change-password");
@@ -33,7 +34,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
     // 3. Role-based protection: If logged in but trying to access another role's dashboard
     else if (isLoggedIn && isDashboardPage && !pathname.startsWith(dashboardPath)) {
-      const roles = ["player", "coach", "academy", "club", "agent", "admin"];
+      const roles = ["player", "coach", "academy", "club", "agent", "admin", "parent"];
       const tryingToAccessOtherRole = roles.some(
         (role) => role !== userRole && pathname.startsWith(`/dashboard/${role}`)
       );
