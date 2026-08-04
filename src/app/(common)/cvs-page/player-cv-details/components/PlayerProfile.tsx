@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState, useEffect } from "react";
-import flag from "@/assets/cvs-page//id/flag.png";
+import React, { useState } from "react";
 import playerImage from "@/assets/cvs-page/id/player-short-image.png";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -11,7 +11,7 @@ import { usePlayerStats } from "./FullEditablePage";
 import { useUpdatePlayerProfileMutation } from "@/lib/features/cv/cvApi";
 import { CMSField } from "@/components/shared/CMSField";
 import { toast } from "sonner";
-import { cn, getShortForm, getFullWithShortForm, getVeryShortPosition } from "@/lib/utils";
+import { cn, getShortForm, getVeryShortPosition } from "@/lib/utils";
 import { usePlayer } from "@/lib/hooks/usePlayer";
 import goldCard from "@/assets/cvs-page/gold-card.png";
 import pinkCard from "@/assets/cvs-page/pink-card.png";
@@ -20,6 +20,7 @@ import flag1 from "@/assets/cvs-page/flag1.png";
 import club1 from "@/assets/cvs-page/club1.png";
 import { useRouter } from "next/navigation";
 import { IconCircleCheck } from "@tabler/icons-react";
+import { calculateWeightedRating } from "@/lib/utils/rating";
 
 const COUNTRY_CODES: Record<string, string> = {
   "afghanistan": "af", "albania": "al", "algeria": "dz", "andorra": "ad", "angola": "ao",
@@ -149,10 +150,6 @@ export default function PlayerProfile({
       status: getBadgeStatus(s.value)
     }));
 
-  const overallRating = attrData.length > 0
-    ? Math.round(attrData.reduce((sum, attr) => sum + attr.score, 0) / attrData.length)
-    : 75;
-
   const currentStats = {
     pac: playerData.strengths?.pace ?? 75,
     sho: playerData.strengths?.shooting ?? 75,
@@ -161,6 +158,15 @@ export default function PlayerProfile({
     def: playerData.strengths?.defending ?? 75,
     phy: playerData.strengths?.physical ?? 75
   };
+
+  const overallRating = calculateWeightedRating(playerData.position, {
+    pace: currentStats.pac,
+    shooting: currentStats.sho,
+    passing: currentStats.pas,
+    dribbling: currentStats.dri,
+    defending: currentStats.def,
+    physical: currentStats.phy
+  });
 
   const currentPlayer = {
     name: playerData.fullName?.split(' ').pop()?.toUpperCase() || "PLAYER",
@@ -233,7 +239,7 @@ export default function PlayerProfile({
         {/* Left Section - Player Card */}
         <div className="lg:col-span-1  bg-cardBg h-fit rounded-xl overflow-hidden">
           <div className=" overflow-hidden">
-            <div className="aspect-square bg-gradient-to-b from-[#2df168] to-[#39493b] flex items-center justify-center">
+            <div className="aspect-square bg-linear-to-b from-[#2df168] to-[#39493b] flex items-center justify-center">
               <div onClick={() => router.push("/cvs-page/player-cv-details")} className="flex min-w-60 justify-center cursor-pointer">
                 <div className="relative min-h-50 hover:scale-110 duration-300">
                   <Image
@@ -251,8 +257,10 @@ export default function PlayerProfile({
                   <div className="absolute top-[15%] left-7 text-black flex flex-col items-center">
                     <h2 className="text-3xl font-semibold leading-none">{currentPlayer.rating}</h2>
                     <h2 className="text-xs font-bold leading-none mt-1">{currentPlayer.position}</h2>
-                    <img src={getFlagUrlWithFallback()} className="w-6 h-4 object-cover mt-2.5 rounded-xs" alt="flag" />
-                    <img src={getClubLogoUrl()} className="w-6 h-6 object-contain mt-1.5" alt="club logo" />
+                    <Image width={300}
+                      height={400} src={getFlagUrlWithFallback()} className="w-6 h-4 object-cover mt-2.5 rounded-xs" alt="flag" />
+                    <Image width={300}
+                      height={400} src={getClubLogoUrl()} className="w-6 h-6 object-contain mt-1.5" alt="club logo" />
                   </div>
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className=" relative w-[90%] h-[90%] ">
@@ -275,8 +283,10 @@ export default function PlayerProfile({
                           }
                         }}
                       >
-                        <img
+                        <Image
                           className="w-full h-full object-cover"
+                          width={300}
+                          height={400}
                           src={playerData.cardImage || playerImage.src}
                           alt="player Image"
                         />
@@ -531,7 +541,7 @@ export default function PlayerProfile({
                   </div>
 
                   {/* Score */}
-                  <div className="shrink-0 text-right min-w-[5rem] transition-all duration-300">
+                  <div className="shrink-0 text-right min-w-20 transition-all duration-300">
                     <CMSField
                       value={attr.score}
                       onUpdate={(val) => handleUpdate(attr.name, parseInt(String(val)))}

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import flagFr from "@/assets/cvs-page/id/flag-fr.png";
 import flagIt from "@/assets/cvs-page/id/flag-itally.png";
 import flagImage from "@/assets/cvs-page/id/flag.png";
@@ -10,6 +11,7 @@ import positionMap from "@/assets/cvs-page/id/position-map.png";
 import right from "@/assets/cvs-page/id/right_foot.png";
 import trofeeIcon from "@/assets/cvs-page/id/trofeeIcon.png";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { calculateWeightedRating } from "@/lib/utils/rating";
 
 export interface Club {
   id: string;
@@ -397,6 +399,7 @@ export const playerSlice = createSlice({
       const activePlayer = state.players.find((p) => p.id === state.selectedPlayerId);
       if (activePlayer) {
         Object.assign(activePlayer, action.payload);
+        activePlayer.rating = calculateWeightedRating(activePlayer.position, activePlayer.strengths);
       }
     },
     updatePlayerField: (state, action: PayloadAction<{ field: string; value: any }>) => {
@@ -412,6 +415,9 @@ export const playerSlice = createSlice({
             current = current[keys[i]];
           }
           current[keys[keys.length - 1]] = value;
+        }
+        if (field === "position" || field.startsWith("strengths")) {
+          activePlayer.rating = calculateWeightedRating(activePlayer.position, activePlayer.strengths);
         }
       }
     },
