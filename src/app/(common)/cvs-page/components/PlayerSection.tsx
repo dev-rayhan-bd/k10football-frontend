@@ -37,7 +37,7 @@ export default function Players() {
   const { players, selectPlayer } = usePlayer();
 
   return (
-    <div className="container mt-20 bg-black p-8">
+    <div className="container mx-auto px-4 mt-20 bg-black py-8 rounded-3xl">
       <h1
         className="text-4xl text-center font-heading mb-12 animate-pulse"
         style={{ color: "#00FF62" }}
@@ -69,11 +69,11 @@ export default function Players() {
                 router.push("/cvs-page/player-cv-details");
               }}
               key={player.id}
-              className="flex min-w-60 justify-center cursor-pointer"
+              className="flex justify-center cursor-pointer w-full max-w-[280px] mx-auto"
             >
-              <div className="relative min-h-50 hover:scale-110 duration-300">
+              <div className="relative w-full aspect-[270/385] hover:scale-105 transition-all duration-300 z-0">
                 <Image
-                  className="h-full w-full min-w-60 z-10"
+                  className="absolute inset-0 w-full h-full object-contain z-0 pointer-events-none"
                   src={
                     cardType === "pink"
                       ? pinkCard
@@ -83,84 +83,89 @@ export default function Players() {
                   }
                   alt="card background"
                 />
-                {/* top values */}
-                <div className="absolute top-[15%] left-7 text-black flex flex-col items-center">
-                  <h2 className="text-3xl font-semibold leading-none">{player.rating}</h2>
-                  <h2 className="text-xs font-bold leading-none mt-1">{shortPos}</h2>
-                  <img src={flagSrc} className="w-6 h-4 object-cover mt-2 rounded-xs shadow-sm" alt="flag" />
-                  <Image src={club1} className="w-6 mt-1.5" alt="club image" />
+                
+                {/* Top values */}
+                <div className="absolute top-[13%] left-[10%] text-black flex flex-col items-center z-10 w-[18%]">
+                  <h2 className="text-2xl sm:text-3xl font-extrabold leading-none font-heading tracking-tighter">{player.rating}</h2>
+                  <h2 className="text-[9px] sm:text-[11px] font-black leading-none mt-1 uppercase tracking-wider">{shortPos}</h2>
+                  <img src={flagSrc} className="w-5 sm:w-6 h-3 sm:h-4 object-cover mt-2 rounded-xs shadow-xs" alt="flag" />
+                  <Image src={club1} className="w-5 sm:w-6 h-5 sm:h-6 object-contain mt-1.5" alt="club image" />
                 </div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="relative w-[90%] h-[90%]">
-                    {/* Render custom card image if uploaded, otherwise keep default short image */}
-                    <div className="w-[80%] h-[200px] pt-5 pr-3 flex items-center justify-center ml-auto">
-                      <img
-                        className="w-full h-full  object-cover rounded-t-3xl"
-                        src={player.cardImage || playerImage.src}
-                        alt="player Image"
-                      />
-                    </div>
 
-                    {/* shadow */}
-                    <div
-                      className={`w-full h-40 absolute top-[35%] left-0 ${cardType === "gold"
-                        ? "bg-linear-to-t from-transparent via-[#F9E07F] to-transparent"
-                        : cardType === "white"
-                          ? "bg-linear-to-t from-transparent via-[#E5E5E7] to-transparent"
-                          : "bg-linear-to-t from-transparent via-[#F5DCCE] to-transparent"
-                        }`}
-                    ></div>
-                    {/* name */}
-                    <div
-                      className="absolute text-black font-heading text-2xl text-center border-b pb-2 w-[80%] top-[49%] left-1/2 -translate-x-1/2 z-10"
-                    >
-                      {displayLastName}
-                    </div>
+                {/* Player image */}
+                <div className="absolute top-[12%] right-[11%] w-[58%] h-[40%] flex items-end justify-center z-10 overflow-hidden">
+                  <img
+                    className="h-full w-auto object-contain select-none pointer-events-none"
+                    src={player.cardImage || playerImage.src}
+                    alt="player Image"
+                  />
+                </div>
 
-                    <div className="text-black relative z-10 mt-4">
-                      <div className="flex items-center justify-between gap-4 p-3 pb-1">
-                        {/* left */}
-                        <div className="flex-1">
-                          <div className="flex justify-between">
-                            <span className="font-bold text-gray-900">{stats.pac}</span>
-                            <span className="font-semibold text-gray-700">PAC</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="font-bold text-gray-900">{stats.sho}</span>
-                            <span className="font-semibold text-gray-700">SHO</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="font-bold text-gray-900">{stats.pas}</span>
-                            <span className="font-semibold text-gray-700">PAS</span>
-                          </div>
-                        </div>
-                        <div className="h-16 border-r border-border"></div>
-                        {/* right */}
-                        <div className="flex-1">
-                          <div className="flex justify-between">
-                            <span className="font-bold text-gray-900">{stats.dri}</span>
-                            <span className="font-semibold text-gray-700">DRI</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="font-bold text-gray-900">{stats.def}</span>
-                            <span className="font-semibold text-gray-700">DEF</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="font-bold text-gray-900">{stats.phy}</span>
-                            <span className="font-semibold text-gray-700">PHY</span>
-                          </div>
-                        </div>
+                {/* shadow */}
+                <div
+                  className={`absolute top-[35%] left-0 w-full h-[22%] z-10 pointer-events-none ${
+                    cardType === "gold"
+                      ? "bg-linear-to-t from-transparent via-[#F9E07F] to-transparent"
+                      : cardType === "white"
+                        ? "bg-linear-to-t from-transparent via-[#E5E5E7] to-transparent"
+                        : "bg-linear-to-t from-transparent via-[#F5DCCE] to-transparent"
+                  }`}
+                ></div>
+
+                {/* Name */}
+                <div className="absolute top-[52%] left-1/2 -translate-x-1/2 w-[76%] text-center border-b border-black/15 pb-1 z-20">
+                  <h3 className="text-gray-900 font-heading text-lg sm:text-xl font-black uppercase tracking-wide truncate">
+                    {displayLastName}
+                  </h3>
+                </div>
+
+                {/* Stats */}
+                <div className="absolute top-[60%] left-1/2 -translate-x-1/2 w-[82%] text-black z-20">
+                  <div className="flex items-center justify-between gap-1 p-2">
+                    {/* left */}
+                    <div className="flex-1 flex flex-col gap-0.5">
+                      <div className="flex justify-between items-center">
+                        <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{stats.pac}</span>
+                        <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">PAC</span>
                       </div>
-                      <div className="w-[30%] border-b border-black/10 mx-auto my-1"></div>
-                      <div className="flex flex-col items-center justify-center text-[8px] font-bold text-gray-700 space-y-0.5 pb-2">
-                        <div className="truncate max-w-[170px] uppercase tracking-wider">
-                          ACADEMY: <span className="font-black text-black">{player.academyName || "N/A"}</span>
-                        </div>
-                        <div className="truncate max-w-[170px] uppercase tracking-wider">
-                          COACH: <span className="font-black text-black">{player.coachName || "N/A"}</span>
-                        </div>
+                      <div className="flex justify-between items-center">
+                        <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{stats.sho}</span>
+                        <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">SHO</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{stats.pas}</span>
+                        <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">PAS</span>
                       </div>
                     </div>
+
+                    <div className="h-10 border-r border-black/15 mx-1"></div>
+
+                    {/* right */}
+                    <div className="flex-1 flex flex-col gap-0.5">
+                      <div className="flex justify-between items-center">
+                        <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{stats.dri}</span>
+                        <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">DRI</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{stats.def}</span>
+                        <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">DEF</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{stats.phy}</span>
+                        <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">PHY</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Academy & Coach Info */}
+                <div className="absolute bottom-[13.5%] left-1/2 -translate-x-1/2 w-[84%] flex flex-col items-center justify-center text-[8px] sm:text-[10px] font-black text-gray-800/95 space-y-0.5 z-20">
+                  <div className="w-[32%] border-b border-black/10 mx-auto mb-1.5"></div>
+                  <div className="truncate w-full text-center uppercase tracking-wider">
+                    ACADEMY: <span className="font-black text-black">{player.academyName || "N/A"}</span>
+                  </div>
+                  <div className="truncate w-full text-center uppercase tracking-wider">
+                    COACH: <span className="font-black text-black">{player.coachName || "N/A"}</span>
                   </div>
                 </div>
               </div>

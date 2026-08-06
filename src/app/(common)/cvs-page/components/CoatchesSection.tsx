@@ -207,7 +207,7 @@ export default function Coaches() {
 
 
   return (
-    <div className="container mt=20 bg-black p-8">
+    <div className="container mx-auto px-4 mt-20 bg-black py-8 rounded-3xl">
       <h1
         className="text-4xl  text-center font-heading mb-12"
         style={{ color: "#00FF62" }}
@@ -217,10 +217,10 @@ export default function Coaches() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         {displayCoaches.map((coach) => (
-          <div onClick={() => router.push("/cvs-page/coach-cv-details")} key={coach.id} className="flex justify-center">
-            <div className="relative min-h-50 cursor-pointer hover:scale-110 min-w-60 duration-300">
+          <div onClick={() => router.push("/cvs-page/coach-cv-details")} key={coach.id} className="flex justify-center w-full max-w-[280px] mx-auto">
+            <div className="relative w-full aspect-270/385 cursor-pointer hover:scale-105 transition-all duration-300 z-0">
               <Image
-                className=" h-full w-full min-w-60 z-10"
+                className="absolute inset-0 w-full h-full object-contain z-0 pointer-events-none"
                 src={
                   coach.cardType === "pink"
                     ? pinkCard
@@ -230,104 +230,84 @@ export default function Coaches() {
                 }
                 alt="card background"
               />
-              {/* top values */}
-              <div className="absolute top-[15%] left-7 text-black">
-                <h2 className="text-3xl font-semibold">{coach.rating}</h2>
-                <h2 className="text-lg">{coach.position}</h2>
-                <Image src={flag1} className="w-6 mt-2" alt="flag image" />
-                <Image src={club1} className="w-6 mt-2" alt="club image image" />
+              
+              {/* Top values */}
+              <div className="absolute top-[13%] left-[10%] text-black flex flex-col items-center z-10 w-[18%]">
+                <h2 className="text-2xl sm:text-3xl font-extrabold leading-none font-heading tracking-tighter">{coach.rating}</h2>
+                <h2 className="text-[9px] sm:text-[11px] font-black leading-none mt-1 uppercase tracking-wider">{coach.position}</h2>
+                <Image src={flag1} className="w-5 sm:w-6 mt-2 rounded-xs shadow-xs" alt="flag image" />
+                <Image src={club1} className="w-5 sm:w-6 mt-1.5 object-contain" alt="club image" />
               </div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className=" relative w-[90%] h-[90%] overflow-hidden">
-                  {/* coach image */}
-                  <Image
-                    className="w-full h-48 ml-4 object-cover"
-                    src={playerImage}
-                    alt="coach Image"
-                  />
 
-                  {/* shadow */}
-                  <div
-                    className={`w-full h-40 absolute top-[35%] left-0 ${coach.cardType === "gold"
-                        ? "bg-linear-to-t from-transparent via-[#F9E07F] to-transparent"
-                        : coach.cardType === "white"
-                          ? "bg-linear-to-t from-transparent via-[#E5E5E7] to-transparent"
-                          : "bg-linear-to-t from-transparent via-[#F5DCCE] to-transparent"
-                      }`}
-                  ></div>
-                  {/* name */}
-                  <div
-                    className={` absolute text-black text-2xl font-semibold text-center border-b pb-2 w-[80%]  top-[49%] left-1/2 -translate-x-1/2 z-10`}
-                  >
-                    {coach.name}
-                  </div>
+              {/* Coach image */}
+              <div className="absolute top-[12%] right-[11%] w-[58%] h-[40%] flex items-end justify-center z-10 overflow-hidden">
+                <Image
+                  className="h-full w-auto object-contain select-none pointer-events-none"
+                  src={playerImage}
+                  alt="coach Image"
+                />
+              </div>
 
-                  <div className="text-black relative z-10 mt-2">
-                    {/*  */}
-                    <div className="flex items-center justify-between gap-4 p-3">
-                      {/* left */}
-                      <div className="flex-1">
-                        {/* 1 */}
-                        <div className="flex justify-between">
-                          <span className="font-bold text-gray-900">
-                            {coach.stats.att}
-                          </span>
-                          <span className="font-semibold text-gray-700">
-                            ATT
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="font-bold text-gray-900">
-                            {coach.stats.def}
-                          </span>
-                          <span className="font-semibold text-gray-700">
-                            DEF
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="font-bold text-gray-900">
-                            {coach.stats.exp}
-                          </span>
-                          <span className="font-semibold text-gray-700">
-                            EXP
-                          </span>
-                        </div>
-                      </div>
-                      <div className="h-16 border-r border-border"></div>
-                      {/* right */}
-                      <div className="flex-1">
-                        {/* 1 */}
-                        <div className="flex justify-between">
-                          <span className="font-bold text-gray-900">
-                            {coach.stats.tac}
-                          </span>
-                          <span className="font-semibold text-gray-700">
-                            TAC
-                          </span>
-                        </div>
-                        {/* 1 */}
-                        <div className="flex justify-between">
-                          <span className="font-bold text-gray-900">
-                            {coach.stats.imp}
-                          </span>
-                          <span className="font-semibold text-gray-700">
-                            IMP
-                          </span>
-                        </div>
-                        {/* 1 */}
-                        <div className="flex justify-between">
-                          <span className="font-bold text-gray-900">
-                            {coach.stats.lea}
-                          </span>
-                          <span className="font-semibold text-gray-700">
-                            LEA
-                          </span>
-                        </div>
-                      </div>
+              {/* shadow */}
+              <div
+                className={`absolute top-[35%] left-0 w-full h-[22%] z-10 pointer-events-none ${
+                  coach.cardType === "gold"
+                    ? "bg-linear-to-t from-transparent via-[#F9E07F] to-transparent"
+                    : coach.cardType === "white"
+                      ? "bg-linear-to-t from-transparent via-[#E5E5E7] to-transparent"
+                      : "bg-linear-to-t from-transparent via-[#F5DCCE] to-transparent"
+                }`}
+              ></div>
+
+              {/* Name */}
+              <div className="absolute top-[52%] left-1/2 -translate-x-1/2 w-[76%] text-center border-b border-black/15 pb-1 z-20">
+                <h3 className="text-gray-900 font-heading text-lg sm:text-xl font-black uppercase tracking-wide truncate">
+                  {coach.name}
+                </h3>
+              </div>
+
+              {/* Stats */}
+              <div className="absolute top-[60%] left-1/2 -translate-x-1/2 w-[82%] text-black z-20">
+                <div className="flex items-center justify-between gap-1 p-2">
+                  {/* left */}
+                  <div className="flex-1 flex flex-col gap-0.5">
+                    <div className="flex justify-between items-center">
+                      <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{coach.stats.att}</span>
+                      <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">ATT</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{coach.stats.def}</span>
+                      <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">DEF</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{coach.stats.exp}</span>
+                      <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">EXP</span>
                     </div>
                   </div>
-                  <div className="w-[30%] border-b border-border mx-auto"></div>
+
+                  <div className="h-10 border-r border-black/15 mx-1"></div>
+
+                  {/* right */}
+                  <div className="flex-1 flex flex-col gap-0.5">
+                    <div className="flex justify-between items-center">
+                      <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{coach.stats.tac}</span>
+                      <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">TAC</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{coach.stats.imp}</span>
+                      <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">IMP</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{coach.stats.lea}</span>
+                      <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">LEA</span>
+                    </div>
+                  </div>
                 </div>
+              </div>
+
+              {/* Bottom decorative spacer */}
+              <div className="absolute bottom-[13.5%] left-1/2 -translate-x-1/2 w-[80%] flex flex-col items-center justify-center z-20">
+                <div className="w-[32%] border-b border-black/10 mx-auto"></div>
               </div>
             </div>
           </div>

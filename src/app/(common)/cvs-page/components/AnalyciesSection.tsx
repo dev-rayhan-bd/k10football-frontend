@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -52,10 +53,10 @@ const CustomBar = (props: any) => {
 
 const AnalyciesSection = () => {
   return (
-    <div className="container py-10">
+    <div className="container mx-auto px-4 py-10">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
         {/* Bar Chart */}
-        <div className="bg-white/5 backdrop-blur-sm rounded-lg p-6 border border-border">
+        <div className="bg-white/5 backdrop-blur-sm rounded-lg p-6 border border-border min-w-0">
           <h2 className="text-lg font-semibold mb-4">Players by Nationality</h2>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={playersByNationality}>
@@ -75,7 +76,7 @@ const AnalyciesSection = () => {
         </div>
 
         {/* Donut Chart */}
-        <div className="bg-white/5 backdrop-blur-sm rounded-lg p-6 border border-border flex flex-col items-center justify-center">
+        <div className="bg-white/5 backdrop-blur-sm rounded-lg p-6 border border-border flex flex-col items-center justify-center min-w-0">
           <h2 className="text-lg font-semibold mb-4">BY AGE</h2>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>

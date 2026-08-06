@@ -35,9 +35,15 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     // 3. Role-based protection: If logged in but trying to access another role's dashboard
     else if (isLoggedIn && isDashboardPage && !pathname.startsWith(dashboardPath)) {
       const roles = ["player", "coach", "academy", "club", "agent", "admin", "parent"];
-      const tryingToAccessOtherRole = roles.some(
-        (role) => role !== userRole && pathname.startsWith(`/dashboard/${role}`)
-      );
+      // Allow parent and player to access each other's dashboards
+      const allowedRoles = [userRole];
+      if (userRole === "parent") allowedRoles.push("player");
+      if (userRole === "player") allowedRoles.push("parent");
+
+      const tryingToAccessOtherRole = roles.some((role) => {
+        if (allowedRoles.includes(role)) return false;
+        return pathname.startsWith(`/dashboard/${role}`);
+      });
 
       if (tryingToAccessOtherRole) {
         router.replace(dashboardPath);

@@ -7,6 +7,9 @@ import { ReactNode } from "react";
 export function SiteHeader({ showToggle = false, customToggle }: { showToggle?: boolean, customToggle?: ReactNode }) {
   const pathName = usePathname();
   const isAnalysis = pathName.includes("/analysis");
+  const isPlayerPage = pathName.startsWith("/dashboard/player");
+  const isParentPage = pathName.startsWith("/dashboard/parent");
+  const isParentOrPlayerSpace = isPlayerPage || isParentPage;
   const router = useRouter();
 
   const handleToggle = () => {
@@ -61,6 +64,35 @@ export function SiteHeader({ showToggle = false, customToggle }: { showToggle?: 
       </div>
 
       <div className="flex items-center gap-4 text-gray-300">
+        {isParentOrPlayerSpace && (
+          <div className="flex items-center bg-white/5 rounded-lg p-1.5 gap-1.5 mr-2 scale-90 lg:scale-100 border border-white/10 shadow-inner">
+            <button
+              onClick={() => router.push("/dashboard/parent")}
+              className={`px-4 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all duration-300 ${isParentPage ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/35' : 'text-white/40 hover:text-white/60'}`}
+            >
+              Parent
+            </button>
+            <div
+              onClick={() => {
+                if (isParentPage) {
+                  router.push("/dashboard/player");
+                } else {
+                  router.push("/dashboard/parent");
+                }
+              }}
+              className="w-10 h-5 bg-white/10 rounded-full relative cursor-pointer group border border-white/5"
+            >
+              <div className={`absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white rounded-full transition-all duration-300 shadow-sm ${isPlayerPage ? 'right-0.5' : 'left-0.5'}`}></div>
+            </div>
+            <button
+              onClick={() => router.push("/dashboard/player")}
+              className={`px-4 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all duration-300 ${isPlayerPage ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/35 font-extrabold' : 'text-white/40 hover:text-white/60'}`}
+            >
+              Athlete
+            </button>
+          </div>
+        )}
+
         {showToggle && (
           <div className="flex items-center bg-[#5a0000] rounded-lg p-1.5 gap-1.5 mr-2 scale-90 lg:scale-100 border border-white/5">
             <button
