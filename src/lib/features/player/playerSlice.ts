@@ -68,6 +68,7 @@ export interface PlayerData {
   agency: string;
   mainFlag: any;
   position: string;
+  jerseyNumber: number;
   selectedStyleIds: string[];
   careerHighlights: {
     year: string;
@@ -138,6 +139,7 @@ const basePlayerData: PlayerData = {
     { name: "Spanish", level: "Intermediate", color: "text-orange" },
   ],
   rating: 94,
+  jerseyNumber: 10,
   playerImage: playerImage,
   strengths: {
     pace: 82,
@@ -326,7 +328,8 @@ const createMockPlayer = (
   requestedValidation?: boolean,
   lastValidatedDate?: string,
   coachName?: string,
-  academyName?: string
+  academyName?: string,
+  jerseyNumber?: number
 ) => {
   // Clone base categories
   const categories = JSON.parse(JSON.stringify(basePlayerData.skillsCategories));
@@ -342,6 +345,7 @@ const createMockPlayer = (
     id,
     fullName,
     position,
+    jerseyNumber: jerseyNumber || (id === 1 ? 10 : id === 2 ? 7 : id === 3 ? 4 : id === 4 ? 1 : id === 5 ? 9 : (id * 3) % 97 || 11),
     birthCountry,
     rating,
     validationStatus,

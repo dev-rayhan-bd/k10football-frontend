@@ -69,9 +69,9 @@ export default function Players() {
                 router.push("/cvs-page/player-cv-details");
               }}
               key={player.id}
-              className="flex justify-center cursor-pointer w-full max-w-[280px] mx-auto"
+              className="flex justify-center cursor-pointer w-full max-w-70 mx-auto"
             >
-              <div className="relative w-full aspect-[270/385] hover:scale-105 transition-all duration-300 z-0">
+              <div className="relative w-full aspect-270/385 hover:scale-105 transition-all duration-300 z-0">
                 <Image
                   className="absolute inset-0 w-full h-full object-contain z-0 pointer-events-none"
                   src={
@@ -82,90 +82,84 @@ export default function Players() {
                         : whiteCard
                   }
                   alt="card background"
+                  width={285}
+                  height={370}
                 />
-                
+
                 {/* Top values */}
-                <div className="absolute top-[13%] left-[10%] text-black flex flex-col items-center z-10 w-[18%]">
-                  <h2 className="text-2xl sm:text-3xl font-extrabold leading-none font-heading tracking-tighter">{player.rating}</h2>
-                  <h2 className="text-[9px] sm:text-[11px] font-black leading-none mt-1 uppercase tracking-wider">{shortPos}</h2>
-                  <img src={flagSrc} className="w-5 sm:w-6 h-3 sm:h-4 object-cover mt-2 rounded-xs shadow-xs" alt="flag" />
-                  <Image src={club1} className="w-5 sm:w-6 h-5 sm:h-6 object-contain mt-1.5" alt="club image" />
+                <div className="absolute top-[13.5%] left-[13%] text-black flex flex-col items-center z-20 w-[16%] gap-1">
+                  <span className="text-2xl sm:text-3xl font-extrabold leading-none font-heading tracking-tighter text-gray-950">{player.rating}</span>
+
+                  {/* Position Badge */}
+                  <span className="bg-black text-white/95 px-1.5 py-0.5 rounded-[3px] text-[8px] sm:text-[9px] font-black tracking-wider uppercase leading-none min-w-7 text-center shadow-xs">
+                    {shortPos}
+                  </span>
+
+                  {/* Jersey Number Badge */}
+                  <span className="bg-[#E31B23] text-white px-1.5 py-0.5 rounded-[3px] text-[8px] sm:text-[9px] font-black font-mono leading-none tracking-tight shadow-xs min-w-7 text-center">
+                    #{player.jerseyNumber}
+                  </span>
+
+                  <div className="w-[60%] border-b border-black/10 my-1"></div>
+
+                  <Image src={flagSrc} className="w-5.5 sm:w-6.5 h-3.5 sm:h-4.5 object-cover rounded-[2px] shadow-xs" width={285} height={370} alt="flag" />
+                  <Image src={club1} className="w-5.5 sm:w-6.5 h-5.5 sm:h-6.5 object-contain" width={285} height={370} alt="club image" />
                 </div>
 
                 {/* Player image */}
                 <div className="absolute top-[12%] right-[11%] w-[58%] h-[40%] flex items-end justify-center z-10 overflow-hidden">
-                  <img
+                  <Image
                     className="h-full w-auto object-contain select-none pointer-events-none"
-                    src={player.cardImage || playerImage.src}
+                    src={player.cardImage || playerImage}
+                    width={285}
+                    height={370}
                     alt="player Image"
                   />
                 </div>
 
-                {/* shadow */}
-                <div
-                  className={`absolute top-[35%] left-0 w-full h-[22%] z-10 pointer-events-none ${
-                    cardType === "gold"
-                      ? "bg-linear-to-t from-transparent via-[#F9E07F] to-transparent"
-                      : cardType === "white"
-                        ? "bg-linear-to-t from-transparent via-[#E5E5E7] to-transparent"
-                        : "bg-linear-to-t from-transparent via-[#F5DCCE] to-transparent"
-                  }`}
-                ></div>
-
                 {/* Name */}
-                <div className="absolute top-[52%] left-1/2 -translate-x-1/2 w-[76%] text-center border-b border-black/15 pb-1 z-20">
+                <div className="absolute top-[52%] left-1/2 -translate-x-1/2 w-[76%] text-center border-b border-black/15 pb-1.5 z-20">
                   <h3 className="text-gray-900 font-heading text-lg sm:text-xl font-black uppercase tracking-wide truncate">
                     {displayLastName}
                   </h3>
                 </div>
 
-                {/* Stats */}
-                <div className="absolute top-[60%] left-1/2 -translate-x-1/2 w-[82%] text-black z-20">
-                  <div className="flex items-center justify-between gap-1 p-2">
+                {/* Stats - Redesigned as a glassmorphic block */}
+                <div className="absolute top-[60%] left-1/2 -translate-x-1/2 w-[84%] bg-black/3 border border-black/10 backdrop-blur-3xs rounded-xl p-2.5 text-black z-20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
+                  <div className="flex items-center justify-between gap-2">
                     {/* left */}
-                    <div className="flex-1 flex flex-col gap-0.5">
+                    <div className="flex-1 flex flex-col gap-1">
                       <div className="flex justify-between items-center">
-                        <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{stats.pac}</span>
+                        <span className="font-extrabold text-xs sm:text-sm text-gray-950 leading-none">{stats.pac}</span>
                         <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">PAC</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{stats.sho}</span>
+                        <span className="font-extrabold text-xs sm:text-sm text-gray-950 leading-none">{stats.sho}</span>
                         <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">SHO</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{stats.pas}</span>
+                        <span className="font-extrabold text-xs sm:text-sm text-gray-950 leading-none">{stats.pas}</span>
                         <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">PAS</span>
                       </div>
                     </div>
 
-                    <div className="h-10 border-r border-black/15 mx-1"></div>
+                    <div className="h-10 border-r border-black/10 mx-1"></div>
 
                     {/* right */}
-                    <div className="flex-1 flex flex-col gap-0.5">
+                    <div className="flex-1 flex flex-col gap-1">
                       <div className="flex justify-between items-center">
-                        <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{stats.dri}</span>
+                        <span className="font-extrabold text-xs sm:text-sm text-gray-950 leading-none">{stats.dri}</span>
                         <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">DRI</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{stats.def}</span>
+                        <span className="font-extrabold text-xs sm:text-sm text-gray-950 leading-none">{stats.def}</span>
                         <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">DEF</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{stats.phy}</span>
+                        <span className="font-extrabold text-xs sm:text-sm text-gray-950 leading-none">{stats.phy}</span>
                         <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">PHY</span>
                       </div>
                     </div>
-                  </div>
-                </div>
-
-                {/* Academy & Coach Info */}
-                <div className="absolute bottom-[13.5%] left-1/2 -translate-x-1/2 w-[84%] flex flex-col items-center justify-center text-[8px] sm:text-[10px] font-black text-gray-800/95 space-y-0.5 z-20">
-                  <div className="w-[32%] border-b border-black/10 mx-auto mb-1.5"></div>
-                  <div className="truncate w-full text-center uppercase tracking-wider">
-                    ACADEMY: <span className="font-black text-black">{player.academyName || "N/A"}</span>
-                  </div>
-                  <div className="truncate w-full text-center uppercase tracking-wider">
-                    COACH: <span className="font-black text-black">{player.coachName || "N/A"}</span>
                   </div>
                 </div>
               </div>
