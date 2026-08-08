@@ -62,6 +62,13 @@ export default function Players() {
             phy: player.strengths.physical,
           };
 
+          const glowClass = 
+            cardType === "gold"
+              ? "drop-shadow-[0_0_8px_rgba(245,158,11,0.35)] hover:drop-shadow-[0_0_18px_rgba(245,158,11,0.7)]"
+              : cardType === "white"
+                ? "drop-shadow-[0_0_8px_rgba(229,231,235,0.45)] hover:drop-shadow-[0_0_18px_rgba(229,231,235,0.8)]"
+                : "drop-shadow-[0_0_8px_rgba(244,114,182,0.35)] hover:drop-shadow-[0_0_18px_rgba(244,114,182,0.7)]";
+
           return (
             <div
               onClick={() => {
@@ -71,7 +78,7 @@ export default function Players() {
               key={player.id}
               className="flex justify-center cursor-pointer w-full max-w-70 mx-auto"
             >
-              <div className="relative w-full aspect-270/385 hover:scale-105 transition-all duration-300 z-0">
+              <div className={`relative w-full aspect-270/385 hover:scale-105 transition-all duration-300 z-0 ${glowClass}`}>
                 <Image
                   className="absolute inset-0 w-full h-full object-contain z-0 pointer-events-none"
                   src={
@@ -118,7 +125,7 @@ export default function Players() {
                 </div>
 
                 {/* Name */}
-                <div className="absolute top-[52%] left-1/2 -translate-x-1/2 w-[76%] text-center border-b border-black/15 pb-1.5 z-20">
+                <div className="absolute top-[52%] left-1/2 -translate-x-1/2 w-[76%] text-center pb-1.5 z-20">
                   <h3 className="text-gray-900 font-heading text-lg sm:text-xl font-black uppercase tracking-wide truncate">
                     {displayLastName}
                   </h3>

@@ -216,51 +216,66 @@ export default function Coaches() {
       </h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-        {displayCoaches.map((coach) => (
-          <div onClick={() => router.push("/cvs-page/coach-cv-details")} key={coach.id} className="flex justify-center w-full max-w-[280px] mx-auto">
-            <div className="relative w-full aspect-270/385 cursor-pointer hover:scale-105 transition-all duration-300 z-0">
-              <Image
-                className="absolute inset-0 w-full h-full object-contain z-0 pointer-events-none"
-                src={
-                  coach.cardType === "pink"
-                    ? pinkCard
-                    : coach.cardType === "gold"
-                      ? goldCard
-                      : whiteCard
-                }
-                alt="card background"
-              />
-              
-              {/* Top values */}
-              <div className="absolute top-[13%] left-[10%] text-black flex flex-col items-center z-10 w-[18%]">
-                <h2 className="text-2xl sm:text-3xl font-extrabold leading-none font-heading tracking-tighter">{coach.rating}</h2>
-                <h2 className="text-[9px] sm:text-[11px] font-black leading-none mt-1 uppercase tracking-wider">{coach.position}</h2>
-                <Image src={flag1} className="w-5 sm:w-6 mt-2 rounded-xs shadow-xs" alt="flag image" />
-                <Image src={club1} className="w-5 sm:w-6 mt-1.5 object-contain" alt="club image" />
-              </div>
+        {displayCoaches.map((coach) => {
+          const glowClass = 
+            coach.cardType === "gold"
+              ? "drop-shadow-[0_0_8px_rgba(245,158,11,0.35)] hover:drop-shadow-[0_0_18px_rgba(245,158,11,0.7)]"
+              : coach.cardType === "white"
+                ? "drop-shadow-[0_0_8px_rgba(229,231,235,0.45)] hover:drop-shadow-[0_0_18px_rgba(229,231,235,0.8)]"
+                : "drop-shadow-[0_0_8px_rgba(244,114,182,0.35)] hover:drop-shadow-[0_0_18px_rgba(244,114,182,0.7)]";
 
-              {/* Coach image */}
-              <div className="absolute top-[12%] right-[11%] w-[58%] h-[40%] flex items-end justify-center z-10 overflow-hidden">
+          return (
+            <div onClick={() => router.push("/cvs-page/coach-cv-details")} key={coach.id} className="flex justify-center w-full max-w-70 mx-auto">
+              <div className={`relative w-full aspect-270/385 cursor-pointer hover:scale-105 transition-all duration-300 z-0 ${glowClass}`}>
                 <Image
-                  className="h-full w-auto object-contain select-none pointer-events-none"
-                  src={playerImage}
-                  alt="coach Image"
+                  className="absolute inset-0 w-full h-full object-contain z-0 pointer-events-none"
+                  src={
+                    coach.cardType === "pink"
+                      ? pinkCard
+                      : coach.cardType === "gold"
+                        ? goldCard
+                        : whiteCard
+                  }
+                  alt="card background"
                 />
-              </div>
+                
+                {/* Top values */}
+                <div className="absolute top-[13.5%] left-[13%] text-black flex flex-col items-center z-20 w-[16%] gap-1">
+                  <span className="text-2xl sm:text-3xl font-extrabold leading-none font-heading tracking-tighter text-gray-950">{coach.rating}</span>
+                  
+                  {/* Position Badge */}
+                  <span className="bg-black text-white/95 px-1.5 py-0.5 rounded-[3px] text-[8px] sm:text-[9px] font-black tracking-wider uppercase leading-none min-w-7 text-center shadow-xs">
+                    {coach.position}
+                  </span>
 
-              {/* shadow */}
-              <div
-                className={`absolute top-[35%] left-0 w-full h-[22%] z-10 pointer-events-none ${
-                  coach.cardType === "gold"
-                    ? "bg-linear-to-t from-transparent via-[#F9E07F] to-transparent"
-                    : coach.cardType === "white"
-                      ? "bg-linear-to-t from-transparent via-[#E5E5E7] to-transparent"
-                      : "bg-linear-to-t from-transparent via-[#F5DCCE] to-transparent"
-                }`}
-              ></div>
+                  <div className="w-[60%] border-b border-black/10 my-1"></div>
 
-              {/* Name */}
-              <div className="absolute top-[52%] left-1/2 -translate-x-1/2 w-[76%] text-center border-b border-black/15 pb-1 z-20">
+                  <Image src={flag1} className="w-5.5 sm:w-6.5 h-3.5 sm:h-4.5 object-cover rounded-[2px] shadow-xs" alt="flag image" />
+                  <Image src={club1} className="w-5.5 sm:w-6.5 h-5.5 sm:h-6.5 object-contain" alt="club image" />
+                </div>
+
+                {/* Coach image */}
+                <div className="absolute top-[12%] right-[11%] w-[58%] h-[40%] flex items-end justify-center z-10 overflow-hidden">
+                  <Image
+                    className="h-full w-auto object-contain select-none pointer-events-none"
+                    src={playerImage}
+                    alt="coach Image"
+                  />
+                </div>
+
+                {/* shadow */}
+                <div
+                  className={`absolute top-[35%] left-0 w-full h-[22%] z-10 pointer-events-none ${
+                    coach.cardType === "gold"
+                      ? "bg-linear-to-t from-transparent via-[#F9E07F] to-transparent"
+                      : coach.cardType === "white"
+                        ? "bg-linear-to-t from-transparent via-[#E5E5E7] to-transparent"
+                        : "bg-linear-to-t from-transparent via-[#F5DCCE] to-transparent"
+                  }`}
+                ></div>
+
+                {/* Name */}
+                <div className="absolute top-[52%] left-1/2 -translate-x-1/2 w-[76%] text-center pb-1 z-20">
                 <h3 className="text-gray-900 font-heading text-lg sm:text-xl font-black uppercase tracking-wide truncate">
                   {coach.name}
                 </h3>
@@ -311,7 +326,8 @@ export default function Coaches() {
               </div>
             </div>
           </div>
-        ))}
+        );
+      })}
       </div>
     </div>
   );

@@ -241,7 +241,13 @@ export default function PlayerProfile({
           <div className=" overflow-hidden">
             <div className="aspect-square bg-linear-to-b from-[#2df168] to-[#39493b] flex items-center justify-center">
               <div onClick={() => router.push("/cvs-page/player-cv-details")} className="flex justify-center cursor-pointer w-full max-w-[280px] mx-auto">
-                <div className="relative w-full aspect-[270/385] hover:scale-105 transition-all duration-300 z-0">
+                <div className={`relative w-full aspect-270/385 hover:scale-105 transition-all duration-300 z-0 ${
+                  currentPlayer.cardType === "gold"
+                    ? "drop-shadow-[0_0_8px_rgba(245,158,11,0.35)] hover:drop-shadow-[0_0_18px_rgba(245,158,11,0.7)]"
+                    : currentPlayer.cardType === "white"
+                      ? "drop-shadow-[0_0_8px_rgba(229,231,235,0.45)] hover:drop-shadow-[0_0_18px_rgba(229,231,235,0.8)]"
+                      : "drop-shadow-[0_0_8px_rgba(244,114,182,0.35)] hover:drop-shadow-[0_0_18px_rgba(244,114,182,0.7)]"
+                }`}>
                   <Image
                     className="absolute inset-0 w-full h-full object-contain z-0 pointer-events-none"
                     src={
@@ -255,11 +261,23 @@ export default function PlayerProfile({
                   />
                   
                   {/* Top values */}
-                  <div className="absolute top-[13%] left-[10%] text-black flex flex-col items-center z-10 w-[18%]">
-                    <h2 className="text-2xl sm:text-3xl font-extrabold leading-none font-heading tracking-tighter">{currentPlayer.rating}</h2>
-                    <h2 className="text-[9px] sm:text-[11px] font-black leading-none mt-1 uppercase tracking-wider">{currentPlayer.position}</h2>
-                    <Image width={300} height={400} src={getFlagUrlWithFallback()} className="w-5 sm:w-6 h-3 sm:h-4 object-cover mt-2 rounded-xs shadow-xs" alt="flag" />
-                    <Image width={300} height={400} src={getClubLogoUrl()} className="w-5 sm:w-6 h-5 sm:h-6 object-contain mt-1.5" alt="club logo" />
+                  <div className="absolute top-[13.5%] left-[13%] text-black flex flex-col items-center z-20 w-[16%] gap-1">
+                    <span className="text-2xl sm:text-3xl font-extrabold leading-none font-heading tracking-tighter text-gray-950">{currentPlayer.rating}</span>
+
+                    {/* Position Badge */}
+                    <span className="bg-black text-white/95 px-1.5 py-0.5 rounded-[3px] text-[8px] sm:text-[9px] font-black tracking-wider uppercase leading-none min-w-7 text-center shadow-xs">
+                      {currentPlayer.position}
+                    </span>
+
+                    {/* Jersey Number Badge */}
+                    <span className="bg-[#E31B23] text-white px-1.5 py-0.5 rounded-[3px] text-[8px] sm:text-[9px] font-black font-mono leading-none tracking-tight shadow-xs min-w-7 text-center">
+                      #{playerData.jerseyNumber || 10}
+                    </span>
+
+                    <div className="w-[60%] border-b border-black/10 my-1"></div>
+
+                    <Image width={300} height={400} src={getFlagUrlWithFallback()} className="w-5.5 sm:w-6.5 h-3.5 sm:h-4.5 object-cover rounded-[2px] shadow-xs" alt="flag" />
+                    <Image width={300} height={400} src={getClubLogoUrl()} className="w-5.5 sm:w-6.5 h-5.5 sm:h-6.5 object-contain" alt="club logo" />
                   </div>
 
                   {/* Player Image with Upload capabilities */}
@@ -321,7 +339,7 @@ export default function PlayerProfile({
                   ></div>
 
                   {/* Name */}
-                  <div className="absolute top-[52%] left-1/2 -translate-x-1/2 w-[76%] text-center border-b border-black/15 pb-1 z-20">
+                  <div className="absolute top-[52%] left-1/2 -translate-x-1/2 w-[76%] text-center pb-1 z-20">
                     <h3 className="text-gray-900 font-heading text-lg sm:text-xl font-black uppercase tracking-wide truncate">
                       {currentPlayer.name}
                     </h3>
