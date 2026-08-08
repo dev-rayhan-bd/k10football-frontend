@@ -76,9 +76,9 @@ export default function Players() {
                 router.push("/cvs-page/player-cv-details");
               }}
               key={player.id}
-              className="flex justify-center cursor-pointer w-full max-w-70 mx-auto"
+              className="flex justify-center cursor-pointer w-full max-w-[270px] mx-auto"
             >
-              <div className={`relative w-full aspect-270/385 hover:scale-105 transition-all duration-300 z-0 ${glowClass}`}>
+              <div className={`relative w-full aspect-[270/385] hover:scale-105 transition-all duration-300 z-0 ${glowClass}`}>
                 <Image
                   className="absolute inset-0 w-full h-full object-contain z-0 pointer-events-none"
                   src={
@@ -94,11 +94,11 @@ export default function Players() {
                 />
 
                 {/* Top values */}
-                <div className="absolute top-[13.5%] left-[13%] text-black flex flex-col items-center z-20 w-[16%] gap-1">
+                <div className="absolute top-[13.5%] left-[13%] text-black flex flex-col items-center z-20 w-[16%] gap-1 pl-1.5">
                   <span className="text-2xl sm:text-3xl font-extrabold leading-none font-heading tracking-tighter text-gray-950">{player.rating}</span>
 
                   {/* Position Badge */}
-                  <span className="bg-black text-white/95 px-1.5 py-0.5 rounded-[3px] text-[8px] sm:text-[9px] font-black tracking-wider uppercase leading-none min-w-7 text-center shadow-xs">
+                  <span className="bg-black text-white/95 px-1.5 py-0.5 rounded-[3px] text-[8px] sm:text-[9px] font-black tracking-wider uppercase leading-none min-w-7 text-center shadow-xs whitespace-nowrap">
                     {shortPos}
                   </span>
 

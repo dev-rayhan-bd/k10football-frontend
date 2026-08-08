@@ -225,8 +225,8 @@ export default function Coaches() {
                 : "drop-shadow-[0_0_8px_rgba(244,114,182,0.35)] hover:drop-shadow-[0_0_18px_rgba(244,114,182,0.7)]";
 
           return (
-            <div onClick={() => router.push("/cvs-page/coach-cv-details")} key={coach.id} className="flex justify-center w-full max-w-70 mx-auto">
-              <div className={`relative w-full aspect-270/385 cursor-pointer hover:scale-105 transition-all duration-300 z-0 ${glowClass}`}>
+            <div onClick={() => router.push("/cvs-page/coach-cv-details")} key={coach.id} className="flex justify-center w-full max-w-[270px] mx-auto">
+              <div className={`relative w-full aspect-[270/385] cursor-pointer hover:scale-105 transition-all duration-300 z-0 ${glowClass}`}>
                 <Image
                   className="absolute inset-0 w-full h-full object-contain z-0 pointer-events-none"
                   src={
@@ -240,11 +240,11 @@ export default function Coaches() {
                 />
                 
                 {/* Top values */}
-                <div className="absolute top-[13.5%] left-[13%] text-black flex flex-col items-center z-20 w-[16%] gap-1">
+                <div className="absolute top-[13.5%] left-[13%] text-black flex flex-col items-center z-20 w-[16%] gap-1 pl-1.5">
                   <span className="text-2xl sm:text-3xl font-extrabold leading-none font-heading tracking-tighter text-gray-950">{coach.rating}</span>
                   
                   {/* Position Badge */}
-                  <span className="bg-black text-white/95 px-1.5 py-0.5 rounded-[3px] text-[8px] sm:text-[9px] font-black tracking-wider uppercase leading-none min-w-7 text-center shadow-xs">
+                  <span className="bg-black text-white/95 px-1.5 py-0.5 rounded-[3px] text-[8px] sm:text-[9px] font-black tracking-wider uppercase leading-none min-w-7 text-center shadow-xs whitespace-nowrap">
                     {coach.position}
                   </span>
 
@@ -263,16 +263,6 @@ export default function Coaches() {
                   />
                 </div>
 
-                {/* shadow */}
-                <div
-                  className={`absolute top-[35%] left-0 w-full h-[22%] z-10 pointer-events-none ${
-                    coach.cardType === "gold"
-                      ? "bg-linear-to-t from-transparent via-[#F9E07F] to-transparent"
-                      : coach.cardType === "white"
-                        ? "bg-linear-to-t from-transparent via-[#E5E5E7] to-transparent"
-                        : "bg-linear-to-t from-transparent via-[#F5DCCE] to-transparent"
-                  }`}
-                ></div>
 
                 {/* Name */}
                 <div className="absolute top-[52%] left-1/2 -translate-x-1/2 w-[76%] text-center pb-1 z-20">

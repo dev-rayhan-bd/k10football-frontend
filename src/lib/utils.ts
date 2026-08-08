@@ -13,6 +13,9 @@ export const getShortForm = (position: string): string => {
     case "Center Back": return "CB";
     case "Right Back": return "RB";
     case "Left Back": return "LB";
+    case "Midfielder": return "MID";
+    case "Defender": return "DEF";
+    case "Forward": return "FWD";
     case "Wing Back": return "LWB/RWB";
     case "Left Wing Back": return "LWB";
     case "Right Wing Back": return "RWB";
