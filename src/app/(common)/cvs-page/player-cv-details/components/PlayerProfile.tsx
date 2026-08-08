@@ -240,13 +240,13 @@ export default function PlayerProfile({
         <div className="lg:col-span-1  bg-cardBg h-fit rounded-xl overflow-hidden">
           <div className=" overflow-hidden">
             <div className="aspect-square bg-linear-to-b from-[#2df168] to-[#39493b] flex items-center justify-center">
-              <div onClick={() => router.push("/cvs-page/player-cv-details")} className="flex justify-center cursor-pointer w-full max-w-[270px] mx-auto">
-                <div className={`relative w-full aspect-[270/385] hover:scale-105 transition-all duration-300 z-0 ${
+              <div onClick={() => router.push("/cvs-page/player-cv-details")} className="flex justify-center cursor-pointer w-full max-w-67.5 mx-auto">
+                <div className={`relative w-full aspect-270/385 hover:scale-105 transition-all duration-300 z-0 ${
                   currentPlayer.cardType === "gold"
-                    ? "drop-shadow-[0_0_8px_rgba(245,158,11,0.35)] hover:drop-shadow-[0_0_18px_rgba(245,158,11,0.7)]"
+                    ? "drop-shadow-[0_0_10px_rgba(253,224,71,0.5)] hover:drop-shadow-[0_0_25px_rgba(253,224,71,0.95)]"
                     : currentPlayer.cardType === "white"
-                      ? "drop-shadow-[0_0_8px_rgba(229,231,235,0.45)] hover:drop-shadow-[0_0_18px_rgba(229,231,235,0.8)]"
-                      : "drop-shadow-[0_0_8px_rgba(244,114,182,0.35)] hover:drop-shadow-[0_0_18px_rgba(244,114,182,0.7)]"
+                      ? "drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] hover:drop-shadow-[0_0_25px_rgba(255,255,255,0.95)]"
+                      : "drop-shadow-[0_0_10px_rgba(251,113,133,0.5)] hover:drop-shadow-[0_0_25px_rgba(251,113,133,0.95)]"
                 }`}>
                   <Image
                     className="absolute inset-0 w-full h-full object-contain z-0 pointer-events-none"
@@ -273,8 +273,6 @@ export default function PlayerProfile({
                     <span className="bg-[#E31B23] text-white px-1.5 py-0.5 rounded-[3px] text-[8px] sm:text-[9px] font-black font-mono leading-none tracking-tight shadow-xs min-w-7 text-center">
                       #{playerData.jerseyNumber || 10}
                     </span>
-
-                    <div className="w-[60%] border-b border-black/10 my-1"></div>
 
                     <Image width={300} height={400} src={getFlagUrlWithFallback()} className="w-5.5 sm:w-6.5 h-3.5 sm:h-4.5 object-cover rounded-[2px] shadow-xs" alt="flag" />
                     <Image width={300} height={400} src={getClubLogoUrl()} className="w-5.5 sm:w-6.5 h-5.5 sm:h-6.5 object-contain" alt="club logo" />

@@ -64,10 +64,10 @@ export default function Players() {
 
           const glowClass = 
             cardType === "gold"
-              ? "drop-shadow-[0_0_8px_rgba(245,158,11,0.35)] hover:drop-shadow-[0_0_18px_rgba(245,158,11,0.7)]"
+              ? "drop-shadow-[0_0_10px_rgba(253,224,71,0.5)] hover:drop-shadow-[0_0_25px_rgba(253,224,71,0.95)]"
               : cardType === "white"
-                ? "drop-shadow-[0_0_8px_rgba(229,231,235,0.45)] hover:drop-shadow-[0_0_18px_rgba(229,231,235,0.8)]"
-                : "drop-shadow-[0_0_8px_rgba(244,114,182,0.35)] hover:drop-shadow-[0_0_18px_rgba(244,114,182,0.7)]";
+                ? "drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] hover:drop-shadow-[0_0_25px_rgba(255,255,255,0.95)]"
+                : "drop-shadow-[0_0_10px_rgba(251,113,133,0.5)] hover:drop-shadow-[0_0_25px_rgba(251,113,133,0.95)]";
 
           return (
             <div
@@ -76,9 +76,9 @@ export default function Players() {
                 router.push("/cvs-page/player-cv-details");
               }}
               key={player.id}
-              className="flex justify-center cursor-pointer w-full max-w-[270px] mx-auto"
+              className="flex justify-center cursor-pointer w-full max-w-67.5 mx-auto"
             >
-              <div className={`relative w-full aspect-[270/385] hover:scale-105 transition-all duration-300 z-0 ${glowClass}`}>
+              <div className={`relative w-full aspect-270/385 hover:scale-105 transition-all duration-300 z-0 ${glowClass}`}>
                 <Image
                   className="absolute inset-0 w-full h-full object-contain z-0 pointer-events-none"
                   src={
@@ -106,8 +106,6 @@ export default function Players() {
                   <span className="bg-[#E31B23] text-white px-1.5 py-0.5 rounded-[3px] text-[8px] sm:text-[9px] font-black font-mono leading-none tracking-tight shadow-xs min-w-7 text-center">
                     #{player.jerseyNumber}
                   </span>
-
-                  <div className="w-[60%] border-b border-black/10 my-1"></div>
 
                   <Image src={flagSrc} className="w-5.5 sm:w-6.5 h-3.5 sm:h-4.5 object-cover rounded-[2px] shadow-xs" width={285} height={370} alt="flag" />
                   <Image src={club1} className="w-5.5 sm:w-6.5 h-5.5 sm:h-6.5 object-contain" width={285} height={370} alt="club image" />
