@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import React, { useState } from 'react';
@@ -102,7 +103,7 @@ export default function GameReportSection() {
                 </thead>
                 <tbody>
                   {displayRows.map((row) => (
-                    <tr key={row.id} className="border-b border-white/5 hover:bg-white/[0.02] transition">
+                    <tr key={row.id} className="border-b border-white/5 hover:bg-white/2 transition">
                       <td className="px-4 py-6 text-sm">
                         <div className="flex items-center gap-3">
                           <FileText className="w-5 h-5 text-red-600 shrink-0" />

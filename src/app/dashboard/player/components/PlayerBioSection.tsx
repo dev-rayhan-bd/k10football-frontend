@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 
 import { usePlayer } from "@/lib/hooks/usePlayer";
 import { getFullWithShortForm } from "@/lib/utils";
+import Image from "next/image";
 
 export default function PlayerBioSection() {
   const { playerData } = usePlayer();
@@ -28,10 +29,12 @@ export default function PlayerBioSection() {
 
         {/* Player Image absolute overlay - Full height aligned to the bottom right */}
         <div className="absolute right-0 bottom-0 h-full w-[70%] md:w-[55%] flex items-end justify-end pointer-events-none opacity-60 md:opacity-100 z-10">
-          <img
+          <Image
             src={typeof playerData.playerImage === 'string' ? playerData.playerImage : (playerData.playerImage?.src || "/ronaldo.png")}
             alt={playerData.fullName}
-            className="h-[90%] md:h-[100%] object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.9)]"
+            className="h-[90%] md:h-full object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.9)]"
+            width={100}
+            height={100}
           />
         </div>
 
