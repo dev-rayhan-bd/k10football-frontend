@@ -129,8 +129,8 @@ export const events = [
   {
     id: 1,
     title: "Summer Training Camp",
-    date: "Feb 15-20, 2026",
-    fee: "$250",
+    date: "15-20 February 2026",
+    fee: "£250",
     enrolled: "32/40",
     status: "Open",
     group: "Group A",
@@ -140,8 +140,8 @@ export const events = [
   {
     id: 2,
     title: "Tournament Registration",
-    date: "Mar 5, 2026",
-    fee: "$180",
+    date: "5 March 2026",
+    fee: "£180",
     enrolled: "24/30",
     status: "Open",
     group: "Group B",
@@ -151,8 +151,8 @@ export const events = [
   {
     id: 3,
     title: "Skills Workshop",
-    date: "Jan 30, 2026",
-    fee: "$75",
+    date: "30 January 2026",
+    fee: "£75",
     enrolled: "18/20",
     status: "Closing Soon",
     group: "Group C",
@@ -162,8 +162,8 @@ export const events = [
   {
     id: 4,
     title: "Skills Workshop",
-    date: "Jan 30, 2026",
-    fee: "$75",
+    date: "30 January 2026",
+    fee: "£75",
     enrolled: "18/20",
     status: "Closing Soon",
     group: "Group D",
@@ -185,6 +185,7 @@ export const ExtraEventsManagement = () => {
   const [selectedAgeGroups, setSelectedAgeGroups] = useState<string[]>([]);
   const [matchFormation, setMatchFormation] = useState("11v11");
   const [tournamentFormat, setTournamentFormat] = useState("group-knockout");
+  const [numberOfPitches, setNumberOfPitches] = useState("6");
   const [eventDate, setEventDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
@@ -224,7 +225,7 @@ export const ExtraEventsManagement = () => {
     const newEvent = {
       id: newId,
       title: eventName,
-      date: eventDate ? new Date(eventDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "TBA",
+      date: eventDate ? new Date(eventDate + "T12:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "TBA",
       fee: formattedFee,
       enrolled: `0/${maxCapacity || "16 Teams"}`,
       status: "Open",
@@ -234,6 +235,7 @@ export const ExtraEventsManagement = () => {
       eventType,
       tournamentFormat,
       matchFormation,
+      numberOfPitches: Number(numberOfPitches) || 6,
       venueName,
       address,
       description,
@@ -636,23 +638,24 @@ export const ExtraEventsManagement = () => {
                   </div>
                 </div>
 
-                {/* Tournament Format */}
+                {/* Number of Pitches */}
                 <div className="space-y-2">
                   <label className="text-[11px] font-black uppercase tracking-widest text-white/60">
-                    Tournament Structure <span className="text-[#E31B23]">*</span>
+                    Number of Pitches <span className="text-[#E31B23]">*</span>
                   </label>
                   <div className="relative">
                     <select 
-                      value={tournamentFormat}
-                      onChange={(e) => setTournamentFormat(e.target.value)}
+                      value={numberOfPitches}
+                      onChange={(e) => setNumberOfPitches(e.target.value)}
                       className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white appearance-none focus:outline-none focus:border-white/25 transition-all cursor-pointer"
                     >
-                      <option value="group-knockout">Group Stage + Knockout</option>
-                      <option value="knockout">Single Elimination (Knockout)</option>
-                      <option value="round-robin">Round Robin (League Style)</option>
+                      {[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].map((n) => (
+                        <option key={n} value={String(n)}>{n} Pitch{n > 1 ? 'es' : ''} (Pitch A{n > 1 ? ` – ${String.fromCharCode(64 + n)}` : ''})</option>
+                      ))}
                     </select>
                     <IconChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
                   </div>
+                  <p className="text-[9px] text-white/20 font-bold uppercase tracking-widest">How many football pitches are available at the venue</p>
                 </div>
               </div>
             </div>

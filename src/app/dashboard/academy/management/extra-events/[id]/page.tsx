@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
@@ -166,6 +167,7 @@ export default function EventDetailPage() {
   const [regContactName, setRegContactName] = useState("");
   const [regContactPhone, setRegContactPhone] = useState("");
   const [regContactEmail, setRegContactEmail] = useState("");
+  const [regCoachName, setRegCoachName] = useState("");
   const [regCategory, setRegCategory] = useState("");
   const [regPlayers, setRegPlayers] = useState<Array<{ name: string; dob: string; shirt: string }>>([
     { name: "", dob: "", shirt: "" },
@@ -197,7 +199,7 @@ export default function EventDetailPage() {
       const fallbackEvent = {
         id: eventId,
         title: "Academy Tournament Elite",
-        date: "Mar 5, 2026",
+        date: "5 March 2026",
         fee: "£180",
         enrolled: "7 Teams",
         status: "Open",
@@ -327,8 +329,9 @@ export default function EventDetailPage() {
           group: "Group A",
           round: "Group Stage",
           status: "Scheduled",
-          date: "Day 1",
-          time: `${10 + (matchId % 3) * 1.5}:00 AM`
+          pitch: `Pitch ${String.fromCharCode(65 + ((matchId - 1) % (event?.numberOfPitches || 6)))}`,
+          date: event?.date || "Day 1",
+          time: `${10 + ((matchId - 1) % 4)}:${(matchId % 2 === 0) ? '00' : '30'}`
         });
       }
     }
@@ -345,8 +348,9 @@ export default function EventDetailPage() {
           group: "Group B",
           round: "Group Stage",
           status: "Scheduled",
-          date: "Day 1",
-          time: `${10 + (matchId % 3) * 1.5}:30 AM`
+          pitch: `Pitch ${String.fromCharCode(65 + ((matchId - 1) % (event?.numberOfPitches || 6)))}`,
+          date: event?.date || "Day 1",
+          time: `${10 + ((matchId - 1) % 4)}:${(matchId % 2 === 0) ? '30' : '00'}`
         });
       }
     }
@@ -363,8 +367,9 @@ export default function EventDetailPage() {
         score2: null,
         round: "Semifinal 1",
         status: "Scheduled",
-        date: "Day 2",
-        time: "10:00 AM"
+        pitch: "Pitch A",
+        date: event?.date || "Day 2",
+        time: "14:00"
       },
       {
         id: matchId++,
@@ -376,8 +381,9 @@ export default function EventDetailPage() {
         score2: null,
         round: "Semifinal 2",
         status: "Scheduled",
-        date: "Day 2",
-        time: "11:30 AM"
+        pitch: "Pitch B",
+        date: event?.date || "Day 2",
+        time: "15:30"
       }
     ];
 
@@ -391,8 +397,9 @@ export default function EventDetailPage() {
       score2: null,
       round: "Grand Final",
       status: "Scheduled",
-      date: "Day 3",
-      time: "03:00 PM"
+      pitch: "Pitch A",
+      date: event?.date || "Day 3",
+      time: "16:00"
     };
 
     setStatus("live");
@@ -635,6 +642,13 @@ export default function EventDetailPage() {
 
   // Club Form 2 autofill roster helper
   const handleAutofillRoster = () => {
+    setRegClubName("Arsenal Youth Academy");
+    setRegClubLogo(CLUB_PRESET_LOGOS[2].id);
+    setRegCoachName("Coach Michael Edwards");
+    setRegContactName("Michael Edwards");
+    setRegContactPhone("+44 7911 234567");
+    setRegContactEmail("m.edwards@arsenalyouth.com");
+    setRegCategory(event?.ageGroup?.split(",")[0]?.trim() || "U-8");
     setRegPlayers([
       { name: "Harry Kane Jr", dob: "2018-07-28", shirt: "9" },
       { name: "Jude Bellingham Jr", dob: "2018-06-29", shirt: "10" },
@@ -642,7 +656,11 @@ export default function EventDetailPage() {
       { name: "Phil Foden Jr", dob: "2018-05-28", shirt: "11" },
       { name: "Declan Rice Jr", dob: "2018-01-14", shirt: "4" }
     ]);
-    toast.info("Autofilled dynamic players roster!");
+    setCardNumber("4242 4242 4242 4242");
+    setCardExpiry("12/28");
+    setCardCvv("123");
+    setCardHolder("Michael Edwards");
+    toast.info("Autofilled all club registration data!");
   };
 
   // Club Form 2 Submit
@@ -668,6 +686,7 @@ export default function EventDetailPage() {
         name: regClubName,
         logoId: regClubLogo,
         customLogo: regCustomLogo,
+        coachName: regCoachName,
         contactName: regContactName,
         contactEmail: regContactEmail,
         contactPhone: regContactPhone,
@@ -714,7 +733,7 @@ export default function EventDetailPage() {
       return <IconShield className={`${sizeClass} text-white/20`} />;
     }
     if (team.customLogo) {
-      return <img src={team.customLogo} alt={team.name} className={`${sizeClass} object-contain rounded-full`} />;
+      return <Image width={20} height={20} src={team.customLogo} alt={team.name} className={`${sizeClass} object-contain rounded-full`} />;
     }
     const preset = CLUB_PRESET_LOGOS.find((l) => l.id === team.logoId);
     if (preset) {
@@ -790,7 +809,7 @@ export default function EventDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           
           {/* Main Flyer Box */}
-          <div className="lg:col-span-2 bg-gradient-to-b from-[#111111] to-[#050505] rounded-4xl border border-white/10 overflow-hidden shadow-2xl relative">
+          <div className="lg:col-span-2 bg-linear-to-b from-[#111111] to-[#050505] rounded-4xl border border-white/10 overflow-hidden shadow-2xl relative">
             <div className="absolute top-0 right-0 w-64 h-64 bg-radial-gradient from-[#E31B23]/10 to-transparent pointer-events-none" />
             
             {/* Header Banner */}
@@ -799,7 +818,7 @@ export default function EventDetailPage() {
               {/* Shield/Logo */}
               <div className="w-32 h-32 md:w-36 md:h-36 shrink-0 bg-[#161616] rounded-3xl border border-white/10 p-6 flex items-center justify-center shadow-lg relative group">
                 {event.customLogo ? (
-                  <img src={event.customLogo} alt="Logo" className="w-full h-full object-contain" />
+                  <Image width={100} height={100} src={event.customLogo} alt="Logo" className="w-full h-full object-contain" />
                 ) : (
                   <div dangerouslySetInnerHTML={{ 
                     __html: TOURNAMENT_PRESET_LOGOS.find(l => l.id === event.logoId)?.svg || TOURNAMENT_PRESET_LOGOS[0].svg 
@@ -1407,12 +1426,23 @@ export default function EventDetailPage() {
               </div>
             </div>
 
-            {/* Contact Information */}
+            {/* Coach / Manager & Contact Information */}
             <div className="space-y-6">
-              <h3 className="text-xl font-black uppercase text-white font-orbitron border-b border-white/5 pb-2">Contact Details</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <h3 className="text-xl font-black uppercase text-white font-orbitron border-b border-white/5 pb-2">Coach / Manager & Contact</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[11px] font-black uppercase tracking-widest text-white/60">Contact Person Name</label>
+                  <label className="text-[11px] font-black uppercase tracking-widest text-white/60">Coach / Manager Name <span className="text-[#E31B23]">*</span></label>
+                  <input
+                    type="text"
+                    required
+                    value={regCoachName}
+                    onChange={(e) => setRegCoachName(e.target.value)}
+                    placeholder="e.g., Coach Michael Edwards"
+                    className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-white/25 transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[11px] font-black uppercase tracking-widest text-white/60">Contact Person / Responsible</label>
                   <input
                     type="text"
                     value={regContactName}
@@ -1860,19 +1890,20 @@ const TournamentSection = ({
               <div className="flex items-center justify-between gap-2 my-2">
                 <div className="flex-1 text-center flex flex-col items-center gap-1.5">
                   {renderTeamLogo(f.team1Id, "w-8 h-8")}
-                  <div className="text-xs font-bold text-white uppercase truncate max-w-[120px]">{getTeamName(f.team1Id)}</div>
+                  <div className="text-xs font-bold text-white uppercase truncate max-w-30">{getTeamName(f.team1Id)}</div>
                 </div>
-                <div className="bg-white/5 border border-white/10 px-4 py-2.5 rounded-xl shrink-0 font-black text-sm font-orbitron text-white min-w-[70px] text-center">
+                <div className="bg-white/5 border border-white/10 px-4 py-2.5 rounded-xl shrink-0 font-black text-sm font-orbitron text-white min-w-17.5 text-center">
                   {f.status === 'Completed' ? `${f.score1} - ${f.score2}` : 'vs'}
                 </div>
                 <div className="flex-1 text-center flex flex-col items-center gap-1.5">
                   {renderTeamLogo(f.team2Id, "w-8 h-8")}
-                  <div className="text-xs font-bold text-white uppercase truncate max-w-[120px]">{getTeamName(f.team2Id)}</div>
+                  <div className="text-xs font-bold text-white uppercase truncate max-w-30">{getTeamName(f.team2Id)}</div>
                 </div>
               </div>
               <div className="flex justify-between items-center text-[9px] text-white/30 font-bold uppercase tracking-widest pt-2 border-t border-white/5">
                 <span>{f.date}</span>
-                <span>{f.time}</span>
+                <span className="bg-white/5 border border-white/10 px-2 py-0.5 rounded text-[#00FF62]">{f.pitch || "Pitch A"}</span>
+                <span>KO {f.time}</span>
               </div>
             </div>
           ))}
