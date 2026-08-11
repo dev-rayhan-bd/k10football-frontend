@@ -241,19 +241,19 @@ export default function Coaches() {
                 
                 {/* Top values */}
                 <div className="absolute top-[13.5%] left-[13%] text-black flex flex-col items-center z-20 w-[16%] gap-1 pl-1.5">
-                  <span className="text-2xl sm:text-3xl font-extrabold leading-none font-heading tracking-tighter text-gray-950">{coach.rating}</span>
+                  <span className="text-3xl sm:text-4xl font-extrabold leading-none font-heading tracking-tighter text-gray-950">{coach.rating}</span>
                   
                   {/* Position Badge */}
-                  <span className="bg-black text-white/95 px-1.5 py-0.5 rounded-[3px] text-[8px] sm:text-[9px] font-black tracking-wider uppercase leading-none min-w-7 text-center shadow-xs whitespace-nowrap">
+                  <span className="bg-black text-white/95 px-2 py-0.5 rounded-[3px] text-[10px] sm:text-xs font-black tracking-wider uppercase leading-none min-w-8 text-center shadow-xs whitespace-nowrap">
                     {coach.position}
                   </span>
 
-                  <Image src={flag1} className="w-5.5 sm:w-6.5 h-3.5 sm:h-4.5 object-cover rounded-[2px] shadow-xs" alt="flag image" />
-                  <Image src={club1} className="w-5.5 sm:w-6.5 h-5.5 sm:h-6.5 object-contain" alt="club image" />
+                  <Image src={flag1} className="w-7 sm:w-8 h-4.5 sm:h-5.5 object-cover rounded-[2px] shadow-xs" alt="flag image" />
+                  <Image src={club1} className="w-7 sm:w-8 h-7 sm:h-8 object-contain" alt="club image" />
                 </div>
 
                 {/* Coach image */}
-                <div className="absolute top-[12%] right-[11%] w-[58%] h-[40%] flex items-end justify-center z-10 overflow-hidden">
+                <div className="absolute top-[1%] right-[3%] w-[70%] h-[50%] flex items-end justify-center z-10 overflow-hidden">
                   <Image
                     className="h-full w-auto object-contain select-none pointer-events-none"
                     src={playerImage}
@@ -264,7 +264,7 @@ export default function Coaches() {
 
                 {/* Name */}
                 <div className="absolute top-[52%] left-1/2 -translate-x-1/2 w-[76%] text-center pb-1 z-20">
-                <h3 className="text-gray-900 font-heading text-lg sm:text-xl font-black uppercase tracking-wide truncate">
+                <h3 className="text-gray-900 font-heading text-xl sm:text-2xl font-black uppercase tracking-wide truncate">
                   {coach.name}
                 </h3>
               </div>
@@ -275,34 +275,34 @@ export default function Coaches() {
                   {/* left */}
                   <div className="flex-1 flex flex-col gap-0.5">
                     <div className="flex justify-between items-center">
-                      <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{coach.stats.att}</span>
-                      <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">ATT</span>
+                      <span className="font-extrabold text-sm sm:text-base text-gray-900 leading-none">{coach.stats.att}</span>
+                      <span className="font-bold text-[11px] sm:text-xs text-gray-700 leading-none">ATT</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{coach.stats.def}</span>
-                      <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">DEF</span>
+                      <span className="font-extrabold text-sm sm:text-base text-gray-900 leading-none">{coach.stats.def}</span>
+                      <span className="font-bold text-[11px] sm:text-xs text-gray-700 leading-none">DEF</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{coach.stats.exp}</span>
-                      <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">EXP</span>
+                      <span className="font-extrabold text-sm sm:text-base text-gray-900 leading-none">{coach.stats.exp}</span>
+                      <span className="font-bold text-[11px] sm:text-xs text-gray-700 leading-none">EXP</span>
                     </div>
                   </div>
 
-                  <div className="h-10 border-r border-black/15 mx-1"></div>
+                  <div className="h-12 border-r border-black/15 mx-1"></div>
 
                   {/* right */}
                   <div className="flex-1 flex flex-col gap-0.5">
                     <div className="flex justify-between items-center">
-                      <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{coach.stats.tac}</span>
-                      <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">TAC</span>
+                      <span className="font-extrabold text-sm sm:text-base text-gray-900 leading-none">{coach.stats.tac}</span>
+                      <span className="font-bold text-[11px] sm:text-xs text-gray-700 leading-none">TAC</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{coach.stats.imp}</span>
-                      <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">IMP</span>
+                      <span className="font-extrabold text-sm sm:text-base text-gray-900 leading-none">{coach.stats.imp}</span>
+                      <span className="font-bold text-[11px] sm:text-xs text-gray-700 leading-none">IMP</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{coach.stats.lea}</span>
-                      <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">LEA</span>
+                      <span className="font-extrabold text-sm sm:text-base text-gray-900 leading-none">{coach.stats.lea}</span>
+                      <span className="font-bold text-[11px] sm:text-xs text-gray-700 leading-none">LEA</span>
                     </div>
                   </div>
                 </div>

@@ -95,20 +95,20 @@ export default function Players() {
 
                 {/* Top values */}
                 <div className="absolute top-[13.5%] left-[13%] text-black flex flex-col items-center z-20 w-[16%] gap-1 pl-1.5">
-                  <span className="text-2xl sm:text-3xl font-extrabold leading-none font-heading tracking-tighter text-gray-950">{player.rating}</span>
+                  <span className="text-3xl sm:text-4xl font-extrabold leading-none font-heading tracking-tighter text-gray-950">{player.rating}</span>
 
                   {/* Position Badge */}
-                  <span className="bg-black text-white/95 px-1.5 py-0.5 rounded-[3px] text-[8px] sm:text-[9px] font-black tracking-wider uppercase leading-none min-w-7 text-center shadow-xs whitespace-nowrap">
+                  <span className="bg-black text-white/95 px-2 py-0.5 rounded-[3px] text-[10px] sm:text-xs font-black tracking-wider uppercase leading-none min-w-8 text-center shadow-xs whitespace-nowrap">
                     {shortPos}
                   </span>
 
                   {/* Jersey Number Badge */}
-                  <span className="bg-[#E31B23] text-white px-1.5 py-0.5 rounded-[3px] text-[8px] sm:text-[9px] font-black font-mono leading-none tracking-tight shadow-xs min-w-7 text-center">
+                  <span className="bg-[#E31B23] text-white px-2 py-0.5 rounded-[3px] text-[10px] sm:text-xs font-black font-mono leading-none tracking-tight shadow-xs min-w-8 text-center">
                     #{player.jerseyNumber}
                   </span>
 
-                  <Image src={flagSrc} className="w-5.5 sm:w-6.5 h-3.5 sm:h-4.5 object-cover rounded-[2px] shadow-xs" width={285} height={370} alt="flag" />
-                  <Image src={club1} className="w-5.5 sm:w-6.5 h-5.5 sm:h-6.5 object-contain" width={285} height={370} alt="club image" />
+                  <Image src={flagSrc} className="w-7 sm:w-8 h-4.5 sm:h-5.5 object-cover rounded-[2px] shadow-xs" width={285} height={370} alt="flag" />
+                  <Image src={club1} className="w-7 sm:w-8 h-7 sm:h-8 object-contain" width={285} height={370} alt="club image" />
                 </div>
 
                 {/* Player image */}
@@ -124,7 +124,7 @@ export default function Players() {
 
                 {/* Name */}
                 <div className="absolute top-[52%] left-1/2 -translate-x-1/2 w-[76%] text-center pb-1.5 z-20">
-                  <h3 className="text-gray-900 font-heading text-lg sm:text-xl font-black uppercase tracking-wide truncate">
+                  <h3 className="text-gray-900 font-heading text-xl sm:text-2xl font-black uppercase tracking-wide truncate">
                     {displayLastName}
                   </h3>
                 </div>
@@ -135,34 +135,34 @@ export default function Players() {
                     {/* left */}
                     <div className="flex-1 flex flex-col gap-1">
                       <div className="flex justify-between items-center">
-                        <span className="font-extrabold text-xs sm:text-sm text-gray-950 leading-none">{stats.pac}</span>
-                        <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">PAC</span>
+                        <span className="font-extrabold text-sm sm:text-base text-gray-950 leading-none">{stats.pac}</span>
+                        <span className="font-bold text-[11px] sm:text-xs text-gray-700 leading-none">PAC</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="font-extrabold text-xs sm:text-sm text-gray-950 leading-none">{stats.sho}</span>
-                        <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">SHO</span>
+                        <span className="font-extrabold text-sm sm:text-base text-gray-950 leading-none">{stats.sho}</span>
+                        <span className="font-bold text-[11px] sm:text-xs text-gray-700 leading-none">SHO</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="font-extrabold text-xs sm:text-sm text-gray-950 leading-none">{stats.pas}</span>
-                        <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">PAS</span>
+                        <span className="font-extrabold text-sm sm:text-base text-gray-950 leading-none">{stats.pas}</span>
+                        <span className="font-bold text-[11px] sm:text-xs text-gray-700 leading-none">PAS</span>
                       </div>
                     </div>
 
-                    <div className="h-10 border-r border-black/10 mx-1"></div>
+                    <div className="h-12 border-r border-black/10 mx-1"></div>
 
                     {/* right */}
                     <div className="flex-1 flex flex-col gap-1">
                       <div className="flex justify-between items-center">
-                        <span className="font-extrabold text-xs sm:text-sm text-gray-950 leading-none">{stats.dri}</span>
-                        <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">DRI</span>
+                        <span className="font-extrabold text-sm sm:text-base text-gray-950 leading-none">{stats.dri}</span>
+                        <span className="font-bold text-[11px] sm:text-xs text-gray-700 leading-none">DRI</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="font-extrabold text-xs sm:text-sm text-gray-950 leading-none">{stats.def}</span>
-                        <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">DEF</span>
+                        <span className="font-extrabold text-sm sm:text-base text-gray-950 leading-none">{stats.def}</span>
+                        <span className="font-bold text-[11px] sm:text-xs text-gray-700 leading-none">DEF</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="font-extrabold text-xs sm:text-sm text-gray-950 leading-none">{stats.phy}</span>
-                        <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">PHY</span>
+                        <span className="font-extrabold text-sm sm:text-base text-gray-950 leading-none">{stats.phy}</span>
+                        <span className="font-bold text-[11px] sm:text-xs text-gray-700 leading-none">PHY</span>
                       </div>
                     </div>
                   </div>
