@@ -1,10 +1,10 @@
 import React from 'react'
-import SearchBar from './components/SearchBar'
-import AnalyciesSection from './components/AnalyciesSection'
-import ImageCarousel from '../components/ImageCarousel'
-import StartJourneySection from '../components/StartJourneySection'
-import Players from './components/PlayerSection'
-import Coaches from './components/CoatchesSection'
+import SearchBar from '@/components/cvs-page/SearchBar'
+import AnalyciesSection from '@/components/cvs-page/AnalyciesSection'
+import ImageCarousel from '@/components/common/ImageCarousel'
+import StartJourneySection from '@/components/common/StartJourneySection'
+import Players from '@/components/cvs-page/PlayerSection'
+import Coaches from '@/components/cvs-page/CoatchesSection'
 
 const CVSPage = () => {
   return (

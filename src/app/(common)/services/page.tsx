@@ -1,8 +1,8 @@
 import React from 'react'
-import ServiceSection from './components/ServiceSection'
-import AdditionalServices from './components/AdditionalServices'
-import ImageCarousel from '../components/ImageCarousel'
-import StartJourneySection from '../components/StartJourneySection'
+import ServiceSection from '@/components/about/ServiceSection'
+import AdditionalServices from '@/components/services/AdditionalServices'
+import ImageCarousel from '@/components/common/ImageCarousel'
+import StartJourneySection from '@/components/common/StartJourneySection'
 
 const ServicePage = () => {
   return (

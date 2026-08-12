@@ -27,7 +27,7 @@ import { useAppSelector, useAppDispatch } from "@/lib/hooks/reduxHooks";
 import { PlayerStateItem, setSelectedPlayerId } from "@/lib/features/player/playerSlice";
 import { toast } from "sonner";
 import { COACH_POOL } from "@/components/user-wise-dashboard/academy-analysis/team-data-store";
-import FullEditablePage from "@/app/(common)/cvs-page/player-cv-details/components/FullEditablePage";
+import FullEditablePage from "@/components/cvs-page/player-cv-details/FullEditablePage";
 import { getFullWithShortForm } from "@/lib/utils";
 import { FileText } from 'lucide-react';
 

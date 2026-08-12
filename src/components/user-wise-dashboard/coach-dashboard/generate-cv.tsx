@@ -21,9 +21,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import FullEditableCv from "@/app/(common)/cvs-page/coach-cv-details/components/FullEditableCv";
+import FullEditableCv from "@/components/cvs-page/coach-cv-details/FullEditableCv";
 import { useCoach } from "@/lib/hooks/useCoach";
-import { usePlayerStats } from "@/app/(common)/cvs-page/player-cv-details/components/FullEditablePage";
+import { usePlayerStats } from "@/components/cvs-page/player-cv-details/FullEditablePage";
 import { usePlayer } from "@/lib/hooks/usePlayer";
 import { useRouter } from "next/navigation";
 import { IconUserCheck } from "@tabler/icons-react";

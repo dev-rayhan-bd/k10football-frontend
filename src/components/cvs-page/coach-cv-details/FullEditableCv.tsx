@@ -1,18 +1,18 @@
 "use client";
 
-import DocSection from "../../player-cv-details/components/DocSection";
+import DocSection from "@/components/cvs-page/player-cv-details/DocSection";
 import CoachBioSection from "./CoachBioSection";
 import CoachClubsSection from "./CoachClubsSection";
 import ComplementaryCoursesSection from "./ComplementaryCoursesSection";
 import TestimonialSection from "./TestimonialSection";
 import Top3Formation from "./Top3Formation";
-import MyImagesSection from "../../player-cv-details/components/MyImageSection";
-import MyVideosSection from "../../player-cv-details/components/MyVideoSection";
-import AdditionalNotesSection from "../../player-cv-details/components/AdditionalNotesSection";
+import MyImagesSection from "@/components/cvs-page/player-cv-details/MyImageSection";
+import MyVideosSection from "@/components/cvs-page/player-cv-details/MyVideoSection";
+import AdditionalNotesSection from "@/components/cvs-page/player-cv-details/AdditionalNotesSection";
 import {
   PlayerStatsProvider,
   usePlayerStats,
-} from "../../player-cv-details/components/FullEditablePage";
+} from "@/components/cvs-page/player-cv-details/FullEditablePage";
 import { useAppSelector } from "@/lib/hooks/reduxHooks";
 import { AuthState } from "@/redux/features/auth";
 

@@ -1,12 +1,12 @@
-import MyImagesSection from "@/app/(common)/cvs-page/player-cv-details/components/MyImageSection";
-import PerformanceChart from "./components/PerformanceChart";
-import PlayerBioSection from "./components/PlayerBioSection";
-import RightSideContent from "./components/RightSideContent";
-import MyVideosSection from "@/app/(common)/cvs-page/player-cv-details/components/MyVideoSection";
-import CVSection from "./components/CVSection";
-import GameReportSection from "./components/GaMeReportSection";
+import MyImagesSection from "@/components/cvs-page/player-cv-details/MyImageSection";
+import PerformanceChart from "@/components/dashboard/player/PerformanceChart";
+import PlayerBioSection from "@/components/dashboard/player/PlayerBioSection";
+import RightSideContent from "@/components/dashboard/player/RightSideContent";
+import MyVideosSection from "@/components/cvs-page/player-cv-details/MyVideoSection";
+import CVSection from "@/components/dashboard/player/CVSection";
+import GameReportSection from "@/components/dashboard/player/GaMeReportSection";
 
-import { PlayerStatsProvider } from "@/app/(common)/cvs-page/player-cv-details/components/FullEditablePage";
+import { PlayerStatsProvider } from "@/components/cvs-page/player-cv-details/FullEditablePage";
 
 const PlayerDashboard = () => {
   return (

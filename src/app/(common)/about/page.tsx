@@ -1,11 +1,11 @@
 import React from "react";
-import ServiceSection from "./components/ServiceSection";
-import OutStorySection from "./components/OutStorySection";
-import OutValueSection from "./components/OutValueSection";
-import TimelineSection from "./components/TimelineSection";
-import TeamSection from "./components/TeamSection";
-import ImageCarousel from "../components/ImageCarousel";
-import StartJourneySection from "../components/StartJourneySection";
+import ServiceSection from "@/components/about/ServiceSection";
+import OutStorySection from "@/components/about/OutStorySection";
+import OutValueSection from "@/components/about/OutValueSection";
+import TimelineSection from "@/components/about/TimelineSection";
+import TeamSection from "@/components/about/TeamSection";
+import ImageCarousel from "@/components/common/ImageCarousel";
+import StartJourneySection from "@/components/common/StartJourneySection";
 
 const AboutPage = () => {
   return (

@@ -1,6 +1,6 @@
-import ImageCarousel from "../../components/ImageCarousel";
-import StartJourneySection from "../../components/StartJourneySection";
-import FullEditablePage from "./components/FullEditablePage";
+import ImageCarousel from "@/components/common/ImageCarousel";
+import StartJourneySection from "@/components/common/StartJourneySection";
+import FullEditablePage from "@/components/cvs-page/player-cv-details/FullEditablePage";
 
 const PlayerCvDetailsPage = () => {
   return (

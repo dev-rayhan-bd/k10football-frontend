@@ -47,7 +47,7 @@ import {
 import Image, { type StaticImageData } from "next/image";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { usePlayerStats } from "../../player-cv-details/components/FullEditablePage";
+import { usePlayerStats } from "@/components/cvs-page/player-cv-details/FullEditablePage";
 
 const ACCOMPLISHMENT_ICONS: Record<string, React.ComponentType<any>> = {
   trophy: Trophy,

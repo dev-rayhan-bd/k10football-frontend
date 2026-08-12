@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { Plus, Trash2, X, Check, Info, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { usePlayerStats } from "../../player-cv-details/components/FullEditablePage";
+import { usePlayerStats } from "@/components/cvs-page/player-cv-details/FullEditablePage";
 
 import clubImage from '@/assets/cvs-page/club1.png';
 import Image from 'next/image';
