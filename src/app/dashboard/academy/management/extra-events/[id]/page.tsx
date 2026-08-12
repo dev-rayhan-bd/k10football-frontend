@@ -32,7 +32,15 @@ import {
   IconShield,
   IconUpload,
   IconChevronDown,
-  IconCalendarEvent
+  IconCalendarEvent,
+  IconEye,
+  IconTable,
+  IconCrown,
+  IconSearch,
+  IconSparkles,
+  IconFilter,
+  IconActivity,
+  IconRefresh
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { DashboardModal } from "@/components/dashboard/dashboard-modal";
@@ -146,7 +154,7 @@ export default function EventDetailPage() {
   // States
   const [event, setEvent] = useState<any>(null);
   const [copied, setCopied] = useState(false);
-  const [previewRole, setPreviewRole] = useState<"invited_club" | "owner_admin">("invited_club");
+  const [previewRole, setPreviewRole] = useState<"invited_club" | "owner_admin" | "spectator_parent">("invited_club");
   
   // Tournament State
   const [teams, setTeams] = useState<any[]>([]);
@@ -262,10 +270,10 @@ export default function EventDetailPage() {
 
   const handleCopyLink = () => {
     if (typeof window !== "undefined") {
-      const url = window.location.href;
+      const url = `${window.location.origin}/tournament/live/${eventId}`;
       navigator.clipboard.writeText(url);
       setCopied(true);
-      toast.success("Link copied to clipboard!");
+      toast.success("Public tournament link copied to clipboard!");
       setTimeout(() => setCopied(false), 2000);
     }
   };
@@ -762,35 +770,72 @@ export default function EventDetailPage() {
   return (
     <div className="max-w-6xl mx-auto py-8 px-4 flex flex-col gap-6 animate-in fade-in duration-300">
       
-      {/* DEVELOPMENT ONLY SWITCHER BAR */}
-      <div className="bg-[#1C1C1C] border border-white/10 rounded-3xl p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <div className="flex items-center gap-3">
-          <IconDeviceGamepad className="text-[#00FF62] animate-pulse" size={24} />
+      {/* DEMO ROLE SWITCHER BAR */}
+      <div className="bg-[#161618] border border-white/15 rounded-3xl p-5 shadow-2xl flex flex-col lg:flex-row justify-between items-center gap-4 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-full bg-linear-to-r from-transparent via-[#E31B23]/10 to-[#00FF62]/10 pointer-events-none" />
+        <div className="flex items-center gap-3.5 z-10">
+          <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#00FF62] shadow-inner">
+            <IconDeviceGamepad className="animate-pulse" size={22} />
+          </div>
           <div>
-            <p className="text-xs font-black uppercase text-white font-orbitron tracking-wide">Interactive Demo Role Switcher</p>
-            <p className="text-[10px] text-white/40 font-bold uppercase tracking-wider">Switch view roles to experience both flows live</p>
+            <div className="flex items-center gap-2">
+              <p className="text-xs font-black uppercase text-white font-orbitron tracking-wider">Interactive Role & View Switcher</p>
+              <span className="bg-[#00FF62]/10 border border-[#00FF62]/30 text-[#00FF62] text-[8px] font-black uppercase px-2 py-0.5 rounded-full font-orbitron">CLIENT DEMO</span>
+            </div>
+            <p className="text-[10px] text-white/50 font-bold uppercase tracking-wider mt-0.5">Switch view roles to preview how clubs, parents, and admins see live results</p>
           </div>
         </div>
-        <div className="flex bg-black/60 rounded-2xl p-1 border border-white/5">
+
+        <div className="flex flex-wrap items-center gap-2 z-10 bg-black/60 p-1.5 rounded-2xl border border-white/10">
           <button
             onClick={() => setPreviewRole("invited_club")}
-            className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer ${
+            className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
               previewRole === "invited_club"
-                ? "bg-[#E31B23] text-white shadow-lg shadow-[#E31B23]/25"
-                : "text-white/40 hover:text-white"
+                ? "bg-[#E31B23] text-white shadow-lg shadow-[#E31B23]/30 border border-[#E31B23]"
+                : "text-white/50 hover:text-white hover:bg-white/5"
             }`}
           >
-            Invited Club Flow (Invitation & Form 2)
+            <IconShield size={14} />
+            Invited Club Flow
           </button>
+
+          <button
+            onClick={() => setPreviewRole("spectator_parent")}
+            className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+              previewRole === "spectator_parent"
+                ? "bg-amber-500 text-black font-black shadow-lg shadow-amber-500/30 border border-amber-400"
+                : "text-white/50 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            <IconEye size={14} />
+            Parents & Spectators View
+          </button>
+
           <button
             onClick={() => setPreviewRole("owner_admin")}
-            className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer ${
+            className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
               previewRole === "owner_admin"
-                ? "bg-[#E31B23] text-white shadow-lg shadow-[#E31B23]/25"
-                : "text-white/40 hover:text-white"
+                ? "bg-[#00FF62] text-black font-black shadow-lg shadow-[#00FF62]/30 border border-[#00FF62]"
+                : "text-white/50 hover:text-white hover:bg-white/5"
             }`}
           >
-            Tournament Owner View (Admin & Allocations)
+            <IconCrown size={14} />
+            Tournament Owner (Admin)
+          </button>
+        </div>
+
+        {/* Quick Simulator Toggles */}
+        <div className="flex items-center gap-2 z-10 shrink-0">
+          <button
+            onClick={status === "registration" ? handleGoLive : handleResetTournament}
+            className={`px-3.5 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border cursor-pointer font-orbitron flex items-center gap-1.5 ${
+              status === "live" || status === "completed"
+                ? "bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20"
+                : "bg-[#00FF62]/10 border-[#00FF62]/30 text-[#00FF62] hover:bg-[#00FF62]/20"
+            }`}
+          >
+            <IconActivity size={13} className="animate-pulse" />
+            {status === "live" ? "Live Mode Active" : "Toggle Live Mode"}
           </button>
         </div>
       </div>
@@ -1008,7 +1053,50 @@ export default function EventDetailPage() {
         </div>
       )}
 
-      {/* ROLE STATE VIEW: 2. TOURNAMENT OWNER VIEW (ADMIN MANAGER) */}
+      {/* ROLE STATE VIEW: 2. PARENTS & SPECTATORS PUBLIC VIEW */}
+      {previewRole === "spectator_parent" && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="bg-linear-to-r from-amber-500/10 via-[#161618] to-black rounded-4xl border border-amber-500/30 p-8 md:p-10 shadow-2xl relative overflow-hidden">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+              <div className="space-y-2 max-w-xl">
+                <div className="inline-flex items-center gap-2 bg-amber-500/20 border border-amber-500/30 px-3.5 py-1.5 rounded-full text-amber-400 text-[10px] font-black uppercase tracking-widest font-orbitron">
+                  <IconEye size={14} />
+                  Public Fan & Parent Live Portal
+                </div>
+                <h2 className="text-2xl md:text-4xl font-black uppercase text-white font-orbitron tracking-tight leading-tight">
+                  {event.title}
+                </h2>
+                <p className="text-sm text-white/60 leading-relaxed">
+                  Live scores, group standings, match fixtures, and championship knockout brackets visible for parents, clubs, and supporters.
+                </p>
+              </div>
+
+              {/* Share Box */}
+              <div className="bg-black/60 border border-white/10 rounded-3xl p-5 space-y-3 shrink-0 w-full md:w-auto min-w-65">
+                <span className="text-[9px] font-black uppercase tracking-wider text-white/50 font-orbitron block">Public Spectator Link</span>
+                <button
+                  onClick={handleCopyLink}
+                  className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-black uppercase tracking-wider text-[10px] py-3 px-4 rounded-xl transition-all font-orbitron cursor-pointer shadow-lg shadow-amber-500/20"
+                >
+                  {copied ? (
+                    <>
+                      <IconCheck size={14} />
+                      Spectator Link Copied!
+                    </>
+                  ) : (
+                    <>
+                      <IconCopy size={14} />
+                      Share Public Result Link
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ROLE STATE VIEW: 3. TOURNAMENT OWNER VIEW (ADMIN MANAGER) */}
       {previewRole === "owner_admin" && (
         <div className="space-y-8 animate-in fade-in duration-300">
           
@@ -1271,22 +1359,22 @@ export default function EventDetailPage() {
         </div>
       )}
 
-      {/* DYNAMIC TOURNAMENT STANDINGS & BRACKET AREA (Only displayed once tournament starts or for preview) */}
-      {(status === "live" || status === "completed" || previewRole === "owner_admin") && (
-        <TournamentSection 
-          ageGroup={event.ageGroup} 
-          status={status}
-          groupFixtures={groupFixtures}
-          semis={semis}
-          final={final}
-          groupA={groupA}
-          groupB={groupB}
-          teams={teams}
-          renderTeamLogo={renderTeamLogo}
-          getTeamName={getTeamName}
-          calculateStandings={calculateStandings}
-        />
-      )}
+      {/* DYNAMIC TOURNAMENT STANDINGS & BRACKET AREA (Displayed across preview roles) */}
+      <TournamentSection 
+        ageGroup={event.ageGroup} 
+        status={status}
+        groupFixtures={groupFixtures}
+        semis={semis}
+        final={final}
+        groupA={groupA}
+        groupB={groupB}
+        teams={teams}
+        renderTeamLogo={renderTeamLogo}
+        getTeamName={getTeamName}
+        calculateStandings={calculateStandings}
+        onStartLive={handleGoLive}
+        onSimulate={handleSimulateGroupStage}
+      />
 
       {/* FORM 2 MODAL: CLUB REGISTRATION & PAYMENT */}
       <DashboardModal
@@ -1739,7 +1827,6 @@ export default function EventDetailPage() {
   );
 }
 
-// Separate components
 interface TournamentSectionProps {
   ageGroup: string;
   status: "registration" | "live" | "completed";
@@ -1752,6 +1839,8 @@ interface TournamentSectionProps {
   renderTeamLogo: (id: string, size?: string) => React.ReactNode;
   getTeamName: (id: string, def?: string) => string;
   calculateStandings: (grp: string) => any[];
+  onStartLive?: () => void;
+  onSimulate?: () => void;
 }
 
 const TournamentSection = ({
@@ -1765,144 +1854,277 @@ const TournamentSection = ({
   teams,
   renderTeamLogo,
   getTeamName,
-  calculateStandings
+  calculateStandings,
+  onStartLive,
+  onSimulate
 }: TournamentSectionProps) => {
   const [activeTab, setActiveTab] = useState<"standings" | "fixtures" | "bracket">("standings");
   const [selectedGroup, setSelectedGroup] = useState<"Group A" | "Group B">("Group A");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
 
-  useEffect(() => {
-    if (status !== "registration" && groupFixtures.length > 0) {
-      // stay
-    }
-  }, [status, groupFixtures]);
+  const categories = Array.from(
+    new Set((ageGroup || "U-8, U-10").split(",").map((c) => c.trim()))
+  );
+
+  const filteredFixtures = groupFixtures.filter((f) => {
+    const t1 = getTeamName(f.team1Id).toLowerCase();
+    const t2 = getTeamName(f.team2Id).toLowerCase();
+    const q = searchQuery.toLowerCase();
+    return t1.includes(q) || t2.includes(q);
+  });
 
   return (
-    <div className="bg-[#111111] rounded-4xl border border-white/15 p-8 md:p-12 shadow-2xl flex flex-col gap-8">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/10 pb-6">
-        <div>
-          <h2 className="text-2xl md:text-3xl font-black uppercase text-white font-orbitron tracking-tight leading-none flex items-center gap-3">
-            <IconBallFootball className="text-[#E31B23]" />
-            Tournament Arena
-          </h2>
-          <p className="text-white/40 font-bold uppercase tracking-widest text-[9px] mt-1.5">
-            Standings, fixtures and knockout brackets for category: {ageGroup}
-          </p>
+    <div className="bg-linear-to-b from-[#141417] via-[#0E0E10] to-[#0A0A0C] rounded-4xl border border-white/15 p-6 md:p-10 shadow-2xl flex flex-col gap-8 relative overflow-hidden">
+      {/* Background Accent Glow */}
+      <div className="absolute top-0 right-1/4 w-96 h-96 bg-radial from-[#00FF62]/5 to-transparent pointer-events-none" />
+      <div className="absolute bottom-0 left-10 w-96 h-96 bg-radial from-[#E31B23]/5 to-transparent pointer-events-none" />
+
+      {/* Header Bar */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 border-b border-white/10 pb-6 relative z-10">
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-[#E31B23]/10 border border-[#E31B23]/30 flex items-center justify-center text-[#E31B23] shadow-lg shadow-[#E31B23]/10">
+              <IconTrophy size={22} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-2xl md:text-3xl font-black uppercase text-white font-orbitron tracking-tight leading-none">
+                  TOURNAMENT ARENA
+                </h2>
+                <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest font-orbitron flex items-center gap-1.5 border ${
+                  status === "live" 
+                    ? "bg-red-500/10 border-red-500/30 text-red-400 shadow-sm shadow-red-500/20" 
+                    : status === "completed"
+                    ? "bg-[#00FF62]/10 border-[#00FF62]/30 text-[#00FF62]"
+                    : "bg-amber-500/10 border-amber-500/30 text-amber-400"
+                }`}>
+                  <span className={`w-2 h-2 rounded-full ${status === "live" ? "bg-red-500 animate-ping" : status === "completed" ? "bg-[#00FF62]" : "bg-amber-400"}`} />
+                  {status === "live" ? "🔴 LIVE MATCHES IN PROGRESS" : status === "completed" ? "🏆 TOURNAMENT FINISHED" : "📅 REGISTRATION & PREVIEW"}
+                </span>
+              </div>
+              <p className="text-white/50 font-bold uppercase tracking-widest text-[9px] mt-1">
+                Official Live Standings, Match Schedules and Knockout Brackets
+              </p>
+            </div>
+          </div>
         </div>
-        <div className="flex gap-2">
-          {["standings", "fixtures", "bracket"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab as any)}
-              className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border cursor-pointer ${
-                activeTab === tab
-                  ? "bg-[#E31B23] border-[#E31B23] text-white shadow-lg shadow-[#E31B23]/10"
-                  : "bg-white/5 border-white/10 text-white/40 hover:text-white"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
+
+        {/* Tab Buttons */}
+        <div className="flex flex-wrap items-center gap-2 bg-black/70 p-1.5 rounded-2xl border border-white/10 shrink-0">
+          <button
+            onClick={() => setActiveTab("standings")}
+            className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 cursor-pointer font-orbitron ${
+              activeTab === "standings"
+                ? "bg-[#E31B23] text-white shadow-lg shadow-[#E31B23]/30 border border-[#E31B23]"
+                : "text-white/40 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            <IconTable size={15} />
+            Standings
+          </button>
+          <button
+            onClick={() => setActiveTab("fixtures")}
+            className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 cursor-pointer font-orbitron ${
+              activeTab === "fixtures"
+                ? "bg-[#E31B23] text-white shadow-lg shadow-[#E31B23]/30 border border-[#E31B23]"
+                : "text-white/40 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            <IconCalendarEvent size={15} />
+            Fixtures
+          </button>
+          <button
+            onClick={() => setActiveTab("bracket")}
+            className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 cursor-pointer font-orbitron ${
+              activeTab === "bracket"
+                ? "bg-[#E31B23] text-white shadow-lg shadow-[#E31B23]/30 border border-[#E31B23]"
+                : "text-white/40 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            <IconTrophy size={15} />
+            Bracket
+          </button>
         </div>
       </div>
 
+      {/* Category Pills & Search Filter */}
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 relative z-10 bg-white/2 p-3 rounded-2xl border border-white/5">
+        <div className="flex items-center gap-2 overflow-x-auto">
+          <span className="text-[9px] font-black uppercase tracking-widest text-white/40 font-orbitron mr-1 shrink-0">Category:</span>
+          {["All", ...categories].map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-3.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border ${
+                selectedCategory === cat
+                  ? "bg-white text-black border-white shadow-md font-orbitron"
+                  : "bg-white/5 border-white/10 text-white/50 hover:text-white"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Search Box */}
+        <div className="relative shrink-0 w-full sm:w-64">
+          <IconSearch size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search team or squad..."
+            className="w-full bg-black/60 border border-white/10 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#E31B23] transition-all"
+          />
+        </div>
+      </div>
+
+      {/* Registration Mode Preview Banner */}
       {status === "registration" && (
-        <div className="text-center py-20 border border-dashed border-white/5 rounded-3xl bg-black/20 flex flex-col items-center justify-center space-y-4">
-          <IconTrophy size={48} className="text-white/20 animate-pulse" />
-          <h3 className="text-lg font-black uppercase text-white font-orbitron">Awaiting Kickoff</h3>
-          <p className="text-xs text-white/40 max-w-sm leading-relaxed">
-            The tournament standings, fixtures, and brackets will be displayed once the organizer generates the matches and starts the tournament.
-          </p>
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-3 text-amber-300">
+          <div className="flex items-center gap-2.5">
+            <IconSparkles size={18} className="shrink-0 text-amber-400 animate-pulse" />
+            <span className="text-xs font-medium">
+              Showing live tournament structure. Click <strong>Generate Results</strong> to simulate live scores and populate standings tables instantly.
+            </span>
+          </div>
+          {onSimulate && (
+            <button
+              onClick={onSimulate}
+              className="bg-amber-500 hover:bg-amber-400 text-black font-black uppercase tracking-widest text-[9px] py-2 px-4 rounded-xl transition-all font-orbitron cursor-pointer shrink-0 shadow-md"
+            >
+              Simulate Live Scores
+            </button>
+          )}
         </div>
       )}
 
-      {status !== "registration" && activeTab === "standings" && (
-        <div className="space-y-6">
-          <div className="flex gap-2">
-            {["Group A", "Group B"].map((grp) => (
-              <button
-                key={grp}
-                onClick={() => setSelectedGroup(grp as any)}
-                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer ${
-                  selectedGroup === grp
-                    ? "bg-white/10 text-white border border-white/20"
-                    : "bg-transparent text-white/40 hover:text-white"
-                }`}
-              >
-                {grp}
-              </button>
-            ))}
+      {/* TAB 1: STANDINGS */}
+      {activeTab === "standings" && (
+        <div className="space-y-6 relative z-10">
+          {/* Group Selector */}
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex bg-black/50 p-1 rounded-xl border border-white/10">
+              {["Group A", "Group B"].map((grp) => (
+                <button
+                  key={grp}
+                  onClick={() => setSelectedGroup(grp as any)}
+                  className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer font-orbitron ${
+                    selectedGroup === grp
+                      ? "bg-[#E31B23] text-white shadow-md shadow-[#E31B23]/20"
+                      : "text-white/40 hover:text-white"
+                  }`}
+                >
+                  {grp}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2 text-[9px] font-bold text-white/40 uppercase tracking-widest">
+              <span className="w-2.5 h-2.5 rounded-sm bg-[#00FF62]" /> Top 2 teams qualify for Championship Semi-Finals
+            </div>
           </div>
 
-          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-black/40">
+          {/* Standings Table */}
+          <div className="overflow-x-auto rounded-3xl border border-white/15 bg-black/60 shadow-2xl backdrop-blur-md">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-white/10 bg-white/2">
-                  <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40 text-center w-12">Pos</th>
-                  <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40">Team</th>
-                  <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40 text-center">P</th>
-                  <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40 text-center">W</th>
-                  <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40 text-center">D</th>
-                  <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40 text-center">L</th>
-                  <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40 text-center">GF</th>
-                  <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40 text-center">GA</th>
-                  <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40 text-center">GD</th>
-                  <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40 text-center">Pts</th>
+                <tr className="border-b border-white/10 bg-white/5">
+                  <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40 text-center w-14 font-orbitron">POS</th>
+                  <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40 font-orbitron">SQUAD / CLUB</th>
+                  <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40 text-center font-orbitron">P</th>
+                  <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40 text-center font-orbitron">W</th>
+                  <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40 text-center font-orbitron">D</th>
+                  <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40 text-center font-orbitron">L</th>
+                  <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40 text-center font-orbitron">GF</th>
+                  <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40 text-center font-orbitron">GA</th>
+                  <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40 text-center font-orbitron">GD</th>
+                  <th className="p-4 text-[9px] font-black uppercase tracking-wider text-[#00FF62] text-center font-orbitron">PTS</th>
                 </tr>
               </thead>
               <tbody>
-                {calculateStandings(selectedGroup).map((row: any, idx: number) => (
-                  <tr key={idx} className="border-b border-white/5 hover:bg-white/1 transition-all">
-                    <td className="p-4 text-center font-black text-xs text-white/60 font-orbitron">{idx + 1}</td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        {renderTeamLogo(row.id, "w-6 h-6")}
-                        <span className="text-sm font-bold text-white uppercase">{row.name}</span>
-                      </div>
-                    </td>
-                    <td className="p-4 text-center font-bold text-sm text-white">{row.p}</td>
-                    <td className="p-4 text-center text-sm font-bold text-green-400">{row.w}</td>
-                    <td className="p-4 text-center text-sm font-bold text-gray-400">{row.d}</td>
-                    <td className="p-4 text-center text-sm font-bold text-red-400">{row.l}</td>
-                    <td className="p-4 text-center text-sm text-white/60">{row.gf}</td>
-                    <td className="p-4 text-center text-sm text-white/60">{row.ga}</td>
-                    <td className={`p-4 text-center text-sm font-bold ${row.gd > 0 ? 'text-green-400' : row.gd < 0 ? 'text-red-400' : 'text-white/60'}`}>
-                      {row.gd > 0 ? `+${row.gd}` : row.gd}
-                    </td>
-                    <td className="p-4 text-center font-black text-sm text-[#00FF62] font-orbitron">{row.pts}</td>
-                  </tr>
-                ))}
+                {calculateStandings(selectedGroup)
+                  .filter((row: any) => row.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map((row: any, idx: number) => {
+                    const isQualified = idx < 2;
+                    return (
+                      <tr 
+                        key={idx} 
+                        className={`border-b border-white/5 transition-all hover:bg-white/5 ${
+                          isQualified ? "bg-[#00FF62]/5 border-l-4 border-l-[#00FF62]" : ""
+                        }`}
+                      >
+                        <td className="p-4 text-center font-black text-xs font-orbitron">
+                          <div className="flex items-center justify-center gap-1">
+                            <span className={isQualified ? "text-[#00FF62]" : "text-white/60"}>{idx + 1}</span>
+                            {isQualified && (
+                              <span className="bg-[#00FF62]/20 text-[#00FF62] text-[8px] font-black px-1.5 py-0.2 rounded font-orbitron">Q</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center gap-3">
+                            {renderTeamLogo(row.id, "w-7 h-7")}
+                            <span className="text-sm font-bold text-white uppercase tracking-tight">{row.name}</span>
+                          </div>
+                        </td>
+                        <td className="p-4 text-center font-bold text-sm text-white">{row.p}</td>
+                        <td className="p-4 text-center text-sm font-bold text-[#00FF62]">{row.w}</td>
+                        <td className="p-4 text-center text-sm font-bold text-white/40">{row.d}</td>
+                        <td className="p-4 text-center text-sm font-bold text-red-400">{row.l}</td>
+                        <td className="p-4 text-center text-sm text-white/60">{row.gf}</td>
+                        <td className="p-4 text-center text-sm text-white/60">{row.ga}</td>
+                        <td className={`p-4 text-center text-sm font-bold ${row.gd > 0 ? 'text-[#00FF62]' : row.gd < 0 ? 'text-red-400' : 'text-white/60'}`}>
+                          {row.gd > 0 ? `+${row.gd}` : row.gd}
+                        </td>
+                        <td className="p-4 text-center font-black text-base text-[#00FF62] font-orbitron">{row.pts}</td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>
         </div>
       )}
 
-      {status !== "registration" && activeTab === "fixtures" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {groupFixtures.map((f) => (
-            <div key={f.id} className="bg-black/40 border border-white/5 rounded-2xl p-6 flex flex-col justify-between gap-4">
-              <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-wider text-white/40">
-                <span>{f.round} ({f.group})</span>
-                <span className={`px-2 py-0.5 rounded ${f.status === 'Completed' ? 'bg-[#00FF62]/10 text-[#00FF62] border border-[#00FF62]/20' : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'}`}>
-                  {f.status}
+      {/* TAB 2: FIXTURES */}
+      {activeTab === "fixtures" && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
+          {(filteredFixtures.length > 0 ? filteredFixtures : groupFixtures).map((f) => (
+            <div key={f.id} className="bg-black/60 border border-white/10 rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-xl hover:border-white/20 transition-all">
+              <div className="flex justify-between items-center">
+                <span className="text-[9px] font-black uppercase tracking-wider text-white/40 font-orbitron">
+                  {f.round} ({f.group})
+                </span>
+                <span className={`px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest font-orbitron flex items-center gap-1 ${
+                  f.status === 'Completed' 
+                    ? 'bg-[#00FF62]/10 text-[#00FF62] border border-[#00FF62]/30' 
+                    : 'bg-red-500/10 text-red-400 border border-red-500/30'
+                }`}>
+                  {f.status === 'Completed' ? 'FULL TIME' : '🔴 LIVE MATCH'}
                 </span>
               </div>
-              <div className="flex items-center justify-between gap-2 my-2">
-                <div className="flex-1 text-center flex flex-col items-center gap-1.5">
-                  {renderTeamLogo(f.team1Id, "w-8 h-8")}
-                  <div className="text-xs font-bold text-white uppercase truncate max-w-30">{getTeamName(f.team1Id)}</div>
+
+              <div className="flex items-center justify-between gap-3 my-2 bg-white/2 p-4 rounded-2xl border border-white/5">
+                <div className="flex-1 text-center flex flex-col items-center gap-2">
+                  {renderTeamLogo(f.team1Id, "w-10 h-10")}
+                  <div className="text-xs font-bold text-white uppercase truncate max-w-28">{getTeamName(f.team1Id)}</div>
                 </div>
-                <div className="bg-white/5 border border-white/10 px-4 py-2.5 rounded-xl shrink-0 font-black text-sm font-orbitron text-white min-w-17.5 text-center">
-                  {f.status === 'Completed' ? `${f.score1} - ${f.score2}` : 'vs'}
+
+                <div className="bg-black border border-white/15 px-5 py-3 rounded-2xl shrink-0 font-black text-lg font-orbitron text-white text-center shadow-inner">
+                  {f.status === 'Completed' ? `${f.score1} - ${f.score2}` : f.score1 !== null ? `${f.score1} - ${f.score2}` : 'VS'}
                 </div>
-                <div className="flex-1 text-center flex flex-col items-center gap-1.5">
-                  {renderTeamLogo(f.team2Id, "w-8 h-8")}
-                  <div className="text-xs font-bold text-white uppercase truncate max-w-30">{getTeamName(f.team2Id)}</div>
+
+                <div className="flex-1 text-center flex flex-col items-center gap-2">
+                  {renderTeamLogo(f.team2Id, "w-10 h-10")}
+                  <div className="text-xs font-bold text-white uppercase truncate max-w-28">{getTeamName(f.team2Id)}</div>
                 </div>
               </div>
-              <div className="flex justify-between items-center text-[9px] text-white/30 font-bold uppercase tracking-widest pt-2 border-t border-white/5">
+
+              <div className="flex justify-between items-center text-[9px] text-white/40 font-bold uppercase tracking-widest pt-2 border-t border-white/5">
                 <span>{f.date}</span>
-                <span className="bg-white/5 border border-white/10 px-2 py-0.5 rounded text-[#00FF62]">{f.pitch || "Pitch A"}</span>
+                <span className="bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-lg text-[#00FF62] font-orbitron">{f.pitch || "Pitch A"}</span>
                 <span>KO {f.time}</span>
               </div>
             </div>
@@ -1910,38 +2132,42 @@ const TournamentSection = ({
         </div>
       )}
 
-      {status !== "registration" && activeTab === "bracket" && (
-        <div className="flex flex-col lg:flex-row items-center justify-center gap-12 py-8 relative">
-          
+      {/* TAB 3: BRACKET */}
+      {activeTab === "bracket" && (
+        <div className="flex flex-col lg:flex-row items-center justify-center gap-10 py-6 relative z-10">
           {/* Semifinals */}
-          <div className="flex flex-col gap-8 w-full max-w-sm">
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-white/40 text-center font-orbitron">Semifinals</h4>
+          <div className="flex flex-col gap-6 w-full max-w-sm">
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-white/40 text-center font-orbitron flex items-center justify-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#E31B23]" />
+              Semi-Final Knockouts
+            </h4>
             {semis.map((match) => (
-              <div key={match.id} className="bg-black/40 border border-white/5 rounded-2xl p-5 space-y-3 relative shadow-lg">
-                <div className="flex justify-between items-center text-[9px] font-bold text-white/30 uppercase tracking-widest">
+              <div key={match.id} className="bg-black/60 border border-white/15 rounded-3xl p-5 space-y-4 relative shadow-2xl hover:border-white/25 transition-all">
+                <div className="flex justify-between items-center text-[9px] font-bold text-white/40 uppercase tracking-widest border-b border-white/5 pb-2">
                   <span>Match #{match.id} ({match.round})</span>
                   <span>{match.date}</span>
                 </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      {renderTeamLogo(match.team1Id, "w-5 h-5")}
-                      <span className={`text-xs ${match.winnerId === match.team1Id ? 'font-black text-white' : 'text-white/40'}`}>
+                <div className="space-y-3">
+                  <div className={`flex justify-between items-center p-2 rounded-xl transition-all ${match.winnerId === match.team1Id ? 'bg-[#00FF62]/10 border border-[#00FF62]/30' : ''}`}>
+                    <div className="flex items-center gap-2.5">
+                      {renderTeamLogo(match.team1Id, "w-6 h-6")}
+                      <span className={`text-xs ${match.winnerId === match.team1Id ? 'font-black text-white' : 'text-white/60'}`}>
                         {getTeamName(match.team1Id, match.team1Placeholder)}
                       </span>
                     </div>
-                    <span className="text-xs font-black text-white font-orbitron bg-white/5 px-2 py-0.5 rounded">
+                    <span className="text-xs font-black text-white font-orbitron bg-black/60 px-2.5 py-1 rounded-lg border border-white/10">
                       {match.score1 !== null ? match.score1 : "-"}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      {renderTeamLogo(match.team2Id, "w-5 h-5")}
-                      <span className={`text-xs ${match.winnerId === match.team2Id ? 'font-black text-white' : 'text-white/40'}`}>
+
+                  <div className={`flex justify-between items-center p-2 rounded-xl transition-all ${match.winnerId === match.team2Id ? 'bg-[#00FF62]/10 border border-[#00FF62]/30' : ''}`}>
+                    <div className="flex items-center gap-2.5">
+                      {renderTeamLogo(match.team2Id, "w-6 h-6")}
+                      <span className={`text-xs ${match.winnerId === match.team2Id ? 'font-black text-white' : 'text-white/60'}`}>
                         {getTeamName(match.team2Id, match.team2Placeholder)}
                       </span>
                     </div>
-                    <span className="text-xs font-black text-white font-orbitron bg-white/5 px-2 py-0.5 rounded">
+                    <span className="text-xs font-black text-white font-orbitron bg-black/60 px-2.5 py-1 rounded-lg border border-white/10">
                       {match.score2 !== null ? match.score2 : "-"}
                     </span>
                   </div>
@@ -1950,47 +2176,50 @@ const TournamentSection = ({
             ))}
           </div>
 
-          <div className="hidden lg:block w-12 h-0.5 bg-white/10 shrink-0" />
+          <div className="hidden lg:block w-12 h-0.5 bg-linear-to-r from-white/10 via-[#E31B23] to-amber-500 shrink-0" />
 
-          {/* Final */}
+          {/* Grand Final */}
           {final && (
             <div className="w-full max-w-sm flex flex-col gap-4">
-              <h4 className="text-[10px] font-black uppercase tracking-widest text-[#E31B23] text-center font-orbitron animate-pulse">Championship Final</h4>
-              <div className="bg-[#E31B23]/5 border-2 border-[#E31B23]/25 rounded-3xl p-6 space-y-4 relative shadow-2xl">
-                <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-[#E31B23]">
-                  <span>Grand Final</span>
+              <h4 className="text-[10px] font-black uppercase tracking-widest text-amber-400 text-center font-orbitron animate-pulse flex items-center justify-center gap-2">
+                <IconCrown size={14} />
+                Championship Grand Final
+              </h4>
+              <div className="bg-linear-to-b from-[#E31B23]/10 via-black to-black border-2 border-amber-500/40 rounded-4xl p-6 space-y-4 relative shadow-2xl">
+                <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-amber-400 border-b border-amber-500/20 pb-2">
+                  <span>Grand Final Championship</span>
                   <span>{final.date} - {final.time}</span>
                 </div>
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                  <div className="flex justify-between items-center p-2 rounded-xl border border-white/5 bg-white/2">
                     <div className="flex items-center gap-2.5">
-                      {renderTeamLogo(final.team1Id, "w-6 h-6")}
+                      {renderTeamLogo(final.team1Id, "w-7 h-7")}
                       <span className={`text-sm ${final.winnerId === final.team1Id ? 'font-black text-white' : 'text-white/80'}`}>
                         {getTeamName(final.team1Id, final.team1Placeholder)}
                       </span>
                     </div>
-                    <span className="text-sm font-black text-white font-orbitron">
+                    <span className="text-base font-black text-amber-400 font-orbitron">
                       {final.score1 !== null ? final.score1 : "TBD"}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center p-2 rounded-xl border border-white/5 bg-white/2">
                     <div className="flex items-center gap-2.5">
-                      {renderTeamLogo(final.team2Id, "w-6 h-6")}
+                      {renderTeamLogo(final.team2Id, "w-7 h-7")}
                       <span className={`text-sm ${final.winnerId === final.team2Id ? 'font-black text-white' : 'text-white/80'}`}>
                         {getTeamName(final.team2Id, final.team2Placeholder)}
                       </span>
                     </div>
-                    <span className="text-sm font-black text-white font-orbitron">
+                    <span className="text-base font-black text-amber-400 font-orbitron">
                       {final.score2 !== null ? final.score2 : "TBD"}
                     </span>
                   </div>
                 </div>
-                
+
                 {final.winnerId && (
-                  <div className="mt-4 pt-3 border-t border-[#E31B23]/20 flex flex-col items-center justify-center gap-1">
-                    <IconTrophy className="text-yellow-400" size={32} />
-                    <p className="text-[10px] font-black text-white uppercase tracking-widest">Tournament Champion</p>
-                    <p className="text-base font-black text-yellow-400 uppercase font-orbitron tracking-tight text-center">
+                  <div className="mt-4 pt-4 border-t border-amber-500/30 flex flex-col items-center justify-center gap-1.5 bg-amber-500/10 rounded-2xl p-4">
+                    <IconTrophy className="text-amber-400 animate-bounce" size={36} />
+                    <p className="text-[9px] font-black text-white/60 uppercase tracking-widest">TOURNAMENT CHAMPION</p>
+                    <p className="text-lg font-black text-amber-400 uppercase font-orbitron tracking-tight text-center">
                       {getTeamName(final.winnerId)}
                     </p>
                   </div>
