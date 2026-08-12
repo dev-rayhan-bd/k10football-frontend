@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useRef } from "react";
@@ -13,7 +14,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Eye, Heart, Upload } from "lucide-react";
 import Image from "next/image";
-import { usePlayerStats } from "./FullEditablePage";
 import { useUpdatePlayerProfileMutation } from "@/lib/features/cv/cvApi";
 import { CMSField } from "@/components/shared/CMSField";
 import { cn } from "@/lib/utils";
@@ -66,8 +66,7 @@ const SAMPLE_IMAGES: ImageCard[] = [
   },
 ];
 
-export default function MyImagesSection({ editable = false }: { editable?: boolean }) {
-  const { role } = usePlayerStats();
+const MyImagesSection = ({ editable = false }: { editable?: boolean }) => {
   const [updatePlayer] = useUpdatePlayerProfileMutation();
   const [images, setImages] = useState<ImageCard[]>(SAMPLE_IMAGES);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -327,4 +326,6 @@ export default function MyImagesSection({ editable = false }: { editable?: boole
       </Dialog>
     </div>
   );
-}
+};
+
+export default MyImagesSection;

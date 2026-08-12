@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { useState, useRef } from 'react'
@@ -12,10 +13,8 @@ import {
 } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { Eye, Heart, Upload } from 'lucide-react'
-import { usePlayerStats } from './FullEditablePage'
 import { useUpdatePlayerProfileMutation } from '@/lib/features/cv/cvApi'
 import { CMSField } from '@/components/shared/CMSField'
-import { cn } from '@/lib/utils'
 
 interface VideoCard {
   id: string
@@ -61,8 +60,7 @@ const SAMPLE_VIDEOS: VideoCard[] = [
   },
 ]
 
-export default function MyVideosSection({ editable = false }: { editable?: boolean }) {
-  const { role } = usePlayerStats();
+const MyVideosSection = ({ editable = false }: { editable?: boolean }) => {
   const [updatePlayer] = useUpdatePlayerProfileMutation();
   const [videos, setVideos] = useState<VideoCard[]>(SAMPLE_VIDEOS)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -320,5 +318,7 @@ export default function MyVideosSection({ editable = false }: { editable?: boole
         </DialogContent>
       </Dialog>
     </div>
-  )
-}
+  );
+};
+
+export default MyVideosSection;

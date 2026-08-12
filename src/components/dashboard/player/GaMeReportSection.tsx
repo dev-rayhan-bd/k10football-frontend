@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 
-export default function GameReportSection() {
+const GameReportSection = () => {
   const router = useRouter();
   const { playerData } = usePlayer();
   const [selectedReport, setSelectedReport] = useState<any>(null);
@@ -64,21 +64,21 @@ export default function GameReportSection() {
   };
 
   return (
-    <div className="py-16">
+    <div className="py-8 sm:py-12 md:py-16 px-2 sm:px-4">
       <div className="w-full">
         {/* Main Card */}
-        <div className="border border-white/10 bg-[#0A0A0A]/60 rounded-3xl p-8 shadow-xl">
+        <div className="border border-white/10 bg-[#0A0A0A]/60 rounded-3xl p-4 sm:p-6 md:p-8 shadow-xl">
           {/* Header */}
-          <div className="flex items-start justify-between mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
             <div>
-              <h1 className="text-3xl font-black text-white mb-1 uppercase italic font-orbitron">Game Reports</h1>
-              <p className="text-gray-400 text-sm">Professional match performance analysis</p>
+              <h1 className="text-2xl sm:text-3xl font-black text-white mb-1 uppercase italic font-orbitron">Game Reports</h1>
+              <p className="text-gray-400 text-xs sm:text-sm">Professional match performance analysis</p>
             </div>
             <button 
               onClick={() => router.push("/dashboard/player/game-reports/create")}
-              className="px-4 py-2 border border-white/10 text-white rounded-lg hover:bg-white/5 transition flex items-center gap-2 text-xs uppercase tracking-widest font-orbitron cursor-pointer"
+              className="px-4 py-2 border border-white/10 text-white rounded-xl hover:bg-white/5 transition flex items-center gap-2 text-xs uppercase tracking-widest font-orbitron cursor-pointer"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 text-red-500" />
               Request Report
             </button>
           </div>
@@ -90,52 +90,56 @@ export default function GameReportSection() {
                 No game reports or requests found.
               </div>
             ) : (
-              <table className="w-full">
+              <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-white/10 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                    <th className="px-4 py-4 text-left">Report</th>
-                    <th className="px-4 py-4 text-left">Rating</th>
-                    <th className="px-4 py-4 text-left">Amount</th>
-                    <th className="px-4 py-4 text-left">Date</th>
-                    <th className="px-4 py-4 text-left">Status</th>
-                    <th className="px-4 py-4 text-center">View</th>
+                  <tr className="border-b border-white/10 text-[10px] font-black text-gray-400 uppercase tracking-widest font-orbitron">
+                    <th className="px-3 sm:px-4 py-3">Report</th>
+                    <th className="px-3 sm:px-4 py-3">Rating</th>
+                    <th className="px-3 sm:px-4 py-3">Amount</th>
+                    <th className="px-3 sm:px-4 py-3">Date</th>
+                    <th className="px-3 sm:px-4 py-3">Status</th>
+                    <th className="px-3 sm:px-4 py-3 text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {displayRows.map((row) => (
-                    <tr key={row.id} className="border-b border-white/5 hover:bg-white/2 transition">
-                      <td className="px-4 py-6 text-sm">
-                        <div className="flex items-center gap-3">
-                          <FileText className="w-5 h-5 text-red-600 shrink-0" />
-                          <span className="text-white font-bold font-orbitron">{row.team2}</span>
-                        </div>
+                    <tr 
+                      key={row.id} 
+                      className="border-b border-white/5 text-xs sm:text-sm hover:bg-white/5 transition-colors"
+                    >
+                      <td className="px-3 sm:px-4 py-3.5 font-medium text-white flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-red-500 shrink-0" />
+                        <span className="truncate max-w-37.5 sm:max-w-none">{row.team2}</span>
                       </td>
-                      <td className="px-4 py-6 text-sm font-bold text-red-500 font-orbitron">{row.rating}</td>
-                      <td className="px-4 py-6 text-sm text-gray-300 font-orbitron">{row.amount}</td>
-                      <td className="px-4 py-6 text-sm text-gray-400">{row.date}</td>
-                      <td className="px-4 py-6 text-sm">
-                        <div className="flex items-center gap-2">
-                          {row.status === 'Paid' ? (
-                            <>
-                              <CheckCircle className="w-4 h-4 text-green-500" />
-                              <span className="text-green-500 font-bold uppercase tracking-wider text-[10px] font-orbitron">Paid</span>
-                            </>
-                          ) : (
-                            <>
-                              <Clock className="w-4 h-4 text-orange-500 animate-pulse" />
-                              <span className="text-orange-500 font-bold uppercase tracking-wider text-[10px] font-orbitron">Pending</span>
-                            </>
-                          )}
-                        </div>
+                      <td className="px-3 sm:px-4 py-3.5 font-bold font-orbitron text-red-500">
+                        {row.rating !== 'N/A' ? `${row.rating}/100` : 'N/A'}
                       </td>
-                      <td className="px-4 py-6 text-sm text-center">
-                        {row.raw ? (
-                          <Eye 
-                            onClick={() => handleView(row)}
-                            className="w-5 h-5 text-red-600 hover:text-red-500 cursor-pointer transition mx-auto" 
-                          />
+                      <td className="px-3 sm:px-4 py-3.5 text-gray-300 font-orbitron">{row.amount}</td>
+                      <td className="px-3 sm:px-4 py-3.5 text-gray-400 text-xs">{row.date}</td>
+                      <td className="px-3 sm:px-4 py-3.5">
+                        {row.status === 'Paid' ? (
+                          <Badge className="bg-green-500/10 text-green-400 border border-green-500/20 text-[10px] font-orbitron">
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Completed
+                          </Badge>
                         ) : (
-                          <span className="text-gray-600 text-xs italic font-orbitron">Requested</span>
+                          <Badge className="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-orbitron">
+                            <Clock className="w-3 h-3 mr-1" />
+                            Pending
+                          </Badge>
+                        )}
+                      </td>
+                      <td className="px-3 sm:px-4 py-3.5 text-right">
+                        {row.raw ? (
+                          <button
+                            onClick={() => handleView(row)}
+                            className="p-1.5 rounded-lg border border-white/10 text-gray-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
+                            title="View Analysis"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        ) : (
+                          <span className="text-xs text-gray-500 italic">Waiting...</span>
                         )}
                       </td>
                     </tr>
@@ -147,85 +151,84 @@ export default function GameReportSection() {
         </div>
       </div>
 
-      {/* Report Detail Drawer */}
+      {/* Report Detail Sheet */}
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetContent className="bg-[#0A0A0A] border-white/10 p-6 text-white sm:max-w-xl overflow-y-auto">
-          <SheetHeader className="mb-8">
-            <div className="flex items-center justify-between">
-              <Badge className="bg-red-600 text-white font-black italic uppercase tracking-tighter font-orbitron">
-                Game Report Details
-              </Badge>
-              <div className="text-right">
-                <div className="text-4xl font-black text-[#00FF62] italic font-orbitron">
-                  {selectedReport ? (selectedReport.rating * 10).toFixed(0) : "0"}
-                </div>
-                <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest font-orbitron">Scout Rating</div>
-              </div>
-            </div>
-            <SheetTitle className="text-3xl font-black text-white uppercase italic tracking-tighter mt-4 font-orbitron">
-              {selectedReport?.team1} vs {selectedReport?.team2}
-            </SheetTitle>
-            <SheetDescription className="text-gray-500 italic">
-              Professional Performance Analysis by {selectedReport?.scoutName}
-            </SheetDescription>
-          </SheetHeader>
-
+        <SheetContent side="right" className="w-full sm:max-w-xl bg-[#0F0F12] border-l border-white/10 text-white overflow-y-auto p-6">
           {selectedReport && (
-            <div className="space-y-8">
-              {/* Core Info */}
-              <div className="grid grid-cols-2 gap-6 bg-white/5 p-6 rounded-2xl border border-white/5">
-                <div className="space-y-1">
-                  <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest font-orbitron">Position</div>
-                  <div className="text-md font-bold text-white uppercase font-orbitron">{selectedReport.playerPosition}</div>
+            <div className="space-y-6">
+              <SheetHeader className="border-b border-white/10 pb-4">
+                <div className="flex items-center justify-between">
+                  <SheetTitle className="text-xl font-black text-white font-orbitron uppercase">
+                    vs {selectedReport.team2}
+                  </SheetTitle>
+                  <Badge className="bg-green-500/10 text-green-400 border border-green-500/20 text-xs font-orbitron">
+                    Score: {selectedReport.score1} - {selectedReport.score2}
+                  </Badge>
                 </div>
-                <div className="space-y-1">
-                  <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest font-orbitron">Date</div>
-                  <div className="text-md font-bold text-white uppercase font-orbitron">{selectedReport.date}</div>
+                <SheetDescription className="text-gray-400 text-xs mt-1">
+                  Evaluated by Coach {selectedReport.coachName} on {selectedReport.date}
+                </SheetDescription>
+              </SheetHeader>
+
+              {/* Match Overview */}
+              <div className="grid grid-cols-3 gap-3 bg-white/5 p-4 rounded-xl border border-white/5 text-center">
+                <div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Rating</p>
+                  <p className="text-2xl font-black text-red-500 font-orbitron">{(selectedReport.rating * 10).toFixed(0)}</p>
                 </div>
-                <div className="space-y-1">
-                  <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest font-orbitron">League</div>
-                  <div className="text-md font-bold text-white uppercase font-orbitron">{selectedReport.league}</div>
+                <div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Goals</p>
+                  <p className="text-2xl font-black text-white font-orbitron">{selectedReport.goals}</p>
                 </div>
-                <div className="space-y-1">
-                  <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest font-orbitron">Score</div>
-                  <div className="text-md font-bold text-red-600 italic font-orbitron">{selectedReport.score}</div>
+                <div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Assists</p>
+                  <p className="text-2xl font-black text-white font-orbitron">{selectedReport.assists}</p>
                 </div>
               </div>
 
-              {/* Performance stats */}
-              <div className="p-8 rounded-3xl border border-white/10 bg-[#0D0D0D] space-y-6">
-                <div className="flex items-center gap-3 mb-2">
-                  <FileText size={20} className="text-[#00FF62]" />
-                  <h3 className="text-sm font-black text-white uppercase tracking-widest font-orbitron">Performance Metrics</h3>
-                </div>
-                <div className="grid grid-cols-3 gap-6">
-                  <div className="text-center">
-                    <div className="text-3xl font-black text-white italic font-orbitron">{selectedReport.goals}</div>
-                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider font-orbitron">Goals</div>
+              {/* Tactical & Physical Metrics */}
+              <div className="space-y-4">
+                <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest font-orbitron">Performance Metrics</h3>
+                <div className="space-y-3 bg-black/40 p-4 rounded-xl border border-white/5">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-gray-400">Pass Accuracy</span>
+                    <span className="font-bold text-green-400 font-orbitron">{selectedReport.passAccuracy}%</span>
                   </div>
-                  <div className="text-center border-l border-white/5">
-                    <div className="text-3xl font-black text-white italic font-orbitron">{selectedReport.assists}</div>
-                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider font-orbitron">Assists</div>
+                  <div className="w-full bg-gray-800 rounded-full h-1.5">
+                    <div className="bg-green-500 h-1.5 rounded-full" style={{ width: `${selectedReport.passAccuracy}%` }} />
                   </div>
-                  <div className="text-center border-l border-white/5">
-                    <div className="text-3xl font-black text-white italic font-orbitron">{selectedReport.passes}</div>
-                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider font-orbitron">Passes</div>
+
+                  <div className="flex justify-between items-center text-xs pt-2">
+                    <span className="text-gray-400">Minutes Played</span>
+                    <span className="font-bold text-white font-orbitron">{selectedReport.minutesPlayed}&apos;</span>
                   </div>
                 </div>
               </div>
 
-              {/* Scout Comments */}
-              <div className="space-y-3">
-                <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest font-orbitron">Scout Analysis</div>
-                <p className="text-sm text-gray-400 leading-relaxed italic bg-white/5 p-4 rounded-xl border border-white/5">
-                  Player demonstrated high tactical intelligence, agility, and overall excellent pitch coverage. Displayed high confidence under pressure, quick transition capabilities, and outstanding distribution qualities.
-                </p>
-              </div>
+              {/* Coach Evaluation Comments */}
+              <div className="space-y-4">
+                <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest font-orbitron">Coach Tactical Assessment</h3>
+                
+                {selectedReport.strengths && (
+                  <div className="bg-green-500/5 border border-green-500/20 p-4 rounded-xl space-y-1">
+                    <p className="text-[10px] font-bold text-green-400 uppercase tracking-wider">Key Strengths</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">{selectedReport.strengths}</p>
+                  </div>
+                )}
 
-              {/* Footer Info */}
-              <div className="pt-6 border-t border-white/5 flex justify-between items-center text-[10px] font-bold text-gray-500 uppercase tracking-widest font-orbitron">
-                <span>Report ID: #{selectedReport.id}</span>
-                <span className="text-green-500">Status: {selectedReport.status}</span>
+                {selectedReport.areasToImprove && (
+                  <div className="bg-amber-500/5 border border-amber-500/20 p-4 rounded-xl space-y-1">
+                    <p className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Areas for Improvement</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">{selectedReport.areasToImprove}</p>
+                  </div>
+                )}
+
+                {selectedReport.coachComments && (
+                  <div className="bg-white/5 border border-white/10 p-4 rounded-xl space-y-1">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Coach Overall Comments</p>
+                    <p className="text-xs text-gray-300 leading-relaxed italic">&quot;{selectedReport.coachComments}&quot;</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -233,4 +236,6 @@ export default function GameReportSection() {
       </Sheet>
     </div>
   );
-}
+};
+
+export default GameReportSection;
