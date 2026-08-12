@@ -180,7 +180,7 @@ const coaches: Coach[] = [
   },
 ];
 
-export default function Coaches() {
+const Coaches = () => {
   const router = useRouter();
   const { coachData } = useCoach();
 
@@ -319,4 +319,6 @@ export default function Coaches() {
       </div>
     </div>
   );
-}
+};
+
+export default Coaches;

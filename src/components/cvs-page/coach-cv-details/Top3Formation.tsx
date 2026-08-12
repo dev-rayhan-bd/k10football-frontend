@@ -135,7 +135,7 @@ const TacticalMap = ({
   );
 };
 
-export default function Top3Formation({ editable }: { editable?: boolean }) {
+const Top3Formation = ({ editable }: { editable?: boolean }) => {
   const { coachData, handleUpdate } = useCoach();
 
   const handleMarkersUpdate = (index: number, newMarkers: any[]) => {
@@ -145,15 +145,15 @@ export default function Top3Formation({ editable }: { editable?: boolean }) {
   };
 
   return (
-    <div className="py-20 bg-black p-12">
+    <div className="py-8 sm:py-16 md:py-20 bg-black p-4 sm:p-8 md:p-12 rounded-3xl">
       <div className="container mx-auto">
         {/* Title */}
-        <h1 className="text-4xl font-heading text-white text-center mb-12 tracking-wide uppercase">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading text-white text-center mb-6 sm:mb-12 tracking-wide uppercase">
           Top 3 Formations
         </h1>
 
         {/* Formation Maps */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
           {[0, 1, 2].map((index) => (
             <TacticalMap
               key={index}
@@ -168,5 +168,7 @@ export default function Top3Formation({ editable }: { editable?: boolean }) {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
+
+export default Top3Formation;

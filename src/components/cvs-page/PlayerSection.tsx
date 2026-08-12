@@ -32,7 +32,7 @@ const getFlagUrl = (countryName: string) => {
   return code ? `https://flagcdn.com/w40/${code}.png` : "";
 };
 
-export default function Players() {
+const Players = () => {
   const router = useRouter();
   const { players, selectPlayer } = usePlayer();
 
@@ -174,5 +174,7 @@ export default function Players() {
       </div>
     </div>
   );
-}
+};
+
+export default Players;
 
