@@ -123,46 +123,46 @@ const Players = () => {
                 </div>
 
                 {/* Name */}
-                <div className="absolute top-[52%] left-1/2 -translate-x-1/2 w-[76%] text-center pb-1.5 z-20">
-                  <h3 className="text-gray-900 font-heading text-xl sm:text-2xl font-black uppercase tracking-wide truncate">
+                <div className="absolute top-[51%] left-1/2 -translate-x-1/2 w-[85%] text-center pb-1 z-20">
+                  <h3 className="text-gray-900 font-heading text-2xl sm:text-3xl font-black uppercase tracking-widest truncate">
                     {displayLastName}
                   </h3>
                 </div>
 
                 {/* Stats - Redesigned as a glassmorphic block */}
-                <div className="absolute top-[60%] left-1/2 -translate-x-1/2 w-[84%] bg-black/3 border border-black/10 backdrop-blur-3xs rounded-xl p-2.5 text-black z-20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
-                  <div className="flex items-center justify-between gap-2">
+                <div className="absolute top-[59%] left-1/2 -translate-x-1/2 w-[86%] bg-black/3 border border-black/10 backdrop-blur-3xs rounded-xl p-2.5 text-black z-20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
+                  <div className="flex items-center justify-between gap-3">
                     {/* left */}
-                    <div className="flex-1 flex flex-col gap-1">
-                      <div className="flex justify-between items-center">
-                        <span className="font-extrabold text-sm sm:text-base text-gray-950 leading-none">{stats.pac}</span>
-                        <span className="font-bold text-[11px] sm:text-xs text-gray-700 leading-none">PAC</span>
+                    <div className="flex-1 flex flex-col gap-1.5">
+                      <div className="flex justify-between items-center px-1">
+                        <span className="font-extrabold text-lg sm:text-xl text-gray-950 leading-none">{stats.pac}</span>
+                        <span className="font-bold text-sm sm:text-[15px] text-gray-700 leading-none">PAC</span>
                       </div>
-                      <div className="flex justify-between items-center">
-                        <span className="font-extrabold text-sm sm:text-base text-gray-950 leading-none">{stats.sho}</span>
-                        <span className="font-bold text-[11px] sm:text-xs text-gray-700 leading-none">SHO</span>
+                      <div className="flex justify-between items-center px-1">
+                        <span className="font-extrabold text-lg sm:text-xl text-gray-950 leading-none">{stats.sho}</span>
+                        <span className="font-bold text-sm sm:text-[15px] text-gray-700 leading-none">SHO</span>
                       </div>
-                      <div className="flex justify-between items-center">
-                        <span className="font-extrabold text-sm sm:text-base text-gray-950 leading-none">{stats.pas}</span>
-                        <span className="font-bold text-[11px] sm:text-xs text-gray-700 leading-none">PAS</span>
+                      <div className="flex justify-between items-center px-1">
+                        <span className="font-extrabold text-lg sm:text-xl text-gray-950 leading-none">{stats.pas}</span>
+                        <span className="font-bold text-sm sm:text-[15px] text-gray-700 leading-none">PAS</span>
                       </div>
                     </div>
 
-                    <div className="h-12 border-r border-black/10 mx-1"></div>
+                    <div className="h-16 border-r-2 border-black/10 mx-1"></div>
 
                     {/* right */}
-                    <div className="flex-1 flex flex-col gap-1">
-                      <div className="flex justify-between items-center">
-                        <span className="font-extrabold text-sm sm:text-base text-gray-950 leading-none">{stats.dri}</span>
-                        <span className="font-bold text-[11px] sm:text-xs text-gray-700 leading-none">DRI</span>
+                    <div className="flex-1 flex flex-col gap-1.5">
+                      <div className="flex justify-between items-center px-1">
+                        <span className="font-extrabold text-lg sm:text-xl text-gray-950 leading-none">{stats.dri}</span>
+                        <span className="font-bold text-sm sm:text-[15px] text-gray-700 leading-none">DRI</span>
                       </div>
-                      <div className="flex justify-between items-center">
-                        <span className="font-extrabold text-sm sm:text-base text-gray-950 leading-none">{stats.def}</span>
-                        <span className="font-bold text-[11px] sm:text-xs text-gray-700 leading-none">DEF</span>
+                      <div className="flex justify-between items-center px-1">
+                        <span className="font-extrabold text-lg sm:text-xl text-gray-950 leading-none">{stats.def}</span>
+                        <span className="font-bold text-sm sm:text-[15px] text-gray-700 leading-none">DEF</span>
                       </div>
-                      <div className="flex justify-between items-center">
-                        <span className="font-extrabold text-sm sm:text-base text-gray-950 leading-none">{stats.phy}</span>
-                        <span className="font-bold text-[11px] sm:text-xs text-gray-700 leading-none">PHY</span>
+                      <div className="flex justify-between items-center px-1">
+                        <span className="font-extrabold text-lg sm:text-xl text-gray-950 leading-none">{stats.phy}</span>
+                        <span className="font-bold text-sm sm:text-[15px] text-gray-700 leading-none">PHY</span>
                       </div>
                     </div>
                   </div>

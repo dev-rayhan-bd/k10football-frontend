@@ -327,46 +327,46 @@ return (
 
 
               {/* Name */}
-              <div className="absolute top-[52%] left-1/2 -translate-x-1/2 w-[76%] text-center pb-1 z-20">
-                <h3 className="text-gray-900 font-heading text-lg sm:text-xl font-black uppercase tracking-wide truncate">
+              <div className="absolute top-[51%] left-1/2 -translate-x-1/2 w-[85%] text-center pb-1 z-20">
+                <h3 className="text-gray-900 font-heading text-xl sm:text-2xl font-black uppercase tracking-widest truncate">
                   {currentPlayer.name}
                 </h3>
               </div>
 
               {/* Stats */}
-              <div className="absolute top-[60%] left-1/2 -translate-x-1/2 w-[82%] text-black z-20">
-                <div className="flex items-center justify-between gap-1 p-2">
+              <div className="absolute top-[59%] left-1/2 -translate-x-1/2 w-[86%] text-black z-20">
+                <div className="flex items-center justify-between gap-2 p-2">
                   {/* left */}
-                  <div className="flex-1 flex flex-col gap-0.5">
-                    <div className="flex justify-between items-center">
-                      <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{currentPlayer.stats.pac}</span>
-                      <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">PAC</span>
+                  <div className="flex-1 flex flex-col gap-1.5">
+                    <div className="flex justify-between items-center px-1">
+                      <span className="font-extrabold text-base sm:text-lg text-gray-900 leading-none">{currentPlayer.stats.pac}</span>
+                      <span className="font-bold text-xs sm:text-sm text-gray-700 leading-none">PAC</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{currentPlayer.stats.sho}</span>
-                      <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">SHO</span>
+                    <div className="flex justify-between items-center px-1">
+                      <span className="font-extrabold text-base sm:text-lg text-gray-900 leading-none">{currentPlayer.stats.sho}</span>
+                      <span className="font-bold text-xs sm:text-sm text-gray-700 leading-none">SHO</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{currentPlayer.stats.pas}</span>
-                      <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">PAS</span>
+                    <div className="flex justify-between items-center px-1">
+                      <span className="font-extrabold text-base sm:text-lg text-gray-900 leading-none">{currentPlayer.stats.pas}</span>
+                      <span className="font-bold text-xs sm:text-sm text-gray-700 leading-none">PAS</span>
                     </div>
                   </div>
 
-                  <div className="h-10 border-r border-black/15 mx-1"></div>
+                  <div className="h-14 border-r-2 border-black/15 mx-1"></div>
 
                   {/* right */}
-                  <div className="flex-1 flex flex-col gap-0.5">
-                    <div className="flex justify-between items-center">
-                      <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{currentPlayer.stats.dri}</span>
-                      <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">DRI</span>
+                  <div className="flex-1 flex flex-col gap-1.5">
+                    <div className="flex justify-between items-center px-1">
+                      <span className="font-extrabold text-base sm:text-lg text-gray-900 leading-none">{currentPlayer.stats.dri}</span>
+                      <span className="font-bold text-xs sm:text-sm text-gray-700 leading-none">DRI</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{currentPlayer.stats.def}</span>
-                      <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">DEF</span>
+                    <div className="flex justify-between items-center px-1">
+                      <span className="font-extrabold text-base sm:text-lg text-gray-900 leading-none">{currentPlayer.stats.def}</span>
+                      <span className="font-bold text-xs sm:text-sm text-gray-700 leading-none">DEF</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="font-extrabold text-xs sm:text-sm text-gray-900 leading-none">{currentPlayer.stats.phy}</span>
-                      <span className="font-bold text-[9px] sm:text-[10px] text-gray-700 leading-none">PHY</span>
+                    <div className="flex justify-between items-center px-1">
+                      <span className="font-extrabold text-base sm:text-lg text-gray-900 leading-none">{currentPlayer.stats.phy}</span>
+                      <span className="font-bold text-xs sm:text-sm text-gray-700 leading-none">PHY</span>
                     </div>
                   </div>
                 </div>
