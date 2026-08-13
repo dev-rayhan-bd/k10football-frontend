@@ -22,7 +22,7 @@ const NavDocuments = ({
     icon: Icon;
   }[];
 }) => {
-// const { isMobile } = useSidebar();
+const { setOpenMobile } = useSidebar();
 
 const pathName = usePathname();
 console.log(pathName);
@@ -42,7 +42,7 @@ return (
         key={item.name}
       >
         <SidebarMenuButton className="py-6 hover:bg-transparent" asChild>
-          <Link href={item.url}>
+          <Link href={item.url} onClick={() => setOpenMobile?.(false)}>
             <div className="w-7">
               <item.icon size={24} />
             </div>

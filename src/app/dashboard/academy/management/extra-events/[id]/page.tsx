@@ -38,9 +38,7 @@ import {
   IconCrown,
   IconSearch,
   IconSparkles,
-  IconFilter,
   IconActivity,
-  IconRefresh
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import DashboardModal from "@/components/dashboard/dashboard-modal";
@@ -1868,6 +1866,32 @@ const TournamentSection = ({
     new Set((ageGroup || "U-8, U-10").split(",").map((c) => c.trim()))
   );
 
+  const mockRoundOf16 = Array.from({ length: 8 }, (_, i) => ({
+    id: `r16-${i + 1}`,
+    round: "Round of 16",
+    date: "Day 2",
+    team1Id: `r16-t${i * 2 + 1}`,
+    team2Id: `r16-t${i * 2 + 2}`,
+    team1Placeholder: `Group ${String.fromCharCode(65 + i)} Winner`,
+    team2Placeholder: `Group ${String.fromCharCode(66 + i)} Runner-up`,
+    score1: null,
+    score2: null,
+    winnerId: null,
+  }));
+
+  const mockQuarters = Array.from({ length: 4 }, (_, i) => ({
+    id: `qf-${i + 1}`,
+    round: "Quarter-Final",
+    date: "Day 3",
+    team1Id: `qf-t${i * 2 + 1}`,
+    team2Id: `qf-t${i * 2 + 2}`,
+    team1Placeholder: `Winner R16 ${i * 2 + 1}`,
+    team2Placeholder: `Winner R16 ${i * 2 + 2}`,
+    score1: null,
+    score2: null,
+    winnerId: null,
+  }));
+
   const filteredFixtures = groupFixtures.filter((f) => {
     const t1 = getTeamName(f.team1Id).toLowerCase();
     const t2 = getTeamName(f.team2Id).toLowerCase();
@@ -2065,10 +2089,16 @@ const TournamentSection = ({
                           </div>
                         </td>
                         <td className="p-4">
-                          <div className="flex items-center gap-3">
+                          <button 
+                            onClick={() => {
+                              setActiveTab("fixtures");
+                              setSearchQuery(row.name);
+                            }}
+                            className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity w-full text-left"
+                          >
                             {renderTeamLogo(row.id, "w-7 h-7")}
                             <span className="text-sm font-bold text-white uppercase tracking-tight">{row.name}</span>
-                          </div>
+                          </button>
                         </td>
                         <td className="p-4 text-center font-bold text-sm text-white">{row.p}</td>
                         <td className="p-4 text-center text-sm font-bold text-[#00FF62]">{row.w}</td>
@@ -2135,9 +2165,96 @@ const TournamentSection = ({
 
       {/* TAB 3: BRACKET */}
       {activeTab === "bracket" && (
-        <div className="flex flex-col lg:flex-row items-center justify-center gap-10 py-6 relative z-10">
+        <div className="flex flex-col lg:flex-row items-center justify-start lg:justify-center gap-10 py-6 relative z-10 overflow-x-auto pb-10">
+          
+          {/* Round of 16 */}
+          <div className="flex flex-col gap-6 w-full min-w-70 max-w-sm shrink-0">
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-white/40 text-center font-orbitron flex items-center justify-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#E31B23]" />
+              Round of 16
+            </h4>
+            {mockRoundOf16.map((match) => (
+              <div key={match.id} className="bg-black/60 border border-white/15 rounded-3xl p-5 space-y-4 relative shadow-2xl hover:border-white/25 transition-all">
+                <div className="flex justify-between items-center text-[9px] font-bold text-white/40 uppercase tracking-widest border-b border-white/5 pb-2">
+                  <span>Match #{match.id.replace('r16-', '')} ({match.round})</span>
+                  <span>{match.date}</span>
+                </div>
+                <div className="space-y-3">
+                  <div className={`flex justify-between items-center p-2 rounded-xl transition-all`}>
+                    <div className="flex items-center gap-2.5">
+                      {renderTeamLogo(match.team1Id, "w-6 h-6")}
+                      <span className="text-xs text-white/60">
+                        {getTeamName(match.team1Id, match.team1Placeholder)}
+                      </span>
+                    </div>
+                    <span className="text-xs font-black text-white font-orbitron bg-black/60 px-2.5 py-1 rounded-lg border border-white/10">
+                      -
+                    </span>
+                  </div>
+
+                  <div className={`flex justify-between items-center p-2 rounded-xl transition-all`}>
+                    <div className="flex items-center gap-2.5">
+                      {renderTeamLogo(match.team2Id, "w-6 h-6")}
+                      <span className="text-xs text-white/60">
+                        {getTeamName(match.team2Id, match.team2Placeholder)}
+                      </span>
+                    </div>
+                    <span className="text-xs font-black text-white font-orbitron bg-black/60 px-2.5 py-1 rounded-lg border border-white/10">
+                      -
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="hidden lg:block w-8 h-0.5 bg-white/10 shrink-0 self-center" />
+
+          {/* Quarter-Finals */}
+          <div className="flex flex-col gap-6 w-full min-w-70 max-w-sm shrink-0">
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-white/40 text-center font-orbitron flex items-center justify-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#E31B23]" />
+              Quarter-Finals
+            </h4>
+            {mockQuarters.map((match) => (
+              <div key={match.id} className="bg-black/60 border border-white/15 rounded-3xl p-5 space-y-4 relative shadow-2xl hover:border-white/25 transition-all">
+                <div className="flex justify-between items-center text-[9px] font-bold text-white/40 uppercase tracking-widest border-b border-white/5 pb-2">
+                  <span>Match #{match.id.replace('qf-', '')} ({match.round})</span>
+                  <span>{match.date}</span>
+                </div>
+                <div className="space-y-3">
+                  <div className={`flex justify-between items-center p-2 rounded-xl transition-all`}>
+                    <div className="flex items-center gap-2.5">
+                      {renderTeamLogo(match.team1Id, "w-6 h-6")}
+                      <span className="text-xs text-white/60">
+                        {getTeamName(match.team1Id, match.team1Placeholder)}
+                      </span>
+                    </div>
+                    <span className="text-xs font-black text-white font-orbitron bg-black/60 px-2.5 py-1 rounded-lg border border-white/10">
+                      -
+                    </span>
+                  </div>
+
+                  <div className={`flex justify-between items-center p-2 rounded-xl transition-all`}>
+                    <div className="flex items-center gap-2.5">
+                      {renderTeamLogo(match.team2Id, "w-6 h-6")}
+                      <span className="text-xs text-white/60">
+                        {getTeamName(match.team2Id, match.team2Placeholder)}
+                      </span>
+                    </div>
+                    <span className="text-xs font-black text-white font-orbitron bg-black/60 px-2.5 py-1 rounded-lg border border-white/10">
+                      -
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="hidden lg:block w-8 h-0.5 bg-white/10 shrink-0 self-center" />
+
           {/* Semifinals */}
-          <div className="flex flex-col gap-6 w-full max-w-sm">
+          <div className="flex flex-col gap-6 w-full min-w-70 max-w-sm shrink-0">
             <h4 className="text-[10px] font-black uppercase tracking-widest text-white/40 text-center font-orbitron flex items-center justify-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#E31B23]" />
               Semi-Final Knockouts

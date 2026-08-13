@@ -56,7 +56,7 @@ return (
       <NavDocuments items={sidebarItems} />
     </ScrollArea>
   </SidebarContent>
-  <div className="mt-auto p-4 flex flex-col gap-6 bg-[#111111]">
+  <div className="mt-auto p-4 pb-10 flex flex-col gap-6 bg-[#111111]">
     {tier && !collapsed && (
       <div className="bg-white/5 rounded-xl p-4 border border-white/10">
         <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Current Tier</p>
