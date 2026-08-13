@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import Image from "next/image";
 
 interface StatInputProps {
   label: string;
@@ -16,7 +17,7 @@ interface StatInputProps {
 const StatInput = ({ label, value, onChange, colorClass, align = "left" }: StatInputProps) => {
   return (
     <div className={cn("flex flex-col gap-1.5 w-full", align === "right" ? "items-end text-right" : "items-start text-left")}>
-      <Label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em] font-orbitron">{label}</Label>
+      <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest font-orbitron">{label}</Label>
       <div className={cn("h-11 w-full rounded-lg relative overflow-hidden shadow-lg", colorClass)}>
         {/* Plus / Minus Buttons */}
         <div className={cn("absolute top-0 bottom-0 flex items-center justify-center w-[50%]", align === "right" ? "right-0" : "left-0")}>
@@ -27,7 +28,7 @@ const StatInput = ({ label, value, onChange, colorClass, align = "left" }: StatI
           >
             -
           </button>
-          <div className="w-[1px] h-4 bg-white/20" />
+          <div className="w-px h-4 bg-white/20" />
           <button
             type="button"
             onClick={() => onChange(value + 1)}
@@ -200,13 +201,13 @@ const MatchStatisticsForm = ({
       <div className="bg-[#0A0A0A] rounded-[40px] border border-white/10 p-8 md:p-12 flex flex-col gap-10 relative overflow-hidden shadow-2xl">
         {/* MATCH STATISTICS Header Bar */}
         <div className="relative w-full">
-          <div className="bg-gradient-to-r from-[#00A3FF] to-[#0066FF] font-orbitron text-white w-full py-4 rounded-xl font-black uppercase tracking-[0.4em] shadow-[0_0_40px_rgba(0,163,255,0.3)] text-center border border-white/20 text-lg italic">
+          <div className="bg-linear-to-r from-[#00A3FF] to-[#0066FF] font-orbitron text-white w-full py-4 rounded-xl font-black uppercase tracking-[0.4em] shadow-[0_0_40px_rgba(0,163,255,0.3)] text-center border border-white/20 text-lg italic">
             Match Statistics
           </div>
         </div>
 
         {/* 3-Column Layout: Left Stats, Player Image, Right Stats */}
-        <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-start min-h-[700px]">
+        <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-start min-h-175">
           {/* Left Column (Stats 1-12) */}
           <div className="lg:col-span-3 flex flex-col gap-4 z-20">
             <StatInput label="Shots on Goal" value={stats.shotsOnGoal || 0} onChange={(val) => handleStatChange("shotsOnGoal", val)} colorClass="bg-[#00D1FF]" />
@@ -224,22 +225,24 @@ const MatchStatisticsForm = ({
           </div>
 
           {/* Center Column: Player Standing Image */}
-          <div className="lg:col-span-6 flex justify-center items-end h-full relative min-h-[500px]">
+          <div className="hidden lg:flex lg:col-span-6 justify-center items-end h-full relative min-h-125">
             {isGK ? (
-              <img 
+              <Image 
                 src="/mini__GP15525.webp" 
                 alt="Goalkeeper" 
-                className="h-[520px] object-contain drop-shadow-[0_25px_50px_rgba(0,0,0,0.9)] select-none pointer-events-none"
+                className="h-130 object-contain drop-shadow-[0_25px_50px_rgba(0,0,0,0.9)] select-none pointer-events-none"
+                width={500}
+                height={500}
                 onError={(e) => {
                   // Fallback if the image doesn't load
                   e.currentTarget.src = "/pngegg.png";
                 }}
               />
             ) : (
-              <img 
+              <Image
                 src="/sergio-ramos.png" 
                 alt="Sergio Ramos" 
-                className="h-[520px] object-contain drop-shadow-[0_25px_50px_rgba(0,0,0,0.9)] select-none pointer-events-none"
+                className="h-130 object-contain drop-shadow-[0_25px_50px_rgba(0,0,0,0.9)] select-none pointer-events-none"
                 onError={(e) => {
                   e.currentTarget.src = "/ronaldo.png";
                 }}
@@ -283,11 +286,13 @@ const MatchStatisticsForm = ({
               onClick={handleGoalClick}
               className="aspect-video relative cursor-crosshair overflow-hidden group select-none bg-black"
             >
-              <img 
+              <Image
                 src="/goal-bar.png" 
                 alt="Goal" 
                 draggable={false}
                 className="w-full h-full object-cover opacity-80 group-hover:opacity-90 transition-opacity pointer-events-none select-none" 
+                width={500}
+                height={500}
               />
               <div className="absolute inset-0 bg-black/10 pointer-events-none" />
               {/* Grid hint */}
@@ -299,11 +304,11 @@ const MatchStatisticsForm = ({
                 <div 
                   key={idx} 
                   onClick={(e) => removeGoalMarker(idx, e)}
-                  className="absolute w-8 h-8 -ml-4 -mt-4 bg-white/95 rounded-full flex items-center justify-center shadow-2xl border-2 border-red-600 hover:scale-125 hover:bg-red-500 transition-all cursor-pointer animate-in zoom-in duration-200"
+                  className="absolute w-8 h-8 -ml-4 -mt-4 flex items-center justify-center hover:scale-125 transition-all cursor-pointer animate-in zoom-in duration-200 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
                   style={{ left: `${marker.x}%`, top: `${marker.y}%` }}
                   title="Click to remove"
                 >
-                  <span className="text-sm select-none">{isGK ? "🧤" : "⚽"}</span>
+                  <span className="text-2xl select-none leading-none">{isGK ? "🧤" : "⚽"}</span>
                 </div>
               ))}
             </div>
@@ -329,11 +334,13 @@ const MatchStatisticsForm = ({
               onMouseLeave={handlePitchMouseLeave}
               className="aspect-video relative cursor-crosshair overflow-hidden group select-none bg-[#092b15]"
             >
-              <img 
+              <Image
                 src="/FootballPitch.png" 
                 alt="Football Pitch" 
                 draggable={false}
                 className="w-full h-full object-cover opacity-80 group-hover:opacity-90 transition-opacity pointer-events-none select-none" 
+                width={500}
+                height={500}
               />
               <div className="absolute inset-0 bg-black/10 pointer-events-none" />
               {/* Grid hint */}
@@ -428,11 +435,11 @@ const MatchStatisticsForm = ({
                 <div 
                   key={idx} 
                   onClick={(e) => removePitchMarker(idx, e)}
-                  className="absolute w-7 h-7 -ml-3.5 -mt-3.5 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-green-600 hover:scale-125 transition-all cursor-pointer animate-in zoom-in duration-200 z-30"
+                  className="absolute w-8 h-8 -ml-4 -mt-4 flex items-center justify-center hover:scale-125 transition-all cursor-pointer animate-in zoom-in duration-200 z-30 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
                   style={{ left: `${line.x1}%`, top: `${line.y1}%` }}
                   title="Click to remove"
                 >
-                  <span className="text-xs select-none font-sans">⚽</span>
+                  <span className="text-2xl select-none leading-none">⚽</span>
                 </div>
               ))}
             </div>
