@@ -26,7 +26,7 @@ import { MatchStats } from "@/lib/constants/reports";
 import { cn } from "@/lib/utils";
 import { useAppSelector } from "@/lib/hooks/reduxHooks";
 
-export const GameReports = () => {
+const GameReports = () => {
   const reports = useAppSelector(state => state.reports.reports);
   const [selectedReport, setSelectedReport] = React.useState<MatchStats | null>(null);
   const [isOpen, setIsOpen] = React.useState(false);
@@ -263,3 +263,5 @@ export const GameReports = () => {
     </div>
   );
 };
+
+export default GameReports;

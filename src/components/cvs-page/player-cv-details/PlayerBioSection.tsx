@@ -42,7 +42,7 @@ const STYLE_ICONS: Record<string, any> = {
 };
 import positionIcon from "@/assets/cvs-page/id/positionIcon.png";
 import trofeeIcon from "@/assets/cvs-page/id/trofeeIcon.png";
-import { CMSField } from "@/components/shared/CMSField";
+import CMSField from "@/components/shared/CMSField";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";

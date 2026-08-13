@@ -21,7 +21,7 @@ const SectionHeader = ({ icon: Icon, title }: { icon: any, title: string }) => (
   </div>
 );
 
-export const AgentSettings = () => {
+const AgentSettings = () => {
   return (
     <div className="p-2 md:p-6 space-y-6">
       <div className="mb-8">
@@ -143,3 +143,5 @@ export const AgentSettings = () => {
     </div>
   );
 };
+
+export default AgentSettings;

@@ -1,8 +1,8 @@
 "use client";
 import React from "react";
 import { IconPlus, IconStar } from "@tabler/icons-react";
-import { DashboardTable, Column } from "@/components/dashboard/dashboard-table";
-import { TableActionButtons } from "@/components/dashboard/table-action-buttons";
+import DashboardTable, { Column } from "@/components/dashboard/dashboard-table";
+import TableActionButtons from "@/components/dashboard/table-action-buttons";
 import { 
   DashboardPageHeader, 
   DashboardSection 
@@ -14,7 +14,7 @@ const successData = [
   { id: 3, title: "New Striker Joins IJ17 Squad from Local Rivals", category: "Seasonal Highlight", date: "2023-12-01", status: "Rejected", avatar: "https://i.pravatar.cc/150?u=3" },
 ];
 
-export const SuccessStory = () => {
+const SuccessStory = () => {
   const columns: Column<typeof successData[0]>[] = [
     {
       header: "Story Title",
@@ -67,3 +67,5 @@ export const SuccessStory = () => {
     </div>
   );
 };
+
+export default SuccessStory;

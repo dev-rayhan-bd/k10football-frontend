@@ -1,5 +1,6 @@
-import { AcademySettings } from "@/components/user-wise-dashboard/academy/settings";
+import AcademySettings from "@/components/user-wise-dashboard/academy/settings";
 
-export default function AnalysisSettingsPage() {
-  return <AcademySettings />;
+const AnalysisSettingsPage = () => {
+return <AcademySettings />;
 }
+export default AnalysisSettingsPage;

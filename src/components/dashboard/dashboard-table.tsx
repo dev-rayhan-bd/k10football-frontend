@@ -18,56 +18,58 @@ interface DashboardTableProps<T> {
   onRowClick?: (row: T) => void;
 }
 
-export function DashboardTable<T>({ columns, data, className, onRowClick }: DashboardTableProps<T>) {
-  return (
-    <div className={cn("border border-white/20 rounded-2xl overflow-hidden", className)}>
-      <table className="w-full text-left border-collapse">
-        <thead>
-          <tr className="bg-white/5 border-b border-white/20 text-[10px] font-black text-white uppercase tracking-wider">
-            {columns.map((col, i) => (
-              <th 
-                key={col.key} 
-                className={cn(
-                  "px-6 py-4",
-                  i !== columns.length - 1 && "border-r border-white/20",
-                  col.align === "center" && "text-center",
-                  col.align === "right" && "text-right",
-                  col.headerClassName
-                )}
-              >
-                {col.header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-white/20">
-          {data.map((row, rowIndex) => (
-            <tr 
-              key={rowIndex} 
-              onClick={() => onRowClick?.(row)}
+const DashboardTable = <T,>({ columns, data, className, onRowClick }: DashboardTableProps<T>) => {
+return (
+<div className={cn("border border-white/20 rounded-2xl overflow-hidden", className)}>
+  <table className="w-full text-left border-collapse">
+    <thead>
+      <tr className="bg-white/5 border-b border-white/20 text-[10px] font-black text-white uppercase tracking-wider">
+        {columns.map((col, i) => (
+          <th 
+            key={col.key} 
+            className={cn(
+              "px-6 py-4",
+              i !== columns.length - 1 && "border-r border-white/20",
+              col.align === "center" && "text-center",
+              col.align === "right" && "text-right",
+              col.headerClassName
+            )}
+          >
+            {col.header}
+          </th>
+        ))}
+      </tr>
+    </thead>
+    <tbody className="divide-y divide-white/20">
+      {data.map((row, rowIndex) => (
+        <tr 
+          key={rowIndex} 
+          onClick={() => onRowClick?.(row)}
+          className={cn(
+            "hover:bg-white/[0.02] transition-colors",
+            onRowClick && "cursor-pointer"
+          )}
+        >
+          {columns.map((col, colIndex) => (
+            <td 
+              key={`${rowIndex}-${col.key}`} 
               className={cn(
-                "hover:bg-white/[0.02] transition-colors",
-                onRowClick && "cursor-pointer"
+                "px-6 py-5",
+                colIndex !== columns.length - 1 && "border-r border-white/20",
+                col.align === "center" && "text-center",
+                col.align === "right" && "text-right",
+                col.cellClassName
               )}
             >
-              {columns.map((col, colIndex) => (
-                <td 
-                  key={`${rowIndex}-${col.key}`} 
-                  className={cn(
-                    "px-6 py-5",
-                    colIndex !== columns.length - 1 && "border-r border-white/20",
-                    col.align === "center" && "text-center",
-                    col.align === "right" && "text-right",
-                    col.cellClassName
-                  )}
-                >
-                  {col.render ? col.render(row) : (row as any)[col.key]}
-                </td>
-              ))}
-            </tr>
+              {col.render ? col.render(row) : (row as any)[col.key]}
+            </td>
           ))}
-        </tbody>
-      </table>
-    </div>
-  );
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+);
 }
+
+export default DashboardTable;

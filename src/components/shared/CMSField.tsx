@@ -31,7 +31,7 @@ interface CMSFieldProps {
 
 const EMOJIS = ["⚽", "👀", "🎯", "🧠", "💪", "🌍", "🏆", "🔥", "⚡", "📈", "👏", "🙌", "❤️", "👍"];
 
-export const CMSField = ({
+const CMSField = ({
   value,
   onUpdate,
   canEdit,
@@ -294,3 +294,5 @@ export const CMSField = ({
     </div>
   );
 };
+
+export default CMSField;

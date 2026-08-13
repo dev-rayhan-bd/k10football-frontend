@@ -20,7 +20,7 @@ interface DashboardHeroProps {
   logoImage?: string;
 }
 
-export const DashboardHero = ({
+const DashboardHero = ({
   backgroundImage,
   rating,
   badgeText,
@@ -129,3 +129,5 @@ export const DashboardHero = ({
     </div>
   );
 };
+
+export default DashboardHero;

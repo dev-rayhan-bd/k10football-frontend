@@ -12,10 +12,10 @@ import {
   IconMail,
   IconChevronDown
 } from "@tabler/icons-react";
-import { DashboardStatCard } from "@/components/dashboard/dashboard-stat-card";
+import DashboardStatCard from "@/components/dashboard/dashboard-stat-card";
 import { DashboardSidebarPanel, DashboardSidebarItem } from "@/components/dashboard/dashboard-sidebar";
-import { DashboardTable, Column } from "@/components/dashboard/dashboard-table";
-import { TableActionButtons } from "@/components/dashboard/table-action-buttons";
+import DashboardTable, { Column } from "@/components/dashboard/dashboard-table";
+import TableActionButtons from "@/components/dashboard/table-action-buttons";
 import { Button } from "@/components/ui/button";
 import { 
   BarChart, 
@@ -166,7 +166,7 @@ const CustomBarTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-export const AgentDashboard = () => {
+const AgentDashboard = () => {
     return (
         <div className="space-y-6">
             {/* Hero & Sidebar Row */}
@@ -450,3 +450,5 @@ export const AgentDashboard = () => {
         </div>
     );
 };
+
+export default AgentDashboard;

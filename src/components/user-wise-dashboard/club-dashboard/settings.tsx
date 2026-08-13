@@ -12,7 +12,7 @@ import {
   SettingsToggle 
 } from "@/components/dashboard/dashboard-settings-elements";
 
-export const ClubSettings = () => {
+const ClubSettings = () => {
   return (
     <div className="space-y-8 pb-12">
       {/* Header */}
@@ -97,3 +97,5 @@ export const ClubSettings = () => {
     </div>
   );
 };
+
+export default ClubSettings;

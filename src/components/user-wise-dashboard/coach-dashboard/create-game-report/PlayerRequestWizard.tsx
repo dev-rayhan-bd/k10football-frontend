@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { usePlayer } from "@/lib/hooks/usePlayer";
 import { addReportRequest } from "@/lib/constants/reports";
-import { StripePaymentModal } from "./StripePaymentModal";
+import StripePaymentModal from "./StripePaymentModal";
 import { useAppDispatch } from "@/lib/hooks/reduxHooks";
 import { addGameReportRequest } from "@/lib/features/reports/reportsSlice";
 import { 

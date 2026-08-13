@@ -1,6 +1,7 @@
 import React from "react";
 import AnalyticsReport from "@/components/user-wise-dashboard/academy-management/analyticsReport";
 
-export default function AnalyticsReportPage() {
-  return <AnalyticsReport />;
+const AnalyticsReportPage = () => {
+return <AnalyticsReport />;
 }
+export default AnalyticsReportPage;

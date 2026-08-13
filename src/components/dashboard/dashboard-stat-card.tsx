@@ -6,7 +6,7 @@ interface DashboardStatCardProps {
   value: string;
 }
 
-export const DashboardStatCard = ({ icon, label, value }: DashboardStatCardProps) => (
+const DashboardStatCard = ({ icon, label, value }: DashboardStatCardProps) => (
   <div className="bg-[#111111] p-6 md:p-8 rounded-2xl border border-white/15 hover:border-white/20 transition-all space-y-6 group">
     <div className="w-12 h-12 bg-white/5 rounded-2xl border border-white/15 flex items-center justify-center text-white/40 group-hover:text-white transition-colors">
       {icon}
@@ -21,3 +21,5 @@ export const DashboardStatCard = ({ icon, label, value }: DashboardStatCardProps
     </div>
   </div>
 );
+
+export default DashboardStatCard;

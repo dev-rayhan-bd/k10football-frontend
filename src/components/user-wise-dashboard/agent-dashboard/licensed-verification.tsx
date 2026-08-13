@@ -15,7 +15,7 @@ const SectionHeader = ({ title }: { title: string }) => (
   </div>
 );
 
-export const AgentVerification = () => {
+const AgentVerification = () => {
   return (
     <div className="p-2 md:p-6 space-y-6">
       <div className="mb-8">
@@ -133,3 +133,5 @@ export const AgentVerification = () => {
     </div>
   );
 };
+
+export default AgentVerification;

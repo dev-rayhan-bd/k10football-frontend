@@ -24,7 +24,7 @@ const notifications = [
   { id: 4, name: "Professional Pathway Agency", type: "Agent", date: "Feb 28, 2024", icon: IconBriefcase },
 ];
 
-export const PlayerNotifications = () => {
+const PlayerNotifications = () => {
   return (
     <div className="space-y-10 pb-16">
       {/* Header */}
@@ -92,3 +92,5 @@ export const PlayerNotifications = () => {
     </div>
   );
 };
+
+export default PlayerNotifications;

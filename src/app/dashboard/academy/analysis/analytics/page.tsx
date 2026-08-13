@@ -1,5 +1,6 @@
-import { Analytics } from "@/components/user-wise-dashboard/academy-analysis/analytics";
+import Analytics from "@/components/user-wise-dashboard/academy-analysis/analytics";
 
-export default function AnalyticsPage() {
-  return <Analytics />;
+const AnalyticsPage = () => {
+return <Analytics />;
 }
+export default AnalyticsPage;

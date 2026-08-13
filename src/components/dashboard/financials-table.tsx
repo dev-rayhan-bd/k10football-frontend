@@ -19,7 +19,7 @@ interface FinancialsTableProps {
   transactions: Transaction[];
 }
 
-export const FinancialsTable = ({ transactions }: FinancialsTableProps) => {
+const FinancialsTable = ({ transactions }: FinancialsTableProps) => {
   return (
     <div className="w-full overflow-x-auto rounded-2xl border border-white/10">
       <table className="w-full text-left border-collapse">
@@ -81,3 +81,5 @@ export const FinancialsTable = ({ transactions }: FinancialsTableProps) => {
     </div>
   );
 };
+
+export default FinancialsTable;

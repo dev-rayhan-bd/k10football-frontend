@@ -1,5 +1,7 @@
 import React from "react";
 
-export const Requests = () => {
+const Requests = () => {
   return <div>Requests</div>;
 };
+
+export default Requests;

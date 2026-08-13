@@ -22,7 +22,7 @@ interface TableActionButtonsProps {
   isHeartFilled?: boolean;
 }
 
-export const TableActionButtons = ({
+const TableActionButtons = ({
   onView,
   onEdit,
   onDelete,
@@ -117,3 +117,5 @@ export const TableActionButtons = ({
     </div>
   );
 };
+
+export default TableActionButtons;

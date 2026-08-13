@@ -35,7 +35,7 @@ const areaData = [
   { month: "Nov-Dec", value: 900 },
 ];
 
-export const DashboardCharts = () => {
+const DashboardCharts = () => {
   const players = useAppSelector((state) => state.player.players);
   const evaluationRecords = useAppSelector((state) => state.evaluation.records);
 
@@ -216,3 +216,5 @@ export const DashboardCharts = () => {
     </div>
   );
 };
+
+export default DashboardCharts;

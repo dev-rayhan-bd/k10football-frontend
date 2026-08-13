@@ -41,7 +41,7 @@ const SettingField = ({ label, value, type = "text", placeholder, icon: Icon }: 
   </div>
 );
 
-export const AcademySettings = () => {
+const AcademySettings = () => {
   return (
     <div className="flex flex-col gap-10 pb-20">
       {/* Header */}
@@ -131,3 +131,5 @@ export const AcademySettings = () => {
     </div>
   );
 };
+
+export default AcademySettings;

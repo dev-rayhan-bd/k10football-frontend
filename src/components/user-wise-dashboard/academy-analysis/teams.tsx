@@ -10,8 +10,8 @@ import {
   IconPlus,
   IconMinus
 } from "@tabler/icons-react";
-import { DashboardStatCard } from "@/components/dashboard/dashboard-stat-card";
-import { TableActionButtons } from "@/components/dashboard/table-action-buttons";
+import DashboardStatCard from "@/components/dashboard/dashboard-stat-card";
+import TableActionButtons from "@/components/dashboard/table-action-buttons";
 
 const teamsData = [
   { id: "1", name: "Santos U17", ageGroup: "Under 17", coachCount: 3, playerCount: 22, status: "Active" },
@@ -20,7 +20,7 @@ const teamsData = [
   { id: "4", name: "Santos U18", ageGroup: "Under 18", coachCount: 4, playerCount: 20, status: "Active" },
 ];
 
-export const Teams = () => {
+const Teams = () => {
   return (
     <div className="flex flex-col gap-8 pb-10">
       {/* Header */}
@@ -100,3 +100,5 @@ export const Teams = () => {
     </div>
   );
 };
+
+export default Teams;

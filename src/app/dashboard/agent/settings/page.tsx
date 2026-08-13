@@ -1,5 +1,5 @@
 import React from "react";
-import { AgentSettings } from "@/components/user-wise-dashboard/agent-dashboard/settings";
+import AgentSettings from "@/components/user-wise-dashboard/agent-dashboard/settings";
 
 const AgentSettingsPage = () => {
   return <AgentSettings />;

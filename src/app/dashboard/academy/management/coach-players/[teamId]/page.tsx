@@ -4,7 +4,8 @@ interface PageProps {
   params: Promise<{ teamId: string }>;
 }
 
-export default async function ManagementTeamDetailsPage({ params }: PageProps) {
-  const resolvedParams = await params;
-  return <TeamDetails teamId={resolvedParams.teamId} />;
+const ManagementTeamDetailsPage = async ({ params }: PageProps) => {
+const resolvedParams = await params;
+return <TeamDetails teamId={resolvedParams.teamId} />;
 }
+export default ManagementTeamDetailsPage;

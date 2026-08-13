@@ -11,7 +11,7 @@ const relatedPositions: Record<string, string[]> = {
 
 const futsalOptions = Object.keys(relatedPositions);
 
-export const FutsalPositionSelector = () => {
+const FutsalPositionSelector = () => {
   const [selected, setSelected] = useState<string>(futsalOptions[0]);
   const positions = relatedPositions[selected] || [];
 
@@ -45,3 +45,5 @@ export const FutsalPositionSelector = () => {
     </div>
   );
 };
+
+export default FutsalPositionSelector;

@@ -26,7 +26,7 @@ const mediaItems = [
   { title: "Training Highlights", date: "Feb 28, 2024", views: 156, likes: 62, img: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=400" },
 ];
 
-export const MyImagesAndVideos = () => {
+const MyImagesAndVideos = () => {
   return (
     <div className="space-y-8 pb-12">
       {/* Header */}
@@ -119,3 +119,5 @@ const MediaSection = ({ title, type, items }: { title: string, type: 'image' | '
     </div>
   </div>
 );
+
+export default MyImagesAndVideos;

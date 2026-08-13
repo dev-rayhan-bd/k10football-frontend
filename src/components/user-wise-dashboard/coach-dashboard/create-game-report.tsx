@@ -7,7 +7,7 @@ interface CreateGameReportProps {
   onContinue: (data: any) => void;
 }
 
-export const CreateGameReport = ({ onCancel, onContinue }: CreateGameReportProps) => {
+const CreateGameReport = ({ onCancel, onContinue }: CreateGameReportProps) => {
   return (
     <CreateGameReportWizard 
       onCancel={onCancel} 
@@ -15,3 +15,5 @@ export const CreateGameReport = ({ onCancel, onContinue }: CreateGameReportProps
     />
   );
 };
+
+export default CreateGameReport;

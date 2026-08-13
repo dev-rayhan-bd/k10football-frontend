@@ -8,8 +8,8 @@ import {
   IconPlus,
 } from "@tabler/icons-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { DashboardTable, Column } from "@/components/dashboard/dashboard-table";
-import { TableActionButtons } from "@/components/dashboard/table-action-buttons";
+import DashboardTable, { Column } from "@/components/dashboard/dashboard-table";
+import TableActionButtons from "@/components/dashboard/table-action-buttons";
 
 const stats = [
   { label: "Total Reports", value: "6", icon: IconFileText },
@@ -22,7 +22,7 @@ import { usePlayer } from "@/lib/hooks/usePlayer";
 import { MatchStats } from "@/lib/constants/reports";
 import { useAppSelector } from "@/lib/hooks/reduxHooks";
 
-export const GameReports = () => {
+const GameReports = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { players } = usePlayer();
@@ -243,3 +243,5 @@ export const GameReports = () => {
     </div>
   );
 };
+
+export default GameReports;

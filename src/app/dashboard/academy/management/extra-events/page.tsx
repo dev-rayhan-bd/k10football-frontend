@@ -1,6 +1,7 @@
 import React from "react";
 import ExtraEventsManagement from "@/components/user-wise-dashboard/academy-management/extraEvents";
 
-export default function ExtraEventsPage() {
-  return <ExtraEventsManagement />;
+const ExtraEventsPage = () => {
+return <ExtraEventsManagement />;
 }
+export default ExtraEventsPage;

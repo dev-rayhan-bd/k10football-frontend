@@ -10,9 +10,9 @@ import {
   IconCertificate,
   IconBriefcase
 } from "@tabler/icons-react";
-import { DashboardHero } from "@/components/dashboard/dashboard-hero";
+import DashboardHero from "@/components/dashboard/dashboard-hero";
 
-export const MyCV = () => {
+const MyCV = () => {
   return (
     <div className="space-y-8 pb-12">
       {/* Header */}
@@ -261,3 +261,5 @@ const FormationCard = ({ title, subtitle, wins, usage, image }: { title: string,
     </div>
   </div>
 );
+
+export default MyCV;

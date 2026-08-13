@@ -13,7 +13,7 @@ interface DashboardModalProps {
   maxWidth?: string;
 }
 
-export const DashboardModal = ({
+const DashboardModal = ({
   isOpen,
   onClose,
   title,
@@ -82,3 +82,5 @@ export const DashboardModal = ({
     </div>
   );
 };
+
+export default DashboardModal;

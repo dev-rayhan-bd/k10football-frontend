@@ -1,9 +1,10 @@
-import { SuperAdminPayments } from "@/components/user-wise-dashboard/super-admin-dashboard/payments";
+import SuperAdminPayments from "@/components/user-wise-dashboard/super-admin-dashboard/payments";
 
-export default function PaymentsPage() {
-    return (
-        <div>
-            <SuperAdminPayments />
-        </div>
-    );
+const PaymentsPage = () => {
+return (
+    <div>
+        <SuperAdminPayments />
+    </div>
+);
 }
+export default PaymentsPage;

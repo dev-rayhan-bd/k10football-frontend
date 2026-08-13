@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { DashboardModal } from "@/components/dashboard/dashboard-modal";
+import DashboardModal from "@/components/dashboard/dashboard-modal";
 import { 
   IconPlus, 
   IconChevronDown,

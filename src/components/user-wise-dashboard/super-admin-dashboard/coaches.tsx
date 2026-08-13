@@ -7,7 +7,7 @@ import {
   IconTrash
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
-import { DashboardTable, Column } from "@/components/dashboard/dashboard-table";
+import DashboardTable, { Column } from "@/components/dashboard/dashboard-table";
 
 const CvPill = ({ type }: { type: "Silver" | "Gold" }) => {
   const styles = {
@@ -37,7 +37,7 @@ interface CoachRow {
   active: boolean;
 }
 
-export const SuperAdminCoaches = () => {
+const SuperAdminCoaches = () => {
   const columns: Column<CoachRow>[] = [
     {
       header: "Name",
@@ -124,3 +124,5 @@ export const SuperAdminCoaches = () => {
     </div>
   );
 };
+
+export default SuperAdminCoaches;

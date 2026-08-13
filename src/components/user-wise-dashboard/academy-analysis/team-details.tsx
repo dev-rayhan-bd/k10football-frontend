@@ -19,7 +19,7 @@ import {
   DialogHeader,
   DialogTitle
 } from "@/components/ui/dialog";
-import { DashboardStatCard } from "@/components/dashboard/dashboard-stat-card";
+import DashboardStatCard from "@/components/dashboard/dashboard-stat-card";
 import {
   getTeams,
   saveTeams,

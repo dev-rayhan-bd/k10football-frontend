@@ -1,5 +1,5 @@
 "use client";
-import { DashboardLayout } from "@/components/dashboard-layout";
+import DashboardLayout from "@/components/dashboard-layout";
 import { 
   IconDashboard, 
   IconSchool, 
@@ -27,13 +27,14 @@ const analysisSidebarItems = [
   { name: "Settings", url: "/dashboard/academy/analysis/settings", icon: IconSettings },
 ];
 
-export default function AcademyAnalysisLayout({ children }: { children: ReactNode }) {
-  return (
-    <DashboardLayout 
-      sidebarItems={analysisSidebarItems}
-      showToggle={true}
-    >
-      {children}
-    </DashboardLayout>
-  );
+const AcademyAnalysisLayout = ({ children }: { children: ReactNode }) => {
+return (
+<DashboardLayout 
+  sidebarItems={analysisSidebarItems}
+  showToggle={true}
+>
+  {children}
+</DashboardLayout>
+);
 }
+export default AcademyAnalysisLayout;

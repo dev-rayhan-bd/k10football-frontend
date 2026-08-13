@@ -10,7 +10,7 @@ interface MediaCardProps {
   likes: number;
 }
 
-export const MediaCard = ({
+const MediaCard = ({
   type,
   thumbnail,
   title,
@@ -57,3 +57,5 @@ export const MediaCard = ({
     </div>
   );
 };
+
+export default MediaCard;

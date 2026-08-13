@@ -29,11 +29,11 @@ import {
   DialogTitle 
 } from "@/components/ui/dialog";
 
-import { DashboardHero } from "@/components/dashboard/dashboard-hero";
-import { DashboardStatCard } from "@/components/dashboard/dashboard-stat-card";
+import DashboardHero from "@/components/dashboard/dashboard-hero";
+import DashboardStatCard from "@/components/dashboard/dashboard-stat-card";
 import { DashboardSidebarPanel, DashboardSidebarItem } from "@/components/dashboard/dashboard-sidebar";
-import { ProductCard } from "@/components/dashboard/product-card";
-import { DashboardCharts } from "@/components/dashboard/dashboard-charts";
+import ProductCard from "@/components/dashboard/product-card";
+import DashboardCharts from "@/components/dashboard/dashboard-charts";
 
 const PlayerEvalSidebarItem = ({ player, status }: { player: any, status: any }) => {
   const playerImgSrc = typeof player.playerImage === 'string'

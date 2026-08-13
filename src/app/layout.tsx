@@ -45,24 +45,25 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+const RootLayout = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${inter.variable} ${audiowide.variable} ${orbitron.variable} antialiased`}
-        suppressHydrationWarning
-      >
-        <StoreProvider>
-          <AuthGuard>
-            {children}
-            <Toaster />
-          </AuthGuard>
-        </StoreProvider>
-      </body>
-    </html>
-  );
+}>) => {
+return (
+<html lang="en" suppressHydrationWarning>
+  <body
+    className={`${inter.variable} ${audiowide.variable} ${orbitron.variable} antialiased`}
+    suppressHydrationWarning
+  >
+    <StoreProvider>
+      <AuthGuard>
+        {children}
+        <Toaster />
+      </AuthGuard>
+    </StoreProvider>
+  </body>
+</html>
+);
 }
+export default RootLayout;

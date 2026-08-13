@@ -82,200 +82,201 @@ const DEFAULT_TESTIMONIALS = [
   }
 ];
 
-export default function TestimonialSection({ editable }: { editable?: boolean }) {
-  const { coachData, handleUpdate } = useCoach()
-  const [isOpen, setIsOpen] = useState(false)
-  const [formData, setFormData] = useState({
+const TestimonialSection = ({ editable }: { editable?: boolean }) => {
+const { coachData, handleUpdate } = useCoach()
+const [isOpen, setIsOpen] = useState(false)
+const [formData, setFormData] = useState({
+name: '',
+role: '',
+text: '',
+avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop'
+})
+
+const testimonials = (coachData.testimonials && coachData.testimonials.length > 0) 
+? coachData.testimonials 
+: DEFAULT_TESTIMONIALS
+
+const handleAdd = () => {
+if (formData.name && formData.text) {
+  const newTestimonial = {
+    ...formData,
+    id: Date.now()
+  }
+  handleUpdate('testimonials', [newTestimonial, ...testimonials])
+  setFormData({
     name: '',
     role: '',
     text: '',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop'
   })
-
-  const testimonials = (coachData.testimonials && coachData.testimonials.length > 0) 
-    ? coachData.testimonials 
-    : DEFAULT_TESTIMONIALS
-
-  const handleAdd = () => {
-    if (formData.name && formData.text) {
-      const newTestimonial = {
-        ...formData,
-        id: Date.now()
-      }
-      handleUpdate('testimonials', [newTestimonial, ...testimonials])
-      setFormData({
-        name: '',
-        role: '',
-        text: '',
-        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop'
-      })
-      setIsOpen(false)
-    }
-  }
-
-  const handleRemove = (id: number) => {
-    handleUpdate('testimonials', testimonials.filter(t => t.id !== id))
-  }
-
-  const StarRating = () => (
-    <div className="flex gap-1">
-      {[...Array(5)].map((_, i) => (
-        <Star key={i} className="w-4 h-4 fill-green-500 text-green-500" />
-      ))}
-    </div>
-  )
-
-  const TestimonialCard = ({ testimonial }: { testimonial: any }) => (
-    <div className="bg-gray-900 border border-gray-700 rounded-lg p-6 min-w-[320px] flex-shrink-0 group relative overflow-hidden">
-      {editable && (
-        <button 
-          onClick={() => handleRemove(testimonial.id)}
-          className="absolute top-2 right-2 p-1.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-lg opacity-0 group-hover:opacity-100 transition-all z-10"
-        >
-          <Trash2 size={14} />
-        </button>
-      )}
-      <div className="flex items-start gap-4 mb-4">
-        <Image
-          src={testimonial.avatar}
-          alt={testimonial.name}
-          width={200}
-          height={200}
-          className="w-14 h-14 rounded-full object-cover border border-gray-700"
-        />
-        <div className="flex-1">
-          <p className="text-white font-semibold text-sm">{testimonial.name}</p>
-          <p className="text-gray-400 text-xs">{testimonial.role}</p>
-          <div className="mt-2">
-            <StarRating />
-          </div>
-        </div>
-      </div>
-      <p className="text-gray-300 text-sm max-w-sm leading-relaxed relative z-0 italic">
-        <Quote size={12} className="inline-block mr-1 opacity-50 -mt-1" />
-        {testimonial.text}
-      </p>
-    </div>
-  )
-
-  return (
-    <div className=" bg-black py-20 ">
-      <div className={`${editable? "container mx-auto" : ""}`}>
-        {/* Title Area */}
-        <div className="flex flex-col items-center mb-16 gap-4">
-          <h1 className="text-4xl font-heading text-white tracking-wide">
-            TESTIMONIALS
-          </h1>
-          
-          {editable && (
-            <Dialog open={isOpen} onOpenChange={setIsOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-white/5 hover:bg-white/10 text-white border border-white/10 gap-2 px-6 py-5 rounded-xl font-black uppercase tracking-widest text-[10px] h-auto">
-                  <Plus size={16} className="text-primary" /> Add Testimonial
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="bg-gray-900 border-gray-800 text-white sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle className="text-xl font-bold font-orbitron uppercase italic text-primary">New Testimonial</DialogTitle>
-                </DialogHeader>
-                <div className="grid gap-6 py-4">
-                  <div className="flex flex-col items-center gap-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">Profile Image</Label>
-                    <div className="relative group w-20 h-20 cursor-pointer overflow-hidden rounded-full border-2 border-dashed border-gray-800 hover:border-primary/50 transition-all flex items-center justify-center bg-black/50">
-                      {formData.avatar ? (
-                        <img 
-                          src={formData.avatar} 
-                          alt="Avatar Preview" 
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <Plus className="text-gray-400 group-hover:text-primary transition-colors" size={24} />
-                      )}
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                        <span className="text-[8px] text-white font-black uppercase tracking-widest">Upload</span>
-                      </div>
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            if (file.size > 2 * 1024 * 1024) {
-                              toast.error("File size too large. Max 2MB.");
-                              return;
-                            }
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                              setFormData({ ...formData, avatar: reader.result as string });
-                            };
-                            reader.readAsDataURL(file);
-                          }
-                        }}
-                        className="absolute inset-0 opacity-0 cursor-pointer"
-                      />
-                    </div>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-white/40">Full Name</Label>
-                    <Input 
-                      id="name" 
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="e.g. John Smith" 
-                      className="bg-black/50 border-gray-800 text-white h-12 rounded-xl focus:border-primary/50 transition-colors"
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="role" className="text-[10px] font-black uppercase tracking-widest text-white/40">Role / Designation</Label>
-                    <Input 
-                      id="role" 
-                      value={formData.role}
-                      onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                      placeholder="e.g. Academy Director" 
-                      className="bg-black/50 border-gray-800 text-white h-12 rounded-xl focus:border-primary/50 transition-colors"
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="text" className="text-[10px] font-black uppercase tracking-widest text-white/40">Their Testimony</Label>
-                    <Textarea 
-                      id="text" 
-                      value={formData.text}
-                      onChange={(e) => setFormData({ ...formData, text: e.target.value })}
-                      placeholder="Enter the coach evaluation here..." 
-                      className="bg-black/50 border-gray-800 text-white min-h-[100px] rounded-xl focus:border-primary/50 transition-colors resize-none p-4"
-                    />
-                  </div>
-                  <Button onClick={handleAdd} className="w-full bg-primary hover:bg-primary/90 text-black font-black uppercase tracking-widest py-6 rounded-xl mt-2">
-                    Add Testimonial
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          )}
-        </div>
-
-        {/* First Marquee Row */}
-        <div className="mb-8">
-          <Marquee gradient gradientColor="#000000" pauseOnHover speed={40}>
-            {(testimonials.slice(0, Math.ceil(testimonials.length / 2)) || []).map((testimonial) => (
-              <div key={testimonial.id} className="mr-6">
-                <TestimonialCard testimonial={testimonial} />
-              </div>
-            ))}
-          </Marquee>
-        </div>
-
-        {/* Second Marquee Row */}
-        <div>
-          <Marquee gradient gradientColor="#000000" pauseOnHover speed={40} direction="right">
-            {(testimonials.slice(Math.ceil(testimonials.length / 2)) || []).map((testimonial) => (
-              <div key={testimonial.id} className="mr-6">
-                <TestimonialCard testimonial={testimonial} />
-              </div>
-            ))}
-          </Marquee>
-        </div>
-      </div>
-    </div>
-  )
+  setIsOpen(false)
 }
+}
+
+const handleRemove = (id: number) => {
+handleUpdate('testimonials', testimonials.filter(t => t.id !== id))
+}
+
+const StarRating = () => (
+<div className="flex gap-1">
+  {[...Array(5)].map((_, i) => (
+    <Star key={i} className="w-4 h-4 fill-green-500 text-green-500" />
+  ))}
+</div>
+)
+
+const TestimonialCard = ({ testimonial }: { testimonial: any }) => (
+<div className="bg-gray-900 border border-gray-700 rounded-lg p-6 min-w-[320px] flex-shrink-0 group relative overflow-hidden">
+  {editable && (
+    <button 
+      onClick={() => handleRemove(testimonial.id)}
+      className="absolute top-2 right-2 p-1.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-lg opacity-0 group-hover:opacity-100 transition-all z-10"
+    >
+      <Trash2 size={14} />
+    </button>
+  )}
+  <div className="flex items-start gap-4 mb-4">
+    <Image
+      src={testimonial.avatar}
+      alt={testimonial.name}
+      width={200}
+      height={200}
+      className="w-14 h-14 rounded-full object-cover border border-gray-700"
+    />
+    <div className="flex-1">
+      <p className="text-white font-semibold text-sm">{testimonial.name}</p>
+      <p className="text-gray-400 text-xs">{testimonial.role}</p>
+      <div className="mt-2">
+        <StarRating />
+      </div>
+    </div>
+  </div>
+  <p className="text-gray-300 text-sm max-w-sm leading-relaxed relative z-0 italic">
+    <Quote size={12} className="inline-block mr-1 opacity-50 -mt-1" />
+    {testimonial.text}
+  </p>
+</div>
+)
+
+return (
+<div className=" bg-black py-20 ">
+  <div className={`${editable? "container mx-auto" : ""}`}>
+    {/* Title Area */}
+    <div className="flex flex-col items-center mb-16 gap-4">
+      <h1 className="text-4xl font-heading text-white tracking-wide">
+        TESTIMONIALS
+      </h1>
+      
+      {editable && (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-white/5 hover:bg-white/10 text-white border border-white/10 gap-2 px-6 py-5 rounded-xl font-black uppercase tracking-widest text-[10px] h-auto">
+              <Plus size={16} className="text-primary" /> Add Testimonial
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="bg-gray-900 border-gray-800 text-white sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold font-orbitron uppercase italic text-primary">New Testimonial</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-6 py-4">
+              <div className="flex flex-col items-center gap-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">Profile Image</Label>
+                <div className="relative group w-20 h-20 cursor-pointer overflow-hidden rounded-full border-2 border-dashed border-gray-800 hover:border-primary/50 transition-all flex items-center justify-center bg-black/50">
+                  {formData.avatar ? (
+                    <img 
+                      src={formData.avatar} 
+                      alt="Avatar Preview" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Plus className="text-gray-400 group-hover:text-primary transition-colors" size={24} />
+                  )}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                    <span className="text-[8px] text-white font-black uppercase tracking-widest">Upload</span>
+                  </div>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        if (file.size > 2 * 1024 * 1024) {
+                          toast.error("File size too large. Max 2MB.");
+                          return;
+                        }
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setFormData({ ...formData, avatar: reader.result as string });
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                  />
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-white/40">Full Name</Label>
+                <Input 
+                  id="name" 
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="e.g. John Smith" 
+                  className="bg-black/50 border-gray-800 text-white h-12 rounded-xl focus:border-primary/50 transition-colors"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="role" className="text-[10px] font-black uppercase tracking-widest text-white/40">Role / Designation</Label>
+                <Input 
+                  id="role" 
+                  value={formData.role}
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                  placeholder="e.g. Academy Director" 
+                  className="bg-black/50 border-gray-800 text-white h-12 rounded-xl focus:border-primary/50 transition-colors"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="text" className="text-[10px] font-black uppercase tracking-widest text-white/40">Their Testimony</Label>
+                <Textarea 
+                  id="text" 
+                  value={formData.text}
+                  onChange={(e) => setFormData({ ...formData, text: e.target.value })}
+                  placeholder="Enter the coach evaluation here..." 
+                  className="bg-black/50 border-gray-800 text-white min-h-[100px] rounded-xl focus:border-primary/50 transition-colors resize-none p-4"
+                />
+              </div>
+              <Button onClick={handleAdd} className="w-full bg-primary hover:bg-primary/90 text-black font-black uppercase tracking-widest py-6 rounded-xl mt-2">
+                Add Testimonial
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
+
+    {/* First Marquee Row */}
+    <div className="mb-8">
+      <Marquee gradient gradientColor="#000000" pauseOnHover speed={40}>
+        {(testimonials.slice(0, Math.ceil(testimonials.length / 2)) || []).map((testimonial) => (
+          <div key={testimonial.id} className="mr-6">
+            <TestimonialCard testimonial={testimonial} />
+          </div>
+        ))}
+      </Marquee>
+    </div>
+
+    {/* Second Marquee Row */}
+    <div>
+      <Marquee gradient gradientColor="#000000" pauseOnHover speed={40} direction="right">
+        {(testimonials.slice(Math.ceil(testimonials.length / 2)) || []).map((testimonial) => (
+          <div key={testimonial.id} className="mr-6">
+            <TestimonialCard testimonial={testimonial} />
+          </div>
+        ))}
+      </Marquee>
+    </div>
+  </div>
+</div>
+)
+}
+export default TestimonialSection;

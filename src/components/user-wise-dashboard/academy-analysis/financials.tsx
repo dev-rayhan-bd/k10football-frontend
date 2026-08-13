@@ -33,7 +33,7 @@ const StatusPill = ({ status }: { status: "Completed" | "Pending" }) => {
   );
 };
 
-export const Financials = () => {
+const Financials = () => {
   return (
     <div className="flex flex-col gap-8 pb-10">
       {/* Header */}
@@ -116,3 +116,5 @@ export const Financials = () => {
     </div>
   );
 };
+
+export default Financials;

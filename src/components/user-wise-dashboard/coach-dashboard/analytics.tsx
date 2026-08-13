@@ -17,7 +17,7 @@ import {
   YAxis,
   CartesianGrid
 } from "recharts";
-import { DashboardTable, Column } from "@/components/dashboard/dashboard-table";
+import DashboardTable, { Column } from "@/components/dashboard/dashboard-table";
 
 const profileAnalysisData = [
   { subject: 'Tactics', A: 97, fullMark: 100 },
@@ -62,7 +62,7 @@ const trophyColumns: Column<typeof trophyStats[0]>[] = [
   { header: "Champion", key: "champion", align: "center", cellClassName: "text-sm text-white" },
 ];
 
-export const Analytics = () => {
+const Analytics = () => {
   return (
     <div className="space-y-8 pb-12">
       {/* Header */}
@@ -208,3 +208,5 @@ export const Analytics = () => {
     </div>
   );
 };
+
+export default Analytics;

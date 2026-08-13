@@ -118,7 +118,7 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
   );
 };
 
-export const SuperAdminAnalytics = () => {
+const SuperAdminAnalytics = () => {
   return (
     <div className="flex flex-col gap-8 pb-10">
       {/* Header */}
@@ -279,3 +279,5 @@ export const SuperAdminAnalytics = () => {
     </div>
   );
 };
+
+export default SuperAdminAnalytics;

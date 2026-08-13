@@ -1,5 +1,6 @@
-import { GameReportsOverview } from "@/components/user-wise-dashboard/academy-analysis/game-reports-overview";
+import GameReportsOverview from "@/components/user-wise-dashboard/academy-analysis/game-reports-overview";
 
-export default function AnalysisGameReportsOverviewPage() {
-  return <GameReportsOverview />;
+const AnalysisGameReportsOverviewPage = () => {
+return <GameReportsOverview />;
 }
+export default AnalysisGameReportsOverviewPage;

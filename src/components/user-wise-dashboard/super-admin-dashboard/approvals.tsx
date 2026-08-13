@@ -6,7 +6,7 @@ import {
   IconX
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
-import { DashboardTable, Column } from "@/components/dashboard/dashboard-table";
+import DashboardTable, { Column } from "@/components/dashboard/dashboard-table";
 import { toast } from "sonner";
 
 const StatusPill = ({ status }: { status: "Pending" | "Approved" | "Rejected" }) => {
@@ -37,7 +37,7 @@ interface StoryRow {
   status: "Approved" | "Pending";
 }
 
-export const SuperAdminApprovals = () => {
+const SuperAdminApprovals = () => {
   const [approvals, setApprovals] = useState<ApprovalRow[]>([]);
 
   useEffect(() => {
@@ -226,3 +226,5 @@ export const SuperAdminApprovals = () => {
     </div>
   );
 };
+
+export default SuperAdminApprovals;

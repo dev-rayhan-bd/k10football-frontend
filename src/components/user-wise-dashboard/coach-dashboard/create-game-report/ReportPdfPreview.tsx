@@ -1,7 +1,7 @@
 "use client";
 import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { RadarChart } from "./RadarChart";
+import RadarChart from "./RadarChart";
 import { IconDownload, IconCheck, IconLoader2 } from "@tabler/icons-react";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
@@ -18,7 +18,7 @@ interface ReportPdfPreviewProps {
   isPlayer?: boolean;
 }
 
-export const ReportPdfPreview = ({
+const ReportPdfPreview = ({
   formData,
   characteristics,
   stats,
@@ -363,3 +363,5 @@ export const ReportPdfPreview = ({
     </div>
   );
 };
+
+export default ReportPdfPreview;

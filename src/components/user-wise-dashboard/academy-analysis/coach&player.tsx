@@ -18,8 +18,8 @@ import {
   DialogHeader,
   DialogTitle
 } from "@/components/ui/dialog";
-import { DashboardStatCard } from "@/components/dashboard/dashboard-stat-card";
-import { TableActionButtons } from "@/components/dashboard/table-action-buttons";
+import DashboardStatCard from "@/components/dashboard/dashboard-stat-card";
+import TableActionButtons from "@/components/dashboard/table-action-buttons";
 import {
   getTeams,
   saveTeams,

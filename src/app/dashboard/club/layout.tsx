@@ -1,5 +1,5 @@
 "use client";
-import { DashboardLayout } from "@/components/dashboard-layout";
+import DashboardLayout from "@/components/dashboard-layout";
 import { 
   IconDashboard, 
   IconUser, 
@@ -23,13 +23,14 @@ const clubSidebarItems = [
   { name: "Settings", url: "/dashboard/club/settings", icon: IconSettings },
 ];
 
-export default function ClubLayout({ children }: { children: ReactNode }) {
-  return (
-    <DashboardLayout 
-      sidebarItems={clubSidebarItems}
-      tier={{ name: "ACTIVE CLUB", color: "#00FF62" }}
-    >
-      {children}
-    </DashboardLayout>
-  );
+const ClubLayout = ({ children }: { children: ReactNode }) => {
+return (
+<DashboardLayout 
+  sidebarItems={clubSidebarItems}
+  tier={{ name: "ACTIVE CLUB", color: "#00FF62" }}
+>
+  {children}
+</DashboardLayout>
+);
 }
+export default ClubLayout;

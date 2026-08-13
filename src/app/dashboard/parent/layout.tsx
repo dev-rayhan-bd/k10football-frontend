@@ -1,6 +1,6 @@
 "use client";
 
-import { DashboardLayout } from "@/components/dashboard-layout";
+import DashboardLayout from "@/components/dashboard-layout";
 import {
   IconDashboard,
   IconUsers,
@@ -20,13 +20,14 @@ const parentSidebarItems = [
   { name: "Academy Shop", url: "/dashboard/parent/shop", icon: IconBuildingStore }
 ];
 
-export default function ParentLayout({ children }: { children: ReactNode }) {
-  return (
-    <DashboardLayout
-      sidebarItems={parentSidebarItems}
-      tier={{ name: "PARENT", color: "var(--indigo)" }}
-    >
-      {children}
-    </DashboardLayout>
-  );
+const ParentLayout = ({ children }: { children: ReactNode }) => {
+return (
+<DashboardLayout
+  sidebarItems={parentSidebarItems}
+  tier={{ name: "PARENT", color: "var(--indigo)" }}
+>
+  {children}
+</DashboardLayout>
+);
 }
+export default ParentLayout;

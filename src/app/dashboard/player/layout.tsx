@@ -1,5 +1,5 @@
 "use client";
-import { DashboardLayout } from "@/components/dashboard-layout";
+import DashboardLayout from "@/components/dashboard-layout";
 import { 
   IconDashboard, 
   IconFileText, 
@@ -21,13 +21,14 @@ const playerSidebarItems = [
   { name: "Settings", url: "/dashboard/player/settings", icon: IconSettings },
 ];
 
-export default function PlayerLayout({ children }: { children: ReactNode }) {
-  return (
-    <DashboardLayout 
-      sidebarItems={playerSidebarItems}
-      tier={{ name: "GOLD", color: "var(--gold)" }}
-    >
-      {children}
-    </DashboardLayout>
-  );
+const PlayerLayout = ({ children }: { children: ReactNode }) => {
+return (
+<DashboardLayout 
+  sidebarItems={playerSidebarItems}
+  tier={{ name: "GOLD", color: "var(--gold)" }}
+>
+  {children}
+</DashboardLayout>
+);
 }
+export default PlayerLayout;

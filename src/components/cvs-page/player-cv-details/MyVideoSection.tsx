@@ -14,7 +14,7 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { Eye, Heart, Upload } from 'lucide-react'
 import { useUpdatePlayerProfileMutation } from '@/lib/features/cv/cvApi'
-import { CMSField } from '@/components/shared/CMSField'
+import CMSField from '@/components/shared/CMSField'
 
 interface VideoCard {
   id: string

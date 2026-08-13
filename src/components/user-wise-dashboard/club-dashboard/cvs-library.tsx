@@ -6,8 +6,8 @@ import {
   IconShare, 
   IconChevronDown
 } from "@tabler/icons-react";
-import { DashboardTable, Column } from "@/components/dashboard/dashboard-table";
-import { TableActionButtons } from "@/components/dashboard/table-action-buttons";
+import DashboardTable, { Column } from "@/components/dashboard/dashboard-table";
+import TableActionButtons from "@/components/dashboard/table-action-buttons";
 import { 
   DashboardPageHeader, 
   DashboardStatCard, 
@@ -27,7 +27,7 @@ const cvData = [
   { id: 4, name: "James Brown", position: "Goalkeeper", rating: 7.9, club: "Liverpool Academy", country: "Argentina", age: 17, status: "Bronze", avatar: "https://i.pravatar.cc/150?u=4" },
 ];
 
-export const CVsLibrary = () => {
+const CVsLibrary = () => {
   const [activeTab, setActiveTab] = useState("All CVS");
 
   const columns: Column<typeof cvData[0]>[] = [
@@ -114,3 +114,5 @@ const FilterButton = ({ label }: { label: string }) => (
     <IconChevronDown size={14} className="text-gray-500" />
   </button>
 );
+
+export default CVsLibrary;

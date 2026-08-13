@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 
-export default function DashboardRootLayout({ children }: { children: ReactNode }) {
-  return <>{children}</>;
+const DashboardRootLayout = ({ children }: { children: ReactNode }) => {
+return <>{children}</>;
 }
+export default DashboardRootLayout;

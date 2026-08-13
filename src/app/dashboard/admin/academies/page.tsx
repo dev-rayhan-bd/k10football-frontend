@@ -1,7 +1,8 @@
-import { SuperAdminAcademies } from "@/components/user-wise-dashboard/super-admin-dashboard/academies";
+import SuperAdminAcademies from "@/components/user-wise-dashboard/super-admin-dashboard/academies";
 
-export default function AcademiesPage() {
-    return (
-        <SuperAdminAcademies />
-    );
+const AcademiesPage = () => {
+return (
+    <SuperAdminAcademies />
+);
 }
+export default AcademiesPage;

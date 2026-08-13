@@ -11,7 +11,7 @@ import {
   SettingsToggle 
 } from "@/components/dashboard/dashboard-settings-elements";
 
-export const PlayerSettings = () => {
+const PlayerSettings = () => {
   return (
     <div className="space-y-10 pb-16">
       {/* Header */}
@@ -74,3 +74,5 @@ export const PlayerSettings = () => {
     </div>
   );
 };
+
+export default PlayerSettings;

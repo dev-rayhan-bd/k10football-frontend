@@ -1,5 +1,6 @@
-import { PlayerEvaluation } from "@/components/user-wise-dashboard/academy-analysis/player-evaluation";
+import PlayerEvaluation from "@/components/user-wise-dashboard/academy-analysis/player-evaluation";
 
-export default function PlayerEvaluationPage() {
-  return <PlayerEvaluation />;
+const PlayerEvaluationPage = () => {
+return <PlayerEvaluation />;
 }
+export default PlayerEvaluationPage;

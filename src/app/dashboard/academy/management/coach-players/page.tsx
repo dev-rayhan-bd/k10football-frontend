@@ -1,5 +1,6 @@
 import { CoachAndPlayer } from "@/components/user-wise-dashboard/academy-analysis/coach&player";
 
-export default function ManagementCoachPlayersPage() {
-  return <CoachAndPlayer />;
+const ManagementCoachPlayersPage = () => {
+return <CoachAndPlayer />;
 }
+export default ManagementCoachPlayersPage;

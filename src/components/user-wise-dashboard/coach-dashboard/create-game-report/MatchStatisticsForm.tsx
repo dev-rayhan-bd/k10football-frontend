@@ -85,7 +85,7 @@ interface MatchStatisticsFormProps {
   onSubmit: () => void;
 }
 
-export const MatchStatisticsForm = ({
+const MatchStatisticsForm = ({
   position,
   stats,
   setStats,
@@ -459,3 +459,5 @@ export const MatchStatisticsForm = ({
     </div>
   );
 };
+
+export default MatchStatisticsForm;

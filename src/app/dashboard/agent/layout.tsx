@@ -1,5 +1,5 @@
 "use client";
-import { DashboardLayout } from "@/components/dashboard-layout";
+import DashboardLayout from "@/components/dashboard-layout";
 import { 
   IconDashboard, 
   IconUser, 
@@ -27,13 +27,14 @@ const agentSidebarItems = [
   { name: "Settings", url: "/dashboard/agent/settings", icon: IconSettings },
 ];
 
-export default function AgentLayout({ children }: { children: ReactNode }) {
-  return (
-    <DashboardLayout 
-      sidebarItems={agentSidebarItems}
-      tier={{ name: "ACTIVE AGENT", color: "#00FF62" }}
-    >
-      {children}
-    </DashboardLayout>
-  );
+const AgentLayout = ({ children }: { children: ReactNode }) => {
+return (
+<DashboardLayout 
+  sidebarItems={agentSidebarItems}
+  tier={{ name: "ACTIVE AGENT", color: "#00FF62" }}
+>
+  {children}
+</DashboardLayout>
+);
 }
+export default AgentLayout;

@@ -1,5 +1,5 @@
 import React from "react";
-import { AgentAnalytics } from "@/components/user-wise-dashboard/agent-dashboard/analytics";
+import AgentAnalytics from "@/components/user-wise-dashboard/agent-dashboard/analytics";
 
 const AgentAnalyticsPage = () => {
   return <AgentAnalytics />;

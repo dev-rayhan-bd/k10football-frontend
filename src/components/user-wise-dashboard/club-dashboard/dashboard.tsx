@@ -24,9 +24,9 @@ import {
   Bar,
   Cell
 } from "recharts";
-import { DashboardHero } from "@/components/dashboard/dashboard-hero";
-import { DashboardTable, Column } from "@/components/dashboard/dashboard-table";
-import { TableActionButtons } from "@/components/dashboard/table-action-buttons";
+import DashboardHero from "@/components/dashboard/dashboard-hero";
+import DashboardTable, { Column } from "@/components/dashboard/dashboard-table";
+import TableActionButtons from "@/components/dashboard/table-action-buttons";
 import {
   DashboardStatCard,
   DashboardSection
@@ -89,7 +89,7 @@ const mediaData = [
   { id: 4, title: "vs Liverpool U19", date: "Mar 5, 2024", views: 312, likes: 227, image: "https://images.unsplash.com/photo-1551958219-acbc608c6377?q=80&w=400" },
 ];
 
-export const ClubDashboard = () => {
+const ClubDashboard = () => {
   const staffColumns: Column<typeof staffData[0]>[] = [
     { header: "Team Name", key: "teamName", cellClassName: "text-sm text-gray-400" },
     { header: "Age Group", key: "ageGroup", align: "center", cellClassName: "text-sm text-gray-400" },
@@ -378,3 +378,5 @@ const MediaCard = ({ title, date, views, likes, image, isVideo }: { title: strin
     </div>
   </div>
 );
+
+export default ClubDashboard;

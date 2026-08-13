@@ -186,7 +186,7 @@ const EvaluationCard = ({
   </div>
 );
 
-export const PlayerEvaluation = () => {
+const PlayerEvaluation = () => {
   const players = useAppSelector((state) => state.player.players);
   const evaluationRecords = useAppSelector((state) => state.evaluation.records);
   
@@ -911,3 +911,5 @@ export const PlayerEvaluation = () => {
     </div>
   );
 };
+
+export default PlayerEvaluation;

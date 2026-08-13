@@ -6,8 +6,8 @@ import {
   IconUsers,
   IconPlus
 } from "@tabler/icons-react";
-import { DashboardTable, Column } from "@/components/dashboard/dashboard-table";
-import { TableActionButtons } from "@/components/dashboard/table-action-buttons";
+import DashboardTable, { Column } from "@/components/dashboard/dashboard-table";
+import TableActionButtons from "@/components/dashboard/table-action-buttons";
 import { 
   DashboardPageHeader, 
   DashboardStatCard, 
@@ -27,7 +27,7 @@ const academyData = [
   { id: 4, name: "Santos U18", ageGroup: "Under 18", manager: "James Brown", teams: 5, coaches: 10, players: 68, status: "Active" },
 ];
 
-export const MyAcademies = () => {
+const MyAcademies = () => {
   const columns: Column<typeof academyData[0]>[] = [
     { header: "Academy Name", key: "name", cellClassName: "text-sm font-bold text-white" },
     { header: "Age Group", key: "ageGroup", align: "center", cellClassName: "text-sm text-gray-400" },
@@ -77,3 +77,5 @@ export const MyAcademies = () => {
     </div>
   );
 };
+
+export default MyAcademies;

@@ -30,12 +30,12 @@ import {
   DialogTitle 
 } from "@/components/ui/dialog";
 
-import { DashboardHero } from "@/components/dashboard/dashboard-hero";
-import { DashboardStatCard } from "@/components/dashboard/dashboard-stat-card";
+import DashboardHero from "@/components/dashboard/dashboard-hero";
+import DashboardStatCard from "@/components/dashboard/dashboard-stat-card";
 import { DashboardSidebarPanel, DashboardSidebarItem } from "@/components/dashboard/dashboard-sidebar";
-import { DashboardCharts } from "@/components/dashboard/dashboard-charts";
-import { MediaCard } from "@/components/dashboard/media-card";
-import { FinancialsTable } from "@/components/dashboard/financials-table";
+import DashboardCharts from "@/components/dashboard/dashboard-charts";
+import MediaCard from "@/components/dashboard/media-card";
+import FinancialsTable from "@/components/dashboard/financials-table";
 
 
 const mediaData = [

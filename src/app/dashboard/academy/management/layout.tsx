@@ -1,5 +1,5 @@
 "use client";
-import { DashboardLayout } from "@/components/dashboard-layout";
+import DashboardLayout from "@/components/dashboard-layout";
 import { 
   IconDashboard, 
   IconMessage, 
@@ -42,13 +42,14 @@ const managementSidebarItems = [
   { name: "Settings", url: "/dashboard/academy/management/settings", icon: IconSettings },
 ];
 
-export default function AcademyManagementLayout({ children }: { children: ReactNode }) {
-  return (
-    <DashboardLayout 
-      sidebarItems={managementSidebarItems}
-      showToggle={true}
-    >
-      {children}
-    </DashboardLayout>
-  );
+const AcademyManagementLayout = ({ children }: { children: ReactNode }) => {
+return (
+<DashboardLayout 
+  sidebarItems={managementSidebarItems}
+  showToggle={true}
+>
+  {children}
+</DashboardLayout>
+);
 }
+export default AcademyManagementLayout;

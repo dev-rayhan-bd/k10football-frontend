@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Eye, Heart, Upload } from "lucide-react";
 import Image from "next/image";
 import { useUpdatePlayerProfileMutation } from "@/lib/features/cv/cvApi";
-import { CMSField } from "@/components/shared/CMSField";
+import CMSField from "@/components/shared/CMSField";
 import { cn } from "@/lib/utils";
 
 interface ImageCard {

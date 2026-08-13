@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { GameReports } from "@/components/user-wise-dashboard/player-dashboard/game-reports";
+import GameReports from "@/components/user-wise-dashboard/player-dashboard/game-reports";
 
 const GameReportsPage = () => {
   return <GameReports />;

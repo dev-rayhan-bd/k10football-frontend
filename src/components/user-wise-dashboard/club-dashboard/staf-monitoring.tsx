@@ -8,8 +8,8 @@ import {
   IconPlus,
   IconDots
 } from "@tabler/icons-react";
-import { DashboardTable, Column } from "@/components/dashboard/dashboard-table";
-import { TableActionButtons } from "@/components/dashboard/table-action-buttons";
+import DashboardTable, { Column } from "@/components/dashboard/dashboard-table";
+import TableActionButtons from "@/components/dashboard/table-action-buttons";
 import { 
   DashboardPageHeader, 
   DashboardStatCard, 
@@ -44,7 +44,7 @@ const playerData = [
   { id: 4, name: "James Brown", position: "Goalkeeper", rating: 7.9, matches: 30, goals: 0, assists: 0, status: "Active", avatar: "https://i.pravatar.cc/150?u=8" },
 ];
 
-export const StaffMonitoring = () => {
+const StaffMonitoring = () => {
   const managerColumns: Column<typeof managerData[0]>[] = [
     {
       header: "Name",
@@ -197,3 +197,5 @@ const AddButton = ({ label }: { label: string }) => (
     {label}
   </button>
 );
+
+export default StaffMonitoring;

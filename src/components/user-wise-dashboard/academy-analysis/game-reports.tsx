@@ -29,7 +29,7 @@ import logo from "@/assets/sort_logo.png";
 
 import { useAppSelector } from "@/lib/hooks/reduxHooks";
 import { MatchStats } from "@/lib/constants/reports";
-import { RadarChart } from "@/components/user-wise-dashboard/coach-dashboard/create-game-report/RadarChart";
+import RadarChart from "@/components/user-wise-dashboard/coach-dashboard/create-game-report/RadarChart";
 
 const getPlayerTag = (player: any) => {
   if (player.fullName === "Marcus Silva") return "U-15";
@@ -204,7 +204,7 @@ const GameReportCard = ({
   );
 };
 
-export const GameReports = () => {
+const GameReports = () => {
   const players = useAppSelector((state) => state.player.players);
   const reports = useAppSelector((state) => state.reports.reports);
   
@@ -830,3 +830,5 @@ export const GameReports = () => {
     </div>
   );
 };
+
+export default GameReports;

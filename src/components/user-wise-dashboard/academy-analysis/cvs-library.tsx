@@ -10,7 +10,7 @@ import {
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 
-import { TableActionButtons } from "@/components/dashboard/table-action-buttons";
+import TableActionButtons from "@/components/dashboard/table-action-buttons";
 
 const LibraryStatCard = ({ icon: Icon, value, label }: { icon: any, value: string | number, label: string }) => (
   <div className="bg-[#111111] border border-white/20 rounded-2xl p-8 flex flex-col gap-4 flex-1">
@@ -47,7 +47,7 @@ const StatusPill = ({ type }: { type: "Silver" | "Gold" | "Bronze" }) => {
   );
 };
 
-export const CvsLibrary = () => {
+const CvsLibrary = () => {
   const [activeTab, setActiveTab] = React.useState("All CVS");
 
   return (
@@ -155,3 +155,5 @@ export const CvsLibrary = () => {
     </div>
   );
 };
+
+export default CvsLibrary;

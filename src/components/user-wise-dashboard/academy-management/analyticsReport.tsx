@@ -138,18 +138,18 @@ const tooltipStyle = {
 };
 
 // ─── Section Heading ────────────────────────────────────────────────────────
-function SectionHeading({ icon, title, subtitle, color }: { icon: React.ReactNode; title: string; subtitle: string; color: string }) {
-  return (
-    <div className="flex items-center gap-4">
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${color}`}>
-        {icon}
-      </div>
-      <div>
-        <h2 className="text-xl font-black uppercase text-white font-orbitron tracking-tight">{title}</h2>
-        <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-0.5">{subtitle}</p>
-      </div>
-    </div>
-  );
+const SectionHeading = ({ icon, title, subtitle, color }: { icon: React.ReactNode; title: string; subtitle: string; color: string }) => {
+return (
+<div className="flex items-center gap-4">
+  <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${color}`}>
+    {icon}
+  </div>
+  <div>
+    <h2 className="text-xl font-black uppercase text-white font-orbitron tracking-tight">{title}</h2>
+    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-0.5">{subtitle}</p>
+  </div>
+</div>
+);
 }
 
 // ─── Component ─────────────────────────────────────────────────────────────

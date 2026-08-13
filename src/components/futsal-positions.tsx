@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const FutsalPositions = () => {
+const FutsalPositions = () => {
   const positions = [
     { name: 'Goalkeeper', role: 'Goalkeeper', size: 'large' },
     { name: 'Fixo', role: 'Defender', size: 'small' },
@@ -21,3 +21,5 @@ export const FutsalPositions = () => {
     </div>
   );
 };
+
+export default FutsalPositions;

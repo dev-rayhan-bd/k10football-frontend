@@ -1,5 +1,6 @@
-import { SuccessStory } from "@/components/user-wise-dashboard/academy-analysis/success-story";
+import SuccessStory from "@/components/user-wise-dashboard/academy-analysis/success-story";
 
-export default function SuccessStoryPage() {
-  return <SuccessStory />;
+const SuccessStoryPage = () => {
+return <SuccessStory />;
 }
+export default SuccessStoryPage;

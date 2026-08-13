@@ -1,7 +1,8 @@
-import { SuperAdminAnalytics } from "@/components/user-wise-dashboard/super-admin-dashboard/analytics";
+import SuperAdminAnalytics from "@/components/user-wise-dashboard/super-admin-dashboard/analytics";
 
-export default function AnalyticsPage() {
-    return (
-        <SuperAdminAnalytics />
-    );
+const AnalyticsPage = () => {
+return (
+    <SuperAdminAnalytics />
+);
 }
+export default AnalyticsPage;

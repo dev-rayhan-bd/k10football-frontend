@@ -9,7 +9,7 @@ interface ProductCardProps {
   price: string;
 }
 
-export const ProductCard = ({
+const ProductCard = ({
   image,
   category,
   stock,
@@ -51,3 +51,5 @@ export const ProductCard = ({
     </div>
   );
 };
+
+export default ProductCard;

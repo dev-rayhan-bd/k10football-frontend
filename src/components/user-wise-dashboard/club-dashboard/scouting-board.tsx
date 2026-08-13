@@ -3,8 +3,8 @@ import React from "react";
 import {
   IconChevronDown
 } from "@tabler/icons-react";
-import { DashboardTable, Column } from "@/components/dashboard/dashboard-table";
-import { TableActionButtons } from "@/components/dashboard/table-action-buttons";
+import DashboardTable, { Column } from "@/components/dashboard/dashboard-table";
+import TableActionButtons from "@/components/dashboard/table-action-buttons";
 
 const playerData = [
   { id: 1, name: "Marcus Silva", position: "Forward", rating: 9.2, club: "Manchester Academy", country: "Brazil", age: 19, status: "Silver", avatar: "https://i.pravatar.cc/150?u=1" },
@@ -20,7 +20,7 @@ const coachData = [
   { id: 4, name: "Rafael Costa", role: "Goalkeeping Coach", speciality: "GK Training", experience: "10 yrs", club: "Ajax Youth", country: "Netherlands", status: "Contracted", avatar: "https://i.pravatar.cc/150?u=13" },
 ];
 
-export const ScoutingBoard = () => {
+const ScoutingBoard = () => {
   const playerColumns: Column<typeof playerData[0]>[] = [
     {
       header: "Name",
@@ -142,3 +142,5 @@ const FilterButton = ({ label }: { label: string }) => (
     <IconChevronDown size={14} className="text-gray-500" />
   </button>
 );
+
+export default ScoutingBoard;

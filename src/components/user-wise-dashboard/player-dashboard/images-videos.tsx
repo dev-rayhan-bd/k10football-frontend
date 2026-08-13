@@ -34,7 +34,7 @@ const videoItems = [
   { title: "Regional Cup - Best Moments", date: "Feb 15, 2024", views: 211, likes: 115, img: "https://images.unsplash.com/photo-1560272564-c83b66b1ad12?q=80&w=400" },
 ];
 
-export const PlayerImagesAndVideos = () => {
+const PlayerImagesAndVideos = () => {
   return (
     <div className="space-y-10 pb-16">
       {/* Header */}
@@ -138,3 +138,4 @@ const MediaSection = ({ title, type, items }: { title: string, type: 'image' | '
   </div>
 );
 
+export default PlayerImagesAndVideos;

@@ -6,13 +6,13 @@ import {
   IconUpload,
   IconCalendar
 } from "@tabler/icons-react";
-import { DashboardHero } from "@/components/dashboard/dashboard-hero";
+import DashboardHero from "@/components/dashboard/dashboard-hero";
 import { 
   SettingsSection, 
   SettingsInput 
 } from "@/components/dashboard/dashboard-settings-elements";
 
-export const ClubProfile = () => {
+const ClubProfile = () => {
   return (
     <div className="space-y-8 pb-12">
       <div>
@@ -133,3 +133,5 @@ export const ClubProfile = () => {
     </div>
   );
 };
+
+export default ClubProfile;

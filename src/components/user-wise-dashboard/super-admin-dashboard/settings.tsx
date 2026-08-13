@@ -39,7 +39,7 @@ const SettingField = ({ label, value, type = "text", placeholder, icon: Icon }: 
   </div>
 );
 
-export const SuperAdminSettings = () => {
+const SuperAdminSettings = () => {
   return (
     <div className="flex flex-col gap-10 pb-20">
       {/* Header */}
@@ -106,3 +106,5 @@ export const SuperAdminSettings = () => {
     </div>
   );
 };
+
+export default SuperAdminSettings;

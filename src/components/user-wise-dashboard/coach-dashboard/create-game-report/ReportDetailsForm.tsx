@@ -19,7 +19,7 @@ interface ReportDetailsFormProps {
   onContinue: () => void;
 }
 
-export const ReportDetailsForm = ({
+const ReportDetailsForm = ({
   formData,
   setFormData,
   characteristics,
@@ -344,3 +344,5 @@ export const ReportDetailsForm = ({
     </div>
   );
 };
+
+export default ReportDetailsForm;

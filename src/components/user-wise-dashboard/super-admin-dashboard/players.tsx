@@ -8,7 +8,7 @@ import {
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 
-import { DashboardTable, Column } from "@/components/dashboard/dashboard-table";
+import DashboardTable, { Column } from "@/components/dashboard/dashboard-table";
 
 const CvPill = ({ type }: { type: "Silver" | "Gold" | "Bronze" }) => {
   const styles = {
@@ -40,7 +40,7 @@ interface PlayerRow {
   active: boolean;
 }
 
-export const SuperAdminPlayers = () => {
+const SuperAdminPlayers = () => {
   const columns: Column<PlayerRow>[] = [
     {
       header: "Name",
@@ -130,3 +130,5 @@ export const SuperAdminPlayers = () => {
     </div>
   );
 };
+
+export default SuperAdminPlayers;

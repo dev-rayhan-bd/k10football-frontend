@@ -11,7 +11,7 @@ import {
   SettingsToggle 
 } from "@/components/dashboard/dashboard-settings-elements";
 
-export const Settings = () => {
+const Settings = () => {
   return (
     <div className="space-y-8 pb-12">
       {/* Header */}
@@ -63,3 +63,5 @@ export const Settings = () => {
     </div>
   );
 };
+
+export default Settings;

@@ -13,7 +13,7 @@ import iconSetPieceSpecialist from "@/assets/cvs-page/id/coach-styles-icons/set-
 import iconTikiTaka from "@/assets/cvs-page/id/coach-styles-icons/tiki-taka.png";
 import iconYouthDevelopment from "@/assets/cvs-page/id/coach-styles-icons/youth development.png";
 import trophyIcon from "@/assets/cvs-page/id/trofeeIcon.png";
-import { CMSField } from "@/components/shared/CMSField";
+import CMSField from "@/components/shared/CMSField";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {

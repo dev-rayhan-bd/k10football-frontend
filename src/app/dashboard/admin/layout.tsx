@@ -1,5 +1,5 @@
 "use client";
-import { DashboardLayout } from "@/components/dashboard-layout";
+import DashboardLayout from "@/components/dashboard-layout";
 import { 
   IconDashboard, 
   IconUsers, 
@@ -31,13 +31,14 @@ const adminSidebarItems = [
   { name: "Settings", url: "/dashboard/admin/settings", icon: IconSettings },
 ];
 
-export default function AdminLayout({ children }: { children: ReactNode }) {
-  return (
-    <DashboardLayout 
-      sidebarItems={adminSidebarItems}
-      tier={{ name: "SUPER ADMIN", color: "#FF1010" }}
-    >
-      {children}
-    </DashboardLayout>
-  );
+const AdminLayout = ({ children }: { children: ReactNode }) => {
+return (
+<DashboardLayout 
+  sidebarItems={adminSidebarItems}
+  tier={{ name: "SUPER ADMIN", color: "#FF1010" }}
+>
+  {children}
+</DashboardLayout>
+);
 }
+export default AdminLayout;

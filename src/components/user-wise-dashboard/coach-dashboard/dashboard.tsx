@@ -31,9 +31,9 @@ import {
   Tooltip,
   Legend
 } from "recharts";
-import { DashboardTable, Column } from "@/components/dashboard/dashboard-table";
-import { TableActionButtons } from "@/components/dashboard/table-action-buttons";
-import { DashboardHero } from "@/components/dashboard/dashboard-hero";
+import DashboardTable, { Column } from "@/components/dashboard/dashboard-table";
+import TableActionButtons from "@/components/dashboard/table-action-buttons";
+import DashboardHero from "@/components/dashboard/dashboard-hero";
 
 // Mock Data
 const profileAnalysisData = [
@@ -74,7 +74,7 @@ const teamData = [
 
 import { useCoach } from "@/lib/hooks/useCoach";
 
-export const CoachDashboard = () => {
+const CoachDashboard = () => {
   const { hasAcademy } = useContext(CoachContext);
   const { coachData } = useCoach();
   const router = useRouter();
@@ -481,3 +481,5 @@ const MediaBlock = ({ title, type, items }: { title: string, type: 'image' | 'vi
     </div>
   </div>
 );
+
+export default CoachDashboard;

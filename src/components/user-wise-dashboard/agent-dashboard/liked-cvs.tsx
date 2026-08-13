@@ -2,8 +2,8 @@
 
 import React from "react";
 import { IconChevronDown } from "@tabler/icons-react";
-import { DashboardTable, Column } from "@/components/dashboard/dashboard-table";
-import { TableActionButtons } from "@/components/dashboard/table-action-buttons";
+import DashboardTable, { Column } from "@/components/dashboard/dashboard-table";
+import TableActionButtons from "@/components/dashboard/table-action-buttons";
 import { Button } from "@/components/ui/button";
 
 type Player = {
@@ -98,7 +98,7 @@ const mockPlayers: Player[] = [
   { avatar: "https://i.pravatar.cc/150?u=13", name: "James Brown", position: "Goalkeeper", rating: 7.9, club: "Liverpool Academy", country: "Argentina", age: 17, status: "Bronze" },
 ];
 
-export const LikedCVs = () => {
+const LikedCVs = () => {
   return (
     <div className="p-2 md:p-6 space-y-6">
       <div className="mb-8">
@@ -121,3 +121,5 @@ export const LikedCVs = () => {
     </div>
   );
 };
+
+export default LikedCVs;

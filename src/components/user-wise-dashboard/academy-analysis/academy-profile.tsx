@@ -8,12 +8,12 @@ import {
   IconMapPin,
   IconCalendarEvent
 } from "@tabler/icons-react";
-import { DashboardHero } from "@/components/dashboard/dashboard-hero";
+import DashboardHero from "@/components/dashboard/dashboard-hero";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
-export const AcademyProfile = () => {
+const AcademyProfile = () => {
   return (
     <div className="flex flex-col gap-8 pb-10">
       {/* Header */}
@@ -185,3 +185,5 @@ export const AcademyProfile = () => {
     </div>
   );
 };
+
+export default AcademyProfile;

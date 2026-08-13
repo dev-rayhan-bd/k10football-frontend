@@ -24,7 +24,7 @@ const StatBar = ({ label, value, colorClass, align = "left" }: { label: string; 
   </div>
 );
 
-export const GameReportsOverview = () => {
+const GameReportsOverview = () => {
   return (
     <div className="flex flex-col gap-8 pb-10">
       {/* Header */}
@@ -146,3 +146,5 @@ export const GameReportsOverview = () => {
     </div>
   );
 };
+
+export default GameReportsOverview;

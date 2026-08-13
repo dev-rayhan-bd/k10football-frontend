@@ -19,8 +19,8 @@ import {
   Bar,
   Cell
 } from "recharts";
-import { DashboardTable, Column } from "@/components/dashboard/dashboard-table";
-import { TableActionButtons } from "@/components/dashboard/table-action-buttons";
+import DashboardTable, { Column } from "@/components/dashboard/dashboard-table";
+import TableActionButtons from "@/components/dashboard/table-action-buttons";
 
 const stats = [
   { label: "Players Profile Viewed", value: "24", icon: IconUsers },
@@ -53,7 +53,7 @@ const playerEngagementData = [
   { id: 4, name: "James Brown", position: "Goalkeeper", rating: 7.9, age: 17, country: "Argentina", club: "Liverpool Academy", status: "Bronze", views: 28, likes: 9, shares: 4, avatar: "https://i.pravatar.cc/150?u=4" },
 ];
 
-export const Analytics = () => {
+const Analytics = () => {
   const columns: Column<typeof playerEngagementData[0]>[] = [
     {
       header: "Name",
@@ -184,3 +184,5 @@ const FilterButton = ({ label }: { label: string }) => (
     <IconChevronDown size={14} className="text-gray-500" />
   </button>
 );
+
+export default Analytics;

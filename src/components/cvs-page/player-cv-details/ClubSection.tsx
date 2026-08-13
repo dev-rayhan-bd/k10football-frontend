@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useRef } from 'react';
 import { usePlayer } from '@/lib/hooks/usePlayer';
-import { CMSField } from '@/components/shared/CMSField';
+import CMSField from '@/components/shared/CMSField';
 import { cn } from '@/lib/utils';
 import { Plus, Trash2, X, Check, Info, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';

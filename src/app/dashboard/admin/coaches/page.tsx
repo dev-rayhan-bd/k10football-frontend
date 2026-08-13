@@ -1,7 +1,8 @@
-import { SuperAdminCoaches } from "@/components/user-wise-dashboard/super-admin-dashboard/coaches";
+import SuperAdminCoaches from "@/components/user-wise-dashboard/super-admin-dashboard/coaches";
 
-export default function CoachesPage() {
-    return (
-        <SuperAdminCoaches />
-    );
+const CoachesPage = () => {
+return (
+    <SuperAdminCoaches />
+);
 }
+export default CoachesPage;

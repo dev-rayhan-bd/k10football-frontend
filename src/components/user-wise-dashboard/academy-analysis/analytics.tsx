@@ -49,7 +49,7 @@ const engagementData = [
   { name: "Nov-Dec", completed: 3, pending: 4 },
 ];
 
-export const Analytics = () => {
+const Analytics = () => {
   const players = useAppSelector((state) => state.player.players);
 
   // Deterministic age mapper for mock players to provide a rich distribution
@@ -217,3 +217,5 @@ export const Analytics = () => {
     </div>
   );
 };
+
+export default Analytics;

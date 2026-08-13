@@ -5,10 +5,10 @@ import {
   IconClock,
   IconCreditCard
 } from "@tabler/icons-react";
-import { DashboardHero } from "@/components/dashboard/dashboard-hero";
-import { DashboardStatCard } from "@/components/dashboard/dashboard-stat-card";
+import DashboardHero from "@/components/dashboard/dashboard-hero";
+import DashboardStatCard from "@/components/dashboard/dashboard-stat-card";
 import { DashboardSidebarPanel, DashboardSidebarItem } from "@/components/dashboard/dashboard-sidebar";
-import { DashboardTable, Column } from "@/components/dashboard/dashboard-table";
+import DashboardTable, { Column } from "@/components/dashboard/dashboard-table";
 import { Button } from "@/components/ui/button";
 import { 
   BarChart, 
@@ -128,7 +128,7 @@ const CustomAreaTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-export const SuperAdminDashboard = () => {
+const SuperAdminDashboard = () => {
     return (
         <div className="flex flex-col xl:flex-row gap-6 p-6">
             <div className="flex-1 space-y-6 min-w-0">
@@ -288,3 +288,5 @@ export const SuperAdminDashboard = () => {
         </div>
     );
 };
+
+export default SuperAdminDashboard;

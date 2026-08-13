@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { usePlayerStats } from "./FullEditablePage";
 import { useUpdatePlayerProfileMutation } from "@/lib/features/cv/cvApi";
-import { CMSField } from "@/components/shared/CMSField";
+import CMSField from "@/components/shared/CMSField";
 
 const AdditionalNotesSection = ({
   editable = false,

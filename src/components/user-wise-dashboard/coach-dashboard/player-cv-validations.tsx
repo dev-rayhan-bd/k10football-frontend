@@ -7,12 +7,12 @@ import {
   IconCircleX,
   IconPlus,
 } from "@tabler/icons-react";
-import { DashboardTable, Column } from "@/components/dashboard/dashboard-table";
-import { TableActionButtons } from "@/components/dashboard/table-action-buttons";
+import DashboardTable, { Column } from "@/components/dashboard/dashboard-table";
+import TableActionButtons from "@/components/dashboard/table-action-buttons";
 import { usePlayer } from "@/lib/hooks/usePlayer";
 import { useRouter } from "next/navigation";
 
-export const PlayerCVValidations = () => {
+const PlayerCVValidations = () => {
   const router = useRouter();
   const { players, selectPlayer, validatePlayer } = usePlayer();
 
@@ -129,3 +129,4 @@ export const PlayerCVValidations = () => {
   );
 };
 
+export default PlayerCVValidations;

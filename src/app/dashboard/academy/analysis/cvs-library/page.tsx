@@ -1,5 +1,6 @@
-import { CvsLibrary } from "@/components/user-wise-dashboard/academy-analysis/cvs-library";
+import CvsLibrary from "@/components/user-wise-dashboard/academy-analysis/cvs-library";
 
-export default function CvsLibraryPage() {
-  return <CvsLibrary />;
+const CvsLibraryPage = () => {
+return <CvsLibrary />;
 }
+export default CvsLibraryPage;

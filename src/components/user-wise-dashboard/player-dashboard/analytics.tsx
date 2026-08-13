@@ -111,7 +111,7 @@ const performanceTrend = [
   { month: "Feb", goals: 9, assists: 7, rating: 9.0 },
 ];
 
-export const PlayerAnalytics = () => {
+const PlayerAnalytics = () => {
   return (
     <div className="space-y-10 pb-16">
       {/* Header */}
@@ -290,3 +290,5 @@ const SkillCard = ({ skill }: any) => (
     </div>
   </div>
 );
+
+export default PlayerAnalytics;

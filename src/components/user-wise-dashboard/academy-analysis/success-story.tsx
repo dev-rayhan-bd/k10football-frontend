@@ -37,7 +37,7 @@ const SummaryCard = ({ label, value, icon: Icon, bgColor, textColor }: { label: 
   </div>
 );
 
-export const SuccessStory = () => {
+const SuccessStory = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
   const [editingStory, setEditingStory] = useState<any | null>(null);
@@ -400,3 +400,5 @@ export const SuccessStory = () => {
     </div>
   );
 };
+
+export default SuccessStory;

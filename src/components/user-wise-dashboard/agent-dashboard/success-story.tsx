@@ -2,8 +2,8 @@
 
 import React from "react";
 import { IconPlus, IconCloudUpload } from "@tabler/icons-react";
-import { DashboardTable, Column } from "@/components/dashboard/dashboard-table";
-import { TableActionButtons } from "@/components/dashboard/table-action-buttons";
+import DashboardTable, { Column } from "@/components/dashboard/dashboard-table";
+import TableActionButtons from "@/components/dashboard/table-action-buttons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -88,7 +88,7 @@ const mockStories: Story[] = [
   { avatar: "https://i.pravatar.cc/150?u=22", title: "Agent Luis Secures Trial for Midfielder at Benfica Academy", category: "Agent Milestone", date: "2023-12-01", status: "Rejected" },
 ];
 
-export const SuccessStory = () => {
+const SuccessStory = () => {
   return (
     <div className="p-2 md:p-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
@@ -198,3 +198,5 @@ export const SuccessStory = () => {
     </div>
   );
 };
+
+export default SuccessStory;

@@ -10,7 +10,7 @@ interface RadarChartProps {
   gridColor?: string;
 }
 
-export const RadarChart = ({
+const RadarChart = ({
   stats,
   size = 200,
   color = "#38bdf8",
@@ -117,3 +117,4 @@ export const RadarChart = ({
   );
 };
 
+export default RadarChart;

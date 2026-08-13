@@ -7,7 +7,7 @@ import {
   IconTrash
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
-import { DashboardTable, Column } from "@/components/dashboard/dashboard-table";
+import DashboardTable, { Column } from "@/components/dashboard/dashboard-table";
 
 const StatusBadge = ({ active }: { active: boolean }) => (
   <span className={`px-4 py-1 rounded-full text-[10px] font-black uppercase border ${active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-white/5 text-white/40 border-white/10"}`}>
@@ -23,7 +23,7 @@ interface ClubRow {
   active: boolean;
 }
 
-export const SuperAdminClubs = () => {
+const SuperAdminClubs = () => {
   const columns: Column<ClubRow>[] = [
     {
       header: "Club",
@@ -98,3 +98,5 @@ export const SuperAdminClubs = () => {
     </div>
   );
 };
+
+export default SuperAdminClubs;

@@ -1,5 +1,6 @@
-import { Financials } from "@/components/user-wise-dashboard/academy-analysis/financials";
+import Financials from "@/components/user-wise-dashboard/academy-analysis/financials";
 
-export default function FinanceCommitteePage() {
-  return <Financials />;
+const FinanceCommitteePage = () => {
+return <Financials />;
 }
+export default FinanceCommitteePage;

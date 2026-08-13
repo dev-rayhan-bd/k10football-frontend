@@ -13,7 +13,7 @@ interface StripePaymentModalProps {
   onBack: () => void;
 }
 
-export const StripePaymentModal = ({ onPay, onBack }: StripePaymentModalProps) => {
+const StripePaymentModal = ({ onPay, onBack }: StripePaymentModalProps) => {
   const [paymentData, setPaymentData] = useState({ card: "", expiry: "", cvc: "", name: "EDDIE RICCI" });
   const [loading, setLoading] = useState(false);
 
@@ -153,3 +153,5 @@ export const StripePaymentModal = ({ onPay, onBack }: StripePaymentModalProps) =
     </div>
   );
 };
+
+export default StripePaymentModal;

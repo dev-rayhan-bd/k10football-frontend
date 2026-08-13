@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { DashboardModal } from "@/components/dashboard/dashboard-modal";
+import DashboardModal from "@/components/dashboard/dashboard-modal";
 import { 
   IconPlus, 
   IconEye, 

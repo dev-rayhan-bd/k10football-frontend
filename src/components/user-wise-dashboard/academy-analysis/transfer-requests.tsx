@@ -113,7 +113,7 @@ const TransferTable = ({ title, data }: { title: string, data: any[] }) => (
   </div>
 );
 
-export const TransferRequests = () => {
+const TransferRequests = () => {
   const [open, setOpen] = useState(false);
 
   const mockData = [
@@ -235,3 +235,5 @@ const IconChevronDown = ({ size, className }: any) => (
     <path d="m6 9 6 6 6-6" />
   </svg>
 );
+
+export default TransferRequests;

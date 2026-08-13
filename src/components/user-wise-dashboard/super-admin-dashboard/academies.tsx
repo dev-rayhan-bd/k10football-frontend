@@ -11,7 +11,7 @@ import {
   IconUser
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
-import { DashboardTable, Column } from "@/components/dashboard/dashboard-table";
+import DashboardTable, { Column } from "@/components/dashboard/dashboard-table";
 
 const SummaryStatCard = ({ icon: Icon, value, label }: { icon: any, value: string | number, label: string }) => (
   <div className="bg-[#111111] border border-white/20 rounded-2xl p-6 flex flex-col gap-4 flex-1">
@@ -40,7 +40,7 @@ interface AcademyRow {
   active: boolean;
 }
 
-export const SuperAdminAcademies = () => {
+const SuperAdminAcademies = () => {
   const columns: Column<AcademyRow>[] = [
     {
       header: "Academy",
@@ -124,3 +124,5 @@ export const SuperAdminAcademies = () => {
     </div>
   );
 };
+
+export default SuperAdminAcademies;

@@ -1,9 +1,10 @@
-import { SuperAdminApprovals } from "@/components/user-wise-dashboard/super-admin-dashboard/approvals";
+import SuperAdminApprovals from "@/components/user-wise-dashboard/super-admin-dashboard/approvals";
 
-export default function ApprovalsPage() {
-    return (
-        <div>
-            <SuperAdminApprovals />
-        </div>
-    );
+const ApprovalsPage = () => {
+return (
+    <div>
+        <SuperAdminApprovals />
+    </div>
+);
 }
+export default ApprovalsPage;

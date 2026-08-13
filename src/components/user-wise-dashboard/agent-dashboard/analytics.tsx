@@ -46,7 +46,7 @@ const CustomBarTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-export const AgentAnalytics = () => {
+const AgentAnalytics = () => {
   return (
     <div className="p-2 md:p-6 space-y-6">
        <div className="mb-8">
@@ -131,3 +131,5 @@ export const AgentAnalytics = () => {
     </div>
   );
 };
+
+export default AgentAnalytics;

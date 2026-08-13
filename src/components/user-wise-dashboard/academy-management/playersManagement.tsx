@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { DashboardModal } from "@/components/dashboard/dashboard-modal";
+import DashboardModal from "@/components/dashboard/dashboard-modal";
 import { 
   IconSearch, 
   IconPlus, 

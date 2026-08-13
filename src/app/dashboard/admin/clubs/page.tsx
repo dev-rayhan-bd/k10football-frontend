@@ -1,7 +1,8 @@
-import { SuperAdminClubs } from "@/components/user-wise-dashboard/super-admin-dashboard/clubs";
+import SuperAdminClubs from "@/components/user-wise-dashboard/super-admin-dashboard/clubs";
 
-export default function ClubsPage() {
-    return (
-        <SuperAdminClubs />
-    );
+const ClubsPage = () => {
+return (
+    <SuperAdminClubs />
+);
 }
+export default ClubsPage;

@@ -10,8 +10,8 @@ import {
   IconEye,
   IconDotsVertical
 } from "@tabler/icons-react";
-import { DashboardTable, Column } from "@/components/dashboard/dashboard-table";
-import { TableActionButtons } from "@/components/dashboard/table-action-buttons";
+import DashboardTable, { Column } from "@/components/dashboard/dashboard-table";
+import TableActionButtons from "@/components/dashboard/table-action-buttons";
 
 const stats = [
   { label: "Total Players", value: "24", icon: IconUsers },
@@ -27,7 +27,7 @@ const teamData = [
   { id: 4, name: "James Brown", position: "Goalkeeper", rating: 9.0, matches: 30, goals: 0, assists: 0, status: "Active", avatar: "https://i.pravatar.cc/150?u=4" },
 ];
 
-export const MyTeams = () => {
+const MyTeams = () => {
   const router = useRouter();
   const columns: Column<typeof teamData[0]>[] = [
     {
@@ -109,3 +109,5 @@ export const MyTeams = () => {
     </div>
   );
 };
+
+export default MyTeams;
