@@ -4,6 +4,7 @@ import "./globals.css";
 import AuthGuard from "@/providers/AuthGuard";
 import { Toaster } from "@/components/ui/sonner";
 import StoreProvider from "@/providers/StoreProvider";
+import NextTopLoader from "nextjs-toploader";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -56,6 +57,17 @@ return (
     className={`${inter.variable} ${audiowide.variable} ${orbitron.variable} antialiased`}
     suppressHydrationWarning
   >
+    <NextTopLoader
+      color="#EC4899"
+      initialPosition={0.08}
+      crawlSpeed={200}
+      height={3}
+      crawl={true}
+      showSpinner={false}
+      easing="ease"
+      speed={200}
+      shadow="0 0 10px #EC4899,0 0 5px #EC4899"
+    />
     <StoreProvider>
       <AuthGuard>
         {children}
