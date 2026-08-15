@@ -95,7 +95,7 @@ export const FeesPayments = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
         <div className="bg-[#111111] rounded-[32px] border border-white/15 p-8 flex items-center gap-6 shadow-xl">
           <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10">
             <IconCurrencyDollar size={32} className="text-[#E31B23]" />

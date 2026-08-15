@@ -460,7 +460,7 @@ const PlayerEvaluation = () => {
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         <SummaryCard label="Avg. Overall Rating" value={avgRatingVal} icon={IconStar} bgColor="bg-red-500" textColor="text-red-500" />
         <SummaryCard label="Improving Players" value={improvingCountVal} icon={IconTrendingUp} bgColor="bg-emerald-500" textColor="text-emerald-500" />
         <SummaryCard label="Evaluated this Month" value={thisMonthCount} icon={IconFileText} bgColor="bg-blue-500" textColor="text-blue-500" />
@@ -509,7 +509,7 @@ const PlayerEvaluation = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               {filteredCards.map((card, idx) => (
                 <EvaluationCard 
                   key={card.id ? `${card.id}-${idx}` : `mock-${idx}`}

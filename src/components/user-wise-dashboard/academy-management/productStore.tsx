@@ -276,7 +276,7 @@ export const ProductStoreManagement = () => {
           {/* Inventory Management */}
           <div className="space-y-6 bg-[#0A0A0A] border border-white/15 rounded-[32px] p-8">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Inventory Management</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               <div className="space-y-2">
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
                   Stock Quantity <span className="text-[#E31B23]">*</span>

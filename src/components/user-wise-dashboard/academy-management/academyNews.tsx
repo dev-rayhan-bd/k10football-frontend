@@ -186,7 +186,7 @@ export const AcademyNewsManagement = () => {
           {/* Article Information */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Article Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               <div className="space-y-2 md:col-span-3">
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
                   Article Title <span className="text-[#E31B23]">*</span>

@@ -48,7 +48,7 @@ const PlayerImagesAndVideos = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, idx) => (
           <div 
             key={idx} 
@@ -89,7 +89,7 @@ const MediaSection = ({ title, type, items }: { title: string, type: 'image' | '
       </button>
     </div>
 
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
       {items.map((item, idx) => (
         <div key={idx} className="group cursor-pointer">
           <div className="relative aspect-video rounded-2xl overflow-hidden mb-5 border border-white/5">

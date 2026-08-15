@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React from "react";
@@ -9,8 +11,6 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  AreaChart,
-  Area,
   PieChart,
   Pie,
   Cell
@@ -114,11 +114,11 @@ const DashboardCharts = () => {
   return (
     <div className="flex flex-col gap-8">
       {/* Bar Chart - Game Reports Engagement */}
-      <div className="bg-white/[0.01] border border-white/5 p-8 rounded-3xl space-y-6">
+      <div className="bg-white/1 border border-white/5 p-8 rounded-3xl space-y-6">
         <div className="flex justify-between items-center">
           <h3 className="text-xl font-black uppercase text-white font-orbitron">Game Reports Engagement</h3>
         </div>
-        <div className="h-[250px] w-full">
+        <div className="h-62.5 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={barData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
@@ -140,11 +140,11 @@ const DashboardCharts = () => {
       </div>
 
       {/* Age Category */}
-      <div className="bg-white/[0.01] border border-white/5 p-8 rounded-3xl space-y-6">
+      <div className="bg-white/1 border border-white/5 p-8 rounded-3xl space-y-6">
         <div className="flex justify-between items-center">
           <h3 className="text-xl font-black uppercase text-white font-orbitron">Age Category</h3>
         </div>
-        <div className="h-[250px] w-full">
+        <div className="h-62.5 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={ageGroups} margin={{ top: 10, right: 15, left: 15, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
@@ -174,12 +174,12 @@ const DashboardCharts = () => {
       </div>
 
       {/* Donut Chart - Evaluation Status */}
-      <div className="space-y-6 bg-white/[0.01] border border-white/5 p-8 rounded-3xl">
+      <div className="space-y-6 bg-white/1 border border-white/5 p-8 rounded-3xl">
         <div className="flex justify-between items-center">
           <h3 className="text-xl font-black uppercase text-white font-orbitron">Player Evaluation Status</h3>
         </div>
         <div className="flex flex-col md:flex-row items-center justify-around gap-8 py-4">
-          <div className="h-[300px] w-[300px] shrink-0">
+          <div className="h-75 w-75 shrink-0">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -202,7 +202,7 @@ const DashboardCharts = () => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full max-w-xl">
             {evaluationStatusData.map((entry, index) => (
-              <div key={index} className="flex items-center gap-4 bg-white/[0.02] border border-white/5 p-4 rounded-2xl hover:border-white/10 transition-all">
+              <div key={index} className="flex items-center gap-4 bg-white/2 border border-white/5 p-4 rounded-2xl hover:border-white/10 transition-all">
                 <div className="w-3.5 h-3.5 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
                 <div className="min-w-0">
                   <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest block leading-none mb-1">{entry.name}</span>

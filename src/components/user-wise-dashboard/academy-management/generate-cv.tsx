@@ -378,7 +378,7 @@ const GenerateCv = () => {
         </section>
 
         {/* Top Squares - As requested by client doc */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-full">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-full">
           {/* Completion Status */}
           <div className="bg-[#111111] rounded-3xl border border-white/10 p-8 flex flex-col gap-6">
             <h3 className="text-sm font-black text-white font-orbitron uppercase tracking-widest">Completion Status</h3>

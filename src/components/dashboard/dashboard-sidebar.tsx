@@ -1,3 +1,4 @@
+import Image from "next/image";
 import React from "react";
 
 interface DashboardSidebarPanelProps {
@@ -49,11 +50,11 @@ export const DashboardSidebarItem = ({
 }: DashboardSidebarItemProps) => (
   <div 
     onClick={onClick}
-    className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.04] transition-all group flex items-center gap-4 cursor-pointer"
+    className="p-4 bg-white/2 border border-white/5 rounded-2xl hover:bg-white/4 transition-all group flex items-center gap-4 cursor-pointer"
   >
     {avatar && (
       <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 shrink-0">
-        <img src={avatar} alt={title} className="w-full h-full object-cover" />
+        <Image width={50} height={50} src={avatar} alt={title} className="w-full h-full object-cover" />
       </div>
     )}
     <div className="flex-1 min-w-0">
@@ -65,7 +66,7 @@ export const DashboardSidebarItem = ({
       </p>
     </div>
     {extraInfo && (
-      <div className="text-sm md:text-base font-black text-white shrink-0">
+      <div className="text-sm md:text-base font-black text-white shrink-0 whitespace-nowrap">
         {extraInfo}
       </div>
     )}

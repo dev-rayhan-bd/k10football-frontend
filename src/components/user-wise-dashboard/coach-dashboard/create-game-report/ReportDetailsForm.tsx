@@ -234,7 +234,7 @@ const ReportDetailsForm = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
             <div className="space-y-2">
               <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Matches Played:</Label>
               <Input 

@@ -141,7 +141,7 @@ const PlayersManagement = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
         <div className="bg-[#111111] rounded-3xl border border-white/15 p-8 flex flex-col items-center justify-center gap-2">
           <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Total Players</p>
           <p className="text-5xl font-black text-white font-orbitron">64</p>
@@ -223,7 +223,7 @@ const PlayersManagement = () => {
           {/* Team & Position Details */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Team & Position Details</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               <div className="space-y-2">
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
                   Team <span className="text-[#E31B23]">*</span>
@@ -289,7 +289,7 @@ const PlayersManagement = () => {
           {/* Emergency Contact */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Emergency Contact</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               <div className="space-y-2">
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
                   Assign Parents <span className="text-[#E31B23]">*</span>

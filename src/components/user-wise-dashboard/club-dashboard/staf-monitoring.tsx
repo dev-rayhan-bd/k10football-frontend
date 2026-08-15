@@ -161,7 +161,7 @@ const StaffMonitoring = () => {
     <div className="space-y-8 pb-12">
       <DashboardPageHeader title="Staff Monitoring" subtitle="Manage your Coach and Players" />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, idx) => (
           <DashboardStatCard key={idx} {...stat} icon={<stat.icon size={20} />} />
         ))}

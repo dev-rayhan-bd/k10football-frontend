@@ -81,7 +81,7 @@ const MyTeams = () => {
         <p className="text-gray-500 text-sm mt-1">Manage your squad, track performance, and optimize your lineup</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, idx) => (
           <div key={idx} className="p-6 rounded-2xl border border-white/20 bg-[#0D0D0D]">
             <div className="flex flex-col gap-4">

@@ -118,7 +118,7 @@ const ClubProfile = () => {
           <h3 className="text-xl font-bold text-white italic uppercase tracking-tight">Achievements</h3>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
           <SettingsInput label="Year" placeholder="Enter Year" />
           <SettingsInput label="Championship" placeholder="Enter Championship" />
           <SettingsInput label="Venue" placeholder="Enter Venue" />

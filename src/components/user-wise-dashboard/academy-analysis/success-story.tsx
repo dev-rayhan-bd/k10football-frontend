@@ -183,7 +183,7 @@ const SuccessStory = () => {
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         <SummaryCard label="Total Stories" value={totalStories} icon={IconFileText} bgColor="bg-red-500" textColor="text-red-500" />
         <SummaryCard label="Images Shared" value={imageCount} icon={IconPhoto} bgColor="bg-emerald-500" textColor="text-emerald-500" />
         <SummaryCard label="Videos Shared" value={videoCount} icon={IconVideo} bgColor="bg-blue-500" textColor="text-blue-500" />

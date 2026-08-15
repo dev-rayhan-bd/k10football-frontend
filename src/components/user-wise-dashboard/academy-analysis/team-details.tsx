@@ -238,7 +238,7 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
       </div>
 
       {/* Roster Capacity Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
         <DashboardStatCard
           icon={<IconTrophy size={24} />}
           label="Coaches (Max 2)"

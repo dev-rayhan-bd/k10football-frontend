@@ -30,7 +30,7 @@ const Teams = () => {
       </div>
 
       {/* Stats Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
         <DashboardStatCard icon={<IconBallFootball size={24} />} label="Teams" value="4" />
         <DashboardStatCard icon={<IconTrophy size={24} />} label="Total Coach" value="16" />
         <DashboardStatCard icon={<IconUsers size={24} />} label="Total Players" value="64" />

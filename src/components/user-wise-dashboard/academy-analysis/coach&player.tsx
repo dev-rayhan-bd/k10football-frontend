@@ -195,7 +195,7 @@ export const CoachAndPlayer = () => {
       </div>
 
       {/* Stats Section */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         <DashboardStatCard icon={<IconBallFootball size={24} />} label="Total Teams" value={String(totalTeams)} />
         <DashboardStatCard icon={<IconTrophy size={24} />} label="Total Coaches" value={String(totalCoaches)} />
         <DashboardStatCard icon={<IconUsers size={24} />} label="Total Players" value={String(totalPlayers)} />

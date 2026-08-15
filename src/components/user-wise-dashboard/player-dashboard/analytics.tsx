@@ -126,7 +126,7 @@ const PlayerAnalytics = () => {
 
       {/* Stats Grid */}
       <div className="p-8 rounded-[40px] border border-white/5 bg-[#0D0D0D]/40 backdrop-blur-xl">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat, idx) => (
             <div key={idx} className="p-8 rounded-3xl border border-white/5 bg-[#0A0A0A]/60 group hover:border-white/10 transition-all duration-500">
               <div className="flex flex-col gap-6">

@@ -36,7 +36,7 @@ const MyImagesAndVideos = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, idx) => (
           <div key={idx} className="p-6 rounded-2xl border border-white/20 bg-[#0D0D0D] group hover:border-[#E31B23]/30 transition-all">
             <div className="flex flex-col gap-4">
@@ -74,7 +74,7 @@ const MediaSection = ({ title, type, items }: { title: string, type: 'image' | '
       </button>
     </div>
 
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
       {items.map((item, idx) => (
         <div key={idx} className="group relative rounded-2xl overflow-hidden border border-white/20 bg-[#111] hover:scale-[1.02] transition-all duration-300">
           <div className="relative aspect-video overflow-hidden">

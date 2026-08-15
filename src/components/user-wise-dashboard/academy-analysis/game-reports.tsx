@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-function-type */
 "use client";
 
 import React, { useState } from "react";
@@ -107,7 +110,7 @@ const getStatsFromReport = (report: MatchStats) => {
 
 const SummaryCard = ({ label, value, icon: Icon, bgColor, textColor }: { label: string, value: string | number, icon: any, bgColor: string, textColor: string }) => (
   <div className="bg-[#0A0A0A] border border-white/20 rounded-[20px] p-5 flex items-center gap-4 flex-1">
-    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${bgColor} bg-opacity-20 border border-white/20 flex-shrink-0`}>
+    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${bgColor} bg-opacity-20 border border-white/20 shrink-0`}>
       {Icon && <Icon size={24} className={`${textColor} opacity-100`} stroke={2} />}
     </div>
     <div className="space-y-0.5">
@@ -140,7 +143,7 @@ const GameReportCard = ({
     >
       <div className="flex justify-between items-center">
         <span className="bg-white/5 border border-white/20 rounded-full px-4 py-1 text-[10px] font-bold text-white/60">{tag}</span>
-        <span className="text-white/40 text-[10px] font-bold uppercase tracking-wider truncate max-w-[160px]">{team1} vs {team2}</span>
+        <span className="text-white/40 text-[10px] font-bold uppercase tracking-wider truncate max-w-40">{team1} vs {team2}</span>
       </div>
 
       <div className="space-y-1">
@@ -160,7 +163,7 @@ const GameReportCard = ({
         </div>
         <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
           <div 
-            className="h-full bg-gradient-to-r from-sky-500 to-sky-400" 
+            className="h-full bg-linear-to-r from-sky-500 to-sky-400" 
             style={{ width: `${displayRating}%` }} 
           />
         </div>
@@ -169,19 +172,19 @@ const GameReportCard = ({
       <div className="flex justify-between items-center">
          <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5 text-emerald-400 text-[10px] font-bold">
-               <div className="w-2.5 h-2.5 rounded-full border-2 border-emerald-400 flex items-center justify-center p-[1px]">
+               <div className="w-2.5 h-2.5 rounded-full border-2 border-emerald-400 flex items-center justify-center p-px">
                  <div className="w-full h-full bg-emerald-400 rounded-full" />
                </div>
                {goals} G
             </div>
             <div className="flex items-center gap-1.5 text-yellow-400 text-[10px] font-bold">
-               <div className="w-2.5 h-2.5 rounded-full border-2 border-yellow-400 flex items-center justify-center p-[1px]">
+               <div className="w-2.5 h-2.5 rounded-full border-2 border-yellow-400 flex items-center justify-center p-px">
                  <div className="w-full h-full bg-yellow-400 rounded-full" />
                </div>
                {assists} A
             </div>
             <div className="flex items-center gap-1.5 text-sky-400 text-[10px] font-bold">
-               <div className="w-2.5 h-2.5 rounded-full border-2 border-sky-400 flex items-center justify-center p-[1px]">
+               <div className="w-2.5 h-2.5 rounded-full border-2 border-sky-400 flex items-center justify-center p-px">
                  <div className="w-full h-full bg-sky-400 rounded-full" />
                </div>
                {passes} P
@@ -416,7 +419,7 @@ const GameReports = () => {
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         <SummaryCard label="Avg. Match Rating" value={`${avgRatingVal}%`} icon={IconStar} bgColor="bg-sky-500" textColor="text-sky-500" />
         <SummaryCard label="Total Goals" value={totalGoalsVal} icon={IconTrendingUp} bgColor="bg-emerald-500" textColor="text-emerald-500" />
         <SummaryCard label="Total Assists" value={totalAssistsVal} icon={IconFileText} bgColor="bg-blue-500" textColor="text-blue-500" />
@@ -445,7 +448,7 @@ const GameReports = () => {
               <h2 className="text-2xl font-black text-white font-orbitron uppercase tracking-tight">Scouting Reports</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               {filteredReports.map((report, idx) => (
                 <GameReportCard 
                   key={report.id ? `${report.id}-${idx}` : `report-${idx}`}
@@ -474,9 +477,9 @@ const GameReports = () => {
         </div>
 
         {/* Sidebar */}
-        <div className="w-[340px] flex flex-col gap-8 shrink-0">
+        <div className="w-full lg:w-85 flex flex-col gap-8 shrink-0 min-w-0">
            {/* Top Scorers */}
-           <div className="bg-[#111111] border border-white/20 rounded-[32px] p-8 flex flex-col gap-6">
+           <div className="bg-[#111111] border border-white/20 rounded-4xl p-8 flex flex-col gap-6">
               <div className="flex items-center gap-3">
                  <div className="w-10 h-10 rounded-xl bg-sky-600 flex items-center justify-center shadow-[0_0_20px_rgba(14,165,233,0.2)]">
                     <IconTrendingUp size={20} className="text-white" />
@@ -505,7 +508,7 @@ const GameReports = () => {
            </div>
 
            {/* Top Performers */}
-           <div className="bg-[#111111] border border-white/20 rounded-[32px] p-8 flex flex-col gap-6">
+           <div className="bg-[#111111] border border-white/20 rounded-4xl p-8 flex flex-col gap-6">
               <div className="flex items-center gap-3">
                  <div className="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center">
                     <IconStar size={20} className="text-sky-500" />
@@ -543,7 +546,7 @@ const GameReports = () => {
       <Dialog open={!!selectedCard} onOpenChange={(open) => !open && setSelectedCard(null)}>
         <DialogContent 
           showCloseButton={false}
-          className="!w-screen !h-screen !max-w-none !max-h-none !top-0 !left-0 !translate-x-0 !translate-y-0 !rounded-none !border-none bg-black/98 text-white p-8 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
+          className="w-screen! h-screen! max-w-none! max-h-none! top-0! left-0! translate-x-0! translate-y-0! rounded-none! border-none! bg-black/98 text-white p-8 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
         >
           <DialogHeader className="flex flex-row justify-between items-center shrink-0 pb-4 border-b border-white/10 mb-6">
             <div>
@@ -558,7 +561,7 @@ const GameReports = () => {
               <button
                 onClick={handleDownloadPDF}
                 disabled={isGeneratingPdf}
-                className="flex items-center gap-2 bg-sky-600 hover:bg-sky-500 border border-transparent text-[10px] font-black uppercase tracking-widest text-white px-6 py-2.5 rounded-xl transition-all shadow-[0_0_15px_rgba(14,165,233,0.2)] cursor-pointer disabled:opacity-50 font-bold font-orbitron"
+                className="flex items-center gap-2 bg-sky-600 hover:bg-sky-500 border border-transparent text-[10px] font-black uppercase tracking-widest text-white px-6 py-2.5 rounded-xl transition-all shadow-[0_0_15px_rgba(14,165,233,0.2)] cursor-pointer disabled:opacity-50 font-orbitron"
               >
                 {isGeneratingPdf ? (
                   <>
@@ -572,7 +575,7 @@ const GameReports = () => {
               </button>
               <button
                 onClick={() => setSelectedCard(null)}
-                className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] font-black uppercase tracking-widest text-white px-6 py-2.5 rounded-xl transition-all cursor-pointer font-bold font-orbitron"
+                className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] font-black uppercase tracking-widest text-white px-6 py-2.5 rounded-xl transition-all cursor-pointer font-orbitron"
               >
                 <IconX size={16} /> Close
               </button>
@@ -590,7 +593,7 @@ const GameReports = () => {
                 {/* Watermark Logo */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none z-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={logo.src} alt="Logo Watermark" className="w-[500px] object-contain" />
+                  <img src={logo.src} alt="Logo Watermark" className="w-125 object-contain" />
                 </div>
 
                 {/* Header */}
@@ -794,7 +797,7 @@ const GameReports = () => {
                 {/* Bottom section (Radar, Overall, Logos) */}
                 <div className="absolute bottom-10 left-10 right-10 z-10 flex items-center justify-between border-t-2 border-slate-200 pt-4">
                   {/* Radar Chart */}
-                  <div className="w-[180px]">
+                  <div className="w-45">
                     <RadarChart 
                       stats={radarStats} 
                       size={140} 
@@ -813,7 +816,7 @@ const GameReports = () => {
                   </div>
 
                   {/* Logo and tag */}
-                  <div className="flex flex-col items-center gap-1.5 w-[180px]">
+                  <div className="flex flex-col items-center gap-1.5 w-45">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={logo.src} alt="K10 Logo" className="w-10 h-10 object-contain" />
                     <div className="text-center leading-none">

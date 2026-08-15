@@ -59,7 +59,7 @@ const MyAcademies = () => {
     <div className="space-y-8 pb-12">
       <DashboardPageHeader title="My Academies" subtitle="View you all academies" />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
         {stats.map((stat, idx) => (
           <DashboardStatCard key={idx} {...stat} icon={<stat.icon size={20} />} />
         ))}

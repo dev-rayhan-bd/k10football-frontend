@@ -136,7 +136,7 @@ const MyCV = () => {
 
               <div className="pt-8 border-t border-white/10">
                 <h4 className="text-xs font-black text-white uppercase tracking-[0.2em] italic mb-6">Transfer Info</h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                   <InputField label="Football Agent Contract" value="+44 7700 900000" />
                   <InputField label="Transfer Fees" value="$ 50000.00" />
                   <InputField label="Salary" value="$ 20000.00" />
@@ -199,7 +199,7 @@ const MyCV = () => {
           {/* Formation Section */}
           <div className="p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
             <h3 className="text-xl font-black text-white italic uppercase tracking-tight mb-8">Formation</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               <FormationCard title="2-2-3-3" subtitle="High Press" wins="45 Wins" usage="60%Usage" image="/formation-field.png" />
               <FormationCard title="2-2-3-3" subtitle="Possession" wins="45 Wins" usage="60%Usage" image="/formation-field.png" />
               <FormationCard title="3-2-2-3" subtitle="Counter-Attack" wins="45 Wins" usage="60%Usage" image="/formation-field.png" />

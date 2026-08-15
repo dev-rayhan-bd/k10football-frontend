@@ -266,7 +266,7 @@ export const MatchesManagement = () => {
                 <span className="text-[11px] font-bold text-white uppercase tracking-widest">Travel Required (Away Match)</span>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 pt-4">
               <div className="space-y-2">
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/60">Bus / Transportation Cost</label>
                 <input type="text" placeholder="0.00" className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all" />
