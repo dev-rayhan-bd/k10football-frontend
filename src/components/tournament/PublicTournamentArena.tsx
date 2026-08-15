@@ -456,7 +456,7 @@ const PublicTournamentArena = ({
 
       {/* TAB 3: BRACKET */}
       {activeTab === "bracket" && (
-        <div className="flex flex-col lg:flex-row items-center justify-center gap-10 py-6 relative z-10">
+        <div className="flex flex-row items-center justify-start gap-10 py-6 relative z-10 overflow-x-auto pb-10 w-full">
           {/* Semifinals */}
           <div className="flex flex-col gap-6 w-full max-w-sm">
             <h4 className="text-[10px] font-black uppercase tracking-widest text-white/40 text-center font-orbitron flex items-center justify-center gap-2">

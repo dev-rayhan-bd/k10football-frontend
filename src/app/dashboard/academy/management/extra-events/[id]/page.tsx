@@ -2165,7 +2165,7 @@ const TournamentSection = ({
 
       {/* TAB 3: BRACKET */}
       {activeTab === "bracket" && (
-        <div className="flex flex-col lg:flex-row items-center justify-start lg:justify-center gap-10 py-6 relative z-10 overflow-x-auto pb-10">
+        <div className="flex flex-row items-center justify-start gap-10 py-6 relative z-10 overflow-x-auto pb-10 w-full">
           
           {/* Round of 16 */}
           <div className="flex flex-col gap-6 w-full min-w-70 max-w-sm shrink-0">

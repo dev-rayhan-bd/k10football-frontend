@@ -1,14 +1,18 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   IconChevronDown, 
   IconCalendar, 
   IconX,
-  IconCheck
+  IconCheck,
+  IconPlayerPlay,
+  IconPlayerStop
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 interface ReportDetailsFormProps {
   formData: any;
@@ -28,6 +32,30 @@ const ReportDetailsForm = ({
   onContinue
 }: ReportDetailsFormProps) => {
   const [newTag, setNewTag] = useState("");
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [secondsElapsed, setSecondsElapsed] = useState(Number(formData.minutesPlayed || 0) * 60);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isTimerRunning) {
+      interval = setInterval(() => {
+        setSecondsElapsed(prev => {
+          const newSecs = prev + 1;
+          setFormData({ ...formData, minutesPlayed: Math.floor(newSecs / 60).toString() });
+          return newSecs;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isTimerRunning, formData, setFormData]);
+
+  const toggleTimer = () => setIsTimerRunning(!isTimerRunning);
+
+  const formatTime = (totalSeconds: number) => {
+    const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+    const s = (totalSeconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
 
   const handleChange = (field: string, val: any) => {
     setFormData({ ...formData, [field]: val });
@@ -177,7 +205,7 @@ const ReportDetailsForm = ({
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   onKeyDown={handleKeyPress}
-                  className="bg-transparent border-none text-xs font-bold text-white focus:outline-none flex-1 min-w-[80px]"
+                  className="bg-transparent border-none text-xs font-bold text-white focus:outline-none flex-1 min-w-20"
                 />
               </div>
             </div>
@@ -216,12 +244,30 @@ const ReportDetailsForm = ({
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Minutes Played:</Label>
-              <div className="relative">
+              <div className="flex justify-between items-center">
+                <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Minutes Played:</Label>
+                <div className="flex items-center gap-2 -mt-1">
+                  <span className="text-xs font-bold text-white font-orbitron min-w-8 text-right">{formatTime(secondsElapsed)}</span>
+                  <button 
+                    type="button"
+                    onClick={toggleTimer}
+                    className={cn(
+                      "flex items-center justify-center w-6 h-6 rounded-full text-black transition-all",
+                      isTimerRunning ? "bg-red-500 hover:bg-red-600 shadow-[0_0_10px_rgba(239,68,68,0.5)]" : "bg-[#00FF62] hover:bg-[#00D150] shadow-[0_0_10px_rgba(0,255,98,0.3)]"
+                    )}
+                  >
+                    {isTimerRunning ? <IconPlayerStop size={12} fill="currentColor" /> : <IconPlayerPlay size={12} fill="currentColor" />}
+                  </button>
+                </div>
+              </div>
+              <div className="relative mt-1">
                 <Input 
                   className="bg-[#161616] border-white/10 text-white h-12 font-bold focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]" 
                   value={formData.minutesPlayed}
-                  onChange={(e) => handleChange("minutesPlayed", e.target.value)}
+                  onChange={(e) => {
+                    handleChange("minutesPlayed", e.target.value);
+                    setSecondsElapsed(Number(e.target.value || 0) * 60);
+                  }}
                 />
                 <span className="absolute right-4 top-3.5 text-gray-500 text-xs font-bold font-orbitron">min</span>
               </div>
