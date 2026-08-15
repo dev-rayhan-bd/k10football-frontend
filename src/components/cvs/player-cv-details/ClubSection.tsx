@@ -7,7 +7,7 @@ import { Plus, Trash2, X, Check, Info, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
-import club1 from '@/assets/cvs-page/club1.png';
+import club1 from '@/assets/cvs/club1.png';
 import Image from 'next/image';
 
 const YEARS = Array.from({ length: 30 }, (_, i) => String(new Date().getFullYear() - i));

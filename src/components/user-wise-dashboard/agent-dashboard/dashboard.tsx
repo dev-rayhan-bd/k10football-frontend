@@ -29,8 +29,8 @@ import {
   Area,
   Legend
 } from "recharts";
-import MyImagesSection from "@/components/cvs-page/player-cv-details/MyImageSection";
-import MyVideosSection from "@/components/cvs-page/player-cv-details/MyVideoSection";
+import MyImagesSection from "@/components/cvs/player-cv-details/MyImageSection";
+import MyVideosSection from "@/components/cvs/player-cv-details/MyVideoSection";
 
 const areaData = [
   { week: "Week 1", views: 14 },

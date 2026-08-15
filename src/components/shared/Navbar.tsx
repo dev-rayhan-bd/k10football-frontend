@@ -16,7 +16,7 @@ const pathName = usePathname();
 const navLinks = [
 { label: 'Home', href: '/' },
 { label: 'Services', href: '/services'},
-{ label: 'CVs', href: '/cvs-page'},
+{ label: 'CVs', href: '/cvs'},
 { label: 'K10 Plans', href: 'k10plans'},
 { label: 'About', href: '/about'},
 ]

@@ -1,11 +1,11 @@
 "use client";
 
-import club1 from "@/assets/cvs-page/club1.png";
-import flag1 from "@/assets/cvs-page/flag1.png";
-import goldCard from "@/assets/cvs-page/gold-card.png";
-import playerImage from "@/assets/cvs-page/id/player-short-image.png";
-import pinkCard from "@/assets/cvs-page/pink-card.png";
-import whiteCard from "@/assets/cvs-page/white-card.png";
+import club1 from "@/assets/cvs/club1.png";
+import flag1 from "@/assets/cvs/flag1.png";
+import goldCard from "@/assets/cvs/gold-card.png";
+import playerImage from "@/assets/cvs/id/player-short-image.png";
+import pinkCard from "@/assets/cvs/pink-card.png";
+import whiteCard from "@/assets/cvs/white-card.png";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { usePlayer } from "@/lib/hooks/usePlayer";
@@ -73,7 +73,7 @@ const Players = () => {
             <div
               onClick={() => {
                 selectPlayer(player.id);
-                router.push("/cvs-page/player-cv-details");
+                router.push("/cvs/player-cv-details");
               }}
               key={player.id}
               className="flex justify-center cursor-pointer w-full max-w-67.5 mx-auto"
@@ -124,7 +124,7 @@ const Players = () => {
 
                 {/* Name */}
                 <div className="absolute top-[51%] left-1/2 -translate-x-1/2 w-[85%] text-center pb-1 z-20">
-                  <h3 className="text-gray-900 font-heading text-2xl sm:text-3xl font-black uppercase tracking-widest truncate">
+                  <h3 className="text-gray-900 font-heading text-lg sm:text-xl font-black uppercase tracking-widest truncate">
                     {displayLastName}
                   </h3>
                 </div>

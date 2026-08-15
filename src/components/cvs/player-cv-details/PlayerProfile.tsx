@@ -3,7 +3,7 @@
 "use client";
 
 import React, { useState } from "react";
-import playerImage from "@/assets/cvs-page/id/player-short-image.png";
+import playerImage from "@/assets/cvs/id/player-short-image.png";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import Image from "next/image";
@@ -13,11 +13,11 @@ import CMSField from "@/components/shared/CMSField";
 import { toast } from "sonner";
 import { cn, getShortForm, getVeryShortPosition } from "@/lib/utils";
 import { usePlayer } from "@/lib/hooks/usePlayer";
-import goldCard from "@/assets/cvs-page/gold-card.png";
-import pinkCard from "@/assets/cvs-page/pink-card.png";
-import whiteCard from "@/assets/cvs-page/white-card.png";
-import flag1 from "@/assets/cvs-page/flag1.png";
-import club1 from "@/assets/cvs-page/club1.png";
+import goldCard from "@/assets/cvs/gold-card.png";
+import pinkCard from "@/assets/cvs/pink-card.png";
+import whiteCard from "@/assets/cvs/white-card.png";
+import flag1 from "@/assets/cvs/flag1.png";
+import club1 from "@/assets/cvs/club1.png";
 import { useRouter } from "next/navigation";
 import { IconCircleCheck } from "@tabler/icons-react";
 import { calculateWeightedRating } from "@/lib/utils/rating";
@@ -240,7 +240,7 @@ return (
     <div className="lg:col-span-1  bg-cardBg h-fit rounded-xl overflow-hidden">
       <div className=" overflow-hidden">
         <div className="aspect-square bg-linear-to-b from-[#2df168] to-[#39493b] flex items-center justify-center">
-          <div onClick={() => router.push("/cvs-page/player-cv-details")} className="flex justify-center cursor-pointer w-full max-w-67.5 mx-auto">
+          <div onClick={() => router.push("/cvs/player-cv-details")} className="flex justify-center cursor-pointer w-full max-w-67.5 mx-auto">
             <div className={`relative w-full aspect-270/385 hover:scale-105 transition-all duration-300 z-0 ${
               currentPlayer.cardType === "gold"
                 ? "drop-shadow-[0_0_10px_rgba(253,224,71,0.5)] hover:drop-shadow-[0_0_25px_rgba(253,224,71,0.95)]"

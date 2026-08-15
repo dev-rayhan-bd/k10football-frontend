@@ -1,10 +1,10 @@
 "use client";
-import club1 from "@/assets/cvs-page/club1.png";
-import playerImage from "@/assets/cvs-page/coach-image2.png";
-import flag1 from "@/assets/cvs-page/flag1.png";
-import goldCard from "@/assets/cvs-page/gold-card.png";
-import pinkCard from "@/assets/cvs-page/pink-card.png";
-import whiteCard from "@/assets/cvs-page/white-card.png";
+import club1 from "@/assets/cvs/club1.png";
+import playerImage from "@/assets/cvs/coach-image2.png";
+import flag1 from "@/assets/cvs/flag1.png";
+import goldCard from "@/assets/cvs/gold-card.png";
+import pinkCard from "@/assets/cvs/pink-card.png";
+import whiteCard from "@/assets/cvs/white-card.png";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCoach } from "@/lib/hooks/useCoach";
@@ -17,12 +17,12 @@ interface Coach {
   country: string;
   image: string;
   stats: {
-    att: number;
-    tac: number;
+    pac: number;
+    sho: number;
+    pas: number;
+    dri: number;
     def: number;
-    imp: number;
-    exp: number;
-    lea: number;
+    phy: number;
   };
   cardType: "gold" | "white" | "pink";
 }
@@ -35,7 +35,7 @@ const coaches: Coach[] = [
     position: "MAN",
     country: "🇦🇺",
     image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
-    stats: { att: 93, tac: 85, def: 75, imp: 78, exp: 78, lea: 82 },
+    stats: { pac: 93, sho: 85, pas: 75, dri: 78, def: 78, phy: 82 },
     cardType: "gold",
   },
   {
@@ -45,7 +45,7 @@ const coaches: Coach[] = [
     position: "MAN",
     country: "🇦🇷",
     image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop",
-    stats: { att: 93, tac: 85, def: 75, imp: 78, exp: 78, lea: 82 },
+    stats: { pac: 93, sho: 85, pas: 75, dri: 78, def: 78, phy: 82 },
     cardType: "white",
   },
   {
@@ -55,7 +55,7 @@ const coaches: Coach[] = [
     position: "MAN",
     country: "🇮🇹",
     image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop",
-    stats: { att: 93, tac: 85, def: 75, imp: 78, exp: 78, lea: 82 },
+    stats: { pac: 93, sho: 85, pas: 75, dri: 78, def: 78, phy: 82 },
     cardType: "gold",
   },
   {
@@ -65,7 +65,7 @@ const coaches: Coach[] = [
     position: "MAN",
     country: "🇵🇹",
     image: "https://images.unsplash.com/photo-1507919886487-4fed9a8a5e0c?w=400&h=400&fit=crop",
-    stats: { att: 93, tac: 85, def: 75, imp: 78, exp: 78, lea: 82 },
+    stats: { pac: 93, sho: 85, pas: 75, dri: 78, def: 78, phy: 82 },
     cardType: "white",
   },
   {
@@ -75,7 +75,7 @@ const coaches: Coach[] = [
     position: "MAN",
     country: "🇳🇱",
     image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop",
-    stats: { att: 93, tac: 85, def: 75, imp: 78, exp: 78, lea: 82 },
+    stats: { pac: 93, sho: 85, pas: 75, dri: 78, def: 78, phy: 82 },
     cardType: "gold",
   },
   {
@@ -85,7 +85,7 @@ const coaches: Coach[] = [
     position: "MAN",
     country: "🇦🇷",
     image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
-    stats: { att: 93, tac: 85, def: 75, imp: 78, exp: 78, lea: 82 },
+    stats: { pac: 93, sho: 85, pas: 75, dri: 78, def: 78, phy: 82 },
     cardType: "white",
   },
   {
@@ -95,7 +95,7 @@ const coaches: Coach[] = [
     position: "MAN",
     country: "🇫🇷",
     image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop",
-    stats: { att: 93, tac: 85, def: 75, imp: 78, exp: 78, lea: 82 },
+    stats: { pac: 93, sho: 85, pas: 75, dri: 78, def: 78, phy: 82 },
     cardType: "gold",
   },
   {
@@ -105,7 +105,7 @@ const coaches: Coach[] = [
     position: "MAN",
     country: "🇪🇸",
     image: "https://images.unsplash.com/photo-1507919886487-4fed9a8a5e0c?w=400&h=400&fit=crop",
-    stats: { att: 93, tac: 85, def: 75, imp: 78, exp: 78, lea: 82 },
+    stats: { pac: 93, sho: 85, pas: 75, dri: 78, def: 78, phy: 82 },
     cardType: "white",
   },
   {
@@ -115,7 +115,7 @@ const coaches: Coach[] = [
     position: "MAN",
     country: "🇬🇧",
     image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
-    stats: { att: 93, tac: 85, def: 75, imp: 78, exp: 78, lea: 82 },
+    stats: { pac: 93, sho: 85, pas: 75, dri: 78, def: 78, phy: 82 },
     cardType: "gold",
   },
   {
@@ -125,7 +125,7 @@ const coaches: Coach[] = [
     position: "MAN",
     country: "🇪🇸",
     image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop",
-    stats: { att: 93, tac: 85, def: 75, imp: 78, exp: 78, lea: 82 },
+    stats: { pac: 93, sho: 85, pas: 75, dri: 78, def: 78, phy: 82 },
     cardType: "white",
   },
   {
@@ -135,7 +135,7 @@ const coaches: Coach[] = [
     position: "MAN",
     country: "🇧🇷",
     image: "https://images.unsplash.com/photo-1507919886487-4fed9a8a5e0c?w=400&h=400&fit=crop",
-    stats: { att: 93, tac: 85, def: 75, imp: 78, exp: 78, lea: 82 },
+    stats: { pac: 93, sho: 85, pas: 75, dri: 78, def: 78, phy: 82 },
     cardType: "gold",
   },
   {
@@ -145,7 +145,7 @@ const coaches: Coach[] = [
     position: "MAN",
     country: "🇪🇬",
     image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
-    stats: { att: 93, tac: 85, def: 75, imp: 78, exp: 78, lea: 82 },
+    stats: { pac: 93, sho: 85, pas: 75, dri: 78, def: 78, phy: 82 },
     cardType: "white",
   },
   {
@@ -155,7 +155,7 @@ const coaches: Coach[] = [
     position: "MAN",
     country: "🇫🇷",
     image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop",
-    stats: { att: 93, tac: 85, def: 75, imp: 78, exp: 78, lea: 82 },
+    stats: { pac: 93, sho: 85, pas: 75, dri: 78, def: 78, phy: 82 },
     cardType: "gold",
   },
   {
@@ -165,7 +165,7 @@ const coaches: Coach[] = [
     position: "MAN",
     country: "🇬🇧",
     image: "https://images.unsplash.com/photo-1507919886487-4fed9a8a5e0c?w=400&h=400&fit=crop",
-    stats: { att: 93, tac: 85, def: 75, imp: 78, exp: 78, lea: 82 },
+    stats: { pac: 93, sho: 85, pas: 75, dri: 78, def: 78, phy: 82 },
     cardType: "white",
   },
   {
@@ -175,7 +175,7 @@ const coaches: Coach[] = [
     position: "MAN",
     country: "🇦🇺",
     image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
-    stats: { att: 93, tac: 85, def: 75, imp: 78, exp: 78, lea: 82 },
+    stats: { pac: 93, sho: 85, pas: 75, dri: 78, def: 78, phy: 82 },
     cardType: "gold",
   },
 ];
@@ -193,12 +193,12 @@ const Coaches = () => {
         name: coachData.fullName.split(" ")[1]?.toUpperCase() || coachData.fullName.toUpperCase(),
         rating: 58, // Fixed rating from bio
         stats: {
-          att: coachData.seasonStats.wins,
-          tac: coachData.seasonStats.matches,
-          def: coachData.seasonStats.cleanSheets,
-          imp: 85,
-          exp: 90,
-          lea: 95,
+          pac: coachData.seasonStats.wins,
+          sho: coachData.seasonStats.matches,
+          pas: coachData.seasonStats.cleanSheets,
+          dri: 85,
+          def: 90,
+          phy: 95,
         }
       }
     }
@@ -225,7 +225,7 @@ const Coaches = () => {
                 : "drop-shadow-[0_0_10px_rgba(251,113,133,0.5)] hover:drop-shadow-[0_0_25px_rgba(251,113,133,0.95)]";
 
           return (
-            <div onClick={() => router.push("/cvs-page/coach-cv-details")} key={coach.id} className="flex justify-center w-full max-w-67.5 mx-auto">
+            <div onClick={() => router.push("/cvs/coach-cv-details")} key={coach.id} className="flex justify-center w-full max-w-67.5 mx-auto">
               <div className={`relative w-full aspect-270/385 cursor-pointer hover:scale-105 transition-all duration-300 z-0 ${glowClass}`}>
                 <Image
                   className="absolute inset-0 w-full h-full object-contain z-0 pointer-events-none"
@@ -253,56 +253,58 @@ const Coaches = () => {
                 </div>
 
                 {/* Coach image */}
-                <div className="absolute top-[1%] right-[3%] w-[70%] h-[50%] flex items-end justify-center z-10 overflow-hidden">
+                <div className="absolute top-[3%] right-[6%] w-[64%] h-[47%] flex items-end justify-center z-10 overflow-hidden">
                   <Image
                     className="h-full w-auto object-contain select-none pointer-events-none"
                     src={playerImage}
+                    width={285}
+                    height={370}
                     alt="coach Image"
                   />
                 </div>
 
 
                 {/* Name */}
-                <div className="absolute top-[52%] left-1/2 -translate-x-1/2 w-[76%] text-center pb-1 z-20">
-                <h3 className="text-gray-900 font-heading text-xl sm:text-2xl font-black uppercase tracking-wide truncate">
+                <div className="absolute top-[51%] left-1/2 -translate-x-1/2 w-[85%] text-center pb-1 z-20">
+                <h3 className="text-gray-900 font-heading text-lg sm:text-xl font-black uppercase tracking-wide truncate">
                   {coach.name}
                 </h3>
               </div>
 
-              {/* Stats */}
-              <div className="absolute top-[60%] left-1/2 -translate-x-1/2 w-[82%] text-black z-20">
-                <div className="flex items-center justify-between gap-1 p-2">
+              {/* Stats - Redesigned as a glassmorphic block */}
+              <div className="absolute top-[59%] left-1/2 -translate-x-1/2 w-[86%] bg-black/3 border border-black/10 backdrop-blur-3xs rounded-xl p-2.5 text-black z-20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
+                <div className="flex items-center justify-between gap-3">
                   {/* left */}
-                  <div className="flex-1 flex flex-col gap-0.5">
-                    <div className="flex justify-between items-center">
-                      <span className="font-extrabold text-sm sm:text-base text-gray-900 leading-none">{coach.stats.att}</span>
-                      <span className="font-bold text-[11px] sm:text-xs text-gray-700 leading-none">ATT</span>
+                  <div className="flex-1 flex flex-col gap-1.5">
+                    <div className="flex justify-between items-center px-1">
+                      <span className="font-extrabold text-lg sm:text-xl text-gray-950 leading-none">{coach.stats.pac}</span>
+                      <span className="font-bold text-sm sm:text-[15px] text-gray-700 leading-none">PAC</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="font-extrabold text-sm sm:text-base text-gray-900 leading-none">{coach.stats.def}</span>
-                      <span className="font-bold text-[11px] sm:text-xs text-gray-700 leading-none">DEF</span>
+                    <div className="flex justify-between items-center px-1">
+                      <span className="font-extrabold text-lg sm:text-xl text-gray-950 leading-none">{coach.stats.sho}</span>
+                      <span className="font-bold text-sm sm:text-[15px] text-gray-700 leading-none">SHO</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="font-extrabold text-sm sm:text-base text-gray-900 leading-none">{coach.stats.exp}</span>
-                      <span className="font-bold text-[11px] sm:text-xs text-gray-700 leading-none">EXP</span>
+                    <div className="flex justify-between items-center px-1">
+                      <span className="font-extrabold text-lg sm:text-xl text-gray-950 leading-none">{coach.stats.pas}</span>
+                      <span className="font-bold text-sm sm:text-[15px] text-gray-700 leading-none">PAS</span>
                     </div>
                   </div>
 
-                  <div className="h-12 border-r border-black/15 mx-1"></div>
+                  <div className="h-16 border-r-2 border-black/10 mx-1"></div>
 
                   {/* right */}
-                  <div className="flex-1 flex flex-col gap-0.5">
-                    <div className="flex justify-between items-center">
-                      <span className="font-extrabold text-sm sm:text-base text-gray-900 leading-none">{coach.stats.tac}</span>
-                      <span className="font-bold text-[11px] sm:text-xs text-gray-700 leading-none">TAC</span>
+                  <div className="flex-1 flex flex-col gap-1.5">
+                    <div className="flex justify-between items-center px-1">
+                      <span className="font-extrabold text-lg sm:text-xl text-gray-950 leading-none">{coach.stats.dri}</span>
+                      <span className="font-bold text-sm sm:text-[15px] text-gray-700 leading-none">DRI</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="font-extrabold text-sm sm:text-base text-gray-900 leading-none">{coach.stats.imp}</span>
-                      <span className="font-bold text-[11px] sm:text-xs text-gray-700 leading-none">IMP</span>
+                    <div className="flex justify-between items-center px-1">
+                      <span className="font-extrabold text-lg sm:text-xl text-gray-950 leading-none">{coach.stats.def}</span>
+                      <span className="font-bold text-sm sm:text-[15px] text-gray-700 leading-none">DEF</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="font-extrabold text-sm sm:text-base text-gray-900 leading-none">{coach.stats.lea}</span>
-                      <span className="font-bold text-[11px] sm:text-xs text-gray-700 leading-none">LEA</span>
+                    <div className="flex justify-between items-center px-1">
+                      <span className="font-extrabold text-lg sm:text-xl text-gray-950 leading-none">{coach.stats.phy}</span>
+                      <span className="font-bold text-sm sm:text-[15px] text-gray-700 leading-none">PHY</span>
                     </div>
                   </div>
                 </div>

@@ -20,9 +20,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import FullEditablePage from "@/components/cvs-page/player-cv-details/FullEditablePage";
+import FullEditablePage from "@/components/cvs/player-cv-details/FullEditablePage";
 import { usePlayer } from "@/lib/hooks/usePlayer";
-import { usePlayerStats } from "@/components/cvs-page/player-cv-details/FullEditablePage";
+import { usePlayerStats } from "@/components/cvs/player-cv-details/FullEditablePage";
 import { getFullWithShortForm } from "@/lib/utils";
 import { FileText } from 'lucide-react';
 import { useAppSelector } from "@/lib/hooks/reduxHooks";

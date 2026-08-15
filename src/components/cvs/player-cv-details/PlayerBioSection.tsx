@@ -1,24 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import positionMap from "@/assets/cvs-page/id/position-map.png";
-import technicalIcon from "@/assets/cvs-page/id/player-styles-icons/technical.png";
-import finesseShotIcon from "@/assets/cvs-page/id/player-styles-icons/finesse shot.png";
-import incisivePassIcon from "@/assets/cvs-page/id/player-styles-icons/incisiver pass.png";
-import longBallIcon from "@/assets/cvs-page/id/player-styles-icons/long ball specialist.png";
-import speedsterIcon from "@/assets/cvs-page/id/player-styles-icons/speedster.png";
-import powerHeaderIcon from "@/assets/cvs-page/id/player-styles-icons/power header.png";
-import interceptorIcon from "@/assets/cvs-page/id/player-styles-icons/interceptor.png";
-import blockIcon from "@/assets/cvs-page/id/player-styles-icons/block specialist.png";
-import clinicalFinisherIcon from "@/assets/cvs-page/id/player-styles-icons/clinical finisher.png";
-import dribblingIcon from "@/assets/cvs-page/id/player-styles-icons/dribbling wizard.png";
-import setPieceIcon from "@/assets/cvs-page/id/player-styles-icons/set piece specialist.png";
-import playmakerIcon from "@/assets/cvs-page/id/player-styles-icons/playmark.png";
-import acrobaticIcon from "@/assets/cvs-page/id/player-styles-icons/acrobatic.png";
-import deadballIcon from "@/assets/cvs-page/id/player-styles-icons/dead ball specialist.png";
-import relentlessIcon from "@/assets/cvs-page/id/player-styles-icons/relentless.png";
-import quickStepIcon from "@/assets/cvs-page/id/player-styles-icons/quick step.png";
-import tricksterIcon from "@/assets/cvs-page/id/player-styles-icons/trickster.png";
-import whippedCrossIcon from "@/assets/cvs-page/id/player-styles-icons/whipped cross.png";
+import positionMap from "@/assets/cvs/id/position-map.png";
+import technicalIcon from "@/assets/cvs/id/player-styles-icons/technical.png";
+import finesseShotIcon from "@/assets/cvs/id/player-styles-icons/finesse shot.png";
+import incisivePassIcon from "@/assets/cvs/id/player-styles-icons/incisiver pass.png";
+import longBallIcon from "@/assets/cvs/id/player-styles-icons/long ball specialist.png";
+import speedsterIcon from "@/assets/cvs/id/player-styles-icons/speedster.png";
+import powerHeaderIcon from "@/assets/cvs/id/player-styles-icons/power header.png";
+import interceptorIcon from "@/assets/cvs/id/player-styles-icons/interceptor.png";
+import blockIcon from "@/assets/cvs/id/player-styles-icons/block specialist.png";
+import clinicalFinisherIcon from "@/assets/cvs/id/player-styles-icons/clinical finisher.png";
+import dribblingIcon from "@/assets/cvs/id/player-styles-icons/dribbling wizard.png";
+import setPieceIcon from "@/assets/cvs/id/player-styles-icons/set piece specialist.png";
+import playmakerIcon from "@/assets/cvs/id/player-styles-icons/playmark.png";
+import acrobaticIcon from "@/assets/cvs/id/player-styles-icons/acrobatic.png";
+import deadballIcon from "@/assets/cvs/id/player-styles-icons/dead ball specialist.png";
+import relentlessIcon from "@/assets/cvs/id/player-styles-icons/relentless.png";
+import quickStepIcon from "@/assets/cvs/id/player-styles-icons/quick step.png";
+import tricksterIcon from "@/assets/cvs/id/player-styles-icons/trickster.png";
+import whippedCrossIcon from "@/assets/cvs/id/player-styles-icons/whipped cross.png";
 
 const STYLE_ICONS: Record<string, any> = {
   "technical": technicalIcon,
@@ -40,8 +40,8 @@ const STYLE_ICONS: Record<string, any> = {
   "trickster": tricksterIcon,
   "whipped-cross": whippedCrossIcon,
 };
-import positionIcon from "@/assets/cvs-page/id/positionIcon.png";
-import trofeeIcon from "@/assets/cvs-page/id/trofeeIcon.png";
+import positionIcon from "@/assets/cvs/id/positionIcon.png";
+import trofeeIcon from "@/assets/cvs/id/trofeeIcon.png";
 import CMSField from "@/components/shared/CMSField";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";

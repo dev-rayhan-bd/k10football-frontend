@@ -21,9 +21,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import FullEditableCv from "@/components/cvs-page/coach-cv-details/FullEditableCv";
+import FullEditableCv from "@/components/cvs/coach-cv-details/FullEditableCv";
 import { useCoach } from "@/lib/hooks/useCoach";
-import { usePlayerStats } from "@/components/cvs-page/player-cv-details/FullEditablePage";
+import { usePlayerStats } from "@/components/cvs/player-cv-details/FullEditablePage";
 import { usePlayer } from "@/lib/hooks/usePlayer";
 import { useRouter } from "next/navigation";
 import { IconUserCheck } from "@tabler/icons-react";
@@ -531,7 +531,7 @@ const GenerateCvCoach = () => {
                         <button
                           onClick={() => {
                             selectPlayer(player.id);
-                            router.push("/cvs-page/player-cv-details");
+                            router.push("/cvs/player-cv-details");
                           }}
                           className="px-3 py-1.5 bg-[#E31B23] hover:bg-[#ff2d35] text-white text-[9px] font-black uppercase tracking-widest rounded-lg transition-all border border-[#E31B23]/50 cursor-pointer"
                         >

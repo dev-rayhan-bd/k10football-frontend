@@ -1,18 +1,18 @@
 "use client";
-import badge1 from "@/assets/cvs-page/id/coach-badge1.png";
-import badge2 from "@/assets/cvs-page/id/coach-badge2.png";
-import iconAttackMinded from "@/assets/cvs-page/id/coach-styles-icons/attack minded.png";
-import iconCounterAttack from "@/assets/cvs-page/id/coach-styles-icons/counter-attack.png";
-import iconDisciplinarian from "@/assets/cvs-page/id/coach-styles-icons/disciplainarian.png";
-import iconGegenpressing from "@/assets/cvs-page/id/coach-styles-icons/gegenpressing.png";
-import iconHolistic from "@/assets/cvs-page/id/coach-styles-icons/holistic.png";
-import iconMotivator from "@/assets/cvs-page/id/coach-styles-icons/motivator.png";
-import iconParkTheBus from "@/assets/cvs-page/id/coach-styles-icons/park the bus.png";
-import iconPlayerCentric from "@/assets/cvs-page/id/coach-styles-icons/player-centric.png";
-import iconSetPieceSpecialist from "@/assets/cvs-page/id/coach-styles-icons/set-piece specialist.png";
-import iconTikiTaka from "@/assets/cvs-page/id/coach-styles-icons/tiki-taka.png";
-import iconYouthDevelopment from "@/assets/cvs-page/id/coach-styles-icons/youth development.png";
-import trophyIcon from "@/assets/cvs-page/id/trofeeIcon.png";
+import badge1 from "@/assets/cvs/id/coach-badge1.png";
+import badge2 from "@/assets/cvs/id/coach-badge2.png";
+import iconAttackMinded from "@/assets/cvs/id/coach-styles-icons/attack minded.png";
+import iconCounterAttack from "@/assets/cvs/id/coach-styles-icons/counter-attack.png";
+import iconDisciplinarian from "@/assets/cvs/id/coach-styles-icons/disciplainarian.png";
+import iconGegenpressing from "@/assets/cvs/id/coach-styles-icons/gegenpressing.png";
+import iconHolistic from "@/assets/cvs/id/coach-styles-icons/holistic.png";
+import iconMotivator from "@/assets/cvs/id/coach-styles-icons/motivator.png";
+import iconParkTheBus from "@/assets/cvs/id/coach-styles-icons/park the bus.png";
+import iconPlayerCentric from "@/assets/cvs/id/coach-styles-icons/player-centric.png";
+import iconSetPieceSpecialist from "@/assets/cvs/id/coach-styles-icons/set-piece specialist.png";
+import iconTikiTaka from "@/assets/cvs/id/coach-styles-icons/tiki-taka.png";
+import iconYouthDevelopment from "@/assets/cvs/id/coach-styles-icons/youth development.png";
+import trophyIcon from "@/assets/cvs/id/trofeeIcon.png";
 import CMSField from "@/components/shared/CMSField";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -47,7 +47,7 @@ import {
 import Image, { type StaticImageData } from "next/image";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { usePlayerStats } from "@/components/cvs-page/player-cv-details/FullEditablePage";
+import { usePlayerStats } from "@/components/cvs/player-cv-details/FullEditablePage";
 
 const ACCOMPLISHMENT_ICONS: Record<string, React.ComponentType<any>> = {
   trophy: Trophy,

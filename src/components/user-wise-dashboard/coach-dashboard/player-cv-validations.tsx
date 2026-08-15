@@ -86,7 +86,7 @@ const PlayerCVValidations = () => {
         <TableActionButtons 
           onView={() => {
             selectPlayer(player.id);
-            router.push("/cvs-page/player-cv-details");
+            router.push("/cvs/player-cv-details");
           }} 
           onVerify={player.status !== "Verified" ? () => validatePlayer(player.id) : undefined}
         />

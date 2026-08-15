@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import flagFr from "@/assets/cvs-page/id/flag-fr.png";
-import flagIt from "@/assets/cvs-page/id/flag-itally.png";
-import flagImage from "@/assets/cvs-page/id/flag.png";
-import futsalMap from "@/assets/cvs-page/id/Futsal Pitch.jpg";
-// import leftLeg from "@/assets/cvs-page/id/left-leg-image.png";
-import leftLeg from "@/assets/cvs-page/id/left_foot.png";
-import playerImage from "@/assets/cvs-page/id/player-image.png";
-import positionMap from "@/assets/cvs-page/id/position-map.png";
-// import right from "@/assets/cvs-page/id/right-legt-image.png";
-import right from "@/assets/cvs-page/id/right_foot.png";
-import trofeeIcon from "@/assets/cvs-page/id/trofeeIcon.png";
+import flagFr from "@/assets/cvs/id/flag-fr.png";
+import flagIt from "@/assets/cvs/id/flag-itally.png";
+import flagImage from "@/assets/cvs/id/flag.png";
+import futsalMap from "@/assets/cvs/id/Futsal Pitch.jpg";
+// import leftLeg from "@/assets/cvs/id/left-leg-image.png";
+import leftLeg from "@/assets/cvs/id/left_foot.png";
+import playerImage from "@/assets/cvs/id/player-image.png";
+import positionMap from "@/assets/cvs/id/position-map.png";
+// import right from "@/assets/cvs/id/right-legt-image.png";
+import right from "@/assets/cvs/id/right_foot.png";
+import trofeeIcon from "@/assets/cvs/id/trofeeIcon.png";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { calculateWeightedRating } from "@/lib/utils/rating";
 

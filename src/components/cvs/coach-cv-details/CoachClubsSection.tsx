@@ -6,9 +6,9 @@ import { cn } from '@/lib/utils';
 import { Plus, Trash2, X, Check, Info, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { usePlayerStats } from "@/components/cvs-page/player-cv-details/FullEditablePage";
+import { usePlayerStats } from "@/components/cvs/player-cv-details/FullEditablePage";
 
-import clubImage from '@/assets/cvs-page/club1.png';
+import clubImage from '@/assets/cvs/club1.png';
 import Image from 'next/image';
 
 const YEARS = Array.from({ length: 30 }, (_, i) => String(new Date().getFullYear() - i));

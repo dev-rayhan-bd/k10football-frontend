@@ -1,7 +1,7 @@
 'use client'
 
-import formation1 from "@/assets/cvs-page/id/position-map.png"
-import formationPin from "@/assets/cvs-page/id/positionIcon.png"
+import formation1 from "@/assets/cvs/id/position-map.png"
+import formationPin from "@/assets/cvs/id/positionIcon.png"
 import { useCoach } from "@/lib/hooks/useCoach"
 import { cn } from "@/lib/utils"
 import Image from 'next/image'

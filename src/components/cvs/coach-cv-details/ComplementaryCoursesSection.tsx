@@ -33,15 +33,15 @@ import {
 } from "@/components/ui/dialog"
 
 // Static Logo Imports
-import courseLogo1 from "@/assets/cvs-page/id/courses-logo1.png";
-import courseLogo2 from "@/assets/cvs-page/id/courses-logo2.png";
-import courseLogo3 from "@/assets/cvs-page/id/courses-logo3.png";
-import courseLogo4 from "@/assets/cvs-page/id/courses-logo4.png";
-import courseLogo5 from "@/assets/cvs-page/id/courses-logo5.jpg";
-import courseLogo6 from "@/assets/cvs-page/id/courses-logo6.png";
-import courseLogo7 from "@/assets/cvs-page/id/courses-logo7.png";
-import courseLogo8 from "@/assets/cvs-page/id/courses-logo8.png";
-import courseLogo9 from "@/assets/cvs-page/id/courses-logo9.png";
+import courseLogo1 from "@/assets/cvs/id/courses-logo1.png";
+import courseLogo2 from "@/assets/cvs/id/courses-logo2.png";
+import courseLogo3 from "@/assets/cvs/id/courses-logo3.png";
+import courseLogo4 from "@/assets/cvs/id/courses-logo4.png";
+import courseLogo5 from "@/assets/cvs/id/courses-logo5.jpg";
+import courseLogo6 from "@/assets/cvs/id/courses-logo6.png";
+import courseLogo7 from "@/assets/cvs/id/courses-logo7.png";
+import courseLogo8 from "@/assets/cvs/id/courses-logo8.png";
+import courseLogo9 from "@/assets/cvs/id/courses-logo9.png";
 
 const STATIC_LOGOS = [
   { id: 1, name: "Logo 1", image: courseLogo1 },
