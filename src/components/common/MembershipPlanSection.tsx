@@ -166,7 +166,7 @@ const MembershipPlanSection = () => {
                   {plan.price} <span className="text-gray-400 text-xl">/month</span>
                 </div>
               </div>
-              <ul className="space-y-2 flex-grow">
+              <ul className="space-y-2 grow">
                 {plan.features.map((feature, j) => (
                   <li
                     key={j}
@@ -180,7 +180,7 @@ const MembershipPlanSection = () => {
               <Button 
                 onClick={() => handleChoosePlan(plan.name)}
                 variant={"outline"} 
-                className="w-full bg-primary text-black rounded-full bg-transparent text-white cursor-pointer hover:bg-[#00dd00]"
+                className="w-full bg-primary text-black rounded-full cursor-pointer hover:bg-[#00dd00]"
               >
                 Choose Plan
               </Button>
@@ -190,9 +190,9 @@ const MembershipPlanSection = () => {
       </div>
 
       <Dialog open={modalType !== null} onOpenChange={(open) => !open && setModalType(null)}>
-        <DialogContent className="bg-[#0c0c0e] border border-white/10 text-white w-full max-w-[800px] sm:max-w-[800px] p-8 md:p-10 rounded-[32px] overflow-y-auto max-h-[90vh] [&>button]:text-white">
+        <DialogContent className="bg-[#0c0c0e] border border-white/10 text-white w-[95vw] sm:w-full max-w-200 p-4 sm:p-8 md:p-10 rounded-2xl sm:rounded-4xl overflow-y-auto max-h-[90vh] [&>button]:text-white">
           <DialogHeader className="text-center space-y-2 mb-8">
-            <DialogTitle className="text-3xl font-black font-heading text-white text-center uppercase tracking-tight font-orbitron">
+            <DialogTitle className="text-3xl font-black font-heading text-white text-center uppercase tracking-tight">
               {modalType === "player" ? "Player Plans" : "Coach Plans"}
             </DialogTitle>
             <p className="text-white/60 text-sm max-w-lg mx-auto font-medium">
@@ -217,7 +217,7 @@ const MembershipPlanSection = () => {
                   </div>
                 </div>
                 
-                <ul className="space-y-3 flex-grow mt-2">
+                <ul className="space-y-3 grow mt-2">
                   {plan.features.map((feature, j) => (
                     <li key={j} className="text-xs text-white/70 flex items-start gap-2 leading-relaxed">
                       <span className="text-primary font-bold select-none">✓</span>

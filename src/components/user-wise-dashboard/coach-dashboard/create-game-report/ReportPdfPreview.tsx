@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -5,6 +7,7 @@ import RadarChart from "./RadarChart";
 import { IconDownload, IconCheck, IconLoader2 } from "@tabler/icons-react";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
+import Image from "next/image";
 
 interface ReportPdfPreviewProps {
   formData: any;
@@ -22,11 +25,8 @@ const ReportPdfPreview = ({
   formData,
   characteristics,
   stats,
-  goalMarkers,
-  pitchMarkers,
   onSave,
   onBack,
-  viewOnly,
   isPlayer
 }: ReportPdfPreviewProps) => {
   const previewRef = useRef<HTMLDivElement>(null);
@@ -95,22 +95,23 @@ const ReportPdfPreview = ({
       </div>
 
       {/* PDF Container (Styled exactly like the 3rd image, print-friendly white background) */}
-      <div className="border border-white/10 rounded-3xl overflow-hidden shadow-2xl bg-white p-1">
-        <div 
-          ref={previewRef} 
-          id="pdf-report-content" 
-          className="bg-white text-slate-800 p-10 font-sans relative overflow-hidden select-none w-full"
-          style={{ width: "794px", height: "1123px", minWidth: "794px", minHeight: "1123px" }} // Exact A4 aspect ratio in pixels (96 DPI)
-        >
+      <div className="w-full border border-white/10 rounded-3xl overflow-x-auto shadow-2xl bg-white/5 p-2 sm:p-6 mb-6 hide-scrollbar">
+        <div className="w-max mx-auto">
+          <div 
+            ref={previewRef} 
+            id="pdf-report-content" 
+            className="bg-white text-slate-800 p-10 font-sans relative overflow-hidden select-none"
+            style={{ width: "794px", height: "1123px", minWidth: "794px", minHeight: "1123px" }} // Exact A4 aspect ratio in pixels (96 DPI)
+          >
           {/* Watermark Logo */}
           <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none z-0">
-            <img src="/logo.png" alt="Logo Watermark" className="w-[500px] object-contain" />
+            <Image src="/logo.png" alt="Logo Watermark" className="w-125 object-contain" width={500} height={500}/>
           </div>
 
           {/* Header */}
           <div className="relative z-10 flex items-center justify-between border-b-4 border-slate-900 pb-4 mb-6">
             <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="K10 Logo" className="w-12 h-12 object-contain" />
+              <Image src="/logo.png" alt="K10 Logo" className="w-12 h-12 object-contain" width={12} height={12} />
               <div>
                 <div className="text-xs font-black tracking-widest text-slate-900 font-orbitron">K10 FOOTBALL</div>
                 <div className="text-[8px] text-slate-500 font-bold uppercase tracking-widest font-orbitron">ANALYSIS CV</div>
@@ -129,7 +130,7 @@ const ReportPdfPreview = ({
                 <div className="text-xs font-black tracking-widest text-slate-900 font-orbitron">K10 FOOTBALL</div>
                 <div className="text-[8px] text-slate-500 font-bold uppercase tracking-widest font-orbitron">ANALYSIS CV</div>
               </div>
-              <img src="/logo.png" alt="K10 Logo" className="w-12 h-12 object-contain" />
+              <Image src="/logo.png" alt="K10 Logo" className="w-12 h-12 object-contain" width={12} height={12}/>
             </div>
           </div>
 
@@ -184,17 +185,19 @@ const ReportPdfPreview = ({
                     <div className="text-2xl font-black text-sky-600 font-orbitron italic leading-none">{overallRating}</div>
                     <div className="text-[8px] font-bold text-sky-500 uppercase font-orbitron leading-none mt-0.5">{formData.position.slice(0,3)}</div>
                   </div>
-                  <img src="/logo.png" alt="Club Logo" className="w-5 h-5 object-contain" />
+                  <Image src="/logo.png" alt="Club Logo" className="w-5 h-5 object-contain" width={50} height={50} />
                 </div>
                 {/* Player image in FUT Card */}
                 <div className="w-24 h-28 overflow-hidden relative mt-1 flex items-end justify-center">
-                  <img 
+                  <Image 
                     src={isGK ? "/mini__GP15525.webp" : "/sergio-ramos.png"} 
                     alt="Player Card Image" 
                     className="h-full object-contain"
                     onError={(e) => {
                       e.currentTarget.src = isGK ? "/pngegg.png" : "/ronaldo.png";
                     }}
+                    width={50}
+                    height={50}
                   />
                 </div>
                 {/* FUT card footer */}
@@ -296,7 +299,7 @@ const ReportPdfPreview = ({
           {/* Bottom section (Radar, Overall, Logos) */}
           <div className="relative z-10 flex items-center justify-between border-t-2 border-slate-200 pt-6 mt-6">
             {/* Radar Chart */}
-            <div className="w-[180px]">
+            <div className="w-45">
               <RadarChart 
                 stats={radarStats} 
                 size={140} 
@@ -313,8 +316,8 @@ const ReportPdfPreview = ({
             </div>
 
             {/* Logo and tag */}
-            <div className="flex flex-col items-center gap-1.5 w-[180px]">
-              <img src="/logo.png" alt="K10 Logo" className="w-10 h-10 object-contain" />
+            <div className="flex flex-col items-center gap-1.5 w-45">
+              <Image src="/logo.png" alt="K10 Logo" className="w-10 h-10 object-contain" width={10} height={10}/>
               <div className="text-center leading-none">
                 <div className="text-[10px] font-black tracking-widest text-slate-900 font-orbitron">K10 FOOTBALL</div>
                 <div className="text-[7px] text-slate-500 font-bold uppercase tracking-widest font-orbitron">ANALYSIS CV</div>
@@ -323,21 +326,22 @@ const ReportPdfPreview = ({
           </div>
         </div>
       </div>
+      </div>
 
       {/* Buttons */}
-      <div className="flex gap-4">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
         <Button 
           variant="outline" 
           onClick={onBack}
           disabled={downloading}
-          className="flex-1 border-white/10 bg-transparent text-white h-14 rounded-xl font-bold uppercase tracking-widest hover:bg-white/5 transition-colors font-orbitron"
+          className="flex-1 border-white/10 bg-transparent text-white h-14 rounded-xl text-sm font-bold uppercase tracking-widest hover:bg-white/5 transition-colors font-orbitron"
         >
           Back
         </Button>
         <Button 
           onClick={handleDownloadPdf}
           disabled={downloading}
-          className="flex-1 bg-sky-500 hover:bg-sky-400 text-white h-14 rounded-xl font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(14,165,233,0.2)] flex items-center justify-center gap-2 font-orbitron"
+          className="flex-1 bg-sky-500 hover:bg-sky-400 text-white h-14 rounded-xl text-sm font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(14,165,233,0.2)] flex items-center justify-center gap-2 font-orbitron"
         >
           {downloading ? (
             <>
@@ -354,7 +358,7 @@ const ReportPdfPreview = ({
         <Button 
           onClick={() => onSave(overallRating)}
           disabled={downloading}
-          className="flex-1 bg-[#00FF62] hover:bg-[#00D150] text-black h-14 rounded-xl font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(0,255,98,0.2)] flex items-center justify-center gap-2 font-orbitron"
+          className="flex-1 bg-[#00FF62] hover:bg-[#00D150] text-black h-14 rounded-xl text-sm font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(0,255,98,0.2)] flex items-center justify-center gap-2 font-orbitron"
         >
           <IconCheck size={18} />
           {isPlayer ? "Proceed to Payment" : "Save & Finish"}

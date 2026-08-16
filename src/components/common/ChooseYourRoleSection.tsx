@@ -35,7 +35,7 @@ const ChooseYourRoleSection = () => {
     },
   ];
   return (
-    <section className="bg-black py-12  -28 px-4 sm:px-6 lg:px-8">
+    <section className="bg-black py-12 sm:py-20 lg:py-28 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto space-y-12">
         <div className="text-center space-y-4">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white font-heading">
@@ -52,18 +52,18 @@ const ChooseYourRoleSection = () => {
           {roles.map((role, i) => (
             <div
               key={i}
-              className={`flex flex-col cursor-pointer hover:scale-110 duration-300 items-center text-center mt-20 col-span-4 ${
+              className={`flex flex-col cursor-pointer hover:scale-110 duration-300 items-center text-center mt-20 col-span-1 sm:col-span-1 lg:col-span-4 ${
                  i === 3
                   ? "lg:col-start-3"
                   : i===4
-                    ? "lg:col-span-4"
+                    ? ""
                     : ""
               }`}
             >
               {/* Green Rectangle Background */}
-              <div className="w-full h-48 sm:h-56 lg:h-64 bg-gradient-to-t from-[#001E0B] to-[#017A2F] rounded-lg mb-4 flex relative">
+              <div className="w-full h-48 sm:h-56 lg:h-64 bg-linear-to-t from-[#001E0B] to-[#017A2F] rounded-lg mb-4 flex relative">
                 {/* Circular Image with Black Border */}
-                <div className="relative  w-32 h-32  mx-auto -mt-16 sm:-mt-20 sm:w-48 sm:h-48 rounded-full border-4 border-black overflow-hidden flex-shrink-0">
+                <div className="relative  w-32 h-32  mx-auto -mt-16 sm:-mt-20 sm:w-48 sm:h-48 rounded-full border-4 border-black overflow-hidden shrink-0">
                   <Image
                     src={role.image}
                     alt={role.title}

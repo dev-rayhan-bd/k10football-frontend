@@ -63,7 +63,7 @@ const StripePaymentModal = ({ onPay, onBack }: StripePaymentModalProps) => {
         <div className="w-20 h-20 rounded-full bg-[#00FF62]/10 border border-[#00FF62]/20 flex items-center justify-center mx-auto mb-6">
           <IconTrophy size={40} className="text-[#00FF62]" />
         </div>
-        <h1 className="text-5xl font-black text-white uppercase italic tracking-tighter font-orbitron">Complete Payment</h1>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white uppercase italic tracking-tighter font-orbitron">Complete Payment</h1>
         <p className="text-gray-400 italic">Secure professional scouting analysis for $6.99</p>
       </div>
 
@@ -81,7 +81,7 @@ const StripePaymentModal = ({ onPay, onBack }: StripePaymentModalProps) => {
               <div className="space-y-4">
                 <Input 
                   placeholder="Card Number (16 digits)" 
-                  className="bg-transparent border-none text-xl font-bold tracking-[0.2em] p-0 focus-visible:ring-0 placeholder:text-gray-700 text-white" 
+                  className="bg-transparent border-none text-base sm:text-xl font-bold tracking-widest sm:tracking-[0.2em] p-0 focus-visible:ring-0 placeholder:text-gray-700 text-white" 
                   value={paymentData.card}
                   onChange={(e) => handleCardChange(e.target.value)}
                 />
@@ -121,7 +121,7 @@ const StripePaymentModal = ({ onPay, onBack }: StripePaymentModalProps) => {
 
         <div className="flex flex-col gap-4">
           <Button 
-            className="w-full h-16 rounded-2xl bg-[#00FF62] hover:bg-[#00D150] text-black font-black uppercase tracking-widest text-lg transition-all shadow-[0_0_30px_rgba(0,255,98,0.2)] disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed flex items-center justify-center gap-2 font-orbitron"
+            className="w-full h-14 sm:h-16 rounded-2xl bg-[#00FF62] hover:bg-[#00D150] text-black font-black uppercase tracking-wider sm:tracking-widest text-xs sm:text-sm md:text-lg transition-all shadow-[0_0_30px_rgba(0,255,98,0.2)] disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed flex items-center justify-center gap-2 font-orbitron text-center leading-tight px-2"
             onClick={handleFinalSubmit}
             disabled={!isValid || loading}
           >

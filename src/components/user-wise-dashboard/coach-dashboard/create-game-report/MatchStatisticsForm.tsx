@@ -215,17 +215,16 @@ const MatchStatisticsForm = ({
         </div>
         <div 
           onClick={handleGoalClick}
-          className="aspect-video relative cursor-crosshair overflow-hidden group select-none bg-black"
+          className="aspect-4/3 landscape:aspect-21/9 lg:aspect-video relative cursor-crosshair overflow-hidden group select-none bg-black"
         >
           <Image
             src="/goal-bar.png" 
             alt="Goal" 
             draggable={false}
-            className="w-full h-full object-cover opacity-80 group-hover:opacity-90 transition-opacity pointer-events-none select-none" 
+            className="w-full h-full object-cover transition-opacity pointer-events-none select-none" 
             width={500}
             height={500}
           />
-          <div className="absolute inset-0 bg-black/10 pointer-events-none" />
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-40 transition-opacity pointer-events-none">
             <span className="text-white text-xs font-semibold uppercase tracking-widest font-orbitron">Click Goal to Place Marker</span>
           </div>
@@ -259,17 +258,16 @@ const MatchStatisticsForm = ({
         </div>
         <div 
           onClick={handlePitchClick}
-          className="aspect-video relative cursor-crosshair overflow-hidden group select-none bg-[#092b15]"
+          className="aspect-4/3 landscape:aspect-21/9 lg:aspect-video relative cursor-crosshair overflow-hidden group select-none bg-[#092b15]"
         >
           <Image
-            src="/FootballPitch.png" 
+            src="/field.png" 
             alt="Football Pitch" 
             draggable={false}
-            className="w-full h-full object-cover opacity-80 group-hover:opacity-90 transition-opacity pointer-events-none select-none" 
+            className="w-full h-full object-cover transition-opacity pointer-events-none select-none" 
             width={500}
             height={500}
           />
-          <div className="absolute inset-0 bg-black/10 pointer-events-none" />
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-40 transition-opacity pointer-events-none">
             <span className="text-white text-xs font-semibold uppercase tracking-widest font-orbitron">Click Pitch to Place Marker</span>
           </div>
@@ -284,7 +282,7 @@ const MatchStatisticsForm = ({
             >
               <div className="flex items-center">
                 <span className="text-xl select-none leading-none">⚽</span>
-                <IconArrowUpRight size={24} className="text-[#00FF62] -ml-2 drop-shadow-[0_2px_2px_rgba(0,0,0,1)]" stroke={3} />
+                <IconArrowUpRight size={24} className="text-black -ml-2 drop-shadow-[0_2px_2px_rgba(255,255,255,0.5)]" stroke={3} />
               </div>
             </div>
           ))}
@@ -295,8 +293,8 @@ const MatchStatisticsForm = ({
   return (
     <div className="flex flex-col gap-8 pb-10 animate-in fade-in duration-500">
       <div>
-        <h1 className="text-5xl font-black text-white font-orbitron uppercase tracking-tight">Create Game Reports</h1>
-        <p className="text-white/60 font-medium mt-2 text-lg">Create Professional Football Player Game Reports</p>
+        <h1 className="text-4xl md:text-5xl font-black text-white font-orbitron uppercase tracking-tight wrap-break-word">Create Game Reports</h1>
+        <p className="text-white/60 font-medium mt-2 text-base md:text-lg">Create Professional Football Player Game Reports</p>
       </div>
 
       <div className="bg-[#0A0A0A] rounded-[40px] border border-white/10 p-8 md:p-12 flex flex-col gap-10 relative overflow-hidden shadow-2xl">
@@ -307,28 +305,28 @@ const MatchStatisticsForm = ({
         </div>
 
         {/* ---------------- MOBILE LAYOUT: SWIPER ---------------- */}
-        <div className="lg:hidden flex overflow-x-auto snap-x snap-mandatory w-[calc(100%+4rem)] -mx-8 px-4 scroll-smooth hide-scrollbar pb-6 gap-6">
+        <div className="lg:hidden flex overflow-x-auto snap-x snap-mandatory w-auto -mx-8 px-8 scroll-smooth hide-scrollbar pb-6 gap-6">
           {/* Page 1: First 12 */}
           <div className="min-w-[85vw] snap-center shrink-0">
             <h3 className="text-white/40 text-center font-orbitron text-xs font-bold uppercase tracking-widest mb-4">Page 1 (Swipe ⬅️)</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 landscape:grid-cols-6 gap-2 sm:gap-4">
               {renderLeftStats("left")}
             </div>
           </div>
           {/* Page 2: Next 12 */}
           <div className="min-w-[85vw] snap-center shrink-0">
              <h3 className="text-white/40 text-center font-orbitron text-xs font-bold uppercase tracking-widest mb-4">Page 2 (Swipe ⬅️)</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 landscape:grid-cols-6 gap-2 sm:gap-4">
               {renderRightStats("left")}
             </div>
           </div>
           {/* Page 3: Goalpost Diagram */}
-          <div className="min-w-[85vw] snap-center shrink-0">
+          <div className="min-w-[85vw] landscape:min-w-[95vw] lg:min-w-0 snap-center shrink-0">
              <h3 className="text-white/40 text-center font-orbitron text-xs font-bold uppercase tracking-widest mb-4">Page 3 (Swipe ⬅️)</h3>
              {renderGoalDiagram()}
           </div>
           {/* Page 4: Pitch Diagram */}
-          <div className="min-w-[85vw] snap-center shrink-0 pr-4">
+          <div className="min-w-[85vw] landscape:min-w-[95vw] lg:min-w-0 snap-center shrink-0 pr-4">
              <h3 className="text-white/40 text-center font-orbitron text-xs font-bold uppercase tracking-widest mb-4">Page 4</h3>
              {renderPitchDiagram()}
           </div>
@@ -383,17 +381,17 @@ const MatchStatisticsForm = ({
         {/* -------------------------------------------------------- */}
       </div>
 
-      <div className="flex gap-6 mt-4">
+      <div className="flex gap-3 sm:gap-6 mt-4">
         <Button 
           variant="outline" 
           onClick={onCancel}
-          className="flex-1 bg-transparent hover:bg-white/5 text-white border border-white/10 h-16 rounded-xl font-black uppercase tracking-[0.2em] transition-all font-orbitron italic"
+          className="flex-1 bg-transparent hover:bg-white/5 text-white border border-white/10 h-14 sm:h-16 rounded-xl text-xs sm:text-sm font-black uppercase tracking-widest sm:tracking-[0.2em] transition-all font-orbitron italic"
         >
           Cancel
         </Button>
         <Button 
           onClick={onSubmit}
-          className="flex-1 bg-[#00FF62] hover:bg-[#00D150] text-black h-16 rounded-xl font-black uppercase tracking-[0.2em] transition-all shadow-[0_0_30px_rgba(0,255,98,0.2)] font-orbitron italic"
+          className="flex-1 bg-[#00FF62] hover:bg-[#00D150] text-black h-14 sm:h-16 rounded-xl text-xs sm:text-sm font-black uppercase tracking-widest sm:tracking-[0.2em] transition-all shadow-[0_0_30px_rgba(0,255,98,0.2)] font-orbitron italic"
         >
           Submit Report
         </Button>

@@ -1,4 +1,3 @@
-import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import image1 from "@/assets/home/keyFeatureImage1.png";
 import image2 from "@/assets/home/key_feature_grid_1.png";
@@ -21,7 +20,7 @@ const KeyFeatureSection = () => {
 
         {/* Feature 1 - Performance Analytics */}
         <div className="relative">
-          <div className="relative h-[600px] sm:h-[400px] lg:h-[500px] bg-[#1a1a1a] rounded-lg border-transparent overflow-hidden">
+          <div className="relative h-150 sm:h-100 lg:h-125 bg-[#1a1a1a] rounded-lg border-transparent overflow-hidden">
             <Image
               src={image1}
               alt="Performance analytics"
@@ -29,7 +28,7 @@ const KeyFeatureSection = () => {
               className="object-cover"
             />
           </div>
-          <div className="absolute bottom-0 left-0 w-full flex items-center justify-center flex-col bg-black/50 p-8 backdrop-blur-xs">
+          <div className="absolute bottom-0 left-0 w-full flex items-center justify-center flex-col bg-black/50 p-4 sm:p-8 backdrop-blur-xs">
             <h4 className="text-3xl mb-5 font-bold text-white text-center">
               Performance Analytics
             </h4>
@@ -46,7 +45,7 @@ const KeyFeatureSection = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Feature 1 - Performance Analytics */}
           <div className="relative">
-            <div className="relative h-[400px] sm:h-[400px] lg:h-[500px] bg-[#1a1a1a] rounded-lg border-transparent overflow-hidden">
+            <div className="relative h-100 sm:h-100 lg:h-125 bg-[#1a1a1a] rounded-lg border-transparent overflow-hidden">
               <Image
                 src={image2}
                 alt="Smart Search"
@@ -54,7 +53,7 @@ const KeyFeatureSection = () => {
                 className="object-cover"
               />
             </div>
-            <div className="absolute bottom-0 left-0 w-full flex items-center justify-center flex-col bg-black/50 p-8 backdrop-blur-xs">
+            <div className="absolute bottom-0 left-0 w-full flex items-center justify-center flex-col bg-black/50 p-4 sm:p-8 backdrop-blur-xs">
               <h4 className="text-3xl mb-5 font-bold text-white  ">
                 Smart Search
               </h4>
@@ -67,7 +66,7 @@ const KeyFeatureSection = () => {
           </div>
           {/* Feature 1 - Performance Analytics */}
           <div className="relative">
-            <div className="relative h-[400px] sm:h-[400px] lg:h-[500px] bg-[#1a1a1a] rounded-lg border-transparent overflow-hidden">
+            <div className="relative h-100 sm:h-100 lg:h-125 bg-[#1a1a1a] rounded-lg border-transparent overflow-hidden">
               <Image
                 src={image3}
                 alt="Role-Based Access"
@@ -75,7 +74,7 @@ const KeyFeatureSection = () => {
                 className="object-cover"
               />
             </div>
-            <div className="absolute bottom-0 left-0 w-full flex items-center justify-center flex-col bg-black/50 p-8 backdrop-blur-xs">
+            <div className="absolute bottom-0 left-0 w-full flex items-center justify-center flex-col bg-black/50 p-4 sm:p-8 backdrop-blur-xs">
               <h4 className="text-3xl mb-5 font-bold text-white ">
                 Role-Based Access
               </h4>
@@ -88,7 +87,7 @@ const KeyFeatureSection = () => {
           </div>
           {/* Feature 1 - Performance Analytics */}
           <div className="relative">
-            <div className="relative h-[400px] sm:h-[400px] lg:h-[500px] bg-[#1a1a1a] rounded-lg border-transparent overflow-hidden">
+            <div className="relative h-100 sm:h-100 lg:h-125 bg-[#1a1a1a] rounded-lg border-transparent overflow-hidden">
               <Image
                 src={image4}
                 alt="Verified Profiles"
@@ -96,7 +95,7 @@ const KeyFeatureSection = () => {
                 className="object-cover"
               />
             </div>
-            <div className="absolute bottom-0 left-0 w-full flex items-center justify-center flex-col bg-black/50 p-8 backdrop-blur-xs">
+            <div className="absolute bottom-0 left-0 w-full flex items-center justify-center flex-col bg-black/50 p-4 sm:p-8 backdrop-blur-xs">
               <h4 className="text-3xl mb-5 font-bold text-white ">
                 Verified Profiles
               </h4>
