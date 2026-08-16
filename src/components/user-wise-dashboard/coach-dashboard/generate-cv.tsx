@@ -2,14 +2,6 @@
 import React, { useState, useEffect } from "react";
 import {
   IconDownload,
-  IconCircleCheck,
-  IconPencil,
-  IconUpload,
-  IconCalendar,
-  IconChevronLeft,
-  IconChevronRight,
-  IconPlus,
-  IconMapPin,
   IconClock,
   IconPhone,
   IconMail,

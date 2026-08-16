@@ -283,85 +283,85 @@ return (
         >
           <div>
             {/* Header Row */}
-            <div className="mb-6 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 text-lg text-gray-400">
-                  <CalendarIcon className="h-6 w-6 text-primary" />
-                  <span className="font-medium">{match.date}</span>
+            <div className="mb-6 flex flex-wrap items-start sm:items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+                <div className="flex items-center gap-1 sm:gap-2 text-sm sm:text-lg text-gray-400">
+                  <CalendarIcon className="h-4 w-4 sm:h-6 sm:w-6 text-primary" />
+                  <span className="font-medium whitespace-nowrap">{match.date}</span>
                 </div>
-                <Badge className="bg-gray-800 text-white hover:bg-gray-700 text-base py-1.5 px-4 rounded-md font-bold uppercase tracking-wider">
+                <Badge className="bg-gray-800 text-white hover:bg-gray-700 text-xs sm:text-base py-1 px-2 sm:py-1.5 sm:px-4 rounded-md font-bold uppercase tracking-wider text-center max-w-[120px] sm:max-w-none truncate block">
                   {match.league}
                 </Badge>
               </div>
-              <div className="text-right flex flex-col items-end gap-1">
-                <Badge className="bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] uppercase font-black tracking-widest py-0.5 px-2">VERIFIED</Badge>
-                <div className="text-3xl font-black text-[#00FF62]">{Number(match.rating).toFixed(1)}</div>
-                <div className="text-xs uppercase tracking-widest text-gray-500 font-black">Rating</div>
+              <div className="text-right flex flex-col items-end gap-1 shrink-0">
+                <Badge className="bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[8px] sm:text-[10px] uppercase font-black tracking-widest py-0.5 px-1 sm:px-2">VERIFIED</Badge>
+                <div className="text-2xl sm:text-3xl font-black text-[#00FF62]">{Number(match.rating).toFixed(1)}</div>
+                <div className="text-[10px] sm:text-xs uppercase tracking-widest text-gray-500 font-black">Rating</div>
               </div>
             </div>
 
             {/* Teams and Score */}
-            <div className="mb-8 flex items-center justify-between gap-4">
-              <div className="flex-1 text-center">
-                <div className="text-xl font-black uppercase tracking-tight text-white mb-1">{match.team1}</div>
-                <div className="h-1 w-12 bg-primary/30 mx-auto rounded-full"></div>
+            <div className="mb-6 sm:mb-8 flex items-center justify-between gap-2 sm:gap-4">
+              <div className="flex-1 text-center min-w-0">
+                <div className="text-sm sm:text-xl font-black uppercase tracking-tight text-white mb-1 truncate">{match.team1}</div>
+                <div className="h-1 w-8 sm:w-12 bg-primary/30 mx-auto rounded-full"></div>
               </div>
-              <div className="shrink-0 bg-[#111111] border border-white/5 p-4 px-8 rounded-xl shadow-inner">
-                <div className="text-4xl font-black text-white tracking-tighter">{match.score}</div>
+              <div className="shrink-0 bg-[#111111] border border-white/5 p-2 sm:p-4 px-4 sm:px-8 rounded-xl shadow-inner">
+                <div className="text-2xl sm:text-4xl font-black text-white tracking-tighter">{match.score}</div>
               </div>
-              <div className="flex-1 text-center">
-                <div className="text-xl font-black uppercase tracking-tight text-white mb-1">{match.team2}</div>
-                <Badge className={cn(getResultColor(match.result), "font-black text-sm uppercase px-3")}>
+              <div className="flex-1 text-center min-w-0">
+                <div className="text-sm sm:text-xl font-black uppercase tracking-tight text-white mb-1 truncate">{match.team2}</div>
+                <Badge className={cn(getResultColor(match.result), "font-black text-[10px] sm:text-sm uppercase px-2 sm:px-3")}>
                   {getResultText(match.result)}
                 </Badge>
               </div>
             </div>
 
             {/* Stadium */}
-            <div className="flex items-center gap-3 text-lg text-gray-400 mb-6 bg-white/5 p-3 rounded-lg">
-              <MapPinIcon className="h-6 w-6 text-primary" />
-              <span className="font-medium">{match.stadium}</span>
+            <div className="flex items-center gap-2 sm:gap-3 text-sm sm:text-lg text-gray-400 mb-4 sm:mb-6 bg-white/5 p-2 sm:p-3 rounded-lg truncate">
+              <MapPinIcon className="h-4 w-4 sm:h-6 sm:w-6 text-primary shrink-0" />
+              <span className="font-medium truncate">{match.stadium}</span>
             </div>
 
             {/* Stats Grid */}
-            <div className="mb-6 grid grid-cols-4 gap-4 border-t border-b border-border/50 py-6 mt-4">
+            <div className="mb-4 sm:mb-6 grid grid-cols-4 gap-2 sm:gap-4 border-t border-b border-border/50 py-4 sm:py-6 mt-4">
               <div className="text-center">
-                <div className="text-3xl font-black text-white mb-1">{match.goals}</div>
-                <div className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Goals</div>
+                <div className="text-xl sm:text-3xl font-black text-white mb-1">{match.goals}</div>
+                <div className="text-[8px] sm:text-[10px] text-gray-500 uppercase font-black tracking-widest truncate">Goals</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-black text-white mb-1">{match.assists}</div>
-                <div className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Assists</div>
+                <div className="text-xl sm:text-3xl font-black text-white mb-1">{match.assists}</div>
+                <div className="text-[8px] sm:text-[10px] text-gray-500 uppercase font-black tracking-widest truncate">Assists</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-black text-white mb-1">{match.passes}</div>
-                <div className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Passes</div>
+                <div className="text-xl sm:text-3xl font-black text-white mb-1">{match.passes}</div>
+                <div className="text-[8px] sm:text-[10px] text-gray-500 uppercase font-black tracking-widest truncate">Passes</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-black text-white mb-1">{match.timePlayedMinutes}</div>
-                <div className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Minutes</div>
+                <div className="text-xl sm:text-3xl font-black text-white mb-1">{match.timePlayedMinutes}</div>
+                <div className="text-[8px] sm:text-[10px] text-gray-500 uppercase font-black tracking-widest truncate">Minutes</div>
               </div>
             </div>
           </div>
 
           {/* Cards and Accuracy + Download Button */}
           <div className="space-y-4 border-t border-white/5 pt-4">
-            <div className="flex items-center justify-between px-2">
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2">
-                  <div className="h-8 w-5 bg-[#FFCC00] rounded-sm shadow-md" />
-                  <span className="text-xl font-black text-white">{match.yellowCards}</span>
+            <div className="flex items-center justify-between px-2 gap-4">
+              <div className="flex items-center gap-3 sm:gap-6">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="h-6 w-4 sm:h-8 sm:w-5 bg-[#FFCC00] rounded-sm shadow-md" />
+                  <span className="text-base sm:text-xl font-black text-white">{match.yellowCards}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-8 w-5 bg-[#DC143C] rounded-sm shadow-md" />
-                  <span className="text-xl font-black text-white">{match.redCards}</span>
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="h-6 w-4 sm:h-8 sm:w-5 bg-[#DC143C] rounded-sm shadow-md" />
+                  <span className="text-base sm:text-xl font-black text-white">{match.redCards}</span>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-2xl font-black text-white">
+                <div className="text-xl sm:text-2xl font-black text-white">
                   {match.passAccuracy}%
                 </div>
-                <div className="text-[10px] uppercase tracking-widest text-gray-500 font-black">Accuracy</div>
+                <div className="text-[8px] sm:text-[10px] uppercase tracking-widest text-gray-500 font-black">Accuracy</div>
               </div>
             </div>
 

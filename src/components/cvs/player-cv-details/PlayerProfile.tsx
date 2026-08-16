@@ -469,15 +469,15 @@ return (
           {attrData.map((attr, idx) => (
             <div
               key={idx}
-              className="flex items-center gap-6 p-5 bg-[#1a1a1a] border border-border rounded-lg hover:bg-[#222] transition-colors"
+              className="flex items-center gap-2 sm:gap-6 p-3 sm:p-5 bg-[#1a1a1a] border border-border rounded-lg hover:bg-[#222] transition-colors"
             >
               {/* Attribute Name */}
-              <div className="flex-1 min-w-0">
-                <p className="text-base font-bold text-gray-200 uppercase tracking-wide">{attr.name}</p>
+              <div className="flex-1 sm:flex-[1.5] min-w-0">
+                <p className="text-[10px] sm:text-base font-bold text-gray-200 uppercase tracking-wide truncate">{attr.name}</p>
               </div>
 
               {/* Progress Bar / Slider */}
-              <div className="flex-1 min-w-0 max-w-xs transition-all duration-300">
+              <div className="hidden sm:block flex-[2] min-w-0 max-w-xs transition-all duration-300">
                 {editable ? (
                   <div className="relative flex items-center h-2 group">
                     <input
@@ -522,23 +522,23 @@ return (
               </div>
 
               {/* Score */}
-              <div className="shrink-0 text-right min-w-20 transition-all duration-300">
+              <div className="shrink-0 text-right min-w-8 sm:min-w-20 transition-all duration-300">
                 <CMSField
                   value={attr.score}
                   onUpdate={(val) => handleUpdate(attr.name, parseInt(String(val)))}
                   canEdit={editable}
                   type="number"
                   editTrigger="doubleClick"
-                  className="text-xl font-black justify-end uppercase"
+                  className="text-base sm:text-xl font-black justify-end uppercase"
                   style={{ color: getHexColor(attr.score) }}
-                  inputClassName="text-right h-8 w-20 text-lg bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-md uppercase"
+                  inputClassName="text-right h-6 w-12 sm:h-8 sm:w-20 text-sm sm:text-lg bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-1 sm:px-2 rounded-md uppercase"
                 />
               </div>
 
               {/* Status Badge */}
-              <div className="w-32">
+              <div className="w-[70px] sm:w-32 shrink-0">
                 <Badge
-                  className={`${getBadgeVariant(attr.status)} border text-sm font-black justify-center w-full py-1 uppercase tracking-tighter`}
+                  className={`${getBadgeVariant(attr.status)} border text-[8px] sm:text-sm font-black justify-center w-full py-0.5 sm:py-1 uppercase tracking-tighter`}
                 >
                   {attr.status}
                 </Badge>

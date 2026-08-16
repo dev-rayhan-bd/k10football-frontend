@@ -1,24 +1,14 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 import React, { useState, useEffect } from "react";
 import {
   IconDownload,
-  IconCircleCheck,
-  IconPencil,
-  IconUpload,
-  IconCalendar,
-  IconChevronLeft,
-  IconChevronRight,
-  IconPlus,
-  IconMapPin,
   IconClock,
   IconPhone,
   IconMail,
   IconShield,
   IconShare,
-  IconTrophy
 } from "@tabler/icons-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import FullEditablePage from "@/components/cvs/player-cv-details/FullEditablePage";
 import { usePlayer } from "@/lib/hooks/usePlayer";
@@ -26,24 +16,25 @@ import { usePlayerStats } from "@/components/cvs/player-cv-details/FullEditableP
 import { getFullWithShortForm } from "@/lib/utils";
 import { FileText } from 'lucide-react';
 import { useAppSelector } from "@/lib/hooks/reduxHooks";
+import Image from "next/image";
 
-const CareerItem = ({ logo, name, role, years, type }: { logo: string; name: string; role: string; years: string; type: string }) => (
-  <div className="bg-black/40 border border-white/10 rounded-2xl p-4 flex flex-col gap-3 group hover:border-white/20 transition-all">
-    <div className="flex items-center gap-4">
-      <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden">
-        <img src={logo} alt={name} className="w-6 h-6 object-contain" />
-      </div>
-      <div className="min-w-0">
-        <h4 className="text-sm font-bold text-white truncate">{name}</h4>
-        <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{role}</p>
-      </div>
-    </div>
-    <div className="flex justify-between items-center">
-      <span className="text-[10px] font-bold text-white/40">{years}</span>
-      <span className="text-[10px] font-black text-[#E31B23] uppercase tracking-widest">{type}</span>
-    </div>
-  </div>
-);
+// const CareerItem = ({ logo, name, role, years, type }: { logo: string; name: string; role: string; years: string; type: string }) => (
+//   <div className="bg-black/40 border border-white/10 rounded-2xl p-4 flex flex-col gap-3 group hover:border-white/20 transition-all">
+//     <div className="flex items-center gap-4">
+//       <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden">
+//         <img src={logo} alt={name} className="w-6 h-6 object-contain" />
+//       </div>
+//       <div className="min-w-0">
+//         <h4 className="text-sm font-bold text-white truncate">{name}</h4>
+//         <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{role}</p>
+//       </div>
+//     </div>
+//     <div className="flex justify-between items-center">
+//       <span className="text-[10px] font-bold text-white/40">{years}</span>
+//       <span className="text-[10px] font-black text-[#E31B23] uppercase tracking-widest">{type}</span>
+//     </div>
+//   </div>
+// );
 
 const GenerateCv = () => {
   const { playerData } = usePlayer();
@@ -314,10 +305,12 @@ const GenerateCv = () => {
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
             <div className="absolute right-0 bottom-0 h-full w-[70%] md:w-[55%] flex items-end justify-end pointer-events-none opacity-60 md:opacity-100">
-              <img
+              <Image
                 src={typeof playerData.playerImage === 'string' ? playerData.playerImage : (playerData.playerImage?.src || "/ronaldo.png")}
                 alt="Player"
                 className="h-[90%] md:h-[105%] object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.9)]"
+                height={500}
+                width={500}
               />
             </div>
 
@@ -336,14 +329,14 @@ const GenerateCv = () => {
                       <span className="text-white">{playerData.age} Years Old</span>
                       <span className="text-white/20 hidden md:inline">/</span>
                       <span className="flex items-center gap-3 text-white">
-                        <img src={`https://flagcdn.com/br.svg`} alt={playerData.birthCountry} className="w-4 h-3 md:w-5 md:h-3.5 object-cover rounded-sm shadow-sm" /> {playerData.birthCountry}
+                        <Image width={16} height={16} src={`https://flagcdn.com/br.svg`} alt={playerData.birthCountry} className="w-4 h-3 md:w-5 md:h-3.5 object-cover rounded-sm shadow-sm" /> {playerData.birthCountry}
                       </span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 md:gap-y-6 pt-4 md:pt-8 max-w-2xl p-4 md:p-6 rounded-2xl">
+              <div className="grid grid-cols-1  md:grid-cols-2 gap-x-12 gap-y-4 md:gap-y-6 pt-4 md:pt-8 max-w-2xl p-4 md:p-6 rounded-2xl">
                 <div className="flex items-center gap-4">
                   <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-white/40"><IconShield size={20} /></div>
                   <div>
@@ -369,7 +362,7 @@ const GenerateCv = () => {
                   <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-white/40"><IconMail size={20} /></div>
                   <div>
                     <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">Email</p>
-                    <p className="text-sm font-bold text-white truncate max-w-[180px]">{playerData.email}</p>
+                    <p className="text-sm font-bold text-white truncate max-w-45">{playerData.email}</p>
                   </div>
                 </div>
               </div>
@@ -378,7 +371,7 @@ const GenerateCv = () => {
         </section>
 
         {/* Top Squares - As requested by client doc */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-full">
           {/* Completion Status */}
           <div className="bg-[#111111] rounded-3xl border border-white/10 p-8 flex flex-col gap-6">
             <h3 className="text-sm font-black text-white font-orbitron uppercase tracking-widest">Completion Status</h3>
@@ -440,7 +433,8 @@ const GenerateCv = () => {
         </div>
         <FullEditablePage editable={true} />
       </div>
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @media print {
           @page {
             size: A4;

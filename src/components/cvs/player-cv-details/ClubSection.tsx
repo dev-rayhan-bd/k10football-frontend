@@ -143,7 +143,7 @@ const ClubSection = () => {
                   value={club.name}
                   onUpdate={(val) => updateClub(club.id, "name", val)}
                   canEdit={true}
-                  className="text-lg font-semibold text-foreground truncate uppercase"
+                  className="text-lg font-semibold text-foreground break-words uppercase leading-tight pr-6"
                 />
                 <div className="flex items-center gap-1 text-sm text-gray-400 mt-1">
                   <CMSField
