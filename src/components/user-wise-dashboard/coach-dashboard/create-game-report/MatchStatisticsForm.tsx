@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import Image from "next/image";
+import { IconArrowUpRight } from "@tabler/icons-react";
 
 interface StatInputProps {
   label: string;
@@ -199,9 +200,7 @@ const MatchStatisticsForm = ({
     <StatInput key={s.key} label={s.label} value={stats[s.key] || 0} onChange={(val) => handleStatChange(s.key, val)} colorClass={s.color} align={align} />
   ));
 
-  const renderDiagrams = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
-      {/* Goalpost diagram */}
+  const renderGoalDiagram = () => (
       <div className="bg-[#121212]/90 border border-white/10 rounded-3xl overflow-hidden shadow-xl">
         <div className="bg-white/5 py-3.5 px-6 text-center border-b border-white/10 flex justify-between items-center">
           <span className="text-[10px] font-black text-white uppercase tracking-[0.3em] font-orbitron">
@@ -243,8 +242,9 @@ const MatchStatisticsForm = ({
           ))}
         </div>
       </div>
+  );
 
-      {/* Football Pitch diagram */}
+  const renderPitchDiagram = () => (
       <div className="bg-[#121212]/90 border border-white/10 rounded-3xl overflow-hidden shadow-xl">
         <div className="bg-white/5 py-3.5 px-6 text-center border-b border-white/10 flex justify-between items-center">
           <span className="text-[10px] font-black text-white uppercase tracking-[0.3em] font-orbitron">
@@ -274,31 +274,22 @@ const MatchStatisticsForm = ({
             <span className="text-white text-xs font-semibold uppercase tracking-widest font-orbitron">Click Pitch to Place Marker</span>
           </div>
 
-          <div 
-            className={cn(
-              "absolute -translate-y-1/2 w-16 h-16 bg-white/10 border border-white/40 rounded-full flex items-center justify-center backdrop-blur-sm pointer-events-none select-none shadow-xl",
-              isGK ? "left-[12%] -translate-x-1/2 top-1/2" : "left-1/2 -translate-x-1/2 top-1/2"
-            )}
-          >
-            <span className="text-[7px] font-black text-white text-center leading-none uppercase font-orbitron">
-              {isGK ? "Accurate\nSaves" : "Accurate\nAssist"}
-            </span>
-          </div>
-
           {pitchMarkers.map((line, idx) => (
             <div 
               key={idx} 
               onClick={(e) => removePitchMarker(idx, e)}
-              className="absolute w-8 h-8 -ml-4 -mt-4 flex items-center justify-center hover:scale-125 transition-all cursor-pointer animate-in zoom-in duration-200 z-30 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+              className="absolute -ml-4 -mt-4 flex items-center justify-center hover:scale-125 transition-all cursor-pointer animate-in zoom-in duration-200 z-30 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
               style={{ left: `${line.x1}%`, top: `${line.y1}%` }}
               title="Click to remove"
             >
-              <span className="text-2xl select-none leading-none">⚽</span>
+              <div className="flex items-center">
+                <span className="text-xl select-none leading-none">⚽</span>
+                <IconArrowUpRight size={24} className="text-[#00FF62] -ml-2 drop-shadow-[0_2px_2px_rgba(0,0,0,1)]" stroke={3} />
+              </div>
             </div>
           ))}
         </div>
       </div>
-    </div>
   );
 
   return (
@@ -331,10 +322,15 @@ const MatchStatisticsForm = ({
               {renderRightStats("left")}
             </div>
           </div>
-          {/* Page 3: Diagrams */}
+          {/* Page 3: Goalpost Diagram */}
+          <div className="min-w-[85vw] snap-center shrink-0">
+             <h3 className="text-white/40 text-center font-orbitron text-xs font-bold uppercase tracking-widest mb-4">Page 3 (Swipe ⬅️)</h3>
+             {renderGoalDiagram()}
+          </div>
+          {/* Page 4: Pitch Diagram */}
           <div className="min-w-[85vw] snap-center shrink-0 pr-4">
-             <h3 className="text-white/40 text-center font-orbitron text-xs font-bold uppercase tracking-widest mb-4">Page 3</h3>
-             {renderDiagrams()}
+             <h3 className="text-white/40 text-center font-orbitron text-xs font-bold uppercase tracking-widest mb-4">Page 4</h3>
+             {renderPitchDiagram()}
           </div>
         </div>
         {/* -------------------------------------------------------- */}
@@ -378,7 +374,10 @@ const MatchStatisticsForm = ({
           </div>
 
           <div className="mt-12">
-            {renderDiagrams()}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
+              {renderGoalDiagram()}
+              {renderPitchDiagram()}
+            </div>
           </div>
         </div>
         {/* -------------------------------------------------------- */}
