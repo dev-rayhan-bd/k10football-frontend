@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React from "react";
 import { 
@@ -174,24 +176,24 @@ const PlayerAnalytics = () => {
       </div>
 
       {/* Performance Trend */}
-      <div className="p-10 rounded-[40px] border border-white/5 bg-[#0D0D0D]/40 backdrop-blur-xl">
-        <h2 className="text-2xl font-bold text-white tracking-tight uppercase font-heading mb-10">Performance Trend</h2>
+      <div className="p-4 sm:p-10 rounded-[40px] border border-white/5 bg-[#0D0D0D]/40 backdrop-blur-xl">
+        <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight uppercase font-heading mb-6 sm:mb-10">Performance Trend</h2>
         <div className="space-y-4">
           {performanceTrend.map((item, idx) => (
-            <div key={idx} className="flex items-center justify-between p-6 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors group">
-              <div className="text-lg font-bold text-white w-20">{item.month}</div>
-              <div className="flex-1 grid grid-cols-3 gap-8">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-gray-500 uppercase font-bold tracking-widest">Goals:</span>
-                  <span className="text-white font-bold">{item.goals}</span>
+            <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors group gap-4 sm:gap-0">
+              <div className="text-base sm:text-lg font-bold text-white w-full sm:w-20 border-b sm:border-0 border-white/10 pb-2 sm:pb-0">{item.month}</div>
+              <div className="flex-1 grid grid-cols-3 gap-2 sm:gap-8">
+                <div className="flex flex-col xl:flex-row items-start xl:items-center gap-1 xl:gap-3">
+                  <span className="text-[10px] sm:text-xs text-gray-500 uppercase font-bold tracking-widest">Goals:</span>
+                  <span className="text-white font-bold text-sm sm:text-base">{item.goals}</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-gray-500 uppercase font-bold tracking-widest">Assists:</span>
-                  <span className="text-white font-bold">{item.assists}</span>
+                <div className="flex flex-col xl:flex-row items-start xl:items-center gap-1 xl:gap-3">
+                  <span className="text-[10px] sm:text-xs text-gray-500 uppercase font-bold tracking-widest">Assists:</span>
+                  <span className="text-white font-bold text-sm sm:text-base">{item.assists}</span>
                 </div>
-                <div className="flex items-center justify-end gap-3">
-                  <span className="text-xs text-gray-500 uppercase font-bold tracking-widest">Rating:</span>
-                  <span className="text-white font-bold">{item.rating}</span>
+                <div className="flex flex-col xl:flex-row items-start xl:items-center justify-start xl:justify-end gap-1 xl:gap-3">
+                  <span className="text-[10px] sm:text-xs text-gray-500 uppercase font-bold tracking-widest">Rating:</span>
+                  <span className="text-white font-bold text-sm sm:text-base">{item.rating}</span>
                 </div>
               </div>
             </div>
@@ -209,7 +211,7 @@ const RadarCard = ({ title, subtitle, data, color, score, growth }: any) => (
       <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
     </div>
     
-    <div className="w-full h-[400px]">
+    <div className="w-full h-100">
       <ResponsiveContainer width="100%" height="100%">
         <RadarChart cx="50%" cy="50%" outerRadius="70%" data={data}>
           <PolarGrid stroke="#333" />
@@ -239,7 +241,7 @@ const RadarCard = ({ title, subtitle, data, color, score, growth }: any) => (
 );
 
 const SkillCard = ({ skill }: any) => (
-  <div className="p-8 rounded-[32px] border border-white/5 bg-[#0A0A0A]/60 flex flex-col items-center gap-8 group hover:border-white/10 transition-all duration-500">
+  <div className="p-8 rounded-4xl border border-white/5 bg-[#0A0A0A]/60 flex flex-col items-center gap-8 group hover:border-white/10 transition-all duration-500">
     <div className="relative w-32 h-32 flex items-center justify-center">
       <svg className="w-full h-full -rotate-90">
         <circle

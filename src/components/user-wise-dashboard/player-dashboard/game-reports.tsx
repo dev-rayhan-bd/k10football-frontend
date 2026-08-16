@@ -5,8 +5,6 @@ import {
   IconStar,
   IconCircleCheck,
   IconClock,
-  IconCreditCard,
-  IconPlus,
   IconEye,
   IconDownload,
   IconReportAnalytics
@@ -115,8 +113,8 @@ const GameReports = () => {
       </div>
 
       {/* Table Section */}
-      <div className="p-10 rounded-[40px] border border-white/5 bg-[#0D0D0D]/40 backdrop-blur-xl overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+      <div className="p-4 sm:p-10 rounded-[40px] border border-white/5 bg-[#0D0D0D]/40 backdrop-blur-xl overflow-x-auto w-full">
+        <table className="w-full text-left border-collapse min-w-200">
           <thead>
             <tr className="border-b border-white/10 text-[11px] font-bold text-gray-500 uppercase tracking-[0.2em]">
               <th className="pb-6 pl-4">Report</th>

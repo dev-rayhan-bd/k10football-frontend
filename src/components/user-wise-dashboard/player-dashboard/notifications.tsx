@@ -1,10 +1,8 @@
 "use client";
-import React from "react";
 import { 
   IconHeart, 
   IconCalendar, 
   IconEye, 
-  IconUser,
   IconBuildingCommunity,
   IconSearch,
   IconBriefcase
@@ -60,19 +58,19 @@ const PlayerNotifications = () => {
       </div>
 
       {/* Notification List */}
-      <div className="p-10 rounded-[40px] border border-white/5 bg-[#0D0D0D]/40 backdrop-blur-xl space-y-4">
+      <div className="p-4 sm:p-10 rounded-[40px] border border-white/5 bg-[#0D0D0D]/40 backdrop-blur-xl space-y-4">
         {notifications.map((item) => (
           <div 
             key={item.id} 
-            className="group flex items-center justify-between p-6 rounded-2xl bg-[#0A0A0A]/60 border border-white/5 hover:border-white/10 transition-all duration-300"
+            className="group flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-6 rounded-2xl bg-[#0A0A0A]/60 border border-white/5 hover:border-white/10 transition-all duration-300 gap-4 sm:gap-0"
           >
-            <div className="flex items-center gap-6">
-              <div className="w-14 h-14 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 group-hover:text-white group-hover:bg-white/10 transition-all">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 group-hover:text-white group-hover:bg-white/10 transition-all">
                 <IconHeart size={24} stroke={1.5} />
               </div>
               <div className="space-y-1.5">
-                <h4 className="text-lg font-bold text-white tracking-tight">{item.name}</h4>
-                <div className="flex items-center gap-3">
+                <h4 className="text-base sm:text-lg font-bold text-white tracking-tight">{item.name}</h4>
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                   <span className="px-3 py-1 rounded-full bg-white/5 text-[10px] font-bold text-gray-400 uppercase tracking-widest border border-white/10">
                     {item.type}
                   </span>
@@ -83,7 +81,7 @@ const PlayerNotifications = () => {
                 </div>
               </div>
             </div>
-            <button className="px-6 py-2.5 rounded-xl border border-green-500/20 bg-green-500/5 text-[11px] font-black text-green-500 uppercase tracking-widest hover:bg-green-500 hover:text-black transition-all">
+            <button className="w-full sm:w-auto px-6 py-2.5 rounded-xl border border-green-500/20 bg-green-500/5 text-[11px] font-black text-green-500 uppercase tracking-widest hover:bg-green-500 hover:text-black transition-all">
               Interested
             </button>
           </div>
