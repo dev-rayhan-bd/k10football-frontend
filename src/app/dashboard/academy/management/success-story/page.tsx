@@ -1,5 +1,5 @@
 import React from "react";
-import SuccessStoryManagement from "@/components/user-wise-dashboard/academy-management/successStory";
+import SuccessStoryManagement from "@/components/user-wise-dashboard/academy-management/SuccessStory";
 
 const SuccessStoryPage = () => {
 return <SuccessStoryManagement />;

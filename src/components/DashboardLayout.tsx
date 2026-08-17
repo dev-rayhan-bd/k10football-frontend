@@ -1,0 +1,32 @@
+"use client";
+import AppSidebar, { SidebarItem } from "@/components/AppSidebar";
+import SiteHeader from "@/components/SiteHeader";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { ReactNode } from "react";
+
+interface DashboardLayoutProps {
+  children: ReactNode;
+  sidebarItems: SidebarItem[];
+  tier?: {
+    name: string;
+    color: string;
+  };
+  showToggle?: boolean;
+  customToggle?: ReactNode;
+}
+
+const DashboardLayout = ({ children, sidebarItems, tier, showToggle = false, customToggle }: DashboardLayoutProps) => {
+return (
+<SidebarProvider>
+  <AppSidebar variant="inset" sidebarItems={sidebarItems} tier={tier} />
+  <SidebarInset className="bg-[#0A0A0A] text-white min-w-0 flex-1">
+    <SiteHeader showToggle={showToggle} customToggle={customToggle} />
+    <main className="p-4 md:p-6 lg:p-8 pb-0 md:pb-0 lg:pb-0 min-h-screen @container/main">
+      {children}
+    </main>
+  </SidebarInset>
+</SidebarProvider>
+);
+}
+
+export default DashboardLayout;

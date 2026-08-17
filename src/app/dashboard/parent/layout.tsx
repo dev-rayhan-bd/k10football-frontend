@@ -1,6 +1,6 @@
 "use client";
 
-import DashboardLayout from "@/components/dashboard-layout";
+import DashboardLayout from "@/components/DashboardLayout";
 import {
   IconDashboard,
   IconUsers,

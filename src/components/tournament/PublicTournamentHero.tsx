@@ -2,7 +2,7 @@
 "use client";
 
 import Image from "next/image";
-import { TOURNAMENT_PRESET_LOGOS } from "@/components/user-wise-dashboard/academy-management/extraEvents";
+import { TOURNAMENT_PRESET_LOGOS } from "@/components/user-wise-dashboard/academy-management/ExtraEvents";
 import { IconEye, IconCopy, IconCheck, IconRefresh } from "@tabler/icons-react";
 
 type TProps = {

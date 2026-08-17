@@ -1,4 +1,4 @@
-import CvsLibrary from "@/components/user-wise-dashboard/academy-analysis/cvs-library";
+import CvsLibrary from "@/components/user-wise-dashboard/academy-analysis/CvsLibrary";
 
 const CvsLibraryPage = () => {
 return <CvsLibrary />;

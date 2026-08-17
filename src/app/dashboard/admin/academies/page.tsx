@@ -1,4 +1,4 @@
-import SuperAdminAcademies from "@/components/user-wise-dashboard/super-admin-dashboard/academies";
+import SuperAdminAcademies from "@/components/user-wise-dashboard/super-admin-dashboard/Academies";
 
 const AcademiesPage = () => {
 return (

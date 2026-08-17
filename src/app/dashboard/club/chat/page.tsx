@@ -1,4 +1,4 @@
-import { ClubChat } from "@/components/user-wise-dashboard/club-dashboard/chat";
+import { ClubChat } from "@/components/user-wise-dashboard/club-dashboard/Chat";
 
 const ClubChatPage = () => {
 return <ClubChat />;

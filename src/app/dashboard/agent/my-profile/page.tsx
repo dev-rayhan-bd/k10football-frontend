@@ -1,5 +1,5 @@
 import React from "react";
-import { AgentProfile } from "@/components/user-wise-dashboard/agent-dashboard/my-profile";
+import { AgentProfile } from "@/components/user-wise-dashboard/agent-dashboard/MyProfile";
 
 const AgentProfilePage = () => {
   return <AgentProfile />;

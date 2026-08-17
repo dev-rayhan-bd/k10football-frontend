@@ -1,4 +1,4 @@
-import TransferRequests from "@/components/user-wise-dashboard/academy-analysis/transfer-requests";
+import TransferRequests from "@/components/user-wise-dashboard/academy-analysis/TransferRequests";
 
 const TransferRequestsPage = () => {
 return <TransferRequests />;

@@ -1,4 +1,4 @@
-import AcademyManagementDashboard from "@/components/user-wise-dashboard/academy-management/dashboard";
+import AcademyManagementDashboard from "@/components/user-wise-dashboard/academy-management/Dashboard";
 
 const AcademyManagementPage = () => {
 return <AcademyManagementDashboard />;

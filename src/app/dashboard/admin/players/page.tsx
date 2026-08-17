@@ -1,4 +1,4 @@
-import SuperAdminPlayers from "@/components/user-wise-dashboard/super-admin-dashboard/players";
+import SuperAdminPlayers from "@/components/user-wise-dashboard/super-admin-dashboard/Players";
 
 const PlayersPage = () => {
 return (

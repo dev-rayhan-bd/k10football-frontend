@@ -70,7 +70,7 @@ const PlayerBioSection = () => {
             {playerData.coachName && playerData.coachName !== "N/A" && (
               <button 
                 onClick={() => router.push("/dashboard/player/game-reports/create")}
-                className="w-full mb-6 sm:mb-8 py-3 rounded-xl bg-red-600 hover:bg-red-500 font-bold text-white uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(227,27,35,0.2)] text-xs cursor-pointer font-orbitron"
+                className="w-full mb-6 sm:mb-8 px-2 sm:px-4 py-3 sm:py-3.5 rounded-xl bg-red-600 hover:bg-red-500 font-bold text-white uppercase tracking-widest sm:tracking-widest transition-all shadow-[0_0_20px_rgba(227,27,35,0.2)] text-[10px] sm:text-xs cursor-pointer font-orbitron"
               >
                 Request Game Report from Coach
               </button>

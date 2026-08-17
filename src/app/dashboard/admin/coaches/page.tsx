@@ -1,4 +1,4 @@
-import SuperAdminCoaches from "@/components/user-wise-dashboard/super-admin-dashboard/coaches";
+import SuperAdminCoaches from "@/components/user-wise-dashboard/super-admin-dashboard/Coaches";
 
 const CoachesPage = () => {
 return (

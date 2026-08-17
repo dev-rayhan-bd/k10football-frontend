@@ -1,4 +1,4 @@
-import AcademyValidateCv from "@/components/user-wise-dashboard/academy-management/academy-validate-cv";
+import AcademyValidateCv from "@/components/user-wise-dashboard/academy-management/AcademyValidateCv";
 
 const ValidateCvPage = () => {
 return <AcademyValidateCv />;

@@ -1,4 +1,4 @@
-import AcademyChat from "@/components/user-wise-dashboard/academy-management/chat";
+import AcademyChat from "@/components/user-wise-dashboard/academy-management/Chat";
 
 const ChatPage = () => {
 return <AcademyChat />;

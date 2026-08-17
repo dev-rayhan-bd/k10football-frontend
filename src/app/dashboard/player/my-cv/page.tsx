@@ -1,6 +1,6 @@
 "use client";
 
-import GenerateCv from "@/components/user-wise-dashboard/academy-management/generate-cv";
+import GenerateCv from "@/components/user-wise-dashboard/academy-management/GenerateCv";
 
 const MyCV = () => {
 return (

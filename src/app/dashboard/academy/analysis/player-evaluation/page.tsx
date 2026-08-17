@@ -1,4 +1,4 @@
-import PlayerEvaluation from "@/components/user-wise-dashboard/academy-analysis/player-evaluation";
+import PlayerEvaluation from "@/components/user-wise-dashboard/academy-analysis/PlayerEvaluation";
 
 const PlayerEvaluationPage = () => {
 return <PlayerEvaluation />;

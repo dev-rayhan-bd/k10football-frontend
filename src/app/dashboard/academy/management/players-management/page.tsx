@@ -1,4 +1,4 @@
-import PlayersManagement from "@/components/user-wise-dashboard/academy-management/playersManagement";
+import PlayersManagement from "@/components/user-wise-dashboard/academy-management/PlayersManagement";
 
 const PlayersManagementPage = () => {
 return <PlayersManagement />;

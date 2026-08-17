@@ -1,4 +1,4 @@
-import SuperAdminAnalytics from "@/components/user-wise-dashboard/super-admin-dashboard/analytics";
+import SuperAdminAnalytics from "@/components/user-wise-dashboard/super-admin-dashboard/Analytics";
 
 const AnalyticsPage = () => {
 return (

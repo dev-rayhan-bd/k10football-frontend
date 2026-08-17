@@ -11,7 +11,7 @@ import {
   saveStoredEvents,
   TOURNAMENT_PRESET_LOGOS, 
   CLUB_PRESET_LOGOS 
-} from "@/components/user-wise-dashboard/academy-management/extraEvents";
+} from "@/components/user-wise-dashboard/academy-management/ExtraEvents";
 import { 
   IconCurrencyDollar, 
   IconUsers, 
@@ -41,7 +41,7 @@ import {
   IconActivity,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
-import DashboardModal from "@/components/dashboard/dashboard-modal";
+import DashboardModal from "@/components/dashboard/DashboardModal";
 import Image from "next/image";
 
 const DEFAULT_MOCK_TEAMS = [

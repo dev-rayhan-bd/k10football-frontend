@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { getStoredEvents } from "@/components/user-wise-dashboard/academy-management/extraEvents";
+import { getStoredEvents } from "@/components/user-wise-dashboard/academy-management/ExtraEvents";
 
 import PublicTournamentHeader from "@/components/tournament/PublicTournamentHeader";
 import PublicTournamentHero from "@/components/tournament/PublicTournamentHero";

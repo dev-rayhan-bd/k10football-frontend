@@ -1,4 +1,4 @@
-import SuperAdminSettings from "@/components/user-wise-dashboard/super-admin-dashboard/settings";
+import SuperAdminSettings from "@/components/user-wise-dashboard/super-admin-dashboard/Settings";
 
 const SettingsPage = () => {
 return (

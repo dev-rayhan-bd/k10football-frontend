@@ -1,4 +1,4 @@
-import SuperAdminApprovals from "@/components/user-wise-dashboard/super-admin-dashboard/approvals";
+import SuperAdminApprovals from "@/components/user-wise-dashboard/super-admin-dashboard/Approvals";
 
 const ApprovalsPage = () => {
 return (

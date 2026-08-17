@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import CreateGameReport from "@/components/user-wise-dashboard/coach-dashboard/create-game-report";
+import CreateGameReport from "@/components/user-wise-dashboard/coach-dashboard/CreateGameReport";
 
 import { addReport } from "@/lib/constants/reports";
 

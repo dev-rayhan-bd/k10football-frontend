@@ -1,4 +1,4 @@
-import TeamDetails from "@/components/user-wise-dashboard/academy-analysis/team-details";
+import TeamDetails from "@/components/user-wise-dashboard/academy-analysis/TeamDetails";
 
 interface PageProps {
   params: Promise<{ teamId: string }>;

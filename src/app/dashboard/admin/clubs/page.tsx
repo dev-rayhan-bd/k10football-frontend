@@ -1,4 +1,4 @@
-import SuperAdminClubs from "@/components/user-wise-dashboard/super-admin-dashboard/clubs";
+import SuperAdminClubs from "@/components/user-wise-dashboard/super-admin-dashboard/Clubs";
 
 const ClubsPage = () => {
 return (

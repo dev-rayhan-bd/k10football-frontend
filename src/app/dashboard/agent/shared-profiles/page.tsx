@@ -1,5 +1,5 @@
 import React from "react";
-import SharedProfiles from "@/components/user-wise-dashboard/agent-dashboard/shared-profiles";
+import SharedProfiles from "@/components/user-wise-dashboard/agent-dashboard/SharedProfiles";
 
 const SharedProfilesPage = () => {
   return <SharedProfiles />;

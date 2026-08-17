@@ -1,6 +1,6 @@
 "use client";
 
-import GenerateCvCoach from "@/components/user-wise-dashboard/coach-dashboard/generate-cv";
+import GenerateCvCoach from "@/components/user-wise-dashboard/coach-dashboard/GenerateCv";
 
 const MyCV = () => {
 return (

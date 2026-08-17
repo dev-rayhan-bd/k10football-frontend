@@ -11,10 +11,10 @@ import {
   IconMail
 } from "@tabler/icons-react";
 
-import DashboardHero from "@/components/dashboard/dashboard-hero";
-import DashboardStatCard from "@/components/dashboard/dashboard-stat-card";
-import { DashboardSidebarPanel, DashboardSidebarItem } from "@/components/dashboard/dashboard-sidebar";
-import SuperAdminDashboard from "@/components/user-wise-dashboard/super-admin-dashboard/dashboard";
+import DashboardHero from "@/components/dashboard/DashboardHero";
+import DashboardStatCard from "@/components/dashboard/DashboardStatCard";
+import { DashboardSidebarPanel, DashboardSidebarItem } from "@/components/dashboard/DashboardSidebar";
+import SuperAdminDashboard from "@/components/user-wise-dashboard/super-admin-dashboard/Dashboard";
 
 const AdminDashboard = () => {
   return (

@@ -1,4 +1,4 @@
-import { Badge, CheckCircle2, Shield } from "lucide-react";
+import { Badge, Shield } from "lucide-react";
 
 const AdditionalServices = () => {
   return (
@@ -15,7 +15,7 @@ const AdditionalServices = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {/* Contract Management Card */}
           <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-6 flex gap-4">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
                 <Shield className="w-6 h-6 text-black" strokeWidth={3} />
               </div>

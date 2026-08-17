@@ -1,4 +1,4 @@
-import AcademyProfile from "@/components/user-wise-dashboard/academy-analysis/academy-profile";
+import AcademyProfile from "@/components/user-wise-dashboard/academy-analysis/AcademyProfile";
 
 const AcademyProfilePage = () => {
 return <AcademyProfile />;

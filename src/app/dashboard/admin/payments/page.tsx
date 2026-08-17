@@ -1,4 +1,4 @@
-import SuperAdminPayments from "@/components/user-wise-dashboard/super-admin-dashboard/payments";
+import SuperAdminPayments from "@/components/user-wise-dashboard/super-admin-dashboard/Payments";
 
 const PaymentsPage = () => {
 return (
