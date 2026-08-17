@@ -57,7 +57,7 @@ return (
     </div>
 
     {customToggle && (
-      <div className="hidden lg:flex">
+      <div className="flex">
         {customToggle}
       </div>
     )}

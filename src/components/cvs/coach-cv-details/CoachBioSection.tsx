@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import badge1 from "@/assets/cvs/id/coach-badge1.png";
 import badge2 from "@/assets/cvs/id/coach-badge2.png";
@@ -492,28 +493,28 @@ const CoachBioSection = ({ editable }: { editable?: boolean }) => {
 
   return (
     <>
-      <div className="container">
-        <div className="grid xl:grid-cols-12 gap-6">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-12 gap-6 w-full">
           {/* LEFT COLUMN */}
-          <div className="col-span-12 xl:col-span-4 h-fit space-y-6 bg-cardBg">
+          <div className="col-span-12 xl:col-span-4 h-fit space-y-6 bg-cardBg rounded-2xl md:rounded-none w-full overflow-hidden">
             {/* Personal Information */}
             <div className=" p-6">
               <h2 className="text-lg text-center font-heading font-normal mb-4">
                 Personal Information
               </h2>
               <div className="space-y-3 text-sm">
-                <div className="flex justify-between items-center gap-4">
-                  <span className="text-gray-400">Full Name</span>
+                <div className="flex justify-between items-center gap-2 sm:gap-4">
+                  <span className="text-gray-400 text-xs sm:text-sm whitespace-nowrap shrink-0">Full Name</span>
                   <CMSField
                     value={coachData.fullName}
                     onUpdate={(val) => handleUpdate("fullName", val)}
                     canEdit={canEdit}
-                    className="w-40 justify-end"
-                    inputClassName="text-right"
+                    className="flex-1 justify-end min-w-0 text-right"
+                    inputClassName="text-right w-full truncate"
                   />
                 </div>
-                <div className="flex justify-between items-center gap-4">
-                  <span className="text-gray-400">Date of Birth</span>
+                <div className="flex justify-between items-center gap-2 sm:gap-4">
+                  <span className="text-gray-400 text-xs sm:text-sm whitespace-nowrap shrink-0">Date of Birth</span>
                   <CMSField
                     value={coachData.dob}
                     type="date"
@@ -525,29 +526,29 @@ const CoachBioSection = ({ editable }: { editable?: boolean }) => {
                       }
                     }}
                     canEdit={canEdit}
-                    className="w-1/2 justify-end"
-                    inputClassName="text-right w-full bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-3 py-1.5 rounded-lg"
+                    className="flex-1 justify-end min-w-0 text-right"
+                    inputClassName="text-right w-full bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 sm:px-3 py-1.5 rounded-lg truncate"
                   />
                 </div>
-                <div className="flex justify-between items-center gap-4">
-                  <span className="text-gray-400">Age</span>
-                  <div className="flex items-center gap-1">
-                    <span>{coachData.age ? coachData.age.replace(/\D/g, "") : 0}</span>
+                <div className="flex justify-between items-center gap-2 sm:gap-4">
+                  <span className="text-gray-400 text-xs sm:text-sm whitespace-nowrap shrink-0">Age</span>
+                  <div className="flex items-center gap-1 justify-end flex-1 min-w-0 text-right">
+                    <span className="truncate">{coachData.age ? coachData.age.replace(/\D/g, "") : 0}</span>
                   </div>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Birth Country</span>
-                  <div className="flex items-center gap-2">
+                <div className="flex justify-between items-center gap-2 sm:gap-4">
+                  <span className="text-gray-400 text-xs sm:text-sm whitespace-nowrap shrink-0">Birth Country</span>
+                  <div className="flex items-center justify-end gap-2 flex-1 min-w-0">
                     <CMSField
                       value={coachData.birthCountry}
                       onUpdate={(val) => handleUpdate("birthCountry", val)}
                       canEdit={canEdit}
                       type="combobox"
                       options={ALL_COUNTRIES}
-                      className="w-24 justify-end"
-                      inputClassName="text-right"
+                      className="flex-1 justify-end min-w-0 text-right"
+                      inputClassName="text-right w-full truncate"
                     />
-                    <div className="relative w-6 h-4 overflow-hidden rounded-sm border border-border">
+                    <div className="relative w-6 h-4 overflow-hidden rounded-sm border border-border shrink-0">
                       <Image
                         src={getFlagUrl(coachData.birthCountry)}
                         alt="birth country flag"
@@ -558,19 +559,19 @@ const CoachBioSection = ({ editable }: { editable?: boolean }) => {
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Dual Nationality</span>
-                  <div className="flex items-center gap-2">
+                <div className="flex justify-between items-center gap-2 sm:gap-4">
+                  <span className="text-gray-400 text-xs sm:text-sm whitespace-nowrap shrink-0">Dual Nationality</span>
+                  <div className="flex items-center justify-end gap-2 flex-1 min-w-0">
                     <CMSField
                       value={coachData.dualNationality}
                       onUpdate={(val) => handleUpdate("dualNationality", val)}
                       canEdit={canEdit}
                       type="combobox"
                       options={ALL_COUNTRIES}
-                      className="w-24 justify-end"
-                      inputClassName="text-right"
+                      className="flex-1 justify-end min-w-0 text-right"
+                      inputClassName="text-right w-full truncate"
                     />
-                    <div className="relative w-6 h-4 overflow-hidden rounded-sm border border-border">
+                    <div className="relative w-6 h-4 overflow-hidden rounded-sm border border-border shrink-0">
                       <Image
                         src={getFlagUrl(coachData.dualNationality)}
                         alt="dual nationality flag"
@@ -591,39 +592,43 @@ const CoachBioSection = ({ editable }: { editable?: boolean }) => {
               </h2>
               <div className="space-y-2 text-sm text-primary">
                 <div className="flex items-center gap-2">
-                  <span>📧</span>
+                  <span className="shrink-0">📧</span>
                   <CMSField
                     value={coachData.email}
                     onUpdate={(val) => handleUpdate("email", val)}
                     canEdit={canEdit}
-                    className="flex-1"
+                    className="flex-1 min-w-0"
+                    inputClassName="w-full truncate text-left bg-transparent border-none focus:ring-0 p-0"
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <span>📱</span>
+                  <span className="shrink-0">📱</span>
                   <CMSField
                     value={coachData.phone}
                     onUpdate={(val) => handleUpdate("phone", val)}
                     canEdit={canEdit}
-                    className="flex-1"
+                    className="flex-1 min-w-0"
+                    inputClassName="w-full truncate text-left bg-transparent border-none focus:ring-0 p-0"
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <span>📍</span>
+                  <span className="shrink-0">📍</span>
                   <CMSField
                     value={coachData.location}
                     onUpdate={(val) => handleUpdate("location", val)}
                     canEdit={canEdit}
-                    className="flex-1"
+                    className="flex-1 min-w-0"
+                    inputClassName="w-full truncate text-left bg-transparent border-none focus:ring-0 p-0"
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <span>🌐</span>
+                  <span className="shrink-0">🌐</span>
                   <CMSField
                     value={coachData.website}
                     onUpdate={(val) => handleUpdate("website", val)}
                     canEdit={canEdit}
-                    className="flex-1"
+                    className="flex-1 min-w-0"
+                    inputClassName="w-full truncate text-left bg-transparent border-none focus:ring-0 p-0"
                   />
                 </div>
               </div>
@@ -641,7 +646,7 @@ const CoachBioSection = ({ editable }: { editable?: boolean }) => {
                     return (
                       <div
                         key={index}
-                        className="flex gap-4 border border-white/10 rounded-xl p-3 relative group"
+                        className="flex gap-4 border border-white/10 rounded-xl p-3 relative group w-full overflow-hidden"
                       >
                         <div
                           className={cn(
@@ -656,7 +661,7 @@ const CoachBioSection = ({ editable }: { editable?: boolean }) => {
                         >
                           <IconComponent className="w-5 h-5 text-white hover:scale-110 transition-transform" />
                         </div>
-                        <div className="flex-1 pr-6">
+                        <div className="flex-1 pr-6 min-w-0">
                           <CMSField
                             value={item.text}
                             onUpdate={(val) => {
@@ -666,7 +671,7 @@ const CoachBioSection = ({ editable }: { editable?: boolean }) => {
                             }}
                             canEdit={canEdit}
                             type="textarea"
-                            className="text-white text-sm leading-relaxed"
+                            className="text-white text-sm leading-relaxed w-full break-words"
                           />
                         </div>
                         {canEdit && (
@@ -793,7 +798,7 @@ const CoachBioSection = ({ editable }: { editable?: boolean }) => {
                 {coachData.languages.map((lang, idx) => (
                   <div
                     key={idx}
-                    className="flex justify-between items-center border-b pb-2 gap-2"
+                    className="flex justify-between items-center border-b pb-2 gap-2 w-full overflow-hidden"
                   >
                     <CMSField
                       value={lang.name}

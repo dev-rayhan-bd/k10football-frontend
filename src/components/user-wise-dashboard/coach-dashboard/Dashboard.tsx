@@ -1,21 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useContext } from "react";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/lib/hooks/reduxHooks";
 import { CoachContext } from "@/app/dashboard/coach/layout";
 import {
-  IconUser,
   IconBallFootball,
-  IconUsers,
-  IconChartBar,
-  IconSettings,
-  IconDownload,
-  IconShare,
   IconEye,
   IconHeart,
   IconPlayerPlay,
   IconPlus,
-  IconExternalLink,
   IconCircleCheck
 } from "@tabler/icons-react";
 import {
@@ -23,7 +17,6 @@ import {
   RadarChart,
   PolarGrid,
   PolarAngleAxis,
-  PolarRadiusAxis,
   ResponsiveContainer,
   PieChart,
   Pie,
@@ -35,15 +28,7 @@ import DashboardTable, { Column } from "@/components/dashboard/DashboardTable";
 import TableActionButtons from "@/components/dashboard/TableActionButtons";
 import DashboardHero from "@/components/dashboard/DashboardHero";
 
-// Mock Data
-const profileAnalysisData = [
-  { subject: 'Tactics', A: 97, fullMark: 100 },
-  { subject: 'Leadership', A: 88, fullMark: 100 },
-  { subject: 'Communication', A: 92, fullMark: 100 },
-  { subject: 'Adaptability', A: 98, fullMark: 100 },
-  { subject: 'Discipline', A: 87, fullMark: 100 },
-  { subject: 'Development', A: 96, fullMark: 100 },
-];
+
 
 const tournamentStatsData = [
   { name: 'Win', value: 38, color: '#A80000' },
@@ -53,11 +38,7 @@ const tournamentStatsData = [
   { name: 'Champion', value: 7, color: '#FFEBEB' },
 ];
 
-const pendingReports = [
-  { id: 1, name: "Marcus Silva", position: "Forward", rating: 92, avatar: "https://i.pravatar.cc/150?u=1" },
-  { id: 2, name: "David Chen", position: "Midfielder", rating: 88, avatar: "https://i.pravatar.cc/150?u=2" },
-  { id: 3, name: "Alex Jonson", position: "Defender", rating: 85, avatar: "https://i.pravatar.cc/150?u=3" },
-];
+
 
 const clubsInterested = [
   { id: 1, name: "Manchester City", logo: "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg", action: "Viewed your profile" },
@@ -73,6 +54,7 @@ const teamData = [
 ];
 
 import { useCoach } from "@/lib/hooks/useCoach";
+import Image from "next/image";
 
 const CoachDashboard = () => {
   const { hasAcademy } = useContext(CoachContext);
@@ -86,7 +68,7 @@ const CoachDashboard = () => {
       key: "name",
       render: (player) => (
         <div className="flex items-center gap-3">
-          <img src={player.avatar} className="w-10 h-10 rounded-full object-cover grayscale group-hover:grayscale-0 transition-all" alt={player.name} />
+          <Image width={50} height={50} src={player.avatar} className="w-10 h-10 rounded-full object-cover grayscale group-hover:grayscale-0 transition-all" alt={player.name} />
           <div>
             <div className="text-sm font-bold text-white">{player.name}</div>
             <div className="text-[10px] text-gray-500 uppercase tracking-widest">{player.position}</div>
@@ -167,18 +149,18 @@ const CoachDashboard = () => {
 
           {/* Analytics Section */}
           <div className="p-6 rounded-2xl border border-white/20 bg-[#0D0D0D]">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
               <div>
-                <h2 className="text-xl font-bold text-white">Analytics</h2>
-                <p className="text-sm text-gray-500">Deep insights into coaching performance and leadership</p>
+                <h2 className="text-lg md:text-xl font-bold text-white">Analytics</h2>
+                <p className="text-xs md:text-sm text-gray-500">Deep insights into coaching performance and leadership</p>
               </div>
-              <button className="px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-xs font-bold text-white hover:bg-white/20 transition-colors">
+              <button className="w-full sm:w-auto px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-xs font-bold text-white hover:bg-white/20 transition-colors">
                 Full Analytics
               </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="h-[300px]">
+              <div className="h-75">
                 <h3 className="text-sm font-bold text-gray-400 mb-4 uppercase tracking-widest">Coach Profile Analysis</h3>
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart cx="50%" cy="50%" outerRadius="80%" data={[
@@ -201,7 +183,7 @@ const CoachDashboard = () => {
                   </RadarChart>
                 </ResponsiveContainer>
               </div>
-              <div className="h-[350px] pb-6">
+              <div className="h-87.5 pb-6">
                 <h3 className="text-sm font-bold text-gray-400 mb-4 uppercase tracking-widest">Tournament Stats</h3>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -269,11 +251,11 @@ const CoachDashboard = () => {
           </div>
 
           {/* My CV Section */}
-          <div className="p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
-            <h2 className="text-xl font-bold text-white mb-6">My CV</h2>
+          <div className="p-6 md:p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
+            <h2 className="text-lg md:text-xl font-bold text-white mb-6">My CV</h2>
             <div className="flex flex-col lg:flex-row gap-8 items-start justify-between">
               {/* Progress Card */}
-              <div className="p-5 rounded-xl border border-white/10 bg-white/[0.02] w-full lg:w-auto min-w-[200px]">
+              <div className="p-5 rounded-xl border border-white/10 bg-white/2 w-full lg:w-auto min-w-[200px]">
                 <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Profile Completion</span>
                 <div className="text-4xl font-black text-[#E31B23] italic mt-1 mb-3">85%</div>
                 <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
@@ -341,12 +323,12 @@ const CoachDashboard = () => {
           {/* Conditional My Teams Section */}
           {hasAcademy && (
             <div className="p-6 rounded-2xl border border-white/20 bg-[#0D0D0D]">
-              <div className="flex items-center justify-between mb-8">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
                 <div>
-                  <h2 className="text-xl font-bold text-white">My Teams</h2>
-                  <p className="text-sm text-gray-500">Professional players under your management</p>
+                  <h2 className="text-lg md:text-xl font-bold text-white">My Teams</h2>
+                  <p className="text-xs md:text-sm text-gray-500">Professional players under your management</p>
                 </div>
-                <button className="px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-xs font-bold text-white hover:bg-white/20 transition-colors flex items-center gap-2">
+                <button className="w-full sm:w-auto px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-xs font-bold text-white hover:bg-white/20 transition-colors flex items-center justify-center gap-2">
                   <IconPlus size={16} /> Add Player
                 </button>
               </div>
@@ -379,7 +361,7 @@ const CoachDashboard = () => {
                   className="flex items-center justify-between p-3 rounded-xl bg-white/10 border border-white/20 group hover:border-[#E31B23]/50 transition-colors cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
-                    <img src={teamData.find(p => p.id === req.playerId)?.avatar || "https://i.pravatar.cc/150?u=1"} className="w-10 h-10 rounded-full object-cover" alt={req.playerName} />
+                    <Image src={teamData.find(p => p.id === req.playerId)?.avatar || "https://i.pravatar.cc/150?u=1"} className="w-10 h-10 rounded-full object-cover" alt={req.playerName} />
                     <div>
                       <div className="text-sm font-bold text-white">{req.playerName}</div>
                       <div className="text-[10px] text-gray-500 uppercase tracking-widest">{req.playerPosition}</div>
@@ -403,7 +385,7 @@ const CoachDashboard = () => {
               {clubsInterested.map((club) => (
                 <div key={club.id} className="flex items-center gap-4 p-3 rounded-xl bg-white/10 border border-white/20 group hover:bg-white/[0.1] transition-colors">
                   <div className="w-10 h-10 p-1 rounded-lg bg-white/10 flex items-center justify-center">
-                    <img src={club.logo} className="w-full h-full object-contain" alt={club.name} />
+                    <Image width={50} height={50} src={club.logo} className="w-full h-full object-contain" alt={club.name} />
                   </div>
                   <div>
                     <div className="text-sm font-bold text-white">{club.name}</div>
@@ -440,22 +422,22 @@ const CoachDashboard = () => {
 
 const MediaBlock = ({ title, type, items }: { title: string, type: 'image' | 'video', items: any[] }) => (
   <div className="p-6 rounded-2xl border border-white/20 bg-[#0D0D0D]">
-    <div className="flex items-center justify-between mb-8">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
       <div>
-        <h2 className="text-xl font-bold text-white">{title}</h2>
-        <p className="text-sm text-gray-500">Match highlights & training</p>
+        <h2 className="text-lg md:text-xl font-bold text-white">{title}</h2>
+        <p className="text-xs md:text-sm text-gray-500">Match highlights & training</p>
       </div>
-      <button className="px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-xs font-bold text-white hover:bg-white/20 transition-colors flex items-center gap-2">
+      <button className="w-full sm:w-auto px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-xs font-bold text-white hover:bg-white/20 transition-colors flex items-center justify-center gap-2">
         {type === 'image' ? <IconPlus size={16} /> : <IconPlayerPlay size={16} />}
         {type === 'image' ? 'Upload Image' : 'Upload Video'}
       </button>
     </div>
 
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
       {items.map((item, idx) => (
         <div key={idx} className="group relative rounded-xl overflow-hidden border border-white/20 bg-[#111]">
           <div className="relative aspect-video overflow-hidden">
-            <img src={item.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-60" alt={item.title} />
+            <Image width={100} height={100} src={item.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-60" alt={item.title} />
             {type === 'video' && (
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="w-10 h-10 rounded-full bg-[#E31B23] flex items-center justify-center shadow-2xl">

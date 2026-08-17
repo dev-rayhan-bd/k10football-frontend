@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 import { CreateGameReportWizard } from "./create-game-report/index";
 
 interface CreateGameReportProps {
