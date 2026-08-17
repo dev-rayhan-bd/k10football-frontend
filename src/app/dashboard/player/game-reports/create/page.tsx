@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React from "react";
 import { useRouter } from "next/navigation";
 import CreateGameReport from "@/components/user-wise-dashboard/coach-dashboard/CreateGameReport";
 

@@ -261,29 +261,38 @@ const MatchStatisticsForm = ({
           className="aspect-4/3 landscape:aspect-21/9 lg:aspect-video relative cursor-crosshair overflow-hidden group select-none bg-[#092b15]"
         >
           <Image
-            src="/field.png" 
+            src="/FootballPitch.png" 
             alt="Football Pitch" 
             draggable={false}
-            className="w-full h-full object-cover transition-opacity pointer-events-none select-none" 
+            className="w-full h-full object-cover opacity-80 group-hover:opacity-90 transition-opacity pointer-events-none select-none" 
             width={500}
             height={500}
           />
+          <div className="absolute inset-0 bg-black/10 pointer-events-none" />
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-40 transition-opacity pointer-events-none">
             <span className="text-white text-xs font-semibold uppercase tracking-widest font-orbitron">Click Pitch to Place Marker</span>
+          </div>
+
+          <div 
+            className={cn(
+              "absolute -translate-y-1/2 w-16 h-16 bg-white/10 border border-white/40 rounded-full flex items-center justify-center backdrop-blur-sm pointer-events-none select-none shadow-xl",
+              isGK ? "left-[12%] -translate-x-1/2 top-1/2" : "left-1/2 -translate-x-1/2 top-1/2"
+            )}
+          >
+            <span className="text-[7px] font-black text-white text-center leading-none uppercase font-orbitron whitespace-pre-wrap">
+              {isGK ? "Accurate\nSaves" : "Accurate\nAssist"}
+            </span>
           </div>
 
           {pitchMarkers.map((line, idx) => (
             <div 
               key={idx} 
               onClick={(e) => removePitchMarker(idx, e)}
-              className="absolute -ml-4 -mt-4 flex items-center justify-center hover:scale-125 transition-all cursor-pointer animate-in zoom-in duration-200 z-30 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+              className="absolute w-8 h-8 -ml-4 -mt-4 flex items-center justify-center hover:scale-125 transition-all cursor-pointer animate-in zoom-in duration-200 z-30 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
               style={{ left: `${line.x1}%`, top: `${line.y1}%` }}
               title="Click to remove"
             >
-              <div className="flex items-center">
-                <span className="text-xl select-none leading-none">⚽</span>
-                <IconArrowUpRight size={24} className="text-black -ml-2 drop-shadow-[0_2px_2px_rgba(255,255,255,0.5)]" stroke={3} />
-              </div>
+              <span className="text-2xl select-none leading-none">⚽</span>
             </div>
           ))}
         </div>
