@@ -78,13 +78,13 @@ toast.success(`Downloading PDF Receipt for ${invoiceId}`);
 };
 
 return (
-<div className="space-y-8 pb-12">
+<div className="space-y-8 pb-24 md:pb-12">
   {/* Header */}
   <div>
-    <h1 className="text-4xl md:text-5xl font-black uppercase text-white font-orbitron tracking-tight leading-none">
+    <h1 className="text-3xl md:text-5xl font-black uppercase text-white font-orbitron tracking-tight leading-none">
       Fees & <span className="text-primary italic">Payments</span>
     </h1>
-    <p className="text-white/60 font-bold uppercase tracking-widest text-[11px] mt-2">
+    <p className="text-white/60 font-bold uppercase tracking-widest text-[9px] md:text-[11px] mt-2 leading-relaxed">
       View academy invoices, download billing receipts, and pay membership fees
     </p>
   </div>
@@ -92,7 +92,7 @@ return (
   <div className="bg-[#0D0D0D]/40 border border-white/5 p-8 rounded-3xl shadow-xl space-y-6">
     {/* Tabs Filter */}
     <div className="flex justify-between items-center flex-wrap gap-4">
-      <div className="flex gap-2 bg-black/40 border border-white/5 p-1 rounded-xl">
+      <div className="flex gap-1 sm:gap-2 bg-black/40 border border-white/5 p-1 rounded-xl w-full sm:w-auto overflow-x-auto scrollbar-hide">
         {(["All", "Unpaid", "Paid"] as const).map((tab) => (
           <button
             key={tab}
@@ -103,7 +103,7 @@ return (
                 : "text-gray-400 hover:text-white"
             }`}
           >
-            {tab} Invoices
+            {tab}
           </button>
         ))}
       </div>
@@ -117,26 +117,26 @@ return (
       {filteredInvoices.map((invoice) => (
         <div
           key={invoice.id}
-          className="p-6 rounded-2xl bg-black/40 border border-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-white/10 transition-all"
+          className="p-5 sm:p-6 rounded-2xl bg-white/5 border border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-white/20 transition-all"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-gray-400">
-              <IconReceipt size={24} />
+          <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0 w-full sm:w-auto">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/5 flex items-center justify-center text-gray-400 shrink-0">
+              <IconReceipt className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <div>
-              <h3 className="text-sm font-bold text-white">{invoice.item}</h3>
-              <div className="flex items-center gap-4 text-xs text-gray-400 mt-1">
+            <div className="min-w-0">
+              <h3 className="text-sm font-bold text-white truncate leading-tight">{invoice.item}</h3>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-[10px] sm:text-xs text-gray-400 mt-1.5 sm:mt-1">
                 <span className="flex items-center gap-1">
-                  <IconCalendar size={12} /> Due: {invoice.dueDate}
+                  <IconCalendar size={12} className="shrink-0" /> Due: {invoice.dueDate}
                 </span>
-                <span>ID: {invoice.id}</span>
+                <span className="truncate">ID: {invoice.id}</span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
-            <div className="text-right">
-              <p className="text-lg font-black text-white font-orbitron">${invoice.amount.toFixed(2)}</p>
+          <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto justify-between sm:justify-end pt-4 sm:pt-0 border-t border-white/5 sm:border-0 shrink-0">
+            <div className="text-left sm:text-right">
+              <p className="text-xl sm:text-lg font-black text-white font-orbitron">${invoice.amount.toFixed(2)}</p>
               <Badge className={`text-[8px] font-bold mt-1 ${
                 invoice.status === "Paid"
                   ? "bg-green-500/10 border-green-500/30 text-green-400"

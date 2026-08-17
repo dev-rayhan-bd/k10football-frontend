@@ -57,21 +57,21 @@ try {
 };
 
 return (
-<div className="space-y-8 pb-12">
+<div className="space-y-8 pb-24 md:pb-12">
   {/* Header */}
-  <div className="flex justify-between items-center">
+  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
     <div>
-      <h1 className="text-4xl md:text-5xl font-black uppercase text-white font-orbitron tracking-tight leading-none">
+      <h1 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase text-white font-orbitron tracking-tight leading-none">
         Child <span className="text-primary italic">Profiles</span>
       </h1>
-      <p className="text-white/60 font-bold uppercase tracking-widest text-[11px] mt-2">
+      <p className="text-white/60 font-bold uppercase tracking-widest text-[9px] md:text-[11px] mt-2 leading-relaxed">
         Manage your children&apos;s details, CV stats, and positions
       </p>
     </div>
     {!isEditing && (
       <button
         onClick={() => setIsEditing(true)}
-        className="bg-[#E31B23] hover:bg-[#C2181F] text-white px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all font-bold text-xs uppercase tracking-widest shadow-lg shadow-[#E31B23]/20"
+        className="w-full md:w-auto bg-[#E31B23] hover:bg-[#C2181F] text-white px-5 py-3 md:py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all font-bold text-xs uppercase tracking-widest shadow-lg shadow-[#E31B23]/20 shrink-0"
       >
         <IconPencil size={16} />
         <span>Edit Profile</span>
@@ -130,68 +130,68 @@ return (
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Full Name */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
               Full Name
             </label>
             <input
               type="text"
               disabled={!isEditing}
               {...register("fullName", { required: true })}
-              className="w-full px-4 py-3 rounded-xl border border-white/5 bg-black/40 text-white placeholder:text-gray-600 focus:outline-none focus:border-primary/50 transition-all text-sm disabled:opacity-50"
+              className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-gray-500 focus:outline-none focus:border-primary/50 transition-all text-sm disabled:opacity-50"
             />
           </div>
 
           {/* DOB */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
               Date of Birth
             </label>
             <input
               type="date"
               disabled={!isEditing}
               {...register("dob", { required: true })}
-              className="w-full px-4 py-3 rounded-xl border border-white/5 bg-black/40 text-white focus:outline-none focus:border-primary/50 transition-all text-sm disabled:opacity-50 scheme-dark"
+              className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white focus:outline-none focus:border-primary/50 transition-all text-sm disabled:opacity-50 scheme-dark"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {/* Height */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
               Height (cm)
             </label>
             <input
               type="number"
               disabled={!isEditing}
               {...register("height", { required: true })}
-              className="w-full px-4 py-3 rounded-xl border border-white/5 bg-black/40 text-white placeholder:text-gray-600 focus:outline-none focus:border-primary/50 transition-all text-sm disabled:opacity-50"
+              className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-gray-500 focus:outline-none focus:border-primary/50 transition-all text-sm disabled:opacity-50"
             />
           </div>
 
           {/* Weight */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
               Weight (kg)
             </label>
             <input
               type="number"
               disabled={!isEditing}
               {...register("weight", { required: true })}
-              className="w-full px-4 py-3 rounded-xl border border-white/5 bg-black/40 text-white placeholder:text-gray-600 focus:outline-none focus:border-primary/50 transition-all text-sm disabled:opacity-50"
+              className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-gray-500 focus:outline-none focus:border-primary/50 transition-all text-sm disabled:opacity-50"
             />
           </div>
 
           {/* Preferred Foot */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
               Preferred Foot
             </label>
             <select
               disabled={!isEditing}
               {...register("preferredFoot")}
-              className="w-full px-4 py-3.5 rounded-xl border border-white/5 bg-black/40 text-white focus:outline-none focus:border-primary/50 transition-all text-sm disabled:opacity-50"
+              className="w-full px-4 py-3.5 rounded-xl border border-white/10 bg-white/5 text-white focus:outline-none focus:border-primary/50 transition-all text-sm disabled:opacity-50"
             >
               <option value="Right" className="bg-black text-white">Right Foot</option>
               <option value="Left" className="bg-black text-white">Left Foot</option>
@@ -202,14 +202,14 @@ return (
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Position */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
               Position
             </label>
             <select
               disabled={!isEditing}
               {...register("position")}
-              className="w-full px-4 py-3.5 rounded-xl border border-white/5 bg-black/40 text-white focus:outline-none focus:border-primary/50 transition-all text-sm disabled:opacity-50"
+              className="w-full px-4 py-3.5 rounded-xl border border-white/10 bg-white/5 text-white focus:outline-none focus:border-primary/50 transition-all text-sm disabled:opacity-50"
             >
               <option value="Forward" className="bg-black text-white">Forward / Striker</option>
               <option value="Midfielder" className="bg-black text-white">Midfielder</option>
@@ -219,32 +219,32 @@ return (
           </div>
 
           {/* Academy */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
               Academy Location
             </label>
             <input
               type="text"
               disabled={!isEditing}
               {...register("academy", { required: true })}
-              className="w-full px-4 py-3 rounded-xl border border-white/5 bg-black/40 text-white focus:outline-none focus:border-primary/50 transition-all text-sm disabled:opacity-50"
+              className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white focus:outline-none focus:border-primary/50 transition-all text-sm disabled:opacity-50"
             />
           </div>
         </div>
 
         {isEditing && (
-          <div className="flex gap-4 pt-4 justify-end border-t border-white/5">
+          <div className="flex items-center gap-4 pt-6 mt-4 justify-end border-t border-white/5">
             <button
               type="button"
               onClick={() => setIsEditing(false)}
-              className="px-5 py-3 rounded-xl border border-white/10 text-xs font-bold text-gray-400 hover:bg-white/5 transition-all uppercase tracking-wider"
+              className="h-11 px-6 rounded-xl border border-white/10 text-xs font-bold text-gray-400 hover:bg-white/5 transition-all uppercase tracking-wider flex items-center justify-center"
             >
               Cancel
             </button>
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="bg-[#E31B23] hover:bg-[#C2181F] text-white px-6 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg shadow-[#E31B23]/20"
+              className="h-11 bg-[#E31B23] hover:bg-[#C2181F] text-white px-8 rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg shadow-[#E31B23]/20 flex items-center justify-center"
             >
               {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>

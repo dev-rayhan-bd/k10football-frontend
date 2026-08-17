@@ -65,13 +65,13 @@ toast.success(`RSVP updated: Marcus is marked as ${status.toLowerCase()}`);
 };
 
 return (
-<div className="space-y-8 pb-12">
+<div className="space-y-8 pb-24 md:pb-12">
   {/* Welcome Header */}
   <div>
-    <h1 className="text-4xl md:text-5xl font-black uppercase text-white font-orbitron tracking-tight leading-none">
+    <h1 className="text-3xl md:text-5xl font-black uppercase text-white font-orbitron tracking-tight leading-none">
       Guardian <span className="text-primary italic">Overview</span>
     </h1>
-    <p className="text-white/60 font-bold uppercase tracking-widest text-[11px] mt-2">
+    <p className="text-white/60 font-bold uppercase tracking-widest text-[9px] md:text-[11px] mt-2 leading-relaxed">
       Monitor your child&apos;s football development and manage academy services
     </p>
   </div>
@@ -79,46 +79,46 @@ return (
   {/* Stats Cards Grid */}
   <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
     {/* Children Card */}
-    <div className="bg-[#0D0D0D]/40 border border-white/5 p-6 rounded-2xl flex items-center gap-5 hover:border-white/10 transition-all">
-      <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
-        <IconUsers size={24} />
+    <div className="bg-[#0D0D0D]/40 border border-white/5 p-5 md:p-6 rounded-2xl flex items-center gap-4 md:gap-5 hover:border-white/10 transition-all">
+      <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 shrink-0">
+        <IconUsers className="w-5 h-5 md:w-6 md:h-6" />
       </div>
-      <div>
-        <span className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">Children</span>
-        <p className="text-2xl font-black text-white font-orbitron mt-0.5">1 Player</p>
+      <div className="min-w-0">
+        <span className="text-[9px] md:text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] truncate block">Children</span>
+        <p className="text-xl md:text-2xl font-black text-white font-orbitron mt-0.5 truncate">1 Player</p>
       </div>
     </div>
 
     {/* Next Training Card */}
-    <div className="bg-[#0D0D0D]/40 border border-white/5 p-6 rounded-2xl flex items-center gap-5 hover:border-white/10 transition-all">
-      <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center text-green-400">
-        <IconCalendar size={24} />
+    <div className="bg-[#0D0D0D]/40 border border-white/5 p-5 md:p-6 rounded-2xl flex items-center gap-4 md:gap-5 hover:border-white/10 transition-all">
+      <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-green-500/10 flex items-center justify-center text-green-400 shrink-0">
+        <IconCalendar className="w-5 h-5 md:w-6 md:h-6" />
       </div>
-      <div>
-        <span className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">Next Session</span>
-        <p className="text-sm font-bold text-white mt-1">Tue, 4:00 PM</p>
+      <div className="min-w-0">
+        <span className="text-[9px] md:text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] truncate block">Next Session</span>
+        <p className="text-sm font-bold text-white mt-1 truncate">Tue, 4:00 PM</p>
       </div>
     </div>
 
     {/* Pending Fees Card */}
-    <div className="bg-[#0D0D0D]/40 border border-white/5 p-6 rounded-2xl flex items-center gap-5 hover:border-white/10 transition-all">
-      <div className="w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center text-yellow-400">
-        <IconCreditCard size={24} />
+    <div className="bg-[#0D0D0D]/40 border border-white/5 p-5 md:p-6 rounded-2xl flex items-center gap-4 md:gap-5 hover:border-white/10 transition-all">
+      <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center text-yellow-400 shrink-0">
+        <IconCreditCard className="w-5 h-5 md:w-6 md:h-6" />
       </div>
-      <div>
-        <span className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">Pending Fees</span>
-        <p className="text-2xl font-black text-white font-orbitron mt-0.5">$45.00</p>
+      <div className="min-w-0">
+        <span className="text-[9px] md:text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] truncate block">Pending Fees</span>
+        <p className="text-xl md:text-2xl font-black text-white font-orbitron mt-0.5 truncate">$45.00</p>
       </div>
     </div>
 
     {/* Match Reports Card */}
-    <div className="bg-[#0D0D0D]/40 border border-white/5 p-6 rounded-2xl flex items-center gap-5 hover:border-white/10 transition-all">
-      <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
-        <IconReportAnalytics size={24} />
+    <div className="bg-[#0D0D0D]/40 border border-white/5 p-5 md:p-6 rounded-2xl flex items-center gap-4 md:gap-5 hover:border-white/10 transition-all">
+      <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 shrink-0">
+        <IconReportAnalytics className="w-5 h-5 md:w-6 md:h-6" />
       </div>
-      <div>
-        <span className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">Active Reports</span>
-        <p className="text-2xl font-black text-white font-orbitron mt-0.5">1 Pending</p>
+      <div className="min-w-0">
+        <span className="text-[9px] md:text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] truncate block">Active Reports</span>
+        <p className="text-xl md:text-2xl font-black text-white font-orbitron mt-0.5 truncate">1 Pending</p>
       </div>
     </div>
   </div>

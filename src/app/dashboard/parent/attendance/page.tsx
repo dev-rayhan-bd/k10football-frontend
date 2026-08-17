@@ -94,56 +94,56 @@ attendanceStats.rate = attendanceStats.totalPast > 0
 : 0;
 
 return (
-<div className="space-y-8 pb-12">
+<div className="space-y-8 pb-24 md:pb-12">
   {/* Header */}
   <div>
-    <h1 className="text-4xl md:text-5xl font-black uppercase text-white font-orbitron tracking-tight leading-none">
+    <h1 className="text-3xl md:text-5xl font-black uppercase text-white font-orbitron tracking-tight leading-none">
       Training <span className="text-primary italic">Attendance</span>
     </h1>
-    <p className="text-white/60 font-bold uppercase tracking-widest text-[11px] mt-2">
+    <p className="text-white/60 font-bold uppercase tracking-widest text-[9px] md:text-[11px] mt-2 leading-relaxed">
       Monitor your child&apos;s training schedule and confirm RSVPs
     </p>
   </div>
 
   {/* Stats Board */}
   <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-    <div className="bg-[#0D0D0D]/40 border border-white/5 p-6 rounded-2xl flex items-center gap-5 hover:border-white/10 transition-all">
-      <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center text-green-400">
-        <IconPercentage size={24} />
+    <div className="bg-[#0D0D0D]/40 border border-white/5 p-5 md:p-6 rounded-2xl flex items-center gap-4 md:gap-5 hover:border-white/10 transition-all">
+      <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-green-500/10 flex items-center justify-center text-green-400 shrink-0">
+        <IconPercentage className="w-5 h-5 md:w-6 md:h-6" />
       </div>
-      <div>
-        <span className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">Attendance Rate</span>
-        <p className="text-2xl font-black text-white font-orbitron mt-0.5">{attendanceStats.rate}%</p>
-      </div>
-    </div>
-
-    <div className="bg-[#0D0D0D]/40 border border-white/5 p-6 rounded-2xl flex items-center gap-5 hover:border-white/10 transition-all">
-      <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
-        <IconCalendar size={24} />
-      </div>
-      <div>
-        <span className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">Total Sessions</span>
-        <p className="text-2xl font-black text-white font-orbitron mt-0.5">{attendanceStats.totalPast} Sessions</p>
+      <div className="min-w-0">
+        <span className="text-[9px] md:text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] block truncate">Attendance Rate</span>
+        <p className="text-xl md:text-2xl font-black text-white font-orbitron mt-0.5 truncate">{attendanceStats.rate}%</p>
       </div>
     </div>
 
-    <div className="bg-[#0D0D0D]/40 border border-white/5 p-6 rounded-2xl flex items-center gap-5 hover:border-white/10 transition-all">
-      <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
-        <IconCheck size={24} />
+    <div className="bg-[#0D0D0D]/40 border border-white/5 p-5 md:p-6 rounded-2xl flex items-center gap-4 md:gap-5 hover:border-white/10 transition-all">
+      <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 shrink-0">
+        <IconCalendar className="w-5 h-5 md:w-6 md:h-6" />
       </div>
-      <div>
-        <span className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">Present</span>
-        <p className="text-2xl font-black text-emerald-400 font-orbitron mt-0.5">{attendanceStats.present}</p>
+      <div className="min-w-0">
+        <span className="text-[9px] md:text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] block truncate">Total Sessions</span>
+        <p className="text-xl md:text-2xl font-black text-white font-orbitron mt-0.5 truncate">{attendanceStats.totalPast} Sessions</p>
       </div>
     </div>
 
-    <div className="bg-[#0D0D0D]/40 border border-white/5 p-6 rounded-2xl flex items-center gap-5 hover:border-white/10 transition-all">
-      <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center text-red-400">
-        <IconX size={24} />
+    <div className="bg-[#0D0D0D]/40 border border-white/5 p-5 md:p-6 rounded-2xl flex items-center gap-4 md:gap-5 hover:border-white/10 transition-all">
+      <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 shrink-0">
+        <IconCheck className="w-5 h-5 md:w-6 md:h-6" />
       </div>
-      <div>
-        <span className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">Absent</span>
-        <p className="text-2xl font-black text-red-500 font-orbitron mt-0.5">{attendanceStats.absent}</p>
+      <div className="min-w-0">
+        <span className="text-[9px] md:text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] block truncate">Present</span>
+        <p className="text-xl md:text-2xl font-black text-emerald-400 font-orbitron mt-0.5 truncate">{attendanceStats.present}</p>
+      </div>
+    </div>
+
+    <div className="bg-[#0D0D0D]/40 border border-white/5 p-5 md:p-6 rounded-2xl flex items-center gap-4 md:gap-5 hover:border-white/10 transition-all">
+      <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-red-500/10 flex items-center justify-center text-red-400 shrink-0">
+        <IconX className="w-5 h-5 md:w-6 md:h-6" />
+      </div>
+      <div className="min-w-0">
+        <span className="text-[9px] md:text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] block truncate">Absent</span>
+        <p className="text-xl md:text-2xl font-black text-red-500 font-orbitron mt-0.5 truncate">{attendanceStats.absent}</p>
       </div>
     </div>
   </div>
@@ -158,14 +158,14 @@ return (
           .map((sess) => (
             <div
               key={sess.id}
-              className="p-5 rounded-2xl bg-black/40 border border-white/5 flex flex-col gap-4 hover:border-white/10 transition-all"
+              className="p-5 rounded-2xl bg-white/5 border border-white/10 flex flex-col gap-4 hover:border-white/20 transition-all"
             >
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="text-sm font-bold text-white">{sess.title}</h3>
-                  <span className="text-[10px] text-primary font-bold uppercase tracking-wider">{sess.id}</span>
+              <div className="flex justify-between items-start gap-4">
+                <div className="min-w-0">
+                  <h3 className="text-sm font-bold text-white truncate">{sess.title}</h3>
+                  <span className="text-[10px] text-primary font-bold uppercase tracking-wider truncate block">{sess.id}</span>
                 </div>
-                <Badge className={`text-[8px] font-bold ${
+                <Badge className={`text-[8px] font-bold shrink-0 ${
                   sess.status === "Attending" ? "bg-green-500/10 border-green-500/30 text-green-400" :
                   sess.status === "Declined" ? "bg-red-500/10 border-red-500/30 text-red-400" :
                   "bg-yellow-500/10 border-yellow-500/30 text-yellow-400"
@@ -174,32 +174,32 @@ return (
                 </Badge>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 text-xs text-gray-400">
-                <span className="flex items-center gap-1.5"><IconClock size={14} /> {sess.time}</span>
-                <span className="flex items-center gap-1.5"><IconMapPin size={14} /> {sess.pitch}</span>
-                <span className="flex items-center gap-1.5"><IconUser size={14} /> Coach: {sess.coach}</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-400">
+                <span className="flex items-center gap-1.5"><IconClock size={14} className="shrink-0" /> <span className="truncate">{sess.time}</span></span>
+                <span className="flex items-center gap-1.5"><IconMapPin size={14} className="shrink-0" /> <span className="truncate">{sess.pitch}</span></span>
+                <span className="flex items-center gap-1.5 sm:col-span-2"><IconUser size={14} className="shrink-0" /> <span className="truncate">Coach: {sess.coach}</span></span>
               </div>
 
-              <div className="flex gap-2 pt-2 border-t border-white/5 justify-end">
+              <div className="flex flex-col sm:flex-row gap-2 pt-3 border-t border-white/5 sm:justify-end">
                 <button
                   onClick={() => handleRsvp(sess.id, "Attending")}
-                  className={`px-4 py-2 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1 ${
+                  className={`px-3 py-2.5 sm:px-4 sm:py-2 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 w-full sm:w-auto ${
                     sess.status === "Attending"
                       ? "bg-green-600 border-green-600 text-white"
                       : "bg-white/5 border-white/10 text-gray-300 hover:bg-white/10"
                   }`}
                 >
-                  <IconCheck size={12} /> Confirm Attendance
+                  <IconCheck size={14} /> Confirm Attendance
                 </button>
                 <button
                   onClick={() => handleRsvp(sess.id, "Declined")}
-                  className={`px-4 py-2 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1 ${
+                  className={`px-3 py-2.5 sm:px-4 sm:py-2 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 w-full sm:w-auto ${
                     sess.status === "Declined"
                       ? "bg-red-600 border-red-600 text-white"
                       : "bg-white/5 border-white/10 text-gray-300 hover:bg-white/10"
                   }`}
                 >
-                  <IconX size={12} /> Decline
+                  <IconX size={14} /> Decline
                 </button>
               </div>
             </div>
@@ -216,14 +216,14 @@ return (
           .map((sess) => (
             <div
               key={sess.id}
-              className="p-5 rounded-2xl bg-black/40 border border-white/5 flex flex-col gap-3 hover:border-white/10 transition-all"
+              className="p-5 rounded-2xl bg-white/5 border border-white/10 flex flex-col gap-3 hover:border-white/20 transition-all"
             >
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="text-sm font-bold text-white">{sess.title}</h3>
-                  <span className="text-[10px] text-gray-500 font-bold">{sess.date}</span>
+              <div className="flex justify-between items-start gap-4">
+                <div className="min-w-0">
+                  <h3 className="text-sm font-bold text-white truncate">{sess.title}</h3>
+                  <span className="text-[10px] text-gray-500 font-bold block">{sess.date}</span>
                 </div>
-                <Badge className={`text-[8px] font-bold ${
+                <Badge className={`text-[8px] font-bold shrink-0 ${
                   sess.status === "Present" ? "bg-green-500/10 border-green-500/30 text-green-400" :
                   "bg-red-500/10 border-red-500/30 text-red-400"
                 }`}>
@@ -231,9 +231,9 @@ return (
                 </Badge>
               </div>
 
-              <div className="flex justify-between items-center text-xs text-gray-400">
-                <span className="flex items-center gap-1"><IconMapPin size={12} /> {sess.pitch}</span>
-                <span>Coach: {sess.coach}</span>
+              <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-[10px] sm:text-xs text-gray-400 gap-1.5 sm:gap-0 mt-1">
+                <span className="flex items-center gap-1.5"><IconMapPin size={14} className="shrink-0" /> <span className="truncate">{sess.pitch}</span></span>
+                <span className="flex items-center gap-1.5"><IconUser size={14} className="shrink-0 sm:hidden" /> <span className="truncate">Coach: {sess.coach}</span></span>
               </div>
             </div>
           ))}
