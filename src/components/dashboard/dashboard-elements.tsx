@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import { IconPlus } from "@tabler/icons-react";
 
 interface DashboardPageHeaderProps {
   title: string;

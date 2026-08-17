@@ -113,63 +113,119 @@ const GameReports = () => {
       </div>
 
       {/* Table Section */}
-      <div className="p-4 sm:p-10 rounded-[40px] border border-white/5 bg-[#0D0D0D]/40 backdrop-blur-xl overflow-x-auto w-full">
-        <table className="w-full text-left border-collapse min-w-200">
-          <thead>
-            <tr className="border-b border-white/10 text-[11px] font-bold text-gray-500 uppercase tracking-[0.2em]">
-              <th className="pb-6 pl-4">Report</th>
-              <th className="pb-6">Rating</th>
-              <th className="pb-6">Amount</th>
-              <th className="pb-6">Approval Date</th>
-              <th className="pb-6">Status</th>
-              <th className="pb-6 text-center">Action</th>
-            </tr>
-          </thead>
-          <tbody className="text-sm font-medium">
-            {reports
-              .filter(item => statusFilter === 'All' || item.status === statusFilter)
-              .map((item) => (
-              <tr key={item.id} className="group hover:bg-white/5 transition-colors border-b border-white/5">
-                <td className="py-6 pl-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-8 h-8 rounded-lg bg-red-600/10 flex items-center justify-center text-red-500">
-                      <IconFileText size={18} stroke={1.5} />
-                    </div>
-                    <span className="text-white font-bold">vs {item.team2}</span>
-                  </div>
-                </td>
-                <td className="py-6">
-                  <span className="text-red-600 font-bold">{item.rating.toFixed(1)}</span>
-                </td>
-                <td className="py-6 text-gray-300">
-                  {item.amount}
-                </td>
-                <td className="py-6 text-gray-400">
-                  {item.date}
-                </td>
-                <td className="py-6">
-                  <div className={`flex items-center gap-2 ${item.status === 'Paid' ? 'text-green-500' : 'text-orange-500'}`}>
-                    {item.status === 'Paid' ? <IconCircleCheck size={16} /> : <IconClock size={16} />}
-                    <span className="text-xs font-bold uppercase tracking-wider">{item.status}</span>
-                  </div>
-                </td>
-                <td className="py-6">
-                  <div className="flex items-center justify-center gap-4">
-                    <button
-                      onClick={() => handleView(item)}
-                      className="text-red-600 hover:text-red-400 transition-colors"
-                    >
-                      <IconEye size={18} stroke={1.5} />
-                    </button>
-                    <button className="text-white hover:text-gray-300 transition-colors">
-                      <IconDownload size={18} stroke={1.5} />
-                    </button>
-                  </div>
-                </td>
+      <div className="p-4 sm:p-10 rounded-[30px] sm:rounded-[40px] border border-white/5 bg-[#0D0D0D]/40 backdrop-blur-xl w-full">
+        
+        {/* Desktop Table */}
+        <div className="hidden lg:block overflow-x-auto w-full">
+          <table className="w-full text-left border-collapse min-w-200">
+            <thead>
+              <tr className="border-b border-white/10 text-[11px] font-bold text-gray-500 uppercase tracking-[0.2em]">
+                <th className="pb-6 pl-4">Report</th>
+                <th className="pb-6">Rating</th>
+                <th className="pb-6">Amount</th>
+                <th className="pb-6">Approval Date</th>
+                <th className="pb-6">Status</th>
+                <th className="pb-6 text-center">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="text-sm font-medium">
+              {reports
+                .filter(item => statusFilter === 'All' || item.status === statusFilter)
+                .map((item) => (
+                <tr key={item.id} className="group hover:bg-white/5 transition-colors border-b border-white/5">
+                  <td className="py-6 pl-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-8 h-8 rounded-lg bg-red-600/10 flex items-center justify-center text-red-500">
+                        <IconFileText size={18} stroke={1.5} />
+                      </div>
+                      <span className="text-white font-bold">vs {item.team2}</span>
+                    </div>
+                  </td>
+                  <td className="py-6">
+                    <span className="text-red-600 font-bold">{item.rating.toFixed(1)}</span>
+                  </td>
+                  <td className="py-6 text-gray-300">
+                    {item.amount}
+                  </td>
+                  <td className="py-6 text-gray-400">
+                    {item.date}
+                  </td>
+                  <td className="py-6">
+                    <div className={`flex items-center gap-2 ${item.status === 'Paid' ? 'text-green-500' : 'text-orange-500'}`}>
+                      {item.status === 'Paid' ? <IconCircleCheck size={16} /> : <IconClock size={16} />}
+                      <span className="text-xs font-bold uppercase tracking-wider">{item.status}</span>
+                    </div>
+                  </td>
+                  <td className="py-6">
+                    <div className="flex items-center justify-center gap-4">
+                      <button
+                        onClick={() => handleView(item)}
+                        className="text-red-600 hover:text-red-400 transition-colors"
+                      >
+                        <IconEye size={18} stroke={1.5} />
+                      </button>
+                      <button className="text-white hover:text-gray-300 transition-colors">
+                        <IconDownload size={18} stroke={1.5} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="flex flex-col gap-4 lg:hidden">
+          {reports
+            .filter(item => statusFilter === 'All' || item.status === statusFilter)
+            .map((item) => (
+            <div key={item.id} className="p-5 rounded-2xl bg-[#0A0A0A]/60 border border-white/5 flex flex-col gap-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 shrink-0 rounded-xl bg-red-600/10 flex items-center justify-center text-red-500">
+                    <IconFileText size={20} stroke={1.5} />
+                  </div>
+                  <div>
+                    <span className="text-white font-bold block text-sm sm:text-base leading-tight mb-1">vs {item.team2}</span>
+                    <span className="text-gray-400 text-xs block">{item.date}</span>
+                  </div>
+                </div>
+                <div className="text-right">
+                   <div className="text-[9px] text-gray-500 font-bold uppercase tracking-wider mb-0.5">Rating</div>
+                   <span className="text-red-600 font-bold text-lg leading-tight block">{item.rating.toFixed(1)}</span>
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center pt-3 border-t border-white/5">
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Amount</span>
+                  <span className="text-gray-300 text-sm font-bold">{item.amount}</span>
+                </div>
+                <div className="flex flex-col gap-1 items-end">
+                   <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/5 ${item.status === 'Paid' ? 'text-green-500' : 'text-orange-500'}`}>
+                     {item.status === 'Paid' ? <IconCircleCheck size={14} /> : <IconClock size={14} />}
+                     <span className="text-[10px] font-bold uppercase tracking-wider">{item.status}</span>
+                   </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-1">
+                <button
+                  onClick={() => handleView(item)}
+                  className="flex-1 sm:flex-none flex justify-center items-center gap-2 px-4 py-2.5 rounded-lg bg-red-600/10 text-red-500 hover:bg-red-600/20 text-xs font-bold uppercase transition-colors"
+                >
+                  <IconEye size={16} />
+                  View
+                </button>
+                <button className="flex-1 sm:flex-none flex justify-center items-center gap-2 px-4 py-2.5 rounded-lg bg-white/5 text-white hover:bg-white/10 text-xs font-bold uppercase transition-colors">
+                  <IconDownload size={16} />
+                  Save
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Report Detail Drawer */}

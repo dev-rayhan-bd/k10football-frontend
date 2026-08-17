@@ -19,7 +19,7 @@ const DashboardLayout = ({ children, sidebarItems, tier, showToggle = false, cus
 return (
 <SidebarProvider>
   <AppSidebar variant="inset" sidebarItems={sidebarItems} tier={tier} />
-  <SidebarInset className="bg-[#0A0A0A] text-white min-w-0 flex-1 overflow-x-hidden">
+  <SidebarInset className="bg-[#0A0A0A] text-white min-w-0 flex-1">
     <SiteHeader showToggle={showToggle} customToggle={customToggle} />
     <main className="p-4 md:p-6 lg:p-8 pb-0 md:pb-0 lg:pb-0 min-h-screen @container/main">
       {children}

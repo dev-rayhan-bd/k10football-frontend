@@ -85,29 +85,31 @@ const ClubSection = () => {
 
   return (
     <div className="container py-10 bg-cardBg rounded-xl mt-10">
-      <div className="flex justify-between items-center mb-8">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 gap-4">
+        <div className="flex items-center gap-2 order-2 sm:order-1 w-full sm:w-1/3 justify-center sm:justify-start">
            <Info size={14} className="text-gray-400" />
            <span className="text-xs text-gray-400">{clubCount}/6 Clubs</span>
         </div>
-        <h1 className="text-4xl font-light text-center text-foreground font-heading">Clubs</h1>
-        <Button
-          onClick={() => {
-            if (isLimitReached) {
-              toast.error("Maximum 6 clubs allowed. Remove an entry to add a new one.");
-            } else {
-              setIsAdding(true);
-            }
-          }}
-          disabled={isLimitReached && !isAdding}
-          className={cn(
-            "text-black transition-all font-bold",
-            isLimitReached ? "bg-gray-600 cursor-not-allowed" : "bg-primary hover:bg-primary/90"
-          )}
-          size="sm"
-        >
-          <Plus className="h-4 w-4 mr-2" /> Add Club
-        </Button>
+        <h1 className="text-3xl sm:text-4xl font-light text-center text-foreground font-heading order-1 sm:order-2 w-full sm:w-1/3">Clubs</h1>
+        <div className="order-3 w-full sm:w-1/3 flex justify-center sm:justify-end">
+          <Button
+            onClick={() => {
+              if (isLimitReached) {
+                toast.error("Maximum 6 clubs allowed. Remove an entry to add a new one.");
+              } else {
+                setIsAdding(true);
+              }
+            }}
+            disabled={isLimitReached && !isAdding}
+            className={cn(
+              "text-black transition-all font-bold w-full sm:w-auto",
+              isLimitReached ? "bg-gray-600 cursor-not-allowed" : "bg-primary hover:bg-primary/90"
+            )}
+            size="sm"
+          >
+            <Plus className="h-4 w-4 mr-2" /> Add Club
+          </Button>
+        </div>
       </div>
 
       <div className="border border-border bg-black/30 rounded-2xl p-8">
@@ -143,7 +145,7 @@ const ClubSection = () => {
                   value={club.name}
                   onUpdate={(val) => updateClub(club.id, "name", val)}
                   canEdit={true}
-                  className="text-lg font-semibold text-foreground break-words uppercase leading-tight pr-6"
+                  className="text-lg font-semibold text-foreground wrap-break-word uppercase leading-tight pr-6"
                 />
                 <div className="flex items-center gap-1 text-sm text-gray-400 mt-1">
                   <CMSField

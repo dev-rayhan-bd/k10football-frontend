@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 import React, { useState, useEffect } from "react";
@@ -18,23 +19,6 @@ import { FileText } from 'lucide-react';
 import { useAppSelector } from "@/lib/hooks/reduxHooks";
 import Image from "next/image";
 
-// const CareerItem = ({ logo, name, role, years, type }: { logo: string; name: string; role: string; years: string; type: string }) => (
-//   <div className="bg-black/40 border border-white/10 rounded-2xl p-4 flex flex-col gap-3 group hover:border-white/20 transition-all">
-//     <div className="flex items-center gap-4">
-//       <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden">
-//         <img src={logo} alt={name} className="w-6 h-6 object-contain" />
-//       </div>
-//       <div className="min-w-0">
-//         <h4 className="text-sm font-bold text-white truncate">{name}</h4>
-//         <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{role}</p>
-//       </div>
-//     </div>
-//     <div className="flex justify-between items-center">
-//       <span className="text-[10px] font-bold text-white/40">{years}</span>
-//       <span className="text-[10px] font-black text-[#E31B23] uppercase tracking-widest">{type}</span>
-//     </div>
-//   </div>
-// );
 
 const GenerateCv = () => {
   const { playerData } = usePlayer();
@@ -277,14 +261,14 @@ const GenerateCv = () => {
   return (
     <div className="flex flex-col gap-8 pb-10">
       {/* Header */}
-      <div className="flex justify-between items-end print:hidden">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 print:hidden">
         <div>
-          <h1 className="text-5xl font-black text-white font-orbitron uppercase tracking-tight">Generate CV</h1>
-          <p className="text-white/60 font-medium mt-2 text-lg">My Professional Football Profile</p>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white font-orbitron uppercase tracking-tight">Generate CV</h1>
+          <p className="text-white/60 font-medium mt-1 md:mt-2 text-sm md:text-lg">My Professional Football Profile</p>
         </div>
         <Button
           onClick={generateProfessionalPDF}
-          className="bg-[#222222] hover:bg-[#333333] text-white border border-white/5 gap-2 px-6 py-4 rounded-xl font-bold uppercase tracking-widest text-[10px] h-auto"
+          className="bg-[#222222] hover:bg-[#333333] text-white border border-white/5 gap-2 px-6 py-4 rounded-xl font-bold uppercase tracking-widest text-[10px] h-auto w-full md:w-auto"
         >
           <IconDownload size={18} /> Download CV PDF
         </Button>
@@ -296,13 +280,13 @@ const GenerateCv = () => {
       <div className="flex flex-col gap-6">
         {/* Personal Information Hero - Restoring Original Design */}
         <section className="bg-[#111111] rounded-3xl border border-white/10 p-4 md:p-8 flex flex-col gap-8">
-          <div className="relative rounded-3xl overflow-hidden min-h-[400px] md:min-h-[560px] border border-white/10 group flex flex-col justify-end">
+          <div className="relative rounded-3xl overflow-hidden min-h-100 md:min-h-140 border border-white/10 group flex flex-col justify-end">
             <div
               className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
               style={{ backgroundImage: `url('/stadium-night.jpg')` }}
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/40 via-[45%] to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-r from-black/95 via-black/40 via-45% to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
 
             <div className="absolute right-0 bottom-0 h-full w-[70%] md:w-[55%] flex items-end justify-end pointer-events-none opacity-60 md:opacity-100">
               <Image

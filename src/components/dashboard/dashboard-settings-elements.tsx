@@ -40,7 +40,7 @@ export const SettingsInput = ({ label, placeholder, type = "text", isDate, icon,
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className="w-full h-12 bg-white/[0.02] border border-white/25 rounded-xl px-4 text-sm font-bold text-white focus:outline-none focus:border-[#E31B23]/50 placeholder:text-gray-700 transition-all" 
+        className="w-full h-12 bg-white/2 border border-white/25 rounded-xl px-4 text-sm font-bold text-white focus:outline-none focus:border-[#E31B23]/50 placeholder:text-gray-700 transition-all" 
       />
       {isDate && !icon && <IconCalendar className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />}
       {icon && <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">{icon}</div>}
@@ -65,7 +65,7 @@ export const SettingsToggle = ({ title, description, defaultChecked, onToggle }:
   };
 
   return (
-    <div className="p-6 rounded-xl border border-white/10 bg-white/[0.02] flex items-center justify-between group hover:border-[#E31B23]/20 transition-all">
+    <div className="p-6 rounded-xl border border-white/10 bg-white/2 flex items-center justify-between group hover:border-[#E31B23]/20 transition-all">
       <div>
         <h4 className="text-sm font-bold text-white mb-1">{title}</h4>
         <p className="text-xs text-gray-500">{description}</p>

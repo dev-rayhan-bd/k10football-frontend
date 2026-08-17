@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { IconPhone, IconMail, IconShieldCheck, IconCertificate } from "@tabler/icons-react";
+import Image from "next/image";
 
 interface DashboardHeroProps {
   backgroundImage: string;
@@ -46,20 +48,22 @@ const DashboardHero = ({
   };
 
   return (
-    <div className="relative rounded-3xl overflow-hidden min-h-[500px] border border-white/20 bg-[#0D0D0D] group flex flex-col justify-center">
+    <div className="relative rounded-3xl overflow-hidden min-h-125 border border-white/20 bg-[#0D0D0D] group flex flex-col justify-center">
       {/* Background Image */}
       <div 
-        className="absolute inset-0 bg-[length:100%_auto] bg-no-repeat bg-center opacity-50"
+        className="absolute inset-0 bg-size-[100%_auto] bg-no-repeat bg-center opacity-50"
         style={{ backgroundImage: `url(${backgroundImage})` }}
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent w-2/3" />
+      <div className="absolute inset-0 bg-linear-to-r from-black/60 via-black/20 to-transparent w-2/3" />
       
       {/* Standing Character */}
       {characterImgSrc && (
-        <img 
+        <Image 
           src={characterImgSrc} 
           alt="Character" 
           className="absolute right-16 bottom-6 h-[88%] object-contain object-right z-10 hidden lg:block"
+          width={200}
+          height={200}
         />
       )}
 
@@ -68,7 +72,7 @@ const DashboardHero = ({
           {/* Logo Image */}
           {logoImage && (
             <div className="mb-4">
-              <img src={logoImage} alt="Club Logo" className="w-24 h-auto object-contain" />
+              <Image src={logoImage} alt="Club Logo" className="w-24 h-auto object-contain" width={200} height={200} />
             </div>
           )}
           
