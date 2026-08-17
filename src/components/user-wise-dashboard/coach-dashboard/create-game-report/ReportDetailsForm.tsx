@@ -105,7 +105,7 @@ const ReportDetailsForm = ({
   return (
     <div className="space-y-8 pb-12 animate-in fade-in duration-500">
       <div className="flex flex-col gap-2">
-        <h1 className="text-4xl font-black text-white uppercase tracking-tighter italic font-orbitron">Create Game Reports</h1>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white uppercase tracking-tighter italic font-orbitron">Create Game Reports</h1>
         <p className="text-gray-500 text-sm italic">Create Professional Football Player Game Reports</p>
       </div>
 
@@ -115,7 +115,7 @@ const ReportDetailsForm = ({
           <div className="text-gray-400 text-sm font-medium">Report Fee</div>
           <div className="text-gray-500 text-xs italic">Professional analysis delivered within 48 hours</div>
         </div>
-        <div className="text-4xl font-black text-[#E31B23] tracking-tighter italic font-orbitron">$6.99</div>
+        <div className="text-3xl sm:text-4xl font-black text-[#E31B23] tracking-tighter italic font-orbitron">$6.99</div>
       </div>
 
       <div className="space-y-8">
@@ -125,7 +125,7 @@ const ReportDetailsForm = ({
             <div className="w-8 h-8 rounded-full bg-[#00FF62]/10 border border-[#00FF62] flex items-center justify-center">
               <IconCheck size={18} className="text-[#00FF62]" />
             </div>
-            <h2 className="text-2xl font-black text-white uppercase italic tracking-tight font-orbitron">Player Information</h2>
+            <h2 className="text-xl sm:text-2xl font-black text-white uppercase italic tracking-tight font-orbitron">Player Information</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -234,7 +234,7 @@ const ReportDetailsForm = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
               <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Matches Played:</Label>
               <Input 
@@ -244,15 +244,15 @@ const ReportDetailsForm = ({
               />
             </div>
             <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Minutes Played:</Label>
-                <div className="flex items-center gap-2 -mt-1">
-                  <span className="text-xs font-bold text-white font-orbitron min-w-8 text-right">{formatTime(secondsElapsed)}</span>
+              <div className="flex flex-wrap justify-between items-center gap-1">
+                <Label className="text-[9px] sm:text-[10px] font-black text-gray-500 uppercase tracking-widest leading-tight">Minutes Played:</Label>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] sm:text-xs font-bold text-white font-orbitron min-w-8 text-right">{formatTime(secondsElapsed)}</span>
                   <button 
                     type="button"
                     onClick={toggleTimer}
                     className={cn(
-                      "flex items-center justify-center w-6 h-6 rounded-full text-black transition-all",
+                      "flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full text-black transition-all shrink-0",
                       isTimerRunning ? "bg-red-500 hover:bg-red-600 shadow-[0_0_10px_rgba(239,68,68,0.5)]" : "bg-[#00FF62] hover:bg-[#00D150] shadow-[0_0_10px_rgba(0,255,98,0.3)]"
                     )}
                   >
@@ -289,7 +289,7 @@ const ReportDetailsForm = ({
             <div className="w-8 h-8 rounded-full bg-[#00FF62]/10 border border-[#00FF62] flex items-center justify-center">
               <IconCheck size={18} className="text-[#00FF62]" />
             </div>
-            <h2 className="text-2xl font-black text-white uppercase italic tracking-tight font-orbitron">Match Information</h2>
+            <h2 className="text-xl sm:text-2xl font-black text-white uppercase italic tracking-tight font-orbitron">Match Information</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
