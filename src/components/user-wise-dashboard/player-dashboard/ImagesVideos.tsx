@@ -104,7 +104,7 @@ const MediaSection = ({ title, type, items }: { title: string, type: 'image' | '
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.onerror = null;
-                target.src = '/FootballPitch.png';
+                target.src = '/placeholder_img.jpg';
               }}
             />
             {type === 'video' && (

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React from "react";
 import { 
@@ -6,11 +7,11 @@ import {
   IconHeart, 
   IconPlus, 
   IconUpload,
-  IconDotsVertical,
   IconTrash,
   IconEdit,
   IconShare
 } from "@tabler/icons-react";
+import Image from "next/image";
 
 const stats = [
   { label: "Total Videos", value: "24", icon: IconPlayerPlay },
@@ -78,7 +79,18 @@ const MediaSection = ({ title, type, items }: { title: string, type: 'image' | '
       {items.map((item, idx) => (
         <div key={idx} className="group relative rounded-2xl overflow-hidden border border-white/20 bg-[#111] hover:scale-[1.02] transition-all duration-300">
           <div className="relative aspect-video overflow-hidden">
-             <img src={item.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80" alt={item.title} />
+             <Image
+               src={item.img} 
+               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80" 
+               alt={item.title} 
+               onError={(e) => {
+                 const target = e.target as HTMLImageElement;
+                 target.onerror = null;
+                 target.src = '/placeholder_img.jpg';
+               }}
+               width={1000}
+               height={1000}
+             />
              {type === 'video' && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/20">
                    <div className="w-12 h-12 rounded-full bg-[#E31B23] flex items-center justify-center shadow-[0_0_30px_rgba(227,27,35,0.4)]">
@@ -97,7 +109,7 @@ const MediaSection = ({ title, type, items }: { title: string, type: 'image' | '
                 </button>
              </div>
           </div>
-          <div className="p-4 bg-gradient-to-b from-[#111] to-[#0D0D0D]">
+          <div className="p-4 bg-linear-to-b from-[#111] to-[#0D0D0D]">
              <h4 className="text-sm font-bold text-white truncate">{item.title}</h4>
              <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mt-1">{item.date}</p>
              <div className="flex items-center justify-between mt-4">

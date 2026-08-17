@@ -437,7 +437,18 @@ const MediaBlock = ({ title, type, items }: { title: string, type: 'image' | 'vi
       {items.map((item, idx) => (
         <div key={idx} className="group relative rounded-xl overflow-hidden border border-white/20 bg-[#111]">
           <div className="relative aspect-video overflow-hidden">
-            <Image width={100} height={100} src={item.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-60" alt={item.title} />
+            <Image 
+              width={100} 
+              height={100} 
+              src={item.img} 
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-60" 
+              alt={item.title} 
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.onerror = null;
+                target.src = '/placeholder_img.jpg';
+              }}
+            />
             {type === 'video' && (
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="w-10 h-10 rounded-full bg-[#E31B23] flex items-center justify-center shadow-2xl">
