@@ -59,7 +59,7 @@ const PerformanceChart = () => {
         {/* Main Content */}
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
           {/* Left - Radar Chart */}
-          <div className="flex-1 w-full min-h-75">
+          <div className="flex-1 w-full min-h-75 min-w-0">
             <ResponsiveContainer width="100%" height={320}>
               <RadarChart data={radarData} margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
                 <PolarGrid stroke="#333333" />
@@ -77,7 +77,7 @@ const PerformanceChart = () => {
           </div>
 
           {/* Right - Stats and Metrics */}
-          <div className="flex-1 w-full">
+          <div className="flex-1 w-full min-w-0">
             {/* Stats Cards */}
             <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 sm:mb-8">
               {stats.map((stat) => (

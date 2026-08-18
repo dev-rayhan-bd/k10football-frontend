@@ -23,7 +23,7 @@ const StatInput = ({ label, value, onChange, colorClass, align = "left" }: StatI
           <button
             type="button"
             onClick={() => onChange(Math.max(0, value - 1))}
-            className="flex-1 h-full flex items-center justify-center text-white/85 hover:text-white hover:bg-white/10 active:scale-90 transition-all text-xl font-black font-orbitron cursor-pointer select-none"
+            className="flex-1 h-full flex items-center justify-center text-white/85 hover:text-white hover:bg-white/10 active:scale-90 transition-all text-xl font-black font-orbitron cursor-pointer select-none min-w-0"
           >
             -
           </button>
@@ -31,7 +31,7 @@ const StatInput = ({ label, value, onChange, colorClass, align = "left" }: StatI
           <button
             type="button"
             onClick={() => onChange(value + 1)}
-            className="flex-1 h-full flex items-center justify-center text-white/85 hover:text-white hover:bg-white/10 active:scale-90 transition-all text-xl font-black font-orbitron cursor-pointer select-none"
+            className="flex-1 h-full flex items-center justify-center text-white/85 hover:text-white hover:bg-white/10 active:scale-90 transition-all text-xl font-black font-orbitron cursor-pointer select-none min-w-0"
           >
             +
           </button>
@@ -176,10 +176,10 @@ const MatchStatisticsForm = ({
     e.stopPropagation();
     setPitchMarkers(pitchMarkers.filter((_, idx) => idx !== index));
   };
-  const renderLeftStats = (align: "left" | "right" = "left") => statsLeft.map(s => (
+  const renderLeftStats = (align: "left" | "right" = "left", start = 0, end = 12) => statsLeft.slice(start, end).map(s => (
     <StatInput key={s.key} label={s.label} value={stats[s.key] || 0} onChange={(val) => handleStatChange(s.key, val)} colorClass={s.color} align={align} />
   ));
-  const renderRightStats = (align: "left" | "right" = "right") => statsRight.map(s => (
+  const renderRightStats = (align: "left" | "right" = "right", start = 0, end = 12) => statsRight.slice(start, end).map(s => (
     <StatInput key={s.key} label={s.label} value={stats[s.key] || 0} onChange={(val) => handleStatChange(s.key, val)} colorClass={s.color} align={align} />
   ));
   const renderGoalDiagram = () => (
@@ -290,29 +290,51 @@ const MatchStatisticsForm = ({
           </div>
         </div>
         {/* ---------------- MOBILE LAYOUT: SWIPER ---------------- */}
-        <div className="lg:hidden flex overflow-x-auto snap-x snap-mandatory w-auto -mx-8 px-8 scroll-smooth hide-scrollbar pb-6 gap-6">
-          {/* Page 1: First 12 */}
-          <div className="min-w-[85vw] snap-center shrink-0">
+        <div className="lg:hidden flex overflow-x-auto snap-x snap-mandatory w-[calc(100%+4rem)] -mx-8 px-4 scroll-smooth hide-scrollbar pb-6 gap-8">
+          {/* Page 1: Stats 1-4 */}
+          <div className="w-[calc(100vw-2rem)] min-w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] sm:min-w-[calc(100vw-4rem)] snap-center shrink-0">
             <h3 className="text-white/40 text-center font-orbitron text-xs font-bold uppercase tracking-widest mb-4">Page 1 (Swipe ⬅️)</h3>
-            <div className="grid grid-cols-2 landscape:grid-cols-6 gap-2 sm:gap-4">
-              {renderLeftStats("left")}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-4">
+                {renderLeftStats("left", 0, 4)}
+              </div>
+              <div className="flex flex-col gap-4">
+                {renderRightStats("right", 0, 4)}
+              </div>
             </div>
           </div>
-          {/* Page 2: Next 12 */}
-          <div className="min-w-[85vw] snap-center shrink-0">
+          {/* Page 2: Stats 5-8 */}
+          <div className="w-[calc(100vw-2rem)] min-w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] sm:min-w-[calc(100vw-4rem)] snap-center shrink-0">
              <h3 className="text-white/40 text-center font-orbitron text-xs font-bold uppercase tracking-widest mb-4">Page 2 (Swipe ⬅️)</h3>
-            <div className="grid grid-cols-2 landscape:grid-cols-6 gap-2 sm:gap-4">
-              {renderRightStats("left")}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-4">
+                {renderLeftStats("left", 4, 8)}
+              </div>
+              <div className="flex flex-col gap-4">
+                {renderRightStats("right", 4, 8)}
+              </div>
             </div>
           </div>
-          {/* Page 3: Goalpost Diagram */}
-          <div className="min-w-[85vw] landscape:min-w-[95vw] lg:min-w-0 snap-center shrink-0">
+          {/* Page 3: Stats 9-12 */}
+          <div className="w-[calc(100vw-2rem)] min-w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] sm:min-w-[calc(100vw-4rem)] snap-center shrink-0">
              <h3 className="text-white/40 text-center font-orbitron text-xs font-bold uppercase tracking-widest mb-4">Page 3 (Swipe ⬅️)</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-4">
+                {renderLeftStats("left", 8, 12)}
+              </div>
+              <div className="flex flex-col gap-4">
+                {renderRightStats("right", 8, 12)}
+              </div>
+            </div>
+          </div>
+          {/* Page 4: Goalpost Diagram */}
+          <div className="w-[calc(100vw-2rem)] min-w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] sm:min-w-[calc(100vw-4rem)] snap-center shrink-0">
+             <h3 className="text-white/40 text-center font-orbitron text-xs font-bold uppercase tracking-widest mb-4">Page 4 (Swipe ⬅️)</h3>
              {renderGoalDiagram()}
           </div>
-          {/* Page 4: Pitch Diagram */}
-          <div className="min-w-[85vw] landscape:min-w-[95vw] lg:min-w-0 snap-center shrink-0 pr-4">
-             <h3 className="text-white/40 text-center font-orbitron text-xs font-bold uppercase tracking-widest mb-4">Page 4</h3>
+          {/* Page 5: Pitch Diagram */}
+          <div className="w-[calc(100vw-2rem)] min-w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] sm:min-w-[calc(100vw-4rem)] snap-center shrink-0">
+             <h3 className="text-white/40 text-center font-orbitron text-xs font-bold uppercase tracking-widest mb-4">Page 5</h3>
              {renderPitchDiagram()}
           </div>
         </div>
@@ -320,10 +342,10 @@ const MatchStatisticsForm = ({
         {/* ---------------- DESKTOP LAYOUT ------------------------ */}
         <div className="hidden lg:block">
           <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-start min-h-175">
-            <div className="lg:col-span-3 flex flex-col gap-4 z-20">
+            <div className="lg:col-span-3 flex flex-col gap-4 z-20 min-w-0">
               {renderLeftStats()}
             </div>
-            <div className="hidden lg:flex lg:col-span-6 justify-center items-end h-full relative min-h-125">
+            <div className="hidden lg:flex lg:col-span-6 justify-center items-end h-full relative min-h-125 min-w-0">
               {isGK ? (
                 <Image 
                   src="/mini__GP15525.webp" 
@@ -348,7 +370,7 @@ const MatchStatisticsForm = ({
                 />
               )}
             </div>
-            <div className="lg:col-span-3 flex flex-col gap-4 z-20 items-end">
+            <div className="lg:col-span-3 flex flex-col gap-4 z-20 items-end min-w-0">
               {renderRightStats()}
             </div>
           </div>
@@ -365,13 +387,13 @@ const MatchStatisticsForm = ({
         <Button 
           variant="outline" 
           onClick={onCancel}
-          className="flex-1 bg-transparent hover:bg-white/5 text-white border border-white/10 h-14 sm:h-16 rounded-xl text-xs sm:text-sm font-black uppercase tracking-widest sm:tracking-[0.2em] transition-all font-orbitron italic"
+          className="flex-1 bg-transparent hover:bg-white/5 text-white border border-white/10 h-14 sm:h-16 rounded-xl text-xs sm:text-sm font-black uppercase tracking-widest sm:tracking-[0.2em] transition-all font-orbitron italic min-w-0"
         >
           Cancel
         </Button>
         <Button 
           onClick={onSubmit}
-          className="flex-1 bg-[#00FF62] hover:bg-[#00D150] text-black h-14 sm:h-16 rounded-xl text-xs sm:text-sm font-black uppercase tracking-widest sm:tracking-[0.2em] transition-all shadow-[0_0_30px_rgba(0,255,98,0.2)] font-orbitron italic"
+          className="flex-1 bg-[#00FF62] hover:bg-[#00D150] text-black h-14 sm:h-16 rounded-xl text-xs sm:text-sm font-black uppercase tracking-widest sm:tracking-[0.2em] transition-all shadow-[0_0_30px_rgba(0,255,98,0.2)] font-orbitron italic min-w-0"
         >
           Submit Report
         </Button>

@@ -103,7 +103,7 @@ const SuccessStory = () => {
               <DialogTitle className="text-2xl font-orbitron tracking-wide font-normal">Add Success Story</DialogTitle>
               <p className="text-gray-400 text-sm font-medium mt-1">Share your academy's latest achievement or success Story</p>
             </DialogHeader>
-            <div className="p-6 md:p-8 space-y-6 overflow-y-auto flex-1 custom-scrollbar">
+            <div className="p-6 md:p-8 space-y-6 overflow-y-auto flex-1 custom-scrollbar min-w-0">
               <div className="space-y-1.5">
                 <Label className="text-gray-300 text-xs ml-1 font-medium">Story Title</Label>
                 <Input placeholder="e.g., U14 Winger Signed by National Talent Centre" className="bg-[#111111] border-white/15 text-white h-11 rounded-xl focus:border-white/40 focus:ring-1 focus:ring-white/40" />
@@ -168,10 +168,10 @@ const SuccessStory = () => {
               </div>
             </div>
             <div className="p-6 md:p-8 border-t border-white/5 flex gap-4 bg-[#0a0a0a] shrink-0 items-center justify-center">
-              <Button className="flex-1 bg-transparent border border-white/15 text-white hover:bg-white/5 h-12 rounded-xl font-medium">
+              <Button className="flex-1 bg-transparent border border-white/15 text-white hover:bg-white/5 h-12 rounded-xl font-medium min-w-0">
                 Cancel
               </Button>
-              <Button className="flex-1 bg-white/10 border border-white/5 text-white hover:bg-white/20 h-12 rounded-xl font-medium">
+              <Button className="flex-1 bg-white/10 border border-white/5 text-white hover:bg-white/20 h-12 rounded-xl font-medium min-w-0">
                 Submit for Approval
               </Button>
             </div>

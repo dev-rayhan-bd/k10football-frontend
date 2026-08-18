@@ -25,7 +25,7 @@ import {
   DialogTitle 
 } from "@/components/ui/dialog";
 const SummaryCard = ({ label, value, icon: Icon, bgColor, textColor }: { label: string, value: string | number, icon: any, bgColor: string, textColor: string }) => (
-  <div className="bg-[#0A0A0A] border border-white/20 rounded-[20px] p-5 flex items-center gap-4 flex-1">
+  <div className="bg-[#0A0A0A] border border-white/20 rounded-[20px] p-5 flex items-center gap-4 flex-1 min-w-0">
     <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${bgColor} bg-opacity-20 border border-white/20 shrink-0`}>
       {Icon && <Icon size={24} className={`${textColor} opacity-100`} stroke={2} />}
     </div>
@@ -179,7 +179,7 @@ const SuccessStory = () => {
       <div className="flex flex-col gap-8">
         {/* Filters */}
         <div className="flex gap-4">
-          <div className="relative flex-1">
+          <div className="relative flex-1 min-w-0">
             <IconSearch size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
             <Input 
               placeholder="Search success stories by title or keywords..." 

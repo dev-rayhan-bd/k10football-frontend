@@ -115,7 +115,7 @@ const CoachDashboard = () => {
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column */}
-        <div className="lg:col-span-9 space-y-6">
+        <div className="lg:col-span-9 space-y-6 min-w-0">
           {/* Hero Section */}
           <DashboardHero
             backgroundImage="/stadium-night.jpg"
@@ -241,7 +241,7 @@ const CoachDashboard = () => {
             <h2 className="text-lg md:text-xl font-bold text-white mb-6">My CV</h2>
             <div className="flex flex-col lg:flex-row gap-8 items-start justify-between">
               {/* Progress Card */}
-              <div className="p-5 rounded-xl border border-white/10 bg-white/2 w-full lg:w-auto min-w-[200px]">
+              <div className="p-5 rounded-xl border border-white/10 bg-white/2 w-full lg:w-auto min-w-50">
                 <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Profile Completion</span>
                 <div className="text-4xl font-black text-[#E31B23] italic mt-1 mb-3">85%</div>
                 <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
@@ -249,7 +249,7 @@ const CoachDashboard = () => {
                 </div>
               </div>
               {/* Info and Checklist */}
-              <div className="flex-1 space-y-6">
+              <div className="flex-1 space-y-6 min-w-0">
                 <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
                   {[
                     { label: 'Personal Info', checked: true },
@@ -322,7 +322,7 @@ const CoachDashboard = () => {
           )}
         </div>
         {/* Right Column */}
-        <div className="lg:col-span-3 space-y-6">
+        <div className="lg:col-span-3 space-y-6 min-w-0">
           {/* Pending Game Reports */}
           <section className="p-6 rounded-2xl border border-white/20 bg-[#0D0D0D]">
             <div className="flex items-center gap-2 mb-6">
@@ -360,7 +360,7 @@ const CoachDashboard = () => {
             </div>
             <div className="space-y-4">
               {clubsInterested.map((club) => (
-                <div key={club.id} className="flex items-center gap-4 p-3 rounded-xl bg-white/10 border border-white/20 group hover:bg-white/[0.1] transition-colors">
+                <div key={club.id} className="flex items-center gap-4 p-3 rounded-xl bg-white/10 border border-white/20 group hover:bg-white/10 transition-colors">
                   <div className="w-10 h-10 p-1 rounded-lg bg-white/10 flex items-center justify-center">
                     <Image width={50} height={50} src={club.logo} className="w-full h-full object-contain" alt={club.name} />
                   </div>

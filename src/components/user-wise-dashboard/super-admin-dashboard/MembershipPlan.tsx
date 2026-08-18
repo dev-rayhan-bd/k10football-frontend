@@ -152,11 +152,11 @@ return (
                         
                         <div className="flex gap-4 pt-2">
                             <DialogTrigger asChild>
-                                <Button variant="outline" className="flex-1 bg-transparent border-[#3f3f46] text-white hover:bg-[#27272a] hover:text-white h-12 rounded-lg font-normal">
+                                <Button variant="outline" className="flex-1 bg-transparent border-[#3f3f46] text-white hover:bg-[#27272a] hover:text-white h-12 rounded-lg font-normal min-w-0">
                                     Cancel
                                 </Button>
                             </DialogTrigger>
-                            <Button className="flex-1 bg-[#333336] hover:bg-[#4a4a4e] text-white border-0 h-12 rounded-lg font-normal">
+                            <Button className="flex-1 bg-[#333336] hover:bg-[#4a4a4e] text-white border-0 h-12 rounded-lg font-normal min-w-0">
                                 Save
                             </Button>
                         </div>
@@ -197,10 +197,10 @@ return (
                     
                     <div className="mt-auto pt-4 flex justify-center">
                         <div className="flex rounded-full border border-[#2a2a30] overflow-hidden w-full max-w-[220px]">
-                            <button className="flex-1 bg-[#27272a] hover:bg-[#3f3f46] text-gray-200 text-sm py-2.5 px-4 transition-colors font-medium">
+                            <button className="flex-1 bg-[#27272a] hover:bg-[#3f3f46] text-gray-200 text-sm py-2.5 px-4 transition-colors font-medium min-w-0">
                                 Edit Plan
                             </button>
-                            <button className="flex-1 bg-transparent hover:bg-[#1a1a1c] text-gray-200 text-sm py-2.5 px-4 transition-colors font-medium">
+                            <button className="flex-1 bg-transparent hover:bg-[#1a1a1c] text-gray-200 text-sm py-2.5 px-4 transition-colors font-medium min-w-0">
                                 Deactivate
                             </button>
                         </div>

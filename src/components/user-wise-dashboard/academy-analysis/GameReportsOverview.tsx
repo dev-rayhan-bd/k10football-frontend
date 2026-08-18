@@ -50,7 +50,7 @@ const GameReportsOverview = () => {
         </div>
         <div className="relative flex justify-between gap-20">
            {/* Left Column */}
-           <div className="flex flex-col gap-4 flex-1 max-w-[300px]">
+           <div className="flex flex-col gap-4 flex-1 max-w-[300px] min-w-0">
               <StatBar label="Shots on Goal" value="8" colorClass="bg-[#00D1FF]" />
               <StatBar label="Goal Scored" value="3" colorClass="bg-[#8B5CF6]" />
               <StatBar label="Assists" value="6" colorClass="bg-[#2DD4BF]" />
@@ -73,7 +73,7 @@ const GameReportsOverview = () => {
               />
            </div>
            {/* Right Column */}
-           <div className="flex flex-col gap-4 items-end flex-1 max-w-[300px]">
+           <div className="flex flex-col gap-4 items-end flex-1 max-w-[300px] min-w-0">
               <StatBar label="Goal Unsave" value="1" colorClass="bg-[#8B5CF6]" align="right" />
               <StatBar label="Penalties Saves" value="1" colorClass="bg-[#F59E0B]" align="right" />
               <StatBar label="Appearances" value="15" colorClass="bg-[#00D1FF]" align="right" />
@@ -125,10 +125,10 @@ const GameReportsOverview = () => {
       </div>
       {/* Footer Buttons */}
       <div className="flex gap-6 mt-4">
-        <Button className="flex-1 bg-transparent hover:bg-white/5 text-white border border-white/10 h-16 rounded-xl font-black uppercase tracking-[0.2em] transition-all">
+        <Button className="flex-1 bg-transparent hover:bg-white/5 text-white border border-white/10 h-16 rounded-xl font-black uppercase tracking-[0.2em] transition-all min-w-0">
           Cancel
         </Button>
-        <Button className="flex-1 bg-[#00FF85] hover:bg-[#00E074] text-black h-16 rounded-xl font-black uppercase tracking-[0.2em] transition-all shadow-[0_0_30px_rgba(0,255,133,0.2)]">
+        <Button className="flex-1 bg-[#00FF85] hover:bg-[#00E074] text-black h-16 rounded-xl font-black uppercase tracking-[0.2em] transition-all shadow-[0_0_30px_rgba(0,255,133,0.2)] min-w-0">
           Submit Report
         </Button>
       </div>

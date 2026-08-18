@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 const LibraryStatCard = ({ icon: Icon, value, label }: { icon: any, value: string | number, label: string }) => (
-  <div className="bg-[#111111] border border-white/20 rounded-2xl p-8 flex flex-col gap-4 flex-1">
+  <div className="bg-[#111111] border border-white/20 rounded-2xl p-8 flex flex-col gap-4 flex-1 min-w-0">
     <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/20 flex items-center justify-center">
        <Icon size={20} className="text-white/60" />
     </div>

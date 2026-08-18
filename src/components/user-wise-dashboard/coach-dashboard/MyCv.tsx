@@ -27,7 +27,7 @@ const MyCV = () => {
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column - Status & Career */}
-        <div className="lg:col-span-4 space-y-6">
+        <div className="lg:col-span-4 space-y-6 min-w-0">
           {/* Completion Status */}
           <div className="p-6 rounded-2xl border border-white/20 bg-[#0D0D0D]">
             <h3 className="text-sm font-black text-white uppercase tracking-widest italic mb-6">Completion Status</h3>
@@ -82,7 +82,7 @@ const MyCV = () => {
           </div>
         </div>
         {/* Right Column - Form Sections */}
-        <div className="lg:col-span-8 space-y-8">
+        <div className="lg:col-span-8 space-y-8 min-w-0">
           {/* Personal Information */}
           <Section title="Personal Information">
             <div className="space-y-8">
@@ -117,7 +117,7 @@ const MyCV = () => {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-2">Upload image</span>
-                  <div className="flex-1 rounded-2xl border-2 border-dashed border-white/10 bg-white/[0.02] flex flex-col items-center justify-center p-8 group hover:border-[#E31B23]/30 transition-all">
+                  <div className="flex-1 rounded-2xl border-2 border-dashed border-white/10 bg-white/[0.02] flex flex-col items-center justify-center p-8 group hover:border-[#E31B23]/30 transition-all min-w-0">
                     <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white/40 mb-4 group-hover:bg-[#E31B23]/10 group-hover:text-[#E31B23] transition-all">
                       <IconPlus size={24} />
                     </div>
@@ -233,7 +233,7 @@ const FormationCard = ({ title, subtitle, wins, usage, image }: { title: string,
       />
       <div className="absolute inset-0 bg-gradient-to-t from-[#050505] to-transparent opacity-20" />
     </div>
-    <div className="p-8 text-center flex-1 flex flex-col justify-center bg-[#080808]">
+    <div className="p-8 text-center flex-1 flex flex-col justify-center bg-[#080808] min-w-0">
       <div className="text-4xl font-bold text-white mb-2 tracking-tight">{title}</div>
       <div className="text-sm text-gray-500 font-medium mb-6">{subtitle}</div>
       <div className="flex items-center justify-center gap-4 text-lg font-bold text-white">

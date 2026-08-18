@@ -129,7 +129,7 @@ return (
 
   <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
     {/* Plotting & Form (7 cols) */}
-    <div className="lg:col-span-8 bg-[#0D0D0D]/40 border border-white/5 p-8 rounded-3xl shadow-xl space-y-6">
+    <div className="lg:col-span-8 bg-[#0D0D0D]/40 border border-white/5 p-8 rounded-3xl shadow-xl space-y-6 min-w-0">
       <h2 className="text-xl font-black uppercase text-white font-orbitron">Submit Performance Stats</h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -232,7 +232,7 @@ return (
     </div>
 
     {/* Existing Reports list (4 cols) */}
-    <div className="lg:col-span-4 bg-[#0D0D0D]/40 border border-white/5 p-8 rounded-3xl shadow-xl space-y-6">
+    <div className="lg:col-span-4 bg-[#0D0D0D]/40 border border-white/5 p-8 rounded-3xl shadow-xl space-y-6 min-w-0">
       <h2 className="text-xl font-black uppercase text-white font-orbitron">Match History</h2>
 
       <div className="space-y-4">

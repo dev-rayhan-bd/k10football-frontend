@@ -291,7 +291,7 @@ const ReportPdfPreview = ({
               />
             </div>
             {/* Overall score */}
-            <div className="text-center flex-1">
+            <div className="text-center flex-1 min-w-0">
               <div className="text-4xl font-black text-emerald-600 font-orbitron tracking-tighter italic">
                 OVERALL = {overallRating}%
               </div>
@@ -314,14 +314,14 @@ const ReportPdfPreview = ({
           variant="outline" 
           onClick={onBack}
           disabled={downloading}
-          className="flex-1 border-white/10 bg-transparent text-white h-14 rounded-xl text-sm font-bold uppercase tracking-widest hover:bg-white/5 transition-colors font-orbitron"
+          className="flex-1 border-white/10 bg-transparent text-white h-14 rounded-xl text-sm font-bold uppercase tracking-widest hover:bg-white/5 transition-colors font-orbitron min-w-0"
         >
           Back
         </Button>
         <Button 
           onClick={handleDownloadPdf}
           disabled={downloading}
-          className="flex-1 bg-sky-500 hover:bg-sky-400 text-white h-14 rounded-xl text-sm font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(14,165,233,0.2)] flex items-center justify-center gap-2 font-orbitron"
+          className="flex-1 bg-sky-500 hover:bg-sky-400 text-white h-14 rounded-xl text-sm font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(14,165,233,0.2)] flex items-center justify-center gap-2 font-orbitron min-w-0"
         >
           {downloading ? (
             <>
@@ -338,7 +338,7 @@ const ReportPdfPreview = ({
         <Button 
           onClick={() => onSave(overallRating)}
           disabled={downloading}
-          className="flex-1 bg-[#00FF62] hover:bg-[#00D150] text-black h-14 rounded-xl text-sm font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(0,255,98,0.2)] flex items-center justify-center gap-2 font-orbitron"
+          className="flex-1 bg-[#00FF62] hover:bg-[#00D150] text-black h-14 rounded-xl text-sm font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(0,255,98,0.2)] flex items-center justify-center gap-2 font-orbitron min-w-0"
         >
           <IconCheck size={18} />
           {isPlayer ? "Proceed to Payment" : "Save & Finish"}

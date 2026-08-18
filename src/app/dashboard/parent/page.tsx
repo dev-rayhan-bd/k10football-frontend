@@ -125,7 +125,7 @@ return (
 
   <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
     {/* Child Profile Preview */}
-    <div className="lg:col-span-2 space-y-6">
+    <div className="lg:col-span-2 space-y-6 min-w-0">
       <div className="bg-[#0D0D0D]/40 border border-white/5 p-8 rounded-3xl shadow-xl flex flex-col gap-6">
         <div className="flex justify-between items-start">
           <h2 className="text-xl font-black uppercase text-white font-orbitron">Youth Profile</h2>
@@ -145,7 +145,7 @@ return (
             height={80}
             className="w-20 h-20 rounded-full object-cover border-2 border-primary/20"
           />
-          <div className="flex-1 text-center sm:text-left space-y-2">
+          <div className="flex-1 text-center sm:text-left space-y-2 min-w-0">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               <h3 className="text-lg font-bold text-white">{childProfile.name}</h3>
               <Badge className="w-fit mx-auto sm:mx-0 bg-yellow-500/10 border-yellow-500/30 text-yellow-400 font-bold">
@@ -179,7 +179,7 @@ return (
                 <div className={`w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center ${act.iconColor} shrink-0`}>
                   <Icon size={18} />
                 </div>
-                <div className="flex-1 space-y-1">
+                <div className="flex-1 space-y-1 min-w-0">
                   <div className="flex justify-between items-start gap-4">
                     <h4 className="text-sm font-bold text-white leading-none">{act.title}</h4>
                     <span className="text-[10px] text-gray-500 font-bold shrink-0">{act.time}</span>

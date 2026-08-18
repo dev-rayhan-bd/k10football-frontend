@@ -25,7 +25,7 @@ const SettingsSection = ({ icon: Icon, title, children }: { icon: any, title: st
 );
 
 const SettingField = ({ label, value, type = "text", placeholder, icon: Icon }: any) => (
-  <div className="space-y-2 flex-1">
+  <div className="space-y-2 flex-1 min-w-0">
     <Label className="text-white/70 text-[11px] font-bold uppercase tracking-wider">{label}</Label>
     <div className="relative">
       <Input 
@@ -51,7 +51,7 @@ const SuperAdminSettings = () => {
       {/* Super Admin Information */}
       <SettingsSection icon={IconUser} title="Super Admin Information">
         <div className="flex flex-col xl:flex-row gap-10">
-           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8">
+           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8 min-w-0">
               <SettingField label="Super Admin Name" value="K10 Football" />
               <SettingField label="Contact" value="+55 11 9999-8888" />
               <SettingField label="Default Language" value="English" icon={IconChevronDown} />

@@ -81,7 +81,7 @@ const AcademyChat = () => {
           Create New Chat
         </button>
       </div>
-      <div className="flex flex-1 gap-6 min-h-0">
+      <div className="flex flex-1 gap-6 min-h-0 min-w-0">
         {/* Sidebar */}
         <div className="w-[320px] bg-[#111111] rounded-3xl border border-white/10 flex flex-col overflow-hidden">
           <div className="p-4">
@@ -94,7 +94,7 @@ const AcademyChat = () => {
               />
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto custom-scrollbar">
+          <div className="flex-1 overflow-y-auto custom-scrollbar min-w-0">
             {conversations.map((conv) => (
               <button 
                 key={conv.id}
@@ -120,7 +120,7 @@ const AcademyChat = () => {
           </div>
         </div>
         {/* Chat Area */}
-        <div className="flex-1 bg-[#111111] rounded-3xl border border-white/10 flex flex-col overflow-hidden">
+        <div className="flex-1 bg-[#111111] rounded-3xl border border-white/10 flex flex-col overflow-hidden min-w-0">
           {/* Chat Header */}
           <div className="p-4 border-b border-white/10 flex justify-between items-center">
             <div className="flex items-center gap-3">
@@ -137,7 +137,7 @@ const AcademyChat = () => {
             </button>
           </div>
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 custom-scrollbar min-w-0">
             {messages.map((msg) => (
               <div key={msg.id} className={`flex flex-col ${msg.isMe ? "items-end" : "items-start"}`}>
                 <div className={`max-w-[70%] p-4 rounded-2xl text-sm leading-relaxed ${

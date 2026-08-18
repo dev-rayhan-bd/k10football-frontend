@@ -483,7 +483,7 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
             />
           </div>
           {/* Coaches List */}
-          <div className="flex-1 overflow-y-auto mt-6 pr-2 space-y-4 max-h-[45vh] scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+          <div className="flex-1 overflow-y-auto mt-6 pr-2 space-y-4 max-h-[45vh] scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent min-w-0">
             {filteredCoaches.length === 0 ? (
               <p className="text-center text-white/40 text-xs py-4">No coaches match search query.</p>
             ) : (
@@ -564,7 +564,7 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
             />
           </div>
           {/* Players List */}
-          <div className="flex-1 overflow-y-auto mt-6 pr-2 space-y-4 max-h-[45vh] scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+          <div className="flex-1 overflow-y-auto mt-6 pr-2 space-y-4 max-h-[45vh] scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent min-w-0">
             {filteredPlayers.length === 0 ? (
               <p className="text-center text-white/40 text-xs py-4">No players match search query.</p>
             ) : (

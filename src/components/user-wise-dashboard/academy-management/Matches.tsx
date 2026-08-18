@@ -59,7 +59,7 @@ export const MatchesManagement = () => {
 
       {/* Filter Bar */}
       <div className="bg-[#111111] rounded-[32px] border border-white/15 p-4 flex gap-4 shadow-xl">
-        <div className="relative flex-1">
+        <div className="relative flex-1 min-w-0">
           <IconSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={20} />
           <input 
             type="text" 

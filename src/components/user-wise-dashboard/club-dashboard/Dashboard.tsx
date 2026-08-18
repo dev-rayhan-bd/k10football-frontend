@@ -182,7 +182,7 @@ const ClubDashboard = () => {
     <div className="space-y-8 pb-12">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Section - Main Content */}
-        <div className="lg:col-span-9 space-y-8">
+        <div className="lg:col-span-9 space-y-8 min-w-0">
           {/* Hero Section */}
           <div className="rounded-3xl overflow-hidden border border-white/10">
             <DashboardHero
@@ -287,7 +287,7 @@ const ClubDashboard = () => {
           </DashboardSection>
         </div>
         {/* Right Section - Recent Activity */}
-        <div className="hidden lg:block lg:col-span-3 sticky top-8 h-fit">
+        <div className="hidden lg:block lg:col-span-3 sticky top-8 h-fit min-w-0">
           <div className="p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
             <div className="flex items-center gap-3 mb-8">
               <div className="p-2 rounded-lg bg-red-500/10 text-red-500">

@@ -852,7 +852,7 @@ return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 
       {/* Main Flyer Box */}
-      <div className="lg:col-span-2 bg-linear-to-b from-[#111111] to-[#050505] rounded-4xl border border-white/10 overflow-hidden shadow-2xl relative">
+      <div className="lg:col-span-2 bg-linear-to-b from-[#111111] to-[#050505] rounded-4xl border border-white/10 overflow-hidden shadow-2xl relative min-w-0">
         <div className="absolute top-0 right-0 w-64 h-64 bg-radial-gradient from-[#E31B23]/10 to-transparent pointer-events-none" />
 
         {/* Header Banner */}
@@ -1148,7 +1148,7 @@ return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
           {/* Left Column: Registered Teams (Roster Viewer) */}
-          <div className="lg:col-span-1 bg-[#111] border border-white/10 rounded-4xl p-6 md:p-8 space-y-6">
+          <div className="lg:col-span-1 bg-[#111] border border-white/10 rounded-4xl p-6 md:p-8 space-y-6 min-w-0">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Registered Teams</h3>
             <p className="text-[11px] text-white/40 leading-relaxed font-bold uppercase tracking-widest">
               Roster registrations received. Click any team to view their registered player list.
@@ -1179,7 +1179,7 @@ return (
           </div>
 
           {/* Right Column: Group Allocation Board */}
-          <div className="lg:col-span-2 bg-[#111] border border-white/10 rounded-4xl p-6 md:p-8 space-y-6">
+          <div className="lg:col-span-2 bg-[#111] border border-white/10 rounded-4xl p-6 md:p-8 space-y-6 min-w-0">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <h3 className="text-xl font-black uppercase text-white font-orbitron">Group Stage Builder</h3>
@@ -1657,7 +1657,7 @@ return (
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-2">
-            <div className="lg:col-span-1 space-y-4">
+            <div className="lg:col-span-1 space-y-4 min-w-0">
               <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Total Summary</span>
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-sm">
@@ -1675,7 +1675,7 @@ return (
               </div>
             </div>
 
-            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
               <div className="space-y-2 md:col-span-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-white/40">Credit Card Number</label>
                 <input
@@ -2138,7 +2138,7 @@ const TournamentSection = ({
               </div>
 
               <div className="flex items-center justify-between gap-3 my-2 bg-white/2 p-4 rounded-2xl border border-white/5">
-                <div className="flex-1 text-center flex flex-col items-center gap-2">
+                <div className="flex-1 text-center flex flex-col items-center gap-2 min-w-0">
                   {renderTeamLogo(f.team1Id, "w-10 h-10")}
                   <div className="text-xs font-bold text-white uppercase truncate max-w-28">{getTeamName(f.team1Id)}</div>
                 </div>
@@ -2147,7 +2147,7 @@ const TournamentSection = ({
                   {f.status === 'Completed' ? `${f.score1} - ${f.score2}` : f.score1 !== null ? `${f.score1} - ${f.score2}` : 'VS'}
                 </div>
 
-                <div className="flex-1 text-center flex flex-col items-center gap-2">
+                <div className="flex-1 text-center flex flex-col items-center gap-2 min-w-0">
                   {renderTeamLogo(f.team2Id, "w-10 h-10")}
                   <div className="text-xs font-bold text-white uppercase truncate max-w-28">{getTeamName(f.team2Id)}</div>
                 </div>

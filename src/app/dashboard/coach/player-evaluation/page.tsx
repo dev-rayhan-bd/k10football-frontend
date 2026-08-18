@@ -308,7 +308,7 @@ return (
         </div>
 
         {/* Page 1 Body */}
-        <div className="flex flex-col flex-1 justify-center py-6 relative z-10">
+        <div className="flex flex-col flex-1 justify-center py-6 relative z-10 min-w-0">
           {/* Title Block */}
           <div className="space-y-2">
             <h1 className="text-4xl font-black text-gray-900 tracking-tighter leading-none font-heading uppercase">
@@ -382,7 +382,7 @@ return (
         </div>
 
         {/* Categories container */}
-        <div className="flex-1 flex flex-col justify-between py-2 space-y-3">
+        <div className="flex-1 flex flex-col justify-between py-2 space-y-3 min-w-0">
           {/* Category: Techniques */}
           <div className="p-4 rounded-2xl border border-gray-100 bg-white space-y-2">
             <h3 className="text-sm font-black text-gray-900 border-b pb-1 uppercase tracking-wide">Techniques</h3>

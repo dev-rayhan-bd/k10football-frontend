@@ -336,7 +336,7 @@ export const ExtraEventsManagement = () => {
             <div className="flex gap-2 mt-auto w-full">
               <Link 
                 href={`/dashboard/academy/management/extra-events/${event.id}`}
-                className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest text-white/60 hover:text-white transition-all text-center block"
+                className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest text-white/60 hover:text-white transition-all text-center block min-w-0"
               >
                 View Details
               </Link>

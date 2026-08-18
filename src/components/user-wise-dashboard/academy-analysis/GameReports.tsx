@@ -104,7 +104,7 @@ const getStatsFromReport = (report: MatchStats) => {
   }
 };
 const SummaryCard = ({ label, value, icon: Icon, bgColor, textColor }: { label: string, value: string | number, icon: any, bgColor: string, textColor: string }) => (
-  <div className="bg-[#0A0A0A] border border-white/20 rounded-[20px] p-5 flex items-center gap-4 flex-1">
+  <div className="bg-[#0A0A0A] border border-white/20 rounded-[20px] p-5 flex items-center gap-4 flex-1 min-w-0">
     <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${bgColor} bg-opacity-20 border border-white/20 shrink-0`}>
       {Icon && <Icon size={24} className={`${textColor} opacity-100`} stroke={2} />}
     </div>
@@ -392,10 +392,10 @@ const GameReports = () => {
       </div>
       <div className="flex gap-8">
         {/* Main Content */}
-        <div className="flex-1 flex flex-col gap-8">
+        <div className="flex-1 flex flex-col gap-8 min-w-0">
           {/* Filters */}
           <div className="flex gap-4">
-            <div className="relative flex-1">
+            <div className="relative flex-1 min-w-0">
               <IconSearch size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
               <Input 
                 placeholder="Search reports by player name, scout, team, or position..." 
@@ -754,7 +754,7 @@ const GameReports = () => {
                     />
                   </div>
                   {/* Overall score */}
-                  <div className="text-center flex-1">
+                  <div className="text-center flex-1 min-w-0">
                     <div className="text-4xl font-black text-emerald-600 font-orbitron tracking-tighter italic">
                       OVERALL = {overallPercent}%
                     </div>

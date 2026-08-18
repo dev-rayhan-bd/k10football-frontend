@@ -92,7 +92,7 @@ const ProfileHero = ({
               <div className="flex gap-1.5">
                 <button 
                   onClick={onSimulateApprove} 
-                  className="flex-1 py-1.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[9px] font-black uppercase tracking-wider transition-all"
+                  className="flex-1 py-1.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[9px] font-black uppercase tracking-wider transition-all min-w-0"
                 >
                   Verify
                 </button>
@@ -431,7 +431,7 @@ export const AgentProfile = () => {
             />
             <div 
               onClick={() => document.getElementById("cover-upload-input")?.click()}
-              className="flex-1 min-h-[300px] border border-dashed border-white/15 rounded-2xl flex flex-col items-center justify-center text-gray-500 hover:border-white/30 hover:text-white transition-colors cursor-pointer bg-white/[0.01] relative overflow-hidden group/upload"
+              className="flex-1 min-h-[300px] border border-dashed border-white/15 rounded-2xl flex flex-col items-center justify-center text-gray-500 hover:border-white/30 hover:text-white transition-colors cursor-pointer bg-white/[0.01] relative overflow-hidden group/upload min-w-0"
             >
               {coverPhoto ? (
                 <>

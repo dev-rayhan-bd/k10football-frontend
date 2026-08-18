@@ -68,7 +68,7 @@ const DashboardModal = ({
         </div>
 
         {/* Body - Scrollable */}
-        <div className="flex-1 overflow-y-auto p-8 md:p-10 pt-6 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-8 md:p-10 pt-6 custom-scrollbar min-w-0">
           {children}
         </div>
 

@@ -213,12 +213,12 @@ const GameReports = () => {
               <div className="flex items-center justify-end gap-2 pt-1">
                 <button
                   onClick={() => handleView(item)}
-                  className="flex-1 sm:flex-none flex justify-center items-center gap-2 px-4 py-2.5 rounded-lg bg-red-600/10 text-red-500 hover:bg-red-600/20 text-xs font-bold uppercase transition-colors"
+                  className="flex-1 sm:flex-none flex justify-center items-center gap-2 px-4 py-2.5 rounded-lg bg-red-600/10 text-red-500 hover:bg-red-600/20 text-xs font-bold uppercase transition-colors min-w-0"
                 >
                   <IconEye size={16} />
                   View
                 </button>
-                <button className="flex-1 sm:flex-none flex justify-center items-center gap-2 px-4 py-2.5 rounded-lg bg-white/5 text-white hover:bg-white/10 text-xs font-bold uppercase transition-colors">
+                <button className="flex-1 sm:flex-none flex justify-center items-center gap-2 px-4 py-2.5 rounded-lg bg-white/5 text-white hover:bg-white/10 text-xs font-bold uppercase transition-colors min-w-0">
                   <IconDownload size={16} />
                   Save
                 </button>

@@ -123,7 +123,7 @@ const ParentShop = () => {
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Products List (8 cols) */}
-        <div className="lg:col-span-8 space-y-6">
+        <div className="lg:col-span-8 space-y-6 min-w-0">
           {/* Filters */}
           <div className="flex gap-1 sm:gap-2 bg-black/40 border border-white/5 p-1 rounded-xl w-full overflow-x-auto scrollbar-hide">
             {(["All", "Jerseys", "Kits", "Accessories"] as const).map((cat) => (
@@ -199,7 +199,7 @@ const ParentShop = () => {
           </div>
         </div>
         {/* Cart Sidebar (4 cols) */}
-        <div className="lg:col-span-4 bg-[#0D0D0D]/40 border border-white/5 p-8 rounded-3xl shadow-xl flex flex-col justify-between h-fit min-h-125">
+        <div className="lg:col-span-4 bg-[#0D0D0D]/40 border border-white/5 p-8 rounded-3xl shadow-xl flex flex-col justify-between h-fit min-h-125 min-w-0">
           <div className="space-y-6">
             <div className="flex justify-between items-center border-b border-white/5 pb-4">
               <h2 className="text-xl font-black uppercase text-white font-orbitron flex items-center gap-2">

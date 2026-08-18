@@ -27,7 +27,7 @@ const SettingsSection = ({ icon: Icon, title, children }: { icon: any, title: st
 );
 
 const SettingField = ({ label, value, type = "text", placeholder, icon: Icon }: any) => (
-  <div className="space-y-2 flex-1">
+  <div className="space-y-2 flex-1 min-w-0">
     <Label className="text-white/70 text-[11px] font-bold uppercase tracking-wider">{label}</Label>
     <div className="relative">
       <Input 

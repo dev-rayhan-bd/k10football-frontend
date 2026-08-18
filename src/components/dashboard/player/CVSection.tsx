@@ -42,7 +42,7 @@ const CVSection = () => {
             </div>
 
             {/* Middle - Gold Ready Badge */}
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2.5 mb-2">
                 <div className="w-2.5 h-2.5 bg-yellow-500 rounded-full animate-pulse" />
                 <span className="text-yellow-500 font-bold text-xs sm:text-sm tracking-widest font-orbitron">GOLD READY</span>

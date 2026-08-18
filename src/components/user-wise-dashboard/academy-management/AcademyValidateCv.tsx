@@ -256,13 +256,13 @@ const CvDetailDialog = ({
                       <div className="flex gap-2 pt-2 border-t border-white/10">
                         <button
                           onClick={() => setSelectedCoachIds(COACH_POOL.map(c => c.id))}
-                          className="flex-1 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[9px] font-black uppercase text-white/60 hover:text-white tracking-widest transition-all"
+                          className="flex-1 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[9px] font-black uppercase text-white/60 hover:text-white tracking-widest transition-all min-w-0"
                         >
                           Select All
                         </button>
                         <button
                           onClick={() => setSelectedCoachIds([])}
-                          className="flex-1 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[9px] font-black uppercase text-white/60 hover:text-white tracking-widest transition-all"
+                          className="flex-1 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[9px] font-black uppercase text-white/60 hover:text-white tracking-widest transition-all min-w-0"
                         >
                           Clear
                         </button>
@@ -523,7 +523,7 @@ const AcademyValidateCv = () => {
 
       {/* Filters */}
       <div className="bg-[#111111] rounded-3xl border border-white/15 p-4 flex flex-col md:flex-row gap-4 shadow-xl">
-        <div className="relative flex-1">
+        <div className="relative flex-1 min-w-0">
           <IconSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={20} />
           <input
             type="text"

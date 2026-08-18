@@ -192,14 +192,14 @@ export const PlayerRequestWizard = () => {
             <Button 
               variant="outline" 
               onClick={() => router.back()}
-              className="flex-1 h-14 rounded-xl border-white/10 bg-transparent text-white font-bold uppercase tracking-widest hover:bg-white/5 transition-colors font-orbitron"
+              className="flex-1 h-14 rounded-xl border-white/10 bg-transparent text-white font-bold uppercase tracking-widest hover:bg-white/5 transition-colors font-orbitron min-w-0"
             >
               Cancel
             </Button>
             <Button 
               onClick={() => setStep(2)}
               disabled={!isFormValid()}
-              className="flex-1 bg-[#00FF62] hover:bg-[#00D150] text-black h-14 rounded-xl font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(0,255,98,0.2)] font-orbitron italic"
+              className="flex-1 bg-[#00FF62] hover:bg-[#00D150] text-black h-14 rounded-xl font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(0,255,98,0.2)] font-orbitron italic min-w-0"
             >
               Continue to Payment
             </Button>

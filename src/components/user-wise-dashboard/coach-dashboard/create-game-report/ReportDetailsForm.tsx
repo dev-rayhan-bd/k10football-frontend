@@ -205,7 +205,7 @@ const ReportDetailsForm = ({
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   onKeyDown={handleKeyPress}
-                  className="bg-transparent border-none text-xs font-bold text-white focus:outline-none flex-1 min-w-20"
+                  className="bg-transparent border-none text-xs font-bold text-white focus:outline-none flex-1 min-w-20 min-w-0"
                 />
               </div>
             </div>
@@ -374,13 +374,13 @@ const ReportDetailsForm = ({
       <div className="flex items-center gap-4 pt-8">
         <Button 
           variant="outline" 
-          className="flex-1 h-14 rounded-xl border-white/10 bg-transparent text-white font-black uppercase tracking-widest hover:bg-white/10 transition-all italic font-orbitron"
+          className="flex-1 h-14 rounded-xl border-white/10 bg-transparent text-white font-black uppercase tracking-widest hover:bg-white/10 transition-all italic font-orbitron min-w-0"
           onClick={onCancel}
         >
           Cancel
         </Button>
         <Button 
-          className="flex-1 h-14 rounded-xl bg-[#00FF62] hover:bg-[#00D150] text-black font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(0,255,98,0.2)] italic font-orbitron disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 h-14 rounded-xl bg-[#00FF62] hover:bg-[#00D150] text-black font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(0,255,98,0.2)] italic font-orbitron disabled:opacity-50 disabled:cursor-not-allowed min-w-0"
           onClick={onContinue}
           disabled={!isFormValid()}
         >

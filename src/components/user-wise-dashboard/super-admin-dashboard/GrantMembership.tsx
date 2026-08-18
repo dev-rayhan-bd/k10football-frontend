@@ -344,7 +344,7 @@ return (
     </div>
 
     {/* Memberships Granted Table */}
-    <div className="bg-[#111111] border border-white/15 rounded-[32px] p-6 lg:p-8 flex flex-col gap-6 lg:col-span-2 shadow-2xl">
+    <div className="bg-[#111111] border border-white/15 rounded-[32px] p-6 lg:p-8 flex flex-col gap-6 lg:col-span-2 shadow-2xl min-w-0">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-black uppercase text-white font-orbitron">Active Grants</h2>
         <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black text-white/60 uppercase tracking-widest">

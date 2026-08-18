@@ -122,7 +122,7 @@ return (
     </div>
 
     {/* Profile Details / Form */}
-    <div className="lg:col-span-2 bg-[#0D0D0D]/40 border border-white/5 p-8 rounded-3xl shadow-xl">
+    <div className="lg:col-span-2 bg-[#0D0D0D]/40 border border-white/5 p-8 rounded-3xl shadow-xl min-w-0">
       <h2 className="text-xl font-black uppercase text-white font-orbitron mb-6">
         {isEditing ? "Edit Profile Info" : "Profile Details"}
       </h2>

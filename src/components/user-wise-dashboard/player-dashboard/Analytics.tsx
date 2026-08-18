@@ -182,7 +182,7 @@ const PlayerAnalytics = () => {
           {performanceTrend.map((item, idx) => (
             <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors group gap-4 sm:gap-0">
               <div className="text-base sm:text-lg font-bold text-white w-full sm:w-20 border-b sm:border-0 border-white/10 pb-2 sm:pb-0">{item.month}</div>
-              <div className="flex-1 grid grid-cols-3 gap-2 sm:gap-8">
+              <div className="flex-1 grid grid-cols-3 gap-2 sm:gap-8 min-w-0">
                 <div className="flex flex-col xl:flex-row items-start xl:items-center gap-1 xl:gap-3">
                   <span className="text-[10px] sm:text-xs text-gray-500 uppercase font-bold tracking-widest">Goals:</span>
                   <span className="text-white font-bold text-sm sm:text-base">{item.goals}</span>

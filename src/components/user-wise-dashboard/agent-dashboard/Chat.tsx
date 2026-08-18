@@ -159,7 +159,7 @@ export const AgentChat = () => {
           New Chat
         </button>
       </div>
-      <div className="flex flex-1 gap-6 min-h-0">
+      <div className="flex flex-1 gap-6 min-h-0 min-w-0">
         {/* Sidebar */}
         <div className="w-[320px] bg-[#111111] rounded-3xl border border-white/10 flex flex-col overflow-hidden shrink-0">
           {/* Search */}
@@ -190,7 +190,7 @@ export const AgentChat = () => {
             ))}
           </div>
           {/* Conversation List */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto min-w-0">
             {filteredConversations.map((conv) => (
               <button
                 key={conv.id}
@@ -222,7 +222,7 @@ export const AgentChat = () => {
           </div>
         </div>
         {/* Chat Area */}
-        <div className="flex-1 bg-[#111111] rounded-3xl border border-white/10 flex flex-col overflow-hidden">
+        <div className="flex-1 bg-[#111111] rounded-3xl border border-white/10 flex flex-col overflow-hidden min-w-0">
           {/* Chat Header */}
           <div className="p-4 border-b border-white/10 flex justify-between items-center">
             {activeConvData && (
@@ -243,7 +243,7 @@ export const AgentChat = () => {
             </button>
           </div>
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
+          <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-4 min-w-0">
             {activeMessages.map((msg) => (
               <div key={msg.id} className={`flex flex-col ${msg.isMe ? "items-end" : "items-start"}`}>
                 <div
@@ -310,7 +310,7 @@ export const AgentChat = () => {
                       <div className="w-9 h-9 rounded-full overflow-hidden border border-white/10 shrink-0">
                         <Image src={p.avatar} alt={p.name} className="w-full h-full object-cover" />
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold">{p.name}</p>
                       </div>
                       <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${roleBadgeColors[p.role]}`}>

@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 const RequestStatCard = ({ icon: Icon, value, label, iconColor }: { icon: any, value: string | number, label: string, iconColor: string }) => (
-  <div className="bg-[#0A0A0A] border border-white/20 rounded-2xl p-6 flex flex-col gap-4 flex-1">
+  <div className="bg-[#0A0A0A] border border-white/20 rounded-2xl p-6 flex flex-col gap-4 flex-1 min-w-0">
     <div className={`w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center ${iconColor}`}>
        <Icon size={20} />
     </div>
@@ -177,11 +177,11 @@ const TransferRequests = () => {
                    <Button 
                      variant="outline" 
                      onClick={() => setOpen(false)}
-                     className="flex-1 bg-transparent border-white/10 h-14 rounded-xl text-white font-bold hover:bg-white/5"
+                     className="flex-1 bg-transparent border-white/10 h-14 rounded-xl text-white font-bold hover:bg-white/5 min-w-0"
                    >
                       Cancel
                    </Button>
-                   <Button className="flex-1 bg-[#1A1A1A] border border-white/10 h-14 rounded-xl text-white font-bold hover:bg-white/5">
+                   <Button className="flex-1 bg-[#1A1A1A] border border-white/10 h-14 rounded-xl text-white font-bold hover:bg-white/5 min-w-0">
                       Submit Request
                    </Button>
                 </div>

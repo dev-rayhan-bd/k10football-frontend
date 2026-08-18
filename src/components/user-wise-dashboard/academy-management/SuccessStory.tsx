@@ -128,7 +128,7 @@ export const SuccessStoryManagement = () => {
           <div className="flex gap-4 w-full">
             <button 
               onClick={() => setShowAddModal(false)}
-              className="flex-1 py-4 rounded-xl border border-white/30 text-sm font-bold text-white hover:bg-white/5 transition-all"
+              className="flex-1 py-4 rounded-xl border border-white/30 text-sm font-bold text-white hover:bg-white/5 transition-all min-w-0"
             >
               Cancel
             </button>

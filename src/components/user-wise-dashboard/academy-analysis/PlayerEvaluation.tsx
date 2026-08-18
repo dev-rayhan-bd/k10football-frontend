@@ -87,7 +87,7 @@ const mockCards = [
   { id: 106, tag: "U-16", name: "Sarah Williams", date: "Jan 25, 2026", coach: "Mike Williams", rating: 7.8, tech: 16, phys: 15, ment: 16, pos: "Midfielder", tier: "TIER 2", btnColor: "text-emerald-500 bg-emerald-500" }
 ];
 const SummaryCard = ({ label, value, icon: Icon, bgColor, textColor }: { label: string, value: string | number, icon: any, bgColor: string, textColor: string }) => (
-  <div className="bg-[#0A0A0A] border border-white/20 rounded-[20px] p-5 flex items-center gap-4 flex-1">
+  <div className="bg-[#0A0A0A] border border-white/20 rounded-[20px] p-5 flex items-center gap-4 flex-1 min-w-0">
     <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${bgColor} bg-opacity-20 border border-white/20 flex-shrink-0`}>
       {Icon && <Icon size={24} className={`${textColor} opacity-100`} stroke={2} />}
     </div>
@@ -421,10 +421,10 @@ const PlayerEvaluation = () => {
       </div>
       <div className="flex gap-8">
         {/* Main Content */}
-        <div className="flex-1 flex flex-col gap-8">
+        <div className="flex-1 flex flex-col gap-8 min-w-0">
           {/* Filters */}
           <div className="flex gap-4">
-            <div className="relative flex-1">
+            <div className="relative flex-1 min-w-0">
               <IconSearch size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
               <Input 
                 placeholder="Search players by name, team, or position..." 
@@ -603,7 +603,7 @@ const PlayerEvaluation = () => {
                   </div>
                 </div>
                 {/* Page 1 Body */}
-                <div className="flex flex-col flex-1 justify-center py-6 relative z-10">
+                <div className="flex flex-col flex-1 justify-center py-6 relative z-10 min-w-0">
                   <div className="space-y-2">
                     <h1 className="text-4xl font-black text-gray-900 tracking-tighter leading-none font-heading uppercase">
                       PLAYER <span className="text-[#E31B23]">DEVELOPMENT</span> PROGRAMME
@@ -668,7 +668,7 @@ const PlayerEvaluation = () => {
                     Date: {selectedCard.date}
                   </div>
                 </div>
-                <div className="flex-1 flex flex-col justify-between py-2 space-y-3">
+                <div className="flex-1 flex flex-col justify-between py-2 space-y-3 min-w-0">
                   {/* Techniques */}
                   <div className="p-4 rounded-2xl border border-gray-100 bg-white space-y-2">
                     <h3 className="text-sm font-black text-gray-900 border-b pb-1 uppercase tracking-wide">Techniques</h3>
