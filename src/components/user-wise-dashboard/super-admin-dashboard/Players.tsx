@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import React from "react";
 import { 
   IconChevronDown, 
@@ -7,9 +8,7 @@ import {
   IconTrash
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
-
 import DashboardTable, { Column } from "@/components/dashboard/DashboardTable";
-
 const CvPill = ({ type }: { type: "Silver" | "Gold" | "Bronze" }) => {
   const styles = {
     Silver: "bg-white/10 text-white border-white/20",
@@ -22,13 +21,11 @@ const CvPill = ({ type }: { type: "Silver" | "Gold" | "Bronze" }) => {
     </span>
   );
 };
-
 const StatusBadge = ({ active }: { active: boolean }) => (
   <span className={`px-4 py-1 rounded-full text-[10px] font-black uppercase border ${active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-white/5 text-white/40 border-white/10"}`}>
     {active ? "Active" : "Inactive"}
   </span>
 );
-
 interface PlayerRow {
   name: string;
   pos: string;
@@ -39,7 +36,6 @@ interface PlayerRow {
   reports: number;
   active: boolean;
 }
-
 const SuperAdminPlayers = () => {
   const columns: Column<PlayerRow>[] = [
     {
@@ -48,7 +44,7 @@ const SuperAdminPlayers = () => {
       render: (row) => (
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-white/10 overflow-hidden border border-white/20">
-             <img src={`https://i.pravatar.cc/150?u=${row.name}`} alt={row.name} className="w-full h-full object-cover" />
+             <Image src={`https://i.pravatar.cc/150?u=${row.name}`} alt={row.name} className="w-full h-full object-cover" />
           </div>
           <div>
             <p className="text-white text-sm font-black uppercase">{row.name}</p>
@@ -97,14 +93,12 @@ const SuperAdminPlayers = () => {
       )
     }
   ];
-
   const data: PlayerRow[] = [
     { name: "Marcus Silva", pos: "Forward", age: 19, country: "Brazil", academy: "Elite FC Academy", cv: "Silver", reports: 12, active: true },
     { name: "David Chen", pos: "Midfielder", age: 18, country: "England", academy: "Champions Academy", cv: "Gold", reports: 9, active: true },
     { name: "Alex Jonson", pos: "Defender", age: 20, country: "Spain", academy: "Elite FC Academy", cv: "Silver", reports: 8, active: false },
     { name: "James Brown", pos: "Goalkeeper", age: 17, country: "Argentina", academy: "Youth Stars", cv: "Bronze", reports: 10, active: true },
   ];
-
   return (
     <div className="flex flex-col gap-8 pb-10">
       {/* Header */}
@@ -112,7 +106,6 @@ const SuperAdminPlayers = () => {
         <h1 className="text-5xl font-black text-white font-orbitron tracking-tight">Player</h1>
         <p className="text-white/60 font-medium mt-2 text-lg">Monitored all registered players</p>
       </div>
-
       {/* Main Container */}
       <div className="bg-[#111111] border border-white/20 rounded-[40px] p-8 flex flex-col gap-8">
         {/* Table Filters */}
@@ -123,7 +116,6 @@ const SuperAdminPlayers = () => {
             </Button>
           ))}
         </div>
-
         {/* Professional Table */}
         <DashboardTable columns={columns} data={data} />
       </div>

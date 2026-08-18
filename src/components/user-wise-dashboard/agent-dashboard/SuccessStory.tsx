@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import React from "react";
 import { IconPlus, IconCloudUpload } from "@tabler/icons-react";
 import DashboardTable, { Column } from "@/components/dashboard/DashboardTable";
@@ -16,7 +16,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
 type Story = {
   avatar: string;
   title: string;
@@ -24,7 +23,6 @@ type Story = {
   date: string;
   status: "Approved" | "Pending" | "Rejected";
 };
-
 const getStatusBadge = (status: "Approved" | "Pending" | "Rejected") => {
   switch (status) {
     case "Approved": return "border-green-500/50 bg-green-500/10 text-green-500";
@@ -33,7 +31,6 @@ const getStatusBadge = (status: "Approved" | "Pending" | "Rejected") => {
     default: return "border-gray-500/50 bg-gray-500/10 text-gray-500";
   }
 };
-
 const columns: Column<Story>[] = [
   {
     header: "Story Title",
@@ -41,7 +38,7 @@ const columns: Column<Story>[] = [
     align: "left",
     render: (row) => (
       <div className="flex items-center gap-3">
-        <img src={row.avatar} alt="avatar" className="w-10 h-10 rounded-full border border-white/10 shrink-0" />
+        <Image src={row.avatar} alt="avatar" className="w-10 h-10 rounded-full border border-white/10 shrink-0" />
         <p className="text-white font-medium text-sm w-48 truncate sm:w-auto sm:whitespace-normal">{row.title}</p>
       </div>
     ),
@@ -81,13 +78,11 @@ const columns: Column<Story>[] = [
     ),
   },
 ];
-
 const mockStories: Story[] = [
   { avatar: "https://i.pravatar.cc/150?u=20", title: "Agent Luis Secures Trial for Midfielder at Benfica Academy", category: "Transfer Achievement", date: "2024-01-15", status: "Approved" },
   { avatar: "https://i.pravatar.cc/150?u=21", title: "Agent Luis Secures Trial for Midfielder at Benfica Academy", category: "Signing Achievement", date: "2024-02-01", status: "Pending" },
   { avatar: "https://i.pravatar.cc/150?u=22", title: "Agent Luis Secures Trial for Midfielder at Benfica Academy", category: "Agent Milestone", date: "2023-12-01", status: "Rejected" },
 ];
-
 const SuccessStory = () => {
   return (
     <div className="p-2 md:p-6 space-y-6">
@@ -96,7 +91,6 @@ const SuccessStory = () => {
           <h1 className="text-3xl font-bold text-white font-orbitron tracking-wide mb-1">Success Story</h1>
           <p className="text-gray-400 text-sm font-medium">Share your academy's latest achievement or success Story</p>
         </div>
-
         <Dialog>
           <DialogTrigger asChild>
             <Button className="bg-white/5 border border-white/10 text-white hover:bg-white/10 rounded-xl px-4 py-2 shrink-0 h-11 w-full sm:w-auto">
@@ -109,13 +103,11 @@ const SuccessStory = () => {
               <DialogTitle className="text-2xl font-orbitron tracking-wide font-normal">Add Success Story</DialogTitle>
               <p className="text-gray-400 text-sm font-medium mt-1">Share your academy's latest achievement or success Story</p>
             </DialogHeader>
-
             <div className="p-6 md:p-8 space-y-6 overflow-y-auto flex-1 custom-scrollbar">
               <div className="space-y-1.5">
                 <Label className="text-gray-300 text-xs ml-1 font-medium">Story Title</Label>
                 <Input placeholder="e.g., U14 Winger Signed by National Talent Centre" className="bg-[#111111] border-white/15 text-white h-11 rounded-xl focus:border-white/40 focus:ring-1 focus:ring-white/40" />
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-1.5">
                   <Label className="text-gray-300 text-xs ml-1 font-medium">Player Name</Label>
@@ -134,7 +126,6 @@ const SuccessStory = () => {
                   <Input type="date" defaultValue="2025-11-22" className="bg-[#111111] border-white/15 text-white h-11 rounded-xl [color-scheme:dark] focus:border-white/40 focus:ring-1 focus:ring-white/40" />
                 </div>
               </div>
-
               <div className="space-y-1.5">
                 <Label className="text-gray-300 text-xs ml-1 font-medium">Signed Club / Achievement</Label>
                 <Select defaultValue="benfica">
@@ -147,7 +138,6 @@ const SuccessStory = () => {
                   </SelectContent>
                 </Select>
               </div>
-
               <div className="space-y-1.5">
                 <Label className="text-gray-300 text-xs ml-1 font-medium">Category</Label>
                 <Select defaultValue="select">
@@ -162,7 +152,6 @@ const SuccessStory = () => {
                   </SelectContent>
                 </Select>
               </div>
-
               <div className="space-y-1.5">
                 <Label className="text-gray-300 text-xs ml-1 font-medium">Upload Photo</Label>
                 <div className="min-h-[200px] border border-dashed border-white/15 rounded-2xl flex flex-col items-center justify-center text-gray-500 hover:border-white/30 hover:text-white transition-colors cursor-pointer bg-white/[0.01]">
@@ -170,7 +159,6 @@ const SuccessStory = () => {
                   <p className="text-xs font-medium opacity-50">Upload Image</p>
                 </div>
               </div>
-
               <div className="space-y-1.5">
                 <Label className="text-gray-300 text-xs ml-1 font-medium">Story Content</Label>
                 <Textarea 
@@ -179,7 +167,6 @@ const SuccessStory = () => {
                 />
               </div>
             </div>
-
             <div className="p-6 md:p-8 border-t border-white/5 flex gap-4 bg-[#0a0a0a] shrink-0 items-center justify-center">
               <Button className="flex-1 bg-transparent border border-white/15 text-white hover:bg-white/5 h-12 rounded-xl font-medium">
                 Cancel
@@ -191,7 +178,6 @@ const SuccessStory = () => {
           </DialogContent>
         </Dialog>
       </div>
-
       <div className="bg-[#111111] border border-white/15 rounded-3xl p-6 md:p-8">
         <DashboardTable columns={columns} data={mockStories} />
       </div>

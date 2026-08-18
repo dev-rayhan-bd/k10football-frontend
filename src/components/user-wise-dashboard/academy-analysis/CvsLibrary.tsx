@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import React from "react";
 import { 
   IconFileText, 
@@ -9,9 +10,7 @@ import {
   IconSearch
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
-
 import TableActionButtons from "@/components/dashboard/TableActionButtons";
-
 const LibraryStatCard = ({ icon: Icon, value, label }: { icon: any, value: string | number, label: string }) => (
   <div className="bg-[#111111] border border-white/20 rounded-2xl p-8 flex flex-col gap-4 flex-1">
     <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/20 flex items-center justify-center">
@@ -23,7 +22,6 @@ const LibraryStatCard = ({ icon: Icon, value, label }: { icon: any, value: strin
     </div>
   </div>
 );
-
 const TabButton = ({ active, label, icon: Icon, onClick }: { active?: boolean, label: string, icon: any, onClick: () => void }) => (
   <button 
     onClick={onClick}
@@ -33,7 +31,6 @@ const TabButton = ({ active, label, icon: Icon, onClick }: { active?: boolean, l
     <span className="text-xs font-black uppercase tracking-wider">{label}</span>
   </button>
 );
-
 const StatusPill = ({ type }: { type: "Silver" | "Gold" | "Bronze" }) => {
   const styles = {
     Silver: "bg-white/10 text-white border-white/20",
@@ -46,10 +43,8 @@ const StatusPill = ({ type }: { type: "Silver" | "Gold" | "Bronze" }) => {
     </span>
   );
 };
-
 const CvsLibrary = () => {
   const [activeTab, setActiveTab] = React.useState("All CVS");
-
   return (
     <div className="flex flex-col gap-8 pb-10">
       {/* Header */}
@@ -57,7 +52,6 @@ const CvsLibrary = () => {
         <h1 className="text-5xl font-black text-white font-orbitron uppercase tracking-tight">CVs Library</h1>
         <p className="text-white/60 font-medium mt-2 text-lg">View and manage athlete CVs</p>
       </div>
-
       {/* Summary Container */}
       <div className="bg-[#111111] border border-white/15 rounded-[40px] p-10 flex flex-col gap-10">
         <div className="flex gap-6">
@@ -65,7 +59,6 @@ const CvsLibrary = () => {
           <LibraryStatCard icon={IconHeart} value="42" label="Liked CVs" />
           <LibraryStatCard icon={IconEye} value="18" label="Profiles Shared" />
         </div>
-
         {/* Tabs */}
         <div className="flex gap-8 border-b border-white/15">
           <TabButton active={activeTab === "All CVS"} onClick={() => setActiveTab("All CVS")} label="All CVS" icon={IconFileText} />
@@ -73,7 +66,6 @@ const CvsLibrary = () => {
           <TabButton active={activeTab === "Profiles Shared"} onClick={() => setActiveTab("Profiles Shared")} label="Profiles Shared" icon={IconEye} />
         </div>
       </div>
-
       {/* Table Container */}
       <div className="bg-[#111111] border border-white/20 rounded-[40px] p-8 flex flex-col gap-8">
         {/* Table Filters */}
@@ -84,7 +76,6 @@ const CvsLibrary = () => {
             </Button>
           ))}
         </div>
-
         {/* Professional Table */}
         <div className="border border-white/20 rounded-2xl overflow-hidden">
           <table className="w-full text-left border-collapse">
@@ -110,7 +101,7 @@ const CvsLibrary = () => {
                   <td className="px-6 py-5 border-r border-white/20">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-white/10 overflow-hidden border border-white/20">
-                         <img src={`https://i.pravatar.cc/150?u=${row.name}`} alt={row.name} className="w-full h-full object-cover" />
+                         <Image src={`https://i.pravatar.cc/150?u=${row.name}`} alt={row.name} className="w-full h-full object-cover" />
                       </div>
                       <div>
                         <p className="text-white text-sm font-black uppercase">{row.name}</p>

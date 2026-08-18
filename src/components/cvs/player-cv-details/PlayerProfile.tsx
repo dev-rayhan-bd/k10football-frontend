@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
+import Image from "next/image";
 import React, { useState } from "react";
 import playerImage from "@/assets/cvs/id/player-short-image.png";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import Image from "next/image";
 import { usePlayerStats } from "./FullEditablePage";
 import { useUpdatePlayerProfileMutation } from "@/lib/features/cv/cvApi";
 import CMSField from "@/components/shared/CMSField";
@@ -21,7 +20,6 @@ import club1 from "@/assets/cvs/club1.png";
 import { useRouter } from "next/navigation";
 import { IconCircleCheck } from "@tabler/icons-react";
 import { calculateWeightedRating } from "@/lib/utils/rating";
-
 const COUNTRY_CODES: Record<string, string> = {
   "afghanistan": "af", "albania": "al", "algeria": "dz", "andorra": "ad", "angola": "ao",
   "antigua and barbuda": "ag", "argentina": "ar", "armenia": "am", "australia": "au",
@@ -67,20 +65,16 @@ const COUNTRY_CODES: Record<string, string> = {
   "vanuatu": "vu", "vatican city": "va", "venezuela": "ve", "vietnam": "vn", "yemen": "ye",
   "zambia": "zm", "zimbabwe": "zw"
 };
-
-
 interface Attribute {
   name: string;
   score: number;
   status: "Excellent" | "Good" | "Average";
 }
-
 const getBadgeStatus = (score: number): "Excellent" | "Good" | "Average" => {
   if (score >= 80) return "Excellent";
   if (score >= 60) return "Good";
   return "Average";
 };
-
 const getBadgeVariant = (status: string) => {
   switch (status) {
     case "Excellent":
@@ -93,25 +87,21 @@ const getBadgeVariant = (status: string) => {
       return "bg-green-500/10 text-green-500 border-green-500/50";
   }
 };
-
 const getIndicatorColor = (val: number) => {
   if (val >= 80) return "bg-green-500";
   if (val >= 60) return "bg-yellow-500";
   return "bg-red-500";
 };
-
 const getHexColor = (val: number) => {
   if (val >= 80) return "#22c55e";
   if (val >= 60) return "#eab308";
   return "#ef4444";
 };
-
 const getFlagUrl = (countryName: string) => {
   if (!countryName) return "";
   const code = COUNTRY_CODES[countryName.toLowerCase()];
   return code ? `https://flagcdn.com/${code}.svg` : "";
 };
-
 const PlayerProfile = ({
   editable = false,
 }: {
@@ -122,8 +112,6 @@ const { bioRating, skillsAvg, metricsAvg, attributesAvg, role } =
 usePlayerStats();
 const { playerData, handleUpdate: updatePlayerData, validatePlayer } = usePlayer();
 const [updatePlayer] = useUpdatePlayerProfileMutation();
-
-
 
 const getFlagUrlWithFallback = () => {
 const url = getFlagUrl(playerData.birthCountry);
@@ -200,7 +188,7 @@ try {
   const { removeBackground } = await import("@imgly/background-removal");
   const blob = await removeBackground(file);
   const processedFile = new File([blob], file.name, { type: "image/png" });
-  
+
   const reader = new FileReader();
   reader.onloadend = () => {
     updatePlayerData("cardImage", reader.result as string);
@@ -210,7 +198,7 @@ try {
 } catch (error) {
   console.error("Background removal failed:", error);
   toast.error("Background removal failed. Using original image.", { id: "card-bg-removal" });
-  
+
   const reader = new FileReader();
   reader.onloadend = () => {
     updatePlayerData("cardImage", reader.result as string);
@@ -259,7 +247,7 @@ return (
                 }
                 alt="card background"
               />
-              
+
               {/* Top values */}
               <div className="absolute top-[13.5%] left-[13%] text-black flex flex-col items-center z-20 w-[16%] gap-1 pl-1.5">
                 <span className="text-2xl sm:text-3xl font-extrabold leading-none font-heading tracking-tighter text-gray-950">{currentPlayer.rating}</span>
@@ -324,7 +312,6 @@ return (
                   </>
                 )}
               </div>
-
 
               {/* Name */}
               <div className="absolute top-[51%] left-1/2 -translate-x-1/2 w-[85%] text-center pb-1 z-20">
@@ -436,7 +423,7 @@ return (
             className="text-base text-primary/80 font-black justify-center uppercase tracking-[0.2em]"
             inputClassName="text-center"
           />
-          
+
           {/* Validation / Verification Action */}
           <div className="pt-4 border-t border-white/5 flex flex-col gap-2">
             {role === "coach" && (playerData.validationStatus === "pending" || playerData.validationStatus === "expired") && (

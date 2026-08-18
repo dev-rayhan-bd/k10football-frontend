@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import React, { useState } from "react";
 import { 
   IconSearch, 
@@ -10,7 +10,6 @@ import {
   IconUser,
   IconUsers
 } from "@tabler/icons-react";
-
 interface Message {
   id: string;
   senderId: string;
@@ -18,7 +17,6 @@ interface Message {
   time: string;
   isMe: boolean;
 }
-
 interface Conversation {
   id: string;
   user: {
@@ -30,7 +28,6 @@ interface Conversation {
   time: string;
   unreadCount?: number;
 }
-
 const conversations: Conversation[] = [
   {
     id: "1",
@@ -53,25 +50,21 @@ const conversations: Conversation[] = [
     unreadCount: 1,
   },
 ];
-
 const messages: Message[] = [
   { id: "1", senderId: "robert", text: "Hi, I wanted to ask about Marcus' performance.", time: "10:30 AM", isMe: false },
   { id: "2", senderId: "me", text: "Hello! Marcus is doing great in training. His passing accuracy has improved significantly.", time: "10:32 AM", isMe: true },
   { id: "3", senderId: "robert", text: "That's wonderful to hear! Thanks for the update.", time: "10:35 AM", isMe: false },
 ];
-
 const participants = [
   { id: "1", name: "Robert Silva", role: "Parent", avatar: "https://i.pravatar.cc/100?u=robert" },
   { id: "2", name: "Linda Chen", role: "Parent", avatar: "https://i.pravatar.cc/100?u=linda" },
   { id: "3", name: "Michael Jordan", role: "Parent", avatar: "https://i.pravatar.cc/100?u=michael" },
   { id: "4", name: "David Martinez", role: "Parent", avatar: "https://i.pravatar.cc/100?u=david" },
 ];
-
 const AcademyChat = () => {
   const [showNewChatModal, setShowNewChatModal] = useState(false);
   const [chatType, setChatType] = useState<"individual" | "group">("individual");
   const [selectedParticipant, setSelectedParticipant] = useState("1");
-
   return (
     <div className="flex flex-col gap-6 h-full min-h-[calc(100vh-120px)]">
       {/* Header */}
@@ -88,7 +81,6 @@ const AcademyChat = () => {
           Create New Chat
         </button>
       </div>
-
       <div className="flex flex-1 gap-6 min-h-0">
         {/* Sidebar */}
         <div className="w-[320px] bg-[#111111] rounded-3xl border border-white/10 flex flex-col overflow-hidden">
@@ -102,7 +94,6 @@ const AcademyChat = () => {
               />
             </div>
           </div>
-
           <div className="flex-1 overflow-y-auto custom-scrollbar">
             {conversations.map((conv) => (
               <button 
@@ -110,7 +101,7 @@ const AcademyChat = () => {
                 className={`w-full p-4 flex items-start gap-3 hover:bg-white/[0.03] transition-all text-left border-b border-white/[0.02] last:border-0 ${conv.id === "1" ? "bg-white/[0.03]" : ""}`}
               >
                 <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 shrink-0">
-                  <img src={conv.user.avatar} alt={conv.user.name} className="w-full h-full object-cover" />
+                  <Image src={conv.user.avatar} alt={conv.user.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-center mb-0.5">
@@ -128,14 +119,13 @@ const AcademyChat = () => {
             ))}
           </div>
         </div>
-
         {/* Chat Area */}
         <div className="flex-1 bg-[#111111] rounded-3xl border border-white/10 flex flex-col overflow-hidden">
           {/* Chat Header */}
           <div className="p-4 border-b border-white/10 flex justify-between items-center">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10 shrink-0">
-                <img src="https://i.pravatar.cc/100?u=robert" alt="Robert Silva" className="w-full h-full object-cover" />
+                <Image src="https://i.pravatar.cc/100?u=robert" alt="Robert Silva" className="w-full h-full object-cover" />
               </div>
               <div>
                 <h3 className="text-sm font-bold text-white">Robert Silva</h3>
@@ -146,7 +136,6 @@ const AcademyChat = () => {
               <IconDotsVertical size={20} />
             </button>
           </div>
-
           {/* Messages Area */}
           <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 custom-scrollbar">
             {messages.map((msg) => (
@@ -164,7 +153,6 @@ const AcademyChat = () => {
               </div>
             ))}
           </div>
-
           {/* Input Area */}
           <div className="p-4 border-t border-white/10">
             <div className="relative">
@@ -180,12 +168,10 @@ const AcademyChat = () => {
           </div>
         </div>
       </div>
-
       {/* New Chat Modal */}
       {showNewChatModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowNewChatModal(false)} />
-          
           <div className="relative w-full max-w-lg bg-[#111111] rounded-[32px] border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
             {/* Modal Header */}
             <div className="p-8 pb-4 flex justify-between items-center border-b border-white/10">
@@ -197,7 +183,6 @@ const AcademyChat = () => {
                 <IconX size={20} />
               </button>
             </div>
-
             <div className="p-8 flex flex-col gap-8">
               {/* Chat Type Selection */}
               <div className="space-y-4">
@@ -233,7 +218,6 @@ const AcademyChat = () => {
                   </button>
                 </div>
               </div>
-
               {/* Participant Selection */}
               <div className="space-y-4">
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/40">Select Participants (Select 1)</label>
@@ -249,7 +233,7 @@ const AcademyChat = () => {
                       }`}
                     >
                       <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10 shrink-0">
-                        <img src={p.avatar} alt={p.name} className="w-full h-full object-cover" />
+                        <Image src={p.avatar} alt={p.name} className="w-full h-full object-cover" />
                       </div>
                       <div>
                         <p className="text-sm font-bold">{p.name}</p>
@@ -260,7 +244,6 @@ const AcademyChat = () => {
                 </div>
               </div>
             </div>
-
             {/* Modal Footer */}
             <div className="p-8 border-t border-white/5 flex justify-end gap-4">
               <button 
@@ -279,5 +262,4 @@ const AcademyChat = () => {
     </div>
   );
 };
-
 export default AcademyChat;

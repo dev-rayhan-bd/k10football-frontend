@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/incompatible-library */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
+import Image from "next/image";
 import React from "react";
 import {
   IconUsers,
@@ -13,63 +14,58 @@ import {
   IconMapPin,
   IconCalendarEvent,
   IconClipboardText,
-  IconAlertCircle,
   IconPlus,
   IconDotsVertical,
   IconPencil,
   IconTrash,
   IconVideo
 } from "@tabler/icons-react";
-
 import { useAppSelector } from "@/lib/hooks/reduxHooks";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle
 } from "@/components/ui/dialog";
-
 import DashboardHero from "@/components/dashboard/DashboardHero";
 import DashboardStatCard from "@/components/dashboard/DashboardStatCard";
 import DashboardCharts from "@/components/dashboard/DashboardCharts";
 import MediaCard from "@/components/dashboard/MediaCard";
 import { DashboardSidebarPanel, DashboardSidebarItem } from "@/components/dashboard/DashboardSidebar";
-
-
 const mediaData = [
   { id: "1", type: "image" as const, title: "vs Chelsea U19", date: "Mar 10, 2024", views: 189, likes: 45, thumbnail: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=2076" },
   { id: "2", type: "image" as const, title: "Training Highlights", date: "Feb 28, 2024", views: 156, likes: 62, thumbnail: "https://images.unsplash.com/photo-1518005020250-6759229547b9?q=80&w=2021" },
   { id: "3", type: "image" as const, title: "vs Liverpool U19", date: "Mar 5, 2024", views: 312, likes: 227, thumbnail: "https://images.unsplash.com/photo-1551958219-acbc608c6377?q=80&w=2070" },
   { id: "4", type: "image" as const, title: "vs Liverpool U19", date: "Mar 5, 2024", views: 312, likes: 227, thumbnail: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?q=80&w=2071" },
 ];
-
 const videoData = [
   { id: "1", type: "video" as const, title: "vs Arsenal U19", date: "Mar 15, 2024", views: 234, likes: 97, thumbnail: "https://images.unsplash.com/photo-1556056504-5c7696c4c28d?q=80&w=2076" },
   { id: "2", type: "video" as const, title: "vs Arsenal U19", date: "Mar 15, 2024", views: 234, likes: 97, thumbnail: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=2070" },
   { id: "3", type: "video" as const, title: "vs Liverpool U19", date: "Mar 5, 2024", views: 312, likes: 227, thumbnail: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=2070" },
   { id: "4", type: "video" as const, title: "Training Highlights", date: "Feb 28, 2024", views: 156, likes: 62, thumbnail: "https://images.unsplash.com/photo-1518005020250-6759229547b9?q=80&w=2021" },
 ];
-
 // const transactions = [
 //   { id: "1", athlete: { name: "Marcus Silva", role: "Forward", avatar: "https://i.pravatar.cc/100?u=marcus" }, report: "Under 19 vs Chelsea U19", amount: "$ 6.99", myAmount: "$ 2.796", date: "2024-01-15", status: "Completed" as const },
 //   { id: "2", athlete: { name: "David Chen", role: "Midfielder", avatar: "https://i.pravatar.cc/100?u=david" }, report: "Under 18 vs Chelsea U18", amount: "$ 6.99", myAmount: "$ 2.796", date: "2024-02-01", status: "Pending" as const },
 //   { id: "3", athlete: { name: "Alex Jonson", role: "Defender", avatar: "https://i.pravatar.cc/100?u=alex" }, report: "Under 17 vs Liverpool U17", amount: "$ 6.99", myAmount: "$ 2.796", date: "2023-12-01", status: "Completed" as const },
 //   { id: "4", athlete: { name: "James Brown", role: "Goalkeeper", avatar: "https://i.pravatar.cc/100?u=james" }, report: "Under 16 vs City U16", amount: "$ 6.99", myAmount: "$ 2.796", date: "2024-03-10", status: "Rejected" as const },
 // ];
-
 const PlayerEvalSidebarItem = ({ player, status }: { player: any, status: any }) => {
   const playerImgSrc = typeof player.playerImage === 'string'
     ? player.playerImage
     : (player.playerImage?.src || "/ronaldo.png");
-
   return (
     <div className="p-4 bg-white/2 border border-white/5 rounded-2xl hover:bg-white/4 transition-all group flex items-center justify-between gap-3 cursor-pointer">
       <div className="flex items-center gap-3 min-w-0">
         <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10 shrink-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={playerImgSrc} alt={player.fullName} className="w-full h-full object-cover" />
+          <Image 
+            src={playerImgSrc}
+            alt={player.fullName}
+            className="w-full h-full object-cover"
+            onError={(e) => { e.currentTarget.src = "/placeholder_img.jpg"; }}
+          />
         </div>
         <div className="min-w-0">
           <p className="text-xs font-bold text-white group-hover:text-[#E31B23] transition-colors truncate">
@@ -98,17 +94,14 @@ const PlayerEvalSidebarItem = ({ player, status }: { player: any, status: any })
     </div>
   );
 };
-
 const AcademyAnalysisDashboard = () => {
   const players = useAppSelector((state) => state.player.players);
   const evaluationRecords = useAppSelector((state) => state.evaluation.records);
   const [selectedMedia, setSelectedMedia] = React.useState<{ mediaType: "image" | "video"; mediaFile: string } | null>(null);
-
   const getEvaluationStatus = (player: any) => {
     // If the mock data has evaluationDate, we can use that as fallback if there is no record in Redux
     const reduxRecord = evaluationRecords[player.id];
     const evalDateStr = reduxRecord?.date || player.evaluationDate || player.lastValidatedDate;
-
     if (!evalDateStr) {
       return {
         expired: true,
@@ -116,19 +109,14 @@ const AcademyAnalysisDashboard = () => {
         label: "Expired",
       };
     }
-
     const evalDate = new Date(evalDateStr);
     const currentDate = new Date();
-
     evalDate.setHours(0, 0, 0, 0);
     currentDate.setHours(0, 0, 0, 0);
-
     const dueDate = new Date(evalDate.getTime());
     dueDate.setDate(dueDate.getDate() + 90);
-
     const diffTime = dueDate.getTime() - currentDate.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
     return {
       expired: diffDays <= 0,
       remainingDays: diffDays,
@@ -137,7 +125,6 @@ const AcademyAnalysisDashboard = () => {
         : `${diffDays}d remaining`,
     };
   };
-
   const playersWithStatus = players.map(player => ({
     player,
     status: getEvaluationStatus(player)
@@ -152,7 +139,6 @@ const AcademyAnalysisDashboard = () => {
     // Both active: sort by smaller remainingDays (closest to expiration)
     return a.status.remainingDays - b.status.remainingDays;
   });
-
   const [isOpen, setIsOpen] = React.useState(false);
   const [activeDropdownId, setActiveDropdownId] = React.useState<string | null>(null);
   const [editingStory, setEditingStory] = React.useState<any | null>(null);
@@ -179,7 +165,6 @@ const AcademyAnalysisDashboard = () => {
       mediaFile: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=2076",
     }
   ]);
-
   const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm({
     defaultValues: {
       title: "",
@@ -188,7 +173,6 @@ const AcademyAnalysisDashboard = () => {
       mediaFile: "",
     }
   });
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -199,7 +183,6 @@ const AcademyAnalysisDashboard = () => {
       reader.readAsDataURL(file);
     }
   };
-
   const handleAddClick = () => {
     setEditingStory(null);
     reset({
@@ -210,7 +193,6 @@ const AcademyAnalysisDashboard = () => {
     });
     setIsOpen(true);
   };
-
   const handleEditClick = (story: any) => {
     setEditingStory(story);
     setValue("title", story.title);
@@ -220,13 +202,11 @@ const AcademyAnalysisDashboard = () => {
     setActiveDropdownId(null);
     setIsOpen(true);
   };
-
   const handleDeleteClick = (id: string) => {
     setStories((prev) => prev.filter((s) => s.id !== id));
     setActiveDropdownId(null);
     toast.success("Success story deleted successfully!");
   };
-
   const onSubmit = (data: any) => {
     if (!data.mediaFile) {
       toast.error("Please upload an image or video");
@@ -237,12 +217,12 @@ const AcademyAnalysisDashboard = () => {
         prev.map((s) =>
           s.id === editingStory.id
             ? {
-                ...s,
-                title: data.title,
-                description: data.description,
-                mediaType: data.mediaType,
-                mediaFile: data.mediaFile,
-              }
+              ...s,
+              title: data.title,
+              description: data.description,
+              mediaType: data.mediaType,
+              mediaFile: data.mediaFile,
+            }
             : s
         )
       );
@@ -262,14 +242,12 @@ const AcademyAnalysisDashboard = () => {
     reset();
     setEditingStory(null);
   };
-
   return (
     <div className="flex flex-col gap-8 pb-10">
       {/* Breadcrumbs */}
       <div className="text-xs text-gray-500 uppercase tracking-widest font-medium">
         Academy Dashboard / <span className="text-white">Analysis</span>
       </div>
-
       <div className="flex flex-col xl:flex-row gap-8">
         {/* Main Content */}
         <div className="flex-1 min-w-0 flex flex-col gap-6">
@@ -289,7 +267,6 @@ const AcademyAnalysisDashboard = () => {
               { type: "email", label: "Email", value: "contact@santosfc.academy" },
             ]}
           />
-
           {/* Stats Section */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <DashboardStatCard icon={<IconBallFootball size={24} />} label="Teams" value="4" />
@@ -297,10 +274,9 @@ const AcademyAnalysisDashboard = () => {
             <DashboardStatCard icon={<IconTrophy size={24} />} label="Coaches" value="12" />
             <DashboardStatCard icon={<IconFileAnalytics size={24} />} label="Game Reports" value="12" />
           </div>
-
           {/* Analytics Section */}
           <div className="bg-[#111111] rounded-3xl border border-white/5 p-8 flex flex-col gap-8">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <h2 className="text-2xl font-black uppercase text-white font-orbitron">Analytics</h2>
                 <p className="text-xs text-white/40 font-bold uppercase tracking-widest">Deep insights into Revenue</p>
@@ -311,10 +287,9 @@ const AcademyAnalysisDashboard = () => {
             </div>
             <DashboardCharts />
           </div>
-
           {/* Images Section */}
           <div className="bg-[#111111] rounded-3xl border border-white/5 p-8 flex flex-col gap-8">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <h2 className="text-2xl font-black uppercase text-white font-orbitron">Images</h2>
                 <p className="text-xs text-white/40 font-bold uppercase tracking-widest">Match highlights & training</p>
@@ -324,17 +299,15 @@ const AcademyAnalysisDashboard = () => {
                 Upload Image
               </button>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {mediaData.map((item) => (
                 <MediaCard key={item.id} {...item} />
               ))}
             </div>
           </div>
-
           {/* Videos Section */}
           <div className="bg-[#111111] rounded-3xl border border-white/5 p-8 flex flex-col gap-8">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <h2 className="text-2xl font-black uppercase text-white font-orbitron">Videos</h2>
                 <p className="text-xs text-white/40 font-bold uppercase tracking-widest">Match highlights & training</p>
@@ -344,37 +317,34 @@ const AcademyAnalysisDashboard = () => {
                 Upload Video
               </button>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {videoData.map((item) => (
                 <MediaCard key={item.id} {...item} />
               ))}
             </div>
           </div>
-
           {/* Success Story Section */}
           <div className="bg-[#111111] rounded-3xl border border-white/5 p-8 flex flex-col gap-8">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <h2 className="text-2xl font-black uppercase text-white font-orbitron">Success Story</h2>
                 <p className="text-xs text-white/40 font-bold uppercase tracking-widest">Share and view academy milestones</p>
               </div>
-              <button 
+              <button
                 onClick={handleAddClick}
-                className="flex items-center gap-2 bg-[#E31B23] hover:bg-[#ff2d35] border border-transparent text-[10px] font-black uppercase tracking-widest text-white px-6 py-2.5 rounded-xl transition-all shadow-[0_0_15px_rgba(227,27,35,0.2)] cursor-pointer font-bold"
+                className="flex items-center gap-2 bg-[#E31B23] hover:bg-[#ff2d35] border border-transparent text-[10px] font-black uppercase tracking-widest text-white px-6 py-2.5 rounded-xl transition-all shadow-[0_0_15px_rgba(227,27,35,0.2)] cursor-pointer"
               >
                 <IconPlus size={16} />
                 Add Success Story
               </button>
             </div>
-
             {/* List of stories */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {stories.map((story) => (
                 <div key={story.id} className="bg-white/2 border border-white/5 rounded-2xl overflow-hidden hover:border-white/10 transition-all flex flex-col h-full group relative">
                   {/* Actions Dropdown */}
                   <div className="absolute top-3 right-3 z-10">
-                    <button 
+                    <button
                       onClick={(e) => {
                         e.stopPropagation();
                         setActiveDropdownId(activeDropdownId === story.id ? null : story.id);
@@ -385,15 +355,15 @@ const AcademyAnalysisDashboard = () => {
                     </button>
                     {activeDropdownId === story.id && (
                       <>
-                        <div 
-                          className="fixed inset-0 z-20 cursor-default" 
+                        <div
+                          className="fixed inset-0 z-20 cursor-default"
                           onClick={(e) => {
                             e.stopPropagation();
                             setActiveDropdownId(null);
                           }}
                         />
                         <div className="absolute right-0 mt-1 w-32 bg-[#111111] border border-white/10 rounded-xl shadow-xl py-1.5 z-30 flex flex-col">
-                          <button 
+                          <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
@@ -404,7 +374,7 @@ const AcademyAnalysisDashboard = () => {
                             <IconPencil size={14} className="text-[#3B82F6]" />
                             Edit
                           </button>
-                          <button 
+                          <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
@@ -419,15 +389,18 @@ const AcademyAnalysisDashboard = () => {
                       </>
                     )}
                   </div>
-
                   {/* Media container */}
-                  <div 
+                  <div
                     onClick={() => setSelectedMedia({ mediaType: story.mediaType, mediaFile: story.mediaFile })}
-                    className="aspect-video w-full bg-black relative overflow-hidden flex-shrink-0 flex items-center justify-center cursor-zoom-in"
+                    className="aspect-video w-full bg-black relative overflow-hidden shrink-0 flex items-center justify-center cursor-zoom-in"
                   >
                     {story.mediaType === "image" ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={story.mediaFile} alt={story.title} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300" />
+                      <Image 
+                        src={story.mediaFile}
+                        alt={story.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
+                        onError={(e) => { e.currentTarget.src = "/placeholder_img.jpg"; }}
+                      />
                     ) : (
                       <div className="relative w-full h-full">
                         <video src={story.mediaFile} className="w-full h-full object-cover pointer-events-none" />
@@ -440,7 +413,7 @@ const AcademyAnalysisDashboard = () => {
                     )}
                   </div>
                   {/* Text details */}
-                  <div className="p-6 flex flex-col gap-3 flex-grow">
+                  <div className="p-6 flex flex-col gap-3 grow">
                     <h3 className="text-lg font-bold text-white leading-tight font-orbitron uppercase group-hover:text-[#E31B23] transition-colors">{story.title}</h3>
                     <p className="text-xs text-white/50 leading-relaxed line-clamp-4">{story.description}</p>
                   </div>
@@ -448,7 +421,6 @@ const AcademyAnalysisDashboard = () => {
               ))}
             </div>
           </div>
-
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-3xl max-w-lg p-8">
               <DialogHeader>
@@ -460,76 +432,72 @@ const AcademyAnalysisDashboard = () => {
                 {/* Title */}
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-white/60 uppercase tracking-widest block">Story Title</label>
-                  <input 
-                    type="text" 
-                    placeholder="Enter title (e.g. Under-17 Championship Victory)" 
-                    className="w-full h-12 bg-white/[0.02] border border-white/10 rounded-xl px-4 text-sm font-bold text-white focus:outline-none focus:border-[#E31B23]/50 transition-all placeholder:text-gray-600"
+                  <input
+                    type="text"
+                    placeholder="Enter title (e.g. Under-17 Championship Victory)"
+                    className="w-full h-12 bg-white/2 border border-white/10 rounded-xl px-4 text-sm font-bold text-white focus:outline-none focus:border-[#E31B23]/50 transition-all placeholder:text-gray-600"
                     {...register("title", { required: "Title is required", minLength: { value: 3, message: "Title must be at least 3 characters" } })}
                   />
                   {errors.title && <p className="text-xs text-red-500 font-bold">{errors.title.message}</p>}
                 </div>
-
                 {/* Description */}
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-white/60 uppercase tracking-widest block">Description</label>
-                  <textarea 
-                    placeholder="Share the details of this success story..." 
-                    className="w-full h-28 bg-white/[0.02] border border-white/10 rounded-xl p-4 text-sm font-bold text-white focus:outline-none focus:border-[#E31B23]/50 transition-all placeholder:text-gray-600 resize-none"
+                  <textarea
+                    placeholder="Share the details of this success story..."
+                    className="w-full h-28 bg-white/2 border border-white/10 rounded-xl p-4 text-sm font-bold text-white focus:outline-none focus:border-[#E31B23]/50 transition-all placeholder:text-gray-600 resize-none"
                     {...register("description", { required: "Description is required", minLength: { value: 10, message: "Description must be at least 10 characters" } })}
                   />
                   {errors.description && <p className="text-xs text-red-500 font-bold">{errors.description.message}</p>}
                 </div>
-
                 {/* Media Type selection */}
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-white/60 uppercase tracking-widest block">Media Type</label>
                   <div className="flex gap-4">
                     <label className="flex items-center gap-2 cursor-pointer text-sm font-bold">
-                      <input 
-                        type="radio" 
-                        value="image" 
+                      <input
+                        type="radio"
+                        value="image"
                         className="accent-[#E31B23] w-4 h-4 cursor-pointer"
-                        {...register("mediaType")} 
+                        {...register("mediaType")}
                       />
                       Image
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer text-sm font-bold">
-                      <input 
-                        type="radio" 
-                        value="video" 
+                      <input
+                        type="radio"
+                        value="video"
                         className="accent-[#E31B23] w-4 h-4 cursor-pointer"
-                        {...register("mediaType")} 
+                        {...register("mediaType")}
                       />
                       Video
                     </label>
                   </div>
                 </div>
-
                 {/* File Upload */}
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-white/60 uppercase tracking-widest block">
                     Upload {watch("mediaType") === "image" ? "Image" : "Video"}
                   </label>
                   <div className="relative">
-                    <input 
-                      type="file" 
+                    <input
+                      type="file"
                       accept={watch("mediaType") === "image" ? "image/*" : "video/*"}
                       className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:bg-white/5 file:text-white hover:file:bg-white/10 file:transition-all cursor-pointer"
                       onChange={handleFileChange}
                     />
                   </div>
                 </div>
-
                 {/* Buttons */}
                 <div className="flex gap-4 pt-4 border-t border-white/5 justify-end">
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setIsOpen(false)}
                     className="px-6 py-2.5 rounded-xl border border-white/10 text-white/60 hover:text-white bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer"
                   >
                     Cancel
                   </button>
-                  <button 
+                  <button
                     type="submit"
                     className="px-6 py-2.5 rounded-xl bg-[#E31B23] hover:bg-[#ff2d35] text-white text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-[0_0_15px_rgba(227,27,35,0.3)]"
                   >
@@ -539,21 +507,23 @@ const AcademyAnalysisDashboard = () => {
               </form>
             </DialogContent>
           </Dialog>
-
           {/* Media Popup Overlay Viewer */}
           <Dialog open={!!selectedMedia} onOpenChange={(open) => !open && setSelectedMedia(null)}>
             <DialogContent className="bg-black/95 border border-white/10 text-white rounded-3xl max-w-4xl p-6 flex flex-col items-center justify-center overflow-hidden">
               <div className="w-full flex items-center justify-center max-h-[75vh]">
                 {selectedMedia?.mediaType === "image" ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={selectedMedia.mediaFile} alt="Preview" className="max-w-full max-h-[70vh] object-contain rounded-xl" />
+                  <Image 
+                    src={selectedMedia.mediaFile}
+                    alt="Preview"
+                    className="max-w-full max-h-[70vh] object-contain rounded-xl"
+                    onError={(e) => { e.currentTarget.src = "/placeholder_img.jpg"; }}
+                  />
                 ) : (
                   <video src={selectedMedia?.mediaFile} controls autoPlay className="max-w-full max-h-[70vh] object-contain rounded-xl" />
                 )}
               </div>
             </DialogContent>
           </Dialog>
-
           {/* Financials Section */}
           {/* <div className="bg-[#111111] rounded-3xl border border-white/5 p-8 flex flex-col gap-8">
             <div className="flex justify-between items-center">
@@ -562,13 +532,11 @@ const AcademyAnalysisDashboard = () => {
                 <p className="text-xs text-white/40 font-bold uppercase tracking-widest">Track your academy&apos;s revenue and transactions</p>
               </div>
             </div>
-
             <FinancialsTable transactions={transactions} />
           </div> */}
         </div>
-
         {/* Sidebar */}
-        <div className="w-full xl:w-[380px] shrink-0 flex flex-col gap-6">
+        <div className="w-full xl:w-95 shrink-0 flex flex-col gap-6">
           <DashboardSidebarPanel title="Pending Game Reports" icon={<IconCalendarFilled size={24} />}>
             <DashboardSidebarItem
               avatar="https://i.pravatar.cc/100?u=marcus"
@@ -592,15 +560,13 @@ const AcademyAnalysisDashboard = () => {
               extraInfo="8.5"
             />
           </DashboardSidebarPanel>
-
           <DashboardSidebarPanel title="Player Evaluations" icon={<IconClipboardText size={24} />}>
-            <div className="max-h-[300px] overflow-y-auto pr-1 flex flex-col gap-3 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+            <div className="max-h-75 overflow-y-auto pr-1 flex flex-col gap-3 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
               {playersWithStatus.map(({ player, status }) => (
                 <PlayerEvalSidebarItem key={player.id} player={player} status={status} />
               ))}
             </div>
           </DashboardSidebarPanel>
-
           <DashboardSidebarPanel title="Clubs Interested" icon={<IconHeartFilled size={24} />}>
             <DashboardSidebarItem
               avatar="/Manchester-City-F.C-Transparent-File 1.png"
@@ -618,7 +584,6 @@ const AcademyAnalysisDashboard = () => {
               subtitle="Viewed your profile"
             />
           </DashboardSidebarPanel>
-
           <DashboardSidebarPanel title="Quickk stats">
             <div className="flex flex-col gap-4 px-2">
               <div className="flex justify-between items-center">
@@ -640,5 +605,4 @@ const AcademyAnalysisDashboard = () => {
     </div>
   );
 };
-
 export default AcademyAnalysisDashboard;

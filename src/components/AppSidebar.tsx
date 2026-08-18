@@ -1,22 +1,18 @@
 "use client";
-
-import * as React from "react";
 import Image from "next/image";
+import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
 import logo from "@/assets/logo.png";
 import NavDocuments from "@/components/NavDocuments";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Icon } from "@tabler/icons-react";
-
 export type SidebarItem = {
   name: string;
   url: string;
   icon: Icon;
 };
-
 type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
   sidebarItems: SidebarItem[];
   tier?: {
@@ -24,7 +20,6 @@ type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
     color: string;
   };
 };
-
 const AppSidebar = ({ sidebarItems, tier, ...props }: AppSidebarProps) => {
 const router = useRouter();
 const { state } = useSidebar();

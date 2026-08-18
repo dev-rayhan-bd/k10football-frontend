@@ -5,7 +5,6 @@ import coatchImage from "@/assets/home/coatch_image.png";
 import academyImge from "@/assets/home/academy_image.png";
 import agentImage from "@/assets/home/footbal_agent_image.png";
 import clubImage from "@/assets/home/professional_football_club.png";
-
 const ChooseYourRoleSection = () => {
   const roles = [
     {
@@ -47,7 +46,6 @@ const ChooseYourRoleSection = () => {
             K10&apos;s global football network.
           </p>
         </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8">
           {roles.map((role, i) => (
             <div
@@ -87,5 +85,4 @@ const ChooseYourRoleSection = () => {
     </section>
   );
 };
-
 export default ChooseYourRoleSection;

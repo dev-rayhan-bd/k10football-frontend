@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
 import Image from "next/image";
 import {
   Bar,
@@ -17,7 +16,6 @@ import {
 } from "recharts";
 import image from "@/assets/cvs/player_position.png"
 import image_bar from "@/assets/cvs/bar.png"
-
 const playersByNationality = [
   { name: "Brazil", Players: 68 },
   { name: "Argentina", Players: 56 },
@@ -27,14 +25,12 @@ const playersByNationality = [
   { name: "Japan", Players: 22 },
   { name: "Spain", Players: 20 },
 ];
-
 const ageGroupData = [
   { name: "07-10", value: 15, fill: "#FF1010" },
   { name: "11-15", value: 30, fill: "#00FF62" },
   { name: "16-20", value: 35, fill: "#FDC700" },
   { name: "21+", value: 20, fill: "#0077FF" },
 ];
-
 const CustomBar = (props: any) => {
   const { x, y, width, height, fill } = props;
   if (width <= 0 || height <= 0) return null;
@@ -50,7 +46,6 @@ const CustomBar = (props: any) => {
     />
   );
 };
-
 const AnalyciesSection = () => {
   return (
     <div className="container mx-auto px-4 py-10">
@@ -74,7 +69,6 @@ const AnalyciesSection = () => {
             </BarChart>
           </ResponsiveContainer>
         </div>
-
         {/* Donut Chart */}
         <div className="bg-white/5 backdrop-blur-sm rounded-lg p-6 border border-border flex flex-col items-center justify-center min-w-0">
           <h2 className="text-lg font-semibold mb-4">BY AGE</h2>
@@ -116,7 +110,6 @@ const AnalyciesSection = () => {
           </div>
         </div>
       </div>
-
       {/* Player Position Field */}
       <div className="bg-white/5 backdrop-blur-sm rounded-lg p-6 border border-border">
         <h2 className="text-lg font-semibold mb-6">BY PLAYER POSITION</h2>
@@ -130,5 +123,4 @@ const AnalyciesSection = () => {
     </div>
   );
 };
-
 export default AnalyciesSection;

@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 "use client";
-
+import Image from "next/image";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,25 +29,21 @@ import { toast } from "sonner";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import logo from "@/assets/sort_logo.png";
-
 import { useAppSelector } from "@/lib/hooks/reduxHooks";
 import { MatchStats } from "@/lib/constants/reports";
 import RadarChart from "@/components/user-wise-dashboard/coach-dashboard/create-game-report/RadarChart";
-
 const getPlayerTag = (player: any) => {
   if (player.fullName === "Marcus Silva") return "U-15";
   if (player.fullName === "Sarah Williams") return "U-16";
   if (player.fullName === "David Chen") return "U-17";
   if (player.fullName === "Alex Jonson" || player.fullName === "Alex Jordan") return "U-17";
   if (player.fullName === "James Brown") return "U-19";
-  
   const ageNum = parseInt(player.age);
   if (!isNaN(ageNum)) {
     return `U-${ageNum}`;
   }
   return "U-15";
 };
-
 // Map individual report details to the 24 stats for the detailed report view
 const getStatsFromReport = (report: MatchStats) => {
   const isGK = report.playerPosition?.toUpperCase() === "GOALKEEPER";
@@ -107,7 +103,6 @@ const getStatsFromReport = (report: MatchStats) => {
     };
   }
 };
-
 const SummaryCard = ({ label, value, icon: Icon, bgColor, textColor }: { label: string, value: string | number, icon: any, bgColor: string, textColor: string }) => (
   <div className="bg-[#0A0A0A] border border-white/20 rounded-[20px] p-5 flex items-center gap-4 flex-1">
     <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${bgColor} bg-opacity-20 border border-white/20 shrink-0`}>
@@ -119,7 +114,6 @@ const SummaryCard = ({ label, value, icon: Icon, bgColor, textColor }: { label: 
     </div>
   </div>
 );
-
 const GameReportCard = ({ 
   tag, 
   playerName, 
@@ -145,7 +139,6 @@ const GameReportCard = ({
         <span className="bg-white/5 border border-white/20 rounded-full px-4 py-1 text-[10px] font-bold text-white/60">{tag}</span>
         <span className="text-white/40 text-[10px] font-bold uppercase tracking-wider truncate max-w-40">{team1} vs {team2}</span>
       </div>
-
       <div className="space-y-1">
         <div className="flex items-center gap-2 text-white/40 text-[10px] font-bold">
           <IconClock size={12} /> {date}
@@ -155,7 +148,6 @@ const GameReportCard = ({
           <IconUsers size={12} /> Scout: {coach}
         </p>
       </div>
-
       <div className="space-y-2">
         <div className="flex justify-between items-end">
           <p className="text-white/40 text-[10px] font-bold uppercase">Overall Performance:</p>
@@ -168,7 +160,6 @@ const GameReportCard = ({
           />
         </div>
       </div>
-
       <div className="flex justify-between items-center">
          <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5 text-emerald-400 text-[10px] font-bold">
@@ -206,31 +197,25 @@ const GameReportCard = ({
     </div>
   );
 };
-
 const GameReports = () => {
   const players = useAppSelector((state) => state.player.players);
   const reports = useAppSelector((state) => state.reports.reports);
-  
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCard, setSelectedCard] = useState<any | null>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-
   // Map Redux game reports to component view format
   const mappedReports = reports.map((report) => {
     const player = report.playerId ? players.find(p => p.id === report.playerId) : undefined;
-    
     const pName = player?.fullName || report.playerName || "Marcus Silva";
     const pPos = player?.position || report.playerPosition || "Defensive Midfielder";
     const pTag = player ? getPlayerTag(player) : "U-15";
     const tier = player?.validationStatus === "verified" ? "TIER 1" : "TIER 2";
-
     // Format date: "YYYY-MM-DD" -> "MMM DD, YYYY"
     let formattedDate = report.date;
     try {
       const d = new Date(report.date);
       formattedDate = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
     } catch (e) {}
-
     return {
       ...report,
       playerName: pName,
@@ -240,7 +225,6 @@ const GameReports = () => {
       dateFormatted: formattedDate
     };
   });
-
   const filteredReports = mappedReports.filter(report => 
     report.playerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     report.playerPosition.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -248,7 +232,6 @@ const GameReports = () => {
     report.team1.toLowerCase().includes(searchTerm.toLowerCase()) ||
     report.team2.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
   // Dynamic Summary Stats
   const totalReportsCount = mappedReports.length;
   const avgRatingVal = totalReportsCount > 0 
@@ -259,14 +242,11 @@ const GameReports = () => {
     : "0.0";
   const totalGoalsVal = mappedReports.reduce((sum, r) => sum + (r.goals || 0), 0);
   const totalAssistsVal = mappedReports.reduce((sum, r) => sum + (r.assists || 0), 0);
-
   // Retrieve stats and radar mappings for selected card
   const activeStats = selectedCard ? getStatsFromReport(selectedCard) : null;
-  
   const mapStat = (val: number, maxVal = 15) => {
     return Math.min(99, Math.max(50, Math.round(50 + (val / maxVal) * 49)));
   };
-
   const isGK = selectedCard?.playerPosition?.toUpperCase() === "GOALKEEPER";
   const radarStats = selectedCard && activeStats
     ? (isGK
@@ -287,11 +267,9 @@ const GameReports = () => {
           { label: "PHY", value: mapStat((activeStats.appearances || 0) + (activeStats.savesAccurate || 0), 30) }
         ])
     : [];
-
   const overallPercent = radarStats.length > 0
     ? Math.round(radarStats.reduce((sum, s) => sum + s.value, 0) / radarStats.length)
     : 0;
-
   // Download PDF Report
   const handleDownloadPDF = async () => {
     const page = document.getElementById("report-page-1");
@@ -299,15 +277,12 @@ const GameReports = () => {
       toast.error("Report elements not found in DOM.");
       return;
     }
-
     const toastId = toast.loading("Generating PDF report... Please wait.");
     setIsGeneratingPdf(true);
-
     const originalGetComputedStyle = window.getComputedStyle;
     const dummy = document.createElement("div");
     dummy.style.display = "none";
     document.body.appendChild(dummy);
-
     const convertModernColor = (value: string) => {
       if (typeof value !== "string") return value;
       if (!value.includes("oklch") && !value.includes("lab") && !value.includes("oklab") && !value.includes("lch")) {
@@ -326,7 +301,6 @@ const GameReports = () => {
         }
       });
     };
-
     window.getComputedStyle = function (el, pseudoEl) {
       const style = originalGetComputedStyle(el, pseudoEl);
       return new Proxy(style, {
@@ -353,21 +327,17 @@ const GameReports = () => {
         },
       });
     };
-
     try {
       const pdf = new jsPDF("p", "mm", "a4");
       const imgWidth = 210;
       const imgHeight = 297;
-
       const canvas = await html2canvas(page, {
         scale: 2,
         useCORS: true,
         backgroundColor: "#ffffff",
       });
-
       const imgData = canvas.toDataURL("image/png");
       pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-
       pdf.save(`Game_Report_${selectedCard.playerName.replace(/\s+/g, "_")}.pdf`);
       toast.success("PDF report downloaded successfully!", { id: toastId });
     } catch (error) {
@@ -381,20 +351,17 @@ const GameReports = () => {
       setIsGeneratingPdf(false);
     }
   };
-
   const matchingPlayer = selectedCard ? players.find((p) => p.id === selectedCard.playerId) : null;
   const playerImgSrc = selectedCard
     ? (typeof matchingPlayer?.playerImage === "string"
         ? matchingPlayer.playerImage
         : (matchingPlayer?.playerImage?.src || "/ronaldo.png"))
     : "/ronaldo.png";
-
   // Sidebar Aggregations
   // 1. Top Performers (by average rating)
   const topPerformers = [...mappedReports]
     .sort((a, b) => b.rating - a.rating)
     .slice(0, 5);
-
   // 2. Top Scorers (by cumulative goals in reports)
   const goalMap: Record<string, { name: string, goals: number, pos: string, team: string }> = {};
   mappedReports.forEach(r => {
@@ -408,7 +375,6 @@ const GameReports = () => {
   const topScorers = Object.values(goalMap)
     .sort((a, b) => b.goals - a.goals)
     .slice(0, 4);
-
   return (
     <div className="flex flex-col gap-8 pb-10">
       <div className="flex justify-between items-end">
@@ -417,7 +383,6 @@ const GameReports = () => {
           <p className="text-white/60 font-medium mt-2 text-lg">Professional player match performance analysis and scout records</p>
         </div>
       </div>
-
       {/* Summary Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         <SummaryCard label="Avg. Match Rating" value={`${avgRatingVal}%`} icon={IconStar} bgColor="bg-sky-500" textColor="text-sky-500" />
@@ -425,7 +390,6 @@ const GameReports = () => {
         <SummaryCard label="Total Assists" value={totalAssistsVal} icon={IconFileText} bgColor="bg-blue-500" textColor="text-blue-500" />
         <SummaryCard label="Total Reports" value={totalReportsCount} icon={IconUsers} bgColor="bg-yellow-500" textColor="text-yellow-500" />
       </div>
-
       <div className="flex gap-8">
         {/* Main Content */}
         <div className="flex-1 flex flex-col gap-8">
@@ -441,13 +405,11 @@ const GameReports = () => {
               />
             </div>
           </div>
-
           {/* Reports Grid */}
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-black text-white font-orbitron uppercase tracking-tight">Scouting Reports</h2>
             </div>
-
             <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               {filteredReports.map((report, idx) => (
                 <GameReportCard 
@@ -475,7 +437,6 @@ const GameReports = () => {
             </div>
           </div>
         </div>
-
         {/* Sidebar */}
         <div className="w-full lg:w-85 flex flex-col gap-8 shrink-0 min-w-0">
            {/* Top Scorers */}
@@ -506,7 +467,6 @@ const GameReports = () => {
                  )}
               </div>
            </div>
-
            {/* Top Performers */}
            <div className="bg-[#111111] border border-white/20 rounded-4xl p-8 flex flex-col gap-6">
               <div className="flex items-center gap-3">
@@ -541,7 +501,6 @@ const GameReports = () => {
            </div>
         </div>
       </div>
-
       {/* Game Report Preview Modal */}
       <Dialog open={!!selectedCard} onOpenChange={(open) => !open && setSelectedCard(null)}>
         <DialogContent 
@@ -581,7 +540,6 @@ const GameReports = () => {
               </button>
             </div>
           </DialogHeader>
-
           {selectedCard && activeStats && (
             <div className="flex flex-col items-center gap-8 py-6">
               {/* Printable Page 1 */}
@@ -592,15 +550,12 @@ const GameReports = () => {
               >
                 {/* Watermark Logo */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none z-0">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={logo.src} alt="Logo Watermark" className="w-125 object-contain" />
+                  <Image src={logo.src} alt="Logo Watermark" className="w-125 object-contain" />
                 </div>
-
                 {/* Header */}
                 <div className="relative z-10 flex items-center justify-between border-b-4 border-slate-900 pb-3 mb-4">
                   <div className="flex items-center gap-3">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={logo.src} alt="K10 Logo" className="w-12 h-12 object-contain" />
+                    <Image src={logo.src} alt="K10 Logo" className="w-12 h-12 object-contain" />
                     <div>
                       <div className="text-xs font-black tracking-widest text-slate-900 font-orbitron">K10 FOOTBALL</div>
                       <div className="text-[8px] text-slate-500 font-bold uppercase tracking-widest font-orbitron">ANALYSIS CV</div>
@@ -619,11 +574,9 @@ const GameReports = () => {
                       <div className="text-xs font-black tracking-widest text-slate-900 font-orbitron">K10 FOOTBALL</div>
                       <div className="text-[8px] text-slate-500 font-bold uppercase tracking-widest font-orbitron">ANALYSIS CV</div>
                     </div>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={logo.src} alt="K10 Logo" className="w-12 h-12 object-contain" />
+                    <Image src={logo.src} alt="K10 Logo" className="w-12 h-12 object-contain" />
                   </div>
                 </div>
-
                 {/* Body Content */}
                 <div className="relative z-10 grid grid-cols-12 gap-4 mb-4">
                   {/* Player details */}
@@ -667,7 +620,6 @@ const GameReports = () => {
                       <p className="text-slate-700 text-xs font-bold mt-0.5 uppercase">{selectedCard.foot || "RIGHT"}</p>
                     </div>
                   </div>
-
                   {/* FUT player card photo preview */}
                   <div className="col-span-4 flex justify-end">
                     <div className="w-36 h-48 border-2 border-sky-400 bg-sky-50 rounded-2xl p-2 relative shadow-md flex flex-col items-center justify-between">
@@ -681,13 +633,11 @@ const GameReports = () => {
                             {selectedCard.playerPosition?.slice(0,3)}
                           </div>
                         </div>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={logo.src} alt="Club Logo" className="w-5 h-5 object-contain" />
+                        <Image src={logo.src} alt="Club Logo" className="w-5 h-5 object-contain" />
                       </div>
                       {/* Player image in FUT Card */}
                       <div className="w-24 h-28 overflow-hidden relative mt-1 flex items-end justify-center">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img 
+                        <Image 
                           src={playerImgSrc} 
                           alt="Player Card Image" 
                           className="h-full object-contain object-bottom"
@@ -702,7 +652,6 @@ const GameReports = () => {
                     </div>
                   </div>
                 </div>
-
                 {/* Player Characteristic Section */}
                 <div className="relative z-10 mb-4">
                   <div className="bg-sky-500 text-white font-orbitron px-4 py-1 rounded text-[10px] font-black uppercase tracking-wider mb-2 shadow">
@@ -720,7 +669,6 @@ const GameReports = () => {
                     )}
                   </div>
                 </div>
-
                 {/* Match Information Section */}
                 <div className="relative z-10 mb-4">
                   <div className="bg-sky-500 text-white font-orbitron px-4 py-1 rounded text-[10px] font-black uppercase tracking-wider mb-2 shadow">
@@ -753,7 +701,6 @@ const GameReports = () => {
                     </div>
                   </div>
                 </div>
-
                 {/* Match Statistics Section */}
                 <div className="relative z-10 mb-4">
                   <div className="bg-sky-500 text-white font-orbitron px-4 py-1 rounded text-[10px] font-black uppercase tracking-wider mb-2 shadow">
@@ -793,7 +740,6 @@ const GameReports = () => {
                     ))}
                   </div>
                 </div>
-
                 {/* Bottom section (Radar, Overall, Logos) */}
                 <div className="absolute bottom-10 left-10 right-10 z-10 flex items-center justify-between border-t-2 border-slate-200 pt-4">
                   {/* Radar Chart */}
@@ -807,18 +753,15 @@ const GameReports = () => {
                       gridColor="rgba(0, 0, 0, 0.1)"
                     />
                   </div>
-
                   {/* Overall score */}
                   <div className="text-center flex-1">
                     <div className="text-4xl font-black text-emerald-600 font-orbitron tracking-tighter italic">
                       OVERALL = {overallPercent}%
                     </div>
                   </div>
-
                   {/* Logo and tag */}
                   <div className="flex flex-col items-center gap-1.5 w-45">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={logo.src} alt="K10 Logo" className="w-10 h-10 object-contain" />
+                    <Image src={logo.src} alt="K10 Logo" className="w-10 h-10 object-contain" />
                     <div className="text-center leading-none">
                       <div className="text-[10px] font-black tracking-widest text-slate-900 font-orbitron">K10 FOOTBALL</div>
                       <div className="text-[7px] text-slate-500 font-bold uppercase tracking-widest font-orbitron">ANALYSIS CV</div>
@@ -833,5 +776,4 @@ const GameReports = () => {
     </div>
   );
 };
-
 export default GameReports;

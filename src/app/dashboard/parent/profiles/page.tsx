@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
+import Image from "next/image";
 
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -12,7 +13,6 @@ import {
   IconShield,
   IconPencil,
 } from "@tabler/icons-react";
-import Image from "next/image";
 
 interface ChildProfileForm {
   fullName: string;

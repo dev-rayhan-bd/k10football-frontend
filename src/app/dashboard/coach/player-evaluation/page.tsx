@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/reduxHooks";
@@ -298,8 +299,7 @@ return (
         <div className="flex justify-between items-center w-full relative z-10">
           {/* Logo Badge */}
           <div className="flex items-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={logo.src} alt="K10 Football Logo" className="h-10 object-contain" />
+            <Image src={logo.src} alt="K10 Football Logo" className="h-10 object-contain" />
           </div>
           {/* Date */}
           <div className="text-gray-500 text-xs font-bold font-mono">
@@ -357,9 +357,7 @@ return (
 
         {/* Right Side Player Cut-out Image */}
         <div className="absolute right-0 bottom-0 h-[80%] w-[50%] flex items-end justify-end pointer-events-none z-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={playerImgSrc}
+          <Image             src={playerImgSrc}
             alt={selectedPlayer.fullName}
             className="h-full object-contain object-bottom relative z-10"
           />
@@ -375,8 +373,7 @@ return (
         <div className="flex justify-between items-center w-full relative z-10">
           {/* Logo Badge */}
           <div className="flex items-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={logo.src} alt="K10 Football Logo" className="h-10 object-contain" />
+            <Image src={logo.src} alt="K10 Football Logo" className="h-10 object-contain" />
           </div>
           {/* Date */}
           <div className="text-gray-500 text-xs font-bold font-mono">
@@ -678,8 +675,7 @@ return (
                 >
                   <td className="py-4 px-4">
                     <div className="flex items-center gap-3">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img 
+                      <Image 
                         src={playerImgSrc} 
                         className="w-10 h-10 rounded-full object-cover bg-gray-900 border border-white/10" 
                         alt={player.fullName} 

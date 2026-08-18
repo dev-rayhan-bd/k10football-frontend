@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
+import Image from "next/image";
 import { useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,11 +13,9 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Eye, Heart, Upload } from "lucide-react";
-import Image from "next/image";
 import { useUpdatePlayerProfileMutation } from "@/lib/features/cv/cvApi";
 import CMSField from "@/components/shared/CMSField";
 import { cn } from "@/lib/utils";
-
 interface ImageCard {
   id: string;
   title: string;
@@ -26,7 +24,6 @@ interface ImageCard {
   likes: number;
   image: string;
 }
-
 const SAMPLE_IMAGES: ImageCard[] = [
   {
     id: "1",
@@ -65,7 +62,6 @@ const SAMPLE_IMAGES: ImageCard[] = [
       "https://images.pexels.com/photos/32205625/pexels-photo-32205625.jpeg",
   },
 ];
-
 const MyImagesSection = ({ editable = false }: { editable?: boolean }) => {
   const [updatePlayer] = useUpdatePlayerProfileMutation();
   const [images, setImages] = useState<ImageCard[]>(SAMPLE_IMAGES);
@@ -76,27 +72,22 @@ const MyImagesSection = ({ editable = false }: { editable?: boolean }) => {
     description: "",
     image: null as File | null,
   });
-
   const canEdit = editable;
-
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
       setFormData((prev) => ({ ...prev, image: e.target.files![0] }));
     }
   };
-
   const handleUpdateImage = async (id: string, field: string, value: any) => {
     setImages((prev) =>
       prev.map((img) => (img.id === id ? { ...img, [field]: value } : img)),
     );
-
     try {
       await updatePlayer({
         id: "current-player",
@@ -106,7 +97,6 @@ const MyImagesSection = ({ editable = false }: { editable?: boolean }) => {
       console.error(error);
     }
   };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.title && formData.date && formData.image) {
@@ -124,10 +114,8 @@ const MyImagesSection = ({ editable = false }: { editable?: boolean }) => {
       // In a real app, you'd call the API here to upload the image
     }
   };
-
   const EditableGalleryImage = ({ img }: { img: ImageCard }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
-
     const onFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) {
@@ -138,7 +126,6 @@ const MyImagesSection = ({ editable = false }: { editable?: boolean }) => {
         reader.readAsDataURL(file);
       }
     };
-
     return (
       <Card
         className="bg-gray-900 border-gray-800 overflow-hidden hover:border-gray-700 transition-colors"
@@ -203,7 +190,6 @@ const MyImagesSection = ({ editable = false }: { editable?: boolean }) => {
       </Card>
     );
   };
-
   return (
     <div className="mt-20">
       <div className="container bg-cardBg p-10 rounded-lg">
@@ -224,7 +210,6 @@ const MyImagesSection = ({ editable = false }: { editable?: boolean }) => {
             </Button>
           )}
         </div>
-
         {/* Image Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {images.map((img) => (
@@ -232,7 +217,6 @@ const MyImagesSection = ({ editable = false }: { editable?: boolean }) => {
           ))}
         </div>
       </div>
-
       {/* Upload Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="bg-gray-900 border-gray-800">
@@ -264,7 +248,6 @@ const MyImagesSection = ({ editable = false }: { editable?: boolean }) => {
                 </label>
               </div>
             </div>
-
             <div>
               <label className="block text-white text-sm font-medium mb-2">
                 Title
@@ -278,7 +261,6 @@ const MyImagesSection = ({ editable = false }: { editable?: boolean }) => {
                 className="bg-gray-800 border-gray-700 text-white placeholder-gray-500"
               />
             </div>
-
             <div>
               <label className="block text-white text-sm font-medium mb-2">
                 Date
@@ -291,7 +273,6 @@ const MyImagesSection = ({ editable = false }: { editable?: boolean }) => {
                 className="bg-gray-800 border-gray-700 text-white"
               />
             </div>
-
             <div>
               <label className="block text-white text-sm font-medium mb-2">
                 Description
@@ -304,7 +285,6 @@ const MyImagesSection = ({ editable = false }: { editable?: boolean }) => {
                 className="bg-gray-800 border-gray-700 text-white placeholder-gray-500 h-24"
               />
             </div>
-
             <div className="flex gap-3 pt-4">
               <Button
                 type="button"
@@ -327,5 +307,4 @@ const MyImagesSection = ({ editable = false }: { editable?: boolean }) => {
     </div>
   );
 };
-
 export default MyImagesSection;

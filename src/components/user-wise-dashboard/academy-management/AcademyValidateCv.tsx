@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import React, { useState, useMemo } from "react";
 import {
@@ -30,7 +31,6 @@ import { COACH_POOL } from "@/components/user-wise-dashboard/academy-analysis/Te
 import FullEditablePage from "@/components/cvs/player-cv-details/FullEditablePage";
 import { getFullWithShortForm } from "@/lib/utils";
 import { FileText } from 'lucide-react';
-import Image from "next/image";
 
 // ─── CV Tier calculation ───────────────────────────────────────────────────
 type CvTier = "Gold" | "Silver" | "Bronze";
@@ -604,8 +604,7 @@ const AcademyValidateCv = () => {
                     <td className="py-4 px-6 border-r border-white/15">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full overflow-hidden border border-white/15 shrink-0 bg-white/5">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={imgSrc} alt={p.fullName} className="w-full h-full object-cover" />
+                          <Image src={imgSrc} alt={p.fullName} className="w-full h-full object-cover" />
                         </div>
                         <div>
                           <p className="text-sm font-black text-white whitespace-nowrap">{p.fullName}</p>

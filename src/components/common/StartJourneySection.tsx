@@ -1,7 +1,6 @@
 import Image from "next/image";
 import image from "@/assets/home/startJourneyImage.png";
 import GradientButton from "@/components/shared/GradientButton";
-
 const StartJourneySection = () => {
   return (
     <div className="relative overflow-hidden bg-black">
@@ -18,5 +17,4 @@ const StartJourneySection = () => {
     </div>
   );
 };
-
 export default StartJourneySection;

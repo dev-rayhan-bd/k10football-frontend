@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/incompatible-library */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
+import Image from "next/image";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -24,7 +24,6 @@ import {
   DialogHeader, 
   DialogTitle 
 } from "@/components/ui/dialog";
-
 const SummaryCard = ({ label, value, icon: Icon, bgColor, textColor }: { label: string, value: string | number, icon: any, bgColor: string, textColor: string }) => (
   <div className="bg-[#0A0A0A] border border-white/20 rounded-[20px] p-5 flex items-center gap-4 flex-1">
     <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${bgColor} bg-opacity-20 border border-white/20 shrink-0`}>
@@ -36,14 +35,12 @@ const SummaryCard = ({ label, value, icon: Icon, bgColor, textColor }: { label: 
     </div>
   </div>
 );
-
 const SuccessStory = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
   const [editingStory, setEditingStory] = useState<any | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMedia, setSelectedMedia] = useState<{ mediaType: "image" | "video"; mediaFile: string } | null>(null);
-
   const [stories, setStories] = useState([
     {
       id: "1",
@@ -67,7 +64,6 @@ const SuccessStory = () => {
       mediaFile: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=2076",
     }
   ]);
-
   const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm({
     defaultValues: {
       title: "",
@@ -76,7 +72,6 @@ const SuccessStory = () => {
       mediaFile: "",
     }
   });
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -87,7 +82,6 @@ const SuccessStory = () => {
       reader.readAsDataURL(file);
     }
   };
-
   const handleAddClick = () => {
     setEditingStory(null);
     reset({
@@ -98,7 +92,6 @@ const SuccessStory = () => {
     });
     setIsOpen(true);
   };
-
   const handleEditClick = (story: any) => {
     setEditingStory(story);
     setValue("title", story.title);
@@ -108,13 +101,11 @@ const SuccessStory = () => {
     setActiveDropdownId(null);
     setIsOpen(true);
   };
-
   const handleDeleteClick = (id: string) => {
     setStories((prev) => prev.filter((s) => s.id !== id));
     setActiveDropdownId(null);
     toast.success("Success story deleted successfully!");
   };
-
   const onSubmit = (data: any) => {
     if (!data.mediaFile) {
       toast.error("Please upload an image or video");
@@ -150,25 +141,21 @@ const SuccessStory = () => {
     reset();
     setEditingStory(null);
   };
-
   const filteredStories = stories.filter(story => 
     story.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     story.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
   // Dynamic Statistics calculations
   const totalStories = stories.length;
   const imageCount = stories.filter(s => s.mediaType === "image").length;
   const videoCount = stories.filter(s => s.mediaType === "video").length;
   const milestones = stories.filter(s => s.description.length > 120).length;
-
   return (
     <div className="flex flex-col gap-8 pb-10">
       {/* Breadcrumbs */}
       <div className="text-xs text-gray-500 uppercase tracking-widest font-medium">
         Academy Dashboard / Analysis / <span className="text-white">Success Story</span>
       </div>
-
       <div className="flex justify-between items-end">
         <div>
           <h1 className="text-5xl font-black text-white font-orbitron uppercase tracking-tight">Success Story</h1>
@@ -181,7 +168,6 @@ const SuccessStory = () => {
           <IconPlus size={20} /> Add Success Story
         </Button>
       </div>
-
       {/* Summary Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         <SummaryCard label="Total Stories" value={totalStories} icon={IconFileText} bgColor="bg-red-500" textColor="text-red-500" />
@@ -189,7 +175,6 @@ const SuccessStory = () => {
         <SummaryCard label="Videos Shared" value={videoCount} icon={IconVideo} bgColor="bg-blue-500" textColor="text-blue-500" />
         <SummaryCard label="Milestones" value={milestones} icon={IconStar} bgColor="bg-yellow-500" textColor="text-yellow-500" />
       </div>
-
       {/* Main Content */}
       <div className="flex flex-col gap-8">
         {/* Filters */}
@@ -204,7 +189,6 @@ const SuccessStory = () => {
             />
           </div>
         </div>
-
         {/* Stories Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredStories.map((story) => (
@@ -256,15 +240,13 @@ const SuccessStory = () => {
                   </>
                 )}
               </div>
-
               {/* Media container */}
               <div 
                 onClick={() => setSelectedMedia({ mediaType: story.mediaType, mediaFile: story.mediaFile })}
                 className="aspect-video w-full bg-black relative overflow-hidden shrink-0 flex items-center justify-center cursor-zoom-in"
               >
                 {story.mediaType === "image" ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={story.mediaFile} alt={story.title} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300" />
+                  <Image src={story.mediaFile} alt={story.title} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300" />
                 ) : (
                   <div className="relative w-full h-full">
                     <video src={story.mediaFile} className="w-full h-full object-cover pointer-events-none" />
@@ -276,7 +258,6 @@ const SuccessStory = () => {
                   </div>
                 )}
               </div>
-              
               {/* Text details */}
               <div className="p-6 flex flex-col gap-3 grow bg-[#111111]">
                 <h3 className="text-lg font-bold text-white leading-tight font-orbitron uppercase group-hover:text-[#E31B23] transition-colors">{story.title}</h3>
@@ -291,7 +272,6 @@ const SuccessStory = () => {
           )}
         </div>
       </div>
-
       {/* Edit/Add Modal */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-3xl max-w-lg p-8">
@@ -312,7 +292,6 @@ const SuccessStory = () => {
               />
               {errors.title && <p className="text-xs text-red-500 font-bold">{errors.title.message}</p>}
             </div>
-
             {/* Description */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-white/60 uppercase tracking-widest block">Description</label>
@@ -323,7 +302,6 @@ const SuccessStory = () => {
               />
               {errors.description && <p className="text-xs text-red-500 font-bold">{errors.description.message}</p>}
             </div>
-
             {/* Media Type selection */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-white/60 uppercase tracking-widest block">Media Type</label>
@@ -348,7 +326,6 @@ const SuccessStory = () => {
                 </label>
               </div>
             </div>
-
             {/* File Upload */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-white/60 uppercase tracking-widest block">
@@ -363,7 +340,6 @@ const SuccessStory = () => {
                 />
               </div>
             </div>
-
             {/* Buttons */}
             <div className="flex gap-4 pt-4 border-t border-white/5 justify-end">
               <button 
@@ -383,14 +359,12 @@ const SuccessStory = () => {
           </form>
         </DialogContent>
       </Dialog>
-
       {/* Media Popup Overlay Viewer */}
       <Dialog open={!!selectedMedia} onOpenChange={(open) => !open && setSelectedMedia(null)}>
         <DialogContent className="bg-black/95 border border-white/10 text-white rounded-3xl max-w-4xl p-6 flex flex-col items-center justify-center overflow-hidden">
           <div className="w-full flex items-center justify-center max-h-[75vh]">
             {selectedMedia?.mediaType === "image" ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={selectedMedia.mediaFile} alt="Preview" className="max-w-full max-h-[70vh] object-contain rounded-xl" />
+              <Image src={selectedMedia.mediaFile} alt="Preview" className="max-w-full max-h-[70vh] object-contain rounded-xl" />
             ) : (
               <video src={selectedMedia?.mediaFile} controls autoPlay className="max-w-full max-h-[70vh] object-contain rounded-xl" />
             )}
@@ -400,5 +374,4 @@ const SuccessStory = () => {
     </div>
   );
 };
-
 export default SuccessStory;

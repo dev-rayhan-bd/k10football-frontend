@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import React from "react";
 import { 
   IconChevronDown, 
@@ -8,13 +9,11 @@ import {
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import DashboardTable, { Column } from "@/components/dashboard/DashboardTable";
-
 const StatusBadge = ({ active }: { active: boolean }) => (
   <span className={`px-4 py-1 rounded-full text-[10px] font-black uppercase border ${active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-white/5 text-white/40 border-white/10"}`}>
     {active ? "Active" : "Inactive"}
   </span>
 );
-
 const VerificationPill = ({ status }: { status: "Approved" | "Pending" | "Rejected" }) => {
   const styles = {
     Approved: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -27,14 +26,12 @@ const VerificationPill = ({ status }: { status: "Approved" | "Pending" | "Reject
     </span>
   );
 };
-
 interface AgentRow {
   name: string;
   verification: "Approved" | "Pending" | "Rejected";
   cvsShared: number;
   active: boolean;
 }
-
 const SuperAdminAgents = () => {
   const columns: Column<AgentRow>[] = [
     {
@@ -43,7 +40,7 @@ const SuperAdminAgents = () => {
       render: (row) => (
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-white/10 overflow-hidden border border-white/20">
-             <img src={`https://i.pravatar.cc/150?u=${row.name}`} alt={row.name} className="w-full h-full object-cover" />
+             <Image src={`https://i.pravatar.cc/150?u=${row.name}`} alt={row.name} className="w-full h-full object-cover" />
           </div>
           <p className="text-white text-sm font-black uppercase">{row.name}</p>
         </div>
@@ -81,14 +78,12 @@ const SuperAdminAgents = () => {
       )
     }
   ];
-
   const data: AgentRow[] = [
     { name: "Michael Brown", verification: "Approved", cvsShared: 28, active: true },
     { name: "Sarah Wilson", verification: "Pending", cvsShared: 30, active: true },
     { name: "James Taylor", verification: "Approved", cvsShared: 29, active: false },
     { name: "Emma Davis", verification: "Rejected", cvsShared: 30, active: true },
   ];
-
   return (
     <div className="flex flex-col gap-8 pb-10">
       {/* Header */}
@@ -96,7 +91,6 @@ const SuperAdminAgents = () => {
         <h1 className="text-5xl font-black text-white font-orbitron tracking-tight">Agents</h1>
         <p className="text-white/60 font-medium mt-2 text-lg">View and manage all platform agents</p>
       </div>
-
       {/* Main Container */}
       <div className="bg-[#111111] border border-white/20 rounded-[40px] p-10 flex flex-col gap-8">
         {/* Table Filters */}
@@ -105,7 +99,6 @@ const SuperAdminAgents = () => {
             All Status <IconChevronDown size={14} />
           </Button>
         </div>
-
         {/* Professional Table */}
         <DashboardTable columns={columns} data={data} />
       </div>

@@ -2,7 +2,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
+import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import DashboardModal from "@/components/dashboard/DashboardModal";
@@ -17,8 +17,6 @@ import {
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { useAppSelector } from "@/lib/hooks/reduxHooks";
-import Image from "next/image";
-
 export const TOURNAMENT_PRESET_LOGOS = [
   {
     id: "preset-cup",
@@ -62,7 +60,6 @@ export const TOURNAMENT_PRESET_LOGOS = [
     </svg>`
   }
 ];
-
 export const CLUB_PRESET_LOGOS = [
   {
     id: "club-badge-1",
@@ -104,7 +101,6 @@ export const CLUB_PRESET_LOGOS = [
     </svg>`
   }
 ];
-
 export const getStoredEvents = () => {
   if (typeof window === "undefined") return events;
   const stored = localStorage.getItem("k10_extra_events");
@@ -118,13 +114,11 @@ export const getStoredEvents = () => {
     return events;
   }
 };
-
 export const saveStoredEvents = (newEvents: any[]) => {
   if (typeof window !== "undefined") {
     localStorage.setItem("k10_extra_events", JSON.stringify(newEvents));
   }
 };
-
 export const events = [
   {
     id: 1,
@@ -171,11 +165,9 @@ export const events = [
     targetGroup: "Academy Players Only"
   }
 ];
-
 export const ExtraEventsManagement = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const players = useAppSelector((state) => state.player.players);
-  
   // State for creating new events
   const [eventsList, setEventsList] = useState<any[]>([]);
   const [eventName, setEventName] = useState("");
@@ -202,11 +194,9 @@ export const ExtraEventsManagement = () => {
   const [tournamentLogo, setTournamentLogo] = useState(TOURNAMENT_PRESET_LOGOS[0].id);
   const [customLogoBase64, setCustomLogoBase64] = useState("");
   const [eventBanner, setEventBanner] = useState("");
-
   useEffect(() => {
     setEventsList(getStoredEvents());
   }, []);
-
   const handleCreateEvent = () => {
     if (!eventName) {
       toast.error("Please enter an event name");
@@ -216,12 +206,9 @@ export const ExtraEventsManagement = () => {
       toast.error("Please select an event type");
       return;
     }
-
     const currentEvents = getStoredEvents();
     const newId = currentEvents.length > 0 ? Math.max(...currentEvents.map((e: any) => e.id)) + 1 : 1;
-
     const formattedFee = eventFee ? (eventFee.startsWith("£") || eventFee.startsWith("$") ? eventFee : `£${eventFee}`) : "Free";
-
     const newEvent = {
       id: newId,
       title: eventName,
@@ -248,13 +235,11 @@ export const ExtraEventsManagement = () => {
       banner: eventBanner,
       isCreated: true // flag indicating it was custom created
     };
-
     const updated = [newEvent, ...currentEvents];
     saveStoredEvents(updated);
     setEventsList(updated);
     toast.success("Event created successfully!");
     setShowCreateModal(false);
-
     // Reset Form
     setEventName("");
     setEventType("");
@@ -271,7 +256,6 @@ export const ExtraEventsManagement = () => {
     setTournamentLogo(TOURNAMENT_PRESET_LOGOS[0].id);
     setCustomLogoBase64("");
   };
-
   const handleCopyEventLink = (eventId: number) => {
     if (typeof window !== "undefined") {
       const origin = window.location.origin;
@@ -281,7 +265,6 @@ export const ExtraEventsManagement = () => {
       toast.success("Event link copied to clipboard!");
     }
   };
-
   return (
     <div className="flex flex-col gap-8">
       {/* Header */}
@@ -298,7 +281,6 @@ export const ExtraEventsManagement = () => {
           <span className="text-sm font-bold uppercase tracking-widest">Create Event</span>
         </button>
       </div>
-
       {/* Filter Bar */}
       <div className="flex justify-end gap-3">
         <button className="bg-[#111111] border border-white/15 px-5 py-2.5 rounded-xl text-[11px] font-bold text-white/60 hover:text-white flex items-center gap-2 transition-all">
@@ -310,7 +292,6 @@ export const ExtraEventsManagement = () => {
           <IconChevronDown size={14} />
         </button>
       </div>
-
       {/* Event Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {eventsList.map((event) => (
@@ -321,7 +302,6 @@ export const ExtraEventsManagement = () => {
               }`}>
                 {event.status}
               </span>
-              
               {event.eventType === "tournament" && (
                 <div className="w-10 h-10 text-white select-none">
                   {event.customLogo ? (
@@ -334,7 +314,6 @@ export const ExtraEventsManagement = () => {
                 </div>
               )}
             </div>
-
             <div className="space-y-4">
               <h3 className="text-lg font-black uppercase text-white font-orbitron leading-tight min-h-12 line-clamp-2">
                 {event.title}
@@ -354,7 +333,6 @@ export const ExtraEventsManagement = () => {
                 </div>
               </div>
             </div>
-
             <div className="flex gap-2 mt-auto w-full">
               <Link 
                 href={`/dashboard/academy/management/extra-events/${event.id}`}
@@ -374,7 +352,6 @@ export const ExtraEventsManagement = () => {
           </div>
         ))}
       </div>
-
       {/* Create Event Modal */}
       <DashboardModal
         isOpen={showCreateModal}
@@ -438,7 +415,6 @@ export const ExtraEventsManagement = () => {
                   <IconChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
                 </div>
               </div>
-              
               {/* Tournament Logo Picker */}
               {eventType === "tournament" && (
                 <div className="space-y-3 md:col-span-2 bg-[#1c1c1c]/20 border border-white/5 rounded-3xl p-6">
@@ -504,7 +480,6 @@ export const ExtraEventsManagement = () => {
                   </div>
                 </div>
               )}
-
               <div className="space-y-2">
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
                   Group <span className="text-[#E31B23]">*</span>
@@ -576,7 +551,6 @@ export const ExtraEventsManagement = () => {
               </div>
             </div>
           </div>
-
           {/* Tournament Match Setup (Conditional) */}
           {eventType === "tournament" && (
             <div className="bg-[#1C1C1C]/40 border border-[#E31B23]/35 rounded-4xl p-8 space-y-6">
@@ -584,7 +558,6 @@ export const ExtraEventsManagement = () => {
                 <span className="w-3.5 h-3.5 rounded-full bg-[#E31B23] animate-pulse" />
                 <h3 className="text-xl font-black uppercase text-white font-orbitron tracking-tight">Tournament Setup</h3>
               </div>
-              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Age Groups Multi-Select */}
                 <div className="space-y-2 md:col-span-2">
@@ -617,7 +590,6 @@ export const ExtraEventsManagement = () => {
                     })}
                   </div>
                 </div>
-
                 {/* Organize Formation (Match Format) */}
                 <div className="space-y-2">
                   <label className="text-[11px] font-black uppercase tracking-widest text-white/60">
@@ -637,7 +609,6 @@ export const ExtraEventsManagement = () => {
                     <IconChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
                   </div>
                 </div>
-
                 {/* Number of Pitches */}
                 <div className="space-y-2">
                   <label className="text-[11px] font-black uppercase tracking-widest text-white/60">
@@ -660,7 +631,6 @@ export const ExtraEventsManagement = () => {
               </div>
             </div>
           )}
-
           {/* Date & Time */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Date & Time</h3>
@@ -712,7 +682,6 @@ export const ExtraEventsManagement = () => {
               </div>
             </div>
           </div>
-
           {/* Location */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Location</h3>
@@ -743,7 +712,6 @@ export const ExtraEventsManagement = () => {
               </div>
             </div>
           </div>
-
           {/* Registration & Fees */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Registration & Fees</h3>
@@ -772,7 +740,6 @@ export const ExtraEventsManagement = () => {
               </div>
             </div>
           </div>
-
           {/* Event Details */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Event Details</h3>
@@ -799,7 +766,6 @@ export const ExtraEventsManagement = () => {
               </div>
             </div>
           </div>
-
           {/* Contact Information */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Contact Information</h3>
@@ -842,7 +808,6 @@ export const ExtraEventsManagement = () => {
               </div>
             </div>
           </div>
-
           {/* Event Image */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Event Image</h3>
@@ -881,5 +846,4 @@ export const ExtraEventsManagement = () => {
     </div>
   );
 };
-
 export default ExtraEventsManagement;

@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,10 +30,8 @@ import { toast } from "sonner";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import logo from "@/assets/logo.png";
-
 import { useAppSelector } from "@/lib/hooks/reduxHooks";
 import { EvaluationData } from "@/lib/features/evaluation/evaluationSlice";
-
 const technicalKeys: (keyof EvaluationData)[] = [
   "dribbling", "ballMastery", "runningWithBall", "rangePassing",
   "strikingFinishing", "defending", "firstTouch", "nonDominantFoot"
@@ -44,7 +42,6 @@ const physicalKeys: (keyof EvaluationData)[] = [
 const mentalKeys: (keyof EvaluationData)[] = [
   "gameAwareness", "gamesUnderstanding", "decisionMaking", "concentration", "leadership", "desire", "maturity"
 ];
-
 const DEFAULT_EVALUATION = {
   dribbling: 2,
   ballMastery: 2,
@@ -69,21 +66,18 @@ const DEFAULT_EVALUATION = {
   agility: 2,
   coordination: 2,
 };
-
 const getPlayerTag = (player: any) => {
   if (player.fullName === "Marcus Silva") return "U-15";
   if (player.fullName === "Sarah Williams") return "U-16";
   if (player.fullName === "David Chen") return "U-17";
   if (player.fullName === "Alex Jonson" || player.fullName === "Alex Jordan") return "U-17";
   if (player.fullName === "James Brown") return "U-19";
-  
   const ageNum = parseInt(player.age);
   if (!isNaN(ageNum)) {
     return `U-${ageNum}`;
   }
   return "U-15";
 };
-
 const mockCards = [
   { id: 101, tag: "U-15", name: "Marcus Silva", date: "Jan 25, 2026", coach: "John Smith", rating: 7.2, tech: 16, phys: 14, ment: 15, pos: "Forward", tier: "TIER 1", btnColor: "text-red-500 bg-red-500" },
   { id: 102, tag: "U-16", name: "Sarah Williams", date: "Jan 25, 2026", coach: "Mike Williams", rating: 8.5, tech: 18, phys: 16, ment: 18, pos: "Midfielder", tier: "TIER 2", btnColor: "text-emerald-500 bg-emerald-500" },
@@ -92,7 +86,6 @@ const mockCards = [
   { id: 105, tag: "U-19", name: "James Brown", date: "Jan 25, 2026", coach: "Mike Williams", rating: 8.5, tech: 18, phys: 15, ment: 17, pos: "Forward", tier: "TIER 1", btnColor: "text-yellow-500 bg-yellow-500" },
   { id: 106, tag: "U-16", name: "Sarah Williams", date: "Jan 25, 2026", coach: "Mike Williams", rating: 7.8, tech: 16, phys: 15, ment: 16, pos: "Midfielder", tier: "TIER 2", btnColor: "text-emerald-500 bg-emerald-500" }
 ];
-
 const SummaryCard = ({ label, value, icon: Icon, bgColor, textColor }: { label: string, value: string | number, icon: any, bgColor: string, textColor: string }) => (
   <div className="bg-[#0A0A0A] border border-white/20 rounded-[20px] p-5 flex items-center gap-4 flex-1">
     <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${bgColor} bg-opacity-20 border border-white/20 flex-shrink-0`}>
@@ -104,7 +97,6 @@ const SummaryCard = ({ label, value, icon: Icon, bgColor, textColor }: { label: 
     </div>
   </div>
 );
-
 const EvaluationCard = ({ 
   tag, 
   name, 
@@ -125,7 +117,6 @@ const EvaluationCard = ({
     <div className="flex justify-between items-center">
       <span className="bg-white/5 border border-white/20 rounded-full px-4 py-1 text-[10px] font-bold text-white/60">{tag}</span>
     </div>
-
     <div className="space-y-1">
       <div className="flex items-center gap-2 text-white/40 text-[10px] font-bold">
         <IconClock size={12} /> {date}
@@ -135,7 +126,6 @@ const EvaluationCard = ({
         <IconUsers size={12} /> Coach: {coach}
       </p>
     </div>
-
     <div className="space-y-2">
       <div className="flex justify-between items-end">
         <p className="text-white/40 text-[10px] font-bold uppercase">Overall Rating:</p>
@@ -148,7 +138,6 @@ const EvaluationCard = ({
         />
       </div>
     </div>
-
     <div className="flex justify-between items-center">
        <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5 text-emerald-400 text-[10px] font-bold">
@@ -185,41 +174,32 @@ const EvaluationCard = ({
     </div>
   </div>
 );
-
 const PlayerEvaluation = () => {
   const players = useAppSelector((state) => state.player.players);
   const evaluationRecords = useAppSelector((state) => state.evaluation.records);
-  
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCard, setSelectedCard] = useState<any | null>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-
   const evaluatedItems = Object.values(evaluationRecords);
-
   const evaluatedCards = evaluatedItems.map((record) => {
     const player = players.find(p => p.id === record.playerId);
-    
     // Calculate tech, phys, ment scores
     const evaluation = record.evaluation;
     const techVal = technicalKeys.reduce((sum, key) => sum + (evaluation[key] ?? 2), 0);
     const physVal = physicalKeys.reduce((sum, key) => sum + (evaluation[key] ?? 2), 0);
     const mentVal = mentalKeys.reduce((sum, key) => sum + (evaluation[key] ?? 2), 0);
     const totalSum = techVal + physVal + mentVal;
-    
     // rating maps sum of 22 items (max score 66) to 10 scale
     const rating = Number(((totalSum / 66) * 10).toFixed(1));
-    
     let btnColor = "text-red-500 bg-red-500";
     if (rating >= 8.5) btnColor = "text-emerald-500 bg-emerald-500";
     else if (rating >= 7.5) btnColor = "text-yellow-500 bg-yellow-500";
-
     // Format date: "YYYY-MM-DD" -> "MMM DD, YYYY"
     let formattedDate = record.date;
     try {
       const d = new Date(record.date);
       formattedDate = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
     } catch (e) {}
-
     return {
       id: record.playerId,
       name: record.playerName,
@@ -235,26 +215,22 @@ const PlayerEvaluation = () => {
       btnColor,
     };
   });
-
   // Filter out mock cards if there is an active evaluated card with the same player name
   const activeEvaluatedNames = new Set(evaluatedCards.map(c => c.name.toLowerCase()));
   const filteredMockCards = mockCards.filter(mc => !activeEvaluatedNames.has(mc.name.toLowerCase()));
   const cardsToRender = [...evaluatedCards, ...filteredMockCards];
-
   const filteredCards = cardsToRender.filter(card => 
     card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     card.pos.toLowerCase().includes(searchTerm.toLowerCase()) ||
     card.tag.toLowerCase().includes(searchTerm.toLowerCase()) ||
     card.coach.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
   // Dynamic Summary Stats
   const totalEvalsCount = cardsToRender.length;
   const avgRatingVal = totalEvalsCount > 0 
     ? (cardsToRender.reduce((sum, c) => sum + Number(c.rating), 0) / totalEvalsCount).toFixed(1)
     : "0.0";
   const improvingCountVal = cardsToRender.filter(c => Number(c.rating) >= 8.0).length;
-  
   // Count evaluations saved this month
   const thisMonthCount = 28 + evaluatedCards.filter(c => {
     try {
@@ -265,7 +241,6 @@ const PlayerEvaluation = () => {
       return false;
     }
   }).length;
-
   // Retrieve evaluation data object for selected card (seeded or real Redux data)
   const getEvaluationData = (card: any) => {
     if (!card) return DEFAULT_EVALUATION as EvaluationData;
@@ -273,10 +248,8 @@ const PlayerEvaluation = () => {
     if (record?.evaluation) {
       return record.evaluation;
     }
-
     // Distribute mock scores based on aggregate tech/phys/ment values
     const mockEval = { ...DEFAULT_EVALUATION } as EvaluationData;
-    
     // Distribute tech
     let techLeft = card.tech || 16;
     technicalKeys.forEach((key) => {
@@ -284,7 +257,6 @@ const PlayerEvaluation = () => {
       mockEval[key] = val;
       techLeft -= val;
     });
-
     // Distribute phys
     let physLeft = card.phys || 14;
     physicalKeys.forEach((key) => {
@@ -292,7 +264,6 @@ const PlayerEvaluation = () => {
       mockEval[key] = val;
       physLeft -= val;
     });
-
     // Distribute ment
     let mentLeft = card.ment || 15;
     mentalKeys.forEach((key) => {
@@ -300,10 +271,8 @@ const PlayerEvaluation = () => {
       mockEval[key] = val;
       mentLeft -= val;
     });
-
     return mockEval;
   };
-
   // Download PDF Report
   const handleDownloadPDF = async () => {
     const page1 = document.getElementById("report-page-1");
@@ -312,15 +281,12 @@ const PlayerEvaluation = () => {
       toast.error("Evaluation elements not found in DOM.");
       return;
     }
-
     const toastId = toast.loading("Generating PDF report... Please wait.");
     setIsGeneratingPdf(true);
-
     const originalGetComputedStyle = window.getComputedStyle;
     const dummy = document.createElement("div");
     dummy.style.display = "none";
     document.body.appendChild(dummy);
-
     const convertModernColor = (value: string) => {
       if (typeof value !== "string") return value;
       if (!value.includes("oklch") && !value.includes("lab") && !value.includes("oklab") && !value.includes("lch")) {
@@ -339,7 +305,6 @@ const PlayerEvaluation = () => {
         }
       });
     };
-
     window.getComputedStyle = function (el, pseudoEl) {
       const style = originalGetComputedStyle(el, pseudoEl);
       return new Proxy(style, {
@@ -366,12 +331,10 @@ const PlayerEvaluation = () => {
         },
       });
     };
-
     try {
       const pdf = new jsPDF("l", "mm", "a4");
       const imgWidth = 297;
       const imgHeight = 210;
-
       // Capture Page 1
       toast.loading("Rendering Page 1...", { id: toastId });
       const canvas1 = await html2canvas(page1, {
@@ -379,7 +342,6 @@ const PlayerEvaluation = () => {
         useCORS: true,
         backgroundColor: "#ffffff",
       });
-
       // Capture Page 2
       toast.loading("Rendering Page 2...", { id: toastId });
       const canvas2 = await html2canvas(page2, {
@@ -387,15 +349,12 @@ const PlayerEvaluation = () => {
         useCORS: true,
         backgroundColor: "#ffffff",
       });
-
       toast.loading("Assembling PDF document...", { id: toastId });
       const imgData1 = canvas1.toDataURL("image/png");
       pdf.addImage(imgData1, "PNG", 0, 0, imgWidth, imgHeight);
-
       pdf.addPage();
       const imgData2 = canvas2.toDataURL("image/png");
       pdf.addImage(imgData2, "PNG", 0, 0, imgWidth, imgHeight);
-
       pdf.save(`Evaluation_Report_${selectedCard.name.replace(/\s+/g, "_")}.pdf`);
       toast.success("PDF report downloaded successfully!", { id: toastId });
     } catch (error) {
@@ -409,7 +368,6 @@ const PlayerEvaluation = () => {
       setIsGeneratingPdf(false);
     }
   };
-
   // Render read-only circular rating indicators
   const renderReadOnlyRatingCircle = (
     key: keyof EvaluationData,
@@ -427,7 +385,6 @@ const PlayerEvaluation = () => {
       else if (targetVal === 2) bgColor = "#FEF9C3";
       else if (targetVal === 3) bgColor = "#DCFCE7";
     }
-
     return (
       <div className="w-14 flex justify-center">
         <div
@@ -439,7 +396,6 @@ const PlayerEvaluation = () => {
       </div>
     );
   };
-
   // Get matching player for selected card details
   const matchingPlayer = selectedCard ? players.find((p) => p.id === selectedCard.id) : null;
   const playerImgSrc = selectedCard
@@ -447,9 +403,7 @@ const PlayerEvaluation = () => {
         ? matchingPlayer.playerImage
         : (matchingPlayer?.playerImage?.src || "/ronaldo.png"))
     : "/ronaldo.png";
-
   const activeEvaluationData = selectedCard ? getEvaluationData(selectedCard) : (DEFAULT_EVALUATION as EvaluationData);
-
   return (
     <div className="flex flex-col gap-8 pb-10">
       <div className="flex justify-between items-end">
@@ -458,7 +412,6 @@ const PlayerEvaluation = () => {
           <p className="text-white/60 font-medium mt-2 text-lg">Create and manage player development progress reports</p>
         </div>
       </div>
-
       {/* Summary Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         <SummaryCard label="Avg. Overall Rating" value={avgRatingVal} icon={IconStar} bgColor="bg-red-500" textColor="text-red-500" />
@@ -466,7 +419,6 @@ const PlayerEvaluation = () => {
         <SummaryCard label="Evaluated this Month" value={thisMonthCount} icon={IconFileText} bgColor="bg-blue-500" textColor="text-blue-500" />
         <SummaryCard label="Total Evaluations" value={totalEvalsCount} icon={IconUsers} bgColor="bg-yellow-500" textColor="text-yellow-500" />
       </div>
-
       <div className="flex gap-8">
         {/* Main Content */}
         <div className="flex-1 flex flex-col gap-8">
@@ -482,7 +434,6 @@ const PlayerEvaluation = () => {
               />
             </div>
           </div>
-
           {/* Evaluation Grid */}
           <div className="space-y-6">
             <div className="flex justify-between items-center">
@@ -508,7 +459,6 @@ const PlayerEvaluation = () => {
                 </div>
               </div>
             </div>
-
             <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               {filteredCards.map((card, idx) => (
                 <EvaluationCard 
@@ -535,7 +485,6 @@ const PlayerEvaluation = () => {
             </div>
           </div>
         </div>
-
         {/* Sidebar */}
         <div className="w-[340px] flex flex-col gap-8 shrink-0">
            {/* Most Improved */}
@@ -572,7 +521,6 @@ const PlayerEvaluation = () => {
                  ))}
               </div>
            </div>
-
            {/* Top Performers */}
            <div className="bg-[#111111] border border-white/20 rounded-[32px] p-8 flex flex-col gap-6">
               <div className="flex items-center gap-3">
@@ -607,7 +555,6 @@ const PlayerEvaluation = () => {
            </div>
         </div>
       </div>
-
       {/* Evaluation Report Sheet Dialog Modal */}
       <Dialog open={!!selectedCard} onOpenChange={(open) => !open && setSelectedCard(null)}>
         <DialogContent 
@@ -639,7 +586,6 @@ const PlayerEvaluation = () => {
               </button>
             </div>
           </DialogHeader>
-
           {selectedCard && (
             <div className="flex flex-col items-center gap-8 py-6">
               {/* Printable Page 1 */}
@@ -650,14 +596,12 @@ const PlayerEvaluation = () => {
                 {/* Header Banner Section */}
                 <div className="flex justify-between items-center w-full relative z-10">
                   <div className="flex items-center">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={logo.src} alt="K10 Football Logo" className="h-10 object-contain" />
+                    <Image src={logo.src} alt="K10 Football Logo" className="h-10 object-contain" />
                   </div>
                   <div className="text-gray-500 text-xs font-bold font-mono">
                     Date: {selectedCard.date}
                   </div>
                 </div>
-
                 {/* Page 1 Body */}
                 <div className="flex flex-col flex-1 justify-center py-6 relative z-10">
                   <div className="space-y-2">
@@ -668,7 +612,6 @@ const PlayerEvaluation = () => {
                       TIER 1 PLAYER PROGRESS REPORT
                     </p>
                   </div>
-
                   {/* Player Info Row */}
                   <div className="flex gap-8 py-4 border-t border-b border-gray-100 text-gray-800 mt-6 max-w-[500px]">
                     <div>
@@ -684,7 +627,6 @@ const PlayerEvaluation = () => {
                       <span className="text-base font-extrabold text-[#E31B23]">{matchingPlayer?.academyName || "Santos FC Academy"}</span>
                     </div>
                   </div>
-
                   {/* Legend/Key */}
                   <div className="mt-8 space-y-3">
                     <h3 className="text-xs font-black text-gray-900 uppercase tracking-widest">Key:</h3>
@@ -704,18 +646,15 @@ const PlayerEvaluation = () => {
                     </div>
                   </div>
                 </div>
-
                 {/* Right Side Player Cut-out Image */}
                 <div className="absolute right-0 bottom-0 h-[80%] w-[50%] flex items-end justify-end pointer-events-none z-0">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <Image 
                     src={playerImgSrc}
                     alt={selectedCard.name}
                     className="h-full object-contain object-bottom relative z-10"
                   />
                 </div>
               </div>
-
               {/* Printable Page 2 */}
               <div 
                 id="report-page-2"
@@ -723,14 +662,12 @@ const PlayerEvaluation = () => {
               >
                 <div className="flex justify-between items-center w-full relative z-10">
                   <div className="flex items-center">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={logo.src} alt="K10 Football Logo" className="h-10 object-contain" />
+                    <Image src={logo.src} alt="K10 Football Logo" className="h-10 object-contain" />
                   </div>
                   <div className="text-gray-500 text-xs font-bold font-mono">
                     Date: {selectedCard.date}
                   </div>
                 </div>
-
                 <div className="flex-1 flex flex-col justify-between py-2 space-y-3">
                   {/* Techniques */}
                   <div className="p-4 rounded-2xl border border-gray-100 bg-white space-y-2">
@@ -788,7 +725,6 @@ const PlayerEvaluation = () => {
                       </div>
                     </div>
                   </div>
-
                   {/* Characteristics */}
                   <div className="p-4 rounded-2xl border border-gray-100 bg-white space-y-2">
                     <h3 className="text-sm font-black text-gray-900 border-b pb-1 uppercase tracking-wide">Characteristics</h3>
@@ -845,7 +781,6 @@ const PlayerEvaluation = () => {
                       </div>
                     </div>
                   </div>
-
                   {/* Physical */}
                   <div className="p-4 rounded-2xl border border-gray-100 bg-white space-y-2">
                     <h3 className="text-sm font-black text-gray-900 border-b pb-1 uppercase tracking-wide">Physical</h3>

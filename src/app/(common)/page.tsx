@@ -1,3 +1,4 @@
+import Image from "next/image";
 import React from "react";
 import HeroSection from "@/components/common/HeroSection";
 import StatsSection from "@/components/common/StatsSection";

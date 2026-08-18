@@ -1,3 +1,4 @@
+import Image from "next/image";
 import ImageCarousel from "@/components/common/ImageCarousel";
 import StartJourneySection from "@/components/common/StartJourneySection";
 import FullEditableCv from "@/components/cvs/coach-cv-details/FullEditableCv";

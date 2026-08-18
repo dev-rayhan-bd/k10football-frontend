@@ -3,7 +3,6 @@ import image1 from "@/assets/home/keyFeatureImage1.png";
 import image2 from "@/assets/home/key_feature_grid_1.png";
 import image3 from "@/assets/home/key_feature_grid_2.png";
 import image4 from "@/assets/home/key_feature_grid_3.png";
-
 const KeyFeatureSection = () => {
   return (
     <section className="bg-black py-12 sm:py-20 lg:py-28 px-4 sm:px-6 lg:px-8">
@@ -17,7 +16,6 @@ const KeyFeatureSection = () => {
             management and networking.
           </p>
         </div>
-
         {/* Feature 1 - Performance Analytics */}
         <div className="relative">
           <div className="relative h-150 sm:h-100 lg:h-125 bg-[#1a1a1a] rounded-lg border-transparent overflow-hidden">
@@ -40,7 +38,6 @@ const KeyFeatureSection = () => {
             </p>
           </div>
         </div>
-
         {/* Features Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Feature 1 - Performance Analytics */}
@@ -110,5 +107,4 @@ const KeyFeatureSection = () => {
     </section>
   );
 };
-
 export default KeyFeatureSection;

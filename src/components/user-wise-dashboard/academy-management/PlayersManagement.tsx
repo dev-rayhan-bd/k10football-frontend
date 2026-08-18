@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import React from "react";
 import DashboardModal from "@/components/dashboard/DashboardModal";
 import { 
@@ -13,7 +13,6 @@ import {
   IconChevronLeft,
   IconUpload
 } from "@tabler/icons-react";
-
 const players = [
   { id: "1", name: "Marcus Silva", age: 15, team: "U-15", position: "Forward", attendance: "95%", feeStatus: "Paid", lastActive: "2 hours ago", avatar: "https://i.pravatar.cc/100?u=marcus" },
   { id: "2", name: "David Chen", age: 16, team: "U-17", position: "Midfielder", attendance: "88%", feeStatus: "Paid", lastActive: "5 hours ago", avatar: "https://i.pravatar.cc/100?u=david" },
@@ -21,10 +20,8 @@ const players = [
   { id: "4", name: "James Brown", age: 17, team: "U-17", position: "Goalkeeper", attendance: "98%", feeStatus: "Paid", lastActive: "3 hours ago", avatar: "https://i.pravatar.cc/100?u=james" },
   { id: "5", name: "Sarah Williams", age: 15, team: "U-15", position: "Midfielder", attendance: "85%", feeStatus: "Paid", lastActive: "6 hours ago", avatar: "https://i.pravatar.cc/100?u=sarah" },
 ];
-
 const PlayersManagement = () => {
   const [showAddModal, setShowAddModal] = React.useState(false);
-
   return (
     <div className="flex flex-col gap-8 pb-10 relative">
       {/* Header */}
@@ -41,7 +38,6 @@ const PlayersManagement = () => {
           Add New Player
         </button>
       </div>
-
       {/* Search Bar */}
       <div className="bg-[#111111] rounded-3xl border border-white/15 p-4 flex gap-4">
         <div className="relative flex-1">
@@ -57,7 +53,6 @@ const PlayersManagement = () => {
           <span className="text-sm font-bold">Filters</span>
         </button>
       </div>
-
       {/* Main Content Card */}
       <div className="bg-[#111111] rounded-3xl border border-white/15 p-8 flex flex-col gap-8">
         <div className="flex justify-between items-center">
@@ -71,7 +66,6 @@ const PlayersManagement = () => {
             ))}
           </div>
         </div>
-
         {/* Players Table */}
         <div className="rounded-2xl border border-white/15 overflow-hidden">
           <table className="w-full text-left border-collapse">
@@ -93,7 +87,7 @@ const PlayersManagement = () => {
                   <td className="py-5 px-6 border-r border-white/15">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-full overflow-hidden border border-white/15 shrink-0">
-                        <img src={p.avatar} alt={p.name} className="w-full h-full object-cover" />
+                        <Image src={p.avatar} alt={p.name} className="w-full h-full object-cover" />
                       </div>
                       <span className="text-sm font-bold text-white">{p.name}</span>
                     </div>
@@ -139,7 +133,6 @@ const PlayersManagement = () => {
           </table>
         </div>
       </div>
-
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
         <div className="bg-[#111111] rounded-3xl border border-white/15 p-8 flex flex-col items-center justify-center gap-2">
@@ -155,7 +148,6 @@ const PlayersManagement = () => {
           <p className="text-5xl font-black text-[#E31B23] font-orbitron">3</p>
         </div>
       </div>
-
       {/* Add New Player Modal */}
       <DashboardModal
         isOpen={showAddModal}
@@ -219,7 +211,6 @@ const PlayersManagement = () => {
               </div>
             </div>
           </div>
-
           {/* Team & Position Details */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Team & Position Details</h3>
@@ -254,7 +245,6 @@ const PlayersManagement = () => {
               </div>
             </div>
           </div>
-
           {/* Contact Information */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Contact Information</h3>
@@ -285,7 +275,6 @@ const PlayersManagement = () => {
               </div>
             </div>
           </div>
-
           {/* Emergency Contact */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Emergency Contact</h3>
@@ -315,7 +304,6 @@ const PlayersManagement = () => {
               </div>
             </div>
           </div>
-
           {/* Medical Information */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Medical Information</h3>
@@ -328,7 +316,6 @@ const PlayersManagement = () => {
               <p className="text-[9px] text-white/20 font-bold uppercase tracking-widest">This information will be kept confidential and used only in emergencies</p>
             </div>
           </div>
-
           {/* Profile Photo */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Profile Photo</h3>
@@ -346,5 +333,4 @@ const PlayersManagement = () => {
     </div>
   );
 };
-
 export default PlayersManagement;

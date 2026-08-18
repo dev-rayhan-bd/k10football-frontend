@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import React, { useState } from "react";
 import {
   IconFileText,
@@ -10,34 +11,26 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import DashboardTable, { Column } from "@/components/dashboard/DashboardTable";
 import TableActionButtons from "@/components/dashboard/TableActionButtons";
-
 const stats = [
   { label: "Total Reports", value: "6", icon: IconFileText },
   { label: "Completed", value: "5", icon: IconCircleCheck },
   { label: "Pending", value: "1", icon: IconClock },
   { label: "This Month", value: "22", icon: IconCalendar },
 ];
-
 import { usePlayer } from "@/lib/hooks/usePlayer";
 import { MatchStats } from "@/lib/constants/reports";
 import { useAppSelector } from "@/lib/hooks/reduxHooks";
-
 const GameReports = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { players } = usePlayer();
-
   const reports = useAppSelector(state => state.reports.reports);
   const requests = useAppSelector(state => state.reports.requests);
-
   const playerId = searchParams.get("playerId");
-
   // Get all completed reports
   const completedReports = reports.filter(r => r.status === "Paid");
-
   // Get all pending requests
   const pendingRequests = requests.filter(req => req.status === "Pending");
-
   // Merge them for display
   const displayRows = [
     ...completedReports.map(r => {
@@ -71,12 +64,10 @@ const GameReports = () => {
       };
     })
   ];
-
   // Filter display rows by playerId if active filter is set
   const filteredRows = playerId
     ? displayRows.filter(row => row.playerId === Number(playerId))
     : displayRows;
-
   // Calculate stats based on filtered lists
   const filterCompleted = playerId
     ? completedReports.filter(r => r.playerId === Number(playerId))
@@ -84,18 +75,15 @@ const GameReports = () => {
   const filterPending = playerId
     ? pendingRequests.filter(req => req.playerId === Number(playerId))
     : pendingRequests;
-
   const totalCount = filterCompleted.length + filterPending.length;
   const completedCount = filterCompleted.length;
   const pendingCount = filterPending.length;
-
   const stats = [
     { label: "Total Reports", value: totalCount.toString(), icon: IconFileText },
     { label: "Completed", value: completedCount.toString(), icon: IconCircleCheck },
     { label: "Pending", value: pendingCount.toString(), icon: IconClock },
     { label: "This Month", value: totalCount.toString(), icon: IconCalendar },
   ];
-
   const columns: Column<any>[] = [
     {
       header: "Name",
@@ -105,7 +93,7 @@ const GameReports = () => {
         const avatar = player && typeof player.playerImage === "string" ? player.playerImage : "https://i.pravatar.cc/150?u=" + (row.playerId || 1);
         return (
           <div className="flex items-center gap-3">
-            <img src={avatar} className="w-10 h-10 rounded-full object-cover" alt={row.playerName || "Player"} />
+            <Image src={avatar} className="w-10 h-10 rounded-full object-cover" alt={row.playerName || "Player"} />
             <div>
               <div className="text-sm font-bold text-white">{row.playerName || "Marcus Silva"}</div>
               <div className="text-[10px] text-red-500 font-bold uppercase tracking-widest">{row.playerPosition}</div>
@@ -188,7 +176,6 @@ const GameReports = () => {
       ),
     },
   ];
-
   return (
     <div className="space-y-8 pb-12 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
@@ -197,7 +184,6 @@ const GameReports = () => {
           <p className="text-gray-500 text-sm mt-1">Professional performance analysis</p>
         </div>
       </div>
-
       {playerId && (
         <div className="p-4 rounded-2xl bg-sky-500/10 border border-sky-500/20 text-sky-400 text-sm flex items-center justify-between shadow-lg">
           <span>Showing reports for player: <strong>{players.find(p => p.id === Number(playerId))?.fullName || "Marcus Silva"}</strong></span>
@@ -209,7 +195,6 @@ const GameReports = () => {
           </button>
         </div>
       )}
-
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, idx) => (
           <div key={idx} className="p-6 rounded-2xl border border-white/20 bg-[#0D0D0D]">
@@ -225,7 +210,6 @@ const GameReports = () => {
           </div>
         ))}
       </div>
-
       <div className="p-8 rounded-3xl border border-white/20 bg-[#0D0D0D]">
         <DashboardTable 
           columns={columns} 

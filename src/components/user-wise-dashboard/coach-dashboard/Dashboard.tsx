@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+import Image from "next/image";
 import React, { useContext } from "react";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/lib/hooks/reduxHooks";
@@ -27,9 +28,6 @@ import {
 import DashboardTable, { Column } from "@/components/dashboard/DashboardTable";
 import TableActionButtons from "@/components/dashboard/TableActionButtons";
 import DashboardHero from "@/components/dashboard/DashboardHero";
-
-
-
 const tournamentStatsData = [
   { name: 'Win', value: 38, color: '#A80000' },
   { name: 'Los', value: 25, color: '#FF1A1A' },
@@ -37,31 +35,23 @@ const tournamentStatsData = [
   { name: 'Runner Up', value: 9, color: '#FF4D4D' },
   { name: 'Champion', value: 7, color: '#FFEBEB' },
 ];
-
-
-
 const clubsInterested = [
   { id: 1, name: "Manchester City", logo: "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg", action: "Viewed your profile" },
   { id: 2, name: "Liverpool FC", logo: "https://upload.wikimedia.org/wikipedia/en/0/0c/Liverpool_FC.svg", action: "Viewed your profile" },
   { id: 3, name: "Chelsea FC", logo: "https://upload.wikimedia.org/wikipedia/en/c/cc/Chelsea_FC.svg", action: "Viewed your profile" },
 ];
-
 const teamData = [
   { id: 1, name: "Marcus Silva", position: "Forward", rating: 9.2, matches: 28, goals: 15, assists: 8, status: "Active", avatar: "https://i.pravatar.cc/150?u=1" },
   { id: 2, name: "David Chen", position: "Midfielder", rating: 8.8, matches: 30, goals: 5, assists: 12, status: "Active", avatar: "https://i.pravatar.cc/150?u=2" },
   { id: 3, name: "Alex Jonson", position: "Defender", rating: 8.5, matches: 29, goals: 2, assists: 3, status: "Injured", avatar: "https://i.pravatar.cc/150?u=3" },
   { id: 4, name: "James Brown", position: "Goalkeeper", rating: 9.0, matches: 30, goals: 0, assists: 0, status: "Active", avatar: "https://i.pravatar.cc/150?u=4" },
 ];
-
 import { useCoach } from "@/lib/hooks/useCoach";
-import Image from "next/image";
-
 const CoachDashboard = () => {
   const { hasAcademy } = useContext(CoachContext);
   const { coachData } = useCoach();
   const router = useRouter();
   const requests = useAppSelector(state => state.reports.requests);
-
   const teamColumns: Column<typeof teamData[0]>[] = [
     {
       header: "Name",
@@ -121,7 +111,6 @@ const CoachDashboard = () => {
       ),
     },
   ];
-
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -146,7 +135,6 @@ const CoachDashboard = () => {
             ]}
             characterImage={coachData.coachImage}
           />
-
           {/* Analytics Section */}
           <div className="p-6 rounded-2xl border border-white/20 bg-[#0D0D0D]">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
@@ -158,7 +146,6 @@ const CoachDashboard = () => {
                 Full Analytics
               </button>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="h-75">
                 <h3 className="text-sm font-bold text-gray-400 mb-4 uppercase tracking-widest">Coach Profile Analysis</h3>
@@ -249,7 +236,6 @@ const CoachDashboard = () => {
               </div>
             </div>
           </div>
-
           {/* My CV Section */}
           <div className="p-6 md:p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
             <h2 className="text-lg md:text-xl font-bold text-white mb-6">My CV</h2>
@@ -262,7 +248,6 @@ const CoachDashboard = () => {
                   <div className="h-full bg-[#E31B23] rounded-full" style={{ width: '85%' }} />
                 </div>
               </div>
-
               {/* Info and Checklist */}
               <div className="flex-1 space-y-6">
                 <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
@@ -279,7 +264,6 @@ const CoachDashboard = () => {
                     </div>
                   ))}
                 </div>
-
                 <div className="flex gap-4">
                   <div className="w-1 h-12 bg-white/40 rounded-full" />
                   <div>
@@ -290,7 +274,6 @@ const CoachDashboard = () => {
                   </div>
                 </div>
               </div>
-
               {/* Buttons */}
               <div className="flex flex-col gap-2 w-full lg:w-auto">
                 <button className="px-6 py-2.5 rounded-lg border border-white/10 bg-white/10 text-xs font-bold text-white hover:bg-white/20 transition-all text-center">
@@ -302,7 +285,6 @@ const CoachDashboard = () => {
               </div>
             </div>
           </div>
-
           {/* Media Sections */}
           <div className="space-y-6">
             <MediaBlock title="My Images" type="image" items={[
@@ -311,7 +293,6 @@ const CoachDashboard = () => {
               { title: "vs Liverpool U19", date: "Mar 5, 2024", views: 312, likes: 227, img: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=400" },
               { title: "Training Highlights", date: "Feb 28, 2024", views: 156, likes: 62, img: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=400" },
             ]} />
-
             <MediaBlock title="My Videos" type="video" items={[
               { title: "vs Arsenal U19", date: "Mar 15, 2024", views: 234, likes: 97, img: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=400" },
               { title: "vs Chelsea U19", date: "Mar 10, 2024", views: 189, likes: 45, img: "https://images.unsplash.com/photo-1526232762682-d2f5f7144f2a?q=80&w=400" },
@@ -319,7 +300,6 @@ const CoachDashboard = () => {
               { title: "Training Highlights", date: "Feb 28, 2024", views: 156, likes: 62, img: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=400" },
             ]} />
           </div>
-
           {/* Conditional My Teams Section */}
           {hasAcademy && (
             <div className="p-6 rounded-2xl border border-white/20 bg-[#0D0D0D]">
@@ -332,7 +312,6 @@ const CoachDashboard = () => {
                   <IconPlus size={16} /> Add Player
                 </button>
               </div>
-
               <DashboardTable 
                 columns={teamColumns} 
                 data={teamData} 
@@ -342,7 +321,6 @@ const CoachDashboard = () => {
             </div>
           )}
         </div>
-
         {/* Right Column */}
         <div className="lg:col-span-3 space-y-6">
           {/* Pending Game Reports */}
@@ -372,7 +350,6 @@ const CoachDashboard = () => {
               ))}
             </div>
           </section>
-
           {/* Clubs Interested */}
           <section className="p-6 rounded-2xl border border-white/20 bg-[#0D0D0D]">
             <div className="flex items-center gap-2 mb-6">
@@ -395,7 +372,6 @@ const CoachDashboard = () => {
               ))}
             </div>
           </section>
-
           {/* Quick Stats */}
           <section className="p-6 rounded-2xl border border-white/20 bg-[#0D0D0D]">
             <h2 className="text-sm font-bold text-white uppercase tracking-widest mb-6 italic">Quickk stats</h2>
@@ -419,7 +395,6 @@ const CoachDashboard = () => {
     </div>
   );
 };
-
 const MediaBlock = ({ title, type, items }: { title: string, type: 'image' | 'video', items: any[] }) => (
   <div className="p-6 rounded-2xl border border-white/20 bg-[#0D0D0D]">
     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
@@ -432,7 +407,6 @@ const MediaBlock = ({ title, type, items }: { title: string, type: 'image' | 'vi
         {type === 'image' ? 'Upload Image' : 'Upload Video'}
       </button>
     </div>
-
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
       {items.map((item, idx) => (
         <div key={idx} className="group relative rounded-xl overflow-hidden border border-white/20 bg-[#111]">
@@ -474,5 +448,4 @@ const MediaBlock = ({ title, type, items }: { title: string, type: 'image' | 'vi
     </div>
   </div>
 );
-
 export default CoachDashboard;

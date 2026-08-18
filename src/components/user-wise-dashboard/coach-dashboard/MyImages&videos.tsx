@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+import Image from "next/image";
 import React from "react";
 import { 
   IconPlayerPlay, 
@@ -11,22 +12,18 @@ import {
   IconEdit,
   IconShare
 } from "@tabler/icons-react";
-import Image from "next/image";
-
 const stats = [
   { label: "Total Videos", value: "24", icon: IconPlayerPlay },
   { label: "Total Views", value: "5.2k", icon: IconEye },
   { label: "Total Likes", value: "892", icon: IconHeart },
   { label: "This Month", value: "6", icon: IconUpload },
 ];
-
 const mediaItems = [
   { title: "vs Arsenal U19", date: "Mar 15, 2024", views: 234, likes: 97, img: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=400" },
   { title: "vs Chelsea U19", date: "Mar 10, 2024", views: 189, likes: 45, img: "https://images.unsplash.com/photo-1526232762682-d2f5f7144f2a?q=80&w=400" },
   { title: "vs Liverpool U19", date: "Mar 5, 2024", views: 312, likes: 227, img: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=400" },
   { title: "Training Highlights", date: "Feb 28, 2024", views: 156, likes: 62, img: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=400" },
 ];
-
 const MyImagesAndVideos = () => {
   return (
     <div className="space-y-8 pb-12">
@@ -35,7 +32,6 @@ const MyImagesAndVideos = () => {
         <h1 className="text-4xl font-black text-white italic tracking-tighter uppercase">My Images & Videos</h1>
         <p className="text-gray-500 text-sm mt-1">Your professional football profile</p>
       </div>
-
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, idx) => (
@@ -52,7 +48,6 @@ const MyImagesAndVideos = () => {
           </div>
         ))}
       </div>
-
       {/* Sections */}
       <div className="space-y-8">
         <MediaSection title="My Images" type="image" items={mediaItems} />
@@ -61,7 +56,6 @@ const MyImagesAndVideos = () => {
     </div>
   );
 };
-
 const MediaSection = ({ title, type, items }: { title: string, type: 'image' | 'video', items: any[] }) => (
   <div className="p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
     <div className="flex items-center justify-between mb-8">
@@ -74,7 +68,6 @@ const MediaSection = ({ title, type, items }: { title: string, type: 'image' | '
         {type === 'image' ? 'Upload Image' : 'Upload Video'}
       </button>
     </div>
-
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {items.map((item, idx) => (
         <div key={idx} className="group relative rounded-2xl overflow-hidden border border-white/20 bg-[#111] hover:scale-[1.02] transition-all duration-300">
@@ -99,7 +92,6 @@ const MediaSection = ({ title, type, items }: { title: string, type: 'image' | '
                    </div>
                 </div>
              )}
-             
              {/* Hover Actions */}
              <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
                 <button className="p-2 rounded-lg bg-black/60 backdrop-blur-md border border-white/20 text-white hover:bg-[#E31B23] transition-colors">
@@ -132,5 +124,4 @@ const MediaSection = ({ title, type, items }: { title: string, type: 'image' | '
     </div>
   </div>
 );
-
 export default MyImagesAndVideos;

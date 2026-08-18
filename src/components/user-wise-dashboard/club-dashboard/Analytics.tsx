@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import React from "react";
 import { 
   IconUsers, 
@@ -21,14 +22,12 @@ import {
 } from "recharts";
 import DashboardTable, { Column } from "@/components/dashboard/DashboardTable";
 import TableActionButtons from "@/components/dashboard/TableActionButtons";
-
 const stats = [
   { label: "Players Profile Viewed", value: "24", icon: IconUsers },
   { label: "Liked CVs", value: "8", icon: IconHeart },
   { label: "Shared Profiles", value: "5", icon: IconShare },
   { label: "Profile Views", value: "156", icon: IconEye },
 ];
-
 const timelineData = [
   { name: 'Jan-Feb', players: 45, coaches: 12 },
   { name: 'Mar-Apr', players: 62, coaches: 15 },
@@ -37,7 +36,6 @@ const timelineData = [
   { name: 'Sept-Oct', players: 85, coaches: 22 },
   { name: 'Nov-Dec', players: 98, coaches: 25 },
 ];
-
 const distributionData = [
   { name: 'Midfielder', value: 80 },
   { name: 'Striker', value: 65 },
@@ -45,14 +43,12 @@ const distributionData = [
   { name: 'Goalkeeper', value: 75 },
   { name: 'Winger', value: 58 },
 ];
-
 const playerEngagementData = [
   { id: 1, name: "Marcus Silva", position: "Forward", rating: 9.2, age: 19, country: "Brazil", club: "Manchester Academy", status: "Silver", views: 45, likes: 12, shares: 8, avatar: "https://i.pravatar.cc/150?u=1" },
   { id: 2, name: "David Chen", position: "Midfielder", rating: 8.8, age: 18, country: "England", club: "Chelsea Youth", status: "Gold", views: 38, likes: 15, shares: 6, avatar: "https://i.pravatar.cc/150?u=2" },
   { id: 3, name: "Alex Jonson", position: "Defender", rating: 8.5, age: 20, country: "Spain", club: "Barcelona B", status: "Silver", views: 32, likes: 8, shares: 5, avatar: "https://i.pravatar.cc/150?u=3" },
   { id: 4, name: "James Brown", position: "Goalkeeper", rating: 7.9, age: 17, country: "Argentina", club: "Liverpool Academy", status: "Bronze", views: 28, likes: 9, shares: 4, avatar: "https://i.pravatar.cc/150?u=4" },
 ];
-
 const Analytics = () => {
   const columns: Column<typeof playerEngagementData[0]>[] = [
     {
@@ -60,7 +56,7 @@ const Analytics = () => {
       key: "name",
       render: (player) => (
         <div className="flex items-center gap-3">
-          <img src={player.avatar} className="w-10 h-10 rounded-full object-cover" alt={player.name} />
+          <Image src={player.avatar} className="w-10 h-10 rounded-full object-cover" alt={player.name} />
           <div>
             <div className="text-sm font-bold text-white">{player.name}</div>
             <div className="text-[10px] text-red-500 font-bold uppercase tracking-widest">{player.position}</div>
@@ -95,14 +91,12 @@ const Analytics = () => {
       render: () => <TableActionButtons onView={() => {}} />
     },
   ];
-
   return (
     <div className="space-y-8 pb-12">
       <div>
         <h1 className="text-4xl font-black text-white italic tracking-tighter uppercase leading-none">Analytics</h1>
         <p className="text-gray-500 text-sm mt-2">Track engagement and performance metrics</p>
       </div>
-
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, idx) => (
           <div key={idx} className="p-6 rounded-2xl border border-white/20 bg-[#0D0D0D]">
@@ -118,7 +112,6 @@ const Analytics = () => {
           </div>
         ))}
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
           <h3 className="text-sm font-bold text-white mb-8 uppercase tracking-widest italic">Players & Coaches Monitored</h3>
@@ -138,7 +131,6 @@ const Analytics = () => {
             </ResponsiveContainer>
           </div>
         </div>
-
         <div className="p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
           <h3 className="text-sm font-bold text-white mb-8 uppercase tracking-widest italic">Position Interest Distribution</h3>
           <div className="h-[300px]">
@@ -161,7 +153,6 @@ const Analytics = () => {
           </div>
         </div>
       </div>
-
       <div className="p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
         <div className="flex items-center justify-between mb-8">
           <h3 className="text-xl font-bold text-white italic uppercase tracking-tight">Top Players Engaged</h3>
@@ -177,7 +168,6 @@ const Analytics = () => {
     </div>
   );
 };
-
 const FilterButton = ({ label }: { label: string }) => (
   <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-bold hover:bg-white/10 transition-all">
     {label}

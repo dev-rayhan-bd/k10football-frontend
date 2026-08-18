@@ -1,4 +1,5 @@
 'use client'
+import Image from "next/image";
 
 import React from "react";
 import backgroundImage from "@/assets/player-dashboard/backgroundImage.png";
@@ -7,7 +8,6 @@ import { useRouter } from "next/navigation";
 
 import { usePlayer } from "@/lib/hooks/usePlayer";
 import { getFullWithShortForm } from "@/lib/utils";
-import Image from "next/image";
 
 const PlayerBioSection = () => {
   const { playerData } = usePlayer();

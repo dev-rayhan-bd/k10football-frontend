@@ -1,14 +1,11 @@
 "use client"
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
 import bg_image from "@/assets/home/hero_bg.png"
 import ButtonPrimary from "@/components/shared/ButtonPrimary";
-
-
 const HeroSection = () => {
   return (
     <section className="relative w-full min-h-screen pt-20 overflow-hidden">
-
         {/* Background */}
         <div className="absolute inset-0">
           <Image
@@ -20,9 +17,6 @@ const HeroSection = () => {
           />
           <div className="absolute inset-0 bg-black/20"></div>
         </div>
-
-       
-
         {/* Content */}
         <div className="relative z-10 flex flex-col items-center justify-center h-full pt-32 px-4 sm:px-6 lg:px-8">
           <div className=" -mt-20 lg:-mt-40 text-center max-w-5xl mx-auto space-y-6">
@@ -31,11 +25,9 @@ const HeroSection = () => {
               ARE HERE
             </span>
             </h1>
-           
             <p className="text-sm sm:text-base lg:text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed">
               Connect with elite players, coaches, and clubs in the most advanced football networking platform.
             </p>
-
             {/* CTA Buttons */}
             <div className="flex flex-col w-full sm:w-auto sm:flex-row gap-4 justify-center pt-4 px-4 sm:px-0">
               <div className="w-full sm:w-auto">
@@ -46,11 +38,8 @@ const HeroSection = () => {
               </Button>
             </div>
           </div>
-
-        
         </div>
       </section>
   )
 }
-
 export default HeroSection

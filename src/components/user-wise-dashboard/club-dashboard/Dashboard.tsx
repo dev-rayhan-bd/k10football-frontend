@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import React from "react";
 import {
   IconSchool,
@@ -31,14 +32,12 @@ import {
   DashboardStatCard,
   DashboardSection
 } from "@/components/dashboard/DashboardElements";
-
 const stats = [
   { label: "Players", value: "156", icon: IconUsers },
   { label: "Coaches", value: "12", icon: IconTrophy },
   { label: "Liked CVs", value: "42", icon: IconHeart },
   { label: "Profile share", value: "18", icon: IconShare },
 ];
-
 const timelineData = [
   { name: 'Jan-Feb', players: 45, coaches: 12 },
   { name: 'Mar-Apr', players: 62, coaches: 15 },
@@ -47,7 +46,6 @@ const timelineData = [
   { name: 'Sept-Oct', players: 85, coaches: 22 },
   { name: 'Nov-Dec', players: 98, coaches: 25 },
 ];
-
 const distributionData = [
   { name: 'Midfielder', value: 80 },
   { name: 'Striker', value: 65 },
@@ -55,40 +53,34 @@ const distributionData = [
   { name: 'Goalkeeper', value: 75 },
   { name: 'Winger', value: 58 },
 ];
-
 const staffData = [
   { id: 1, teamName: "Santos U17", ageGroup: "Under 17", scout: "Carlos Silva", players: 22, status: "Active" },
   { id: 2, teamName: "Santos U19", ageGroup: "Under 19", scout: "Roberto Lima", players: 18, status: "Active" },
   { id: 3, teamName: "Santos U16", ageGroup: "Under 16", scout: "Alex Jonson", players: 16, status: "Pending" },
   { id: 4, teamName: "Santos U18", ageGroup: "Under 18", scout: "James Brown", players: 20, status: "Active" },
 ];
-
 const coachData = [
   { id: 1, name: "Eduardo Ricci", role: "Head Coach", team: "Santos U19", experience: "12 yrs", status: "Active" },
   { id: 2, name: "Marco Fernandez", role: "Assistant Coach", team: "Santos U17", experience: "8 yrs", status: "Active" },
   { id: 3, name: "Lucas Oliveira", role: "Fitness Coach", team: "Santos U18", experience: "5 yrs", status: "Active" },
   { id: 4, name: "Rafael Costa", role: "Goalkeeping Coach", team: "Santos U16", experience: "10 yrs", status: "Pending" },
 ];
-
 const favPlayerData = [
   { id: 1, name: "Marcus Silva", position: "Forward", rating: 9.2, club: "Manchester Academy", country: "Brazil", age: 19, avatar: "https://i.pravatar.cc/150?u=1" },
   { id: 2, name: "David Chen", position: "Midfielder", rating: 8.8, club: "Chelsea Youth", country: "England", age: 18, avatar: "https://i.pravatar.cc/150?u=2" },
   { id: 3, name: "Alex Jonson", position: "Defender", rating: 8.5, club: "Barcelona B", country: "Spain", age: 20, avatar: "https://i.pravatar.cc/150?u=3" },
 ];
-
 const favCoachData = [
   { id: 1, name: "Eduardo Ricci", role: "Head Coach", speciality: "Attacking", experience: "12 yrs", club: "Santos FC", country: "Brazil", avatar: "https://i.pravatar.cc/150?u=10" },
   { id: 2, name: "Marco Fernandez", role: "Assistant Coach", speciality: "Defending", experience: "8 yrs", club: "Real Madrid B", country: "Spain", avatar: "https://i.pravatar.cc/150?u=11" },
   { id: 3, name: "Lucas Oliveira", role: "Fitness Coach", speciality: "Physical", experience: "5 yrs", club: "PSG Academy", country: "France", avatar: "https://i.pravatar.cc/150?u=12" },
 ];
-
 const mediaData = [
   { id: 1, title: "vs Chelsea U19", date: "Mar 10, 2024", views: 189, likes: 45, image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=400" },
   { id: 2, title: "Training Highlights", date: "Feb 28, 2024", views: 156, likes: 62, image: "https://images.unsplash.com/photo-1526232759583-26f1dd3f7af3?q=80&w=400" },
   { id: 3, title: "vs Liverpool U19", date: "Mar 5, 2024", views: 312, likes: 227, image: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=400" },
   { id: 4, title: "vs Liverpool U19", date: "Mar 5, 2024", views: 312, likes: 227, image: "https://images.unsplash.com/photo-1551958219-acbc608c6377?q=80&w=400" },
 ];
-
 const ClubDashboard = () => {
   const staffColumns: Column<typeof staffData[0]>[] = [
     { header: "Team Name", key: "teamName", cellClassName: "text-sm text-gray-400" },
@@ -113,7 +105,6 @@ const ClubDashboard = () => {
       render: () => <TableActionButtons onView={() => { }} />
     },
   ];
-
   const coachColumns: Column<typeof coachData[0]>[] = [
     { header: "Name", key: "name", cellClassName: "text-sm text-white font-semibold" },
     { header: "Role", key: "role", align: "center", cellClassName: "text-sm text-gray-400" },
@@ -137,14 +128,13 @@ const ClubDashboard = () => {
       render: () => <TableActionButtons onView={() => { }} />
     },
   ];
-
   const favPlayerColumns: Column<typeof favPlayerData[0]>[] = [
     {
       header: "Name",
       key: "name",
       render: (p) => (
         <div className="flex items-center gap-3">
-          <img src={p.avatar} className="w-10 h-10 rounded-full object-cover" alt="avatar" />
+          <Image src={p.avatar} className="w-10 h-10 rounded-full object-cover" alt="avatar" />
           <div>
             <div className="text-sm font-bold text-white">{p.name}</div>
             <div className="text-[10px] text-red-500 font-bold uppercase tracking-widest">{p.position}</div>
@@ -163,14 +153,13 @@ const ClubDashboard = () => {
       render: () => <TableActionButtons onView={() => {}} onHeart={() => {}} onShare={() => {}} />,
     },
   ];
-
   const favCoachColumns: Column<typeof favCoachData[0]>[] = [
     {
       header: "Name",
       key: "name",
       render: (c) => (
         <div className="flex items-center gap-3">
-          <img src={c.avatar} className="w-10 h-10 rounded-full object-cover" alt="avatar" />
+          <Image src={c.avatar} className="w-10 h-10 rounded-full object-cover" alt="avatar" />
           <div>
             <div className="text-sm font-bold text-white">{c.name}</div>
             <div className="text-[10px] text-red-500 font-bold uppercase tracking-widest">{c.role}</div>
@@ -189,7 +178,6 @@ const ClubDashboard = () => {
       render: () => <TableActionButtons onView={() => {}} onHeart={() => {}} onShare={() => {}} />,
     },
   ];
-
   return (
     <div className="space-y-8 pb-12">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -213,14 +201,12 @@ const ClubDashboard = () => {
               logoImage="https://upload.wikimedia.org/wikipedia/en/4/47/FC_Barcelona_(crest).svg"
             />
           </div>
-
           {/* Stat Grid */}
           <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {stats.map((stat, idx) => (
               <DashboardStatCard key={idx} {...stat} icon={<stat.icon size={20} />} />
             ))}
           </div>
-
           {/* Analytics */}
           <DashboardSection
             title="Analytics"
@@ -261,7 +247,6 @@ const ClubDashboard = () => {
               </div>
             </div>
           </DashboardSection>
-
           {/* Coaches & Players */}
           <DashboardSection title="Coaches & Players">
             <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-6">Players</p>
@@ -269,7 +254,6 @@ const ClubDashboard = () => {
             <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mt-10 mb-6">Coaches</p>
             <DashboardTable columns={coachColumns} data={coachData} className="border-white/10" />
           </DashboardSection>
-
           {/* Favourites */}
           <DashboardSection title="Favourites">
             <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-6">Favourite Players</p>
@@ -277,7 +261,6 @@ const ClubDashboard = () => {
             <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mt-10 mb-6">Favourite Coaches</p>
             <DashboardTable columns={favCoachColumns} data={favCoachData} className="border-white/10" />
           </DashboardSection>
-
           {/* Images */}
           <DashboardSection
             title="Images"
@@ -290,7 +273,6 @@ const ClubDashboard = () => {
               ))}
             </div>
           </DashboardSection>
-
           {/* Videos */}
           <DashboardSection
             title="Videos"
@@ -304,7 +286,6 @@ const ClubDashboard = () => {
             </div>
           </DashboardSection>
         </div>
-
         {/* Right Section - Recent Activity */}
         <div className="hidden lg:block lg:col-span-3 sticky top-8 h-fit">
           <div className="p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
@@ -314,7 +295,6 @@ const ClubDashboard = () => {
               </div>
               <h3 className="text-xl font-black text-white uppercase tracking-tight italic">Recent Activity</h3>
             </div>
-
             <div className="space-y-6">
               <ActivityItem
                 icon={<IconHeart size={18} />}
@@ -343,7 +323,6 @@ const ClubDashboard = () => {
     </div>
   );
 };
-
 const ActivityItem = ({ icon, text, time }: { icon: React.ReactNode, text: string, time: string }) => (
   <div className="p-5 rounded-2xl border border-white/5 bg-white/[0.02] flex gap-4 hover:border-red-500/30 transition-all group">
     <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/40 group-hover:bg-red-500/10 group-hover:text-red-500 transition-colors">
@@ -355,11 +334,10 @@ const ActivityItem = ({ icon, text, time }: { icon: React.ReactNode, text: strin
     </div>
   </div>
 );
-
 const MediaCard = ({ title, date, views, likes, image, isVideo }: { title: string, date: string, views: number, likes: number, image: string, isVideo?: boolean }) => (
   <div className="rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden group hover:border-[#E31B23]/30 transition-all">
     <div className="relative aspect-video overflow-hidden">
-      <img src={image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={title} />
+      <Image src={image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={title} />
       {isVideo && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/20">
           <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white group-hover:bg-[#E31B23] group-hover:scale-110 transition-all">
@@ -378,5 +356,4 @@ const MediaCard = ({ title, date, views, likes, image, isVideo }: { title: strin
     </div>
   </div>
 );
-
 export default ClubDashboard;

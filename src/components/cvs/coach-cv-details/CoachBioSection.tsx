@@ -1015,8 +1015,7 @@ const CoachBioSection = ({ editable }: { editable?: boolean }) => {
                     return (
                       <div key={style.id} className="space-y-4">
                         <div className="flex justify-center">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
+                          <Image 
                             src={iconSrc}
                             className="w-20 h-20 object-contain"
                             alt={style.label}

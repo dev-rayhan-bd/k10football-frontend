@@ -1,6 +1,6 @@
+import Image from "next/image";
 import React from "react";
 import { IconEye } from "@tabler/icons-react";
-
 interface Transaction {
   id: string;
   athlete: {
@@ -14,11 +14,9 @@ interface Transaction {
   date: string;
   status: "Completed" | "Pending" | "Rejected";
 }
-
 interface FinancialsTableProps {
   transactions: Transaction[];
 }
-
 const FinancialsTable = ({ transactions }: FinancialsTableProps) => {
   return (
     <div className="w-full overflow-x-auto rounded-2xl border border-white/10">
@@ -40,7 +38,7 @@ const FinancialsTable = ({ transactions }: FinancialsTableProps) => {
               <td className="py-5 px-6 border-r border-white/10">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 shrink-0">
-                    <img src={tx.athlete.avatar} alt={tx.athlete.name} className="w-full h-full object-cover" />
+                    <Image src={tx.athlete.avatar} alt={tx.athlete.name} className="w-full h-full object-cover" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-base font-bold text-white truncate">{tx.athlete.name}</p>

@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import React, { useState } from "react";
 import {
   IconSearch,
@@ -8,14 +8,12 @@ import {
   IconDotsVertical,
   IconX,
 } from "@tabler/icons-react";
-
 interface Message {
   id: string;
   text: string;
   time: string;
   isMe: boolean;
 }
-
 interface Conversation {
   id: string;
   user: {
@@ -27,19 +25,16 @@ interface Conversation {
   time: string;
   unreadCount?: number;
 }
-
 const roleColors: Record<string, string> = {
   Parent: "text-blue-400",
   Agent: "text-yellow-400",
   Academy: "text-green-400",
 };
-
 const roleBadgeColors: Record<string, string> = {
   Parent: "bg-blue-500/10 text-blue-400",
   Agent: "bg-yellow-500/10 text-yellow-400",
   Academy: "bg-green-500/10 text-green-400",
 };
-
 const conversations: Conversation[] = [
   {
     id: "1",
@@ -80,7 +75,6 @@ const conversations: Conversation[] = [
     time: "Yesterday",
   },
 ];
-
 const messagesByConv: Record<string, Message[]> = {
   "1": [
     { id: "1", text: "Hi, I wanted to ask about Marcus' performance.", time: "10:30 AM", isMe: false },
@@ -98,7 +92,6 @@ const messagesByConv: Record<string, Message[]> = {
     { id: "3", text: "Interested in a partnership agreement. We'll send the docs over.", time: "08:15 AM", isMe: false },
   ],
 };
-
 const participants = [
   { id: "1", name: "Robert Silva", role: "Parent", avatar: "https://i.pravatar.cc/100?u=robert" },
   { id: "2", name: "Linda Chen", role: "Parent", avatar: "https://i.pravatar.cc/100?u=linda" },
@@ -107,32 +100,25 @@ const participants = [
   { id: "5", name: "Santos Academy", role: "Academy", avatar: "https://i.pravatar.cc/100?u=santos" },
   { id: "6", name: "Ajax Youth Academy", role: "Academy", avatar: "https://i.pravatar.cc/100?u=ajax" },
 ];
-
 type FilterTab = "All" | "Parents" | "Agents" | "Academies";
-
 export const ClubChat = () => {
   const [showNewChatModal, setShowNewChatModal] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState("1");
   const [activeConv, setActiveConv] = useState("1");
   const [filterTab, setFilterTab] = useState<FilterTab>("All");
   const [inputMessage, setInputMessage] = useState("");
-
   const filterMap: Record<FilterTab, string | null> = {
     All: null,
     Parents: "Parent",
     Agents: "Agent",
     Academies: "Academy",
   };
-
   const filteredConversations = conversations.filter(
     (c) => !filterMap[filterTab] || c.user.role === filterMap[filterTab]
   );
-
   const activeConvData = conversations.find((c) => c.id === activeConv);
   const activeMessages = messagesByConv[activeConv] ?? [];
-
   const tabs: FilterTab[] = ["All", "Parents", "Agents", "Academies"];
-
   return (
     <div className="flex flex-col gap-6 h-full min-h-[calc(100vh-120px)]">
       {/* Header */}
@@ -151,7 +137,6 @@ export const ClubChat = () => {
           New Chat
         </button>
       </div>
-
       <div className="flex flex-1 gap-6 min-h-0">
         {/* Sidebar */}
         <div className="w-[320px] bg-[#111111] rounded-3xl border border-white/10 flex flex-col overflow-hidden shrink-0">
@@ -166,7 +151,6 @@ export const ClubChat = () => {
               />
             </div>
           </div>
-
           {/* Filter Tabs */}
           <div className="flex gap-1 px-4 pb-3">
             {tabs.map((tab) => (
@@ -183,7 +167,6 @@ export const ClubChat = () => {
               </button>
             ))}
           </div>
-
           {/* Conversation List */}
           <div className="flex-1 overflow-y-auto">
             {filteredConversations.map((conv) => (
@@ -195,7 +178,7 @@ export const ClubChat = () => {
                 }`}
               >
                 <div className="w-11 h-11 rounded-full overflow-hidden border border-white/10 shrink-0">
-                  <img src={conv.user.avatar} alt={conv.user.name} className="w-full h-full object-cover" />
+                  <Image src={conv.user.avatar} alt={conv.user.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-center mb-0.5">
@@ -216,7 +199,6 @@ export const ClubChat = () => {
             ))}
           </div>
         </div>
-
         {/* Chat Area */}
         <div className="flex-1 bg-[#111111] rounded-3xl border border-white/10 flex flex-col overflow-hidden">
           {/* Chat Header */}
@@ -224,7 +206,7 @@ export const ClubChat = () => {
             {activeConvData && (
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10 shrink-0">
-                  <img src={activeConvData.user.avatar} alt={activeConvData.user.name} className="w-full h-full object-cover" />
+                  <Image src={activeConvData.user.avatar} alt={activeConvData.user.name} className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-white">{activeConvData.user.name}</h3>
@@ -238,7 +220,6 @@ export const ClubChat = () => {
               <IconDotsVertical size={20} />
             </button>
           </div>
-
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
             {activeMessages.map((msg) => (
@@ -258,7 +239,6 @@ export const ClubChat = () => {
               </div>
             ))}
           </div>
-
           {/* Input */}
           <div className="p-4 border-t border-white/10">
             <div className="relative">
@@ -276,12 +256,10 @@ export const ClubChat = () => {
           </div>
         </div>
       </div>
-
       {/* New Chat Modal */}
       {showNewChatModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowNewChatModal(false)} />
-
           <div className="relative w-full max-w-lg bg-[#111111] rounded-[32px] border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
             {/* Modal Header */}
             <div className="p-8 pb-4 flex justify-between items-center border-b border-white/10">
@@ -293,7 +271,6 @@ export const ClubChat = () => {
                 <IconX size={20} />
               </button>
             </div>
-
             <div className="p-8">
               <div className="space-y-3">
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/40">Select Participant</label>
@@ -309,7 +286,7 @@ export const ClubChat = () => {
                       }`}
                     >
                       <div className="w-9 h-9 rounded-full overflow-hidden border border-white/10 shrink-0">
-                        <img src={p.avatar} alt={p.name} className="w-full h-full object-cover" />
+                        <Image src={p.avatar} alt={p.name} className="w-full h-full object-cover" />
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-bold">{p.name}</p>
@@ -322,7 +299,6 @@ export const ClubChat = () => {
                 </div>
               </div>
             </div>
-
             {/* Modal Footer */}
             <div className="p-8 pt-0 flex justify-end gap-4">
               <button
@@ -341,5 +317,4 @@ export const ClubChat = () => {
     </div>
   );
 };
-
 export default ClubChat;

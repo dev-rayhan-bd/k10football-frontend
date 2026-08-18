@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import React from "react";
 import { 
   IconFileText, 
@@ -8,7 +9,6 @@ import {
   IconCalendar,
   IconEye
 } from "@tabler/icons-react";
-
 const FinancialStatCard = ({ icon: Icon, value, label, iconColor }: { icon: any, value: string | number, label: string, iconColor: string }) => (
   <div className="bg-[#0A0A0A] border border-white/20 rounded-2xl p-6 flex flex-col gap-4 flex-1">
     <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
@@ -20,7 +20,6 @@ const FinancialStatCard = ({ icon: Icon, value, label, iconColor }: { icon: any,
     </div>
   </div>
 );
-
 const StatusPill = ({ status }: { status: "Completed" | "Pending" }) => {
   const styles = {
     Completed: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -32,7 +31,6 @@ const StatusPill = ({ status }: { status: "Completed" | "Pending" }) => {
     </span>
   );
 };
-
 const Financials = () => {
   return (
     <div className="flex flex-col gap-8 pb-10">
@@ -41,7 +39,6 @@ const Financials = () => {
         <h1 className="text-5xl font-black text-white font-orbitron uppercase tracking-tight">Finance Committee</h1>
         <p className="text-white/60 font-medium mt-2 text-lg">Track your academy's revenue and transactions</p>
       </div>
-
       {/* Summary Container */}
       <div className="bg-[#111111] border border-white/20 rounded-[40px] p-10 flex flex-col gap-10">
         <div className="flex gap-6">
@@ -52,7 +49,6 @@ const Financials = () => {
           <FinancialStatCard icon={IconCalendar} value="$ 125.82" label="This Month" iconColor="text-white/60" />
         </div>
       </div>
-
       {/* Table Container */}
       <div className="bg-[#111111] border border-white/20 rounded-[40px] p-8 flex flex-col gap-6">
         <h2 className="text-xl font-black uppercase text-white font-orbitron">Game report/validation/commission</h2>
@@ -84,7 +80,7 @@ const Financials = () => {
                   <td className="px-6 py-5 border-r border-white/20">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-white/10 overflow-hidden border border-white/20">
-                         <img src={`https://i.pravatar.cc/150?u=${row.name}`} alt={row.name} className="w-full h-full object-cover" />
+                         <Image src={`https://i.pravatar.cc/150?u=${row.name}`} alt={row.name} className="w-full h-full object-cover" />
                       </div>
                       <div>
                         <p className="text-white text-sm font-black uppercase">{row.name}</p>

@@ -1,11 +1,10 @@
 "use client";
-
+import Image from "next/image";
 import React from "react";
 import { IconChevronDown } from "@tabler/icons-react";
 import DashboardTable, { Column } from "@/components/dashboard/DashboardTable";
 import TableActionButtons from "@/components/dashboard/TableActionButtons";
 import { Button } from "@/components/ui/button";
-
 type Player = {
   avatar: string;
   name: string;
@@ -16,7 +15,6 @@ type Player = {
   age: number;
   status: "Gold" | "Silver" | "Bronze";
 };
-
 const getStatusColor = (status: "Gold" | "Silver" | "Bronze") => {
   switch (status) {
     case "Gold": return "bg-[#ffc107] text-black";
@@ -25,7 +23,6 @@ const getStatusColor = (status: "Gold" | "Silver" | "Bronze") => {
     default: return "bg-gray-500 text-white";
   }
 };
-
 const columns: Column<Player>[] = [
   {
     header: "Name",
@@ -33,7 +30,7 @@ const columns: Column<Player>[] = [
     align: "left",
     render: (row) => (
       <div className="flex items-center gap-3">
-        <img src={row.avatar} alt={row.name} className="w-10 h-10 rounded-full border border-white/10" />
+        <Image src={row.avatar} alt={row.name} className="w-10 h-10 rounded-full border border-white/10" />
         <div>
           <p className="text-white font-semibold">{row.name}</p>
           <p className="text-[#E31B23] text-xs">{row.position}</p>
@@ -88,14 +85,12 @@ const columns: Column<Player>[] = [
     ),
   },
 ];
-
 const mockPlayers: Player[] = [
   { avatar: "https://i.pravatar.cc/150?u=10", name: "Marcus Silva", position: "Forward", rating: 9.2, club: "Manchester Academy", country: "Brazil", age: 19, status: "Silver" },
   { avatar: "https://i.pravatar.cc/150?u=11", name: "David Chen", position: "Midfielder", rating: 8.8, club: "Chelsea Youth", country: "England", age: 18, status: "Gold" },
   { avatar: "https://i.pravatar.cc/150?u=12", name: "Alex Jonson", position: "Defender", rating: 8.5, club: "Barcelona B", country: "Spain", age: 20, status: "Silver" },
   { avatar: "https://i.pravatar.cc/150?u=13", name: "James Brown", position: "Goalkeeper", rating: 7.9, club: "Liverpool Academy", country: "Argentina", age: 17, status: "Bronze" },
 ];
-
 const DiscoverPlayers = () => {
   return (
     <div className="p-2 md:p-6 space-y-6">
@@ -103,7 +98,6 @@ const DiscoverPlayers = () => {
         <h1 className="text-3xl font-bold text-white font-orbitron tracking-wide mb-1">Discover Players</h1>
         <p className="text-gray-400 text-sm font-medium">Browse verified athlete profiles</p>
       </div>
-
       <div className="bg-[#111111] border border-white/15 rounded-3xl p-6 md:p-8 space-y-6">
         <div className="flex flex-wrap gap-4 justify-end mb-2">
           <Button variant="outline" className="bg-transparent border-white/10 text-gray-300 hover:bg-white/5 hover:text-white rounded-lg">
@@ -119,7 +113,6 @@ const DiscoverPlayers = () => {
             All Status <IconChevronDown className="ml-2 w-4 h-4" />
           </Button>
         </div>
-
         <DashboardTable columns={columns} data={mockPlayers} />
       </div>
     </div>

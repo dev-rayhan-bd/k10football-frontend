@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+import Image from "next/image";
 
 import { useState } from "react";
-import Image from "next/image";
 import { CLUB_PRESET_LOGOS } from "@/components/user-wise-dashboard/academy-management/ExtraEvents";
 import {
   IconTrophy,

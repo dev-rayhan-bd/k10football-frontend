@@ -2,6 +2,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+import Image from "next/image";
 
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
@@ -42,7 +43,6 @@ import {
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import DashboardModal from "@/components/dashboard/DashboardModal";
-import Image from "next/image";
 
 const DEFAULT_MOCK_TEAMS = [
   {
@@ -685,7 +685,7 @@ setIsPaying(true);
 setTimeout(() => {
   setIsPaying(false);
   setIsSuccess(true);
-  
+
   const newClubId = `team-${Date.now()}`;
   const newClub = {
     id: newClubId,
@@ -767,7 +767,7 @@ const isTournament = event.eventType === "tournament" || event.title.toLowerCase
 
 return (
 <div className="max-w-6xl mx-auto py-8 px-4 flex flex-col gap-6 animate-in fade-in duration-300">
-  
+
   {/* DEMO ROLE SWITCHER BAR */}
   <div className="bg-[#161618] border border-white/15 rounded-3xl p-5 shadow-2xl flex flex-col lg:flex-row justify-between items-center gap-4 relative overflow-hidden">
     <div className="absolute top-0 right-0 w-96 h-full bg-linear-to-r from-transparent via-[#E31B23]/10 to-[#00FF62]/10 pointer-events-none" />
@@ -850,14 +850,14 @@ return (
   {/* ROLE STATE VIEW: 1. INVITED CLUB FLYER VIEW */}
   {previewRole === "invited_club" && (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-      
+
       {/* Main Flyer Box */}
       <div className="lg:col-span-2 bg-linear-to-b from-[#111111] to-[#050505] rounded-4xl border border-white/10 overflow-hidden shadow-2xl relative">
         <div className="absolute top-0 right-0 w-64 h-64 bg-radial-gradient from-[#E31B23]/10 to-transparent pointer-events-none" />
-        
+
         {/* Header Banner */}
         <div className="p-8 md:p-12 border-b border-white/10 flex flex-col md:flex-row gap-8 items-center bg-black/40">
-          
+
           {/* Shield/Logo */}
           <div className="w-32 h-32 md:w-36 md:h-36 shrink-0 bg-[#161616] rounded-3xl border border-white/10 p-6 flex items-center justify-center shadow-lg relative group">
             {event.customLogo ? (
@@ -877,11 +877,11 @@ return (
             <span className="bg-[#E31B23]/10 border border-[#E31B23]/20 text-[#E31B23] px-3.5 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest">
               {status === "registration" ? "Registration Open" : status === "live" ? "Tournament Live" : "Completed"}
             </span>
-            
+
             <h1 className="text-3xl md:text-5xl font-black uppercase text-white font-orbitron tracking-tight leading-none mt-2">
               {event.title}
             </h1>
-            
+
             <div className="flex flex-wrap justify-center md:justify-start gap-3 items-center">
               <span className="bg-white/5 border border-white/10 text-white/60 px-3.5 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wide">
                 {event.targetGroup || "Academy Players Only"}
@@ -895,7 +895,7 @@ return (
 
         {/* Flyer Details Grid */}
         <div className="p-8 md:p-12 space-y-10">
-          
+
           {/* Three Stat Boxes */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div className="bg-[#151515] border border-white/5 rounded-3xl p-6 flex flex-col gap-2 relative">
@@ -957,7 +957,7 @@ return (
 
       {/* Sidebar Info Card */}
       <div className="space-y-6">
-        
+
         {/* Join Tournament Call to Action Box */}
         <div className="bg-[#1C1C1C] border border-[#E31B23]/35 rounded-4xl p-8 space-y-6 shadow-xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-radial-gradient from-[#E31B23]/10 to-transparent pointer-events-none" />
@@ -965,7 +965,7 @@ return (
           <p className="text-xs text-white/50 leading-relaxed">
             Click below to pay the entry fee and register your club roster. Please have player photos and birth dates ready.
           </p>
-          
+
           {status === "registration" ? (
             <button
               onClick={() => {
@@ -995,7 +995,7 @@ return (
               <p className="text-xs text-white/50 mt-1">{event.address || "123 Field Lane, London"}</p>
             </div>
           </div>
-          
+
           {/* Mock Google Map Visual */}
           <div className="w-full h-32 bg-[#1b1b1b] rounded-2xl border border-white/5 overflow-hidden relative flex items-center justify-center">
             <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] bg-size-[16px_16px]" />
@@ -1097,7 +1097,7 @@ return (
   {/* ROLE STATE VIEW: 3. TOURNAMENT OWNER VIEW (ADMIN MANAGER) */}
   {previewRole === "owner_admin" && (
     <div className="space-y-8 animate-in fade-in duration-300">
-      
+
       {/* Admin Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-[#111] border border-white/10 rounded-3xl p-6 space-y-2">
@@ -1146,14 +1146,14 @@ return (
       {/* Group Allocation and Squad Rosters Manager */}
       {status === "registration" ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
+
           {/* Left Column: Registered Teams (Roster Viewer) */}
           <div className="lg:col-span-1 bg-[#111] border border-white/10 rounded-4xl p-6 md:p-8 space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Registered Teams</h3>
             <p className="text-[11px] text-white/40 leading-relaxed font-bold uppercase tracking-widest">
               Roster registrations received. Click any team to view their registered player list.
             </p>
-            
+
             <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
               {teams.map((t) => (
                 <div 
@@ -1187,7 +1187,7 @@ return (
                   Allocate clubs to Group A or Group B (Exactly 4 clubs per group required)
                 </p>
               </div>
-              
+
               <button
                 onClick={handleGoLive}
                 disabled={groupA.length !== 4 || groupB.length !== 4}
@@ -1203,7 +1203,7 @@ return (
 
             {/* Group A & B Columns */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
-              
+
               {/* Group A Column */}
               <div className="bg-black/40 border border-white/5 rounded-3xl p-5 space-y-4">
                 <div className="flex justify-between items-center border-b border-white/5 pb-3">
@@ -1212,7 +1212,7 @@ return (
                     {groupA.length} / 4 Slots
                   </span>
                 </div>
-                
+
                 <div className="space-y-2.5 min-h-[30vh]">
                   {teams.filter(t => groupA.includes(t.id)).map((t) => (
                     <div key={t.id} className="bg-[#121212] border border-white/10 p-3 rounded-xl flex items-center justify-between">
@@ -1253,7 +1253,7 @@ return (
                     {groupB.length} / 4 Slots
                   </span>
                 </div>
-                
+
                 <div className="space-y-2.5 min-h-[30vh]">
                   {teams.filter(t => groupB.includes(t.id)).map((t) => (
                     <div key={t.id} className="bg-[#121212] border border-white/10 p-3 rounded-xl flex items-center justify-between">
@@ -1291,7 +1291,7 @@ return (
 
         </div>
       ) : (
-        
+
         // Tournament is Live / Active - Show match sim control center
         <div className="bg-[#111] border border-white/10 rounded-4xl p-6 md:p-8 space-y-6">
           <div className="flex items-center gap-3">
@@ -1301,7 +1301,7 @@ return (
           <p className="text-[11px] text-white/40 uppercase tracking-widest font-bold max-w-2xl leading-relaxed">
             Step-by-step simulator to execute matches in Group Stages, Semifinals, and Grand Finals, automatically updating standings tables and bracket trees.
           </p>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-2">
             <button
               onClick={handleSimulateGroupStage}
@@ -1403,7 +1403,7 @@ return (
       </div>
     ) : (
       <form onSubmit={handleRegisterSubmit} className="space-y-10">
-        
+
         {/* Autofill helper */}
         <div className="flex justify-end">
           <button
@@ -1430,7 +1430,7 @@ return (
                 className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-white/25 transition-all"
               />
             </div>
-            
+
             <div className="space-y-2">
               <label className="text-[11px] font-black uppercase tracking-widest text-white/60">Choose Category <span className="text-[#E31B23]">*</span></label>
               <div className="relative">
@@ -1655,7 +1655,7 @@ return (
             <IconCreditCard size={24} className="text-[#E31B23]" />
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Secure Registration Fee Payment</h3>
           </div>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-2">
             <div className="lg:col-span-1 space-y-4">
               <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Total Summary</span>
@@ -1687,7 +1687,7 @@ return (
                   className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-white/25"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-white/40">Expiration Date</label>
                 <input
@@ -1735,7 +1735,7 @@ return (
           >
             Cancel
           </button>
-          
+
           <button
             type="submit"
             disabled={isPaying}
@@ -1777,7 +1777,7 @@ return (
             <p className="text-xs text-white/50">{selectedRosterTeam?.contactEmail} • {selectedRosterTeam?.contactPhone}</p>
           </div>
         </div>
-        
+
         <div className="text-right">
           <span className="text-[10px] font-black uppercase tracking-widest text-white/40 block">Assigned Group</span>
           <span className="text-lg font-black text-[#00FF62] font-orbitron uppercase mt-1 block">
@@ -2166,7 +2166,7 @@ const TournamentSection = ({
       {/* TAB 3: BRACKET */}
       {activeTab === "bracket" && (
         <div className="flex flex-row items-center justify-start gap-10 py-6 relative z-10 overflow-x-auto pb-10 w-full">
-          
+
           {/* Round of 16 */}
           <div className="flex flex-col gap-6 w-full min-w-70 max-w-sm shrink-0">
             <h4 className="text-[10px] font-black uppercase tracking-widest text-white/40 text-center font-orbitron flex items-center justify-center gap-2">

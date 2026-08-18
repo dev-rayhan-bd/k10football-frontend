@@ -1,7 +1,7 @@
+"use client";
+import Image from "next/image";
 import React from "react";
 import { IconEye, IconHeart, IconPlayerPlay } from "@tabler/icons-react";
-import Image from "next/image";
-
 interface MediaCardProps {
   type: "image" | "video";
   thumbnail: string;
@@ -10,7 +10,6 @@ interface MediaCardProps {
   views: number;
   likes: number;
 }
-
 const MediaCard = ({
   type,
   thumbnail,
@@ -28,6 +27,11 @@ const MediaCard = ({
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           width={100}
           height={100}
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.srcset = "";
+            target.src = "/placeholder_img.jpg";
+          }}
         />
         {type === "video" && (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -37,7 +41,6 @@ const MediaCard = ({
           </div>
         )}
       </div>
-
       <div className="space-y-1">
         <h3 className="text-base font-black text-white uppercase tracking-tight group-hover:text-primary transition-colors font-orbitron">
           {title}
@@ -46,7 +49,6 @@ const MediaCard = ({
           {date}
         </p>
       </div>
-
       <div className="flex items-center gap-4 pt-2 border-t border-white/5">
         <div className="flex items-center gap-1.5 text-white/40">
           <IconEye size={14} />
@@ -60,5 +62,4 @@ const MediaCard = ({
     </div>
   );
 };
-
 export default MediaCard;

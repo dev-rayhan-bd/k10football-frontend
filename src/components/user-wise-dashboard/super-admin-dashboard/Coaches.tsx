@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import React from "react";
 import { 
   IconChevronDown, 
@@ -8,7 +9,6 @@ import {
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import DashboardTable, { Column } from "@/components/dashboard/DashboardTable";
-
 const CvPill = ({ type }: { type: "Silver" | "Gold" }) => {
   const styles = {
     Silver: "bg-white/10 text-white border-white/20",
@@ -20,13 +20,11 @@ const CvPill = ({ type }: { type: "Silver" | "Gold" }) => {
     </span>
   );
 };
-
 const StatusBadge = ({ active }: { active: boolean }) => (
   <span className={`px-4 py-1 rounded-full text-[10px] font-black uppercase border ${active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-white/5 text-white/40 border-white/10"}`}>
     {active ? "Active" : "Inactive"}
   </span>
 );
-
 interface CoachRow {
   name: string;
   role: string;
@@ -36,7 +34,6 @@ interface CoachRow {
   cv: "Silver" | "Gold";
   active: boolean;
 }
-
 const SuperAdminCoaches = () => {
   const columns: Column<CoachRow>[] = [
     {
@@ -45,7 +42,7 @@ const SuperAdminCoaches = () => {
       render: (row) => (
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-white/10 overflow-hidden border border-white/20">
-             <img src={`https://i.pravatar.cc/150?u=${row.name}`} alt={row.name} className="w-full h-full object-cover" />
+             <Image src={`https://i.pravatar.cc/150?u=${row.name}`} alt={row.name} className="w-full h-full object-cover" />
           </div>
           <div>
             <p className="text-white text-sm font-black uppercase">{row.name}</p>
@@ -93,14 +90,12 @@ const SuperAdminCoaches = () => {
       )
     }
   ];
-
   const data: CoachRow[] = [
     { name: "Carlos Silva", role: "Assistant Coach", license: "UEFA-A", academy: "Elite FC Academy", playerCount: 28, cv: "Silver", active: true },
     { name: "Maria Santos", role: "Head Coach", license: "UEFA-B", academy: "Champions Academy", playerCount: 30, cv: "Gold", active: true },
     { name: "João Pedro", role: "Assistant Coach", license: "UEFA-Pro", academy: "Elite FC Academy", playerCount: 29, cv: "Silver", active: false },
     { name: "Roberto Lima", role: "Head Coach", license: "UEFA-A", academy: "Youth Stars", playerCount: 30, cv: "Gold", active: true },
   ];
-
   return (
     <div className="flex flex-col gap-8 pb-10">
       {/* Header */}
@@ -108,7 +103,6 @@ const SuperAdminCoaches = () => {
         <h1 className="text-5xl font-black text-white font-orbitron tracking-tight">Coaches</h1>
         <p className="text-white/60 font-medium mt-2 text-lg">View all platform coaches</p>
       </div>
-
       {/* Main Container */}
       <div className="bg-[#111111] border border-white/20 rounded-[40px] p-8 flex flex-col gap-8">
         {/* Table Filters */}
@@ -117,7 +111,6 @@ const SuperAdminCoaches = () => {
             All Status <IconChevronDown size={14} />
           </Button>
         </div>
-
         {/* Professional Table */}
         <DashboardTable columns={columns} data={data} />
       </div>

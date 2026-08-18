@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import React, { useState } from "react";
 import DashboardModal from "@/components/dashboard/DashboardModal";
 import { 
@@ -20,18 +20,15 @@ import {
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/reduxHooks";
 import { addParent, deleteParent } from "@/lib/features/parent/parentSlice";
-
 export const ParentsManagement = () => {
   const dispatch = useAppDispatch();
   const parents = useAppSelector((state) => state.parent.parents);
   const players = useAppSelector((state) => state.player.players);
-
   // Component States
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<number[]>([]);
-
   // Form input bindings state
   const [formData, setFormData] = useState({
     firstName: "",
@@ -46,14 +43,12 @@ export const ParentsManagement = () => {
     zipCode: "",
     notes: ""
   });
-
   // Toggle players checkboxes selection
   const handlePlayerCheckboxChange = (playerId: number) => {
     setSelectedPlayerIds((prev) =>
       prev.includes(playerId) ? prev.filter((id) => id !== playerId) : [...prev, playerId]
     );
   };
-
   // Submit Handler
   const handleFormSubmit = async () => {
     // Validations
@@ -81,18 +76,14 @@ export const ParentsManagement = () => {
       toast.error("Please select at least one linked player");
       return;
     }
-
     setIsSubmitting(true);
     const toastId = toast.loading("Saving parent registration in academy database...");
-
     try {
       // Simulate registering database
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      
       // Simulate sending email
       toast.loading(`Sending verification and validation email to ${formData.email}...`, { id: toastId });
       await new Promise((resolve) => setTimeout(resolve, 1800));
-
       // Concatenate linked player names
       const linkedNames = selectedPlayerIds
         .map((pid) => {
@@ -101,7 +92,6 @@ export const ParentsManagement = () => {
         })
         .filter(Boolean)
         .join(", ");
-
       const newParent = {
         id: Date.now(),
         firstName: formData.firstName.trim(),
@@ -124,12 +114,9 @@ export const ParentsManagement = () => {
         status: "Active" as const,
         createdAt: new Date().toISOString().split("T")[0]
       };
-
       dispatch(addParent(newParent));
       toast.success(`Success! Parent linked to ${linkedNames} and invitation email sent to ${formData.email}.`, { id: toastId });
-      
       setShowAddModal(false);
-      
       // Reset State
       setFormData({
         firstName: "",
@@ -151,7 +138,6 @@ export const ParentsManagement = () => {
       setIsSubmitting(false);
     }
   };
-
   // Delete Handler
   const handleDeleteClick = (id: number, name: string) => {
     if (confirm(`Are you sure you want to remove parent "${name}"?`)) {
@@ -159,14 +145,12 @@ export const ParentsManagement = () => {
       toast.success(`Parent "${name}" deleted successfully.`);
     }
   };
-
   // Filter parents search
   const filteredParents = parents.filter((p) => {
     const fullName = p.fullName || "";
     const email = p.email || "";
     const phone = p.phone || "";
     const linkedPlayers = p.linkedPlayers || "";
-
     return (
       fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -174,7 +158,6 @@ export const ParentsManagement = () => {
       linkedPlayers.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
-
   return (
     <div className="flex flex-col gap-8 pb-10">
       {/* Header */}
@@ -196,7 +179,6 @@ export const ParentsManagement = () => {
           <span className="text-sm font-bold uppercase tracking-widest font-orbitron">Add New Parent</span>
         </button>
       </div>
-
       {/* Search Bar */}
       <div className="bg-[#111111] rounded-3xl border border-white/15 p-4 flex gap-4 shadow-xl">
         <div className="relative flex-1">
@@ -214,7 +196,6 @@ export const ParentsManagement = () => {
           <span className="text-sm">Filters</span>
         </button>
       </div>
-
       {/* Main Content Card */}
       <div className="bg-[#111111] rounded-[32px] border border-white/15 p-8 flex flex-col gap-8 shadow-2xl">
         <div className="flex justify-between items-center">
@@ -224,7 +205,6 @@ export const ParentsManagement = () => {
             <IconChevronDown size={14} />
           </button>
         </div>
-
         {/* Parents Table */}
         <div className="rounded-2xl border border-white/15 overflow-hidden">
           <table className="w-full text-left border-collapse">
@@ -243,8 +223,7 @@ export const ParentsManagement = () => {
                   <td className="py-5 px-6 border-r border-white/15">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-full overflow-hidden border border-white/15 shrink-0">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={p.avatar} alt={p.fullName} className="w-full h-full object-cover" />
+                        <Image src={p.avatar} alt={p.fullName} className="w-full h-full object-cover" />
                       </div>
                       <span className="text-sm font-bold text-white whitespace-nowrap">{p.fullName}</span>
                     </div>
@@ -283,7 +262,6 @@ export const ParentsManagement = () => {
           </table>
         </div>
       </div>
-
       {/* Add New Parent Modal */}
       <DashboardModal
         isOpen={showAddModal}
@@ -389,7 +367,6 @@ export const ParentsManagement = () => {
               </div>
             </div>
           </div>
-
           {/* Contact Information */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Contact Information</h3>
@@ -433,7 +410,6 @@ export const ParentsManagement = () => {
               </div>
             </div>
           </div>
-
           {/* Address */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Address</h3>
@@ -479,7 +455,6 @@ export const ParentsManagement = () => {
               </div>
             </div>
           </div>
-
           {/* Linked Players */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Linked Players</h3>
@@ -503,7 +478,7 @@ export const ParentsManagement = () => {
                     className="w-5 h-5 rounded border-white/20 bg-white/5 text-[#E31B23] focus:ring-[#E31B23] cursor-pointer" 
                   />
                   <div className="w-10 h-10 rounded-full overflow-hidden border border-white/15 shrink-0">
-                    <img 
+                    <Image 
                       src={typeof player.playerImage === 'string' ? player.playerImage : (player.playerImage?.src || "/ronaldo.png")} 
                       alt={player.fullName} 
                       className="w-full h-full object-cover" 
@@ -517,7 +492,6 @@ export const ParentsManagement = () => {
               ))}
             </div>
           </div>
-
           {/* Additional Notes */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Additional Notes</h3>
@@ -537,5 +511,4 @@ export const ParentsManagement = () => {
     </div>
   );
 };
-
 export default ParentsManagement;

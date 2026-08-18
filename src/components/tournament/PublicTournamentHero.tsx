@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
 import Image from "next/image";
+
 import { TOURNAMENT_PRESET_LOGOS } from "@/components/user-wise-dashboard/academy-management/ExtraEvents";
 import { IconEye, IconCopy, IconCheck, IconRefresh } from "@tabler/icons-react";
 

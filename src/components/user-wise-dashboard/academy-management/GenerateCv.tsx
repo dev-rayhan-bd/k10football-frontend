@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
+import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import {
   IconDownload,
@@ -17,14 +18,10 @@ import { usePlayerStats } from "@/components/cvs/player-cv-details/FullEditableP
 import { getFullWithShortForm } from "@/lib/utils";
 import { FileText } from 'lucide-react';
 import { useAppSelector } from "@/lib/hooks/reduxHooks";
-import Image from "next/image";
-
-
 const GenerateCv = () => {
   const { playerData } = usePlayer();
   const { role: contextRole } = usePlayerStats();
   const [role, setRole] = useState<string>("player");
-
   const reports = useAppSelector(state => state.reports.reports);
   const gameReports = reports
     .filter(r => r.status === "Paid")
@@ -34,16 +31,13 @@ const GenerateCv = () => {
       opponent: `vs ${r.team2}`,
       rating: r.rating
     }));
-
   useEffect(() => {
     const userRole = localStorage.getItem("userRole") || "player";
     setRole(userRole);
   }, []);
-
   const generateProfessionalPDF = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
-
     const htmlContent = `
       <html>
         <head>
@@ -69,7 +63,6 @@ const GenerateCv = () => {
             .brand { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 3px; color: #E31B23; margin-bottom: 10px; }
             .player-name { font-size: 48px; font-weight: 900; text-transform: uppercase; letter-spacing: -2px; margin: 0; line-height: 1; }
             .player-title { font-size: 16px; font-weight: 600; color: #666; margin-top: 5px; text-transform: uppercase; }
-            
             .rating-circle {
               width: 100px;
               height: 100px;
@@ -84,7 +77,6 @@ const GenerateCv = () => {
             }
             .rating-value { font-size: 36px; font-weight: 900; line-height: 1; }
             .rating-label { font-size: 10px; font-weight: 800; text-transform: uppercase; opacity: 0.6; }
-
             .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
             .section { margin-bottom: 40px; }
             .section-header { 
@@ -99,7 +91,6 @@ const GenerateCv = () => {
               display: flex;
               justify-content: space-between;
             }
-            
             .attribute-table { width: 100%; border-collapse: collapse; }
             .attribute-row { border-bottom: 1px solid #f0f0f0; }
             .attribute-cell { padding: 10px 0; font-size: 13px; }
@@ -107,10 +98,8 @@ const GenerateCv = () => {
             .attr-value { font-weight: 900; text-align: right; color: #111; }
             .attr-bar-bg { width: 60px; height: 6px; background: #eee; border-radius: 3px; display: inline-block; margin-left: 15px; position: relative; top: -2px; }
             .attr-bar-fill { height: 100%; background: #E31B23; border-radius: 3px; }
-
             .full-width { grid-column: span 2; }
             .highlight-box { background: #f9f9f9; padding: 25px; border-radius: 15px; border: 1px solid #eee; }
-            
             .footer {
               margin-top: 80px;
               padding-top: 30px;
@@ -123,7 +112,6 @@ const GenerateCv = () => {
               text-transform: uppercase;
               letter-spacing: 1px;
             }
-
             @media print {
               body { padding: 0; }
               .no-print { display: none; }
@@ -143,7 +131,6 @@ const GenerateCv = () => {
               <span class="rating-value">${playerData.rating}</span>
             </div>
           </div>
-
           <div class="main-grid">
             <!-- Bio Section -->
             <div class="section">
@@ -156,7 +143,6 @@ const GenerateCv = () => {
                 <tr class="attribute-row"><td class="attribute-cell attr-label">Nationality</td><td class="attribute-cell attr-value">${playerData.birthCountry} / ${playerData.dualNationality || 'N/A'}</td></tr>
               </table>
             </div>
-
             <!-- Performance Metrics -->
             <div class="section">
               <div class="section-header">Scouting Summary</div>
@@ -167,7 +153,6 @@ const GenerateCv = () => {
                 <tr class="attribute-row"><td class="attribute-cell attr-label">Agent</td><td class="attribute-cell attr-value">${playerData.agent}</td></tr>
               </table>
             </div>
-
             <!-- Technical Evaluation -->
             <div class="section">
               <div class="section-header">Technical Attributes</div>
@@ -177,7 +162,6 @@ const GenerateCv = () => {
                 `).join('') || ''}
               </table>
             </div>
-
             <!-- Physical Evaluation -->
             <div class="section">
               <div class="section-header">Physical Profile</div>
@@ -187,7 +171,6 @@ const GenerateCv = () => {
                 `).join('') || ''}
               </table>
             </div>
-
             <!-- Mental/Tactical Evaluation -->
             <div class="section">
               <div class="section-header">Mental & Tactical</div>
@@ -197,7 +180,6 @@ const GenerateCv = () => {
                 `).join('') || ''}
               </table>
             </div>
-
             <!-- Advanced Metrics -->
             <div class="section">
               <div class="section-header">Intelligence Metrics</div>
@@ -208,7 +190,6 @@ const GenerateCv = () => {
                 <tr class="attribute-row"><td class="attribute-cell attr-label">Tackle Success</td><td class="attribute-cell attr-value">${playerData.performanceMetrics.tackleSuccess}%</td></tr>
               </table>
             </div>
-
             <!-- Career Timeline -->
             <div class="section full-width">
               <div class="section-header">Professional Career History</div>
@@ -229,7 +210,6 @@ const GenerateCv = () => {
                 `).join('')}
               </table>
             </div>
-
             <div class="section full-width highlight-box">
               <div class="section-header">Coach Evaluation Notes</div>
               <p style="font-size: 13px; color: #444; margin: 0;">
@@ -237,13 +217,11 @@ const GenerateCv = () => {
               </p>
             </div>
           </div>
-
           <div class="footer">
             <span>Tech ID: 9F8E7D6C • Confirmed By: ER Scouting Dept</span>
             <span>Page 1 of 1 • Internal Document</span>
             <span>Date: ${new Date().toLocaleDateString()}</span>
           </div>
-
           <script>
             window.onload = function() { 
               window.print();
@@ -253,11 +231,9 @@ const GenerateCv = () => {
         </body>
       </html>
     `;
-
     printWindow.document.write(htmlContent);
     printWindow.document.close();
   };
-
   return (
     <div className="flex flex-col gap-8 pb-10">
       {/* Header */}
@@ -273,9 +249,6 @@ const GenerateCv = () => {
           <IconDownload size={18} /> Download CV PDF
         </Button>
       </div>
-
-
-
       {/* Main Content */}
       <div className="flex flex-col gap-6">
         {/* Personal Information Hero - Restoring Original Design */}
@@ -287,7 +260,6 @@ const GenerateCv = () => {
             />
             <div className="absolute inset-0 bg-linear-to-r from-black/95 via-black/40 via-45% to-transparent" />
             <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
-
             <div className="absolute right-0 bottom-0 h-full w-[70%] md:w-[55%] flex items-end justify-end pointer-events-none opacity-60 md:opacity-100">
               <Image
                 src={typeof playerData.playerImage === 'string' ? playerData.playerImage : (playerData.playerImage?.src || "/ronaldo.png")}
@@ -297,7 +269,6 @@ const GenerateCv = () => {
                 width={500}
               />
             </div>
-
             <div className="relative p-6 md:p-10 w-full space-y-8">
               <div className="flex flex-col gap-6">
                 <div className="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-gold bg-gold/80 flex items-center justify-center backdrop-blur-2xl shadow-2xl">
@@ -319,7 +290,6 @@ const GenerateCv = () => {
                   </div>
                 </div>
               </div>
-
               <div className="grid grid-cols-1  md:grid-cols-2 gap-x-12 gap-y-4 md:gap-y-6 pt-4 md:pt-8 max-w-2xl p-4 md:p-6 rounded-2xl">
                 <div className="flex items-center gap-4">
                   <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-white/40"><IconShield size={20} /></div>
@@ -353,7 +323,6 @@ const GenerateCv = () => {
             </div>
           </div>
         </section>
-
         {/* Top Squares - As requested by client doc */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-full">
           {/* Completion Status */}
@@ -371,7 +340,6 @@ const GenerateCv = () => {
               </p>
             </div>
           </div>
-
           {/* Tier Status */}
           <div className="bg-[#111111] rounded-3xl border border-white/10 p-8 flex flex-col gap-6 relative overflow-hidden">
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#FBBF24]/10 blur-3xl rounded-full" />
@@ -386,7 +354,6 @@ const GenerateCv = () => {
               <IconShare size={18} className="text-white/40" /> Request Re-validation
             </Button>
           </div>
-
           {/* Career Journey / Last Evaluated */}
           {/* New Game Reports */}
           <div className="bg-[#111111] h-fit rounded-3xl border border-white/10 p-8 flex flex-col gap-6">
@@ -398,7 +365,6 @@ const GenerateCv = () => {
                 New Game Reports
               </h3>
             </div>
-
             <div className="space-y-3">
               {gameReports.map((report) => (
                 <div key={report.id} className="border border-white/10 rounded-xl p-4 flex items-center justify-between hover:bg-white/5 transition group">
@@ -453,7 +419,6 @@ const GenerateCv = () => {
           .bg-black { background-color: #000 !important; }
           .bg-\\[\\#111111\\] { background-color: #111111 !important; }
           .border { border-color: rgba(255, 255, 255, 0.1) !important; }
-          
           /* Hide edit buttons and adjust layout for A4 */
           button { display: none !important; }
           input, textarea { 
@@ -462,7 +427,6 @@ const GenerateCv = () => {
             padding: 0 !important;
             color: white !important;
           }
-          
           /* Custom PDF Header */
           .pdf-footer {
             position: fixed;
@@ -483,5 +447,4 @@ const GenerateCv = () => {
     </div>
   );
 };
-
 export default GenerateCv;

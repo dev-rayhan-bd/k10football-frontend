@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import React from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -9,22 +10,18 @@ import {
 } from "@tabler/icons-react";
 import DashboardTable, { Column } from "@/components/dashboard/DashboardTable";
 import TableActionButtons from "@/components/dashboard/TableActionButtons";
-import Image from "next/image";
-
 const stats = [
   { label: "Total Players", value: "24", icon: IconUsers },
   { label: "Avg Rating", value: "8.5", icon: IconChartBar },
   { label: "Active", value: "22", icon: IconUserCheck },
   { label: "Injured", value: "2", icon: IconUserExclamation },
 ];
-
 const teamData = [
   { id: 1, name: "Marcus Silva", position: "Forward", rating: 9.2, matches: 28, goals: 15, assists: 8, status: "Active", avatar: "https://i.pravatar.cc/150?u=1" },
   { id: 2, name: "David Chen", position: "Midfielder", rating: 8.8, matches: 30, goals: 5, assists: 12, status: "Active", avatar: "https://i.pravatar.cc/150?u=2" },
   { id: 3, name: "Alex Jonson", position: "Defender", rating: 8.5, matches: 29, goals: 2, assists: 3, status: "Injured", avatar: "https://i.pravatar.cc/150?u=3" },
   { id: 4, name: "James Brown", position: "Goalkeeper", rating: 9.0, matches: 30, goals: 0, assists: 0, status: "Active", avatar: "https://i.pravatar.cc/150?u=4" },
 ];
-
 const MyTeams = () => {
   const router = useRouter();
   const columns: Column<typeof teamData[0]>[] = [
@@ -71,14 +68,12 @@ const MyTeams = () => {
       ),
     },
   ];
-
   return (
     <div className="space-y-8 pb-12">
       <div>
         <h1 className="text-4xl font-black text-white italic tracking-tighter uppercase">My Teams</h1>
         <p className="text-gray-500 text-sm mt-1">Manage your squad, track performance, and optimize your lineup</p>
       </div>
-
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, idx) => (
           <div key={idx} className="p-6 rounded-2xl border border-white/20 bg-[#0D0D0D]">
@@ -94,7 +89,6 @@ const MyTeams = () => {
           </div>
         ))}
       </div>
-
       <div className="p-8 rounded-3xl border border-white/20 bg-[#0D0D0D]">
         <h2 className="text-xl font-bold text-white mb-8 italic uppercase tracking-tight">Players</h2>
         <DashboardTable
@@ -107,5 +101,4 @@ const MyTeams = () => {
     </div>
   );
 };
-
 export default MyTeams;

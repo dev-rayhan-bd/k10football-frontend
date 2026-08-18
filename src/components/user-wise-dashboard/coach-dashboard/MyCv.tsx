@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import React from "react";
 import { 
   IconDownload, 
@@ -11,7 +12,6 @@ import {
   IconBriefcase
 } from "@tabler/icons-react";
 import DashboardHero from "@/components/dashboard/DashboardHero";
-
 const MyCV = () => {
   return (
     <div className="space-y-8 pb-12">
@@ -25,7 +25,6 @@ const MyCV = () => {
           <IconDownload size={18} /> Download PDF
         </button>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column - Status & Career */}
         <div className="lg:col-span-4 space-y-6">
@@ -40,7 +39,6 @@ const MyCV = () => {
               Complete all sections to unlock Gold tier status
             </p>
           </div>
-
           {/* Tier Badge */}
           <div className="p-6 rounded-2xl border border-white/20 bg-[#0D0D0D]">
             <div className="flex gap-4">
@@ -53,7 +51,6 @@ const MyCV = () => {
               </div>
             </div>
           </div>
-
           {/* Career Journey */}
           <div className="p-6 rounded-2xl border border-white/20 bg-[#0D0D0D]">
             <div className="flex items-center gap-2 mb-6">
@@ -62,7 +59,6 @@ const MyCV = () => {
               </div>
               <h3 className="text-sm font-black text-white uppercase tracking-widest italic">Career Journey</h3>
             </div>
-            
             <div className="space-y-4">
               {[
                 { name: "Manchester City", role: "U6-U8", years: "2005-2008", type: "FREE TRANSFER", logo: "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg" },
@@ -70,7 +66,7 @@ const MyCV = () => {
                 { name: "Chelsea FC", role: "U12-U16", years: "2012-2015", type: "$ 250000.00", logo: "https://upload.wikimedia.org/wikipedia/en/c/cc/Chelsea_FC.svg" },
               ].map((club, idx) => (
                 <div key={idx} className="p-4 rounded-xl border border-white/10 bg-white/[0.02] flex items-start gap-4 group hover:border-[#E31B23]/30 transition-all">
-                  <img src={club.logo} className="w-10 h-10 object-contain" alt={club.name} />
+                  <Image src={club.logo} className="w-10 h-10 object-contain" alt={club.name} />
                   <div>
                     <div className="text-sm font-bold text-white">{club.name}</div>
                     <div className="text-[10px] text-gray-500 uppercase font-bold mt-0.5">{club.role}</div>
@@ -79,14 +75,12 @@ const MyCV = () => {
                   </div>
                 </div>
               ))}
-              
               <button className="w-full py-3 rounded-xl border border-white/10 bg-white/5 text-white text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all flex items-center justify-center gap-2">
                 <IconPlus size={16} /> Add
               </button>
             </div>
           </div>
         </div>
-
         {/* Right Column - Form Sections */}
         <div className="lg:col-span-8 space-y-8">
           {/* Personal Information */}
@@ -112,7 +106,6 @@ const MyCV = () => {
                   characterImage="/coach-image.png"
                 />
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-6">
                   <InputField label="Full Name" value="John Doe" />
@@ -122,7 +115,6 @@ const MyCV = () => {
                   <InputField label="Contact" value="+44 7700 900000" />
                   <InputField label="Languages" value="SPANISH, PORTUGUESE, ENGLISH" />
                 </div>
-                
                 <div className="flex flex-col">
                   <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-2">Upload image</span>
                   <div className="flex-1 rounded-2xl border-2 border-dashed border-white/10 bg-white/[0.02] flex flex-col items-center justify-center p-8 group hover:border-[#E31B23]/30 transition-all">
@@ -133,7 +125,6 @@ const MyCV = () => {
                   </div>
                 </div>
               </div>
-
               <div className="pt-8 border-t border-white/10">
                 <h4 className="text-xs font-black text-white uppercase tracking-[0.2em] italic mb-6">Transfer Info</h4>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
@@ -144,7 +135,6 @@ const MyCV = () => {
               </div>
             </div>
           </Section>
-
           {/* Cup Played */}
           <Section title="Cup played">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -156,12 +146,10 @@ const MyCV = () => {
               <InputField label="2015 K10 football Cup" value="K10 football FC" />
             </div>
           </Section>
-
           {/* Key Accomplishments */}
           <Section title="Key Accomplishments">
             <div className="h-24 rounded-xl border border-white/5 bg-white/[0.02]" />
           </Section>
-
           {/* Major Trophies */}
           <Section title="Major Trophies">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -173,7 +161,6 @@ const MyCV = () => {
               <InputField label="Gbn Cfn B: 10ngn Vg Vn" value="12" />
             </div>
           </Section>
-
           {/* Key Skills */}
           <Section title="Key Skills">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -183,7 +170,6 @@ const MyCV = () => {
               <InputField label="" value="Positivity" />
             </div>
           </Section>
-
           {/* Courses & Certifications */}
           <Section title="Courses & Certifications">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -195,7 +181,6 @@ const MyCV = () => {
               <InputField label="Youth Development" value="FIFA- 2018" />
             </div>
           </Section>
-
           {/* Formation Section */}
           <div className="p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
             <h3 className="text-xl font-black text-white italic uppercase tracking-tight mb-8">Formation</h3>
@@ -210,7 +195,6 @@ const MyCV = () => {
     </div>
   );
 };
-
 const Section = ({ title, children }: { title: string, children: React.ReactNode }) => (
   <div className="p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
     <div className="flex items-center justify-between mb-8">
@@ -225,7 +209,6 @@ const Section = ({ title, children }: { title: string, children: React.ReactNode
     {children}
   </div>
 );
-
 const InputField = ({ label, value, isDate }: { label: string, value: string, isDate?: boolean }) => (
   <div className="space-y-2">
     {label && <label className="text-[10px] text-gray-500 uppercase font-black tracking-widest">{label}</label>}
@@ -240,11 +223,10 @@ const InputField = ({ label, value, isDate }: { label: string, value: string, is
     </div>
   </div>
 );
-
 const FormationCard = ({ title, subtitle, wins, usage, image }: { title: string, subtitle: string, wins: string, usage: string, image: string }) => (
   <div className="rounded-[32px] border border-white/10 bg-[#050505] overflow-hidden group hover:border-[#E31B23]/30 transition-all flex flex-col h-full">
     <div className="relative aspect-[4/3] w-full overflow-hidden">
-      <img 
+      <Image 
         src={image} 
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
         alt="Formation" 

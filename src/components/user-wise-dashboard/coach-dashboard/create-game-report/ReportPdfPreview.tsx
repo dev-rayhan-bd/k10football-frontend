@@ -1,14 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+import Image from "next/image";
 import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import RadarChart from "./RadarChart";
 import { IconDownload, IconCheck, IconLoader2 } from "@tabler/icons-react";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
-import Image from "next/image";
-
 interface ReportPdfPreviewProps {
   formData: any;
   characteristics: string[];
@@ -20,7 +19,6 @@ interface ReportPdfPreviewProps {
   viewOnly?: boolean;
   isPlayer?: boolean;
 }
-
 const ReportPdfPreview = ({
   formData,
   characteristics,
@@ -31,14 +29,11 @@ const ReportPdfPreview = ({
 }: ReportPdfPreviewProps) => {
   const previewRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
-
   const isGK = formData.position === "GOALKEEPER";
-
   // Helper to scale/normalize stats to a rating between 50 and 99
   const mapStat = (val: number, maxVal = 15) => {
     return Math.min(99, Math.max(50, Math.round(50 + (val / maxVal) * 49)));
   };
-
   // Compute attributes for the radar chart
   const radarStats = isGK
     ? [
@@ -57,11 +52,9 @@ const ReportPdfPreview = ({
         { label: "DEF", value: mapStat((stats.standTackle || 0) + (stats.slidingTackle || 0) + (stats.interception || 0), 30) },
         { label: "PHY", value: mapStat((stats.appearances || 0) + (stats.savesAccurate || 0), 30) }
       ];
-
   const overallRating = Math.round(
     radarStats.reduce((sum, s) => sum + s.value, 0) / radarStats.length
   );
-
   const handleDownloadPdf = async () => {
     if (!previewRef.current) return;
     setDownloading(true);
@@ -77,7 +70,6 @@ const ReportPdfPreview = ({
       const imgWidth = 210; // A4 width in mm
       const pageHeight = 297; // A4 height in mm
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
       pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
       pdf.save(`Player_Analysis_Profile_${formData.playerName.replace(/\s+/g, "_")}.pdf`);
     } catch (err) {
@@ -86,14 +78,12 @@ const ReportPdfPreview = ({
       setDownloading(false);
     }
   };
-
   return (
     <div className="space-y-8 pb-12 animate-in fade-in duration-500 max-w-4xl mx-auto">
       <div className="flex flex-col gap-2">
         <h1 className="text-4xl font-black text-white uppercase tracking-tighter italic font-orbitron">Report Generated</h1>
         <p className="text-gray-400 text-sm">Preview the generated Player Analysis Profile PDF and save it.</p>
       </div>
-
       {/* PDF Container (Styled exactly like the 3rd image, print-friendly white background) */}
       <div className="w-full border border-white/10 rounded-3xl overflow-x-auto shadow-2xl bg-white/5 p-2 sm:p-6 mb-6 hide-scrollbar">
         <div className="w-max mx-auto">
@@ -107,7 +97,6 @@ const ReportPdfPreview = ({
           <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none z-0">
             <Image src="/logo.png" alt="Logo Watermark" className="w-125 object-contain" width={500} height={500}/>
           </div>
-
           {/* Header */}
           <div className="relative z-10 flex items-center justify-between border-b-4 border-slate-900 pb-4 mb-6">
             <div className="flex items-center gap-3">
@@ -133,7 +122,6 @@ const ReportPdfPreview = ({
               <Image src="/logo.png" alt="K10 Logo" className="w-12 h-12 object-contain" width={12} height={12}/>
             </div>
           </div>
-
           {/* Body Content */}
           <div className="relative z-10 grid grid-cols-12 gap-6 mb-6">
             {/* Player details */}
@@ -175,7 +163,6 @@ const ReportPdfPreview = ({
                 <p className="text-slate-700 text-xs font-bold mt-0.5 uppercase">{formData.foot}</p>
               </div>
             </div>
-
             {/* FUT player card photo preview */}
             <div className="col-span-4 flex justify-end">
               <div className="w-36 h-48 border-2 border-sky-400 bg-sky-50 rounded-2xl p-2 relative shadow-md flex flex-col items-center justify-between">
@@ -207,7 +194,6 @@ const ReportPdfPreview = ({
               </div>
             </div>
           </div>
-
           {/* Player Characteristic Section */}
           <div className="relative z-10 mb-6">
             <div className="bg-sky-500 text-white font-orbitron px-4 py-1.5 rounded text-[10px] font-black uppercase tracking-wider mb-3 shadow">
@@ -222,7 +208,6 @@ const ReportPdfPreview = ({
               ))}
             </div>
           </div>
-
           {/* Match Information Section */}
           <div className="relative z-10 mb-6">
             <div className="bg-sky-500 text-white font-orbitron px-4 py-1.5 rounded text-[10px] font-black uppercase tracking-wider mb-4 shadow">
@@ -255,7 +240,6 @@ const ReportPdfPreview = ({
               </div>
             </div>
           </div>
-
           {/* Match Statistics Section */}
           <div className="relative z-10 mb-6">
             <div className="bg-sky-500 text-white font-orbitron px-4 py-1.5 rounded text-[10px] font-black uppercase tracking-wider mb-4 shadow">
@@ -295,7 +279,6 @@ const ReportPdfPreview = ({
               ))}
             </div>
           </div>
-
           {/* Bottom section (Radar, Overall, Logos) */}
           <div className="relative z-10 flex items-center justify-between border-t-2 border-slate-200 pt-6 mt-6">
             {/* Radar Chart */}
@@ -307,14 +290,12 @@ const ReportPdfPreview = ({
                 fillColor="rgba(2, 132, 199, 0.25)" 
               />
             </div>
-
             {/* Overall score */}
             <div className="text-center flex-1">
               <div className="text-4xl font-black text-emerald-600 font-orbitron tracking-tighter italic">
                 OVERALL = {overallRating}%
               </div>
             </div>
-
             {/* Logo and tag */}
             <div className="flex flex-col items-center gap-1.5 w-45">
               <Image src="/logo.png" alt="K10 Logo" className="w-10 h-10 object-contain" width={10} height={10}/>
@@ -327,7 +308,6 @@ const ReportPdfPreview = ({
         </div>
       </div>
       </div>
-
       {/* Buttons */}
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
         <Button 
@@ -367,5 +347,4 @@ const ReportPdfPreview = ({
     </div>
   );
 };
-
 export default ReportPdfPreview;

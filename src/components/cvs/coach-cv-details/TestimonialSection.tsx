@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
+;
 
 const DEFAULT_TESTIMONIALS = [
   {
@@ -183,7 +184,7 @@ return (
                 <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">Profile Image</Label>
                 <div className="relative group w-20 h-20 cursor-pointer overflow-hidden rounded-full border-2 border-dashed border-gray-800 hover:border-primary/50 transition-all flex items-center justify-center bg-black/50">
                   {formData.avatar ? (
-                    <img 
+                    <Image 
                       src={formData.avatar} 
                       alt="Avatar Preview" 
                       className="w-full h-full object-cover"

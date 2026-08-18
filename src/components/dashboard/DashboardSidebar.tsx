@@ -1,6 +1,5 @@
 import Image from "next/image";
 import React from "react";
-
 interface DashboardSidebarPanelProps {
   title: string;
   icon?: React.ReactNode;
@@ -8,7 +7,6 @@ interface DashboardSidebarPanelProps {
   children: React.ReactNode;
   className?: string;
 }
-
 export const DashboardSidebarPanel = ({
   title,
   icon,
@@ -30,7 +28,6 @@ export const DashboardSidebarPanel = ({
     </div>
   );
 };
-
 interface DashboardSidebarItemProps {
   avatar?: string;
   title: string;
@@ -39,7 +36,6 @@ interface DashboardSidebarItemProps {
   extraInfo?: string;
   onClick?: () => void;
 }
-
 export const DashboardSidebarItem = ({
   avatar,
   title,

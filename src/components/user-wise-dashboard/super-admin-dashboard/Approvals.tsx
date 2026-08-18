@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import { 
   IconEye,
@@ -8,7 +9,6 @@ import {
 import { Button } from "@/components/ui/button";
 import DashboardTable, { Column } from "@/components/dashboard/DashboardTable";
 import { toast } from "sonner";
-
 const StatusPill = ({ status }: { status: "Pending" | "Approved" | "Rejected" }) => {
   const styles = {
     Pending: "bg-orange-500/10 text-orange-400 border-orange-500/20",
@@ -21,7 +21,6 @@ const StatusPill = ({ status }: { status: "Pending" | "Approved" | "Rejected" })
     </span>
   );
 };
-
 interface ApprovalRow {
   name: string;
   category?: string;
@@ -29,29 +28,24 @@ interface ApprovalRow {
   date: string;
   status: "Pending" | "Approved" | "Rejected";
 }
-
 interface StoryRow {
   title: string;
   role: string;
   date: string;
   status: "Approved" | "Pending";
 }
-
 const SuperAdminApprovals = () => {
   const [approvals, setApprovals] = useState<ApprovalRow[]>([]);
-
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedStatus = localStorage.getItem("agent_profile_verification_status");
       const agentName = localStorage.getItem("agent_fullName") || "John Doe";
       const agentCerts = localStorage.getItem("agent_certifications") || "FIFA Licensed Agent";
-
       const baseApprovals: ApprovalRow[] = [
         { name: "Elite FC Academy", category: "Premier League Academy", role: "Academy", date: "2024-01-15", status: "Pending" },
         { name: "Champions Academy", category: "Premier League Academy", role: "Academy", date: "2024-02-01", status: "Approved" },
         { name: "Elite FC Academy", category: "Premier League Academy", role: "Academy", date: "2024-02-01", status: "Rejected" },
       ];
-
       // If the agent profile has a verification request active
       if (storedStatus && storedStatus !== "None") {
         setApprovals([
@@ -69,7 +63,6 @@ const SuperAdminApprovals = () => {
       }
     }
   }, []);
-
   const handleApprove = (row: ApprovalRow) => {
     setApprovals((prev) =>
       prev.map((item) => {
@@ -79,7 +72,6 @@ const SuperAdminApprovals = () => {
         return item;
       })
     );
-
     if (row.role === "Agent") {
       localStorage.setItem("agent_profile_verification_status", "Approved");
       toast.success(`Agent "${row.name}" profile approved & verified!`);
@@ -87,7 +79,6 @@ const SuperAdminApprovals = () => {
       toast.success(`${row.role} "${row.name}" approved successfully!`);
     }
   };
-
   const handleReject = (row: ApprovalRow) => {
     setApprovals((prev) =>
       prev.map((item) => {
@@ -97,7 +88,6 @@ const SuperAdminApprovals = () => {
         return item;
       })
     );
-
     if (row.role === "Agent") {
       localStorage.setItem("agent_profile_verification_status", "Rejected");
       toast.error(`Agent "${row.name}" verification rejected.`);
@@ -105,7 +95,6 @@ const SuperAdminApprovals = () => {
       toast.error(`${row.role} "${row.name}" verification rejected.`);
     }
   };
-
   const approvalColumns: Column<ApprovalRow>[] = [
     {
       header: "Name",
@@ -113,7 +102,7 @@ const SuperAdminApprovals = () => {
       render: (row) => (
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-white/10 overflow-hidden border border-white/20">
-             <img src={`https://i.pravatar.cc/150?u=${row.name}`} alt={row.name} className="w-full h-full object-cover" />
+             <Image src={`https://i.pravatar.cc/150?u=${row.name}`} alt={row.name} className="w-full h-full object-cover" />
           </div>
           <div>
             <p className="text-white text-sm font-black uppercase">{row.name}</p>
@@ -153,7 +142,6 @@ const SuperAdminApprovals = () => {
       )
     }
   ];
-
   const storyColumns: Column<StoryRow>[] = [
     {
       header: "Story Title",
@@ -161,7 +149,7 @@ const SuperAdminApprovals = () => {
       render: (row) => (
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-white/10 overflow-hidden border border-white/20">
-             <img src={`https://i.pravatar.cc/150?u=${row.title}`} alt={row.title} className="w-full h-full object-cover" />
+             <Image src={`https://i.pravatar.cc/150?u=${row.title}`} alt={row.title} className="w-full h-full object-cover" />
           </div>
           <p className="text-white text-sm font-black uppercase max-w-[250px] leading-tight">{row.title}</p>
         </div>
@@ -188,13 +176,11 @@ const SuperAdminApprovals = () => {
       )
     }
   ];
-
   const storyData: StoryRow[] = [
     { title: "Academy Graduate Makes First Team Debut", role: "Academies", date: "2024-01-15", status: "Approved" },
     { title: "Agent Luis Secures Trial for Midfielder at Benfica Academy", role: "Agents", date: "2024-02-01", status: "Pending" },
     { title: "1-114 Winger Signed by National Talent Centre", role: "Clubs", date: "2023-12-01", status: "Approved" },
   ];
-
   return (
     <div className="flex flex-col gap-8 pb-10">
       {/* Header */}
@@ -202,7 +188,6 @@ const SuperAdminApprovals = () => {
         <h1 className="text-5xl font-black text-white font-orbitron tracking-tight uppercase">Approvals & Verifications</h1>
         <p className="text-white/60 font-medium mt-2 text-lg">Review and approve pending applications</p>
       </div>
-
       {/* Approvals Section */}
       <div className="bg-[#111111] border border-white/20 rounded-[40px] p-10 flex flex-col gap-8">
         <div className="flex justify-between items-center">
@@ -217,7 +202,6 @@ const SuperAdminApprovals = () => {
         </div>
         <DashboardTable columns={approvalColumns} data={approvals} />
       </div>
-
       {/* Success Story Section */}
       <div className="bg-[#111111] border border-white/20 rounded-[40px] p-10 flex flex-col gap-8">
         <h2 className="text-2xl font-black text-white font-orbitron uppercase tracking-tight">Success Story</h2>

@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import React, { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -8,8 +8,6 @@ import {
   IconShoppingCart,
   IconTrash
 } from "@tabler/icons-react";
-import Image from "next/image";
-
 interface Product {
   id: number;
   name: string;
@@ -18,12 +16,10 @@ interface Product {
   image: string;
   inStock: boolean;
 }
-
 interface CartItem extends Product {
   quantity: number;
   size: string;
 }
-
 const ParentShop = () => {
   const products: Product[] = [
     {
@@ -75,25 +71,20 @@ const ParentShop = () => {
       inStock: false
     }
   ];
-
   const [activeCategory, setActiveCategory] = useState<"All" | "Jerseys" | "Kits" | "Accessories">("All");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<Record<number, string>>({});
   const [isCheckout, setIsCheckout] = useState(false);
-
   const filteredProducts = products.filter(p => {
     if (activeCategory === "All") return true;
     return p.category === activeCategory;
   });
-
   const handleSizeSelect = (productId: number, size: string) => {
     setSelectedSizes({ ...selectedSizes, [productId]: size });
   };
-
   const handleAddToCart = (product: Product) => {
     const size = selectedSizes[product.id] || "M";
     const existing = cart.find(item => item.id === product.id && item.size === size);
-
     if (existing) {
       setCart(cart.map(item =>
         item.id === product.id && item.size === size
@@ -105,14 +96,11 @@ const ParentShop = () => {
     }
     toast.success(`Added ${product.name} (${size}) to cart!`);
   };
-
   const handleRemoveFromCart = (productId: number, size: string) => {
     setCart(cart.filter(item => !(item.id === productId && item.size === size)));
     toast.info("Item removed from cart.");
   };
-
   const cartTotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-
   const handleConfirmPurchase = async () => {
     const toastId = toast.loading("Processing transaction on Stripe...");
     await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -120,7 +108,6 @@ const ParentShop = () => {
     setIsCheckout(false);
     toast.success("Purchase completed successfully! Receipt sent to your email.", { id: toastId });
   };
-
   return (
     <div className="space-y-8 pb-24 md:pb-12">
       {/* Header */}
@@ -134,7 +121,6 @@ const ParentShop = () => {
           </p>
         </div>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Products List (8 cols) */}
         <div className="lg:col-span-8 space-y-6">
@@ -153,7 +139,6 @@ const ParentShop = () => {
               </button>
             ))}
           </div>
-
           {/* Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {filteredProducts.map((prod) => {
@@ -176,16 +161,13 @@ const ParentShop = () => {
                       </div>
                     )}
                   </div>
-
                   <div className="p-6 space-y-4">
                     <div>
                       <h3 className="text-sm font-bold text-white leading-tight">{prod.name}</h3>
                       <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-1">{prod.category}</p>
                     </div>
-
                     <div className="flex justify-between items-center">
                       <span className="text-lg font-black text-white font-orbitron">${prod.price.toFixed(2)}</span>
-
                       {prod.category !== "Accessories" && prod.inStock && (
                         <div className="flex gap-1.5 bg-black/40 p-1 rounded-lg border border-white/5">
                           {["S", "M", "L"].map((sz) => (
@@ -203,7 +185,6 @@ const ParentShop = () => {
                         </div>
                       )}
                     </div>
-
                     <button
                       disabled={!prod.inStock}
                       onClick={() => handleAddToCart(prod)}
@@ -217,7 +198,6 @@ const ParentShop = () => {
             })}
           </div>
         </div>
-
         {/* Cart Sidebar (4 cols) */}
         <div className="lg:col-span-4 bg-[#0D0D0D]/40 border border-white/5 p-8 rounded-3xl shadow-xl flex flex-col justify-between h-fit min-h-125">
           <div className="space-y-6">
@@ -229,7 +209,6 @@ const ParentShop = () => {
                 {cart.reduce((sum, item) => sum + item.quantity, 0)}
               </Badge>
             </div>
-
             <div className="space-y-4 max-h-75 overflow-y-auto pr-2">
               {cart.map((item, idx) => (
                 <div key={idx} className="flex gap-4 p-3 rounded-xl bg-black/20 border border-white/5 items-center justify-between">
@@ -259,7 +238,6 @@ const ParentShop = () => {
                   </div>
                 </div>
               ))}
-
               {cart.length === 0 && (
                 <div className="p-8 text-center text-gray-500 text-xs font-light">
                   Your cart is empty. Add products to get started.
@@ -267,13 +245,11 @@ const ParentShop = () => {
               )}
             </div>
           </div>
-
           <div className="border-t border-white/5 pt-6 space-y-4 mt-6">
             <div className="flex justify-between items-center">
               <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Subtotal</span>
               <span className="text-xl font-black text-white font-orbitron">${cartTotal.toFixed(2)}</span>
             </div>
-
             <Button
               disabled={cart.length === 0}
               onClick={() => setIsCheckout(true)}
@@ -284,7 +260,6 @@ const ParentShop = () => {
           </div>
         </div>
       </div>
-
       {/* Checkout Modal */}
       {isCheckout && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in duration-300">
@@ -293,13 +268,11 @@ const ParentShop = () => {
               <h3 className="text-xl font-black text-white uppercase font-orbitron">Checkout Products</h3>
               <p className="text-xs text-gray-400">Pay using simulated Stripe card details</p>
             </div>
-
             <div className="space-y-4">
               <div className="p-4 rounded-xl bg-black border border-white/5 flex flex-col gap-2">
                 <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Total Charge</span>
                 <span className="text-3xl font-black text-white font-orbitron">${cartTotal.toFixed(2)}</span>
               </div>
-
               <div className="space-y-1.5">
                 <label className="text-[9px] text-gray-500 font-bold uppercase tracking-wider ml-1">Card Details</label>
                 <div className="px-4 py-3.5 rounded-xl border border-white/5 bg-black text-white text-xs select-none">
@@ -307,7 +280,6 @@ const ParentShop = () => {
                 </div>
               </div>
             </div>
-
             <div className="grid grid-cols-2 gap-4">
               <button
                 onClick={() => setIsCheckout(false)}

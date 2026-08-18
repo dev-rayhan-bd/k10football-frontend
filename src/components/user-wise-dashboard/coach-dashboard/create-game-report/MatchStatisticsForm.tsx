@@ -1,12 +1,11 @@
 "use client";
+import Image from "next/image";
 import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import Image from "next/image";
 import { IconArrowUpRight } from "@tabler/icons-react";
-
 interface StatInputProps {
   label: string;
   value: number;
@@ -14,7 +13,6 @@ interface StatInputProps {
   colorClass: string;
   align?: "left" | "right";
 }
-
 const StatInput = ({ label, value, onChange, colorClass, align = "left" }: StatInputProps) => {
   return (
     <div className={cn("flex flex-col gap-1.5 w-full", align === "right" ? "items-end text-right" : "items-start text-left")}>
@@ -67,14 +65,12 @@ const StatInput = ({ label, value, onChange, colorClass, align = "left" }: StatI
     </div>
   );
 };
-
 export interface PitchLine {
   x1: number;
   y1: number;
   x2: number;
   y2: number;
 }
-
 interface MatchStatisticsFormProps {
   position: string;
   stats: Record<string, number>;
@@ -86,7 +82,6 @@ interface MatchStatisticsFormProps {
   onCancel: () => void;
   onSubmit: () => void;
 }
-
 const MatchStatisticsForm = ({
   position,
   stats,
@@ -99,7 +94,6 @@ const MatchStatisticsForm = ({
   onSubmit
 }: MatchStatisticsFormProps) => {
   const isGK = position === "GOALKEEPER";
-
   const statsLeft = [
     { label: "Shots on Goal", key: "shotsOnGoal", color: "bg-[#00D1FF]" },
     { label: "Goal Scored", key: "goalScored", color: "bg-[#8B5CF6]" },
@@ -114,7 +108,6 @@ const MatchStatisticsForm = ({
     { label: "Free Kick", key: "freeKick", color: "bg-[#F59E0B]" },
     { label: "Corner Kick", key: "cornerKick", color: "bg-[#00D1FF]" },
   ];
-  
   const statsRight = [
     { label: "Goal Unsave", key: "goalUnsave", color: "bg-[#8B5CF6]" },
     { label: "Penalties Saves", key: "penaltiesSaves", color: "bg-[#F59E0B]" },
@@ -129,7 +122,6 @@ const MatchStatisticsForm = ({
     { label: "Throwing", key: "throwing", color: "bg-[#F59E0B]" },
     { label: "Reactions", key: "reactions", color: "bg-[#00D1FF]" },
   ];
-
   // Load default stats if empty
   useEffect(() => {
     if (Object.keys(stats).length === 0) {
@@ -154,52 +146,42 @@ const MatchStatisticsForm = ({
       }
     }
   }, [isGK, stats, setStats, setGoalMarkers, setPitchMarkers]);
-
   const handleStatChange = (key: string, val: number) => {
     setStats({ ...stats, [key]: val });
   };
-
   const handleGoalClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
     const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
-    
     // Add marker, max 10 markers
     if (goalMarkers.length < 10) {
       setGoalMarkers([...goalMarkers, { x, y }]);
     }
   };
-
   const removeGoalMarker = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
     setGoalMarkers(goalMarkers.filter((_, idx) => idx !== index));
   };
-
   const handlePitchClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
     const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
-
     if (pitchMarkers.length < 15) {
       setPitchMarkers([...pitchMarkers, { x1: x, y1: y, x2: x, y2: y }]);
     } else {
       toast.error("You can add a maximum of 15 markers.");
     }
   };
-
   const removePitchMarker = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
     setPitchMarkers(pitchMarkers.filter((_, idx) => idx !== index));
   };
-
   const renderLeftStats = (align: "left" | "right" = "left") => statsLeft.map(s => (
     <StatInput key={s.key} label={s.label} value={stats[s.key] || 0} onChange={(val) => handleStatChange(s.key, val)} colorClass={s.color} align={align} />
   ));
-
   const renderRightStats = (align: "left" | "right" = "right") => statsRight.map(s => (
     <StatInput key={s.key} label={s.label} value={stats[s.key] || 0} onChange={(val) => handleStatChange(s.key, val)} colorClass={s.color} align={align} />
   ));
-
   const renderGoalDiagram = () => (
       <div className="bg-[#121212]/90 border border-white/10 rounded-3xl overflow-hidden shadow-xl">
         <div className="bg-white/5 py-3.5 px-6 text-center border-b border-white/10 flex justify-between items-center">
@@ -242,7 +224,6 @@ const MatchStatisticsForm = ({
         </div>
       </div>
   );
-
   const renderPitchDiagram = () => (
       <div className="bg-[#121212]/90 border border-white/10 rounded-3xl overflow-hidden shadow-xl">
         <div className="bg-white/5 py-3.5 px-6 text-center border-b border-white/10 flex justify-between items-center">
@@ -272,7 +253,6 @@ const MatchStatisticsForm = ({
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-40 transition-opacity pointer-events-none">
             <span className="text-white text-xs font-semibold uppercase tracking-widest font-orbitron">Click Pitch to Place Marker</span>
           </div>
-
           <div 
             className={cn(
               "absolute -translate-y-1/2 w-16 h-16 bg-white/10 border border-white/40 rounded-full flex items-center justify-center backdrop-blur-sm pointer-events-none select-none shadow-xl",
@@ -283,7 +263,6 @@ const MatchStatisticsForm = ({
               {isGK ? "Accurate\nSaves" : "Accurate\nAssist"}
             </span>
           </div>
-
           {pitchMarkers.map((line, idx) => (
             <div 
               key={idx} 
@@ -298,21 +277,18 @@ const MatchStatisticsForm = ({
         </div>
       </div>
   );
-
   return (
     <div className="flex flex-col gap-8 pb-10 animate-in fade-in duration-500">
       <div>
         <h1 className="text-4xl md:text-5xl font-black text-white font-orbitron uppercase tracking-tight wrap-break-word">Create Game Reports</h1>
         <p className="text-white/60 font-medium mt-2 text-base md:text-lg">Create Professional Football Player Game Reports</p>
       </div>
-
       <div className="bg-[#0A0A0A] rounded-[40px] border border-white/10 p-8 md:p-12 flex flex-col gap-10 relative overflow-hidden shadow-2xl">
         <div className="relative w-full">
           <div className="bg-linear-to-r from-[#00A3FF] to-[#0066FF] font-orbitron text-white w-full py-4 rounded-xl font-black uppercase tracking-[0.4em] shadow-[0_0_40px_rgba(0,163,255,0.3)] text-center border border-white/20 text-lg italic">
             Match Statistics
           </div>
         </div>
-
         {/* ---------------- MOBILE LAYOUT: SWIPER ---------------- */}
         <div className="lg:hidden flex overflow-x-auto snap-x snap-mandatory w-auto -mx-8 px-8 scroll-smooth hide-scrollbar pb-6 gap-6">
           {/* Page 1: First 12 */}
@@ -341,14 +317,12 @@ const MatchStatisticsForm = ({
           </div>
         </div>
         {/* -------------------------------------------------------- */}
-
         {/* ---------------- DESKTOP LAYOUT ------------------------ */}
         <div className="hidden lg:block">
           <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-start min-h-175">
             <div className="lg:col-span-3 flex flex-col gap-4 z-20">
               {renderLeftStats()}
             </div>
-            
             <div className="hidden lg:flex lg:col-span-6 justify-center items-end h-full relative min-h-125">
               {isGK ? (
                 <Image 
@@ -374,12 +348,10 @@ const MatchStatisticsForm = ({
                 />
               )}
             </div>
-
             <div className="lg:col-span-3 flex flex-col gap-4 z-20 items-end">
               {renderRightStats()}
             </div>
           </div>
-
           <div className="mt-12">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
               {renderGoalDiagram()}
@@ -389,7 +361,6 @@ const MatchStatisticsForm = ({
         </div>
         {/* -------------------------------------------------------- */}
       </div>
-
       <div className="flex gap-3 sm:gap-6 mt-4">
         <Button 
           variant="outline" 
@@ -408,5 +379,4 @@ const MatchStatisticsForm = ({
     </div>
   );
 };
-
 export default MatchStatisticsForm;

@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import {
@@ -29,26 +29,21 @@ import {
   Coach,
   Player
 } from "./TeamDataStore";
-
 interface TeamDetailsProps {
   teamId: string;
 }
-
 export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
   const router = useRouter();
   const pathname = usePathname();
-
   // Component States
   const [team, setTeam] = useState<Team | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [isClient, setIsClient] = useState(false);
-
   // Search Modals state
   const [isAddCoachOpen, setIsAddCoachOpen] = useState(false);
   const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false);
   const [coachSearch, setCoachSearch] = useState("");
   const [playerSearch, setPlayerSearch] = useState("");
-
   // Initialize
   useEffect(() => {
     const allTeams = getTeams();
@@ -59,9 +54,7 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
     }
     setIsClient(true);
   }, [teamId]);
-
   if (!isClient) return null;
-
   if (!team) {
     return (
       <div className="flex flex-col gap-6 items-center justify-center py-20 bg-[#111111] rounded-3xl border border-white/20">
@@ -81,33 +74,27 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
       </div>
     );
   }
-
   // Get details of coaches in this team
   const teamCoaches: Coach[] = team.coaches
     .map((cid) => COACH_POOL.find((c) => c.id === cid))
     .filter(Boolean) as Coach[];
-
   // Get details of players in this team
   const teamPlayers: Player[] = team.players
     .map((pid) => PLAYER_POOL.find((p) => p.id === pid))
     .filter(Boolean) as Player[];
-
   // Fixed size arrays for 2 coaches and 18 players
   const coachRows = Array.from({ length: 2 }).map((_, i) => teamCoaches[i] || null);
   const playerRows = Array.from({ length: 18 }).map((_, i) => teamPlayers[i] || null);
-
   // Search filter for available coaches
   const filteredCoaches = COACH_POOL.filter((coach) =>
     coach.name.toLowerCase().includes(coachSearch.toLowerCase()) ||
     coach.role.toLowerCase().includes(coachSearch.toLowerCase())
   );
-
   // Search filter for available players
   const filteredPlayers = PLAYER_POOL.filter((player) =>
     player.name.toLowerCase().includes(playerSearch.toLowerCase()) ||
     player.role.toLowerCase().includes(playerSearch.toLowerCase())
   );
-
   // Add Coach to Team
   const handleAddCoach = (coachId: string) => {
     if (team.coaches.includes(coachId)) {
@@ -118,50 +105,41 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
       toast.error("Maximum coach limit (2) reached for this team!");
       return;
     }
-
     const updatedTeam = {
       ...team,
       coaches: [...team.coaches, coachId]
     };
-
     // Update localStorage
     const updatedTeams = teams.map((t) => (t.id === team.id ? updatedTeam : t));
     saveTeams(updatedTeams);
     setTeams(updatedTeams);
     setTeam(updatedTeam);
-
     // Update coach pool status
     const coach = COACH_POOL.find((c) => c.id === coachId);
     if (coach) {
       coach.academy = "Santos FC Academy";
       coach.teams = team.name;
     }
-
     toast.success(`Coach "${coach?.name}" added to "${team.name}"`);
   };
-
   // Remove Coach from Team
   const handleRemoveCoach = (coachId: string) => {
     const updatedTeam = {
       ...team,
       coaches: team.coaches.filter((id) => id !== coachId)
     };
-
     const updatedTeams = teams.map((t) => (t.id === team.id ? updatedTeam : t));
     saveTeams(updatedTeams);
     setTeams(updatedTeams);
     setTeam(updatedTeam);
-
     // Update coach pool status to available
     const coach = COACH_POOL.find((c) => c.id === coachId);
     if (coach) {
       coach.academy = "Available";
       coach.teams = "Available";
     }
-
     toast.success(`Coach "${coach?.name}" removed from "${team.name}"`);
   };
-
   // Add Player to Team
   const handleAddPlayer = (playerId: string) => {
     if (team.players.includes(playerId)) {
@@ -172,48 +150,39 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
       toast.error("Maximum player limit (18) reached for this team!");
       return;
     }
-
     const updatedTeam = {
       ...team,
       players: [...team.players, playerId]
     };
-
     // Update localStorage
     const updatedTeams = teams.map((t) => (t.id === team.id ? updatedTeam : t));
     saveTeams(updatedTeams);
     setTeams(updatedTeams);
     setTeam(updatedTeam);
-
     // Update player pool status
     const player = PLAYER_POOL.find((p) => p.id === playerId);
     if (player) {
       player.academy = "Santos FC Academy";
     }
-
     toast.success(`Player "${player?.name}" added to "${team.name}"`);
   };
-
   // Remove Player from Team
   const handleRemovePlayer = (playerId: string) => {
     const updatedTeam = {
       ...team,
       players: team.players.filter((id) => id !== playerId)
     };
-
     const updatedTeams = teams.map((t) => (t.id === team.id ? updatedTeam : t));
     saveTeams(updatedTeams);
     setTeams(updatedTeams);
     setTeam(updatedTeam);
-
     // Update player pool status to available
     const player = PLAYER_POOL.find((p) => p.id === playerId);
     if (player) {
       player.academy = "Available";
     }
-
     toast.success(`Player "${player?.name}" removed from "${team.name}"`);
   };
-
   return (
     <div className="flex flex-col gap-8 pb-10">
       {/* Back Button & Title */}
@@ -236,7 +205,6 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
           <p className="text-white/60 font-medium mt-2 text-lg">Manage roster coaches and players</p>
         </div>
       </div>
-
       {/* Roster Capacity Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
         <DashboardStatCard
@@ -255,7 +223,6 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
           value={String(team.coaches.length + team.players.length)}
         />
       </div>
-
       {/* Coaches Section */}
       <div className="bg-[#111111] rounded-3xl border border-white/20 p-6 md:p-8 flex flex-col gap-8">
         <div className="flex justify-between items-center">
@@ -276,7 +243,6 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
             Add Coach
           </button>
         </div>
-
         <div className="w-full overflow-x-auto rounded-2xl border border-white/20">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -295,7 +261,7 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
                       <td className="py-6 px-6 border-r border-white/20">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 shrink-0">
-                            <img src={coach.avatar} alt={coach.name} className="w-full h-full object-cover" />
+                            <Image src={coach.avatar} alt={coach.name} className="w-full h-full object-cover" />
                           </div>
                           <div className="min-w-0">
                             <p className="text-base font-bold text-white truncate">{coach.name}</p>
@@ -365,7 +331,6 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
           </table>
         </div>
       </div>
-
       {/* Players Section */}
       <div className="bg-[#111111] rounded-3xl border border-white/20 p-6 md:p-8 flex flex-col gap-8">
         <div className="flex justify-between items-center">
@@ -386,7 +351,6 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
             Add Player
           </button>
         </div>
-
         <div className="w-full overflow-x-auto rounded-2xl border border-white/20">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -409,7 +373,7 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
                       <td className="py-6 px-6 border-r border-white/20">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 shrink-0">
-                            <img src={player.avatar} alt={player.name} className="w-full h-full object-cover" />
+                            <Image src={player.avatar} alt={player.name} className="w-full h-full object-cover" />
                           </div>
                           <div className="min-w-0">
                             <p className="text-base font-bold text-white truncate">{player.name}</p>
@@ -497,7 +461,6 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
           </table>
         </div>
       </div>
-
       {/* Add Coach Dialog */}
       <Dialog open={isAddCoachOpen} onOpenChange={setIsAddCoachOpen}>
         <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-3xl max-w-lg p-8 flex flex-col max-h-[85vh]">
@@ -506,7 +469,6 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
               Add Coach to {team.name}
             </DialogTitle>
           </DialogHeader>
-
           {/* Search Box */}
           <div className="relative mt-4 shrink-0">
             <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-white/40 pointer-events-none">
@@ -520,7 +482,6 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
               className="w-full h-12 bg-white/[0.02] border border-white/10 rounded-xl pl-12 pr-4 text-sm font-bold text-white focus:outline-none focus:border-[#E31B23]/50 transition-all placeholder:text-gray-600"
             />
           </div>
-
           {/* Coaches List */}
           <div className="flex-1 overflow-y-auto mt-6 pr-2 space-y-4 max-h-[45vh] scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
             {filteredCoaches.length === 0 ? (
@@ -531,7 +492,6 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
                 // "if a player/coach not in another academy then can add here"
                 // Available academies are "Santos FC Academy" or "Available"
                 const isBelongsToOtherAcademy = coach.academy !== "Santos FC Academy" && coach.academy !== "Available";
-
                 return (
                   <div
                     key={coach.id}
@@ -539,7 +499,7 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10 shrink-0">
-                        <img src={coach.avatar} alt={coach.name} className="w-full h-full object-cover" />
+                        <Image src={coach.avatar} alt={coach.name} className="w-full h-full object-cover" />
                       </div>
                       <div className="min-w-0">
                         <p className="text-xs font-bold text-white truncate">{coach.name}</p>
@@ -549,7 +509,6 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
                         </p>
                       </div>
                     </div>
-
                     <div className="shrink-0">
                       {isAlreadyInTeam ? (
                         <span className="flex items-center gap-1 text-[9px] font-black uppercase text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
@@ -573,7 +532,6 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
               })
             )}
           </div>
-
           <div className="flex justify-end pt-4 border-t border-white/5 shrink-0 mt-4">
             <button
               onClick={() => setIsAddCoachOpen(false)}
@@ -584,7 +542,6 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
           </div>
         </DialogContent>
       </Dialog>
-
       {/* Add Player Dialog */}
       <Dialog open={isAddPlayerOpen} onOpenChange={setIsAddPlayerOpen}>
         <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-3xl max-w-lg p-8 flex flex-col max-h-[85vh]">
@@ -593,7 +550,6 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
               Add Player to {team.name}
             </DialogTitle>
           </DialogHeader>
-
           {/* Search Box */}
           <div className="relative mt-4 shrink-0">
             <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-white/40 pointer-events-none">
@@ -607,7 +563,6 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
               className="w-full h-12 bg-white/[0.02] border border-white/10 rounded-xl pl-12 pr-4 text-sm font-bold text-white focus:outline-none focus:border-[#E31B23]/50 transition-all placeholder:text-gray-600"
             />
           </div>
-
           {/* Players List */}
           <div className="flex-1 overflow-y-auto mt-6 pr-2 space-y-4 max-h-[45vh] scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
             {filteredPlayers.length === 0 ? (
@@ -618,7 +573,6 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
                 // "if a player/coach not in another academy then can add here"
                 // Available academies are "Santos FC Academy" or "Available"
                 const isBelongsToOtherAcademy = player.academy !== "Santos FC Academy" && player.academy !== "Available";
-
                 return (
                   <div
                     key={player.id}
@@ -626,7 +580,7 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10 shrink-0">
-                        <img src={player.avatar} alt={player.name} className="w-full h-full object-cover" />
+                        <Image src={player.avatar} alt={player.name} className="w-full h-full object-cover" />
                       </div>
                       <div className="min-w-0">
                         <p className="text-xs font-bold text-white truncate">{player.name}</p>
@@ -636,7 +590,6 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
                         </p>
                       </div>
                     </div>
-
                     <div className="shrink-0">
                       {isAlreadyInTeam ? (
                         <span className="flex items-center gap-1 text-[9px] font-black uppercase text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
@@ -660,7 +613,6 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
               })
             )}
           </div>
-
           <div className="flex justify-end pt-4 border-t border-white/5 shrink-0 mt-4">
             <button
               onClick={() => setIsAddPlayerOpen(false)}
@@ -674,5 +626,4 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
     </div>
   );
 };
-
 export default TeamDetails;

@@ -1,7 +1,6 @@
+import Image from "next/image";
 import React from "react";
 import { Badge } from "@/components/ui/badge";
-import Image from "next/image";
-
 interface ProductCardProps {
   image: string;
   category: string;
@@ -9,7 +8,6 @@ interface ProductCardProps {
   name: string;
   price: string;
 }
-
 const ProductCard = ({
   image,
   category,
@@ -36,12 +34,10 @@ const ProductCard = ({
           </span>
         </div>
       </div>
-      
       <div className="space-y-4">
         <h3 className="text-lg font-bold text-white uppercase tracking-tight group-hover:text-primary transition-colors font-orbitron">
           {name}
         </h3>
-        
         <div className="flex items-center justify-between">
           <span className="text-2xl font-black text-[#E31B23] font-orbitron">
             ${price}
@@ -54,5 +50,4 @@ const ProductCard = ({
     </div>
   );
 };
-
 export default ProductCard;

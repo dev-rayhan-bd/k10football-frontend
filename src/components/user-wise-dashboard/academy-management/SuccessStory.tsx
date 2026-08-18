@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import React, { useState } from "react";
 import DashboardModal from "@/components/dashboard/DashboardModal";
 import { 
@@ -11,7 +11,6 @@ import {
   IconUpload,
   IconChevronLeft
 } from "@tabler/icons-react";
-
 const successStories = [
   {
     id: 1,
@@ -46,10 +45,8 @@ const successStories = [
     image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jordan"
   }
 ];
-
 export const SuccessStoryManagement = () => {
   const [showAddModal, setShowAddModal] = useState(false);
-
   return (
     <div className="flex flex-col gap-8">
       {/* Header */}
@@ -66,7 +63,6 @@ export const SuccessStoryManagement = () => {
           <span className="text-sm font-bold uppercase tracking-widest">Add Success Story</span>
         </button>
       </div>
-
       {/* Main Table Card */}
       <div className="bg-[#0A0A0A] rounded-[32px] border border-white/15 p-8 flex flex-col gap-8 shadow-2xl">
         <div className="rounded-2xl border border-white/15 overflow-hidden">
@@ -86,7 +82,7 @@ export const SuccessStoryManagement = () => {
                   <td className="py-6 px-6 border-r border-white/15">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-full overflow-hidden border border-white/15 bg-[#1A1A1A] shrink-0">
-                        <img src={story.image} alt="" className="w-full h-full object-cover" />
+                        <Image src={story.image} alt="" className="w-full h-full object-cover" />
                       </div>
                       <p className="text-sm font-black text-white leading-tight max-w-[240px]">{story.title}</p>
                     </div>
@@ -121,7 +117,6 @@ export const SuccessStoryManagement = () => {
           </table>
         </div>
       </div>
-
       {/* Add Success Story Modal */}
       <DashboardModal
         isOpen={showAddModal}
@@ -178,7 +173,6 @@ export const SuccessStoryManagement = () => {
               </div>
             </div>
           </div>
-
           {/* Photo Upload */}
           <div className="space-y-2">
             <p className="text-[11px] font-black uppercase tracking-widest text-white/60">Upload Photo</p>
@@ -189,7 +183,6 @@ export const SuccessStoryManagement = () => {
               <p className="text-xs font-bold text-white/40 uppercase tracking-widest">Upload Image</p>
             </div>
           </div>
-
           {/* Story Content */}
           <div className="space-y-2">
             <p className="text-[11px] font-black uppercase tracking-widest text-white/60">Story Content</p>
@@ -203,5 +196,4 @@ export const SuccessStoryManagement = () => {
     </div>
   );
 };
-
 export default SuccessStoryManagement;

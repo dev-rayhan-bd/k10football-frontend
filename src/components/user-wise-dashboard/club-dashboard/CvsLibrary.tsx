@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import React, { useState } from "react";
 import { 
   IconFileText, 
@@ -13,30 +14,26 @@ import {
   DashboardStatCard, 
   DashboardSection 
 } from "@/components/dashboard/DashboardElements";
-
 const stats = [
   { label: "All CVS", value: "4", icon: IconFileText },
   { label: "Liked CVs", value: "42", icon: IconHeart },
   { label: "Profiles Shared", value: "18", icon: IconShare },
 ];
-
 const cvData = [
   { id: 1, name: "Marcus Silva", position: "Forward", rating: 9.2, club: "Manchester Academy", country: "Brazil", age: 19, status: "Silver", avatar: "https://i.pravatar.cc/150?u=1" },
   { id: 2, name: "David Chen", position: "Midfielder", rating: 8.8, club: "Chelsea Youth", country: "England", age: 18, status: "Gold", avatar: "https://i.pravatar.cc/150?u=2" },
   { id: 3, name: "Alex Jonson", position: "Defender", rating: 8.5, club: "Barcelona B", country: "Spain", age: 20, status: "Silver", avatar: "https://i.pravatar.cc/150?u=3" },
   { id: 4, name: "James Brown", position: "Goalkeeper", rating: 7.9, club: "Liverpool Academy", country: "Argentina", age: 17, status: "Bronze", avatar: "https://i.pravatar.cc/150?u=4" },
 ];
-
 const CVsLibrary = () => {
   const [activeTab, setActiveTab] = useState("All CVS");
-
   const columns: Column<typeof cvData[0]>[] = [
     {
       header: "Name",
       key: "name",
       render: (p) => (
         <div className="flex items-center gap-3">
-          <img src={p.avatar} className="w-10 h-10 rounded-full object-cover" alt="avatar" />
+          <Image src={p.avatar} className="w-10 h-10 rounded-full object-cover" alt="avatar" />
           <div>
             <div className="text-sm font-bold text-white">{p.name}</div>
             <div className="text-[10px] text-red-500 font-bold uppercase tracking-widest">{p.position}</div>
@@ -68,7 +65,6 @@ const CVsLibrary = () => {
       render: () => <TableActionButtons onView={() => {}} onHeart={() => {}} onShare={() => {}} />
     },
   ];
-
   const filterAction = (
     <div className="flex gap-3">
       <FilterButton label="All Positions" />
@@ -77,17 +73,14 @@ const CVsLibrary = () => {
       <FilterButton label="All Status" />
     </div>
   );
-
   return (
     <div className="space-y-8 pb-12">
       <DashboardPageHeader title="CVs Library" subtitle="View and manage athlete CVs" />
-
       <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
         {stats.map((stat, idx) => (
           <DashboardStatCard key={idx} {...stat} icon={<stat.icon size={20} />} />
         ))}
       </div>
-
       <div className="flex items-center gap-8 border-b border-white/10 pb-4">
         {stats.map((tab) => (
           <button 
@@ -100,14 +93,12 @@ const CVsLibrary = () => {
           </button>
         ))}
       </div>
-
       <DashboardSection action={filterAction}>
         <DashboardTable columns={columns} data={cvData} className="border-white/10" />
       </DashboardSection>
     </div>
   );
 };
-
 const FilterButton = ({ label }: { label: string }) => (
   <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-bold hover:bg-white/10 transition-all">
     {label}

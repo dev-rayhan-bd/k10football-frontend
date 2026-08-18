@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import {
   IconClock,
   IconCircleCheck,
@@ -10,25 +11,20 @@ import DashboardTable, { Column } from "@/components/dashboard/DashboardTable";
 import TableActionButtons from "@/components/dashboard/TableActionButtons";
 import { usePlayer } from "@/lib/hooks/usePlayer";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import AddPlayerModal from "./AddPlayerModal";
-
 const PlayerCVValidations = () => {
   const router = useRouter();
   const { players, selectPlayer, validatePlayer } = usePlayer();
-
   // Calculate dynamic stats
   const pendingCount = players.filter((p) => p.validationStatus === "pending").length;
   const verifiedCount = players.filter((p) => p.validationStatus === "verified").length;
   const expiredCount = players.filter((p) => p.validationStatus === "expired").length;
-
   const stats = [
     { label: "Pending Validations", value: String(pendingCount), icon: IconClock },
     { label: "Verified CVs", value: String(verifiedCount), icon: IconCircleCheck },
     { label: "Updated This Month", value: String(verifiedCount), icon: IconCalendar },
     { label: "Expired Status", value: String(expiredCount), icon: IconCircleX },
   ];
-
   const validationData = players.map((player) => ({
     id: player.id,
     name: player.fullName,
@@ -42,7 +38,6 @@ const PlayerCVValidations = () => {
       player.validationStatus === "pending" ? "Pending" : "Expired",
     avatar: player.playerImage,
   }));
-
   const columns: Column<typeof validationData[0]>[] = [
     {
       header: "Name",
@@ -93,7 +88,6 @@ const PlayerCVValidations = () => {
       ),
     },
   ];
-
   return (
     <div className="space-y-6 md:space-y-8 pb-12">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -107,7 +101,6 @@ const PlayerCVValidations = () => {
           </button>
         </AddPlayerModal>
       </div>
-
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {stats.map((stat, idx) => (
           <div key={idx} className="p-4 sm:p-6 rounded-2xl border border-white/20 bg-[#0D0D0D]">
@@ -123,7 +116,6 @@ const PlayerCVValidations = () => {
           </div>
         ))}
       </div>
-
       <div className="p-4 sm:p-6 md:p-8 rounded-3xl border border-white/20 bg-[#0D0D0D] w-full max-w-full overflow-hidden">
         <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
           <DashboardTable columns={columns} data={validationData} className="border-white/10 min-w-150" />
@@ -132,5 +124,4 @@ const PlayerCVValidations = () => {
     </div>
   );
 };
-
 export default PlayerCVValidations;

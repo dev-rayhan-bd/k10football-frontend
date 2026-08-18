@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/incompatible-library */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
+import Image from "next/image";
 import React from "react";
 import {
   IconUsers,
@@ -20,7 +20,6 @@ import {
   IconTrash,
   IconVideo
 } from "@tabler/icons-react";
-
 import { useAppSelector } from "@/lib/hooks/reduxHooks";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -30,24 +29,20 @@ import {
   DialogHeader,
   DialogTitle
 } from "@/components/ui/dialog";
-
 import DashboardHero from "@/components/dashboard/DashboardHero";
 import DashboardStatCard from "@/components/dashboard/DashboardStatCard";
 import { DashboardSidebarPanel, DashboardSidebarItem } from "@/components/dashboard/DashboardSidebar";
 import DashboardCharts from "@/components/dashboard/DashboardCharts";
 import ProductCard from "@/components/dashboard/ProductCard";
-
 const PlayerEvalSidebarItem = ({ player, status }: { player: any, status: any }) => {
   const playerImgSrc = typeof player.playerImage === 'string'
     ? player.playerImage
     : (player.playerImage?.src || "/ronaldo.png");
-
   return (
     <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.04] transition-all group flex items-center justify-between gap-3 cursor-pointer">
       <div className="flex items-center gap-3 min-w-0">
         <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10 shrink-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={playerImgSrc} alt={player.fullName} className="w-full h-full object-cover" />
+          <Image src={playerImgSrc} alt={player.fullName} className="w-full h-full object-cover" />
         </div>
         <div className="min-w-0">
           <p className="text-xs font-bold text-white group-hover:text-[#E31B23] transition-colors truncate">
@@ -76,15 +71,12 @@ const PlayerEvalSidebarItem = ({ player, status }: { player: any, status: any })
     </div>
   );
 };
-
 const AcademyManagementDashboard = () => {
   const players = useAppSelector((state) => state.player.players);
   const evaluationRecords = useAppSelector((state) => state.evaluation.records);
-
   const getEvaluationStatus = (player: any) => {
     const reduxRecord = evaluationRecords[player.id];
     const evalDateStr = reduxRecord?.date || player.evaluationDate || player.lastValidatedDate;
-
     if (!evalDateStr) {
       return {
         expired: true,
@@ -92,19 +84,14 @@ const AcademyManagementDashboard = () => {
         label: "Expired",
       };
     }
-
     const evalDate = new Date(evalDateStr);
     const currentDate = new Date();
-
     evalDate.setHours(0, 0, 0, 0);
     currentDate.setHours(0, 0, 0, 0);
-
     const dueDate = new Date(evalDate.getTime());
     dueDate.setDate(dueDate.getDate() + 90);
-
     const diffTime = dueDate.getTime() - currentDate.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
     return {
       expired: diffDays <= 0,
       remainingDays: diffDays,
@@ -113,7 +100,6 @@ const AcademyManagementDashboard = () => {
         : `${diffDays}d remaining`,
     };
   };
-
   const playersWithStatus = players.map(player => ({
     player,
     status: getEvaluationStatus(player)
@@ -125,7 +111,6 @@ const AcademyManagementDashboard = () => {
     }
     return a.status.remainingDays - b.status.remainingDays;
   });
-
   const [isOpen, setIsOpen] = React.useState(false);
   const [activeDropdownId, setActiveDropdownId] = React.useState<string | null>(null);
   const [editingStory, setEditingStory] = React.useState<any | null>(null);
@@ -153,7 +138,6 @@ const AcademyManagementDashboard = () => {
       mediaFile: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=2076",
     }
   ]);
-
   const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm({
     defaultValues: {
       title: "",
@@ -162,7 +146,6 @@ const AcademyManagementDashboard = () => {
       mediaFile: "",
     }
   });
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -173,7 +156,6 @@ const AcademyManagementDashboard = () => {
       reader.readAsDataURL(file);
     }
   };
-
   const handleAddClick = () => {
     setEditingStory(null);
     reset({
@@ -184,7 +166,6 @@ const AcademyManagementDashboard = () => {
     });
     setIsOpen(true);
   };
-
   const handleEditClick = (story: any) => {
     setEditingStory(story);
     setValue("title", story.title);
@@ -194,13 +175,11 @@ const AcademyManagementDashboard = () => {
     setActiveDropdownId(null);
     setIsOpen(true);
   };
-
   const handleDeleteClick = (id: string) => {
     setStories((prev) => prev.filter((s) => s.id !== id));
     setActiveDropdownId(null);
     toast.success("Success story deleted successfully!");
   };
-
   const onSubmit = (data: any) => {
     if (!data.mediaFile) {
       toast.error("Please upload an image or video");
@@ -236,14 +215,12 @@ const AcademyManagementDashboard = () => {
     reset();
     setEditingStory(null);
   };
-
   return (
     <div className="flex flex-col gap-8 pb-10">
       {/* Breadcrumbs */}
       <div className="text-xs text-gray-500 uppercase tracking-widest font-medium">
         Academy Dashboard / <span className="text-white">Management</span>
       </div>
-
       <div className="flex flex-col xl:flex-row gap-8">
         {/* Main Content */}
         <div className="flex-1 min-w-0 flex flex-col gap-6">
@@ -263,7 +240,6 @@ const AcademyManagementDashboard = () => {
               { type: "email", label: "Email", value: "contact@santosfc.academy" },
             ]}
           />
-
           {/* Stats Section */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <DashboardStatCard icon={<IconBallFootball size={24} />} label="Teams" value="4" />
@@ -271,7 +247,6 @@ const AcademyManagementDashboard = () => {
             <DashboardStatCard icon={<IconTrophy size={24} />} label="Coaches" value="12" />
             <DashboardStatCard icon={<IconFileAnalytics size={24} />} label="Game Reports" value="12" />
           </div>
-
           {/* Analytics Section */}
           <div className="bg-[#111111] rounded-3xl border border-white/5 p-8 flex flex-col gap-8">
             <div className="flex justify-between items-center">
@@ -285,7 +260,6 @@ const AcademyManagementDashboard = () => {
             </div>
             <DashboardCharts />
           </div>
-
           {/* Product Store Section */}
           <div className="bg-[#111111] rounded-3xl border border-white/5 p-8 flex flex-col gap-8">
             <div className="flex justify-between items-center">
@@ -298,7 +272,6 @@ const AcademyManagementDashboard = () => {
                 Upload Image
               </button>
             </div>
-
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <ProductCard
                 image="https://images.unsplash.com/photo-1575361204480-aadea25e6e68?q=80&w=2071&auto=format&fit=crop"
@@ -323,7 +296,6 @@ const AcademyManagementDashboard = () => {
               />
             </div>
           </div>
-
           {/* Success Story Section */}
           <div className="bg-[#111111] rounded-3xl border border-white/5 p-8 flex flex-col gap-8">
             <div className="flex justify-between items-center">
@@ -339,7 +311,6 @@ const AcademyManagementDashboard = () => {
                 Add Success Story
               </button>
             </div>
-
             {/* List of stories */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {stories.map((story) => (
@@ -391,15 +362,13 @@ const AcademyManagementDashboard = () => {
                       </>
                     )}
                   </div>
-
                   {/* Media container */}
                   <div
                     onClick={() => setSelectedMedia({ mediaType: story.mediaType, mediaFile: story.mediaFile })}
                     className="aspect-video w-full bg-black relative overflow-hidden shrink-0 flex items-center justify-center cursor-zoom-in"
                   >
                     {story.mediaType === "image" ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={story.mediaFile} alt={story.title} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300" />
+                      <Image src={story.mediaFile} alt={story.title} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300" />
                     ) : (
                       <div className="relative w-full h-full">
                         <video src={story.mediaFile} className="w-full h-full object-cover pointer-events-none" />
@@ -421,7 +390,6 @@ const AcademyManagementDashboard = () => {
             </div>
           </div>
         </div>
-
         {/* Sidebar */}
         <div className="w-full xl:w-95 shrink-0 flex flex-col gap-6">
           <DashboardSidebarPanel title="Pending Game Reports" icon={<IconCalendarFilled size={24} />}>
@@ -447,7 +415,6 @@ const AcademyManagementDashboard = () => {
               extraInfo="8.5"
             />
           </DashboardSidebarPanel>
-
           <DashboardSidebarPanel title="Player Evaluations" icon={<IconClipboardText size={24} />}>
             <div className="max-h-75 overflow-y-auto pr-1 flex flex-col gap-3 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
               {playersWithStatus.map(({ player, status }) => (
@@ -455,7 +422,6 @@ const AcademyManagementDashboard = () => {
               ))}
             </div>
           </DashboardSidebarPanel>
-
           <DashboardSidebarPanel title="Clubs Interested" icon={<IconHeartFilled size={24} />}>
             <DashboardSidebarItem
               avatar="/Manchester-City-F.C-Transparent-File 1.png"
@@ -473,7 +439,6 @@ const AcademyManagementDashboard = () => {
               subtitle="Viewed your profile"
             />
           </DashboardSidebarPanel>
-
           <DashboardSidebarPanel title="Quickk stats">
             <div className="flex flex-col gap-4 px-2">
               <div className="flex justify-between items-center">
@@ -492,7 +457,6 @@ const AcademyManagementDashboard = () => {
           </DashboardSidebarPanel>
         </div>
       </div>
-
       {/* Form Dialog */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-3xl max-w-lg p-8">
@@ -513,7 +477,6 @@ const AcademyManagementDashboard = () => {
               />
               {errors.title && <p className="text-xs text-red-500 font-bold">{errors.title.message}</p>}
             </div>
-
             {/* Description */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-white/60 uppercase tracking-widest block">Description</label>
@@ -524,7 +487,6 @@ const AcademyManagementDashboard = () => {
               />
               {errors.description && <p className="text-xs text-red-500 font-bold">{errors.description.message}</p>}
             </div>
-
             {/* Media Type selection */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-white/60 uppercase tracking-widest block">Media Type</label>
@@ -549,7 +511,6 @@ const AcademyManagementDashboard = () => {
                 </label>
               </div>
             </div>
-
             {/* File Upload */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-white/60 uppercase tracking-widest block">
@@ -564,7 +525,6 @@ const AcademyManagementDashboard = () => {
                 />
               </div>
             </div>
-
             {/* Buttons */}
             <div className="flex gap-4 pt-4 border-t border-white/5 justify-end">
               <button
@@ -584,14 +544,12 @@ const AcademyManagementDashboard = () => {
           </form>
         </DialogContent>
       </Dialog>
-
       {/* Media Popup Overlay Viewer */}
       <Dialog open={!!selectedMedia} onOpenChange={(open) => !open && setSelectedMedia(null)}>
         <DialogContent className="bg-black/95 border border-white/10 text-white rounded-3xl max-w-4xl p-6 flex flex-col items-center justify-center overflow-hidden">
           <div className="w-full flex items-center justify-center max-h-[75vh]">
             {selectedMedia?.mediaType === "image" ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={selectedMedia.mediaFile} alt="Preview" className="max-w-full max-h-[70vh] object-contain rounded-xl" />
+              <Image src={selectedMedia.mediaFile} alt="Preview" className="max-w-full max-h-[70vh] object-contain rounded-xl" />
             ) : (
               <video src={selectedMedia?.mediaFile} controls autoPlay className="max-w-full max-h-[70vh] object-contain rounded-xl" />
             )}
@@ -601,5 +559,4 @@ const AcademyManagementDashboard = () => {
     </div>
   );
 };
-
 export default AcademyManagementDashboard;

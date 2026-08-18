@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import React, { useState } from "react";
 import DashboardModal from "@/components/dashboard/DashboardModal";
 import { 
@@ -20,7 +20,6 @@ import {
   IconBallFootball,
   IconAlertCircle
 } from "@tabler/icons-react";
-
 const sessions = [
   {
     id: 1,
@@ -67,7 +66,6 @@ const sessions = [
     color: "#FBBF24"
   }
 ];
-
 const initialPlayers = [
   { id: 1, name: "Marcus Silva", number: 7, position: "Forward", status: "present", avatar: "https://i.pravatar.cc/100?u=marcus" },
   { id: 2, name: "Alex Jordan", number: 5, position: "Midfielder", status: "unmarked", avatar: "https://i.pravatar.cc/100?u=alex" },
@@ -79,22 +77,17 @@ const initialPlayers = [
   { id: 8, name: "Oliver Kim", number: 4, position: "Centre Back", status: "unmarked", avatar: "https://i.pravatar.cc/100?u=oliver" },
   { id: 9, name: "Lucas Grant", number: 8, position: "Midfielder", status: "unmarked", avatar: "https://i.pravatar.cc/100?u=lucas" },
 ];
-
 export const TrainingSessions = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedSession, setSelectedSession] = useState<any>(null);
   const [players, setPlayers] = useState(initialPlayers);
-
   const handleStatusChange = (playerId: number, status: string) => {
     setPlayers(prev => prev.map(p => p.id === playerId ? { ...p, status } : p));
   };
-
   const markAll = (status: string) => {
     setPlayers(prev => prev.map(p => ({ ...p, status })));
   };
-
   const unmarkedCount = players.filter(p => p.status === "unmarked").length;
-
   return (
     <div className="flex flex-col gap-8">
       {/* Header */}
@@ -111,7 +104,6 @@ export const TrainingSessions = () => {
           <span className="text-sm font-bold uppercase tracking-widest">Create Session</span>
         </button>
       </div>
-
       {/* Search Bar */}
       <div className="bg-[#111111] rounded-3xl border border-white/15 p-4 flex gap-4 shadow-xl">
         <div className="relative flex-1">
@@ -127,7 +119,6 @@ export const TrainingSessions = () => {
           <span className="text-sm font-bold">Filters</span>
         </button>
       </div>
-
       {/* Session Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {sessions.map((session) => (
@@ -150,7 +141,6 @@ export const TrainingSessions = () => {
                 <IconChevronRight size={14} />
               </button>
             </div>
-
             <div className="space-y-4">
               <div className="flex items-center justify-between text-[11px] font-bold text-white/40 uppercase tracking-widest">
                 <div className="flex items-center gap-2">
@@ -170,7 +160,6 @@ export const TrainingSessions = () => {
                 Coach: <span className="text-white/80">{session.coach}</span>
               </div>
             </div>
-
             <div className="space-y-3">
               <div className="flex justify-between items-end">
                 <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest leading-none">Attendance:</span>
@@ -206,7 +195,6 @@ export const TrainingSessions = () => {
           </div>
         ))}
       </div>
-
       {/* Attendance Modal */}
       <DashboardModal
         isOpen={!!selectedSession}
@@ -253,7 +241,6 @@ export const TrainingSessions = () => {
               Main Field A
             </div>
           </div>
-
           {/* Stats Badges */}
           <div className="flex gap-4 overflow-x-auto pb-2 custom-scrollbar">
             <div className="bg-[#4ADE80]/10 border border-[#4ADE80]/20 rounded-xl px-4 py-2.5 flex items-center gap-2 shrink-0">
@@ -276,7 +263,6 @@ export const TrainingSessions = () => {
               {players.length} total players
             </div>
           </div>
-
           {/* Player Grid Header & Quick Actions */}
           <div className="flex justify-between items-center bg-white/[0.02] border-y border-white/10 -mx-10 px-10 py-4">
             <div className="flex items-center gap-4">
@@ -307,7 +293,6 @@ export const TrainingSessions = () => {
               <input type="text" placeholder="Search" className="bg-white/5 border border-white/15 rounded-xl py-2 pl-10 pr-4 text-xs text-white focus:outline-none focus:border-white/25 w-48" />
             </div>
           </div>
-
           {/* Players List */}
           <div className="space-y-2">
             {players.map((p, index) => (
@@ -324,7 +309,7 @@ export const TrainingSessions = () => {
                   <span className="w-6 text-[11px] font-black text-white/20">{index + 1}</span>
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-full overflow-hidden border border-white/15 shrink-0">
-                      <img src={p.avatar} alt={p.name} className="w-full h-full object-cover" />
+                      <Image src={p.avatar} alt={p.name} className="w-full h-full object-cover" />
                     </div>
                     <div>
                       <p className="text-sm font-black text-white leading-none mb-1">{p.name}</p>
@@ -332,7 +317,6 @@ export const TrainingSessions = () => {
                     </div>
                   </div>
                 </div>
-
                 <div className="flex gap-2">
                   <button 
                     onClick={() => handleStatusChange(p.id, 'present')}
@@ -367,7 +351,6 @@ export const TrainingSessions = () => {
           </div>
         </div>
       </DashboardModal>
-
       {/* Create Session Modal */}
       <DashboardModal
         isOpen={showCreateModal}
@@ -425,7 +408,6 @@ export const TrainingSessions = () => {
               </div>
             </div>
           </div>
-
           {/* Schedule Details */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Schedule Details</h3>
@@ -456,7 +438,6 @@ export const TrainingSessions = () => {
               </div>
             </div>
           </div>
-
           {/* Location & Venue */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Location & Venue</h3>
@@ -472,7 +453,6 @@ export const TrainingSessions = () => {
               </div>
             </div>
           </div>
-
           {/* Session Type & Focus */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Session Type & Focus</h3>
@@ -506,7 +486,6 @@ export const TrainingSessions = () => {
               </div>
             </div>
           </div>
-
           {/* Session Details */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Session Details</h3>
@@ -541,5 +520,4 @@ export const TrainingSessions = () => {
     </div>
   );
 };
-
 export default TrainingSessions;

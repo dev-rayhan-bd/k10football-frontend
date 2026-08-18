@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+import Image from "next/image";
 import positionMap from "@/assets/cvs/id/position-map.png";
 import technicalIcon from "@/assets/cvs/id/player-styles-icons/technical.png";
 import finesseShotIcon from "@/assets/cvs/id/player-styles-icons/finesse shot.png";
@@ -19,7 +20,6 @@ import relentlessIcon from "@/assets/cvs/id/player-styles-icons/relentless.png";
 import quickStepIcon from "@/assets/cvs/id/player-styles-icons/quick step.png";
 import tricksterIcon from "@/assets/cvs/id/player-styles-icons/trickster.png";
 import whippedCrossIcon from "@/assets/cvs/id/player-styles-icons/whipped cross.png";
-
 const STYLE_ICONS: Record<string, any> = {
   "technical": technicalIcon,
   "finesse-shot": finesseShotIcon,
@@ -58,11 +58,9 @@ import { Progress } from "@/components/ui/progress";
 import { usePlayer } from "@/lib/hooks/usePlayer";
 import { cn, getShortForm, getFullWithShortForm, getVeryShortPosition } from "@/lib/utils";
 import { PencilIcon } from "lucide-react";
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { usePlayerStats } from "./FullEditablePage";
-
 const ALL_STYLES = [
   { id: "technical", label: "Technical" },
   { id: "finesse-shot", label: "Finesse Shot" },
@@ -83,8 +81,6 @@ const ALL_STYLES = [
   { id: "trickster", label: "Trickster" },
   { id: "whipped-cross", label: "Whipped Cross" },
 ];
-
-
 const COUNTRY_CODES: Record<string, string> = {
   "afghanistan": "af", "albania": "al", "algeria": "dz", "andorra": "ad", "angola": "ao",
   "antigua and barbuda": "ag", "argentina": "ar", "armenia": "am", "australia": "au",
@@ -130,15 +126,12 @@ const COUNTRY_CODES: Record<string, string> = {
   "vanuatu": "vu", "vatican city": "va", "venezuela": "ve", "vietnam": "vn", "yemen": "ye",
   "zambia": "zm", "zimbabwe": "zw"
 };
-
 const ALL_COUNTRIES = Object.keys(COUNTRY_CODES).map(c =>
   c.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
 ).sort();
-
 const _getMarkersForPosition = (position: string, isFutsal: boolean) => {
   const pos = position?.trim() || "";
   const cleanPos = pos.toLowerCase();
-
   if (isFutsal) {
     if (cleanPos.includes("goalkeeper") || cleanPos.includes("gk")) {
       return [
@@ -288,7 +281,6 @@ const _getMarkersForPosition = (position: string, isFutsal: boolean) => {
     }
   }
 };
-
 const getMarkersForPosition = (position: string, isFutsal: boolean) => {
   const markers = _getMarkersForPosition(position, isFutsal);
   return markers.map((m, idx) => ({
@@ -296,34 +288,24 @@ const getMarkersForPosition = (position: string, isFutsal: boolean) => {
     name: `position${idx + 1}`
   }));
 };
-
 const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
   const { playerData, handleUpdate } = usePlayer();
-
   const { setBioRating, role } = usePlayerStats();
-
   const [editingField, setEditingField] = useState<string | null>(null);
-
   const canEditBio = editable && (role === "player" || role === "parent" || role === "coach");
   const canEditEvaluation = editable && (role === "player" || role === "parent" || role === "coach");
-
   useEffect(() => {
     setBioRating(playerData.rating);
   }, [playerData.rating, setBioRating]);
-
   const [isPositionMap, setIsPositionMap] = useState(true);
   const [activeMarker, setActiveMarker] = useState<{ id: string, type: 'position' | 'futsal' } | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
-
   const prevPositionRef = useRef<string>("");
-
   // Auto-switch maps when position changes
   useEffect(() => {
     if (!playerData || !playerData.position) return;
-
     const cleanPos = playerData.position.toLowerCase();
     const shouldBeFutsal = cleanPos.includes("goalkeeper") || cleanPos.includes("fixo") || cleanPos.includes("alas") || cleanPos.includes("pivot");
-
     // Only auto-switch the map if the position itself has changed
     if (playerData.position !== prevPositionRef.current) {
       setIsPositionMap(!shouldBeFutsal);
@@ -333,87 +315,68 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
       setIsPositionMap(true);
     }
   }, [playerData.position, isPositionMap]);
-
   // Synchronize markers for the active map
   useEffect(() => {
     if (!playerData || !playerData.position) return;
-
     const expected = getMarkersForPosition(playerData.position, !isPositionMap);
     const field = isPositionMap ? 'positionMarkers' : 'futsalMarkers';
     const current = (isPositionMap ? playerData.positionMarkers : playerData.futsalMarkers) || [];
-
     const needsReset = current.length !== 3 || current.some((m, idx) => m.name !== expected[idx]?.name);
-
     if (needsReset) {
       handleUpdate(field, expected);
     }
   }, [playerData.position, isPositionMap]);
-
   const addMarker = () => {
     // Fixed to 3 markers, disabled manual addition
   };
-
   const updateMarkerPosition = (e: MouseEvent | React.MouseEvent) => {
     if (!activeMarker || !mapContainerRef.current) return;
-
     const rect = mapContainerRef.current.getBoundingClientRect();
     let x = ((e.clientX - rect.left) / rect.width) * 100;
     let y = ((e.clientY - rect.top) / rect.height) * 100;
-
     // Constrain to bounds
     x = Math.max(0, Math.min(100, x));
     y = Math.max(0, Math.min(100, y));
-
     const field = activeMarker.type === 'position' ? 'positionMarkers' : 'futsalMarkers';
     const markers = (activeMarker.type === 'position' ? playerData.positionMarkers : playerData.futsalMarkers) || [];
-
     const newMarkers = markers.map(m =>
       m.id === activeMarker.id ? { ...m, x, y } : m
     );
-
     handleUpdate(field, newMarkers);
   };
-
   useEffect(() => {
     const handleGlobalMouseMove = (e: MouseEvent) => {
       if (activeMarker) {
         updateMarkerPosition(e);
       }
     };
-
     const handleGlobalMouseUp = () => {
       setActiveMarker(null);
     };
-
     if (activeMarker) {
       window.addEventListener('mousemove', handleGlobalMouseMove);
       window.addEventListener('mouseup', handleGlobalMouseUp);
     }
-
     return () => {
       window.removeEventListener('mousemove', handleGlobalMouseMove);
       window.removeEventListener('mouseup', handleGlobalMouseUp);
     };
   }, [activeMarker]);
-
   const getIndicatorColor = (val: number) => {
     if (val >= 80) return "bg-green-500";
     if (val >= 60) return "bg-yellow-500";
     return "bg-red-500";
   };
-
   const getHexColor = (val: number) => {
     if (val >= 80) return "#22c55e";
     if (val >= 60) return "#eab308";
     return "#ef4444";
   };
-
   const handleImageUpload = async (
     file: File,
     field: string
   ) => {
     let processedFile = file;
-
     if (field === "playerImage") {
       try {
         toast.loading("Removing background... Please wait.", { id: "bg-removal" });
@@ -426,14 +389,12 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
         toast.error("Background removal failed. Using original image.", { id: "bg-removal" });
       }
     }
-
     const reader = new FileReader();
     reader.onloadend = () => {
       handleUpdate(field, reader.result);
     };
     reader.readAsDataURL(processedFile);
   };
-
   const EditableImage = ({
     src,
     alt,
@@ -454,17 +415,13 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const playerStats = usePlayerStats();
     const [role, setRole] = useState<string>("player");
-
-
     useEffect(() => {
       const currentRole = localStorage.getItem("userRole") || role || "player";
       setRole(currentRole);
     }, [role]);
-
     const canUpload = editable && ((field === "playerImage" || field === "birthCountryFlag" || field === "dualNationalityFlag")
       ? (role === "player" || role === "parent" || role === "coach")
       : canEditEvaluation);
-
     const handleDrop = (e: React.DragEvent) => {
       e.preventDefault();
       if (!canUpload) return;
@@ -473,7 +430,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
         handleImageUpload(file, field);
       }
     };
-
     return (
       <div
         className={`relative group w-full ${canUpload ? "cursor-pointer" : ""}`}
@@ -511,7 +467,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
       </div>
     );
   };
-
   const toggleStyle = (id: string) => {
     const currentStyles = playerData.selectedStyleIds;
     if (currentStyles.includes(id)) {
@@ -523,7 +478,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
       handleUpdate("selectedStyleIds", [...currentStyles, id]);
     }
   };
-
   // const handleShare = async () => {
   //   const shareUrl = window.location.href;
   //   const shareData = {
@@ -531,7 +485,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
   //     text: `Check out ${playerData.fullName}'s verified football profile on Eddie Ricci Management.`,
   //     url: shareUrl,
   //   };
-
   //   try {
   //     if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
   //       await navigator.share(shareData);
@@ -547,22 +500,18 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
   //     }
   //   }
   // };
-
   const orderedSelectedStyles = playerData.selectedStyleIds.map(
     (id: any) => ALL_STYLES.find((s: any) => s.id === id)!
   );
-
   const calculateAge = (dobString: string) => {
     if (!dobString) return "";
     let birthDate: Date;
-
     if (dobString.includes("/")) {
       const [day, month, year] = dobString.split("/");
       birthDate = new Date(`${year}-${month}-${day}`);
     } else {
       birthDate = new Date(dobString);
     }
-
     if (isNaN(birthDate.getTime())) return "";
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
@@ -572,15 +521,12 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
     }
     return age;
   };
-
   const getFlagUrl = (countryName: string) => {
     if (!countryName) return "";
     const code = COUNTRY_CODES[countryName.toLowerCase()];
     if (!code) return "";
     return `https://flagcdn.com/w160/${code}.png`;
   };
-
-
   return (
     <>
       <div className="container">
@@ -711,7 +657,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                 </div>
               </div>
             </div>
-
             <div className="p-6">
               <h2 className="text-lg text-center font-heading font-normal mb-4">
                 Contact
@@ -755,7 +700,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                 </div>
               </div>
             </div>
-
             <div className="p-6">
               <h2 className="text-lg text-center font-heading font-normal mb-4">
                 Physical Stats
@@ -784,7 +728,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                   <div className="text-xs text-gray-400">WEIGHT (kg)</div>
                 </div>
               </div>
-
               <div className=" grid grid-cols-2 gap-6">
                 <div className="border-2 bg-gray-600/30 p-3 rounded-xl">
                   <div className="relative w-full h-16 mb-2">
@@ -914,7 +857,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                 </div>
               </div>
             </div>
-
             <div className="p-6">
               <h2 className="text-lg text-center font-heading font-normal mb-4">
                 Languages
@@ -942,13 +884,11 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                 ))}
               </div>
             </div>
-
             {/* Position Map */}
             <div className="p-6">
               {(() => {
                 const cleanPos = (playerData.position || "").toLowerCase();
                 const isFutsalPos = cleanPos.includes("goalkeeper") || cleanPos.includes("fixo") || cleanPos.includes("alas") || cleanPos.includes("pivot");
-
                 return (
                   <div className="flex gap-2 mb-4">
                     <button
@@ -957,7 +897,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                     >
                       Position Map
                     </button>
-
                     <button
                       disabled={!isFutsalPos}
                       onClick={() => setIsPositionMap(false)}
@@ -974,9 +913,7 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                   </div>
                 );
               })()}
-
               {/* Add position icon button removed to keep exactly 3 markers */}
-
               <div
                 ref={mapContainerRef}
                 className="relative w-full h-auto overflow-hidden select-none"
@@ -989,7 +926,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                   className="w-full h-auto rounded"
                   draggable={false}
                 />
-
                 {/* Render markers */}
                 {((isPositionMap ? playerData.positionMarkers : playerData.futsalMarkers) || []).map((marker: any, idx: number) => (
                   <div
@@ -1018,7 +954,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                     {marker.name && (
                       <div className={cn(
                         "mt-1 px-1.5 py-0.5 rounded bg-black/85 border border-white/10 text-white text-[9px] font-medium text-center whitespace-nowrap shadow-md pointer-events-none tracking-wide select-none transition-all",
-
                       )}>
                         position{idx + 1}
                       </div>
@@ -1028,7 +963,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
               </div>
             </div>
           </div>
-
           {/* CENTER COLUMN - PLAYER IMAGE */}
           <div className="col-span-1 xl:col-span-4 flex flex-col items-center">
             {/* Player Name */}
@@ -1053,7 +987,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                   )}
                 </div>
               </div>
-
               <h1 className="text-2xl font-bold font-heading mb-2 flex items-center justify-center gap-2">
                 <CMSField
                   value={playerData.fullName}
@@ -1064,7 +997,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                 <span className="text-green-500 ">[{playerData.age}]</span>
               </h1>
             </div>
-
             <div className="mb-8">
               <CMSField
                 value={getFullWithShortForm(playerData.position)}
@@ -1100,7 +1032,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                 className="flex items-center gap-2 border border-border px-4 py-2 rounded hover:bg-gray-900 bg-transparent text-foreground h-auto w-fit mx-auto"
               />
             </div>
-
             {/* Player Image */}
             <div className="relative w-full h-[523px]  mb-8 flex  items-end justify-center">
               <EditableImage
@@ -1112,7 +1043,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                 field="playerImage"
               />
             </div>
-
             {/* Player Style Section */}
             <div className="w-full space-y-6">
               <div className="text-center">
@@ -1162,7 +1092,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                     </Dialog>
                   )}
                 </div>
-
                 <div className="space-y-4">
                   {orderedSelectedStyles.map((style: any) => {
                     const badge = STYLE_ICONS[style.id];
@@ -1171,7 +1100,7 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       <div key={style.id} className="space-y-4">
                         <div className="flex justify-center">
                           {badgeSrc ? (
-                            <img
+                            <Image 
                               src={badgeSrc}
                               className="w-20 h-20 object-contain"
                               alt={style.label}
@@ -1190,13 +1119,10 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
               </div>
             </div>
           </div>
-
           {/* RIGHT COLUMN */}
           <div className="col-span-1 xl:col-span-4 space-y-6 bg-cardBg">
             {/* Certification Card */}
             <div className="p-6 bnorder-none rounded-2xl relative overflow-hidden group hover:border-primary/20 transition-all">
-
-
               {/* SVG certificate container */}
               <div className="w-full aspect-square relative select-none">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">
@@ -1217,7 +1143,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                         font-family: 'Inter', 'Montserrat', sans-serif;
                       }
                     `}</style>
-
                     <linearGradient id="gold-grad-static" x1="0%" y1="0%" x2="100%" y2="100%">
                       <stop offset="0%" stopColor="#BF953F" />
                       <stop offset="20%" stopColor="#FCF6BA" />
@@ -1226,20 +1151,17 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       <stop offset="80%" stopColor="#AA771C" />
                       <stop offset="100%" stopColor="#E2C175" />
                     </linearGradient>
-
                     <linearGradient id="gold-bright-static" x1="0%" y1="100%" x2="100%" y2="0%">
                       <stop offset="0%" stopColor="#FCF6BA" />
                       <stop offset="35%" stopColor="#FFEFA6" />
                       <stop offset="70%" stopColor="#B38728" />
                       <stop offset="100%" stopColor="#FCF6BA" />
                     </linearGradient>
-
                     <linearGradient id="gold-dark-static" x1="0%" y1="0%" x2="0%" y2="100%">
                       <stop offset="0%" stopColor="#8a6f27" />
                       <stop offset="50%" stopColor="#4e3a0b" />
                       <stop offset="100%" stopColor="#8a6f27" />
                     </linearGradient>
-
                     <linearGradient id="gold-divider-static" x1="0%" y1="0%" x2="100%" y2="0%">
                       <stop offset="0%" stopColor="#BF953F" stopOpacity="0" />
                       <stop offset="30%" stopColor="#FCF6BA" stopOpacity="0.6" />
@@ -1247,14 +1169,12 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       <stop offset="70%" stopColor="#FCF6BA" stopOpacity="0.6" />
                       <stop offset="100%" stopColor="#AA771C" stopOpacity="0" />
                     </linearGradient>
-
                     <radialGradient id="bg-radial-static" cx="50%" cy="50%" r="50%" fx="30%" fy="30%">
                       <stop offset="0%" stopColor="#0a2a53" />
                       <stop offset="55%" stopColor="#05152e" />
                       <stop offset="90%" stopColor="#010615" />
                       <stop offset="100%" stopColor="#000207" />
                     </radialGradient>
-
                     <linearGradient id="ribbon-grad-static" x1="0%" y1="0%" x2="100%" y2="0%">
                       <stop offset="0%" stopColor="#020e24" />
                       <stop offset="12%" stopColor="#061b3b" />
@@ -1264,21 +1184,17 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       <stop offset="88%" stopColor="#061b3b" />
                       <stop offset="100%" stopColor="#020e24" />
                     </linearGradient>
-
                     <filter id="drop-shadow-static" x="-10%" y="-10%" width="120%" height="125%">
                       <feDropShadow dx="0" dy="10" stdDeviation="10" floodColor="#000000" floodOpacity="0.65" />
                     </filter>
-
                     <filter id="glow-static" x="-20%" y="-20%" width="140%" height="140%">
                       <feGaussianBlur stdDeviation="2.5" result="blur" />
                       <feComposite in="SourceGraphic" in2="blur" operator="over" />
                     </filter>
-
                     <g id="leaf-node-static">
                       <path d="M 0,0 C -6,-10 -18,-18 -25,-14 C -18,1 -6,4 0,0" fill="url(#gold-grad-static)" stroke="url(#gold-dark-static)" strokeWidth="0.5" />
                       <path d="M 0,0 C 6,-10 18,-18 25,-14 C 18,1 6,4 0,0" fill="url(#gold-bright-static)" stroke="url(#gold-dark-static)" strokeWidth="0.5" />
                     </g>
-
                     <g id="wreath-half-static">
                       <path d="M -30,0 Q -95,-15 -136,-72" fill="none" stroke="url(#gold-grad-static)" strokeWidth="3" strokeLinecap="round" />
                       <g transform="translate(-42, -1) rotate(-15) scale(0.65)"><use href="#leaf-node-static" /></g>
@@ -1290,9 +1206,7 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       <g transform="translate(-136, -69) rotate(-105) scale(0.75)"><use href="#leaf-node-static" /></g>
                       <g transform="translate(-137, -86) rotate(-120) scale(0.60)"><use href="#leaf-node-static" /></g>
                     </g>
-
                     <path id="top-text-arc-shared" d="M 124,400 A 276,276 0 0,1 676,400" fill="none" />
-
                     <filter id="green-glow-static" x="-50%" y="-50%" width="200%" height="200%">
                       <feGaussianBlur stdDeviation="3.5" result="blur" />
                       <feMerge>
@@ -1313,21 +1227,16 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       <stop offset="100%" stopColor="#DC2626" stopOpacity="0.1" />
                     </linearGradient>
                   </defs>
-
                   <polygon points="400.00,20.00 414.21,38.28 429.81,21.17 442.55,40.51 459.45,24.68 470.62,44.96 488.71,30.50 498.26,51.59 517.43,38.60 525.29,60.37 545.42,48.93 551.55,71.25 572.52,61.42 576.88,84.16 598.55,76.00 601.12,99.01 623.36,92.57 624.11,115.72 646.79,111.05 645.73,134.18 668.70,131.30 665.82,154.27 688.95,153.21 684.28,175.89 707.43,176.64 700.99,198.88 724.00,201.45 715.84,223.12 738.58,227.48 728.75,248.45 751.07,254.58 739.63,274.71 761.40,282.57 748.41,301.74 769.50,311.29 755.04,329.38 775.32,340.55 759.49,357.45 778.83,370.19 761.72,385.79 780.00,400.00 761.72,414.21 778.83,429.81 759.49,442.55 775.32,459.45 755.04,470.62 769.50,488.71 748.41,498.26 761.40,517.43 739.63,525.29 751.07,545.42 728.75,551.55 738.58,572.52 715.84,576.88 724.00,598.55 700.99,601.12 707.43,623.36 684.28,624.11 688.95,646.79 665.82,645.73 668.70,668.70 645.73,665.82 646.79,688.95 624.11,684.28 623.36,707.43 601.12,700.99 598.55,724.00 576.88,715.84 572.52,738.58 551.55,728.75 545.42,751.07 525.29,739.63 517.43,761.40 498.26,748.41 488.71,769.50 470.62,755.04 459.45,775.32 442.55,759.49 429.81,778.83 414.21,761.72 400.00,780.00 385.79,761.72 370.19,778.83 357.45,759.49 340.55,775.32 329.38,755.04 311.29,769.50 301.74,748.41 282.57,761.40 274.71,739.63 254.58,751.07 248.45,728.75 227.48,738.58 223.12,715.84 201.45,724.00 198.88,700.99 176.64,707.43 175.89,684.28 153.21,688.95 154.27,665.82 131.30,668.70 134.18,645.73 111.05,646.79 115.72,624.11 92.57,623.36 99.01,601.12 76.00,598.55 84.16,576.88 61.42,572.52 71.25,551.55 48.93,545.42 60.37,525.29 38.60,517.43 51.59,498.26 30.50,488.71 44.96,470.62 24.68,459.45 40.51,442.55 21.17,429.81 38.28,414.21 20.00,400.00 38.28,385.79 21.17,370.19 40.51,357.45 24.68,340.55 44.96,329.38 30.50,311.29 51.59,301.74 38.60,282.57 60.37,274.71 48.93,254.58 71.25,248.45 61.42,227.48 84.16,223.12 76.00,201.45 99.01,198.88 92.57,176.64 115.72,175.89 111.05,153.21 134.18,154.27 131.30,131.30 154.27,134.18 153.21,111.05 175.89,115.72 176.64,92.57 198.88,99.01 201.45,76.00 223.12,84.16 227.48,61.42 248.45,71.25 254.58,48.93 274.71,60.37 282.57,38.60 301.74,51.59 311.29,30.50 329.38,44.96 340.55,24.68 357.45,40.51 370.19,21.17 385.79,38.28" fill="url(#gold-grad-static)" filter="url(#drop-shadow-static)" />
-
                   <circle cx="400" cy="400" r="358" stroke="url(#gold-dark-static)" strokeWidth="1.5" fill="none" />
                   <circle cx="400" cy="400" r="352" stroke="url(#gold-grad-static)" strokeWidth="5" fill="none" />
                   <circle cx="400" cy="400" r="344" stroke="url(#gold-dark-static)" strokeWidth="1.5" fill="none" />
-
                   <circle cx="400" cy="400" r="342" fill="url(#bg-radial-static)" />
-
                   <circle cx="400" cy="400" r="328" stroke="url(#gold-grad-static)" strokeWidth="2" strokeDasharray="2 7" fill="none" opacity="0.85" />
                   <circle cx="400" cy="400" r="320" stroke="url(#gold-grad-static)" strokeWidth="1" fill="none" opacity="0.4" />
                   <circle cx="400" cy="400" r="316" stroke="url(#gold-grad-static)" strokeWidth="3" fill="none" />
                   <circle cx="400" cy="400" r="312" stroke="url(#gold-dark-static)" strokeWidth="1.5" fill="none" />
                   <circle cx="400" cy="400" r="276" stroke="url(#gold-grad-static)" strokeDasharray="1.5 5" strokeWidth="1" fill="none" opacity="0.3" />
-
                   <g opacity="0.08" stroke="url(#gold-grad-static)" strokeWidth="2.5" fill="none" transform="translate(570, 310)">
                     <circle cx="0" cy="0" r="130" strokeWidth="2" opacity="0.6" />
                     <polygon points="0,-32 30,-10 19,26 -19,26 -30,-10" fill="url(#gold-grad-static)" opacity="0.35" />
@@ -1350,16 +1259,13 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                     <line x1="45" y1="90" x2="55" y2="118" />
                     <line x1="-45" y1="90" x2="-55" y2="118" />
                   </g>
-
                   <text fontSize="34" fontWeight="900" className="badge-heading" letterSpacing="11">
                     <textPath href="#top-text-arc-shared" startOffset="50%" textAnchor="middle" fill="url(#gold-bright-static)" filter="url(#glow-static)">
                       VERIFIED
                     </textPath>
                   </text>
-
                   <path d="M 168.32,207 L 168.32,207.00 L 171.26,214.95 L 179.73,215.29 L 173.08,220.55 L 175.37,228.71 L 168.32,224.00 L 161.27,228.71 L 163.56,220.55 L 156.91,215.29 L 165.38,214.95 Z" fill="url(#gold-bright-static)" />
                   <path d="M 631.68,207 L 631.68,207.00 L 634.62,214.95 L 643.09,215.29 L 636.44,220.55 L 638.73,228.71 L 631.68,224.00 L 624.63,228.71 L 626.92,220.55 L 620.27,215.29 L 628.74,214.95 Z" fill="url(#gold-bright-static)" />
-
                   <g transform="translate(350 160) scale(2)">
                     <path d="M.215 21.934V.214h56v60h-56v-38.28M24.59 57.359c.414.243.832.489 1.308.868.688.23 1.188 1.058 2.227.652 3.629-1.785 6.82-4.2 9.934-6.848.043-.031.066-.07.187-.222a92.486 92.486 0 0 1 2.399-2.399c.46-.55.917-1.105 1.503-1.722.317-.465.637-.93.961-1.422 0 0-.023-.012.106.02.09-.087.18-.173.34-.388.347-.53.695-1.062 1.172-1.664.304-.695 1.293-1.086 1.078-2.144.68-1.125 1.355-2.25 2.148-3.469.18-.426.363-.851.543-1.281 1.719-4.137 2.86-8.418 3.203-12.899.098-1.273.27-2.539.426-4.007a653.89 653.89 0 0 1-.004-5.563c-.066-.707-.21-1.414-.176-2.113.04-.778-.36-1.094-.988-1.293-1.855-.59-3.7-1.211-5.566-1.762a393.025 393.025 0 0 0-8.918-2.55c-1.641-.446-3.313-.766-5.024-1.286-.074-.23-.152-.465-.156-.816.352-1.09-.27-1.813-1.016-2.64-.715-.84-1.609-1.224-2.898-1.118-1.887-.332-4.332 1.96-4.27 4.332-1.547.504-3.093 1.004-4.64 1.512-1.805.597-3.598 1.25-5.418 1.804a251.347 251.347 0 0 1-8.766 2.473c-.207.14-.57.25-.601.422-.188 1.098-.461 2.219-.418 3.316.148 3.7.418 7.391.671 11.254.403 1.739.801 3.477 1.227 5.387.91 2.465 1.79 4.941 2.75 7.387.246.617.75 1.133 1.125 1.691 0 0 .008.008.024.125.058.05.12.098.183.223 0 0 .012.07.059.215.765 1.187 1.535 2.375 2.312 3.644 0 0 .012.086.043.227.418.453.836.91 1.266 1.515.492.528.984 1.055 1.496 1.73a159.15 159.15 0 0 1 3.082 3.212c.445.398.875.816 1.34 1.187 1.254 1 2.527 1.977 3.804 3.117.63.383 1.258.77 1.903 1.137 0 0-.012.016.039.156Zm0 0" style={{ stroke: "none", fillRule: "nonzero", fill: "#000", fillOpacity: 0 }} />
                     <path d="M4.46 11.441c2.864-.832 5.735-1.632 8.59-2.5 1.821-.554 3.614-1.207 5.419-1.804a248.068 248.068 0 0 1 4.789-1.528c.328-.07.508-.12.75-.175.148-.012.234-.02.316.046.153.446.305.813.453 1.266.16.524.328.965.43 1.457-.918.317-1.777.57-2.621.86-1.613.546-3.219 1.117-4.895 1.671-.34.145-.617.301-.96.438-.31-.016-.56-.063-.778.008A612.005 612.005 0 0 0 8.63 13.5c-.246.078-.45.29-.762.45-.316.198-.722.363-.746.57-.371 3.41-.414 6.824.152 10.316.5 4.906 1.957 9.441 3.903 13.883a8.739 8.739 0 0 1-1.156-.332c-.52.386-.989.738-1.512 1.027a329.184 329.184 0 0 1-2.903-7.672c-.375-1.894-.753-3.703-1.128-5.582-.657-4.957-.84-9.84-.016-14.719Zm0 0" style={{ stroke: "none", fillRule: "nonzero", fill: "#2c2c2c", fillOpacity: 1 }} />
@@ -1596,7 +1502,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                     <path d="M15.246 37.781a8.406 8.406 0 0 1-.371-1.199c.129.313.254.715.371 1.2Zm0 0" style={{ stroke: "none", fillRule: "nonzero", fill: "#b2c7a4", fillOpacity: 1 }} />
                     <path d="M19.3 43.426c.083-.004.15.054.188.07.051.227.059.441.094.734-.191.06-.41.036-.71.004.062-.273.206-.539.429-.808Zm0 0" style={{ stroke: "none", fillRule: "nonzero", fill: "#a4c6ad", fillOpacity: 1 }} />
                   </g>
-
                   {/* 8. Display Field Rows (Coach, License, Club) */}
                   <g transform="translate(15, -45)">
                     {/* Row 1: Coach */}
@@ -1607,15 +1512,12 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       {/* User profiles icon silhouettes */}
                       <circle cx="220" cy="358" r="7" fill="url(#gold-bright-static)" />
                       <path d="M 205,376 Q 205,367 220,367 Q 235,367 235,376" fill="url(#gold-bright-static)" stroke="url(#gold-dark-static)" strokeWidth="0.5" />
-
                       {/* Labels and bold value */}
                       <text x="265" y="354" fontSize="14" fontWeight="800" className="badge-heading gold-text" letterSpacing="1.5" opacity="0.95">HEAD COACH NAME</text>
                       <text x="265" y="382" fontSize="28" fontWeight="900" className="badge-content white-text" letterSpacing="0.5">{playerData.coachName || "N/A"}</text>
-
                       {/* Dividing Tapered Line */}
                       <line x1="210" y1="408" x2="590" y2="408" stroke="url(#gold-divider-static)" strokeWidth="1.5" />
                     </g>
-
                     {/* Row 2: License */}
                     <g transform="translate(0, 88)">
                       {/* Icon Envelope */}
@@ -1629,15 +1531,12 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       <line x1="222" y1="358" x2="231" y2="358" stroke="url(#gold-bright-static)" strokeWidth="1.8" strokeLinecap="round" />
                       <line x1="222" y1="364" x2="231" y2="364" stroke="url(#gold-bright-static)" strokeWidth="1.8" strokeLinecap="round" />
                       <line x1="222" y1="370" x2="228" y2="370" stroke="url(#gold-bright-static)" strokeWidth="1.8" strokeLinecap="round" />
-
                       {/* Labels and bold value */}
                       <text x="265" y="354" fontSize="14" fontWeight="800" className="badge-heading gold-text" letterSpacing="1.5" opacity="0.95">LICENSE NUMBER</text>
                       <text x="265" y="382" fontSize="28" fontWeight="900" className="badge-content white-text" letterSpacing="0.5">{playerData.coachLicenseNumber || "CBF-2026-4587"}</text>
-
                       {/* Dividing Tapered Line */}
                       <line x1="210" y1="408" x2="590" y2="408" stroke="url(#gold-divider-static)" strokeWidth="1.5" />
                     </g>
-
                     {/* Row 3: Club Managed */}
                     <g transform="translate(0, 176)">
                       {/* Icon Envelope */}
@@ -1648,39 +1547,32 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       <circle cx="220" cy="366" r="6" fill="none" stroke="url(#gold-bright-static)" strokeWidth="1.5" />
                       <line x1="220" y1="360" x2="220" y2="372" stroke="url(#gold-bright-static)" strokeWidth="1" />
                       <line x1="214" y1="366" x2="226" y2="366" stroke="url(#gold-bright-static)" strokeWidth="1" />
-
                       {/* Labels and bold value */}
                       <text x="265" y="354" fontSize="14" fontWeight="800" className="badge-heading gold-text" letterSpacing="1.5" opacity="0.95">CLUB MANAGED</text>
                       <text x="265" y="382" fontSize="28" fontWeight="900" className="badge-content white-text" letterSpacing="0.5">{playerData.clubManaged || "Atlético Nacional"}</text>
                     </g>
                   </g>
-
                   {/* 9. 3D Ribbon / Banner Overlay */}
                   <g filter="url(#drop-shadow-static)">
                     {/* Left ribbon shadow folded corner under center */}
                     <polygon points="175,615 175,655 150,635" fill="url(#gold-dark-static)" />
                     {/* Right ribbon shadow folded corner under center */}
                     <polygon points="625,615 625,655 650,635" fill="url(#gold-dark-static)" />
-
                     {/* Left side wing of ribbon (behind center, folded) */}
                     <path d="M 175,615 L 80,635 L 110,665 L 85,695 L 175,655 Z" fill="url(#ribbon-grad-static)" stroke="url(#gold-grad-static)" strokeWidth="2" />
                     {/* Right side wing of ribbon (behind center, folded) */}
                     <path d="M 625,615 L 720,635 L 690,665 L 715,695 L 625,655 Z" fill="url(#ribbon-grad-static)" stroke="url(#gold-grad-static)" strokeWidth="2" />
-
                     {/* Center plate of ribbon with gold boundaries */}
                     <path d="M 148,595 Q 400,565 652,595 L 642,675 Q 400,645 158,675 Z" fill="url(#ribbon-grad-static)" stroke="url(#gold-grad-static)" strokeWidth="3" />
-
                     {/* Text paths on ribbon curves */}
                     <path id="ribbon-text-path-static" d="M 160,635 Q 400,605 640,635" fill="none" />
                     <path id="ribbon-subtext-path-static" d="M 175,662 Q 400,632 625,662" fill="none" />
-
                     {/* Player CV Title text */}
                     <text fontSize="42" fontWeight="900" className="badge-content">
                       <textPath href="#ribbon-text-path-static" startOffset="50%" textAnchor="middle" fill="#FFFFFF">
                         Player CV
                       </textPath>
                     </text>
-
                     {/* Sub text: VERIFIED BY FOOTBALL COACH */}
                     <text fontSize="18" fontWeight="800" className="badge-heading" letterSpacing="3.5">
                       <textPath href="#ribbon-subtext-path-static" startOffset="50%" textAnchor="middle" fill="url(#gold-bright-static)">
@@ -1688,35 +1580,28 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       </textPath>
                     </text>
                   </g>
-
                   {/* 10. Center-Bottom Checkmark Coin Emblem with olive branches flanking */}
-
                   {/* Left Laurel Olive wreath half */}
                   <use href="#wreath-half-static" transform="translate(400, 712) scale(0.60)" />
                   {/* Right Laurel Olive wreath half (Perfect Symmetrical Mirror) */}
                   <use href="#wreath-half-static" transform="translate(400, 712) scale(-0.60, 0.60)" />
-
                   {/* The Medal Checkmark Coin */}
                   <g filter="url(#drop-shadow-static)">
                     {/* Outer gold ring */}
                     <circle cx="400" cy="712" r="30" fill="url(#bg-radial-static)" stroke="url(#gold-grad-static)" strokeWidth="4.5" />
                     <circle cx="400" cy="712" r="24" fill="url(#bg-radial-static)" stroke="url(#gold-bright-static)" strokeWidth="1.2" opacity="0.6" />
-
                     {/* Bold Metallic Checkmark */}
                     <path d="M 386,713 L 396,723 L 416,700" fill="none" stroke="url(#gold-bright-static)" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
                   </g>
-
                   {/* 11. Redundant bottom stars */}
                   <path d="M 400,728 L 400.00,728.00 L 402.65,734.36 L 409.51,734.91 L 404.28,739.39 L 405.88,746.09 L 400.00,742.50 L 394.12,746.09 L 395.72,739.39 L 390.49,734.91 L 397.35,734.36 Z" fill="url(#gold-bright-static)" />
                   <path d="M 478.9,720.66 L 478.90,720.66 L 480.96,725.83 L 486.51,726.19 L 482.23,729.74 L 483.60,735.13 L 478.90,732.16 L 474.20,735.13 L 475.57,729.74 L 471.29,726.19 L 476.84,725.83 Z" fill="url(#gold-bright-static)" />
                   <path d="M 321.1,720.66 L 321.10,720.66 L 323.16,725.83 L 328.71,726.19 L 324.43,729.74 L 325.80,735.13 L 321.10,732.16 L 316.40,735.13 L 317.77,729.74 L 313.49,726.19 L 319.04,725.83 Z" fill="url(#gold-bright-static)" />
                   <path d="M 553.45,694.16 L 553.45,694.16 L 555.21,698.73 L 560.11,699.00 L 556.30,702.09 L 557.56,706.82 L 553.45,704.16 L 549.34,706.82 L 550.60,702.09 L 546.79,699.00 L 551.69,698.73 Z" fill="url(#gold-bright-static)" />
                   <path d="M 246.55,694.16 L 246.55,694.16 L 248.31,698.73 L 253.21,699.00 L 249.40,702.09 L 250.66,706.82 L 246.55,704.16 L 242.44,706.82 L 243.70,702.09 L 239.89,699.00 L 244.79,698.73 Z" fill="url(#gold-bright-static)" />
-
                   {/* 12. Stamp year (2026) */}
                   <text x="400" y="768" fontSize="19" fontWeight="800" className="badge-heading gold-text" textAnchor="middle" letterSpacing="4.5">2026</text>
                 </svg>
-
                 {/* Not Verified Overlay */}
                 {playerData.validationStatus !== "verified" && (
                   <div className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center p-3 z-20 backdrop-blur-xs rounded-xl">
@@ -1730,8 +1615,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                 )}
               </div>
             </div>
-
-
             <div className="p-6">
               <h2 className="text-lg text-center font-heading font-normal mb-4">
                 Strength
@@ -1742,7 +1625,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                     <div className="truncate">
                       <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none">{key}</p>
                     </div>
-
                     <div className="min-w-0 translate-y-[5px]">
                       {canEditEvaluation ? (
                         <div className="relative flex items-center h-2 group">
@@ -1785,7 +1667,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                         />
                       )}
                     </div>
-
                     <div className="flex justify-end">
                       <CMSField
                         value={value as any}
@@ -1803,7 +1684,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                 ))}
               </div>
             </div>
-
             {/* <div className="p-6">
               <h2 className="text-lg text-center font-heading font-normal mb-4">
                 Performance Metrics
@@ -1815,7 +1695,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       <div className="truncate">
                         <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none">{key.replace(/([A-Z])/g, " $1")}</p>
                       </div>
-
                       <div className="min-w-0 translate-y-[5px]">
                         {canEditEvaluation ? (
                           <div className="relative flex items-center h-2 group">
@@ -1858,7 +1737,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                           />
                         )}
                       </div>
-
                       <div className="flex justify-end">
                         <CMSField
                           value={value as any}
@@ -1877,8 +1755,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                 )}
               </div>
             </div> */}
-
-
             <div className="p-6">
               <h2 className="text-lg text-center font-heading font-normal mb-4">
                 Market Value
@@ -1901,7 +1777,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                 />
               </div>
             </div>
-
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg text-center font-heading font-normal">
@@ -1944,7 +1819,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                 </div>
               </div>
             </div>
-
             <div className="p-6">
               <h2 className="text-lg text-center font-heading font-normal mb-4">
                 Accomplishments
@@ -1983,7 +1857,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                 ))}
               </div>
             </div>
-
             <div className="p-6">
               <h2 className="text-lg text-center font-heading font-normal mb-6">
                 Current Season Stats
@@ -2044,5 +1917,4 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
     </>
   );
 };
-
 export default PlayerBioSection;

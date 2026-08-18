@@ -1,3 +1,4 @@
+import Image from "next/image";
 import React from "react";
 import ServiceSection from "@/components/about/ServiceSection";
 import OutStorySection from "@/components/about/OutStorySection";

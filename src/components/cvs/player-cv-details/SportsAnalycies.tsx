@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
+import Image from "next/image";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -18,7 +18,6 @@ import {
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { IconDownload } from "@tabler/icons-react";
-
 const getResultColor = (result: "W" | "D" | "L") => {
   switch (result) {
     case "W":
@@ -29,9 +28,7 @@ const getResultColor = (result: "W" | "D" | "L") => {
       return "bg-red-600 text-white";
   }
 };
-
 const getResultText = (result: "W" | "D" | "L") => result;
-
 const SportsAnalycies = ({ editable = false }: { editable?: boolean }) => {
 const reports = useAppSelector(state => state.reports.reports);
 const paidMatches = reports.filter(m => m.status === "Paid");
@@ -76,7 +73,7 @@ try {
   printElement.innerHTML = `
         <div style="border: 2px solid #E31B23; padding: 25px; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
           <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.03; pointer-events: none;">
-            <img src="/logo.png" style="width: 400px; object-fit: contain;" />
+            <Image src="/logo.png" style="width: 400px; object-fit: contain;" />
           </div>
 
           <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; z-index: 10;">
@@ -193,7 +190,7 @@ try {
   const pdf = new jsPDF("p", "mm", "a4");
   const imgWidth = 210;
   const imgHeight = (canvas.height * imgWidth) / canvas.width;
-  
+
   pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
   pdf.save(`Scouting_Report_vs_${match.team2.replace(/\s+/g, "_")}.pdf`);
   document.body.removeChild(printElement);
@@ -450,5 +447,4 @@ return (
 </div>
 );
 }
-
 export default SportsAnalycies;

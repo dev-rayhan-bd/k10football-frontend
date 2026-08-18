@@ -1,14 +1,13 @@
 "use client";
+import Image from "next/image";
 import club1 from "@/assets/cvs/club1.png";
 import playerImage from "@/assets/cvs/coach-image2.png";
 import flag1 from "@/assets/cvs/flag1.png";
 import goldCard from "@/assets/cvs/gold-card.png";
 import pinkCard from "@/assets/cvs/pink-card.png";
 import whiteCard from "@/assets/cvs/white-card.png";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCoach } from "@/lib/hooks/useCoach";
-
 interface Coach {
   id: number;
   name: string;
@@ -26,7 +25,6 @@ interface Coach {
   };
   cardType: "gold" | "white" | "pink";
 }
-
 const coaches: Coach[] = [
   {
     id: 1,
@@ -179,11 +177,9 @@ const coaches: Coach[] = [
     cardType: "gold",
   },
 ];
-
 const Coaches = () => {
   const router = useRouter();
   const { coachData } = useCoach();
-
   // Map Redux data to the SILVA coach card (if it exists) or replace one
   const displayCoaches = coaches.map(c => {
     // Let's assume SILVA is the coach we want to sync
@@ -204,8 +200,6 @@ const Coaches = () => {
     }
     return c;
   });
-
-
   return (
     <div className="container mx-auto px-4 mt-20 bg-black py-8 rounded-3xl">
       <h1
@@ -214,7 +208,6 @@ const Coaches = () => {
       >
         Coaches
       </h1>
-
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         {displayCoaches.map((coach) => {
           const glowClass = 
@@ -223,7 +216,6 @@ const Coaches = () => {
               : coach.cardType === "white"
                 ? "drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] hover:drop-shadow-[0_0_25px_rgba(255,255,255,0.95)]"
                 : "drop-shadow-[0_0_10px_rgba(251,113,133,0.5)] hover:drop-shadow-[0_0_25px_rgba(251,113,133,0.95)]";
-
           return (
             <div onClick={() => router.push("/cvs/coach-cv-details")} key={coach.id} className="flex justify-center w-full max-w-67.5 mx-auto">
               <div className={`relative w-full aspect-270/385 cursor-pointer hover:scale-105 transition-all duration-300 z-0 ${glowClass}`}>
@@ -238,20 +230,16 @@ const Coaches = () => {
                   }
                   alt="card background"
                 />
-                
                 {/* Top values */}
                 <div className="absolute top-[13.5%] left-[13%] text-black flex flex-col items-center z-20 w-[16%] gap-1 pl-1.5">
                   <span className="text-3xl sm:text-4xl font-extrabold leading-none font-heading tracking-tighter text-gray-950">{coach.rating}</span>
-                  
                   {/* Position Badge */}
                   <span className="bg-black text-white/95 px-2 py-0.5 rounded-[3px] text-[10px] sm:text-xs font-black tracking-wider uppercase leading-none min-w-8 text-center shadow-xs whitespace-nowrap">
                     {coach.position}
                   </span>
-
                   <Image src={flag1} className="w-7 sm:w-8 h-4.5 sm:h-5.5 object-cover rounded-[2px] shadow-xs" alt="flag image" />
                   <Image src={club1} className="w-7 sm:w-8 h-7 sm:h-8 object-contain" alt="club image" />
                 </div>
-
                 {/* Coach image */}
                 <div className="absolute top-[3%] right-[6%] w-[64%] h-[47%] flex items-end justify-center z-10 overflow-hidden">
                   <Image
@@ -262,15 +250,12 @@ const Coaches = () => {
                     alt="coach Image"
                   />
                 </div>
-
-
                 {/* Name */}
                 <div className="absolute top-[51%] left-1/2 -translate-x-1/2 w-[85%] text-center pb-1 z-20">
                 <h3 className="text-gray-900 font-heading text-lg sm:text-xl font-black uppercase tracking-wide truncate">
                   {coach.name}
                 </h3>
               </div>
-
               {/* Stats - Redesigned as a glassmorphic block */}
               <div className="absolute top-[59%] left-1/2 -translate-x-1/2 w-[86%] bg-black/3 border border-black/10 backdrop-blur-3xs rounded-xl p-2.5 text-black z-20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
                 <div className="flex items-center justify-between gap-3">
@@ -289,9 +274,7 @@ const Coaches = () => {
                       <span className="font-bold text-sm sm:text-[15px] text-gray-700 leading-none">PAS</span>
                     </div>
                   </div>
-
                   <div className="h-16 border-r-2 border-black/10 mx-1"></div>
-
                   {/* right */}
                   <div className="flex-1 flex flex-col gap-1.5">
                     <div className="flex justify-between items-center px-1">
@@ -309,7 +292,6 @@ const Coaches = () => {
                   </div>
                 </div>
               </div>
-
               {/* Bottom decorative spacer */}
               <div className="absolute bottom-[13.5%] left-1/2 -translate-x-1/2 w-[80%] flex flex-col items-center justify-center z-20">
                 <div className="w-[32%] border-b border-black/10 mx-auto"></div>
@@ -322,5 +304,4 @@ const Coaches = () => {
     </div>
   );
 };
-
 export default Coaches;

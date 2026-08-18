@@ -1,3 +1,4 @@
+import Image from "next/image";
 import React from 'react'
 import SearchBar from '@/components/cvs/SearchBar'
 import AnalyciesSection from '@/components/cvs/AnalyciesSection'

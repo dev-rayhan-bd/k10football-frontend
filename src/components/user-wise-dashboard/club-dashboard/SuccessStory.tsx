@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import React from "react";
 import { IconPlus, IconStar } from "@tabler/icons-react";
 import DashboardTable, { Column } from "@/components/dashboard/DashboardTable";
@@ -7,13 +8,11 @@ import {
   DashboardPageHeader, 
   DashboardSection 
 } from "@/components/dashboard/DashboardElements";
-
 const successData = [
   { id: 1, title: "New Striker Joins IJ17 Squad from Local Rivals", category: "Player Promotion", date: "2024-01-15", status: "Approved", avatar: "https://i.pravatar.cc/150?u=1" },
   { id: 2, title: "Regional Championship Win Caps Historic Season", category: "Tournament Achievement", date: "2024-02-01", status: "Pending", avatar: "https://i.pravatar.cc/150?u=2" },
   { id: 3, title: "New Striker Joins IJ17 Squad from Local Rivals", category: "Seasonal Highlight", date: "2023-12-01", status: "Rejected", avatar: "https://i.pravatar.cc/150?u=3" },
 ];
-
 const SuccessStory = () => {
   const columns: Column<typeof successData[0]>[] = [
     {
@@ -21,7 +20,7 @@ const SuccessStory = () => {
       key: "title",
       render: (item) => (
         <div className="flex items-center gap-3 py-2">
-          <img src={item.avatar} className="w-10 h-10 rounded-full object-cover" alt="avatar" />
+          <Image src={item.avatar} className="w-10 h-10 rounded-full object-cover" alt="avatar" />
           <span className="text-sm font-bold text-white max-w-xs leading-snug">{item.title}</span>
         </div>
       ),
@@ -48,7 +47,6 @@ const SuccessStory = () => {
       render: () => <TableActionButtons onView={() => {}} onEdit={() => {}} onDelete={() => {}} />,
     },
   ];
-
   return (
     <div className="space-y-8 pb-12">
       <DashboardPageHeader 
@@ -60,7 +58,6 @@ const SuccessStory = () => {
           onClick: () => console.log("Add Success Story")
         }}
       />
-
       <DashboardSection>
         <DashboardTable columns={columns} data={successData} className="border-white/10" />
       </DashboardSection>

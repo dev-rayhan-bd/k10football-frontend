@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import React, { useState } from "react";
 import { 
   IconDownload, 
@@ -21,7 +22,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-
 const RequestStatCard = ({ icon: Icon, value, label, iconColor }: { icon: any, value: string | number, label: string, iconColor: string }) => (
   <div className="bg-[#0A0A0A] border border-white/20 rounded-2xl p-6 flex flex-col gap-4 flex-1">
     <div className={`w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center ${iconColor}`}>
@@ -33,7 +33,6 @@ const RequestStatCard = ({ icon: Icon, value, label, iconColor }: { icon: any, v
     </div>
   </div>
 );
-
 const StatusPill = ({ status }: { status: "Approved" | "Pending" | "Rejected" }) => {
   const styles = {
     Approved: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -46,7 +45,6 @@ const StatusPill = ({ status }: { status: "Approved" | "Pending" | "Rejected" })
     </span>
   );
 };
-
 const TransferTable = ({ title, data }: { title: string, data: any[] }) => (
   <div className="bg-[#111111] border border-white/20 rounded-[40px] p-8 flex flex-col gap-6">
     <h2 className="text-2xl font-black text-white font-orbitron uppercase tracking-tight">{title}</h2>
@@ -69,7 +67,7 @@ const TransferTable = ({ title, data }: { title: string, data: any[] }) => (
               <td className="px-6 py-5 border-r border-white/20 text-left">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-white/10 overflow-hidden border border-white/20">
-                     <img src={`https://i.pravatar.cc/150?u=${row.name}`} alt={row.name} className="w-full h-full object-cover" />
+                     <Image src={`https://i.pravatar.cc/150?u=${row.name}`} alt={row.name} className="w-full h-full object-cover" />
                   </div>
                   <div>
                     <p className="text-white text-sm font-black uppercase">{row.name}</p>
@@ -112,16 +110,13 @@ const TransferTable = ({ title, data }: { title: string, data: any[] }) => (
     </div>
   </div>
 );
-
 const TransferRequests = () => {
   const [open, setOpen] = useState(false);
-
   const mockData = [
     { name: "Marcus Silva", pos: "Forward", incoming: "Chelsea U19", outgoing: "Liverpool U17", requestedBy: "Coach Williams", date: "2024-01-15", status: "Pending" as const },
     { name: "Alex Jonson", pos: "Defender", incoming: "Liverpool U17", outgoing: "City U16", requestedBy: "Coach Anderson", date: "2023-12-01", status: "Approved" as const },
     { name: "James Brown", pos: "Goalkeeper", incoming: "City U16", outgoing: "Chelsea U19", requestedBy: "Coach Martinez", date: "2024-03-10", status: "Rejected" as const },
   ];
-
   return (
     <div className="flex flex-col gap-8 pb-10">
       {/* Header */}
@@ -130,7 +125,6 @@ const TransferRequests = () => {
           <h1 className="text-5xl font-black text-white font-orbitron uppercase tracking-tight">Transfer Requests</h1>
           <p className="text-white/60 font-medium mt-2 text-lg">Manage athlete transfers and requests across teams and academies</p>
         </div>
-        
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button className="bg-[#111111] border border-white/20 hover:bg-white/5 text-white/80 h-10 px-4 rounded-xl flex items-center gap-2 text-xs font-bold">
@@ -150,7 +144,6 @@ const TransferRequests = () => {
                      className="bg-[#111111] border-white/20 h-14 rounded-xl px-6 text-white placeholder:text-white/30"
                    />
                 </div>
-
                 <div className="space-y-2">
                    <Label className="text-white/70 text-[11px] font-bold uppercase tracking-wider">Transfer Type</Label>
                    <div className="relative">
@@ -162,7 +155,6 @@ const TransferRequests = () => {
                       <IconChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40" />
                    </div>
                 </div>
-
                 <div className="space-y-2">
                    <Label className="text-white/70 text-[11px] font-bold uppercase tracking-wider">Target Academy</Label>
                    <div className="relative">
@@ -174,7 +166,6 @@ const TransferRequests = () => {
                       <IconChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40" />
                    </div>
                 </div>
-
                 <div className="space-y-2">
                    <Label className="text-white/70 text-[11px] font-bold uppercase tracking-wider">Reason for Transfer</Label>
                    <Textarea 
@@ -182,7 +173,6 @@ const TransferRequests = () => {
                      className="bg-[#111111] border-white/20 rounded-2xl p-6 text-white placeholder:text-white/30 min-h-[160px] resize-none"
                    />
                 </div>
-
                 <div className="flex gap-4 pt-4">
                    <Button 
                      variant="outline" 
@@ -199,7 +189,6 @@ const TransferRequests = () => {
           </DialogContent>
         </Dialog>
       </div>
-
       {/* Summary Stats */}
       <div className="bg-[#111111] border border-white/20 rounded-[40px] p-10 flex flex-col gap-10">
         <div className="flex gap-6">
@@ -210,7 +199,6 @@ const TransferRequests = () => {
           <RequestStatCard icon={IconCircleX} value="1" label="Rejected" iconColor="text-red-500" />
         </div>
       </div>
-
       {/* Tables Section */}
       <div className="flex flex-col gap-12">
          <TransferTable title="Incoming" data={mockData} />
@@ -219,7 +207,6 @@ const TransferRequests = () => {
     </div>
   );
 };
-
 const IconChevronDown = ({ size, className }: any) => (
   <svg 
     width={size} 

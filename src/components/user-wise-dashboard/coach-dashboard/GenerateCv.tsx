@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import {
   IconDownload,
@@ -18,8 +19,6 @@ import { usePlayerStats } from "@/components/cvs/player-cv-details/FullEditableP
 import { usePlayer } from "@/lib/hooks/usePlayer";
 import { useRouter } from "next/navigation";
 import { IconUserCheck } from "@tabler/icons-react";
-import Image from "next/image";
-
 const COUNTRY_CODES: Record<string, string> = {
   "afghanistan": "af", "albania": "al", "algeria": "dz", "andorra": "ad", "angola": "ao",
   "antigua and barbuda": "ag", "argentina": "ar", "armenia": "am", "australia": "au",
@@ -65,20 +64,17 @@ const COUNTRY_CODES: Record<string, string> = {
   "vanuatu": "vu", "vatican city": "va", "venezuela": "ve", "vietnam": "vn", "yemen": "ye",
   "zambia": "zm", "zimbabwe": "zw"
 };
-
 const getFlagUrl = (countryName: string) => {
   if (!countryName) return "";
   const code = COUNTRY_CODES[countryName.toLowerCase()];
   if (!code) return "";
   return `https://flagcdn.com/w160/${code}.png`;
 };
-
 const pendingReports = [
   { id: 1, name: "Marcus Silva", position: "Forward", rating: 9.2, avatar: "https://i.pravatar.cc/150?u=1" },
   { id: 2, name: "David Chen", position: "Midfielder", rating: 8.8, avatar: "https://i.pravatar.cc/150?u=2" },
   { id: 3, name: "Alex Jonson", position: "Defender", rating: 8.5, avatar: "https://i.pravatar.cc/150?u=3" },
 ];
-
 const CareerItem = ({ logo, name, role, years, type }: { logo: string; name: string; role: string; years: string; type: string }) => (
   <div className="bg-black/40 border border-white/10 rounded-2xl p-4 flex flex-col gap-3 group hover:border-white/20 transition-all">
     <div className="flex items-center gap-4">
@@ -96,16 +92,13 @@ const CareerItem = ({ logo, name, role, years, type }: { logo: string; name: str
     </div>
   </div>
 );
-
 const GenerateCvCoach = () => {
   const router = useRouter();
   const { coachData } = useCoach();
   const { bioRating, skillsAvg, metricsAvg, attributesAvg } = usePlayerStats();
   const { players, selectPlayer } = usePlayer();
   const [role, setRole] = useState<string>("coach");
-
   const overallRating = 88;
-
   // Filter players who need validation
   const validationNeededPlayers = players.filter((player) => {
     return (
@@ -115,23 +108,19 @@ const GenerateCvCoach = () => {
       (player.assignedMonthsAgo && player.assignedMonthsAgo >= 3 && player.validationStatus !== "verified")
     );
   }).slice(0, 3); // Display top 3 pending
-
   const getValidationReason = (player: any) => {
     if (player.requestedValidation) return "Requested";
     if (player.validationStatus === "expired") return "Expired";
     if (player.assignedMonthsAgo && player.assignedMonthsAgo >= 3) return "Assigned > 3M";
     return "Pending";
   };
-
   useEffect(() => {
     const userRole = localStorage.getItem("userRole") || "coach";
     setRole(userRole);
   }, []);
-
   const generateProfessionalPDF = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
-
     const htmlContent = `
       <html>
         <head>
@@ -157,7 +146,6 @@ const GenerateCvCoach = () => {
             .brand { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 3px; color: #E31B23; margin-bottom: 10px; }
             .coach-name { font-size: 48px; font-weight: 900; text-transform: uppercase; letter-spacing: -2px; margin: 0; line-height: 1; }
             .coach-title { font-size: 16px; font-weight: 600; color: #666; margin-top: 5px; text-transform: uppercase; }
-            
             .rating-circle {
               width: 100px;
               height: 100px;
@@ -172,7 +160,6 @@ const GenerateCvCoach = () => {
             }
             .rating-value { font-size: 36px; font-weight: 900; line-height: 1; }
             .rating-label { font-size: 10px; font-weight: 800; text-transform: uppercase; opacity: 0.6; }
-
             .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
             .section { margin-bottom: 40px; }
             .section-header { 
@@ -187,7 +174,6 @@ const GenerateCvCoach = () => {
               display: flex;
               justify-content: space-between;
             }
-            
             .attribute-table { width: 100%; border-collapse: collapse; }
             .attribute-row { border-bottom: 1px solid #f0f0f0; }
             .attribute-cell { padding: 10px 0; font-size: 13px; }
@@ -195,10 +181,8 @@ const GenerateCvCoach = () => {
             .attr-value { font-weight: 900; text-align: right; color: #111; }
             .attr-bar-bg { width: 60px; height: 6px; background: #eee; border-radius: 3px; display: inline-block; margin-left: 15px; position: relative; top: -2px; }
             .attr-bar-fill { height: 100%; background: #E31B23; border-radius: 3px; }
-
             .full-width { grid-column: span 2; }
             .highlight-box { background: #f9f9f9; padding: 25px; border-radius: 15px; border: 1px solid #eee; }
-            
             .footer {
               margin-top: 80px;
               padding-top: 30px;
@@ -211,7 +195,6 @@ const GenerateCvCoach = () => {
               text-transform: uppercase;
               letter-spacing: 1px;
             }
-
             @media print {
               body { padding: 0; }
               .no-print { display: none; }
@@ -231,7 +214,6 @@ const GenerateCvCoach = () => {
               <span class="rating-value">88</span>
             </div>
           </div>
-
           <div class="main-grid">
             <!-- Bio Section -->
             <div class="section">
@@ -243,7 +225,6 @@ const GenerateCvCoach = () => {
                 <tr class="attribute-row"><td class="attribute-cell attr-label">Nationality</td><td class="attribute-cell attr-value">Professional</td></tr>
               </table>
             </div>
-
             <!-- Performance Metrics -->
             <div class="section">
               <div class="section-header">Coaching Summary</div>
@@ -254,7 +235,6 @@ const GenerateCvCoach = () => {
                 <tr class="attribute-row"><td class="attribute-cell attr-label">Contract Until</td><td class="attribute-cell attr-value">2026</td></tr>
               </table>
             </div>
-
             <!-- Technical Evaluation -->
             <div class="section">
               <div class="section-header">Coaching Attributes</div>
@@ -266,7 +246,6 @@ const GenerateCvCoach = () => {
                 <tr class="attribute-row"><td class="attribute-cell attr-label">Communication</td><td class="attribute-cell attr-value">87 <div class="attr-bar-bg"><div class="attr-bar-fill" style="width: 87%"></div></div></td></tr>
               </table>
             </div>
-
             <!-- Development Skills -->
             <div class="section">
               <div class="section-header">Development Skills</div>
@@ -278,7 +257,6 @@ const GenerateCvCoach = () => {
                 <tr class="attribute-row"><td class="attribute-cell attr-label">Strategic Planning</td><td class="attribute-cell attr-value">90 <div class="attr-bar-bg"><div class="attr-bar-fill" style="width: 90%"></div></div></td></tr>
               </table>
             </div>
-
             <!-- Mental/Tactical Evaluation -->
             <div class="section">
               <div class="section-header">Strategic Approach</div>
@@ -289,7 +267,6 @@ const GenerateCvCoach = () => {
                 <tr class="attribute-row"><td class="attribute-cell attr-label">Adaptability</td><td class="attribute-cell attr-value">87 <div class="attr-bar-bg"><div class="attr-bar-fill" style="width: 87%"></div></div></td></tr>
               </table>
             </div>
-
             <!-- Advanced Metrics -->
             <div class="section">
               <div class="section-header">Professional Metrics</div>
@@ -300,7 +277,6 @@ const GenerateCvCoach = () => {
                 <tr class="attribute-row"><td class="attribute-row"><td class="attribute-cell attr-label">Success Rate</td><td class="attribute-cell attr-value">Elite</td></tr>
               </table>
             </div>
-
             <!-- Career Timeline -->
             <div class="section full-width">
               <div class="section-header">Professional Career History</div>
@@ -325,7 +301,6 @@ const GenerateCvCoach = () => {
                 </tr>
               </table>
             </div>
-
             <div class="section full-width highlight-box">
               <div class="section-header">Professional Summary</div>
               <p style="font-size: 13px; color: #444; margin: 0;">
@@ -333,13 +308,11 @@ const GenerateCvCoach = () => {
               </p>
             </div>
           </div>
-
           <div class="footer">
             <span>Tech ID: 9F8E7D6C • Confirmed By: ER Coaching Dept</span>
             <span>Page 1 of 1 • Internal Document</span>
             <span>Date: ${new Date().toLocaleDateString()}</span>
           </div>
-
           <script>
             window.onload = function() { 
               window.print();
@@ -349,11 +322,9 @@ const GenerateCvCoach = () => {
         </body>
       </html>
     `;
-
     printWindow.document.write(htmlContent);
     printWindow.document.close();
   };
-
   return (
     <div className="flex flex-col gap-8 pb-10 w-full overflow-x-hidden">
       {/* Header */}
@@ -369,9 +340,6 @@ const GenerateCvCoach = () => {
           <IconDownload size={18} /> Download CV PDF
         </Button>
       </div>
-
-
-
       {/* Main Content */}
       <div className="flex flex-col gap-6">
         {/* Personal Information Hero - Restoring Original Design */}
@@ -383,7 +351,6 @@ const GenerateCvCoach = () => {
             />
             <div className="absolute inset-0 bg-linear-to-r from-black/95 via-black/40 via-45% to-transparent" />
             <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
-
             <div className="absolute right-0 bottom-0 h-full w-[70%] p-8  md:w-[40%] flex items-center justify-center pointer-events-none opacity-60 md:opacity-100">
               <Image
                 src={coachData.coachImage?.src || coachData.coachImage}
@@ -393,7 +360,6 @@ const GenerateCvCoach = () => {
                 className="h-[90%] md:h-[105%] object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.9)]"
               />
             </div>
-
             <div className="relative p-6 md:p-10 w-full space-y-8">
               <div className="flex flex-col gap-6">
                 <div className="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-gold bg-gold/80 flex items-center justify-center backdrop-blur-2xl shadow-2xl">
@@ -421,7 +387,6 @@ const GenerateCvCoach = () => {
                   </div>
                 </div>
               </div>
-
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 lg:gap-x-12 gap-y-4 md:gap-y-6 pt-4 md:pt-8 w-full p-0 md:p-6 rounded-2xl">
                 <div className="flex items-center gap-3 md:gap-4 min-w-0">
                   <div className="p-2 md:p-3 bg-white/5 rounded-xl border border-white/10 text-white/40 shrink-0"><IconShield size={16} className="md:w-5 md:h-5" /></div>
@@ -455,7 +420,6 @@ const GenerateCvCoach = () => {
             </div>
           </div>
         </section>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 w-full">
           {/* Completion Status */}
           <div className="bg-[#111111] rounded-3xl border border-white/10 p-8 flex flex-col gap-6">
@@ -472,7 +436,6 @@ const GenerateCvCoach = () => {
               </p>
             </div>
           </div>
-
           {/* Tier Status */}
           <div className="bg-[#111111] rounded-3xl border border-white/10 p-6 md:p-8 flex flex-col gap-4 md:gap-6 relative overflow-hidden">
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#FBBF24]/10 blur-3xl rounded-full" />
@@ -487,7 +450,6 @@ const GenerateCvCoach = () => {
               <IconShare size={16} className="text-white/40" /> Request Re-validation
             </Button>
           </div>
-
           {/* Player CV Validations */}
           <section className="p-6 rounded-2xl border border-white/20 bg-[#0D0D0D]">
             <div className="flex items-center gap-2 mb-6">
@@ -506,7 +468,6 @@ const GenerateCvCoach = () => {
                       : reason === "Expired"
                         ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
                         : "bg-red-500/10 text-red-400 border-red-500/20";
-
                   return (
                     <div key={player.id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 group hover:border-[#E31B23]/50 transition-colors">
                       <div className="flex items-center gap-3">
@@ -546,8 +507,6 @@ const GenerateCvCoach = () => {
         </div>
         <FullEditableCv editable={true} />
       </div>
-
-
       <style jsx global>{`
         @media print {
           @page {
@@ -583,7 +542,6 @@ const GenerateCvCoach = () => {
           .bg-black { background-color: #000 !important; }
           .bg-\\[\\#111111\\] { background-color: #111111 !important; }
           .border { border-color: rgba(255, 255, 255, 0.1) !important; }
-          
           /* Hide edit buttons and adjust layout for A4 */
           button { display: none !important; }
           input, textarea { 
@@ -592,7 +550,6 @@ const GenerateCvCoach = () => {
             padding: 0 !important;
             color: white !important;
           }
-          
           /* Custom PDF Header */
           .pdf-footer {
             position: fixed;
@@ -613,5 +570,4 @@ const GenerateCvCoach = () => {
     </div>
   );
 };
-
 export default GenerateCvCoach;

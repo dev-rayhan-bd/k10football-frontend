@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import React, { useState } from "react";
 import DashboardModal from "@/components/dashboard/DashboardModal";
 import { 
@@ -11,7 +11,6 @@ import {
   IconArrowLeft,
   IconBox
 } from "@tabler/icons-react";
-
 const products = [
   {
     id: 1,
@@ -62,20 +61,16 @@ const products = [
     image: "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?auto=format&fit=crop&q=80&w=400"
   }
 ];
-
 export const ProductStoreManagement = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedSizes, setSelectedSizes] = useState<string[]>(["XS", "S", "M", "XL"]);
   const [selectedColors, setSelectedColors] = useState<string[]>(["Black", "White", "Red"]);
-
   const toggleSize = (size: string) => {
     setSelectedSizes(prev => prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size]);
   };
-
   const toggleColor = (color: string) => {
     setSelectedColors(prev => prev.includes(color) ? prev.filter(c => c !== color) : [...prev, color]);
   };
-
   return (
     <div className="flex flex-col gap-8">
       {/* Header */}
@@ -92,7 +87,6 @@ export const ProductStoreManagement = () => {
           <span className="text-sm font-bold uppercase tracking-widest">Add Product</span>
         </button>
       </div>
-
       {/* Main Container */}
       <div className="bg-[#0A0A0A] rounded-[32px] border border-white/5 p-8 flex flex-col gap-8 shadow-2xl">
         <div className="flex justify-between items-center">
@@ -106,14 +100,13 @@ export const ProductStoreManagement = () => {
             ))}
           </div>
         </div>
-
         {/* Product Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((product) => (
             <div key={product.id} className="bg-[#111111] rounded-[32px] border border-white/15 p-6 flex flex-col gap-6 hover:border-white/25 transition-all shadow-xl group relative overflow-hidden">
               {/* Product Image Area */}
               <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-black relative group-hover:scale-[1.02] transition-transform duration-500">
-                <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                <Image src={product.image} alt={product.name} className="w-full h-full object-cover" />
                 <div className="absolute top-4 left-4 flex gap-2">
                   <span className="bg-black/60 backdrop-blur-md px-3 py-1 rounded-lg text-[9px] font-black text-white/80 uppercase tracking-widest border border-white/10">
                     {product.category}
@@ -125,7 +118,6 @@ export const ProductStoreManagement = () => {
                   </span>
                 </div>
               </div>
-
               <div className="space-y-4">
                 <h3 className="text-lg font-black uppercase text-white font-orbitron leading-tight">{product.name}</h3>
                 <div className="flex justify-between items-center">
@@ -139,7 +131,6 @@ export const ProductStoreManagement = () => {
           ))}
         </div>
       </div>
-
       {/* Add Product Modal */}
       <DashboardModal
         isOpen={showAddModal}
@@ -193,7 +184,6 @@ export const ProductStoreManagement = () => {
               </div>
             </div>
           </div>
-
           {/* Pricing */}
           <div className="space-y-6 bg-[#0A0A0A] border border-white/15 rounded-[32px] p-8">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Pricing</h3>
@@ -215,7 +205,6 @@ export const ProductStoreManagement = () => {
               </div>
             </div>
           </div>
-
           {/* Description */}
           <div className="space-y-6 bg-[#0A0A0A] border border-white/15 rounded-[32px] p-8">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Description</h3>
@@ -226,7 +215,6 @@ export const ProductStoreManagement = () => {
               <textarea placeholder="Describe the product features, materials, care instructions, etc." className="w-full bg-[#111111] border border-white/15 rounded-xl py-4 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all resize-none h-32" />
             </div>
           </div>
-
           {/* Available Sizes */}
           <div className="space-y-6 bg-[#0A0A0A] border border-white/15 rounded-[32px] p-8">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Available Sizes</h3>
@@ -249,7 +237,6 @@ export const ProductStoreManagement = () => {
               </div>
             </div>
           </div>
-
           {/* Available Colors */}
           <div className="space-y-6 bg-[#0A0A0A] border border-white/15 rounded-[32px] p-8">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Available Colors</h3>
@@ -272,7 +259,6 @@ export const ProductStoreManagement = () => {
               </div>
             </div>
           </div>
-
           {/* Inventory Management */}
           <div className="space-y-6 bg-[#0A0A0A] border border-white/15 rounded-[32px] p-8">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Inventory Management</h3>
@@ -295,7 +281,6 @@ export const ProductStoreManagement = () => {
               </div>
             </div>
           </div>
-
           {/* Product Image */}
           <div className="space-y-6 bg-[#0A0A0A] border border-white/15 rounded-[32px] p-8">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Product Image</h3>
@@ -308,7 +293,6 @@ export const ProductStoreManagement = () => {
               </div>
             </div>
           </div>
-
           {/* Product Status */}
           <div className="space-y-6 bg-[#0A0A0A] border border-white/15 rounded-[32px] p-8">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Product Status</h3>
@@ -338,5 +322,4 @@ export const ProductStoreManagement = () => {
     </div>
   );
 };
-
 export default ProductStoreManagement;
