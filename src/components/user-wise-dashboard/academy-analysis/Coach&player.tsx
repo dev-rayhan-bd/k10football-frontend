@@ -181,8 +181,8 @@ export const CoachAndPlayer = () => {
       {/* Header */}
       <div className="flex justify-between items-start md:items-center flex-col md:flex-row gap-4">
         <div>
-          <h1 className="text-5xl font-black text-white font-orbitron uppercase tracking-tight">Coach and Players</h1>
-          <p className="text-white/60 font-medium mt-2 text-lg">Manage your Teams, Coaches and Players</p>
+          <h1 className="text-3xl md:text-5xl font-black text-white font-orbitron uppercase tracking-tight">Coach and Players</h1>
+          <p className="text-white/60 font-medium mt-2 text-sm md:text-lg">Manage your Teams, Coaches and Players</p>
         </div>
         <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-4 py-2">
           <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Current Plan:</span>
@@ -203,21 +203,21 @@ export const CoachAndPlayer = () => {
       </div>
 
       {/* Team Capacity Section */}
-      <div className="bg-[#111111] rounded-3xl border border-white/20 p-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="bg-[#111111] rounded-3xl border border-white/20 p-6 md:p-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
         <div className="space-y-1">
-          <h2 className="text-2xl font-black text-white font-orbitron uppercase tracking-tight">Team Capacity</h2>
+          <h2 className="text-xl md:text-2xl font-black text-white font-orbitron uppercase tracking-tight">Team Capacity</h2>
           {plan === "Free" ? (
-            <p className="text-white/60 font-medium text-xs">
-              You are using {teams.length} out of 1 available team slot. You need to upgrade your plan to add more than one team.
+            <p className="text-white/60 font-medium text-xs md:text-sm">
+              You are using {teams.length} out of 1 available team slot. Upgrade your plan for more.
             </p>
           ) : (
-            <p className="text-[#00FF85] font-medium text-xs">
+            <p className="text-[#00FF85] font-medium text-xs md:text-sm">
               Premium Plan Active: Unlimited team slots available.
             </p>
           )}
         </div>
-        <div className="flex items-center gap-8 self-end sm:self-auto">
-          <div className="text-right">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8 w-full sm:w-auto">
+          <div className="text-left sm:text-right w-full sm:w-auto">
             <p className="text-2xl font-black text-[#E31B23] font-orbitron">
               {plan === "Free" ? `${teams.length}/1` : `${teams.length}/∞`}
             </p>
@@ -226,7 +226,7 @@ export const CoachAndPlayer = () => {
           {plan === "Free" && (
             <button 
               onClick={() => setIsPaymentOpen(true)}
-              className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/20 text-[10px] font-black uppercase tracking-[0.2em] text-white px-8 py-4 rounded-xl transition-all cursor-pointer"
+              className="w-full sm:w-auto flex justify-center items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/20 text-[10px] font-black uppercase tracking-[0.2em] text-white px-8 py-4 rounded-xl transition-all cursor-pointer shrink-0"
             >
               <IconPlus size={16} />
               Upgrade Plan
@@ -237,14 +237,14 @@ export const CoachAndPlayer = () => {
 
       {/* Teams Table Section */}
       <div className="bg-[#111111] rounded-3xl border border-white/20 p-6 md:p-8 flex flex-col gap-8">
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-black text-white font-orbitron uppercase tracking-tight">My Teams</h2>
-            <p className="text-white/60 font-medium text-xs uppercase tracking-widest mt-1">Academy Roster Groups</p>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="w-full sm:w-auto min-w-0">
+            <h2 className="text-2xl font-black text-white font-orbitron uppercase tracking-tight truncate">My Teams</h2>
+            <p className="text-white/60 font-medium text-xs uppercase tracking-widest mt-1 truncate">Academy Roster Groups</p>
           </div>
           <button 
             onClick={handleAddTeamClick}
-            className="flex items-center gap-2 bg-[#E31B23] hover:bg-[#ff2d35] border border-transparent text-[10px] font-black uppercase tracking-[0.2em] text-white px-6 py-3 rounded-xl transition-all shadow-[0_0_15px_rgba(227,27,35,0.2)] cursor-pointer"
+            className="w-full sm:w-auto flex justify-center items-center gap-2 bg-[#E31B23] hover:bg-[#ff2d35] border border-transparent text-[10px] font-black uppercase tracking-[0.2em] text-white px-6 py-3 rounded-xl transition-all shadow-[0_0_15px_rgba(227,27,35,0.2)] cursor-pointer shrink-0"
           >
             <IconPlus size={16} />
             Add Team
@@ -254,7 +254,7 @@ export const CoachAndPlayer = () => {
         <div className="w-full overflow-x-auto rounded-2xl border border-white/20">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-white/20 bg-white/[0.02]">
+              <tr className="border-b border-white/20 bg-white/2">
                 <th className="py-5 px-6 text-[11px] font-black uppercase tracking-widest text-white/40 border-r border-white/20">Team Name</th>
                 <th className="py-5 px-6 text-[11px] font-black uppercase tracking-widest text-white/40 border-r border-white/20 text-center">Coaches</th>
                 <th className="py-5 px-6 text-[11px] font-black uppercase tracking-widest text-white/40 border-r border-white/20 text-center">Players</th>
@@ -267,12 +267,12 @@ export const CoachAndPlayer = () => {
               {teams.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-white/40 text-sm font-medium">
-                    No teams available. Click "Add Team" to get started.
+                    No teams available. Click &quot;Add Team&quot; to get started.
                   </td>
                 </tr>
               ) : (
                 teams.map((team, index) => (
-                  <tr key={team.id} className={`group hover:bg-white/[0.02] transition-colors ${index !== teams.length - 1 ? 'border-b border-white/20' : ''}`}>
+                  <tr key={team.id} className={`group hover:bg-white/2 transition-colors ${index !== teams.length - 1 ? 'border-b border-white/20' : ''}`}>
                     <td className="py-6 px-6 border-r border-white/20">
                       <span className="text-base font-bold text-white group-hover:text-[#E31B23] transition-colors">{team.name}</span>
                     </td>
@@ -329,7 +329,7 @@ export const CoachAndPlayer = () => {
                 value={newTeamName}
                 onChange={(e) => setNewTeamName(e.target.value)}
                 placeholder="Enter team name (e.g. Santos U19)"
-                className="w-full h-12 bg-white/[0.02] border border-white/10 rounded-xl px-4 text-sm font-bold text-white focus:outline-none focus:border-[#E31B23]/50 transition-all placeholder:text-gray-600"
+                className="w-full h-12 bg-white/2 border border-white/10 rounded-xl px-4 text-sm font-bold text-white focus:outline-none focus:border-[#E31B23]/50 transition-all placeholder:text-gray-600"
                 required
               />
             </div>
@@ -368,7 +368,7 @@ export const CoachAndPlayer = () => {
                 value={editingTeamName}
                 onChange={(e) => setEditingTeamName(e.target.value)}
                 placeholder="Enter team name"
-                className="w-full h-12 bg-white/[0.02] border border-white/10 rounded-xl px-4 text-sm font-bold text-white focus:outline-none focus:border-[#E31B23]/50 transition-all placeholder:text-gray-600"
+                className="w-full h-12 bg-white/2 border border-white/10 rounded-xl px-4 text-sm font-bold text-white focus:outline-none focus:border-[#E31B23]/50 transition-all placeholder:text-gray-600"
                 required
               />
             </div>
@@ -424,7 +424,7 @@ export const CoachAndPlayer = () => {
                   value={cardNumber}
                   onChange={(e) => setCardNumber(e.target.value.replace(/\D/g, "").replace(/(.{4})/g, "$1 ").trim())}
                   placeholder="4111 2222 3333 4444"
-                  className="w-full h-11 bg-white/[0.02] border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-amber-500/50 transition-all placeholder:text-gray-700 font-mono"
+                  className="w-full h-11 bg-white/2 border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-amber-500/50 transition-all placeholder:text-gray-700 font-mono"
                   required
                 />
               </div>
@@ -441,7 +441,7 @@ export const CoachAndPlayer = () => {
                       setExpiry(val);
                     }}
                     placeholder="MM/YY"
-                    className="w-full h-11 bg-white/[0.02] border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-amber-500/50 transition-all placeholder:text-gray-700 font-mono"
+                    className="w-full h-11 bg-white/2 border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-amber-500/50 transition-all placeholder:text-gray-700 font-mono"
                     required
                   />
                 </div>
@@ -453,7 +453,7 @@ export const CoachAndPlayer = () => {
                     value={cvc}
                     onChange={(e) => setCvc(e.target.value.replace(/\D/g, ""))}
                     placeholder="***"
-                    className="w-full h-11 bg-white/[0.02] border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-amber-500/50 transition-all placeholder:text-gray-700 font-mono"
+                    className="w-full h-11 bg-white/2 border border-white/10 rounded-xl px-4 text-xs font-bold text-white focus:outline-none focus:border-amber-500/50 transition-all placeholder:text-gray-700 font-mono"
                     required
                   />
                 </div>

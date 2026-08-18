@@ -120,15 +120,15 @@ const DashboardHero = ({
         {contacts && contacts.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 max-w-3xl pt-8 border-t border-white/10">
             {contacts.map((contact, index) => (
-              <div key={index} className="flex items-center gap-4">
-                <div className="p-3 bg-white/5 rounded-2xl border border-white/10 text-white/40">
+              <div key={index} className="flex items-center gap-4 min-w-0">
+                <div className="p-3 bg-white/5 rounded-2xl border border-white/10 text-white/40 shrink-0">
                   {getIcon(contact.type)}
                 </div>
-                <div className="space-y-0.5">
-                  <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">
+                <div className="space-y-0.5 min-w-0">
+                  <p className="text-[10px] text-white/40 uppercase font-black tracking-widest truncate">
                     {contact.label}
                   </p>
-                  <p className="text-white text-base font-bold">
+                  <p className="text-white text-base font-bold break-all sm:break-normal">
                     {contact.value}
                   </p>
                 </div>

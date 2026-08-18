@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import Image from "next/image";
 import React from "react";
@@ -7,10 +8,9 @@ import {
   IconEye, 
   IconShare, 
   IconChevronDown,
-  IconSearch
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
-import TableActionButtons from "@/components/dashboard/TableActionButtons";
+
 const LibraryStatCard = ({ icon: Icon, value, label }: { icon: any, value: string | number, label: string }) => (
   <div className="bg-[#111111] border border-white/20 rounded-2xl p-8 flex flex-col gap-4 flex-1">
     <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/20 flex items-center justify-center">
@@ -46,40 +46,41 @@ const StatusPill = ({ type }: { type: "Silver" | "Gold" | "Bronze" }) => {
 const CvsLibrary = () => {
   const [activeTab, setActiveTab] = React.useState("All CVS");
   return (
-    <div className="flex flex-col gap-8 pb-10">
+    <div className="flex flex-col gap-8 pb-10 w-full min-w-0 overflow-x-hidden md:overflow-x-visible">
       {/* Header */}
       <div>
-        <h1 className="text-5xl font-black text-white font-orbitron uppercase tracking-tight">CVs Library</h1>
-        <p className="text-white/60 font-medium mt-2 text-lg">View and manage athlete CVs</p>
+        <h1 className="text-3xl md:text-5xl font-black text-white font-orbitron uppercase tracking-tight">CVs Library</h1>
+        <p className="text-white/60 font-medium mt-2 text-sm md:text-lg">View and manage athlete CVs</p>
       </div>
       {/* Summary Container */}
-      <div className="bg-[#111111] border border-white/15 rounded-[40px] p-10 flex flex-col gap-10">
-        <div className="flex gap-6">
+      <div className="bg-[#111111] border border-white/15 rounded-3xl md:rounded-[40px] p-6 md:p-10 flex flex-col gap-6 md:gap-10 min-w-0 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 min-w-0">
           <LibraryStatCard icon={IconFileText} value="4" label="All CVS" />
           <LibraryStatCard icon={IconHeart} value="42" label="Liked CVs" />
           <LibraryStatCard icon={IconEye} value="18" label="Profiles Shared" />
         </div>
         {/* Tabs */}
-        <div className="flex gap-8 border-b border-white/15">
+        <div className="flex gap-4 md:gap-8 border-b border-white/15 overflow-x-auto no-scrollbar whitespace-nowrap min-w-0 w-full">
           <TabButton active={activeTab === "All CVS"} onClick={() => setActiveTab("All CVS")} label="All CVS" icon={IconFileText} />
           <TabButton active={activeTab === "Liked CVs"} onClick={() => setActiveTab("Liked CVs")} label="Liked CVs" icon={IconHeart} />
           <TabButton active={activeTab === "Profiles Shared"} onClick={() => setActiveTab("Profiles Shared")} label="Profiles Shared" icon={IconEye} />
         </div>
       </div>
       {/* Table Container */}
-      <div className="bg-[#111111] border border-white/20 rounded-[40px] p-8 flex flex-col gap-8">
+      <div className="bg-[#111111] border border-white/20 rounded-3xl md:rounded-[40px] p-6 md:p-8 flex flex-col gap-6 md:gap-8 min-w-0 w-full">
         {/* Table Filters */}
-        <div className="flex justify-end gap-3">
+        <div className="flex flex-wrap sm:justify-end gap-3">
           {["All Positions", "Country", "Age Range", "All Status"].map((filter) => (
-            <Button key={filter} variant="outline" className="bg-black/40 border-white/20 h-10 rounded-xl text-white/60 text-[10px] font-black uppercase tracking-wider flex items-center gap-2 px-4">
+            <Button key={filter} variant="outline" className="w-full sm:w-auto bg-black/40 border-white/20 h-10 rounded-xl text-white/60 text-[10px] font-black uppercase tracking-wider flex items-center justify-between sm:justify-start gap-2 px-4">
               {filter} <IconChevronDown size={14} />
             </Button>
           ))}
         </div>
         {/* Professional Table */}
-        <div className="border border-white/20 rounded-2xl overflow-hidden">
-          <table className="w-full text-left border-collapse">
-            <thead>
+        <div className="w-full overflow-x-auto rounded-2xl border border-white/20">
+          <div className="min-w-200">
+            <table className="w-full text-left border-collapse">
+              <thead>
               <tr className="bg-white/5 border-b border-white/20">
                 <th className="px-6 py-4 text-[10px] font-black text-white uppercase tracking-wider border-r border-white/20">Name</th>
                 <th className="px-6 py-4 text-[10px] font-black text-white uppercase tracking-wider border-r border-white/20 text-center">Rating</th>
@@ -97,11 +98,11 @@ const CvsLibrary = () => {
                 { name: "Alex Jonson", pos: "Defender", rating: "8.5", club: "Barcelona B", country: "Spain", age: 20, status: "Silver" as const },
                 { name: "James Brown", pos: "Goalkeeper", rating: "7.9", club: "Liverpool Academy", country: "Argentina", age: 17, status: "Bronze" as const },
               ].map((row, i) => (
-                <tr key={i} className="hover:bg-white/[0.02] transition-colors">
+                <tr key={i} className="hover:bg-white/2 transition-colors">
                   <td className="px-6 py-5 border-r border-white/20">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-white/10 overflow-hidden border border-white/20">
-                         <Image src={`https://i.pravatar.cc/150?u=${row.name}`} alt={row.name} className="w-full h-full object-cover" />
+                         <Image width={150} height={150} src={`https://i.pravatar.cc/150?u=${row.name}`} alt={row.name} className="w-full h-full object-cover" />
                       </div>
                       <div>
                         <p className="text-white text-sm font-black uppercase">{row.name}</p>
@@ -141,6 +142,7 @@ const CvsLibrary = () => {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </div>

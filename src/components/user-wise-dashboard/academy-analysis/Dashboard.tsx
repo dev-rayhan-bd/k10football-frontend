@@ -399,6 +399,8 @@ const AcademyAnalysisDashboard = () => {
                         src={story.mediaFile}
                         alt={story.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
+                        width={300}
+                        height={300}
                         onError={(e) => { e.currentTarget.src = "/placeholder_img.jpg"; }}
                       />
                     ) : (
