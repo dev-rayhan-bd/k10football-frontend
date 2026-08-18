@@ -6,12 +6,10 @@ import {
   IconChartBar,
   IconUserCheck,
   IconUserExclamation,
-  IconPlus,
-  IconEye,
-  IconDotsVertical
 } from "@tabler/icons-react";
 import DashboardTable, { Column } from "@/components/dashboard/DashboardTable";
 import TableActionButtons from "@/components/dashboard/TableActionButtons";
+import Image from "next/image";
 
 const stats = [
   { label: "Total Players", value: "24", icon: IconUsers },
@@ -35,7 +33,7 @@ const MyTeams = () => {
       key: "name",
       render: (player) => (
         <div className="flex items-center gap-3">
-          <img src={player.avatar} className="w-10 h-10 rounded-full object-cover" alt={player.name} />
+          <Image width={40} height={40} src={player.avatar} className="w-10 h-10 rounded-full object-cover" alt={player.name} />
           <div>
             <div className="text-sm font-bold text-white">{player.name}</div>
             <div className="text-[10px] text-red-500 font-bold uppercase tracking-widest">{player.position}</div>

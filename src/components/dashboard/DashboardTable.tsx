@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React from "react";
 import { cn } from "@/lib/utils";
@@ -20,8 +21,8 @@ interface DashboardTableProps<T> {
 
 const DashboardTable = <T,>({ columns, data, className, onRowClick }: DashboardTableProps<T>) => {
 return (
-<div className={cn("border border-white/20 rounded-2xl overflow-hidden", className)}>
-  <table className="w-full text-left border-collapse">
+<div className={cn("border border-white/20 rounded-2xl overflow-x-auto", className)}>
+  <table className="w-full min-w-max text-left border-collapse whitespace-nowrap">
     <thead>
       <tr className="bg-white/5 border-b border-white/20 text-[10px] font-black text-white uppercase tracking-wider">
         {columns.map((col, i) => (
@@ -46,7 +47,7 @@ return (
           key={rowIndex} 
           onClick={() => onRowClick?.(row)}
           className={cn(
-            "hover:bg-white/[0.02] transition-colors",
+            "hover:bg-white/2 transition-colors",
             onRowClick && "cursor-pointer"
           )}
         >

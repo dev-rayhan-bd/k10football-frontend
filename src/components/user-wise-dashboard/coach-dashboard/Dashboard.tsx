@@ -361,7 +361,7 @@ const CoachDashboard = () => {
                   className="flex items-center justify-between p-3 rounded-xl bg-white/10 border border-white/20 group hover:border-[#E31B23]/50 transition-colors cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
-                    <Image src={teamData.find(p => p.id === req.playerId)?.avatar || "https://i.pravatar.cc/150?u=1"} className="w-10 h-10 rounded-full object-cover" alt={req.playerName} />
+                    <Image width={40} height={40} src={teamData.find(p => p.id === req.playerId)?.avatar || "https://i.pravatar.cc/150?u=1"} className="w-10 h-10 rounded-full object-cover" alt={req.playerName} />
                     <div>
                       <div className="text-sm font-bold text-white">{req.playerName}</div>
                       <div className="text-[10px] text-gray-500 uppercase tracking-widest">{req.playerPosition}</div>
