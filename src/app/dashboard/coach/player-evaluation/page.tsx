@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/reduxHooks";
 import { PlayerStateItem } from "@/lib/features/player/playerSlice";
 import { saveEvaluation, EvaluationData } from "@/lib/features/evaluation/evaluationSlice";
@@ -292,7 +292,7 @@ return (
       {/* Printable Page 1 */}
       <div 
         id="evaluation-report-page-1"
-        className="w-[1130px] h-[800px] bg-white text-black p-12 rounded-2xl border border-gray-200 relative overflow-hidden flex flex-col justify-between select-none"
+        className="w-282.5 h-200 bg-white text-black p-12 rounded-2xl border border-gray-200 relative overflow-hidden flex flex-col justify-between select-none"
       >
         {/* Header Banner Section */}
         <div className="flex justify-between items-center w-full relative z-10">
@@ -320,7 +320,7 @@ return (
           </div>
 
           {/* Player Info Row */}
-          <div className="flex gap-8 py-4 border-t border-b border-gray-100 text-gray-800 mt-6 max-w-[500px]">
+          <div className="flex gap-8 py-4 border-t border-b border-gray-100 text-gray-800 mt-6 max-w-125">
             <div>
               <span className="text-[9px] text-gray-400 uppercase font-black block tracking-wider">Player Name</span>
               <span className="text-base font-extrabold text-[#E31B23]">{selectedPlayer.fullName}</span>
@@ -369,7 +369,7 @@ return (
       {/* Printable Page 2 */}
       <div 
         id="evaluation-report-page-2"
-        className="w-[1130px] h-[800px] bg-white text-black p-8 rounded-2xl border border-gray-200 relative overflow-hidden flex flex-col justify-between select-none"
+        className="w-282.5 h-200 bg-white text-black p-8 rounded-2xl border border-gray-200 relative overflow-hidden flex flex-col justify-between select-none"
       >
         {/* Header Banner Section */}
         <div className="flex justify-between items-center w-full relative z-10">
@@ -394,7 +394,7 @@ return (
               <div className="space-y-1">
                 <div className="flex justify-between items-center text-[7px] font-black uppercase text-gray-400 tracking-wider pb-1">
                   <span>Skill</span>
-                  <div className="flex gap-2 w-[180px] justify-between text-center">
+                  <div className="flex gap-2 w-45 justify-between text-center">
                     <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Improvement</span>
                     <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Good</span>
                     <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Excellent</span>
@@ -408,7 +408,7 @@ return (
                 ].map((skill) => (
                   <div key={skill.key} className="flex justify-between items-center py-0.5 border-b border-gray-50 last:border-0">
                     <span className="text-xs font-bold text-gray-700">{skill.label}</span>
-                    <div className="flex gap-2 w-[180px] justify-between">
+                    <div className="flex gap-2 w-45 justify-between">
                       {renderRatingCircle(skill.key as keyof typeof DEFAULT_EVALUATION, 1)}
                       {renderRatingCircle(skill.key as keyof typeof DEFAULT_EVALUATION, 2)}
                       {renderRatingCircle(skill.key as keyof typeof DEFAULT_EVALUATION, 3)}
@@ -420,7 +420,7 @@ return (
               <div className="space-y-1">
                 <div className="flex justify-between items-center text-[7px] font-black uppercase text-gray-400 tracking-wider pb-1">
                   <span>Skill</span>
-                  <div className="flex gap-2 w-[180px] justify-between text-center">
+                  <div className="flex gap-2 w-45 justify-between text-center">
                     <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Improvement</span>
                     <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Good</span>
                     <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Excellent</span>
@@ -434,7 +434,7 @@ return (
                 ].map((skill) => (
                   <div key={skill.key} className="flex justify-between items-center py-0.5 border-b border-gray-50 last:border-0">
                     <span className="text-xs font-bold text-gray-700">{skill.label}</span>
-                    <div className="flex gap-2 w-[180px] justify-between">
+                    <div className="flex gap-2 w-45 justify-between">
                       {renderRatingCircle(skill.key as keyof typeof DEFAULT_EVALUATION, 1)}
                       {renderRatingCircle(skill.key as keyof typeof DEFAULT_EVALUATION, 2)}
                       {renderRatingCircle(skill.key as keyof typeof DEFAULT_EVALUATION, 3)}
@@ -453,7 +453,7 @@ return (
               <div className="space-y-1">
                 <div className="flex justify-between items-center text-[7px] font-black uppercase text-gray-400 tracking-wider pb-1">
                   <span>Skill</span>
-                  <div className="flex gap-2 w-[180px] justify-between text-center">
+                  <div className="flex gap-2 w-45 justify-between text-center">
                     <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Improvement</span>
                     <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Good</span>
                     <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Excellent</span>
@@ -467,7 +467,7 @@ return (
                 ].map((skill) => (
                   <div key={skill.key} className="flex justify-between items-center py-0.5 border-b border-gray-50 last:border-0">
                     <span className="text-xs font-bold text-gray-700">{skill.label}</span>
-                    <div className="flex gap-2 w-[180px] justify-between">
+                    <div className="flex gap-2 w-45 justify-between">
                       {renderRatingCircle(skill.key as keyof typeof DEFAULT_EVALUATION, 1)}
                       {renderRatingCircle(skill.key as keyof typeof DEFAULT_EVALUATION, 2)}
                       {renderRatingCircle(skill.key as keyof typeof DEFAULT_EVALUATION, 3)}
@@ -479,7 +479,7 @@ return (
               <div className="space-y-1">
                 <div className="flex justify-between items-center text-[7px] font-black uppercase text-gray-400 tracking-wider pb-1">
                   <span>Skill</span>
-                  <div className="flex gap-2 w-[180px] justify-between text-center">
+                  <div className="flex gap-2 w-45 justify-between text-center">
                     <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Improvement</span>
                     <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Good</span>
                     <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Excellent</span>
@@ -492,7 +492,7 @@ return (
                 ].map((skill) => (
                   <div key={skill.key} className="flex justify-between items-center py-0.5 border-b border-gray-50 last:border-0">
                     <span className="text-xs font-bold text-gray-700">{skill.label}</span>
-                    <div className="flex gap-2 w-[180px] justify-between">
+                    <div className="flex gap-2 w-45 justify-between">
                       {renderRatingCircle(skill.key as keyof typeof DEFAULT_EVALUATION, 1)}
                       {renderRatingCircle(skill.key as keyof typeof DEFAULT_EVALUATION, 2)}
                       {renderRatingCircle(skill.key as keyof typeof DEFAULT_EVALUATION, 3)}
@@ -512,7 +512,7 @@ return (
               <div className="space-y-1">
                 <div className="flex justify-between items-center text-[7px] font-black uppercase text-gray-400 tracking-wider pb-1">
                   <span>Skill</span>
-                  <div className="flex gap-2 w-[180px] justify-between text-center">
+                  <div className="flex gap-2 w-45 justify-between text-center">
                     <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Improvement</span>
                     <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Good</span>
                     <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Excellent</span>
@@ -526,7 +526,7 @@ return (
                 ].map((skill) => (
                   <div key={skill.key} className="flex justify-between items-center py-0.5 border-b border-gray-50 last:border-0">
                     <span className="text-xs font-bold text-gray-700">{skill.label}</span>
-                    <div className="flex gap-2 w-[180px] justify-between">
+                    <div className="flex gap-2 w-45 justify-between">
                       {renderRatingCircle(skill.key as keyof typeof DEFAULT_EVALUATION, 1)}
                       {renderRatingCircle(skill.key as keyof typeof DEFAULT_EVALUATION, 2)}
                       {renderRatingCircle(skill.key as keyof typeof DEFAULT_EVALUATION, 3)}
@@ -538,7 +538,7 @@ return (
               <div className="space-y-1">
                 <div className="flex justify-between items-center text-[7px] font-black uppercase text-gray-400 tracking-wider pb-1">
                   <span>Skill</span>
-                  <div className="flex gap-2 w-[180px] justify-between text-center">
+                  <div className="flex gap-2 w-45 justify-between text-center">
                     <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Improvement</span>
                     <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Good</span>
                     <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Excellent</span>
@@ -551,7 +551,7 @@ return (
                 ].map((skill) => (
                   <div key={skill.key} className="flex justify-between items-center py-0.5 border-b border-gray-50 last:border-0">
                     <span className="text-xs font-bold text-gray-700">{skill.label}</span>
-                    <div className="flex gap-2 w-[180px] justify-between">
+                    <div className="flex gap-2 w-45 justify-between">
                       {renderRatingCircle(skill.key as keyof typeof DEFAULT_EVALUATION, 1)}
                       {renderRatingCircle(skill.key as keyof typeof DEFAULT_EVALUATION, 2)}
                       {renderRatingCircle(skill.key as keyof typeof DEFAULT_EVALUATION, 3)}
@@ -567,7 +567,7 @@ return (
     </div>
 
     {/* Action Trigger Buttons */}
-    <div className="flex items-center justify-center gap-4 max-w-[850px] mx-auto pt-6 border-t border-white/5">
+    <div className="flex items-center justify-center gap-4 max-w-212.5 mx-auto pt-6 border-t border-white/5">
       <button
         onClick={() => {
           setSelectedPlayer(null);
@@ -638,7 +638,7 @@ return (
       placeholder="Search by player name or position..."
       value={searchTerm}
       onChange={(e) => setSearchTerm(e.target.value)}
-      className="w-full h-12 bg-white/[0.02] border border-white/10 rounded-xl pl-12 pr-4 text-sm font-bold text-white focus:outline-none focus:border-[#E31B23]/50 transition-all placeholder:text-gray-600"
+      className="w-full h-12 bg-white/2 border border-white/10 rounded-xl pl-12 pr-4 text-sm font-bold text-white focus:outline-none focus:border-[#E31B23]/50 transition-all placeholder:text-gray-600"
     />
   </div>
 
@@ -653,18 +653,18 @@ return (
         <p className="text-gray-500 text-xs">All players have been processed or matching search query.</p>
       </div>
     ) : (
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+      <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+        <table className="w-full min-w-max text-left border-collapse whitespace-nowrap">
           <thead>
             <tr className="border-b border-white/10 text-[10px] text-gray-500 uppercase tracking-widest font-black">
-              <th className="pb-4">Name</th>
-              <th className="pb-4 text-center">Rating</th>
-              <th className="pb-4">Academy / Centre</th>
-              <th className="pb-4">Last Evaluated</th>
-              <th className="pb-4 text-right">Actions</th>
+              <th className="py-4 px-4">Name</th>
+              <th className="py-4 px-4 text-center">Rating</th>
+              <th className="py-4 px-4">Academy / Centre</th>
+              <th className="py-4 px-4">Last Evaluated</th>
+              <th className="py-4 px-4 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/[0.04]">
+          <tbody className="divide-y divide-white/4">
             {filteredPlayers.map((player) => {
               const playerImgSrc = typeof player.playerImage === 'string'
                 ? player.playerImage
@@ -674,9 +674,9 @@ return (
                 <tr 
                   key={player.id} 
                   onClick={() => startEvaluation(player)}
-                  className="group hover:bg-white/[0.02] transition-all cursor-pointer"
+                  className="group hover:bg-white/2 transition-all cursor-pointer"
                 >
-                  <td className="py-4">
+                  <td className="py-4 px-4">
                     <div className="flex items-center gap-3">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img 
@@ -690,11 +690,11 @@ return (
                       </div>
                     </div>
                   </td>
-                  <td className="py-4 text-center">
+                  <td className="py-4 px-4 text-center">
                     <span className="text-sm font-black text-red-600 italic">{player.rating}</span>
                   </td>
-                  <td className="py-4 text-sm text-gray-300 font-semibold">{player.academyName || "Manchester City Academy"}</td>
-                  <td className="py-4 text-sm text-gray-400">
+                  <td className="py-4 px-4 text-sm text-gray-300 font-semibold">{player.academyName || "Manchester City Academy"}</td>
+                  <td className="py-4 px-4 text-sm text-gray-400">
                     {evaluationRecords[player.id]?.date ? (
                       <span className="flex items-center gap-1.5 text-xs font-bold text-green-500">
                         <CheckCircle size={14} /> Evaluated ({evaluationRecords[player.id].date})
@@ -705,7 +705,7 @@ return (
                       </span>
                     )}
                   </td>
-                  <td className="py-4 text-right">
+                  <td className="py-4 px-4 text-right">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();

@@ -444,6 +444,16 @@ export const playerSlice = createSlice({
         player.evaluationDate = action.payload.date;
       }
     },
+    addPlayer: (state, action: PayloadAction<Partial<PlayerStateItem>>) => {
+      const newId = state.players.length > 0 ? Math.max(...state.players.map(p => p.id)) + 1 : 1;
+      const newPlayer = {
+        ...basePlayerData,
+        id: newId,
+        validationStatus: "pending",
+        ...action.payload,
+      };
+      state.players.push(newPlayer as PlayerStateItem);
+    },
   },
 });
 
@@ -453,6 +463,7 @@ export const {
   setSelectedPlayerId,
   validatePlayerCv,
   savePlayerEvaluation,
+  addPlayer,
 } = playerSlice.actions;
 
 export default playerSlice.reducer;

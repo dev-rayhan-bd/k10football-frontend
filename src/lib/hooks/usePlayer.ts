@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAppDispatch, useAppSelector } from "./reduxHooks";
-import { updatePlayerField, setSelectedPlayerId, validatePlayerCv, PlayerData } from "../features/player/playerSlice";
+import { updatePlayerField, setSelectedPlayerId, validatePlayerCv, addPlayer, PlayerData } from "../features/player/playerSlice";
 import { useUpdatePlayerProfileMutation } from "../features/cv/cvApi";
 import { toast } from "sonner";
 
@@ -34,6 +35,11 @@ export const usePlayer = () => {
     toast.success("Player CV successfully validated");
   };
 
+  const handleCreatePlayer = (data: Partial<PlayerData>) => {
+    dispatch(addPlayer(data));
+    toast.success("Player added successfully");
+  };
+
   return {
     playerData,
     players,
@@ -41,6 +47,7 @@ export const usePlayer = () => {
     handleUpdate,
     selectPlayer,
     validatePlayer,
+    handleCreatePlayer,
   };
 };
 
