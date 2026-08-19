@@ -107,7 +107,7 @@ const GameReportsOverview = () => {
                  <p className="text-[10px] font-black text-white uppercase tracking-[0.3em]">Accurate Assist</p>
               </div>
               <div className="aspect-video relative">
-                 <Image src="/FootballPitch.png" alt="Football Pitch" className="w-full h-full object-cover" />
+                 <Image src="/field.png" alt="Football Pitch" className="w-full h-full object-cover" />
                  {/* Assist Path Overlay */}
                  <div className="absolute left-[20%] top-1/2 -translate-y-1/2 flex flex-col items-center">
                     <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-black/20">⚽</div>

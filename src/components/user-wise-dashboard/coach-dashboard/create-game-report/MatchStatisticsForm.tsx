@@ -1,11 +1,12 @@
 "use client";
-import Image from "next/image";
 import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import Image from "next/image";
 import { IconArrowUpRight } from "@tabler/icons-react";
+
 interface StatInputProps {
   label: string;
   value: number;
@@ -13,6 +14,7 @@ interface StatInputProps {
   colorClass: string;
   align?: "left" | "right";
 }
+
 const StatInput = ({ label, value, onChange, colorClass, align = "left" }: StatInputProps) => {
   return (
     <div className={cn("flex flex-col gap-1.5 w-full", align === "right" ? "items-end text-right" : "items-start text-left")}>
@@ -23,7 +25,7 @@ const StatInput = ({ label, value, onChange, colorClass, align = "left" }: StatI
           <button
             type="button"
             onClick={() => onChange(Math.max(0, value - 1))}
-            className="flex-1 h-full flex items-center justify-center text-white/85 hover:text-white hover:bg-white/10 active:scale-90 transition-all text-xl font-black font-orbitron cursor-pointer select-none min-w-0"
+            className="flex-1 h-full flex items-center justify-center text-white/85 hover:text-white hover:bg-white/10 active:scale-90 transition-all text-xl font-black font-orbitron cursor-pointer select-none"
           >
             -
           </button>
@@ -31,25 +33,25 @@ const StatInput = ({ label, value, onChange, colorClass, align = "left" }: StatI
           <button
             type="button"
             onClick={() => onChange(value + 1)}
-            className="flex-1 h-full flex items-center justify-center text-white/85 hover:text-white hover:bg-white/10 active:scale-90 transition-all text-xl font-black font-orbitron cursor-pointer select-none min-w-0"
+            className="flex-1 h-full flex items-center justify-center text-white/85 hover:text-white hover:bg-white/10 active:scale-90 transition-all text-xl font-black font-orbitron cursor-pointer select-none"
           >
             +
           </button>
         </div>
-        <div 
+        <div
           className={cn(
-            "absolute top-0 bottom-0 bg-white w-[50%] flex items-center justify-center", 
+            "absolute top-0 bottom-0 bg-white w-[50%] flex items-center justify-center",
             align === "right" ? "left-0 shadow-[4px_0_10px_rgba(0,0,0,0.1)]" : "right-0 shadow-[-4px_0_10px_rgba(0,0,0,0.1)]"
-          )} 
-          style={{ 
-            clipPath: align === "right" 
-              ? 'polygon(0 0, 100% 0, 85% 100%, 0% 100%)' 
-              : 'polygon(15% 0, 100% 0, 100% 100%, 0% 100%)' 
+          )}
+          style={{
+            clipPath: align === "right"
+              ? 'polygon(0 0, 100% 0, 85% 100%, 0% 100%)'
+              : 'polygon(15% 0, 100% 0, 100% 100%, 0% 100%)'
           }}
         >
-          <input 
-            type="text" 
-            value={value === 0 ? "0" : value} 
+          <input
+            type="text"
+            value={value === 0 ? "0" : value}
             onChange={(e) => {
               const val = parseInt(e.target.value.replace(/\D/g, ""), 10);
               onChange(isNaN(val) ? 0 : val);
@@ -65,12 +67,14 @@ const StatInput = ({ label, value, onChange, colorClass, align = "left" }: StatI
     </div>
   );
 };
+
 export interface PitchLine {
   x1: number;
   y1: number;
   x2: number;
   y2: number;
 }
+
 interface MatchStatisticsFormProps {
   position: string;
   stats: Record<string, number>;
@@ -82,6 +86,7 @@ interface MatchStatisticsFormProps {
   onCancel: () => void;
   onSubmit: () => void;
 }
+
 const MatchStatisticsForm = ({
   position,
   stats,
@@ -94,6 +99,7 @@ const MatchStatisticsForm = ({
   onSubmit
 }: MatchStatisticsFormProps) => {
   const isGK = position === "GOALKEEPER";
+
   const statsLeft = [
     { label: "Shots on Goal", key: "shotsOnGoal", color: "bg-[#00D1FF]" },
     { label: "Goal Scored", key: "goalScored", color: "bg-[#8B5CF6]" },
@@ -108,6 +114,7 @@ const MatchStatisticsForm = ({
     { label: "Free Kick", key: "freeKick", color: "bg-[#F59E0B]" },
     { label: "Corner Kick", key: "cornerKick", color: "bg-[#00D1FF]" },
   ];
+
   const statsRight = [
     { label: "Goal Unsave", key: "goalUnsave", color: "bg-[#8B5CF6]" },
     { label: "Penalties Saves", key: "penaltiesSaves", color: "bg-[#F59E0B]" },
@@ -122,6 +129,7 @@ const MatchStatisticsForm = ({
     { label: "Throwing", key: "throwing", color: "bg-[#F59E0B]" },
     { label: "Reactions", key: "reactions", color: "bg-[#00D1FF]" },
   ];
+
   // Load default stats if empty
   useEffect(() => {
     if (Object.keys(stats).length === 0) {
@@ -146,210 +154,185 @@ const MatchStatisticsForm = ({
       }
     }
   }, [isGK, stats, setStats, setGoalMarkers, setPitchMarkers]);
+
   const handleStatChange = (key: string, val: number) => {
     setStats({ ...stats, [key]: val });
   };
+
   const handleGoalClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
     const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
+
     // Add marker, max 10 markers
     if (goalMarkers.length < 10) {
       setGoalMarkers([...goalMarkers, { x, y }]);
     }
   };
+
   const removeGoalMarker = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
     setGoalMarkers(goalMarkers.filter((_, idx) => idx !== index));
   };
+
   const handlePitchClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
     const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
+
     if (pitchMarkers.length < 15) {
       setPitchMarkers([...pitchMarkers, { x1: x, y1: y, x2: x, y2: y }]);
     } else {
       toast.error("You can add a maximum of 15 markers.");
     }
   };
+
   const removePitchMarker = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
     setPitchMarkers(pitchMarkers.filter((_, idx) => idx !== index));
   };
-  const renderLeftStats = (align: "left" | "right" = "left", start = 0, end = 12) => statsLeft.slice(start, end).map(s => (
+
+  const renderLeftStats = (align: "left" | "right" = "left") => statsLeft.map(s => (
     <StatInput key={s.key} label={s.label} value={stats[s.key] || 0} onChange={(val) => handleStatChange(s.key, val)} colorClass={s.color} align={align} />
   ));
-  const renderRightStats = (align: "left" | "right" = "right", start = 0, end = 12) => statsRight.slice(start, end).map(s => (
+
+  const renderRightStats = (align: "left" | "right" = "right") => statsRight.map(s => (
     <StatInput key={s.key} label={s.label} value={stats[s.key] || 0} onChange={(val) => handleStatChange(s.key, val)} colorClass={s.color} align={align} />
   ));
+
   const renderGoalDiagram = () => (
-      <div className="bg-[#121212]/90 border border-white/10 rounded-3xl overflow-hidden shadow-xl">
-        <div className="bg-white/5 py-3.5 px-6 text-center border-b border-white/10 flex justify-between items-center">
-          <span className="text-[10px] font-black text-white uppercase tracking-[0.3em] font-orbitron">
-            {isGK ? "Accurate Save" : "Accurate Shots"}
-          </span>
-          <button 
-            onClick={() => setGoalMarkers([])}
-            className="text-[9px] font-black text-red-500 hover:text-red-400 uppercase tracking-widest transition-colors font-orbitron"
-          >
-            Clear
-          </button>
-        </div>
-        <div 
-          onClick={handleGoalClick}
-          className="aspect-4/3 landscape:aspect-21/9 lg:aspect-video relative cursor-crosshair overflow-hidden group select-none bg-black"
+    <div className="bg-[#121212]/90 border border-white/10 rounded-3xl overflow-hidden shadow-xl">
+      <div className="bg-white/5 py-3.5 px-6 text-center border-b border-white/10 flex justify-between items-center">
+        <span className="text-[10px] font-black text-white uppercase tracking-[0.3em] font-orbitron">
+          {isGK ? "Accurate Save" : "Accurate Shots"}
+        </span>
+        <button
+          onClick={() => setGoalMarkers([])}
+          className="text-[9px] font-black text-red-500 hover:text-red-400 uppercase tracking-widest transition-colors font-orbitron"
         >
-          <Image
-            src="/goal-bar.png" 
-            alt="Goal" 
-            draggable={false}
-            className="w-full h-full object-cover transition-opacity pointer-events-none select-none" 
-            width={500}
-            height={500}
-          />
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-40 transition-opacity pointer-events-none">
-            <span className="text-white text-xs font-semibold uppercase tracking-widest font-orbitron">Click Goal to Place Marker</span>
-          </div>
-          {goalMarkers.map((marker, idx) => (
-            <div 
-              key={idx} 
-              onClick={(e) => removeGoalMarker(idx, e)}
-              className="absolute w-8 h-8 -ml-4 -mt-4 flex items-center justify-center hover:scale-125 transition-all cursor-pointer animate-in zoom-in duration-200 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
-              style={{ left: `${marker.x}%`, top: `${marker.y}%` }}
-              title="Click to remove"
-            >
-              <span className="text-2xl select-none leading-none">{isGK ? "🧤" : "⚽"}</span>
-            </div>
-          ))}
-        </div>
+          Clear
+        </button>
       </div>
+      <div
+        onClick={handleGoalClick}
+        className="aspect-4/5 sm:aspect-square md:aspect-4/3 landscape:aspect-21/9 lg:aspect-video relative cursor-crosshair overflow-hidden group select-none bg-black"
+      >
+        <Image
+          src="/goal-bar.png"
+          alt="Goal"
+          draggable={false}
+          className="w-full h-full object-cover transition-opacity pointer-events-none select-none"
+          width={500}
+          height={500}
+        />
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-40 transition-opacity pointer-events-none">
+          <span className="text-white text-xs font-semibold uppercase tracking-widest font-orbitron">Click Goal to Place Marker</span>
+        </div>
+        {goalMarkers.map((marker, idx) => (
+          <div
+            key={idx}
+            onClick={(e) => removeGoalMarker(idx, e)}
+            className="absolute w-8 h-8 -ml-4 -mt-4 flex items-center justify-center hover:scale-125 transition-all cursor-pointer animate-in zoom-in duration-200 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+            style={{ left: `${marker.x}%`, top: `${marker.y}%` }}
+            title="Click to remove"
+          >
+            <span className="text-2xl select-none leading-none">{isGK ? "🧤" : "⚽"}</span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
+
   const renderPitchDiagram = () => (
-      <div className="bg-[#121212]/90 border border-white/10 rounded-3xl overflow-hidden shadow-xl">
-        <div className="bg-white/5 py-3.5 px-6 text-center border-b border-white/10 flex justify-between items-center">
-          <span className="text-[10px] font-black text-white uppercase tracking-[0.3em] font-orbitron">
-            {isGK ? "Accurate Saves" : "Accurate Assist"}
-          </span>
-          <button 
-            onClick={() => setPitchMarkers([])}
-            className="text-[9px] font-black text-red-500 hover:text-red-400 uppercase tracking-widest transition-colors font-orbitron"
-          >
-            Clear
-          </button>
-        </div>
-        <div 
-          onClick={handlePitchClick}
-          className="aspect-4/3 landscape:aspect-21/9 lg:aspect-video relative cursor-crosshair overflow-hidden group select-none bg-[#092b15]"
+    <div className="bg-[#121212]/90 border border-white/10 rounded-3xl overflow-hidden shadow-xl">
+      <div className="bg-white/5 py-3.5 px-6 text-center border-b border-white/10 flex justify-between items-center">
+        <span className="text-[10px] font-black text-white uppercase tracking-[0.3em] font-orbitron">
+          {isGK ? "Accurate Saves" : "Accurate Assist"}
+        </span>
+        <button
+          onClick={() => setPitchMarkers([])}
+          className="text-[9px] font-black text-red-500 hover:text-red-400 uppercase tracking-widest transition-colors font-orbitron"
         >
-          <Image
-            src="/FootballPitch.png" 
-            alt="Football Pitch" 
-            draggable={false}
-            className="w-full h-full object-cover opacity-80 group-hover:opacity-90 transition-opacity pointer-events-none select-none" 
-            width={500}
-            height={500}
-          />
-          <div className="absolute inset-0 bg-black/10 pointer-events-none" />
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-40 transition-opacity pointer-events-none">
-            <span className="text-white text-xs font-semibold uppercase tracking-widest font-orbitron">Click Pitch to Place Marker</span>
-          </div>
-          <div 
-            className={cn(
-              "absolute -translate-y-1/2 w-16 h-16 bg-white/10 border border-white/40 rounded-full flex items-center justify-center backdrop-blur-sm pointer-events-none select-none shadow-xl",
-              isGK ? "left-[12%] -translate-x-1/2 top-1/2" : "left-1/2 -translate-x-1/2 top-1/2"
-            )}
-          >
-            <span className="text-[7px] font-black text-white text-center leading-none uppercase font-orbitron whitespace-pre-wrap">
-              {isGK ? "Accurate\nSaves" : "Accurate\nAssist"}
-            </span>
-          </div>
-          {pitchMarkers.map((line, idx) => (
-            <div 
-              key={idx} 
-              onClick={(e) => removePitchMarker(idx, e)}
-              className="absolute w-8 h-8 -ml-4 -mt-4 flex items-center justify-center hover:scale-125 transition-all cursor-pointer animate-in zoom-in duration-200 z-30 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
-              style={{ left: `${line.x1}%`, top: `${line.y1}%` }}
-              title="Click to remove"
-            >
-              <span className="text-2xl select-none leading-none">⚽</span>
-            </div>
-          ))}
-        </div>
+          Clear
+        </button>
       </div>
+      <div
+        onClick={handlePitchClick}
+        className="aspect-4/5 sm:aspect-square md:aspect-4/3 landscape:aspect-21/9 lg:aspect-video relative cursor-crosshair overflow-hidden group select-none bg-[#092b15]"
+      >
+        <Image
+          src="/field.png"
+          alt="Football Pitch"
+          draggable={false}
+          className="w-full h-full object-cover transition-opacity pointer-events-none select-none"
+          width={500}
+          height={500}
+        />
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-40 transition-opacity pointer-events-none">
+          <span className="text-white text-xs font-semibold uppercase tracking-widest font-orbitron">Click Pitch to Place Marker</span>
+        </div>
+
+        {pitchMarkers.map((line, idx) => (
+          <div
+            key={idx}
+            onClick={(e) => removePitchMarker(idx, e)}
+            className="absolute -ml-4 -mt-4 flex items-center justify-center hover:scale-125 transition-all cursor-pointer animate-in zoom-in duration-200 z-30 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+            style={{ left: `${line.x1}%`, top: `${line.y1}%` }}
+            title="Click to remove"
+          >
+            <div className="flex items-center">
+              <span className="text-xl select-none leading-none">⚽</span>
+              <IconArrowUpRight size={24} className="text-black -ml-2 drop-shadow-[0_2px_2px_rgba(255,255,255,0.5)]" stroke={3} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
+
   return (
     <div className="flex flex-col gap-8 pb-10 animate-in fade-in duration-500">
       <div>
-        <h1 className="text-4xl md:text-5xl font-black text-white font-orbitron uppercase tracking-tight wrap-break-word">Create Game Reports</h1>
-        <p className="text-white/60 font-medium mt-2 text-base md:text-lg">Create Professional Football Player Game Reports</p>
+        <h1 className="text-3xl md:text-5xl font-black text-white font-orbitron uppercase tracking-tight wrap-break-word">Create Game Reports</h1>
+        <p className="text-white/60 font-medium mt-2 text-sm sm:text-base md:text-lg">Create Professional Football Player Game Reports</p>
       </div>
-      <div className="bg-[#0A0A0A] rounded-[40px] border border-white/10 p-8 md:p-12 flex flex-col gap-10 relative overflow-hidden shadow-2xl">
+
+      <div className="bg-[#0A0A0A] rounded-[40px] border border-white/10 p-5 sm:p-8 md:p-12 flex flex-col gap-10 relative overflow-hidden shadow-2xl">
         <div className="relative w-full">
-          <div className="bg-linear-to-r from-[#00A3FF] to-[#0066FF] font-orbitron text-white w-full py-4 rounded-xl font-black uppercase tracking-[0.4em] shadow-[0_0_40px_rgba(0,163,255,0.3)] text-center border border-white/20 text-lg italic">
+          <div className="bg-linear-to-r from-[#00A3FF] to-[#0066FF] font-orbitron text-white w-full py-4 px-2 sm:px-4 rounded-xl font-black uppercase tracking-widest sm:tracking-[0.4em] shadow-[0_0_40px_rgba(0,163,255,0.3)] text-center border border-white/20 text-sm sm:text-lg italic">
             Match Statistics
           </div>
         </div>
-        {/* ---------------- MOBILE LAYOUT: SWIPER ---------------- */}
-        <div className="lg:hidden flex overflow-x-auto snap-x snap-mandatory w-[calc(100%+4rem)] -mx-8 px-4 scroll-smooth hide-scrollbar pb-6 gap-8">
-          {/* Page 1: Stats 1-4 */}
-          <div className="w-[calc(100vw-2rem)] min-w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] sm:min-w-[calc(100vw-4rem)] snap-center shrink-0">
-            <h3 className="text-white/40 text-center font-orbitron text-xs font-bold uppercase tracking-widest mb-4">Page 1 (Swipe ⬅️)</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-4">
-                {renderLeftStats("left", 0, 4)}
-              </div>
-              <div className="flex flex-col gap-4">
-                {renderRightStats("right", 0, 4)}
-              </div>
+
+        {/* ---------------- MOBILE LAYOUT: STACKED ---------------- */}
+        <div className="lg:hidden flex flex-col gap-10 w-full pt-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="flex flex-col gap-4">
+              {renderLeftStats("left")}
+            </div>
+            <div className="flex flex-col gap-4">
+              {renderRightStats("left")}
             </div>
           </div>
-          {/* Page 2: Stats 5-8 */}
-          <div className="w-[calc(100vw-2rem)] min-w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] sm:min-w-[calc(100vw-4rem)] snap-center shrink-0">
-             <h3 className="text-white/40 text-center font-orbitron text-xs font-bold uppercase tracking-widest mb-4">Page 2 (Swipe ⬅️)</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-4">
-                {renderLeftStats("left", 4, 8)}
-              </div>
-              <div className="flex flex-col gap-4">
-                {renderRightStats("right", 4, 8)}
-              </div>
-            </div>
-          </div>
-          {/* Page 3: Stats 9-12 */}
-          <div className="w-[calc(100vw-2rem)] min-w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] sm:min-w-[calc(100vw-4rem)] snap-center shrink-0">
-             <h3 className="text-white/40 text-center font-orbitron text-xs font-bold uppercase tracking-widest mb-4">Page 3 (Swipe ⬅️)</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-4">
-                {renderLeftStats("left", 8, 12)}
-              </div>
-              <div className="flex flex-col gap-4">
-                {renderRightStats("right", 8, 12)}
-              </div>
-            </div>
-          </div>
-          {/* Page 4: Goalpost Diagram */}
-          <div className="w-[calc(100vw-2rem)] min-w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] sm:min-w-[calc(100vw-4rem)] snap-center shrink-0">
-             <h3 className="text-white/40 text-center font-orbitron text-xs font-bold uppercase tracking-widest mb-4">Page 4 (Swipe ⬅️)</h3>
-             {renderGoalDiagram()}
-          </div>
-          {/* Page 5: Pitch Diagram */}
-          <div className="w-[calc(100vw-2rem)] min-w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] sm:min-w-[calc(100vw-4rem)] snap-center shrink-0">
-             <h3 className="text-white/40 text-center font-orbitron text-xs font-bold uppercase tracking-widest mb-4">Page 5</h3>
-             {renderPitchDiagram()}
+          <div className="flex flex-col gap-8 w-full">
+            {renderGoalDiagram()}
+            {renderPitchDiagram()}
           </div>
         </div>
         {/* -------------------------------------------------------- */}
+
         {/* ---------------- DESKTOP LAYOUT ------------------------ */}
         <div className="hidden lg:block">
           <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-start min-h-175">
-            <div className="lg:col-span-3 flex flex-col gap-4 z-20 min-w-0">
+            <div className="lg:col-span-3 flex flex-col gap-4 z-20">
               {renderLeftStats()}
             </div>
-            <div className="hidden lg:flex lg:col-span-6 justify-center items-end h-full relative min-h-125 min-w-0">
+
+            <div className="hidden lg:flex lg:col-span-6 justify-center items-end h-full relative min-h-125">
               {isGK ? (
-                <Image 
-                  src="/mini__GP15525.webp" 
-                  alt="Goalkeeper" 
+                <Image
+                  src="/mini__GP15525.webp"
+                  alt="Goalkeeper"
                   className="h-130 object-contain drop-shadow-[0_25px_50px_rgba(0,0,0,0.9)] select-none pointer-events-none"
                   width={500}
                   height={500}
@@ -359,8 +342,8 @@ const MatchStatisticsForm = ({
                 />
               ) : (
                 <Image
-                  src="/sergio-ramos.png" 
-                  alt="Sergio Ramos" 
+                  src="/sergio-ramos.png"
+                  alt="Sergio Ramos"
                   className="h-130 object-contain drop-shadow-[0_25px_50px_rgba(0,0,0,0.9)] select-none pointer-events-none"
                   width={500}
                   height={500}
@@ -370,10 +353,12 @@ const MatchStatisticsForm = ({
                 />
               )}
             </div>
-            <div className="lg:col-span-3 flex flex-col gap-4 z-20 items-end min-w-0">
+
+            <div className="lg:col-span-3 flex flex-col gap-4 z-20 items-end">
               {renderRightStats()}
             </div>
           </div>
+
           <div className="mt-12">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
               {renderGoalDiagram()}
@@ -383,17 +368,18 @@ const MatchStatisticsForm = ({
         </div>
         {/* -------------------------------------------------------- */}
       </div>
+
       <div className="flex gap-3 sm:gap-6 mt-4">
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={onCancel}
-          className="flex-1 bg-transparent hover:bg-white/5 text-white border border-white/10 h-14 sm:h-16 rounded-xl text-xs sm:text-sm font-black uppercase tracking-widest sm:tracking-[0.2em] transition-all font-orbitron italic min-w-0"
+          className="flex-1 bg-transparent hover:bg-white/5 text-white border border-white/10 h-14 sm:h-16 rounded-xl text-xs sm:text-sm font-black uppercase tracking-widest sm:tracking-[0.2em] transition-all font-orbitron italic"
         >
           Cancel
         </Button>
-        <Button 
+        <Button
           onClick={onSubmit}
-          className="flex-1 bg-[#00FF62] hover:bg-[#00D150] text-black h-14 sm:h-16 rounded-xl text-xs sm:text-sm font-black uppercase tracking-widest sm:tracking-[0.2em] transition-all shadow-[0_0_30px_rgba(0,255,98,0.2)] font-orbitron italic min-w-0"
+          className="flex-1 bg-[#00FF62] hover:bg-[#00D150] text-black h-14 sm:h-16 rounded-xl text-xs sm:text-sm font-black uppercase tracking-widest sm:tracking-[0.2em] transition-all shadow-[0_0_30px_rgba(0,255,98,0.2)] font-orbitron italic"
         >
           Submit Report
         </Button>
@@ -401,4 +387,5 @@ const MatchStatisticsForm = ({
     </div>
   );
 };
+
 export default MatchStatisticsForm;
