@@ -1,15 +1,14 @@
 "use client";
 import Image from "next/image";
-import React, { useState } from "react";
+import { useState } from "react";
 import DashboardModal from "@/components/dashboard/DashboardModal";
-import { 
-  IconPlus, 
-  IconEye, 
-  IconEdit, 
+import {
+  IconPlus,
+  IconEye,
+  IconEdit,
   IconTrash,
   IconChevronDown,
   IconUpload,
-  IconChevronLeft
 } from "@tabler/icons-react";
 const successStories = [
   {
@@ -48,27 +47,27 @@ const successStories = [
 export const SuccessStoryManagement = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6 md:gap-8 w-full max-w-full overflow-x-hidden pb-10">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
         <div>
-          <h1 className="text-4xl font-black uppercase text-white font-orbitron tracking-tight leading-none">Success Story</h1>
-          <p className="text-white/60 font-bold uppercase tracking-widest text-[11px] mt-2">Share your academy's latest achievement or success Story</p>
+          <h1 className="text-3xl md:text-4xl font-black uppercase text-white font-orbitron tracking-tight leading-none wrap-break-word">Success Story</h1>
+          <p className="text-white/60 font-bold uppercase tracking-widest text-[9px] md:text-[11px] mt-2">Share your academy&apos;s latest achievement or success Story</p>
         </div>
-        <button 
+        <button
           onClick={() => setShowAddModal(true)}
-          className="bg-[#1A1A1A] hover:bg-[#252525] border border-white/10 text-white px-6 py-3 rounded-xl flex items-center gap-2 transition-all shadow-lg"
+          className="w-full md:w-auto justify-center bg-[#1A1A1A] hover:bg-[#252525] border border-white/10 text-white px-6 py-3 rounded-xl flex items-center gap-2 transition-all shadow-lg shrink-0"
         >
-          <IconPlus size={20} />
-          <span className="text-sm font-bold uppercase tracking-widest">Add Success Story</span>
+          <IconPlus size={20} className="shrink-0" />
+          <span className="text-sm font-bold uppercase tracking-widest truncate">Add Success Story</span>
         </button>
       </div>
       {/* Main Table Card */}
-      <div className="bg-[#0A0A0A] rounded-[32px] border border-white/15 p-8 flex flex-col gap-8 shadow-2xl">
-        <div className="rounded-2xl border border-white/15 overflow-hidden">
-          <table className="w-full text-left border-collapse">
+      <div className="bg-[#0A0A0A] rounded-4xl border border-white/15 p-5 md:p-8 flex flex-col gap-6 md:gap-8 shadow-2xl min-w-0">
+        <div className="rounded-2xl border border-white/15 overflow-x-auto custom-scrollbar">
+          <table className="w-full text-left border-collapse min-w-200">
             <thead>
-              <tr className="border-b border-white/15 bg-white/[0.01]">
+              <tr className="border-b border-white/15 bg-white/1">
                 <th className="py-5 px-6 text-[11px] font-black uppercase tracking-widest text-white/60 border-r border-white/15">Story Title</th>
                 <th className="py-5 px-6 text-[11px] font-black uppercase tracking-widest text-white/60 border-r border-white/15 text-center">Category</th>
                 <th className="py-5 px-6 text-[11px] font-black uppercase tracking-widest text-white/60 border-r border-white/15 text-center">Date</th>
@@ -78,23 +77,32 @@ export const SuccessStoryManagement = () => {
             </thead>
             <tbody>
               {successStories.map((story, index) => (
-                <tr key={story.id} className={`hover:bg-white/[0.02] transition-colors group ${index !== successStories.length - 1 ? 'border-b border-white/15' : ''}`}>
+                <tr key={story.id} className={`hover:bg-white/2 transition-colors group ${index !== successStories.length - 1 ? 'border-b border-white/15' : ''}`}>
                   <td className="py-6 px-6 border-r border-white/15">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-full overflow-hidden border border-white/15 bg-[#1A1A1A] shrink-0">
-                        <Image src={story.image} alt="" className="w-full h-full object-cover" />
+                        <Image
+                          width={100}
+                          height={100}
+                          src={story.image}
+                          alt="" className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.srcset = "";
+                            target.src = "/placeholder_img.jpg";
+                          }}
+                        />
                       </div>
-                      <p className="text-sm font-black text-white leading-tight max-w-[240px]">{story.title}</p>
+                      <p className="text-sm font-black text-white leading-tight max-w-60">{story.title}</p>
                     </div>
                   </td>
                   <td className="py-6 px-6 border-r border-white/15 text-sm font-medium text-white/60 text-center">{story.category}</td>
                   <td className="py-6 px-6 border-r border-white/15 text-sm font-medium text-white/60 text-center">{story.date}</td>
                   <td className="py-6 px-6 border-r border-white/15 text-center">
-                    <span className={`px-5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                      story.status === 'Approved' ? 'bg-[#4ADE80]/10 text-[#4ADE80]' : 
-                      story.status === 'Pending' ? 'bg-[#FBBF24]/10 text-[#FBBF24]' : 
-                      'bg-[#EF4444]/10 text-[#EF4444]'
-                    }`}>
+                    <span className={`px-5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${story.status === 'Approved' ? 'bg-[#4ADE80]/10 text-[#4ADE80]' :
+                      story.status === 'Pending' ? 'bg-[#FBBF24]/10 text-[#FBBF24]' :
+                        'bg-[#EF4444]/10 text-[#EF4444]'
+                      }`}>
                       {story.status}
                     </span>
                   </td>
@@ -125,47 +133,47 @@ export const SuccessStoryManagement = () => {
         subtitle="Share your academy's latest achievement or success Story"
         showBackButton
         footer={
-          <div className="flex gap-4 w-full">
-            <button 
+          <div className="flex flex-col sm:flex-row gap-3 w-full">
+            <button
               onClick={() => setShowAddModal(false)}
-              className="flex-1 py-4 rounded-xl border border-white/30 text-sm font-bold text-white hover:bg-white/5 transition-all min-w-0"
+              className="w-full sm:flex-1 py-3 sm:py-4 rounded-xl border border-white/30 text-xs sm:text-sm font-bold text-white hover:bg-white/5 transition-all min-w-0"
             >
               Cancel
             </button>
-            <button className="flex-[2] py-4 rounded-xl bg-[#1A1A1A] hover:bg-[#252525] border border-white/15 text-sm font-bold text-white transition-all shadow-lg">
+            <button className="w-full sm:flex-2 py-3 sm:py-4 rounded-xl bg-[#1A1A1A] hover:bg-[#252525] border border-white/15 text-xs sm:text-sm font-bold text-white transition-all shadow-lg">
               Submit for Approval
             </button>
           </div>
         }
       >
-        <div className="space-y-8">
+        <div className="space-y-6 sm:space-y-8">
           {/* Form Fields */}
-          <div className="space-y-6 bg-[#0A0A0A] border border-white/15 rounded-[32px] p-8">
+          <div className="space-y-4 sm:space-y-6 bg-[#0A0A0A] border border-white/15 rounded-3xl sm:rounded-4xl p-4 sm:p-6 md:p-8">
             <div className="space-y-2">
-              <label className="text-[11px] font-black uppercase tracking-widest text-white/60">Story Title</label>
-              <input type="text" placeholder="e.g., U14 Winger Signed by National Talent Centre" className="w-full bg-[#111111] border border-white/15 rounded-xl py-4 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all" />
+              <label className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-white/60">Story Title</label>
+              <input type="text" placeholder="e.g., U14 Winger Signed by National Talent Centre" className="w-full bg-[#111111] border border-white/15 rounded-xl py-3 sm:py-4 px-3 sm:px-4 text-xs sm:text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all" />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div className="space-y-2">
-                <label className="text-[11px] font-black uppercase tracking-widest text-white/60">Player Name</label>
-                <input type="text" placeholder="Marcus Silva" className="w-full bg-[#111111] border border-white/15 rounded-xl py-4 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all" />
+                <label className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-white/60">Player Name</label>
+                <input type="text" placeholder="Marcus Silva" className="w-full bg-[#111111] border border-white/15 rounded-xl py-3 sm:py-4 px-3 sm:px-4 text-xs sm:text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all" />
               </div>
               <div className="space-y-2">
-                <label className="text-[11px] font-black uppercase tracking-widest text-white/60">Position</label>
-                <input type="text" placeholder="Forward" className="w-full bg-[#111111] border border-white/15 rounded-xl py-4 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all" />
+                <label className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-white/60">Position</label>
+                <input type="text" placeholder="Forward" className="w-full bg-[#111111] border border-white/15 rounded-xl py-3 sm:py-4 px-3 sm:px-4 text-xs sm:text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all" />
               </div>
               <div className="space-y-2">
-                <label className="text-[11px] font-black uppercase tracking-widest text-white/60">Current Academy</label>
-                <input type="text" placeholder="Elite Youth Academy" className="w-full bg-[#111111] border border-white/15 rounded-xl py-4 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all" />
+                <label className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-white/60">Current Academy</label>
+                <input type="text" placeholder="Elite Youth Academy" className="w-full bg-[#111111] border border-white/15 rounded-xl py-3 sm:py-4 px-3 sm:px-4 text-xs sm:text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all" />
               </div>
               <div className="space-y-2">
-                <label className="text-[11px] font-black uppercase tracking-widest text-white/60">Date</label>
-                <input type="date" className="w-full bg-[#111111] border border-white/15 rounded-xl py-4 px-4 text-sm text-white focus:outline-none focus:border-white/25 transition-all" />
+                <label className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-white/60">Date</label>
+                <input type="date" className="w-full bg-[#111111] border border-white/15 rounded-xl py-3 sm:py-4 px-3 sm:px-4 text-xs sm:text-sm text-white focus:outline-none focus:border-white/25 transition-all" />
               </div>
               <div className="space-y-2 md:col-span-2">
-                <label className="text-[11px] font-black uppercase tracking-widest text-white/60">Category</label>
+                <label className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-white/60">Category</label>
                 <div className="relative">
-                  <select className="w-full bg-[#111111] border border-white/15 rounded-xl py-4 px-4 text-sm text-white/40 appearance-none focus:outline-none focus:border-white/25 transition-all cursor-pointer">
+                  <select className="w-full bg-[#111111] border border-white/15 rounded-xl py-3 sm:py-4 px-3 sm:px-4 text-xs sm:text-sm text-white/40 appearance-none focus:outline-none focus:border-white/25 transition-all cursor-pointer">
                     <option>Select Category</option>
                   </select>
                   <IconChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
@@ -175,20 +183,20 @@ export const SuccessStoryManagement = () => {
           </div>
           {/* Photo Upload */}
           <div className="space-y-2">
-            <p className="text-[11px] font-black uppercase tracking-widest text-white/60">Upload Photo</p>
-            <div className="w-full aspect-video border-2 border-dashed border-white/15 rounded-[32px] flex flex-col items-center justify-center gap-4 bg-white/[0.01] hover:bg-white/[0.02] transition-all cursor-pointer group">
-              <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white/20 group-hover:text-white/40 transition-colors">
-                <IconUpload size={24} />
+            <p className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-white/60">Upload Photo</p>
+            <div className="w-full aspect-video border-2 border-dashed border-white/15 rounded-3xl sm:rounded-4xl flex flex-col items-center justify-center gap-2 sm:gap-4 bg-white/1 hover:bg-white/2 transition-all cursor-pointer group">
+              <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-white/5 flex items-center justify-center text-white/20 group-hover:text-white/40 transition-colors">
+                <IconUpload size={20} className="sm:w-6 sm:h-6" />
               </div>
-              <p className="text-xs font-bold text-white/40 uppercase tracking-widest">Upload Image</p>
+              <p className="text-[10px] sm:text-xs font-bold text-white/40 uppercase tracking-widest text-center px-4">Upload Image</p>
             </div>
           </div>
           {/* Story Content */}
           <div className="space-y-2">
-            <p className="text-[11px] font-black uppercase tracking-widest text-white/60">Story Content</p>
-            <textarea 
-              placeholder="Tell the full story of this achievement..." 
-              className="w-full h-40 bg-[#111111] border border-white/15 rounded-xl py-4 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all resize-none"
+            <p className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-white/60">Story Content</p>
+            <textarea
+              placeholder="Tell the full story of this achievement..."
+              className="w-full h-32 sm:h-40 bg-[#111111] border border-white/15 rounded-xl py-3 sm:py-4 px-3 sm:px-4 text-xs sm:text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all resize-none"
             />
           </div>
         </div>

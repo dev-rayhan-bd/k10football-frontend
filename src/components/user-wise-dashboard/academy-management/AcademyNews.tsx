@@ -1,11 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import DashboardModal from "@/components/dashboard/DashboardModal";
 import { 
-  IconSearch, 
   IconPlus, 
-  IconFilter, 
   IconChevronDown,
   IconEye,
   IconEdit,
@@ -14,13 +12,7 @@ import {
   IconFileText,
   IconWorld,
   IconPencil,
-  IconRecycle,
-  IconCalendar,
-  IconUser,
   IconUpload,
-  IconArrowLeft,
-  IconTag,
-  IconBell
 } from "@tabler/icons-react";
 
 const newsArticles = [
@@ -69,35 +61,35 @@ export const AcademyNewsManagement = () => {
   ];
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6 md:gap-8 w-full max-w-full overflow-x-hidden pb-10">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
         <div>
-          <h1 className="text-4xl font-black uppercase text-white font-orbitron tracking-tight leading-none">Academy News</h1>
-          <p className="text-white/60 font-bold uppercase tracking-widest text-[11px] mt-2">Create and manage news articles</p>
+          <h1 className="text-3xl md:text-4xl font-black uppercase text-white font-orbitron tracking-tight leading-none wrap-break-word">Academy News</h1>
+          <p className="text-white/60 font-bold uppercase tracking-widest text-[9px] md:text-[11px] mt-2">Create and manage news articles</p>
         </div>
         <button 
           onClick={() => setShowCreateModal(true)}
-          className="bg-[#E31B23] hover:bg-[#C2181F] text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20"
+          className="w-full md:w-auto justify-center bg-[#E31B23] hover:bg-[#C2181F] text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 shrink-0"
         >
-          <IconPlus size={20} />
-          <span className="text-sm font-bold uppercase tracking-widest">Create News</span>
+          <IconPlus size={20} className="shrink-0" />
+          <span className="text-sm font-bold uppercase tracking-widest truncate">Create News</span>
         </button>
       </div>
 
       {/* Tabs / Filters Bar */}
-      <div className="bg-[#111111] rounded-[32px] border border-white/15 p-4 flex gap-8 shadow-xl">
+      <div className="bg-[#111111] rounded-4xl border border-white/15 p-4 flex gap-2 md:gap-8 shadow-xl overflow-x-auto custom-scrollbar w-full max-w-full">
         {tabs.map((tab) => (
           <button 
             key={tab.name}
             onClick={() => setActiveTab(tab.name)}
-            className={`flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest transition-all px-4 py-2 rounded-xl ${
+            className={`flex items-center gap-2 text-[10px] md:text-[11px] font-bold uppercase tracking-widest transition-all px-4 py-2 rounded-xl shrink-0 ${
               activeTab === tab.name 
               ? "bg-white/5 text-white border border-white/15" 
               : "text-white/40 hover:text-white/60"
             }`}
           >
-            <tab.icon size={18} />
+            <tab.icon size={18} className="shrink-0" />
             {tab.name}
           </button>
         ))}
@@ -106,51 +98,53 @@ export const AcademyNewsManagement = () => {
       {/* News Cards Grid */}
       <div className="flex flex-col gap-6">
         {newsArticles.map((article) => (
-          <div key={article.id} className="bg-[#111111] rounded-[32px] border border-white/15 p-8 flex flex-col gap-6 hover:border-white/25 transition-all shadow-2xl relative group">
-            {/* Action Buttons (Top Right) */}
-            <div className="absolute top-8 right-8 flex items-center gap-2">
-              <button className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all">
-                <IconEye size={18} />
-              </button>
-              <button className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all">
-                <IconEdit size={18} />
-              </button>
-              <button className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all">
-                <IconLock size={18} />
-              </button>
-              <button className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#E31B23]/10 border border-[#E31B23]/20 text-[#E31B23] hover:bg-[#E31B23] hover:text-white transition-all shadow-lg shadow-[#E31B23]/5 hover:shadow-[#E31B23]/20">
-                <IconTrash size={18} />
-              </button>
+          <div key={article.id} className="bg-[#111111] rounded-4xl border border-white/15 p-5 md:p-8 flex flex-col gap-6 hover:border-white/25 transition-all shadow-2xl min-w-0">
+            
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-2">
+              <div className="flex gap-2 flex-wrap">
+                <span className={`px-3 md:px-4 py-1.5 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest shrink-0 ${
+                  article.status === 'Published' ? 'bg-[#4ADE80]/10 text-[#4ADE80]' : 'bg-[#FBBF24]/10 text-[#FBBF24]'
+                }`}>
+                  {article.status}
+                </span>
+                <span className="bg-white/5 border border-white/10 px-3 md:px-4 py-1.5 rounded-xl text-[9px] md:text-[10px] font-black text-white/60 uppercase tracking-widest shrink-0">
+                  {article.visibility}
+                </span>
+              </div>
+              
+              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                <button className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all shrink-0">
+                  <IconEye size={18} />
+                </button>
+                <button className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all shrink-0">
+                  <IconEdit size={18} />
+                </button>
+                <button className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all shrink-0">
+                  <IconLock size={18} />
+                </button>
+                <button className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#E31B23]/10 border border-[#E31B23]/20 text-[#E31B23] hover:bg-[#E31B23] hover:text-white transition-all shadow-lg shadow-[#E31B23]/5 hover:shadow-[#E31B23]/20 shrink-0">
+                  <IconTrash size={18} />
+                </button>
+              </div>
             </div>
 
-            <div className="flex gap-3">
-              <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${
-                article.status === 'Published' ? 'bg-[#4ADE80]/10 text-[#4ADE80]' : 'bg-[#FBBF24]/10 text-[#FBBF24]'
-              }`}>
-                {article.status}
-              </span>
-              <span className="bg-white/5 border border-white/10 px-4 py-1.5 rounded-xl text-[10px] font-black text-white/60 uppercase tracking-widest">
-                {article.visibility}
-              </span>
-            </div>
-
-            <div className="space-y-3 pr-40">
-              <h3 className="text-2xl font-black uppercase text-white font-orbitron leading-tight tracking-tight">
+            <div className="space-y-3 min-w-0">
+              <h3 className="text-xl md:text-2xl font-black uppercase text-white font-orbitron leading-tight tracking-tight wrap-break-word">
                 {article.title}
               </h3>
-              <p className="text-sm font-medium text-white/60 leading-relaxed max-w-3xl">
+              <p className="text-sm font-medium text-white/60 leading-relaxed max-w-3xl wrap-break-word">
                 {article.excerpt}
               </p>
             </div>
 
-            <div className="pt-6 border-t border-white/5 flex items-center gap-6 text-[10px] font-black text-white/40 uppercase tracking-widest">
-              <div className="flex items-center gap-2">
+            <div className="pt-6 border-t border-white/5 flex flex-wrap items-center gap-4 md:gap-6 text-[9px] md:text-[10px] font-black text-white/40 uppercase tracking-widest">
+              <div className="flex items-center gap-2 shrink-0">
                 Published By: <span className="text-white/80">{article.author}</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 • Publishing Date: <span className="text-white/80">{article.date}</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 • Views: <span className="text-white/80">{article.views}</span>
               </div>
             </div>
@@ -166,17 +160,17 @@ export const AcademyNewsManagement = () => {
         subtitle="Publish news and updates for your academy community"
         showBackButton
         footer={
-          <div className="flex justify-end gap-4">
+          <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
             <button 
               onClick={() => setShowCreateModal(false)}
-              className="px-8 py-3.5 rounded-xl border border-white/30 text-[11px] font-black uppercase tracking-widest text-white hover:bg-white/5 transition-all"
+              className="w-full sm:w-auto px-4 sm:px-8 py-3.5 rounded-xl border border-white/30 text-[11px] font-black uppercase tracking-widest text-white hover:bg-white/5 transition-all shrink-0"
             >
               Cancel
             </button>
-            <button className="px-8 py-3.5 rounded-xl bg-white/5 border border-white/15 text-[11px] font-black uppercase tracking-widest text-white hover:bg-white/10 transition-all">
+            <button className="w-full sm:w-auto px-4 sm:px-8 py-3.5 rounded-xl bg-white/5 border border-white/15 text-[11px] font-black uppercase tracking-widest text-white hover:bg-white/10 transition-all shrink-0">
               Save Draft
             </button>
-            <button className="px-8 py-3.5 rounded-xl bg-[#E31B23] hover:bg-[#C2181F] text-[11px] font-black uppercase tracking-widest text-white flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20">
+            <button className="w-full sm:w-auto justify-center px-4 sm:px-8 py-3.5 rounded-xl bg-[#E31B23] hover:bg-[#C2181F] text-[11px] font-black uppercase tracking-widest text-white flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 shrink-0">
               Publish Now
             </button>
           </div>
@@ -186,8 +180,8 @@ export const AcademyNewsManagement = () => {
           {/* Article Information */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Article Information</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-              <div className="space-y-2 md:col-span-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              <div className="space-y-2 sm:col-span-2 md:col-span-3">
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
                   Article Title <span className="text-[#E31B23]">*</span>
                 </label>
@@ -245,7 +239,7 @@ export const AcademyNewsManagement = () => {
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Featured Image</h3>
             <div className="space-y-2">
               <label className="text-[11px] font-black uppercase tracking-widest text-white/60">Upload Image</label>
-              <div className="w-full border-2 border-dashed border-white/15 rounded-2xl p-12 flex flex-col items-center justify-center gap-4 hover:border-white/25 transition-all cursor-pointer bg-white/[0.01]">
+              <div className="w-full border-2 border-dashed border-white/15 rounded-2xl p-12 flex flex-col items-center justify-center gap-4 hover:border-white/25 transition-all cursor-pointer bg-white/1">
                 <IconUpload size={32} className="text-white/20" />
                 <p className="text-sm font-bold text-white/60">Click to upload or drag and drop image/*</p>
                 <p className="text-[9px] text-white/20 font-bold uppercase tracking-widest">Recommended: 1200x675 pixels (16:9 ratio)</p>

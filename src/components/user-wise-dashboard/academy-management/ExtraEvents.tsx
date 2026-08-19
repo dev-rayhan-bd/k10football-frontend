@@ -266,44 +266,44 @@ export const ExtraEventsManagement = () => {
     }
   };
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6 md:gap-8 w-full max-w-full overflow-x-hidden pb-10">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
         <div>
-          <h1 className="text-4xl font-black uppercase text-white font-orbitron tracking-tight leading-none">Extra Events</h1>
-          <p className="text-white/60 font-bold uppercase tracking-widest text-[11px] mt-2">Manage special events and activities</p>
+          <h1 className="text-3xl md:text-4xl font-black uppercase text-white font-orbitron tracking-tight leading-none wrap-break-word">Extra Events</h1>
+          <p className="text-white/60 font-bold uppercase tracking-widest text-[9px] md:text-[11px] mt-2">Manage special events and activities</p>
         </div>
         <button 
           onClick={() => setShowCreateModal(true)}
-          className="bg-[#E31B23] hover:bg-[#C2181F] text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20"
+          className="w-full md:w-auto justify-center bg-[#E31B23] hover:bg-[#C2181F] text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 shrink-0"
         >
-          <IconPlus size={20} />
-          <span className="text-sm font-bold uppercase tracking-widest">Create Event</span>
+          <IconPlus size={20} className="shrink-0" />
+          <span className="text-sm font-bold uppercase tracking-widest truncate">Create Event</span>
         </button>
       </div>
       {/* Filter Bar */}
-      <div className="flex justify-end gap-3">
-        <button className="bg-[#111111] border border-white/15 px-5 py-2.5 rounded-xl text-[11px] font-bold text-white/60 hover:text-white flex items-center gap-2 transition-all">
+      <div className="flex gap-2 sm:gap-3 overflow-x-auto custom-scrollbar pb-2 md:pb-0 md:justify-end w-full max-w-full">
+        <button className="bg-[#111111] border border-white/15 px-4 sm:px-5 py-2.5 rounded-xl text-[10px] sm:text-[11px] font-bold text-white/60 hover:text-white flex items-center gap-2 transition-all shrink-0">
           All Events
-          <IconChevronDown size={14} />
+          <IconChevronDown size={14} className="shrink-0" />
         </button>
-        <button className="bg-[#111111] border border-white/15 px-5 py-2.5 rounded-xl text-[11px] font-bold text-white/60 hover:text-white flex items-center gap-2 transition-all">
+        <button className="bg-[#111111] border border-white/15 px-4 sm:px-5 py-2.5 rounded-xl text-[10px] sm:text-[11px] font-bold text-white/60 hover:text-white flex items-center gap-2 transition-all shrink-0">
           Date
-          <IconChevronDown size={14} />
+          <IconChevronDown size={14} className="shrink-0" />
         </button>
       </div>
       {/* Event Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {eventsList.map((event) => (
-          <div key={event.id} className="bg-[#111111] rounded-4xl border border-white/15 p-6 flex flex-col gap-6 hover:border-white/25 transition-all shadow-xl group">
-            <div className="flex justify-between items-start">
-              <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${
+          <div key={event.id} className="bg-[#111111] rounded-4xl border border-white/15 p-5 md:p-6 flex flex-col gap-5 md:gap-6 hover:border-white/25 transition-all shadow-xl group min-w-0">
+            <div className="flex justify-between items-start gap-2">
+              <span className={`px-3 md:px-4 py-1.5 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest shrink-0 ${
                 event.status === 'Open' ? 'bg-[#4ADE80]/10 text-[#4ADE80]' : 'bg-[#FBBF24]/10 text-[#FBBF24]'
               }`}>
                 {event.status}
               </span>
               {event.eventType === "tournament" && (
-                <div className="w-10 h-10 text-white select-none">
+                <div className="w-8 h-8 md:w-10 md:h-10 text-white select-none shrink-0">
                   {event.customLogo ? (
                     <Image width={20} height={20} src={event.customLogo} alt="Logo" className="w-full h-full object-contain" />
                   ) : (
@@ -314,8 +314,8 @@ export const ExtraEventsManagement = () => {
                 </div>
               )}
             </div>
-            <div className="space-y-4">
-              <h3 className="text-lg font-black uppercase text-white font-orbitron leading-tight min-h-12 line-clamp-2">
+            <div className="space-y-4 min-w-0">
+              <h3 className="text-lg font-black uppercase text-white font-orbitron leading-tight min-h-12 line-clamp-2 wrap-break-word">
                 {event.title}
               </h3>
               <div className="space-y-3">
@@ -360,18 +360,19 @@ export const ExtraEventsManagement = () => {
         subtitle="Set up a new event for academy members, grassroots teams, and families"
         showBackButton
         footer={
-          <div className="flex justify-end gap-4">
+          <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
             <button 
               onClick={() => setShowCreateModal(false)}
-              className="px-8 py-3.5 rounded-xl border border-white/30 text-[11px] font-black uppercase tracking-widest text-white hover:bg-white/5 transition-all"
+              className="w-full sm:w-auto px-4 sm:px-8 py-3.5 rounded-xl border border-white/30 text-[11px] font-black uppercase tracking-widest text-white hover:bg-white/5 transition-all flex items-center justify-center shrink-0"
             >
               Cancel
             </button>
             <button 
               onClick={handleCreateEvent}
-              className="px-8 py-3.5 rounded-xl bg-[#E31B23] hover:bg-[#C2181F] text-[11px] font-black uppercase tracking-widest text-white flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 cursor-pointer"
+              className="w-full sm:w-auto px-4 sm:px-8 py-3.5 rounded-xl bg-[#E31B23] hover:bg-[#C2181F] text-[11px] font-black uppercase tracking-widest text-white flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 shrink-0"
             >
-              Create Event
+              <IconPlus size={18} className="shrink-0" />
+              <span className="truncate">Create Event</span>
             </button>
           </div>
         }

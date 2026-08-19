@@ -1,14 +1,11 @@
 "use client";
 import Image from "next/image";
-import React, { useState } from "react";
+import { useState } from "react";
 import DashboardModal from "@/components/dashboard/DashboardModal";
-import { 
-  IconPlus, 
-  IconChevronDown, 
+import {
+  IconPlus,
+  IconChevronDown,
   IconUpload,
-  IconSearch,
-  IconFilter,
-  IconArrowLeft,
   IconBox
 } from "@tabler/icons-react";
 const products = [
@@ -72,30 +69,30 @@ export const ProductStoreManagement = () => {
     setSelectedColors(prev => prev.includes(color) ? prev.filter(c => c !== color) : [...prev, color]);
   };
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6 md:gap-8 w-full max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-4xl font-black uppercase text-white font-orbitron tracking-tight leading-none">Product Store</h1>
-          <p className="text-white/60 font-bold uppercase tracking-widest text-[11px] mt-2">Manage store inventory and orders</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
+        <div className="min-w-0 w-full md:w-auto">
+          <h1 className="text-3xl md:text-4xl font-black uppercase text-white font-orbitron tracking-tight leading-none truncate md:whitespace-normal">Product Store</h1>
+          <p className="text-white/60 font-bold uppercase tracking-widest text-[9px] md:text-[11px] mt-2 wrap-break-word">Manage store inventory and orders</p>
         </div>
-        <button 
+        <button
           onClick={() => setShowAddModal(true)}
-          className="bg-[#E31B23] hover:bg-[#C2181F] text-white px-6 py-3 rounded-xl flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20"
+          className="w-full md:w-auto justify-center bg-[#E31B23] hover:bg-[#C2181F] text-white px-6 py-3 rounded-xl flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 shrink-0"
         >
-          <IconPlus size={20} />
-          <span className="text-sm font-bold uppercase tracking-widest">Add Product</span>
+          <IconPlus size={20} className="shrink-0" />
+          <span className="text-sm font-bold uppercase tracking-widest truncate">Add Product</span>
         </button>
       </div>
       {/* Main Container */}
-      <div className="bg-[#0A0A0A] rounded-[32px] border border-white/5 p-8 flex flex-col gap-8 shadow-2xl">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-black uppercase text-white font-orbitron">All Products</h2>
-          <div className="flex gap-3">
+      <div className="bg-[#0A0A0A] rounded-3xl md:rounded-4xl border border-white/5 p-5 md:p-8 flex flex-col gap-6 md:gap-8 shadow-2xl min-w-0 w-full">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
+          <h2 className="text-xl md:text-2xl font-black uppercase text-white font-orbitron truncate">All Products</h2>
+          <div className="flex gap-2 sm:gap-3 w-full md:w-auto overflow-x-auto custom-scrollbar pb-2 md:pb-0 min-w-0">
             {["Category", "Stock Status", "Price Range"].map((filter) => (
-              <button key={filter} className="bg-white/5 border border-white/15 px-5 py-2.5 rounded-xl text-[11px] font-bold text-white/60 hover:text-white flex items-center gap-2 transition-all">
-                {filter}
-                <IconChevronDown size={14} />
+              <button key={filter} className="shrink-0 bg-white/5 border border-white/15 px-3 md:px-5 py-2 md:py-2.5 rounded-xl text-[10px] md:text-[11px] font-bold text-white/60 hover:text-white flex items-center gap-1.5 md:gap-2 transition-all">
+                <span className="whitespace-nowrap">{filter}</span>
+                <IconChevronDown size={14} className="shrink-0" />
               </button>
             ))}
           </div>
@@ -103,10 +100,21 @@ export const ProductStoreManagement = () => {
         {/* Product Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((product) => (
-            <div key={product.id} className="bg-[#111111] rounded-[32px] border border-white/15 p-6 flex flex-col gap-6 hover:border-white/25 transition-all shadow-xl group relative overflow-hidden">
+            <div key={product.id} className="bg-[#111111] rounded-3xl md:rounded-4xl border border-white/15 p-4 md:p-6 flex flex-col gap-4 md:gap-6 hover:border-white/25 transition-all shadow-xl group relative overflow-hidden min-w-0">
               {/* Product Image Area */}
-              <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-black relative group-hover:scale-[1.02] transition-transform duration-500">
-                <Image src={product.image} alt={product.name} className="w-full h-full object-cover" />
+              <div className="aspect-4/3 rounded-2xl overflow-hidden bg-black relative group-hover:scale-[1.02] transition-transform duration-500 w-full">
+                <Image
+                  width={200}
+                  height={200}
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.srcset = "";
+                    target.src = "/placeholder_img.jpg";
+                  }}
+                />
                 <div className="absolute top-4 left-4 flex gap-2">
                   <span className="bg-black/60 backdrop-blur-md px-3 py-1 rounded-lg text-[9px] font-black text-white/80 uppercase tracking-widest border border-white/10">
                     {product.category}
@@ -118,11 +126,11 @@ export const ProductStoreManagement = () => {
                   </span>
                 </div>
               </div>
-              <div className="space-y-4">
-                <h3 className="text-lg font-black uppercase text-white font-orbitron leading-tight">{product.name}</h3>
-                <div className="flex justify-between items-center">
-                  <p className="text-2xl font-black text-[#E31B23] font-orbitron">{product.price}</p>
-                  <button className="bg-white/5 hover:bg-white/10 border border-white/15 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-white/60 hover:text-white transition-all">
+              <div className="space-y-3 md:space-y-4">
+                <h3 className="text-base md:text-lg font-black uppercase text-white font-orbitron leading-tight wrap-break-word">{product.name}</h3>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+                  <p className="text-xl md:text-2xl font-black text-[#E31B23] font-orbitron">{product.price}</p>
+                  <button className="w-full sm:w-auto bg-white/5 hover:bg-white/10 border border-white/15 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-white/60 hover:text-white transition-all shrink-0">
                     View Details
                   </button>
                 </div>
@@ -139,24 +147,24 @@ export const ProductStoreManagement = () => {
         subtitle="Add a new item to the uniform store"
         showBackButton
         footer={
-          <div className="flex gap-4 w-full">
-            <button 
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
+            <button
               onClick={() => setShowAddModal(false)}
-              className="flex-1 py-4 rounded-xl border border-white/30 text-sm font-bold text-white hover:bg-white/5 transition-all min-w-0"
+              className="w-full sm:flex-1 py-3.5 sm:py-4 rounded-xl border border-white/30 text-sm font-bold text-white hover:bg-white/5 transition-all shrink-0"
             >
               Cancel
             </button>
-            <button className="flex-[2] py-4 rounded-xl bg-[#E31B23] hover:bg-[#C2181F] text-sm font-bold text-white flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20">
-              <IconBox size={20} />
-              Add Product
+            <button className="w-full sm:flex-2 py-3.5 sm:py-4 rounded-xl bg-[#E31B23] hover:bg-[#C2181F] text-sm font-bold text-white flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 shrink-0">
+              <IconBox size={20} className="shrink-0" />
+              <span className="truncate">Add Product</span>
             </button>
           </div>
         }
       >
-        <div className="space-y-10">
+        <div className="space-y-6 md:space-y-10 w-full max-w-full overflow-x-hidden">
           {/* Product Information */}
-          <div className="space-y-6 bg-[#0A0A0A] border border-white/15 rounded-[32px] p-8">
-            <h3 className="text-xl font-black uppercase text-white font-orbitron">Product Information</h3>
+          <div className="space-y-4 md:space-y-6 bg-[#0A0A0A] border border-white/15 rounded-3xl md:rounded-4xl p-5 md:p-8 min-w-0">
+            <h3 className="text-lg md:text-xl font-black uppercase text-white font-orbitron wrap-break-word">Product Information</h3>
             <div className="space-y-6">
               <div className="space-y-2">
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
@@ -185,7 +193,7 @@ export const ProductStoreManagement = () => {
             </div>
           </div>
           {/* Pricing */}
-          <div className="space-y-6 bg-[#0A0A0A] border border-white/15 rounded-[32px] p-8">
+          <div className="space-y-4 md:space-y-6 bg-[#0A0A0A] border border-white/15 rounded-3xl md:rounded-4xl p-5 md:p-8 min-w-0 w-full">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Pricing</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
@@ -206,7 +214,7 @@ export const ProductStoreManagement = () => {
             </div>
           </div>
           {/* Description */}
-          <div className="space-y-6 bg-[#0A0A0A] border border-white/15 rounded-[32px] p-8">
+          <div className="space-y-4 md:space-y-6 bg-[#0A0A0A] border border-white/15 rounded-3xl md:rounded-4xl p-5 md:p-8 min-w-0 w-full">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Description</h3>
             <div className="space-y-2">
               <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
@@ -216,20 +224,19 @@ export const ProductStoreManagement = () => {
             </div>
           </div>
           {/* Available Sizes */}
-          <div className="space-y-6 bg-[#0A0A0A] border border-white/15 rounded-[32px] p-8">
+          <div className="space-y-4 md:space-y-6 bg-[#0A0A0A] border border-white/15 rounded-3xl md:rounded-4xl p-5 md:p-8 min-w-0 w-full">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Available Sizes</h3>
             <div className="space-y-4">
               <p className="text-[11px] font-bold text-white/20 uppercase tracking-widest">Select all sizes available for this product</p>
               <div className="flex flex-wrap gap-3">
                 {["XS", "S", "M", "L", "XL", "XXL"].map((size) => (
-                  <button 
+                  <button
                     key={size}
                     onClick={() => toggleSize(size)}
-                    className={`px-6 py-3 rounded-xl border transition-all text-[11px] font-black uppercase tracking-widest ${
-                      selectedSizes.includes(size)
+                    className={`px-6 py-3 rounded-xl border transition-all text-[11px] font-black uppercase tracking-widest ${selectedSizes.includes(size)
                       ? "bg-[#E31B23] border-[#E31B23] text-white shadow-lg shadow-[#E31B23]/20"
                       : "bg-[#1A1A1A] border-white/10 text-white/40 hover:border-white/25"
-                    }`}
+                      }`}
                   >
                     {size}
                   </button>
@@ -238,20 +245,19 @@ export const ProductStoreManagement = () => {
             </div>
           </div>
           {/* Available Colors */}
-          <div className="space-y-6 bg-[#0A0A0A] border border-white/15 rounded-[32px] p-8">
+          <div className="space-y-4 md:space-y-6 bg-[#0A0A0A] border border-white/15 rounded-3xl md:rounded-4xl p-5 md:p-8 min-w-0 w-full">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Available Colors</h3>
             <div className="space-y-4">
               <p className="text-[11px] font-bold text-white/20 uppercase tracking-widest">Select all colors available for this product</p>
               <div className="flex flex-wrap gap-3">
                 {["Black", "White", "Red", "Blue", "Green", "Yellow"].map((color) => (
-                  <button 
+                  <button
                     key={color}
                     onClick={() => toggleColor(color)}
-                    className={`px-6 py-3 rounded-xl border transition-all text-[11px] font-black uppercase tracking-widest ${
-                      selectedColors.includes(color)
+                    className={`px-6 py-3 rounded-xl border transition-all text-[11px] font-black uppercase tracking-widest ${selectedColors.includes(color)
                       ? "bg-[#E31B23] border-[#E31B23] text-white shadow-lg shadow-[#E31B23]/20"
                       : "bg-[#1A1A1A] border-white/10 text-white/40 hover:border-white/25"
-                    }`}
+                      }`}
                   >
                     {color}
                   </button>
@@ -260,7 +266,7 @@ export const ProductStoreManagement = () => {
             </div>
           </div>
           {/* Inventory Management */}
-          <div className="space-y-6 bg-[#0A0A0A] border border-white/15 rounded-[32px] p-8">
+          <div className="space-y-4 md:space-y-6 bg-[#0A0A0A] border border-white/15 rounded-3xl md:rounded-4xl p-5 md:p-8 min-w-0 w-full">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Inventory Management</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               <div className="space-y-2">
@@ -282,11 +288,11 @@ export const ProductStoreManagement = () => {
             </div>
           </div>
           {/* Product Image */}
-          <div className="space-y-6 bg-[#0A0A0A] border border-white/15 rounded-[32px] p-8">
+          <div className="space-y-4 md:space-y-6 bg-[#0A0A0A] border border-white/15 rounded-3xl md:rounded-4xl p-5 md:p-8 min-w-0 w-full">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Product Image</h3>
             <div className="space-y-2">
               <label className="text-[11px] font-black uppercase tracking-widest text-white/60">Upload Image</label>
-              <div className="w-full border-2 border-dashed border-white/15 rounded-[32px] p-12 flex flex-col items-center justify-center gap-4 hover:border-white/25 transition-all cursor-pointer bg-white/[0.01]">
+              <div className="w-full border-2 border-dashed border-white/15 rounded-4xl p-12 flex flex-col items-center justify-center gap-4 hover:border-white/25 transition-all cursor-pointer bg-white/1">
                 <IconUpload size={32} className="text-white/20" />
                 <p className="text-sm font-bold text-white/60">Click to upload or drag and drop image/*</p>
                 <p className="text-[9px] text-white/20 font-bold uppercase tracking-widest">Recommended: Square image, at least 800x800 pixels</p>
@@ -294,7 +300,7 @@ export const ProductStoreManagement = () => {
             </div>
           </div>
           {/* Product Status */}
-          <div className="space-y-6 bg-[#0A0A0A] border border-white/15 rounded-[32px] p-8">
+          <div className="space-y-4 md:space-y-6 bg-[#0A0A0A] border border-white/15 rounded-3xl md:rounded-4xl p-5 md:p-8 min-w-0 w-full">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Product Status</h3>
             <div className="space-y-4">
               <div className="bg-[#111111] border border-white/15 rounded-2xl p-6 flex items-center justify-between">

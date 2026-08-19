@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React from "react";
 import { 
@@ -6,7 +7,6 @@ import {
   IconCreditCard, 
   IconBell, 
   IconCalendar,
-  IconChevronDown,
   IconCircleCheck
 } from "@tabler/icons-react";
 import { Input } from "@/components/ui/input";
@@ -15,26 +15,26 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
 const SettingsSection = ({ icon: Icon, title, children }: { icon: any, title: string, children: React.ReactNode }) => (
-  <div className="bg-[#111111] border border-white/20 rounded-[40px] p-10 flex flex-col gap-8">
+  <div className="bg-[#111111] border border-white/20 rounded-3xl md:rounded-[40px] p-6 md:p-10 flex flex-col gap-6 md:gap-8 min-w-0 w-full max-w-full overflow-hidden">
     <div className="flex items-center gap-3">
-       <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500">
+       <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 shrink-0">
           <Icon size={22} />
        </div>
-       <h2 className="text-2xl font-black text-white font-orbitron uppercase tracking-tight">{title}</h2>
+       <h2 className="text-lg md:text-2xl font-black text-white font-orbitron uppercase tracking-tight truncate">{title}</h2>
     </div>
     {children}
   </div>
 );
 
 const SettingField = ({ label, value, type = "text", placeholder, icon: Icon }: any) => (
-  <div className="space-y-2 flex-1 min-w-0">
+  <div className="space-y-2 flex-1 min-w-0 w-full">
     <Label className="text-white/70 text-[11px] font-bold uppercase tracking-wider">{label}</Label>
-    <div className="relative">
+    <div className="relative w-full">
       <Input 
         type={type} 
         defaultValue={value} 
         placeholder={placeholder}
-        className="bg-black/40 border-white/20 h-14 rounded-xl px-6 text-white/90 placeholder:text-white/20 focus:border-red-500/50 transition-all" 
+        className="bg-black/40 border-white/20 h-14 rounded-xl px-4 md:px-6 text-white/90 placeholder:text-white/20 focus:border-red-500/50 transition-all w-full min-w-0" 
       />
       {Icon && <Icon size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20" />}
     </div>
@@ -43,16 +43,16 @@ const SettingField = ({ label, value, type = "text", placeholder, icon: Icon }: 
 
 const AcademySettings = () => {
   return (
-    <div className="flex flex-col gap-10 pb-20">
+    <div className="flex flex-col gap-6 md:gap-10 pb-10 md:pb-20 w-full max-w-full overflow-x-hidden">
       {/* Header */}
       <div>
-        <h1 className="text-5xl font-black text-white font-orbitron uppercase tracking-tight">Settings</h1>
-        <p className="text-white/60 font-medium mt-2 text-lg">Manage your account and preferences</p>
+        <h1 className="text-3xl md:text-5xl font-black text-white font-orbitron uppercase tracking-tight">Settings</h1>
+        <p className="text-white/60 font-medium mt-2 text-sm md:text-lg">Manage your account and preferences</p>
       </div>
 
       {/* Academy Information */}
       <SettingsSection icon={IconSchool} title="Academy Information">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 min-w-0 w-full">
            <SettingField label="Academy Name" value="Santos FC Academy" />
            <SettingField label="Date of Founded" value="01/01/2018" icon={IconCalendar} />
            <SettingField label="Nationality" value="São Paulo, Brazil" />
@@ -78,33 +78,33 @@ const AcademySettings = () => {
 
       {/* Billing & Subscription */}
       <SettingsSection icon={IconCreditCard} title="Billing & Subscription">
-        <div className="flex flex-col gap-6">
-           <div className="bg-black/40 border border-white/10 rounded-[32px] p-8 flex flex-col gap-6 relative">
-              <div className="flex justify-between items-start">
+        <div className="flex flex-col gap-6 w-full min-w-0">
+           <div className="bg-black/40 border border-white/10 rounded-4xl p-6 md:p-8 flex flex-col gap-6 relative min-w-0">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
                  <div>
-                    <h3 className="text-xl font-black text-white font-orbitron uppercase">Premium Plan</h3>
+                    <h3 className="text-lg md:text-xl font-black text-white font-orbitron uppercase">Premium Plan</h3>
                     <p className="text-white/40 text-sm font-medium mt-1">$89 per month</p>
                  </div>
-                 <Button variant="outline" className="bg-white/5 border-white/10 h-10 px-6 rounded-xl text-white/80 font-bold text-xs hover:bg-white/10">
+                 <Button variant="outline" className="w-full sm:w-auto bg-white/5 border-white/10 h-10 px-6 rounded-xl text-white/80 font-bold text-xs hover:bg-white/10 shrink-0">
                     Change Plan
                  </Button>
               </div>
               <div className="h-px bg-white/5 w-full" />
-              <div className="flex justify-between items-center text-sm">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center text-sm gap-4 sm:gap-0">
                  <div className="space-y-1">
                     <p className="text-white/40 font-bold uppercase text-[10px] tracking-wider">Next billing date</p>
                     <p className="text-white/80 font-medium">July 15, 2025</p>
                  </div>
-                 <div className="space-y-1 text-right">
+                 <div className="space-y-1 sm:text-right">
                     <p className="text-white/40 font-bold uppercase text-[10px] tracking-wider">Payment method</p>
-                    <p className="text-white/80 font-medium flex items-center justify-end gap-2">
-                       •••• 4242 <IconCircleCheck size={16} className="text-emerald-500" />
+                    <p className="text-white/80 font-medium flex items-center sm:justify-end gap-2">
+                       •••• 4242 <IconCircleCheck size={16} className="text-emerald-500 shrink-0" />
                     </p>
                  </div>
               </div>
            </div>
            <div className="pt-2">
-              <Button variant="outline" className="bg-transparent border-white/20 h-12 px-8 rounded-xl text-white/80 font-bold hover:bg-white/5 transition-all">
+              <Button variant="outline" className="w-full sm:w-auto bg-transparent border-white/20 h-12 px-8 rounded-xl text-white/80 font-bold hover:bg-white/5 transition-all">
                  Update Payment Method
               </Button>
            </div>

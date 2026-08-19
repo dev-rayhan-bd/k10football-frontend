@@ -2,18 +2,12 @@
 import Image from "next/image";
 import React, { useState } from "react";
 import DashboardModal from "@/components/dashboard/DashboardModal";
-import { 
-  IconSearch, 
-  IconPlus, 
-  IconFilter, 
+import {
+  IconSearch,
+  IconPlus,
+  IconFilter,
   IconChevronDown,
   IconMessage,
-  IconUser,
-  IconMail,
-  IconPhone,
-  IconBriefcase,
-  IconMapPin,
-  IconNote,
   IconTrash,
   IconLoader2
 } from "@tabler/icons-react";
@@ -132,7 +126,7 @@ export const ParentsManagement = () => {
         notes: ""
       });
       setSelectedPlayerIds([]);
-    } catch (err) {
+    } catch {
       toast.error("Failed to complete parent registration.", { id: toastId });
     } finally {
       setIsSubmitting(false);
@@ -159,57 +153,57 @@ export const ParentsManagement = () => {
     );
   });
   return (
-    <div className="flex flex-col gap-8 pb-10">
+    <div className="flex flex-col gap-6 md:gap-8 pb-10 w-full max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
         <div>
-          <h1 className="text-4xl font-black uppercase text-white font-orbitron tracking-tight leading-none">Parents</h1>
-          <p className="text-white/60 font-bold uppercase tracking-widest text-[11px] mt-2">Manage parent information and communication</p>
+          <h1 className="text-3xl md:text-4xl font-black uppercase text-white font-orbitron tracking-tight leading-none break-words">Parents</h1>
+          <p className="text-white/60 font-bold uppercase tracking-widest text-[9px] md:text-[11px] mt-2">Manage parent information and communication</p>
         </div>
-        <button 
+        <button
           onClick={() => {
             if (!isSubmitting) {
               setShowAddModal(true);
             }
           }}
           disabled={isSubmitting}
-          className="bg-[#E31B23] hover:bg-[#C2181F] text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 cursor-pointer font-bold disabled:opacity-50"
+          className="w-full md:w-auto justify-center bg-[#E31B23] hover:bg-[#C2181F] text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 cursor-pointer font-bold disabled:opacity-50 shrink-0"
         >
           <IconPlus size={20} />
           <span className="text-sm font-bold uppercase tracking-widest font-orbitron">Add New Parent</span>
         </button>
       </div>
       {/* Search Bar */}
-      <div className="bg-[#111111] rounded-3xl border border-white/15 p-4 flex gap-4 shadow-xl">
+      <div className="bg-[#111111] rounded-3xl border border-white/15 p-4 flex flex-col sm:flex-row gap-4 shadow-xl">
         <div className="relative flex-1 min-w-0">
           <IconSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={20} />
-          <input 
-            type="text" 
+          <input
+            type="text"
             placeholder="Search parents by name, email, or phone..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-white/[0.02] border border-white/15 rounded-2xl py-3 pl-12 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition-all"
+            className="w-full bg-white/2 border border-white/15 rounded-2xl py-3 pl-12 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition-all"
           />
         </div>
-        <button className="bg-white/5 hover:bg-white/10 border border-white/15 text-white/60 hover:text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all font-bold">
+        <button className="w-full sm:w-auto justify-center bg-white/5 hover:bg-white/10 border border-white/15 text-white/60 hover:text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all font-bold shrink-0">
           <IconFilter size={20} />
           <span className="text-sm">Filters</span>
         </button>
       </div>
       {/* Main Content Card */}
-      <div className="bg-[#111111] rounded-[32px] border border-white/15 p-8 flex flex-col gap-8 shadow-2xl">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-black uppercase text-white font-orbitron">All Parents ({filteredParents.length})</h2>
-          <button className="bg-white/5 border border-white/15 px-4 py-2 rounded-xl text-[11px] font-bold text-white/60 hover:text-white flex items-center gap-2 transition-all">
+      <div className="bg-[#111111] rounded-3xl md:rounded-4xl border border-white/15 p-4 md:p-8 flex flex-col gap-6 md:gap-8 shadow-2xl w-full max-w-full">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
+          <h2 className="text-lg md:text-xl font-black uppercase text-white font-orbitron">All Parents ({filteredParents.length})</h2>
+          <button className="bg-white/5 border border-white/15 px-4 py-2 rounded-xl text-[11px] font-bold text-white/60 hover:text-white flex items-center gap-2 transition-all shrink-0">
             Status
             <IconChevronDown size={14} />
           </button>
         </div>
         {/* Parents Table */}
-        <div className="rounded-2xl border border-white/15 overflow-hidden">
-          <table className="w-full text-left border-collapse">
+        <div className="rounded-2xl border border-white/15 overflow-x-auto w-full custom-scrollbar">
+          <table className="w-full min-w-200 text-left border-collapse">
             <thead>
-              <tr className="border-b border-white/15 bg-white/[0.01]">
+              <tr className="border-b border-white/15 bg-white/1">
                 <th className="py-5 px-6 text-[11px] font-black uppercase tracking-widest text-white/80 border-r border-white/15">Parent Name</th>
                 <th className="py-5 px-6 text-[11px] font-black uppercase tracking-widest text-white/80 border-r border-white/15 text-center">Email</th>
                 <th className="py-5 px-6 text-[11px] font-black uppercase tracking-widest text-white/80 border-r border-white/15 text-center">Phone</th>
@@ -219,11 +213,11 @@ export const ParentsManagement = () => {
             </thead>
             <tbody>
               {filteredParents.map((p, index) => (
-                <tr key={p.id} className={`hover:bg-white/[0.02] transition-colors group ${index !== filteredParents.length - 1 ? 'border-b border-white/15' : ''}`}>
+                <tr key={p.id} className={`hover:bg-white/2 transition-colors group ${index !== filteredParents.length - 1 ? 'border-b border-white/15' : ''}`}>
                   <td className="py-5 px-6 border-r border-white/15">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-full overflow-hidden border border-white/15 shrink-0">
-                        <Image src={p.avatar} alt={p.fullName} className="w-full h-full object-cover" />
+                        <Image width={40} height={40} src={p.avatar} alt={p.fullName} className="w-full h-full object-cover" />
                       </div>
                       <span className="text-sm font-bold text-white whitespace-nowrap">{p.fullName}</span>
                     </div>
@@ -233,14 +227,14 @@ export const ParentsManagement = () => {
                   <td className="py-5 px-6 border-r border-white/15 text-sm font-medium text-white/60 text-center">{p.linkedPlayers}</td>
                   <td className="py-5 px-6 text-center">
                     <div className="flex items-center justify-center gap-2">
-                      <button 
+                      <button
                         onClick={() => toast.info(`Chat with ${p.fullName} is opened.`)}
                         className="h-9 px-4 flex items-center justify-center gap-2 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all cursor-pointer font-bold"
                       >
                         <IconMessage size={18} />
                         <span className="text-[10px] font-black uppercase tracking-widest">Message</span>
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleDeleteClick(p.id, p.fullName)}
                         className="h-9 w-9 flex items-center justify-center rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all cursor-pointer font-bold"
                         title="Remove Parent"
@@ -274,18 +268,18 @@ export const ParentsManagement = () => {
         subtitle="Register a new parent or guardian account"
         showBackButton
         footer={
-          <div className="flex justify-end gap-4">
-            <button 
+          <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
+            <button
               onClick={() => setShowAddModal(false)}
               disabled={isSubmitting}
-              className="px-8 py-3.5 rounded-xl border border-white/30 text-[11px] font-black uppercase tracking-widest text-white hover:bg-white/5 transition-all cursor-pointer font-bold disabled:opacity-50"
+              className="w-full sm:w-auto px-4 sm:px-8 py-3.5 rounded-xl border border-white/30 text-[11px] font-black uppercase tracking-widest text-white hover:bg-white/5 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center shrink-0"
             >
               Cancel
             </button>
-            <button 
+            <button
               onClick={handleFormSubmit}
               disabled={isSubmitting}
-              className="px-8 py-3.5 rounded-xl bg-[#E31B23] hover:bg-[#C2181F] text-[11px] font-black uppercase tracking-widest text-white flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 cursor-pointer font-bold disabled:opacity-50"
+              className="w-full sm:w-auto px-4 sm:px-8 py-3.5 rounded-xl bg-[#E31B23] hover:bg-[#C2181F] text-[11px] font-black uppercase tracking-widest text-white flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 cursor-pointer disabled:opacity-50 shrink-0"
             >
               {isSubmitting ? (
                 <>
@@ -311,26 +305,26 @@ export const ParentsManagement = () => {
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
                   First Name <span className="text-[#E31B23]">*</span>
                 </label>
-                <input 
-                  type="text" 
-                  placeholder="Enter first name" 
+                <input
+                  type="text"
+                  placeholder="Enter first name"
                   value={formData.firstName}
                   onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                   disabled={isSubmitting}
-                  className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all" 
+                  className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all"
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
                   Last Name <span className="text-[#E31B23]">*</span>
                 </label>
-                <input 
-                  type="text" 
-                  placeholder="Enter last name" 
+                <input
+                  type="text"
+                  placeholder="Enter last name"
                   value={formData.lastName}
                   onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                   disabled={isSubmitting}
-                  className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all" 
+                  className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all"
                 />
               </div>
               <div className="space-y-2">
@@ -338,7 +332,7 @@ export const ParentsManagement = () => {
                   Relationship <span className="text-[#E31B23]">*</span>
                 </label>
                 <div className="relative">
-                  <select 
+                  <select
                     value={formData.relationship}
                     onChange={(e) => setFormData({ ...formData, relationship: e.target.value })}
                     disabled={isSubmitting}
@@ -356,13 +350,13 @@ export const ParentsManagement = () => {
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
                   Occupation
                 </label>
-                <input 
-                  type="text" 
-                  placeholder="Occupation" 
+                <input
+                  type="text"
+                  placeholder="Occupation"
                   value={formData.occupation}
                   onChange={(e) => setFormData({ ...formData, occupation: e.target.value })}
                   disabled={isSubmitting}
-                  className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all" 
+                  className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all"
                 />
               </div>
             </div>
@@ -370,42 +364,42 @@ export const ParentsManagement = () => {
           {/* Contact Information */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Contact Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
                   Email Address <span className="text-[#E31B23]">*</span>
                 </label>
-                <input 
-                  type="email" 
-                  placeholder="parent@example.com" 
+                <input
+                  type="email"
+                  placeholder="parent@example.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   disabled={isSubmitting}
-                  className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all" 
+                  className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all"
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
                   Primary Phone <span className="text-[#E31B23]">*</span>
                 </label>
-                <input 
-                  type="text" 
-                  placeholder="+1 (555) 000-0000" 
+                <input
+                  type="text"
+                  placeholder="+1 (555) 000-0000"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   disabled={isSubmitting}
-                  className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all" 
+                  className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all"
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/60">Alternate Phone</label>
-                <input 
-                  type="text" 
-                  placeholder="+1 (555) 000-0000" 
+                <input
+                  type="text"
+                  placeholder="+1 (555) 000-0000"
                   value={formData.alternatePhone}
                   onChange={(e) => setFormData({ ...formData, alternatePhone: e.target.value })}
                   disabled={isSubmitting}
-                  className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all" 
+                  className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all"
                 />
               </div>
             </div>
@@ -413,44 +407,44 @@ export const ParentsManagement = () => {
           {/* Address */}
           <div className="space-y-6">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Address</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
                   Street Address <span className="text-[#E31B23]">*</span>
                 </label>
-                <input 
-                  type="text" 
-                  placeholder="Street address" 
+                <input
+                  type="text"
+                  placeholder="Street address"
                   value={formData.streetAddress}
                   onChange={(e) => setFormData({ ...formData, streetAddress: e.target.value })}
                   disabled={isSubmitting}
-                  className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all" 
+                  className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all"
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
                   City <span className="text-[#E31B23]">*</span>
                 </label>
-                <input 
-                  type="text" 
-                  placeholder="City" 
+                <input
+                  type="text"
+                  placeholder="City"
                   value={formData.city}
                   onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                   disabled={isSubmitting}
-                  className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all" 
+                  className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all"
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
                   ZIP Code <span className="text-[#E31B23]">*</span>
                 </label>
-                <input 
-                  type="text" 
-                  placeholder="ZIP Code" 
+                <input
+                  type="text"
+                  placeholder="ZIP Code"
                   value={formData.zipCode}
                   onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
                   disabled={isSubmitting}
-                  className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all" 
+                  className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all"
                 />
               </div>
             </div>
@@ -461,8 +455,8 @@ export const ParentsManagement = () => {
             <p className="text-[11px] text-white/40 font-bold uppercase tracking-widest -mt-4">Select the player(s) this parent/guardian is responsible for</p>
             <div className="space-y-3">
               {players.map((player) => (
-                <div 
-                  key={player.id} 
+                <div
+                  key={player.id}
                   onClick={() => {
                     if (!isSubmitting) {
                       handlePlayerCheckboxChange(player.id);
@@ -470,18 +464,25 @@ export const ParentsManagement = () => {
                   }}
                   className="bg-[#111111] border border-white/15 rounded-2xl p-4 flex items-center gap-4 hover:border-white/30 transition-all group cursor-pointer"
                 >
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     checked={selectedPlayerIds.includes(player.id)}
-                    onChange={() => {}} // toggled by parent onClick
+                    onChange={() => { }} // toggled by parent onClick
                     disabled={isSubmitting}
-                    className="w-5 h-5 rounded border-white/20 bg-white/5 text-[#E31B23] focus:ring-[#E31B23] cursor-pointer" 
+                    className="w-5 h-5 rounded border-white/20 bg-white/5 text-[#E31B23] focus:ring-[#E31B23] cursor-pointer"
                   />
                   <div className="w-10 h-10 rounded-full overflow-hidden border border-white/15 shrink-0">
-                    <Image 
-                      src={typeof player.playerImage === 'string' ? player.playerImage : (player.playerImage?.src || "/ronaldo.png")} 
-                      alt={player.fullName} 
-                      className="w-full h-full object-cover" 
+                    <Image
+                      src={typeof player.playerImage === 'string' ? player.playerImage : (player.playerImage?.src || "/ronaldo.png")}
+                      alt={player.fullName}
+                      className="w-full h-full object-cover"
+                      width={40}
+                      height={40}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.srcset = "";
+                        target.src = "/placeholder_img.jpg";
+                      }}
                     />
                   </div>
                   <div>
@@ -497,8 +498,8 @@ export const ParentsManagement = () => {
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Additional Notes</h3>
             <div className="space-y-2">
               <label className="text-[11px] font-black uppercase tracking-widest text-white/60">Notes</label>
-              <textarea 
-                placeholder="Any additional information or special requirements..." 
+              <textarea
+                placeholder="Any additional information or special requirements..."
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 disabled={isSubmitting}

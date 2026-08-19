@@ -1,3 +1,6 @@
+/* eslint-disable react-hooks/static-components */
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import Image from "next/image";
@@ -45,7 +48,6 @@ import trofeeIcon from "@/assets/cvs/id/trofeeIcon.png";
 import CMSField from "@/components/shared/CMSField";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -56,7 +58,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { usePlayer } from "@/lib/hooks/usePlayer";
-import { cn, getShortForm, getFullWithShortForm, getVeryShortPosition } from "@/lib/utils";
+import { cn, getFullWithShortForm } from "@/lib/utils";
 import { PencilIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -291,7 +293,6 @@ const getMarkersForPosition = (position: string, isFutsal: boolean) => {
 const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
   const { playerData, handleUpdate } = usePlayer();
   const { setBioRating, role } = usePlayerStats();
-  const [editingField, setEditingField] = useState<string | null>(null);
   const canEditBio = editable && (role === "player" || role === "parent" || role === "coach");
   const canEditEvaluation = editable && (role === "player" || role === "parent" || role === "coach");
   useEffect(() => {
@@ -326,9 +327,7 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
       handleUpdate(field, expected);
     }
   }, [playerData.position, isPositionMap]);
-  const addMarker = () => {
-    // Fixed to 3 markers, disabled manual addition
-  };
+
   const updateMarkerPosition = (e: MouseEvent | React.MouseEvent) => {
     if (!activeMarker || !mapContainerRef.current) return;
     const rect = mapContainerRef.current.getBoundingClientRect();
@@ -413,7 +412,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
     layout?: "fill" | "responsive" | "intrinsic" | "fixed";
   }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const playerStats = usePlayerStats();
     const [role, setRole] = useState<string>("player");
     useEffect(() => {
       const currentRole = localStorage.getItem("userRole") || role || "player";
@@ -751,7 +749,7 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                     />
                   </div>
                   {canEditBio ? (
-                    <div className="relative flex items-center h-2 group translate-y-[5px]">
+                    <div className="relative flex items-center h-2 group translate-y-1.25">
                       <div className="w-full h-1.5 bg-[#333] rounded-full overflow-hidden relative">
                         <div
                           className={cn("h-full transition-all duration-300 ease-out", getIndicatorColor(playerData.leftLegUsage))}
@@ -798,7 +796,13 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       src={playerData.rightLegImage}
                       alt="right leg"
                       className="object-contain"
-                      layout="fill"
+                      width={100}
+                      height={100}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.srcset = "";
+                        target.src = "/placeholder_img.jpg";
+                      }}
                     />
                   </div>
                   <div className="flex justify-between text-sm mb-1">
@@ -814,7 +818,7 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                     />
                   </div>
                   {canEditBio ? (
-                    <div className="relative flex items-center h-2 group translate-y-[5px]">
+                    <div className="relative flex items-center h-2 group translate-y-1.25">
                       <div className="w-full h-1.5 bg-[#333] rounded-full overflow-hidden relative">
                         <div
                           className={cn("h-full transition-all duration-300 ease-out", getIndicatorColor(playerData.rightLegUsage))}
@@ -925,6 +929,11 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                   height={600}
                   className="w-full h-auto rounded"
                   draggable={false}
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.srcset = "";
+                    target.src = "/placeholder_img.jpg";
+                  }}
                 />
                 {/* Render markers */}
                 {((isPositionMap ? playerData.positionMarkers : playerData.futsalMarkers) || []).map((marker: any, idx: number) => (
@@ -948,7 +957,7 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       height={idx === 0 ? 34 : 30}
                       className={cn(
                         "pointer-events-none drop-shadow-lg transition-transform group-hover/marker:scale-110",
-                        idx === 0 ? "w-[32px] h-[32px] md:w-[34px] md:h-[34px]" : "w-[28px] h-[28px] md:w-[30px] md:h-[30px]"
+                        idx === 0 ? "w-8 h-8 md:w-8.5 md:h-8.5" : "w-7 h-7 md:w-7.5 md:h-7.5"
                       )}
                     />
                     {marker.name && (
@@ -972,16 +981,28 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                   <Image
                     src={getFlagUrl(playerData.birthCountry)}
                     alt="Birth Country"
-                    layout="fill"
+                    width={200}
+                    height={200}
                     className="object-cover rounded shadow-lg border border-border"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.srcset = "";
+                      target.src = "/placeholder_img.jpg";
+                    }}
                   />
                   {playerData.dualNationality && (
                     <div className="absolute -bottom-2 -right-2 w-12 h-8 border-2 border-white rounded shadow-md overflow-hidden">
                       <Image
                         src={getFlagUrl(playerData.dualNationality)}
                         alt="Dual Nationality"
-                        layout="fill"
-                        className="object-cover"
+                        width={200}
+                        height={200}
+                        className="object-cover rounded shadow-lg border border-border"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.srcset = "";
+                          target.src = "/placeholder_img.jpg";
+                        }}
                       />
                     </div>
                   )}
@@ -1033,11 +1054,11 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
               />
             </div>
             {/* Player Image */}
-            <div className="relative w-full h-[523px]  mb-8 flex  items-end justify-center">
+            <div className="relative w-full h-130.75  mb-8 flex  items-end justify-center">
               <EditableImage
                 src={playerData.playerImage}
                 alt={playerData.fullName}
-                className="object-contain w-auto mx-auto h-[500px]"
+                className="object-contain w-auto mx-auto h-125"
                 width={800}
                 height={1000}
                 field="playerImage"
@@ -1100,10 +1121,17 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       <div key={style.id} className="space-y-4">
                         <div className="flex justify-center">
                           {badgeSrc ? (
-                            <Image 
+                            <Image
                               src={badgeSrc}
                               className="w-20 h-20 object-contain"
                               alt={style.label}
+                              width={200}
+                              height={200}
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.srcset = "";
+                                target.src = "/placeholder_img.jpg";
+                              }}
                             />
                           ) : (
                             <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-xs">
@@ -1608,7 +1636,7 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                     <div className="text-[#E31B23] font-black uppercase text-[10px] tracking-widest mb-1.5 flex items-center gap-1">
                       <span>⚠️</span> Pending Validation
                     </div>
-                    <p className="text-[8px] text-gray-400 max-w-[180px] text-center">
+                    <p className="text-[8px] text-gray-400 max-w-45 text-center">
                       A coach must validate your CV details from the academy dashboard to unlock your certificate.
                     </p>
                   </div>
@@ -1625,7 +1653,7 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                     <div className="truncate">
                       <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none">{key}</p>
                     </div>
-                    <div className="min-w-0 translate-y-[5px]">
+                    <div className="min-w-0 translate-y-1.25">
                       {canEditEvaluation ? (
                         <div className="relative flex items-center h-2 group">
                           <div className="w-full h-1.5 bg-[#333] rounded-full overflow-hidden relative">
@@ -1684,77 +1712,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                 ))}
               </div>
             </div>
-            {/* <div className="p-6">
-              <h2 className="text-lg text-center font-heading font-normal mb-4">
-                Performance Metrics
-              </h2>
-              <div className="space-y-2 text-sm">
-                {Object.entries(playerData.performanceMetrics).map(
-                  ([key, value]) => (
-                    <div key={key} className="grid grid-cols-[80px_1fr_auto] items-center gap-2 p-2 bg-[#1a1a1a]/50 border border-border/50 rounded-lg group hover:bg-[#1a1a1a]/80 transition-colors">
-                      <div className="truncate">
-                        <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none">{key.replace(/([A-Z])/g, " $1")}</p>
-                      </div>
-                      <div className="min-w-0 translate-y-[5px]">
-                        {canEditEvaluation ? (
-                          <div className="relative flex items-center h-2 group">
-                            <div className="w-full h-1.5 bg-[#333] rounded-full overflow-hidden relative">
-                              <div
-                                className={cn("h-full transition-all duration-300 ease-out", getIndicatorColor(value as number))}
-                                style={{ width: `${value}%` }}
-                              />
-                            </div>
-                            <input
-                              type="range"
-                              min="0"
-                              max="100"
-                              value={value as any}
-                              onChange={(e) =>
-                                handleUpdate(`performanceMetrics.${key}`, parseInt(e.target.value))
-                              }
-                              style={{
-                                background: `linear-gradient(to right, ${getHexColor(value as number)} ${value}%, #333 ${value}%)`,
-                              }}
-                              className="w-full h-1.5 rounded-full appearance-none cursor-pointer transition-all absolute inset-0 z-10 opacity-0 group-hover:opacity-100 accent-primary"
-                            />
-                            <input
-                              type="range"
-                              min="0"
-                              max="100"
-                              value={value as any}
-                              onChange={(e) =>
-                                handleUpdate(`performanceMetrics.${key}`, parseInt(e.target.value))
-                              }
-                              className="w-full h-6 opacity-0 cursor-pointer absolute inset-0 z-20"
-                            />
-                          </div>
-                        ) : (
-                          <Progress
-                            value={value as any}
-                            className="h-1.5"
-                            style={{ backgroundColor: '#333' }}
-                            indicatorClassName={getIndicatorColor(value as number)}
-                          />
-                        )}
-                      </div>
-                      <div className="flex justify-end">
-                        <CMSField
-                          value={value as any}
-                          onUpdate={(val) => handleUpdate(`performanceMetrics.${key}`, parseInt(String(val)))}
-                          canEdit={canEditEvaluation}
-                          type="number"
-                          editTrigger="doubleClick"
-                          className="font-bold text-xs justify-end"
-                          style={{ color: getHexColor(value as number) }}
-                          inputClassName="text-right h-7 w-16 bg-gray-900 border-primary/50 focus:border-primary transition-all px-2 rounded-md"
-                          hideIcon={true}
-                        />
-                      </div>
-                    </div>
-                  )
-                )}
-              </div>
-            </div> */}
             <div className="p-6">
               <h2 className="text-lg text-center font-heading font-normal mb-4">
                 Market Value

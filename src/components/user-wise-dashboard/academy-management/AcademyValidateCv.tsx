@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import {
   IconSearch,
   IconFilter,
@@ -11,18 +11,12 @@ import {
   IconX,
   IconDownload,
   IconShield,
-  IconUser,
-  IconStar,
-  IconTrophy,
-  IconMapPin,
   IconPhone,
   IconMail,
-  IconBallFootball,
   IconLoader2,
   IconCheck,
   IconClock,
   IconShare,
-  IconCircleCheck,
 } from "@tabler/icons-react";
 import { useAppSelector, useAppDispatch } from "@/lib/hooks/reduxHooks";
 import { PlayerStateItem, setSelectedPlayerId } from "@/lib/features/player/playerSlice";
@@ -55,20 +49,6 @@ function getPlayerType(position: string): string {
   if (p.includes("midfielder") || p.includes("mid") || p.includes("cm") || p.includes("dm") || p.includes("am")) return "Midfielder";
   if (p.includes("forward") || p.includes("striker") || p.includes("winger") || p.includes("cf") || p.includes("lw") || p.includes("rw")) return "Forward";
   return "Field Player";
-}
-
-function getPositionCode(position: string): string {
-  const p = position.toLowerCase();
-  if (p.includes("goalkeeper")) return "GK";
-  if (p.includes("defensive mid")) return "CDM";
-  if (p.includes("center back") || p.includes("cb")) return "CB";
-  if (p.includes("left back")) return "LB";
-  if (p.includes("right back")) return "RB";
-  if (p.includes("midfielder")) return "CM";
-  if (p.includes("forward") || p.includes("striker")) return "ST";
-  if (p.includes("winger")) return "LW";
-  if (p.includes("defender")) return "CB";
-  return "MF";
 }
 
 const VALIDATION_BADGE: Record<string, { label: string; color: string; border: string; bg: string }> = {
@@ -140,20 +120,7 @@ const CvDetailDialog = ({
     setNotified(true);
   };
 
-  const strengths = player.strengths ?? { pace: 0, shooting: 0, passing: 0, dribbling: 0, defending: 0, physical: 0 };
-  const attrs = [
-    { label: "Pace", value: strengths.pace },
-    { label: "Shooting", value: strengths.shooting },
-    { label: "Passing", value: strengths.passing },
-    { label: "Dribbling", value: strengths.dribbling },
-    { label: "Defending", value: strengths.defending },
-    { label: "Physical", value: strengths.physical },
-  ];
 
-  const posCode = getPositionCode(player.position);
-  const pType = getPlayerType(player.position);
-  const imgSrc = typeof player.playerImage === "string" ? player.playerImage : player.playerImage?.src || "/ronaldo.png";
-  const completion = Math.min(100, Math.round((player.rating / 100) * 100));
 
   const reports = useAppSelector(state => state.reports.reports);
   const gameReports = useMemo(() => {
@@ -171,23 +138,23 @@ const CvDetailDialog = ({
     <div className="fixed inset-0 z-50 bg-[#0a0a0a] flex flex-col">
       <div className="relative w-full h-full overflow-y-auto flex flex-col">
         {/* Dialog Header */}
-        <div className="sticky top-0 z-10 bg-[#0a0a0a]/95 backdrop-blur-lg border-b border-white/10 py-5">
-          <div className="w-full flex items-center justify-between px-8">
-            <div className="flex items-center gap-4">
-              <div className={`px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest border ${tierStyle.bg} ${tierStyle.border} ${tierStyle.color}`}>
+        <div className="sticky top-0 z-30 bg-[#0a0a0a]/95 backdrop-blur-lg border-b border-white/10 py-4 sm:py-5">
+          <div className="w-full flex flex-col md:flex-row items-start md:items-center justify-between px-4 sm:px-6 md:px-8 gap-4 md:gap-0">
+            <div className="flex items-center gap-3 sm:gap-4 pr-12 md:pr-0">
+              <div className={`px-3 sm:px-4 py-1.5 rounded-full text-[10px] sm:text-[11px] font-black uppercase tracking-widest border shrink-0 ${tierStyle.bg} ${tierStyle.border} ${tierStyle.color}`}>
                 {tier} CV
               </div>
-              <h2 className="text-xl font-black uppercase text-white font-orbitron tracking-tight">{player.fullName}</h2>
+              <h2 className="text-lg sm:text-xl font-black uppercase text-white font-orbitron tracking-tight truncate">{player.fullName}</h2>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap md:flex-nowrap items-center gap-2 sm:gap-3 w-full md:w-auto">
               {/* NEW: Select & Notify Coach Button */}
-              <div className="relative">
+              <div className="relative w-full sm:w-auto flex-1 md:flex-none">
                 <button
                   onClick={() => setShowCoachSelector(!showCoachSelector)}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all cursor-pointer bg-[#E31B23] hover:bg-[#C2181F] border-[#E31B23]/40 text-white shadow-lg shadow-[#E31B23]/20"
+                  className="flex items-center justify-center gap-2 px-3 sm:px-5 py-2.5 rounded-2xl text-[9px] sm:text-[11px] font-black uppercase tracking-widest transition-all cursor-pointer bg-[#E31B23] hover:bg-[#C2181F] border-[#E31B23]/40 text-white shadow-lg shadow-[#E31B23]/20 w-full"
                 >
-                  <IconBell size={16} />
-                  Select & Notify Coach
+                  <IconBell size={16} className="shrink-0" />
+                  <span className="truncate">Select & Notify Coach</span>
                 </button>
 
                 {showCoachSelector && (
@@ -231,7 +198,11 @@ const CvDetailDialog = ({
                             >
                               <div className="flex items-center gap-2 min-w-0">
                                 <div className="w-8 h-8 rounded-full overflow-hidden bg-white/5 border border-white/10 shrink-0">
-                                  <Image width={100} height={100} src={coach.avatar} alt={coach.name} className="w-full h-full object-cover" />
+                                  <Image width={100} height={100} src={coach.avatar} alt={coach.name} className="w-full h-full object-cover" onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.srcset = "";
+                                    target.src = "/placeholder_img.jpg";
+                                  }} />
                                 </div>
                                 <div className="min-w-0">
                                   <p className="text-[11px] font-black text-white truncate">{coach.name}</p>
@@ -289,22 +260,22 @@ const CvDetailDialog = ({
               <button
                 onClick={handleNotifyCoach}
                 disabled={notifying || notified}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all cursor-pointer disabled:cursor-default border ${notified
+                className={`flex items-center justify-center gap-2 px-3 sm:px-5 py-2.5 rounded-2xl text-[9px] sm:text-[11px] font-black uppercase tracking-widest transition-all cursor-pointer disabled:cursor-default border w-full sm:w-auto flex-1 md:flex-none ${notified
                   ? "bg-[#4ADE80]/10 border-[#4ADE80]/30 text-[#4ADE80]"
                   : "bg-white/5 hover:bg-white/10 border border-white/10 text-white/50 hover:text-white"
                   }`}
               >
                 {notifying ? (
-                  <><IconLoader2 size={16} className="animate-spin" /> Sending...</>
+                  <><IconLoader2 size={16} className="animate-spin shrink-0" /> <span className="truncate">Sending...</span></>
                 ) : notified ? (
-                  <><IconCheck size={16} /> Coach Notified</>
+                  <><IconCheck size={16} className="shrink-0" /> <span className="truncate">Coach Notified</span></>
                 ) : (
-                  <><IconBell size={16} /> Auto Notify ({player.coachName || "Coach"})</>
+                  <><IconBell size={16} className="shrink-0" /> <span className="truncate">Auto Notify ({player.coachName || "Coach"})</span></>
                 )}
               </button>
               <button
                 onClick={onClose}
-                className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white transition-all cursor-pointer"
+                className="absolute top-4 right-4 md:static w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white transition-all cursor-pointer shrink-0"
               >
                 <IconX size={18} />
               </button>
@@ -313,7 +284,7 @@ const CvDetailDialog = ({
         </div>
 
         {/* CV Body - Adjusted to full width */}
-        <div className="p-8 flex flex-col gap-6 w-full">
+        <div className="p-4 sm:p-6 md:p-8 flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
           {/* Personal Information Hero - Restoring Original Design */}
           <section className="bg-[#111111] rounded-3xl border border-white/10 p-4 md:p-8 flex flex-col gap-8">
             <div className="relative rounded-3xl overflow-hidden min-h-100 md:min-h-140 border border-white/10 group flex flex-col justify-end">
@@ -321,7 +292,7 @@ const CvDetailDialog = ({
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
                 style={{ backgroundImage: `url('/stadium-night.jpg')` }}
               />
-              <div className="absolute inset-0 bg-linear-to-r from-black/95 via-black/40 via-[45%] to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-r from-black/95 via-black/40 via-45% to-transparent" />
               <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
 
               <div className="absolute right-0 bottom-0 h-full w-[70%] md:w-[55%] flex items-end justify-end pointer-events-none opacity-60 md:opacity-100">
@@ -331,6 +302,11 @@ const CvDetailDialog = ({
                   className="h-[90%] md:h-[105%] object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.9)]"
                   width={500}
                   height={500}
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.srcset = "";
+                    target.src = "/placeholder_img.jpg";
+                  }}
                 />
               </div>
 
@@ -349,7 +325,19 @@ const CvDetailDialog = ({
                         <span className="text-white">{player.age} Years Old</span>
                         <span className="text-white/20 hidden md:inline">/</span>
                         <span className="flex items-center gap-3 text-white">
-                          <Image width={20} height={20} src={`https://flagcdn.com/br.svg`} alt={player.birthCountry} className="w-4 h-3 md:w-5 md:h-3.5 object-cover rounded-sm shadow-sm" /> {player.birthCountry}
+                          <Image
+                            width={20}
+                            height={20}
+                            src={`https://flagcdn.com/br.svg`}
+                            alt={player.birthCountry}
+                            className="w-4 h-3 md:w-5 md:h-3.5 object-cover rounded-sm shadow-sm"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.srcset = "";
+                              target.src = "/placeholder_img.jpg";
+                            }}
+                          />
+                          {player.birthCountry}
                         </span>
                       </div>
                     </div>
@@ -382,7 +370,7 @@ const CvDetailDialog = ({
                     <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-white/40"><IconMail size={20} /></div>
                     <div>
                       <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">Email</p>
-                      <p className="text-sm font-bold text-white truncate max-w-[180px]">{player.email}</p>
+                      <p className="text-sm font-bold text-white truncate max-w-45">{player.email}</p>
                     </div>
                   </div>
                 </div>
@@ -493,27 +481,27 @@ const AcademyValidateCv = () => {
   }, [players]);
 
   return (
-    <div className="flex flex-col gap-8 pb-10">
+    <div className="flex flex-col gap-6 md:gap-8 w-full max-w-full overflow-x-hidden pb-10">
       {/* Header */}
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
         <div>
-          <h1 className="text-4xl font-black uppercase text-white font-orbitron tracking-tight leading-none">Validate CV</h1>
-          <p className="text-white/60 font-bold uppercase tracking-widest text-[11px] mt-2">Player CV library — view, validate, and notify coaches</p>
+          <h1 className="text-3xl md:text-4xl font-black uppercase text-white font-orbitron tracking-tight leading-none wrap-break-word">Validate CV</h1>
+          <p className="text-white/60 font-bold uppercase tracking-widest text-[9px] md:text-[11px] mt-2">Player CV library — view, validate, and notify coaches</p>
         </div>
-        <button className="bg-white/5 hover:bg-white/10 border border-white/15 text-white/60 hover:text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all font-bold cursor-pointer">
-          <IconDownload size={18} />
-          <span className="text-[11px] font-black uppercase tracking-widest">Export All</span>
+        <button className="w-full md:w-auto justify-center bg-white/5 hover:bg-white/10 border border-white/15 text-white/60 hover:text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all font-bold cursor-pointer shrink-0">
+          <IconDownload size={18} className="shrink-0" />
+          <span className="text-[11px] font-black uppercase tracking-widest truncate">Export All</span>
         </button>
       </div>
 
       {/* Tier Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
         {[
           { label: "Total Players", value: stats.total, color: "text-white", border: "border-white/15", bg: "bg-white/5" },
           { label: "Gold CVs", value: stats.gold, color: "text-[#FBBF24]", border: "border-[#FBBF24]/30", bg: "bg-[#FBBF24]/5" },
           { label: "Silver CVs", value: stats.silver, color: "text-[#CBD5E1]", border: "border-[#CBD5E1]/30", bg: "bg-[#CBD5E1]/5" },
           { label: "Bronze CVs", value: stats.bronze, color: "text-[#F97316]", border: "border-[#F97316]/30", bg: "bg-[#F97316]/5" },
-        ].map(({ label, value, color, border, bg }) => (
+        ].map(({ label, value, color, border }) => (
           <div key={label} className={`bg-[#111111] rounded-[28px] border ${border} p-6 flex flex-col gap-2 shadow-xl`}>
             <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{label}</p>
             <p className={`text-4xl font-black font-orbitron ${color}`}>{value}</p>
@@ -522,18 +510,18 @@ const AcademyValidateCv = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-[#111111] rounded-3xl border border-white/15 p-4 flex flex-col md:flex-row gap-4 shadow-xl">
-        <div className="relative flex-1 min-w-0">
+      <div className="bg-[#111111] rounded-4xl border border-white/15 p-4 flex flex-col xl:flex-row gap-4 shadow-xl w-full max-w-full">
+        <div className="relative flex-1 min-w-0 w-full">
           <IconSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={20} />
           <input
             type="text"
             placeholder="Search by name, position, or country..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-white/[0.02] border border-white/15 rounded-2xl py-3 pl-12 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition-all"
+            className="w-full bg-white/2 border border-white/15 rounded-2xl py-3 pl-12 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition-all"
           />
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-2 sm:gap-3 overflow-x-auto custom-scrollbar pb-2 xl:pb-0 w-full xl:w-auto min-w-0">
           {/* Tier Filter */}
           <div className="relative">
             <IconFilter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
@@ -566,16 +554,16 @@ const AcademyValidateCv = () => {
       </div>
 
       {/* Players Table */}
-      <div className="bg-[#111111] rounded-[32px] border border-white/15 p-8 flex flex-col gap-6 shadow-2xl">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-black uppercase text-white font-orbitron">Player CVs ({filtered.length})</h2>
-          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Click &ldquo;View CV&rdquo; to open full profile</span>
+      <div className="bg-[#111111] rounded-4xl border border-white/15 p-5 md:p-8 flex flex-col gap-6 shadow-2xl min-w-0">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
+          <h2 className="text-lg md:text-xl font-black uppercase text-white font-orbitron wrap-break-word">Player CVs ({filtered.length})</h2>
+          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest shrink-0">Click &ldquo;View CV&rdquo; to open full profile</span>
         </div>
 
-        <div className="rounded-2xl border border-white/15 overflow-hidden">
-          <table className="w-full text-left border-collapse">
+        <div className="rounded-2xl border border-white/15 overflow-x-auto custom-scrollbar">
+          <table className="w-full text-left border-collapse min-w-250">
             <thead>
-              <tr className="border-b border-white/15 bg-white/[0.01]">
+              <tr className="border-b border-white/15 bg-white/1">
                 <th className="py-4 px-6 text-[11px] font-black uppercase tracking-widest text-white/80 border-r border-white/15">Player</th>
                 <th className="py-4 px-6 text-[11px] font-black uppercase tracking-widest text-white/80 border-r border-white/15 text-center">Rating</th>
                 <th className="py-4 px-6 text-[11px] font-black uppercase tracking-widest text-white/80 border-r border-white/15 text-center">CV Tier</th>
@@ -598,13 +586,17 @@ const AcademyValidateCv = () => {
                 return (
                   <tr
                     key={p.id}
-                    className={`hover:bg-white/[0.02] transition-colors group ${index !== filtered.length - 1 ? "border-b border-white/15" : ""}`}
+                    className={`hover:bg-white/2 transition-colors group ${index !== filtered.length - 1 ? "border-b border-white/15" : ""}`}
                   >
                     {/* Player */}
                     <td className="py-4 px-6 border-r border-white/15">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full overflow-hidden border border-white/15 shrink-0 bg-white/5">
-                          <Image src={imgSrc} alt={p.fullName} className="w-full h-full object-cover" />
+                          <Image width={20} height={20} src={imgSrc} alt={p.fullName} className="w-full h-full object-cover" onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.srcset = "";
+                            target.src = "/placeholder_img.jpg";
+                          }} />
                         </div>
                         <div>
                           <p className="text-sm font-black text-white whitespace-nowrap">{p.fullName}</p>

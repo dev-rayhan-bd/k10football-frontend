@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import Image from "next/image";
 import React, { useState } from "react";
@@ -89,74 +90,74 @@ export const TrainingSessions = () => {
   };
   const unmarkedCount = players.filter(p => p.status === "unmarked").length;
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6 md:gap-8 w-full max-w-full overflow-x-hidden pb-10">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
         <div>
-          <h1 className="text-4xl font-black uppercase text-white font-orbitron tracking-tight leading-none">Training Sessions</h1>
-          <p className="text-white/60 font-bold uppercase tracking-widest text-[11px] mt-2">Schedule and manage training sessions</p>
+          <h1 className="text-3xl md:text-4xl font-black uppercase text-white font-orbitron tracking-tight leading-none wrap-break-word">Training Sessions</h1>
+          <p className="text-white/60 font-bold uppercase tracking-widest text-[9px] md:text-[11px] mt-2">Schedule and manage training sessions</p>
         </div>
         <button 
           onClick={() => setShowCreateModal(true)}
-          className="bg-[#E31B23] hover:bg-[#C2181F] text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20"
+          className="w-full md:w-auto justify-center bg-[#E31B23] hover:bg-[#C2181F] text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 shrink-0"
         >
           <IconPlus size={20} />
           <span className="text-sm font-bold uppercase tracking-widest">Create Session</span>
         </button>
       </div>
       {/* Search Bar */}
-      <div className="bg-[#111111] rounded-3xl border border-white/15 p-4 flex gap-4 shadow-xl">
+      <div className="bg-[#111111] rounded-3xl border border-white/15 p-4 flex flex-col sm:flex-row gap-4 shadow-xl">
         <div className="relative flex-1 min-w-0">
           <IconSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={20} />
           <input 
             type="text" 
             placeholder="Search sessions by team, coach, or title..."
-            className="w-full bg-white/[0.02] border border-white/15 rounded-2xl py-3 pl-12 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition-all"
+            className="w-full bg-white/2 border border-white/15 rounded-2xl py-3 pl-12 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition-all"
           />
         </div>
-        <button className="bg-white/5 hover:bg-white/10 border border-white/15 text-white/60 hover:text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all">
+        <button className="w-full sm:w-auto justify-center bg-white/5 hover:bg-white/10 border border-white/15 text-white/60 hover:text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all shrink-0">
           <IconFilter size={20} />
           <span className="text-sm font-bold">Filters</span>
         </button>
       </div>
       {/* Session Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {sessions.map((session) => (
           <div 
             key={session.id} 
             onClick={() => setSelectedSession(session)}
-            className="bg-[#111111] rounded-[32px] border border-white/15 p-6 flex flex-col gap-6 hover:border-white/30 transition-all cursor-pointer group shadow-xl"
+            className="bg-[#111111] rounded-4xl border border-white/15 p-5 md:p-6 flex flex-col gap-5 md:gap-6 hover:border-white/30 transition-all cursor-pointer group shadow-xl"
           >
-            <div className="flex justify-between items-start">
-              <span className="bg-white/5 border border-white/15 px-4 py-2 rounded-xl text-[10px] font-black text-white/80 uppercase tracking-widest">
+            <div className="flex justify-between items-start gap-2">
+              <span className="bg-white/5 border border-white/15 px-3 md:px-4 py-2 rounded-xl text-[10px] font-black text-white/80 uppercase tracking-widest shrink-0">
                 {session.team}
               </span>
-              <button className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all ${
+              <button className={`flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 rounded-xl border text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all shrink-0 min-w-0 ${
                 session.attendance > 50 
                 ? "bg-[#4ADE80]/10 border-[#4ADE80]/20 text-[#4ADE80] group-hover:bg-[#4ADE80] group-hover:text-black" 
                 : "bg-[#E31B23]/10 border-[#E31B23]/20 text-[#E31B23] group-hover:bg-[#E31B23] group-hover:text-white"
               }`}>
-                {session.attendance > 50 ? <IconCheck size={14} /> : <IconAlertCircle size={14} />}
-                Attendance
-                <IconChevronRight size={14} />
+                {session.attendance > 50 ? <IconCheck size={14} className="shrink-0" /> : <IconAlertCircle size={14} className="shrink-0" />}
+                <span className="truncate">Attendance</span>
+                <IconChevronRight size={14} className="shrink-0" />
               </button>
             </div>
             <div className="space-y-4">
-              <div className="flex items-center justify-between text-[11px] font-bold text-white/40 uppercase tracking-widest">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] md:text-[11px] font-bold text-white/40 uppercase tracking-widest">
                 <div className="flex items-center gap-2">
-                  <IconCalendar size={14} />
+                  <IconCalendar size={14} className="shrink-0" />
                   {session.date}
                 </div>
                 <div className="flex items-center gap-2 text-white/80">
-                  <IconClock size={14} />
+                  <IconClock size={14} className="shrink-0" />
                   {session.time}
                 </div>
               </div>
-              <h3 className="text-lg font-black uppercase text-white font-orbitron leading-tight min-h-[3rem] line-clamp-2">
+              <h3 className="text-lg font-black uppercase text-white font-orbitron leading-tight min-h-12 line-clamp-2 wrap-break-word">
                 {session.title}
               </h3>
-              <div className="flex items-center gap-2 text-[11px] font-bold text-white/40 uppercase tracking-widest">
-                <IconUser size={14} />
+              <div className="flex items-center gap-2 text-[10px] md:text-[11px] font-bold text-white/40 uppercase tracking-widest wrap-break-word">
+                <IconUser size={14} className="shrink-0" />
                 Coach: <span className="text-white/80">{session.coach}</span>
               </div>
             </div>
@@ -202,19 +203,19 @@ export const TrainingSessions = () => {
         title={selectedSession?.title || "Attendance"}
         maxWidth="max-w-4xl"
         footer={
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-2 text-[#FBBF24]">
-              <IconAlertCircle size={18} />
+              <IconAlertCircle size={18} className="shrink-0" />
               <span className="text-[11px] font-bold uppercase tracking-widest">{unmarkedCount} players still unmarked</span>
             </div>
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3 sm:gap-4">
               <button 
                 onClick={() => setSelectedSession(null)}
-                className="px-8 py-3.5 rounded-xl border border-white/30 text-[11px] font-black uppercase tracking-widest text-white hover:bg-white/5 transition-all"
+                className="w-full sm:w-auto px-4 sm:px-8 py-3.5 rounded-xl border border-white/30 text-[11px] font-black uppercase tracking-widest text-white hover:bg-white/5 transition-all flex justify-center items-center shrink-0"
               >
                 Cancel
               </button>
-              <button className="px-8 py-3.5 rounded-xl bg-[#E31B23] hover:bg-[#C2181F] text-[11px] font-black uppercase tracking-widest text-white flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20">
+              <button className="w-full sm:w-auto px-4 sm:px-8 py-3.5 rounded-xl bg-[#E31B23] hover:bg-[#C2181F] text-[11px] font-black uppercase tracking-widest text-white flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 shrink-0">
                 <IconDeviceFloppy size={18} />
                 Save Attendance
               </button>
@@ -264,7 +265,7 @@ export const TrainingSessions = () => {
             </div>
           </div>
           {/* Player Grid Header & Quick Actions */}
-          <div className="flex justify-between items-center bg-white/[0.02] border-y border-white/10 -mx-10 px-10 py-4">
+          <div className="flex justify-between items-center bg-white/2 border-y border-white/10 -mx-10 px-10 py-4">
             <div className="flex items-center gap-4">
               <span className="text-[11px] font-bold text-white/40 uppercase tracking-widest">Quick actions:</span>
               <button 
@@ -302,7 +303,7 @@ export const TrainingSessions = () => {
                   p.status === 'present' ? 'bg-[#4ADE80]/5 border-[#4ADE80]/20' :
                   p.status === 'late' ? 'bg-[#FBBF24]/5 border-[#FBBF24]/20' :
                   p.status === 'absent' ? 'bg-[#E31B23]/5 border-[#E31B23]/20' :
-                  'bg-white/[0.01] border-white/5 hover:bg-white/[0.03]'
+                  'bg-white/1 border-white/5 hover:bg-white/3'
                 }`}
               >
                 <div className="flex items-center gap-6">
@@ -359,16 +360,16 @@ export const TrainingSessions = () => {
         subtitle="Schedule a new training session for your team"
         showBackButton
         footer={
-          <div className="flex justify-end gap-4">
+          <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
             <button 
               onClick={() => setShowCreateModal(false)}
-              className="px-8 py-3.5 rounded-xl border border-white/30 text-[11px] font-black uppercase tracking-widest text-white hover:bg-white/5 transition-all"
+              className="w-full sm:w-auto px-4 sm:px-8 py-3.5 rounded-xl border border-white/30 text-[11px] font-black uppercase tracking-widest text-white hover:bg-white/5 transition-all flex items-center justify-center shrink-0"
             >
               Cancel
             </button>
-            <button className="px-8 py-3.5 rounded-xl bg-[#E31B23] hover:bg-[#C2181F] text-[11px] font-black uppercase tracking-widest text-white flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20">
-              <IconPlus size={18} />
-              Create Session
+            <button className="w-full sm:w-auto px-4 sm:px-8 py-3.5 rounded-xl bg-[#E31B23] hover:bg-[#C2181F] text-[11px] font-black uppercase tracking-widest text-white flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 shrink-0">
+              <IconPlus size={18} className="shrink-0" />
+              <span className="truncate">Create Session</span>
             </button>
           </div>
         }

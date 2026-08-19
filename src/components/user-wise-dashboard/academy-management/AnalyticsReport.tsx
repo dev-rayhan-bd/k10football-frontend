@@ -155,34 +155,34 @@ return (
 // ─── Component ─────────────────────────────────────────────────────────────
 export const AnalyticsReport = () => {
   return (
-    <div className="flex flex-col gap-10 pb-10">
+    <div className="flex flex-col gap-8 md:gap-10 pb-10 w-full max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-4xl font-black uppercase text-white font-orbitron tracking-tight leading-none">Analytics Report</h1>
-          <p className="text-white/60 font-bold uppercase tracking-widest text-[11px] mt-2">Financial, performance, and operational analytics</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
+        <div className="min-w-0 w-full md:w-auto">
+          <h1 className="text-3xl md:text-4xl font-black uppercase text-white font-orbitron tracking-tight leading-none truncate md:whitespace-normal">Analytics Report</h1>
+          <p className="text-white/60 font-bold uppercase tracking-widest text-[9px] md:text-[11px] mt-2 wrap-break-word">Financial, performance, and operational analytics</p>
         </div>
-        <button className="bg-[#E31B23] hover:bg-[#C2181F] text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 cursor-pointer">
-          <IconDownload size={20} />
-          <span className="text-sm font-bold uppercase tracking-widest">Export Report</span>
+        <button className="w-full md:w-auto justify-center bg-[#E31B23] hover:bg-[#C2181F] text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 cursor-pointer shrink-0">
+          <IconDownload size={20} className="shrink-0" />
+          <span className="text-sm font-bold uppercase tracking-widest truncate">Export Report</span>
         </button>
       </div>
 
       {/* Quick Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 w-full">
         {[
           { label: "Total Revenue",   value: "$54,280", icon: IconCurrencyDollar,      color: "text-[#E31B23]", bg: "bg-[#E31B23]/10" },
           { label: "Total Expenses",  value: "$24,000", icon: IconTrendingUp,           color: "text-[#4ADE80]", bg: "bg-[#4ADE80]/10" },
           { label: "Active Players",  value: "64",      icon: IconUsers,                color: "text-[#60A5FA]", bg: "bg-[#60A5FA]/10" },
           { label: "Matches Won",     value: "18",      icon: IconTrophy,               color: "text-[#FBBF24]", bg: "bg-[#FBBF24]/10" },
         ].map((stat, i) => (
-          <div key={i} className="bg-[#111111] rounded-[32px] border border-white/15 p-8 flex items-center gap-6 shadow-xl hover:border-white/25 transition-all group">
-            <div className={`w-14 h-14 ${stat.bg} rounded-2xl flex items-center justify-center border border-white/5`}>
-              <stat.icon size={32} className={stat.color} />
+          <div key={i} className="bg-[#111111] rounded-3xl md:rounded-4xl border border-white/15 p-5 md:p-8 flex items-center gap-4 md:gap-6 shadow-xl hover:border-white/25 transition-all group min-w-0">
+            <div className={`w-12 h-12 md:w-14 md:h-14 shrink-0 ${stat.bg} rounded-2xl flex items-center justify-center border border-white/5`}>
+              <stat.icon size={28} className={`md:w-8 md:h-8 ${stat.color}`} />
             </div>
-            <div>
-              <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">{stat.label}</p>
-              <p className="text-3xl font-black text-white font-orbitron tracking-tight">{stat.value}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-[9px] md:text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1 truncate">{stat.label}</p>
+              <p className="text-2xl md:text-3xl font-black text-white font-orbitron tracking-tight truncate">{stat.value}</p>
             </div>
           </div>
         ))}
@@ -191,9 +191,9 @@ export const AnalyticsReport = () => {
       {/* ── Existing Charts ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Revenue Breakdown */}
-        <div className="bg-[#111111] rounded-[32px] border border-white/15 p-8 flex flex-col gap-6 shadow-2xl">
+        <div className="bg-[#111111] rounded-3xl md:rounded-4xl border border-white/15 p-5 md:p-8 flex flex-col gap-4 md:gap-6 shadow-2xl min-w-0 w-full max-w-full overflow-hidden">
           <h2 className="text-xl font-black uppercase text-white font-orbitron">Revenue Breakdown</h2>
-          <div className="h-[320px] w-full">
+          <div className="h-80 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={revenueData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
@@ -211,9 +211,9 @@ export const AnalyticsReport = () => {
         </div>
 
         {/* Expenses Distribution */}
-        <div className="bg-[#111111] rounded-[32px] border border-white/15 p-8 flex flex-col gap-6 shadow-2xl">
+        <div className="bg-[#111111] rounded-3xl md:rounded-4xl border border-white/15 p-5 md:p-8 flex flex-col gap-4 md:gap-6 shadow-2xl min-w-0 w-full max-w-full overflow-hidden">
           <h2 className="text-xl font-black uppercase text-white font-orbitron">Expenses Distribution</h2>
-          <div className="h-[320px] w-full flex items-center justify-center">
+          <div className="h-80 w-full flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie data={expenseData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={5} dataKey="value" stroke="none">
@@ -240,12 +240,12 @@ export const AnalyticsReport = () => {
         />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Monthly Reports Bar */}
-          <div className="bg-[#111111] rounded-[32px] border border-white/15 p-8 flex flex-col gap-6 shadow-2xl">
+          <div className="bg-[#111111] rounded-3xl md:rounded-4xl border border-white/15 p-5 md:p-8 flex flex-col gap-4 md:gap-6 shadow-2xl min-w-0 w-full max-w-full overflow-hidden">
             <div>
               <h3 className="text-base font-black uppercase text-white font-orbitron">Monthly Report Volume</h3>
               <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-0.5">Total reports submitted each month</p>
             </div>
-            <div className="h-[300px] w-full">
+            <div className="h-75 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={gameReportsData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
@@ -263,12 +263,12 @@ export const AnalyticsReport = () => {
           </div>
 
           {/* Game Reports Trend Line */}
-          <div className="bg-[#111111] rounded-[32px] border border-white/15 p-8 flex flex-col gap-6 shadow-2xl">
+          <div className="bg-[#111111] rounded-3xl md:rounded-4xl border border-white/15 p-5 md:p-8 flex flex-col gap-4 md:gap-6 shadow-2xl min-w-0 w-full max-w-full overflow-hidden">
             <div>
               <h3 className="text-base font-black uppercase text-white font-orbitron">Reports Trend</h3>
               <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-0.5">Growth in report submissions over time</p>
             </div>
-            <div className="h-[300px] w-full">
+            <div className="h-75 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={gameReportsData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                   <defs>
@@ -301,12 +301,12 @@ export const AnalyticsReport = () => {
         />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Evaluation Bar Chart */}
-          <div className="bg-[#111111] rounded-[32px] border border-white/15 p-8 flex flex-col gap-6 shadow-2xl">
+          <div className="bg-[#111111] rounded-3xl md:rounded-4xl border border-white/15 p-5 md:p-8 flex flex-col gap-4 md:gap-6 shadow-2xl min-w-0 w-full max-w-full overflow-hidden">
             <div>
               <h3 className="text-base font-black uppercase text-white font-orbitron">Evaluation Status by Month</h3>
               <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-0.5">Completed vs Pending vs Expired evaluations</p>
             </div>
-            <div className="h-[300px] w-full">
+            <div className="h-75 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={evaluationData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
@@ -324,12 +324,12 @@ export const AnalyticsReport = () => {
           </div>
 
           {/* Evaluation Radar */}
-          <div className="bg-[#111111] rounded-[32px] border border-white/15 p-8 flex flex-col gap-6 shadow-2xl">
+          <div className="bg-[#111111] rounded-3xl md:rounded-4xl border border-white/15 p-5 md:p-8 flex flex-col gap-4 md:gap-6 shadow-2xl min-w-0 w-full max-w-full overflow-hidden">
             <div>
               <h3 className="text-base font-black uppercase text-white font-orbitron">Average Skill Scores</h3>
               <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-0.5">Aggregated academy-wide evaluation scores</p>
             </div>
-            <div className="h-[300px] w-full">
+            <div className="h-75 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart cx="50%" cy="50%" outerRadius="80%" data={evalRadarData}>
                   <PolarGrid stroke="rgba(255,255,255,0.08)" />
@@ -356,12 +356,12 @@ export const AnalyticsReport = () => {
         />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Transfer Line Chart */}
-          <div className="bg-[#111111] rounded-[32px] border border-white/15 p-8 flex flex-col gap-6 shadow-2xl">
+          <div className="bg-[#111111] rounded-3xl md:rounded-4xl border border-white/15 p-5 md:p-8 flex flex-col gap-4 md:gap-6 shadow-2xl min-w-0 w-full max-w-full overflow-hidden">
             <div>
               <h3 className="text-base font-black uppercase text-white font-orbitron">Transfer Activity Trend</h3>
               <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-0.5">Monthly flow of player movements</p>
             </div>
-            <div className="h-[300px] w-full">
+            <div className="h-75 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={transferData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
@@ -379,12 +379,12 @@ export const AnalyticsReport = () => {
           </div>
 
           {/* Transfer Status Donut */}
-          <div className="bg-[#111111] rounded-[32px] border border-white/15 p-8 flex flex-col gap-6 shadow-2xl">
+          <div className="bg-[#111111] rounded-3xl md:rounded-4xl border border-white/15 p-5 md:p-8 flex flex-col gap-4 md:gap-6 shadow-2xl min-w-0 w-full max-w-full overflow-hidden">
             <div>
               <h3 className="text-base font-black uppercase text-white font-orbitron">Transfer Status Overview</h3>
               <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-0.5">All-time transfer request statuses</p>
             </div>
-            <div className="h-[300px] w-full">
+            <div className="h-75 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie data={transferStatusPie} cx="50%" cy="50%" innerRadius={65} outerRadius={105} paddingAngle={4} dataKey="value" stroke="none">
@@ -412,12 +412,12 @@ export const AnalyticsReport = () => {
         />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* CV Validation Bar Chart */}
-          <div className="bg-[#111111] rounded-[32px] border border-white/15 p-8 flex flex-col gap-6 shadow-2xl">
+          <div className="bg-[#111111] rounded-3xl md:rounded-4xl border border-white/15 p-5 md:p-8 flex flex-col gap-4 md:gap-6 shadow-2xl min-w-0 w-full max-w-full overflow-hidden">
             <div>
               <h3 className="text-base font-black uppercase text-white font-orbitron">Validations by Month &amp; Tier</h3>
               <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-0.5">How many CVs validated each month by tier</p>
             </div>
-            <div className="h-[300px] w-full">
+            <div className="h-75 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={cvValidationData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
@@ -435,12 +435,12 @@ export const AnalyticsReport = () => {
           </div>
 
           {/* CV Tier Distribution Donut */}
-          <div className="bg-[#111111] rounded-[32px] border border-white/15 p-8 flex flex-col gap-6 shadow-2xl">
+          <div className="bg-[#111111] rounded-3xl md:rounded-4xl border border-white/15 p-5 md:p-8 flex flex-col gap-4 md:gap-6 shadow-2xl min-w-0 w-full max-w-full overflow-hidden">
             <div>
               <h3 className="text-base font-black uppercase text-white font-orbitron">CV Tier Distribution</h3>
               <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-0.5">Total share of validated CVs across tiers</p>
             </div>
-            <div className="h-[300px] w-full">
+            <div className="h-75 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie data={cvStatusPie} cx="50%" cy="50%" innerRadius={65} outerRadius={105} paddingAngle={4} dataKey="value" stroke="none">
@@ -456,12 +456,12 @@ export const AnalyticsReport = () => {
         </div>
 
         {/* CV Validation Area Trend */}
-        <div className="bg-[#111111] rounded-[32px] border border-white/15 p-8 flex flex-col gap-6 shadow-2xl">
+        <div className="bg-[#111111] rounded-3xl md:rounded-4xl border border-white/15 p-5 md:p-8 flex flex-col gap-4 md:gap-6 shadow-2xl min-w-0 w-full max-w-full overflow-hidden">
           <div>
             <h3 className="text-base font-black uppercase text-white font-orbitron">Cumulative CV Validations</h3>
             <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-0.5">Monthly validation trend showing Gold tier growth</p>
           </div>
-          <div className="h-[280px] w-full">
+          <div className="h-70 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={cvValidationData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <defs>
@@ -494,21 +494,21 @@ export const AnalyticsReport = () => {
       </div>
 
       {/* Detailed Reports List */}
-      <div className="bg-[#111111] rounded-[32px] border border-white/15 p-8 flex flex-col gap-8 shadow-2xl">
+      <div className="bg-[#111111] rounded-3xl md:rounded-4xl border border-white/15 p-5 md:p-8 flex flex-col gap-6 md:gap-8 shadow-2xl w-full">
         <h2 className="text-xl font-black uppercase text-white font-orbitron">Detailed Reports</h2>
         <div className="flex flex-col gap-4">
           {detailedReports.map((report, i) => (
-            <div key={i} className="bg-white/[0.02] border border-white/10 rounded-[24px] p-6 flex justify-between items-center hover:border-white/20 transition-all group">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/20 group-hover:text-white/40 transition-colors">
+            <div key={i} className="bg-white/2 border border-white/10 rounded-[20px] md:rounded-3xl p-4 md:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 hover:border-white/20 transition-all group min-w-0">
+              <div className="flex items-center gap-3 md:gap-4 min-w-0 w-full sm:w-auto">
+                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/20 group-hover:text-white/40 transition-colors shrink-0">
                   <IconFileText size={20} />
                 </div>
-                <div>
-                  <h3 className="text-sm font-black text-white uppercase tracking-tight">{report.title}</h3>
-                  <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest mt-0.5">{report.date}</p>
+                <div className="min-w-0">
+                  <h3 className="text-sm font-black text-white uppercase tracking-tight truncate">{report.title}</h3>
+                  <p className="text-[9px] md:text-[10px] font-bold text-white/20 uppercase tracking-widest mt-0.5">{report.date}</p>
                 </div>
               </div>
-              <button className="bg-white/5 hover:bg-white/10 border border-white/15 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-white transition-all shadow-lg cursor-pointer">
+              <button className="w-full sm:w-auto bg-white/5 hover:bg-white/10 border border-white/15 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-white transition-all shadow-lg cursor-pointer shrink-0">
                 Download PDF
               </button>
             </div>

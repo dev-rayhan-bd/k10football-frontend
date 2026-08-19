@@ -1,22 +1,21 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import Image from "next/image";
-import React from "react";
 import { 
   IconFileText, 
   IconClock, 
   IconCircleX, 
   IconCoin, 
   IconCalendar,
-  IconEye
 } from "@tabler/icons-react";
 const FinancialStatCard = ({ icon: Icon, value, label, iconColor }: { icon: any, value: string | number, label: string, iconColor: string }) => (
-  <div className="bg-[#0A0A0A] border border-white/20 rounded-2xl p-6 flex flex-col gap-4 flex-1 min-w-0">
-    <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+  <div className="bg-[#0A0A0A] border border-white/20 rounded-2xl p-4 sm:p-6 flex flex-col gap-3 sm:gap-4 flex-1 min-w-0">
+    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
        <Icon size={20} className={iconColor} />
     </div>
-    <div>
-      <p className="text-white text-3xl font-black font-orbitron">{value}</p>
-      <p className="text-white/40 text-[11px] font-bold uppercase tracking-wider">{label}</p>
+    <div className="min-w-0">
+      <p className="text-white text-2xl sm:text-3xl font-black font-orbitron truncate">{value}</p>
+      <p className="text-white/40 text-[9px] sm:text-[11px] font-bold uppercase tracking-wider truncate mt-1">{label}</p>
     </div>
   </div>
 );
@@ -33,15 +32,15 @@ const StatusPill = ({ status }: { status: "Completed" | "Pending" }) => {
 };
 const Financials = () => {
   return (
-    <div className="flex flex-col gap-8 pb-10">
+    <div className="flex flex-col gap-6 md:gap-8 pb-10 w-full max-w-full overflow-x-hidden">
       {/* Header */}
       <div>
-        <h1 className="text-5xl font-black text-white font-orbitron uppercase tracking-tight">Finance Committee</h1>
-        <p className="text-white/60 font-medium mt-2 text-lg">Track your academy's revenue and transactions</p>
+        <h1 className="text-3xl md:text-5xl font-black text-white font-orbitron uppercase tracking-tight wrap-break-word">Finance Committee</h1>
+        <p className="text-white/60 font-medium mt-2 text-sm md:text-lg">Track your academy&apos;s revenue and transactions</p>
       </div>
       {/* Summary Container */}
-      <div className="bg-[#111111] border border-white/20 rounded-[40px] p-10 flex flex-col gap-10">
-        <div className="flex gap-6">
+      <div className="bg-[#111111] border border-white/20 rounded-4xl md:rounded-[40px] p-6 md:p-10 flex flex-col gap-6 md:gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
           <FinancialStatCard icon={IconFileText} value="137" label="Game Reports" iconColor="text-white/60" />
           <FinancialStatCard icon={IconClock} value="30" label="pending" iconColor="text-yellow-500" />
           <FinancialStatCard icon={IconCircleX} value="7" label="Rejected" iconColor="text-red-500" />
@@ -50,10 +49,10 @@ const Financials = () => {
         </div>
       </div>
       {/* Table Container */}
-      <div className="bg-[#111111] border border-white/20 rounded-[40px] p-8 flex flex-col gap-6">
-        <h2 className="text-xl font-black uppercase text-white font-orbitron">Game report/validation/commission</h2>
-        <div className="border border-white/20 rounded-2xl overflow-hidden">
-          <table className="w-full text-left border-collapse">
+      <div className="bg-[#111111] border border-white/20 rounded-4xl md:rounded-[40px] p-5 md:p-8 flex flex-col gap-5 md:gap-6 w-full max-w-full">
+        <h2 className="text-lg md:text-xl font-black uppercase text-white font-orbitron wrap-break-word">Game report/validation/commission</h2>
+        <div className="border border-white/20 rounded-2xl overflow-x-auto w-full custom-scrollbar">
+          <table className="w-full min-w-200 text-left border-collapse">
             <thead>
               <tr className="bg-white/5 border-b border-white/20 text-[10px] font-black text-white uppercase tracking-wider">
                 <th className="px-6 py-4 border-r border-white/20">Name</th>
@@ -76,11 +75,11 @@ const Financials = () => {
                 { name: "Rodrigo Silva", pos: "Defender", type: "CV Validation", amount: "$ 6.99", myAmount: "$ 2.796", date: "2024-02-28", status: "Completed" as const },
                 { name: "Enzo Fernandez", pos: "Midfielder", type: "Game Report", amount: "$ 6.99", myAmount: "$ 2.796", date: "2024-03-18", status: "Pending" as const },
               ].map((row, i) => (
-                <tr key={i} className="hover:bg-white/[0.02] transition-colors">
+                <tr key={i} className="hover:bg-white/2 transition-colors">
                   <td className="px-6 py-5 border-r border-white/20">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-white/10 overflow-hidden border border-white/20">
-                         <Image src={`https://i.pravatar.cc/150?u=${row.name}`} alt={row.name} className="w-full h-full object-cover" />
+                         <Image width={100} height={100} src={`https://i.pravatar.cc/150?u=${row.name}`} alt={row.name} className="w-full h-full object-cover" />
                       </div>
                       <div>
                         <p className="text-white text-sm font-black uppercase">{row.name}</p>
