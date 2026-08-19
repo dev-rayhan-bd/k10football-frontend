@@ -1,6 +1,5 @@
 "use client";
 import Image from "next/image";
-import React from "react";
 import {
   IconChevronDown
 } from "@tabler/icons-react";
@@ -25,7 +24,18 @@ const ScoutingBoard = () => {
       key: "name",
       render: (p) => (
         <div className="flex items-center gap-3">
-          <Image src={p.avatar} className="w-10 h-10 rounded-full object-cover" alt="avatar" />
+          <Image
+            src={p.avatar}
+            className="w-10 h-10 rounded-full object-cover"
+            alt="avatar"
+            width={10}
+            height={10}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.srcset = "";
+              target.src = "/placeholder_img.jpg";
+            }}
+          />
           <div>
             <div className="text-sm font-bold text-white">{p.name}</div>
             <div className="text-[10px] text-red-500 font-bold uppercase tracking-widest">{p.position}</div>
@@ -42,10 +52,9 @@ const ScoutingBoard = () => {
       key: "status",
       align: "center",
       render: (p) => (
-        <span className={`px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
-          p.status === "Gold" ? "bg-yellow-500/10 text-yellow-500" :
+        <span className={`px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${p.status === "Gold" ? "bg-yellow-500/10 text-yellow-500" :
           p.status === "Silver" ? "bg-gray-400/10 text-gray-400" : "bg-orange-500/10 text-orange-500"
-        }`}>
+          }`}>
           {p.status}
         </span>
       ),
@@ -54,7 +63,7 @@ const ScoutingBoard = () => {
       header: "Actions",
       key: "actions",
       align: "right",
-      render: () => <TableActionButtons onView={() => {}} onHeart={() => {}} onShare={() => {}} />,
+      render: () => <TableActionButtons onView={() => { }} onHeart={() => { }} onShare={() => { }} />,
     },
   ];
   const coachColumns: Column<typeof coachData[0]>[] = [
@@ -63,7 +72,17 @@ const ScoutingBoard = () => {
       key: "name",
       render: (c) => (
         <div className="flex items-center gap-3">
-          <Image src={c.avatar} className="w-10 h-10 rounded-full object-cover" alt="avatar" />
+          <Image
+            src={c.avatar}
+            className="w-10 h-10 rounded-full object-cover"
+            alt="avatar"
+            width={10}
+            height={10}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.srcset = "";
+              target.src = "/placeholder_img.jpg";
+            }} />
           <div>
             <div className="text-sm font-bold text-white">{c.name}</div>
             <div className="text-[10px] text-red-500 font-bold uppercase tracking-widest">{c.role}</div>
@@ -80,9 +99,8 @@ const ScoutingBoard = () => {
       key: "status",
       align: "center",
       render: (c) => (
-        <span className={`px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
-          c.status === "Available" ? "bg-green-500/10 text-green-500" : "bg-orange-500/10 text-orange-500"
-        }`}>
+        <span className={`px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${c.status === "Available" ? "bg-green-500/10 text-green-500" : "bg-orange-500/10 text-orange-500"
+          }`}>
           {c.status}
         </span>
       ),
@@ -91,20 +109,20 @@ const ScoutingBoard = () => {
       header: "Actions",
       key: "actions",
       align: "right",
-      render: () => <TableActionButtons onView={() => {}} onHeart={() => {}} onShare={() => {}} />,
+      render: () => <TableActionButtons onView={() => { }} onHeart={() => { }} onShare={() => { }} />,
     },
   ];
   return (
-    <div className="space-y-10 pb-12">
+    <div className="space-y-6 md:space-y-10 pb-8 md:pb-12 min-w-0">
       <div>
-        <h1 className="text-4xl font-black text-white italic tracking-tighter uppercase leading-none">Scouting Board</h1>
+        <h1 className="text-3xl md:text-4xl font-black text-white italic tracking-tighter uppercase leading-none">Scouting Board</h1>
         <p className="text-gray-500 text-sm mt-2">Discover and track potential signings</p>
       </div>
       {/* Players Table */}
-      <div className="p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
-        <div className="flex items-center justify-between mb-8">
-          <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Players</p>
-          <div className="flex items-center gap-3">
+      <div className="p-4 sm:p-6 md:p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+          <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest shrink-0">Players</p>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <FilterButton label="All Positions" />
             <FilterButton label="Country" />
             <FilterButton label="Age Range" />
@@ -114,10 +132,10 @@ const ScoutingBoard = () => {
         <DashboardTable columns={playerColumns} data={playerData} className="border-white/10" />
       </div>
       {/* Coaches Table */}
-      <div className="p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
-        <div className="flex items-center justify-between mb-8">
-          <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Coaches</p>
-          <div className="flex items-center gap-3">
+      <div className="p-4 sm:p-6 md:p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+          <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest shrink-0">Coaches</p>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <FilterButton label="All Roles" />
             <FilterButton label="Country" />
             <FilterButton label="Speciality" />
@@ -130,7 +148,7 @@ const ScoutingBoard = () => {
   );
 };
 const FilterButton = ({ label }: { label: string }) => (
-  <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-bold hover:bg-white/10 transition-all">
+  <button className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-[10px] sm:text-xs font-bold hover:bg-white/10 transition-all flex-1 sm:flex-none min-w-fit whitespace-nowrap">
     {label}
     <IconChevronDown size={14} className="text-gray-500" />
   </button>

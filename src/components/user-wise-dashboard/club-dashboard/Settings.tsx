@@ -14,11 +14,11 @@ import {
 
 const ClubSettings = () => {
   return (
-    <div className="space-y-8 pb-12">
+    <div className="space-y-6 md:space-y-8 pb-8 md:pb-12 min-w-0">
       {/* Header */}
       <div>
-        <h1 className="text-4xl font-black text-white italic tracking-tighter uppercase leading-none">Settings</h1>
-        <p className="text-gray-500 text-sm mt-2">Manage your club account and preferences</p>
+        <h1 className="text-3xl md:text-4xl font-black text-white italic tracking-tighter uppercase leading-none">Settings</h1>
+        <p className="text-gray-500 text-xs sm:text-sm mt-2">Manage your club account and preferences</p>
       </div>
 
       <div className="space-y-6">
@@ -41,7 +41,7 @@ const ClubSettings = () => {
             <SettingsInput label="New Password" type="password" />
             <SettingsInput label="Confirm New Password" type="password" />
             
-            <button className="px-6 py-2.5 rounded-lg bg-white/10 text-white text-xs font-bold hover:bg-white/20 transition-all border border-white/10">
+            <button className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg bg-white/10 text-white text-[10px] sm:text-xs font-bold hover:bg-white/20 transition-all border border-white/10 mt-2 sm:mt-0">
               Update Password
             </button>
           </div>
@@ -50,12 +50,14 @@ const ClubSettings = () => {
         {/* Billing & Subscription */}
         <SettingsSection title="Billing & Subscription" icon={<IconCreditCard size={20} />}>
           <div className="space-y-6">
-            <div className="p-6 rounded-xl border border-white/10 bg-white/[0.02]">
-              <div className="flex items-center justify-between mb-6">
+            <div className="p-4 sm:p-6 rounded-xl border border-white/10 bg-white/2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
-                  <h4 className="text-sm font-bold text-white">Premium Plan <span className="text-gray-500 font-medium ml-2">($150/month)</span></h4>
+                  <h4 className="text-xs sm:text-sm font-bold text-white flex flex-col sm:flex-row sm:items-center">
+                    Premium Plan <span className="text-gray-500 font-medium sm:ml-2">($150/month)</span>
+                  </h4>
                 </div>
-                <button className="px-4 py-1.5 rounded-lg bg-white/10 text-white text-xs font-bold hover:bg-white/20 transition-all border border-white/10">
+                <button className="w-full sm:w-auto px-4 py-2 sm:py-1.5 rounded-lg bg-white/10 text-white text-[10px] sm:text-xs font-bold hover:bg-white/20 transition-all border border-white/10 whitespace-nowrap">
                   Change Plan
                 </button>
               </div>
@@ -72,7 +74,7 @@ const ClubSettings = () => {
               </div>
             </div>
             
-            <button className="px-6 py-2.5 rounded-lg bg-white/10 text-white text-xs font-bold hover:bg-white/20 transition-all border border-white/10">
+            <button className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg bg-white/10 text-white text-[10px] sm:text-xs font-bold hover:bg-white/20 transition-all border border-white/10 mt-2 sm:mt-0">
               Update Payment Method
             </button>
           </div>

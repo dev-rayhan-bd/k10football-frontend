@@ -56,7 +56,7 @@ const Analytics = () => {
       key: "name",
       render: (player) => (
         <div className="flex items-center gap-3">
-          <Image src={player.avatar} className="w-10 h-10 rounded-full object-cover" alt={player.name} />
+          <Image src={player.avatar} className="w-10 h-10 rounded-full object-cover" alt={player.name} width={100} height={100} />
           <div>
             <div className="text-sm font-bold text-white">{player.name}</div>
             <div className="text-[10px] text-red-500 font-bold uppercase tracking-widest">{player.position}</div>
@@ -92,12 +92,12 @@ const Analytics = () => {
     },
   ];
   return (
-    <div className="space-y-8 pb-12">
+    <div className="space-y-6 md:space-y-8 pb-8 md:pb-12 min-w-0">
       <div>
-        <h1 className="text-4xl font-black text-white italic tracking-tighter uppercase leading-none">Analytics</h1>
+        <h1 className="text-3xl md:text-4xl font-black text-white italic tracking-tighter uppercase leading-none">Analytics</h1>
         <p className="text-gray-500 text-sm mt-2">Track engagement and performance metrics</p>
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {stats.map((stat, idx) => (
           <div key={idx} className="p-6 rounded-2xl border border-white/20 bg-[#0D0D0D]">
             <div className="flex flex-col gap-4">
@@ -112,10 +112,10 @@ const Analytics = () => {
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
-          <h3 className="text-sm font-bold text-white mb-8 uppercase tracking-widest italic">Players & Coaches Monitored</h3>
-          <div className="h-[300px]">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+        <div className="p-4 sm:p-6 md:p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
+          <h3 className="text-xs sm:text-sm font-bold text-white mb-6 sm:mb-8 uppercase tracking-widest italic">Players & Coaches Monitored</h3>
+          <div className="h-75">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={timelineData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
@@ -131,9 +131,9 @@ const Analytics = () => {
             </ResponsiveContainer>
           </div>
         </div>
-        <div className="p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
-          <h3 className="text-sm font-bold text-white mb-8 uppercase tracking-widest italic">Position Interest Distribution</h3>
-          <div className="h-[300px]">
+        <div className="p-4 sm:p-6 md:p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
+          <h3 className="text-xs sm:text-sm font-bold text-white mb-6 sm:mb-8 uppercase tracking-widest italic">Position Interest Distribution</h3>
+          <div className="h-75">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={distributionData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
@@ -153,10 +153,10 @@ const Analytics = () => {
           </div>
         </div>
       </div>
-      <div className="p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
-        <div className="flex items-center justify-between mb-8">
-          <h3 className="text-xl font-bold text-white italic uppercase tracking-tight">Top Players Engaged</h3>
-          <div className="flex gap-3">
+      <div className="p-4 sm:p-6 md:p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+          <h3 className="text-lg sm:text-xl font-bold text-white italic uppercase tracking-tight">Top Players Engaged</h3>
+          <div className="flex flex-wrap gap-2 sm:gap-3">
              <FilterButton label="All Positions" />
              <FilterButton label="Country" />
              <FilterButton label="Age Range" />
@@ -169,7 +169,7 @@ const Analytics = () => {
   );
 };
 const FilterButton = ({ label }: { label: string }) => (
-  <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-bold hover:bg-white/10 transition-all">
+  <button className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-[10px] sm:text-xs font-bold hover:bg-white/10 transition-all flex-1 sm:flex-none min-w-fit whitespace-nowrap">
     {label}
     <IconChevronDown size={14} className="text-gray-500" />
   </button>
