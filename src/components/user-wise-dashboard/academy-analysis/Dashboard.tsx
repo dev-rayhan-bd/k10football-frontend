@@ -65,6 +65,8 @@ const PlayerEvalSidebarItem = ({ player, status }: { player: any, status: any })
             alt={player.fullName}
             className="w-full h-full object-cover"
             onError={(e) => { e.currentTarget.src = "/placeholder_img.jpg"; }}
+            width={50}
+            height={50}
           />
         </div>
         <div className="min-w-0">
@@ -519,6 +521,8 @@ const AcademyAnalysisDashboard = () => {
                     alt="Preview"
                     className="max-w-full max-h-[70vh] object-contain rounded-xl"
                     onError={(e) => { e.currentTarget.src = "/placeholder_img.jpg"; }}
+                    width={1000}
+                    height={1000}
                   />
                 ) : (
                   <video src={selectedMedia?.mediaFile} controls autoPlay className="max-w-full max-h-[70vh] object-contain rounded-xl" />

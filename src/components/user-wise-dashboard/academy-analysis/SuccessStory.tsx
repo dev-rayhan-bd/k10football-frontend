@@ -156,14 +156,14 @@ const SuccessStory = () => {
       <div className="text-xs text-gray-500 uppercase tracking-widest font-medium">
         Academy Dashboard / Analysis / <span className="text-white">Success Story</span>
       </div>
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div>
-          <h1 className="text-5xl font-black text-white font-orbitron uppercase tracking-tight">Success Story</h1>
-          <p className="text-white/60 font-medium mt-2 text-lg">Manage and view academy accomplishments and milestones</p>
+          <h1 className="text-3xl md:text-5xl font-black text-white font-orbitron uppercase tracking-tight">Success Story</h1>
+          <p className="text-white/60 font-medium mt-2 text-sm md:text-lg">Manage and view academy accomplishments and milestones</p>
         </div>
         <Button 
           onClick={handleAddClick}
-          className="bg-[#E31B23] hover:bg-[#C1171D] text-white px-6 h-12 rounded-xl font-bold flex items-center gap-2"
+          className="w-full sm:w-auto bg-[#E31B23] hover:bg-[#C1171D] text-white px-6 h-12 rounded-xl font-bold flex items-center justify-center gap-2"
         >
           <IconPlus size={20} /> Add Success Story
         </Button>
@@ -246,7 +246,17 @@ const SuccessStory = () => {
                 className="aspect-video w-full bg-black relative overflow-hidden shrink-0 flex items-center justify-center cursor-zoom-in"
               >
                 {story.mediaType === "image" ? (
-                  <Image src={story.mediaFile} alt={story.title} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300" />
+                  <Image 
+                    src={story.mediaFile || "/placeholder_img.jpg"} 
+                    alt={story.title} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300" 
+                    width={500} 
+                    height={500}
+                    onError={(e: any) => {
+                      e.currentTarget.src = "/placeholder_img.jpg";
+                      e.currentTarget.srcset = "";
+                    }}
+                  />
                 ) : (
                   <div className="relative w-full h-full">
                     <video src={story.mediaFile} className="w-full h-full object-cover pointer-events-none" />
@@ -274,9 +284,9 @@ const SuccessStory = () => {
       </div>
       {/* Edit/Add Modal */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-3xl max-w-lg p-8">
+        <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-3xl max-w-lg p-6 sm:p-8">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-black uppercase text-white font-orbitron tracking-tight">
+            <DialogTitle className="text-xl sm:text-2xl font-black uppercase text-white font-orbitron tracking-tight">
               {editingStory ? "Edit Success Story" : "Add Success Story"}
             </DialogTitle>
           </DialogHeader>
@@ -341,17 +351,17 @@ const SuccessStory = () => {
               </div>
             </div>
             {/* Buttons */}
-            <div className="flex gap-4 pt-4 border-t border-white/5 justify-end">
+            <div className="flex flex-col-reverse sm:flex-row gap-4 pt-4 border-t border-white/5 justify-end">
               <button 
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="px-6 py-2.5 rounded-xl border border-white/10 text-white/60 hover:text-white bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer"
+                className="w-full sm:w-auto px-6 py-2.5 rounded-xl border border-white/10 text-white/60 hover:text-white bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer"
               >
                 Cancel
               </button>
               <button 
                 type="submit"
-                className="px-6 py-2.5 rounded-xl bg-[#E31B23] hover:bg-[#ff2d35] text-white text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-[0_0_15px_rgba(227,27,35,0.3)]"
+                className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#E31B23] hover:bg-[#ff2d35] text-white text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-[0_0_15px_rgba(227,27,35,0.3)]"
               >
                 {editingStory ? "Save Changes" : "Publish Story"}
               </button>
@@ -364,7 +374,17 @@ const SuccessStory = () => {
         <DialogContent className="bg-black/95 border border-white/10 text-white rounded-3xl max-w-4xl p-6 flex flex-col items-center justify-center overflow-hidden">
           <div className="w-full flex items-center justify-center max-h-[75vh]">
             {selectedMedia?.mediaType === "image" ? (
-              <Image src={selectedMedia.mediaFile} alt="Preview" className="max-w-full max-h-[70vh] object-contain rounded-xl" />
+              <Image 
+                src={selectedMedia.mediaFile || "/placeholder_img.jpg"} 
+                alt="Preview" 
+                className="max-w-full max-h-[70vh] object-contain rounded-xl" 
+                width={500} 
+                height={500}
+                onError={(e: any) => {
+                  e.currentTarget.src = "/placeholder_img.jpg";
+                  e.currentTarget.srcset = "";
+                }}
+              />
             ) : (
               <video src={selectedMedia?.mediaFile} controls autoPlay className="max-w-full max-h-[70vh] object-contain rounded-xl" />
             )}

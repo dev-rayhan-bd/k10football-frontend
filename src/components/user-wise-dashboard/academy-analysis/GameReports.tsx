@@ -104,26 +104,26 @@ const getStatsFromReport = (report: MatchStats) => {
   }
 };
 const SummaryCard = ({ label, value, icon: Icon, bgColor, textColor }: { label: string, value: string | number, icon: any, bgColor: string, textColor: string }) => (
-  <div className="bg-[#0A0A0A] border border-white/20 rounded-[20px] p-5 flex items-center gap-4 flex-1 min-w-0">
-    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${bgColor} bg-opacity-20 border border-white/20 shrink-0`}>
-      {Icon && <Icon size={24} className={`${textColor} opacity-100`} stroke={2} />}
+  <div className="bg-[#0A0A0A] border border-white/20 rounded-[20px] p-4 md:p-5 flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center ${bgColor} bg-opacity-20 border border-white/20 shrink-0`}>
+      {Icon && <Icon className={`w-5 h-5 md:w-6 md:h-6 ${textColor} opacity-100`} stroke={2} />}
     </div>
-    <div className="space-y-0.5">
-      <p className="text-white/40 text-[11px] font-medium leading-none">{label}</p>
-      <p className="text-white text-2xl font-bold font-orbitron">{value}</p>
+    <div className="space-y-0.5 truncate">
+      <p className="text-white/40 text-[10px] md:text-[11px] font-medium leading-none truncate">{label}</p>
+      <p className="text-white text-xl md:text-2xl font-bold font-orbitron truncate">{value}</p>
     </div>
   </div>
 );
-const GameReportCard = ({ 
-  tag, 
-  playerName, 
-  date, 
-  coach, 
-  rating, 
-  goals, 
-  assists, 
-  passes, 
-  pos, 
+const GameReportCard = ({
+  tag,
+  playerName,
+  date,
+  coach,
+  rating,
+  goals,
+  assists,
+  passes,
+  pos,
   tier,
   team1,
   team2,
@@ -131,13 +131,13 @@ const GameReportCard = ({
 }: any) => {
   const displayRating = rating <= 10 ? rating * 10 : rating;
   return (
-    <div 
+    <div
       onClick={onClick}
-      className="bg-[#111111] border border-white/20 rounded-3xl p-6 flex flex-col gap-6 group hover:border-white/40 transition-all cursor-pointer"
+      className="bg-[#111111] border border-white/20 rounded-3xl p-5 sm:p-6 flex flex-col gap-5 sm:gap-6 group hover:border-white/40 transition-all cursor-pointer"
     >
-      <div className="flex justify-between items-center">
-        <span className="bg-white/5 border border-white/20 rounded-full px-4 py-1 text-[10px] font-bold text-white/60">{tag}</span>
-        <span className="text-white/40 text-[10px] font-bold uppercase tracking-wider truncate max-w-40">{team1} vs {team2}</span>
+      <div className="flex justify-between items-center gap-2">
+        <span className="bg-white/5 border border-white/20 rounded-full px-3 py-1 sm:px-4 text-[9px] sm:text-[10px] font-bold text-white/60 whitespace-nowrap">{tag}</span>
+        <span className="text-white/40 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider truncate text-right">{team1} vs {team2}</span>
       </div>
       <div className="space-y-1">
         <div className="flex items-center gap-2 text-white/40 text-[10px] font-bold">
@@ -154,45 +154,45 @@ const GameReportCard = ({
           <p className="text-white/60 text-[10px] font-bold">({displayRating.toFixed(0)}% / 100%)</p>
         </div>
         <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-linear-to-r from-sky-500 to-sky-400" 
-            style={{ width: `${displayRating}%` }} 
+          <div
+            className="h-full bg-linear-to-r from-sky-500 to-sky-400"
+            style={{ width: `${displayRating}%` }}
           />
         </div>
       </div>
-      <div className="flex justify-between items-center">
-         <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1.5 text-emerald-400 text-[10px] font-bold">
-               <div className="w-2.5 h-2.5 rounded-full border-2 border-emerald-400 flex items-center justify-center p-px">
-                 <div className="w-full h-full bg-emerald-400 rounded-full" />
-               </div>
-               {goals} G
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3 xl:gap-0 mt-2 xl:mt-0">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-1 sm:gap-1.5 text-emerald-400 text-[10px] font-bold">
+            <div className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full border-2 border-emerald-400 flex items-center justify-center p-px">
+              <div className="w-full h-full bg-emerald-400 rounded-full" />
             </div>
-            <div className="flex items-center gap-1.5 text-yellow-400 text-[10px] font-bold">
-               <div className="w-2.5 h-2.5 rounded-full border-2 border-yellow-400 flex items-center justify-center p-px">
-                 <div className="w-full h-full bg-yellow-400 rounded-full" />
-               </div>
-               {assists} A
+            {goals} G
+          </div>
+          <div className="flex items-center gap-1 sm:gap-1.5 text-yellow-400 text-[10px] font-bold">
+            <div className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full border-2 border-yellow-400 flex items-center justify-center p-px">
+              <div className="w-full h-full bg-yellow-400 rounded-full" />
             </div>
-            <div className="flex items-center gap-1.5 text-sky-400 text-[10px] font-bold">
-               <div className="w-2.5 h-2.5 rounded-full border-2 border-sky-400 flex items-center justify-center p-px">
-                 <div className="w-full h-full bg-sky-400 rounded-full" />
-               </div>
-               {passes} P
+            {assists} A
+          </div>
+          <div className="flex items-center gap-1 sm:gap-1.5 text-sky-400 text-[10px] font-bold">
+            <div className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full border-2 border-sky-400 flex items-center justify-center p-px">
+              <div className="w-full h-full bg-sky-400 rounded-full" />
             </div>
-         </div>
-         <div className="flex items-center gap-3">
-            <span className="text-white/40 text-[10px] font-bold uppercase">{pos} · {tier}</span>
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                toast.info("Deletion is managed on the coach dashboard.");
-              }}
-              className="text-red-500/40 hover:text-red-500 transition-colors cursor-pointer animate-none"
-            >
-               <IconTrash size={16} />
-            </button>
-         </div>
+            {passes} P
+          </div>
+        </div>
+        <div className="flex items-center justify-between w-full xl:w-auto gap-3">
+          <span className="text-white/40 text-[9px] sm:text-[10px] font-bold uppercase truncate">{pos} · {tier}</span>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              toast.info("Deletion is managed on the coach dashboard.");
+            }}
+            className="text-red-500/40 hover:text-red-500 transition-colors cursor-pointer animate-none"
+          >
+            <IconTrash size={16} />
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -215,7 +215,7 @@ const GameReports = () => {
     try {
       const d = new Date(report.date);
       formattedDate = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-    } catch (e) {}
+    } catch (e) { }
     return {
       ...report,
       playerName: pName,
@@ -225,7 +225,7 @@ const GameReports = () => {
       dateFormatted: formattedDate
     };
   });
-  const filteredReports = mappedReports.filter(report => 
+  const filteredReports = mappedReports.filter(report =>
     report.playerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     report.playerPosition.toLowerCase().includes(searchTerm.toLowerCase()) ||
     report.scoutName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -234,11 +234,11 @@ const GameReports = () => {
   );
   // Dynamic Summary Stats
   const totalReportsCount = mappedReports.length;
-  const avgRatingVal = totalReportsCount > 0 
+  const avgRatingVal = totalReportsCount > 0
     ? (mappedReports.reduce((sum, r) => {
-        const ratingNum = r.rating <= 10 ? r.rating * 10 : r.rating;
-        return sum + ratingNum;
-      }, 0) / totalReportsCount).toFixed(1)
+      const ratingNum = r.rating <= 10 ? r.rating * 10 : r.rating;
+      return sum + ratingNum;
+    }, 0) / totalReportsCount).toFixed(1)
     : "0.0";
   const totalGoalsVal = mappedReports.reduce((sum, r) => sum + (r.goals || 0), 0);
   const totalAssistsVal = mappedReports.reduce((sum, r) => sum + (r.assists || 0), 0);
@@ -251,21 +251,21 @@ const GameReports = () => {
   const radarStats = selectedCard && activeStats
     ? (isGK
       ? [
-          { label: "DIV", value: mapStat((activeStats.reflex || 0) + (activeStats.savesAccurate || 0), 25) },
-          { label: "HAN", value: mapStat((activeStats.handling || 0) + (activeStats.punching || 0), 25) },
-          { label: "KIC", value: mapStat((activeStats.throwing || 0) + (activeStats.passAccurate || 0), 25) },
-          { label: "REF", value: mapStat((activeStats.reflex || 0) + (activeStats.penaltiesSaves || 0) * 5, 20) },
-          { label: "SPD", value: mapStat((activeStats.reactions || 0) + (activeStats.appearances || 0), 25) },
-          { label: "POS", value: mapStat((activeStats.aerialAbility || 0) + (activeStats.savesAccurate || 0), 25) }
-        ]
+        { label: "DIV", value: mapStat((activeStats.reflex || 0) + (activeStats.savesAccurate || 0), 25) },
+        { label: "HAN", value: mapStat((activeStats.handling || 0) + (activeStats.punching || 0), 25) },
+        { label: "KIC", value: mapStat((activeStats.throwing || 0) + (activeStats.passAccurate || 0), 25) },
+        { label: "REF", value: mapStat((activeStats.reflex || 0) + (activeStats.penaltiesSaves || 0) * 5, 20) },
+        { label: "SPD", value: mapStat((activeStats.reactions || 0) + (activeStats.appearances || 0), 25) },
+        { label: "POS", value: mapStat((activeStats.aerialAbility || 0) + (activeStats.savesAccurate || 0), 25) }
+      ]
       : [
-          { label: "PAC", value: mapStat((activeStats.reactions || 0) + (selectedCard.characteristics?.includes("FAST") ? 8 : 4), 20) },
-          { label: "SHO", value: mapStat((activeStats.goalScored || 0) * 3 + (activeStats.shotsOnGoal || 0) + (activeStats.penaltiesTaken || 0), 25) },
-          { label: "PAS", value: mapStat((activeStats.assists || 0) * 2 + (activeStats.passAccurate || 0), 25) },
-          { label: "DRI", value: mapStat((activeStats.passAccurate || 0) + (selectedCard.characteristics?.includes("SKILLFUL") ? 8 : 4), 20) },
-          { label: "DEF", value: mapStat((activeStats.standTackle || 0) + (activeStats.slidingTackle || 0) + (activeStats.interception || 0), 30) },
-          { label: "PHY", value: mapStat((activeStats.appearances || 0) + (activeStats.savesAccurate || 0), 30) }
-        ])
+        { label: "PAC", value: mapStat((activeStats.reactions || 0) + (selectedCard.characteristics?.includes("FAST") ? 8 : 4), 20) },
+        { label: "SHO", value: mapStat((activeStats.goalScored || 0) * 3 + (activeStats.shotsOnGoal || 0) + (activeStats.penaltiesTaken || 0), 25) },
+        { label: "PAS", value: mapStat((activeStats.assists || 0) * 2 + (activeStats.passAccurate || 0), 25) },
+        { label: "DRI", value: mapStat((activeStats.passAccurate || 0) + (selectedCard.characteristics?.includes("SKILLFUL") ? 8 : 4), 20) },
+        { label: "DEF", value: mapStat((activeStats.standTackle || 0) + (activeStats.slidingTackle || 0) + (activeStats.interception || 0), 30) },
+        { label: "PHY", value: mapStat((activeStats.appearances || 0) + (activeStats.savesAccurate || 0), 30) }
+      ])
     : [];
   const overallPercent = radarStats.length > 0
     ? Math.round(radarStats.reduce((sum, s) => sum + s.value, 0) / radarStats.length)
@@ -354,8 +354,8 @@ const GameReports = () => {
   const matchingPlayer = selectedCard ? players.find((p) => p.id === selectedCard.playerId) : null;
   const playerImgSrc = selectedCard
     ? (typeof matchingPlayer?.playerImage === "string"
-        ? matchingPlayer.playerImage
-        : (matchingPlayer?.playerImage?.src || "/ronaldo.png"))
+      ? matchingPlayer.playerImage
+      : (matchingPlayer?.playerImage?.src || "/ronaldo.png"))
     : "/ronaldo.png";
   // Sidebar Aggregations
   // 1. Top Performers (by average rating)
@@ -375,31 +375,32 @@ const GameReports = () => {
   const topScorers = Object.values(goalMap)
     .sort((a, b) => b.goals - a.goals)
     .slice(0, 4);
+
   return (
-    <div className="flex flex-col gap-8 pb-10">
+    <div className="flex flex-col gap-6 md:gap-8 pb-10 w-full max-w-full overflow-x-hidden">
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-5xl font-black text-white font-orbitron uppercase tracking-tight">Game Reports</h1>
-          <p className="text-white/60 font-medium mt-2 text-lg">Professional player match performance analysis and scout records</p>
+          <h1 className="text-3xl md:text-5xl font-black text-white font-orbitron uppercase tracking-tight">Game Reports</h1>
+          <p className="text-white/60 font-medium mt-2 text-sm md:text-lg">Professional player match performance analysis and scout records</p>
         </div>
       </div>
       {/* Summary Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
         <SummaryCard label="Avg. Match Rating" value={`${avgRatingVal}%`} icon={IconStar} bgColor="bg-sky-500" textColor="text-sky-500" />
         <SummaryCard label="Total Goals" value={totalGoalsVal} icon={IconTrendingUp} bgColor="bg-emerald-500" textColor="text-emerald-500" />
         <SummaryCard label="Total Assists" value={totalAssistsVal} icon={IconFileText} bgColor="bg-blue-500" textColor="text-blue-500" />
         <SummaryCard label="Total Reports" value={totalReportsCount} icon={IconUsers} bgColor="bg-yellow-500" textColor="text-yellow-500" />
       </div>
-      <div className="flex gap-8">
+      <div className="flex flex-col xl:flex-row gap-6 xl:gap-8">
         {/* Main Content */}
-        <div className="flex-1 flex flex-col gap-8 min-w-0">
+        <div className="flex-1 flex flex-col gap-6 xl:gap-8 min-w-0">
           {/* Filters */}
           <div className="flex gap-4">
             <div className="relative flex-1 min-w-0">
               <IconSearch size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
-              <Input 
-                placeholder="Search reports by player name, scout, team, or position..." 
-                className="bg-[#111111] border-white/10 h-12 rounded-xl pl-12 text-white/60 font-medium" 
+              <Input
+                placeholder="Search reports by player name, scout, team, or position..."
+                className="bg-[#111111] border-white/10 h-12 rounded-xl pl-12 text-white/60 font-medium"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -408,11 +409,11 @@ const GameReports = () => {
           {/* Reports Grid */}
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-black text-white font-orbitron uppercase tracking-tight">Scouting Reports</h2>
+              <h2 className="text-xl md:text-2xl font-black text-white font-orbitron uppercase tracking-tight">Scouting Reports</h2>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
               {filteredReports.map((report, idx) => (
-                <GameReportCard 
+                <GameReportCard
                   key={report.id ? `${report.id}-${idx}` : `report-${idx}`}
                   tag={report.tag}
                   playerName={report.playerName}
@@ -438,72 +439,72 @@ const GameReports = () => {
           </div>
         </div>
         {/* Sidebar */}
-        <div className="w-full lg:w-85 flex flex-col gap-8 shrink-0 min-w-0">
-           {/* Top Scorers */}
-           <div className="bg-[#111111] border border-white/20 rounded-4xl p-8 flex flex-col gap-6">
-              <div className="flex items-center gap-3">
-                 <div className="w-10 h-10 rounded-xl bg-sky-600 flex items-center justify-center shadow-[0_0_20px_rgba(14,165,233,0.2)]">
-                    <IconTrendingUp size={20} className="text-white" />
-                 </div>
-                 <h2 className="text-2xl font-black text-white font-orbitron uppercase tracking-tight">Top Scorers</h2>
+        <div className="w-full xl:w-[340px] flex flex-col gap-8 shrink-0 min-w-0">
+          {/* Top Scorers */}
+          <div className="bg-[#111111] border border-white/20 rounded-3xl md:rounded-4xl p-6 md:p-8 flex flex-col gap-5 md:gap-6">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-sky-600 flex items-center justify-center shadow-[0_0_20px_rgba(14,165,233,0.2)] shrink-0">
+                <IconTrendingUp className="text-white w-4 h-4 md:w-5 md:h-5" />
               </div>
-              <div className="space-y-4">
-                 {topScorers.map((player, i) => (
-                   <div key={i} className="flex justify-between items-center">
-                      <div className="flex items-center gap-3">
-                         <IconFileText size={16} className="text-sky-400" />
-                         <div>
-                            <p className="text-white text-sm font-black">{player.name}</p>
-                            <p className="text-white/60 text-[10px] font-bold uppercase tracking-wider">{player.team} · {player.pos}</p>
-                         </div>
+              <h2 className="text-xl md:text-2xl font-black text-white font-orbitron uppercase tracking-tight">Top Scorers</h2>
+            </div>
+            <div className="space-y-4">
+              {topScorers.map((player, i) => (
+                <div key={i} className="flex justify-between items-center">
+                  <div className="flex items-center gap-3">
+                    <IconFileText size={16} className="text-sky-400" />
+                    <div>
+                      <p className="text-white text-sm font-black">{player.name}</p>
+                      <p className="text-white/60 text-[10px] font-bold uppercase tracking-wider">{player.team} · {player.pos}</p>
+                    </div>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-[10px] font-black text-emerald-400 bg-emerald-100 bg-opacity-20">
+                    {player.goals} Goals
+                  </span>
+                </div>
+              ))}
+              {topScorers.length === 0 && (
+                <p className="text-white/40 text-xs text-center py-4">No goals recorded yet.</p>
+              )}
+            </div>
+          </div>
+          {/* Top Performers */}
+          <div className="bg-[#111111] border border-white/20 rounded-3xl md:rounded-4xl p-6 md:p-8 flex flex-col gap-5 md:gap-6">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-sky-500/10 flex items-center justify-center shrink-0">
+                <IconStar className="text-sky-500 w-4 h-4 md:w-5 md:h-5" />
+              </div>
+              <h2 className="text-xl md:text-2xl font-black text-white font-orbitron uppercase tracking-tight">Top Performers</h2>
+            </div>
+            <div className="space-y-6">
+              {topPerformers.map((report, i) => {
+                const displayRating = report.rating <= 10 ? report.rating * 10 : report.rating;
+                return (
+                  <div key={i} className="flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                      <span className="text-sky-500 text-[10px] font-black font-orbitron">#{i + 1}</span>
+                      <div>
+                        <p className="text-white text-sm font-bold">{report.playerName}</p>
+                        <p className="text-white/40 text-[10px] font-bold uppercase">{report.tag} · {report.playerPosition}</p>
                       </div>
-                      <span className="px-3 py-1 rounded-full text-[10px] font-black text-emerald-400 bg-emerald-100 bg-opacity-20">
-                        {player.goals} Goals
-                      </span>
-                   </div>
-                 ))}
-                 {topScorers.length === 0 && (
-                   <p className="text-white/40 text-xs text-center py-4">No goals recorded yet.</p>
-                 )}
-              </div>
-           </div>
-           {/* Top Performers */}
-           <div className="bg-[#111111] border border-white/20 rounded-4xl p-8 flex flex-col gap-6">
-              <div className="flex items-center gap-3">
-                 <div className="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center">
-                    <IconStar size={20} className="text-sky-500" />
-                 </div>
-                 <h2 className="text-2xl font-black text-white font-orbitron uppercase tracking-tight">Top Performers</h2>
-              </div>
-              <div className="space-y-6">
-                 {topPerformers.map((report, i) => {
-                   const displayRating = report.rating <= 10 ? report.rating * 10 : report.rating;
-                   return (
-                     <div key={i} className="flex justify-between items-center">
-                        <div className="flex items-center gap-3">
-                           <span className="text-sky-500 text-[10px] font-black font-orbitron">#{i+1}</span>
-                           <div>
-                              <p className="text-white text-sm font-bold">{report.playerName}</p>
-                              <p className="text-white/40 text-[10px] font-bold uppercase">{report.tag} · {report.playerPosition}</p>
-                           </div>
-                        </div>
-                        <div className="flex items-center gap-1 text-white text-[10px] font-black font-orbitron">
-                           <IconStar size={14} className="text-sky-500 fill-sky-500/20" />
-                           {displayRating.toFixed(0)}%
-                        </div>
-                     </div>
-                   );
-                 })}
-                 {topPerformers.length === 0 && (
-                   <p className="text-white/40 text-xs text-center py-4">No reports recorded yet.</p>
-                 )}
-              </div>
-           </div>
+                    </div>
+                    <div className="flex items-center gap-1 text-white text-[10px] font-black font-orbitron">
+                      <IconStar size={14} className="text-sky-500 fill-sky-500/20" />
+                      {displayRating.toFixed(0)}%
+                    </div>
+                  </div>
+                );
+              })}
+              {topPerformers.length === 0 && (
+                <p className="text-white/40 text-xs text-center py-4">No reports recorded yet.</p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
       {/* Game Report Preview Modal */}
       <Dialog open={!!selectedCard} onOpenChange={(open) => !open && setSelectedCard(null)}>
-        <DialogContent 
+        <DialogContent
           showCloseButton={false}
           className="w-screen! h-screen! max-w-none! max-h-none! top-0! left-0! translate-x-0! translate-y-0! rounded-none! border-none! bg-black/98 text-white p-8 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
         >
@@ -543,7 +544,7 @@ const GameReports = () => {
           {selectedCard && activeStats && (
             <div className="flex flex-col items-center gap-8 py-6">
               {/* Printable Page 1 */}
-              <div 
+              <div
                 id="report-page-1"
                 className="bg-white text-slate-800 p-10 font-sans relative overflow-hidden select-none"
                 style={{ width: "794px", height: "1123px", minWidth: "794px", minHeight: "1123px" }}
@@ -630,16 +631,16 @@ const GameReports = () => {
                             {overallPercent}
                           </div>
                           <div className="text-[8px] font-bold text-sky-500 uppercase font-orbitron leading-none mt-0.5">
-                            {selectedCard.playerPosition?.slice(0,3)}
+                            {selectedCard.playerPosition?.slice(0, 3)}
                           </div>
                         </div>
                         <Image src={logo.src} alt="Club Logo" className="w-5 h-5 object-contain" />
                       </div>
                       {/* Player image in FUT Card */}
                       <div className="w-24 h-28 overflow-hidden relative mt-1 flex items-end justify-center">
-                        <Image 
-                          src={playerImgSrc} 
-                          alt="Player Card Image" 
+                        <Image
+                          src={playerImgSrc}
+                          alt="Player Card Image"
                           className="h-full object-contain object-bottom"
                         />
                       </div>
@@ -744,11 +745,11 @@ const GameReports = () => {
                 <div className="absolute bottom-10 left-10 right-10 z-10 flex items-center justify-between border-t-2 border-slate-200 pt-4">
                   {/* Radar Chart */}
                   <div className="w-45">
-                    <RadarChart 
-                      stats={radarStats} 
-                      size={140} 
-                      color="#0284c7" 
-                      fillColor="rgba(2, 132, 199, 0.25)" 
+                    <RadarChart
+                      stats={radarStats}
+                      size={140}
+                      color="#0284c7"
+                      fillColor="rgba(2, 132, 199, 0.25)"
                       textColor="#475569"
                       gridColor="rgba(0, 0, 0, 0.1)"
                     />
