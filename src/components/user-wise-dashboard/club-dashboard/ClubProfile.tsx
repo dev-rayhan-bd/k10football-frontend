@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 import { 
   IconCheck, 
   IconTrophy, 
@@ -8,7 +7,6 @@ import {
 } from "@tabler/icons-react";
 import DashboardHero from "@/components/dashboard/DashboardHero";
 import { 
-  SettingsSection, 
   SettingsInput 
 } from "@/components/dashboard/DashboardSettingsElements";
 
@@ -21,7 +19,7 @@ const ClubProfile = () => {
       </div>
 
       {/* Academy Information Section */}
-      <div className="p-8 rounded-2xl border border-white/20 bg-[#0D0D0D] space-y-8">
+      <div className="p-5 md:p-8 rounded-2xl border border-white/20 bg-[#0D0D0D] space-y-6 md:space-y-8 min-w-0 w-full">
         <div className="flex items-center gap-2 mb-6">
           <div className="p-1 rounded-full bg-green-500/10 text-green-500 border border-green-500/20">
             <IconCheck size={16} />
@@ -48,8 +46,8 @@ const ClubProfile = () => {
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 pt-4">
-          <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 pt-4">
+          <div className="space-y-4 md:space-y-6 w-full min-w-0">
             <SettingsInput label="Club Name" placeholder="Liverpool FC" />
             <SettingsInput label="Club Country" placeholder="Brazil" />
             <SettingsInput label="Club League" placeholder="Premier League" />
@@ -58,10 +56,10 @@ const ClubProfile = () => {
             <SettingsInput label="Email" placeholder="liverpool.fc@gmail.com" />
           </div>
 
-          <div className="space-y-8">
+          <div className="space-y-6 md:space-y-8 w-full min-w-0">
             <div className="space-y-4">
               <label className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Upload Cover Photo</label>
-              <div className="aspect-video rounded-2xl border-2 border-dashed border-white/10 bg-white/[0.02] flex flex-col items-center justify-center gap-3 group hover:border-[#E31B23]/30 transition-all cursor-pointer">
+              <div className="aspect-video rounded-2xl border-2 border-dashed border-white/10 bg-white/2 flex flex-col items-center justify-center gap-3 group hover:border-[#E31B23]/30 transition-all cursor-pointer">
                 <div className="p-3 rounded-xl bg-white/5 text-white/40 group-hover:bg-[#E31B23]/10 group-hover:text-[#E31B23] transition-all">
                   <IconUpload size={24} />
                 </div>
@@ -71,7 +69,7 @@ const ClubProfile = () => {
 
             <div className="space-y-4">
               <label className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Upload Logo</label>
-              <div className="h-32 rounded-2xl border-2 border-dashed border-white/10 bg-white/[0.02] flex flex-col items-center justify-center gap-3 group hover:border-[#E31B23]/30 transition-all cursor-pointer">
+              <div className="h-32 rounded-2xl border-2 border-dashed border-white/10 bg-white/2 flex flex-col items-center justify-center gap-3 group hover:border-[#E31B23]/30 transition-all cursor-pointer">
                 <div className="p-3 rounded-xl bg-white/5 text-white/40 group-hover:bg-[#E31B23]/10 group-hover:text-[#E31B23] transition-all">
                   <IconUpload size={24} />
                 </div>
@@ -83,7 +81,7 @@ const ClubProfile = () => {
       </div>
 
       {/* About the Club Section */}
-      <div className="p-8 rounded-2xl border border-white/20 bg-[#0D0D0D] space-y-8">
+      <div className="p-5 md:p-8 rounded-2xl border border-white/20 bg-[#0D0D0D] space-y-6 md:space-y-8 min-w-0 w-full">
         <div className="flex items-center gap-2 mb-6">
           <div className="p-1 rounded-full bg-green-500/10 text-green-500 border border-green-500/20">
             <IconCheck size={16} />
@@ -110,7 +108,7 @@ const ClubProfile = () => {
       </div>
 
       {/* Achievements Section */}
-      <div className="p-8 rounded-2xl border border-white/20 bg-[#0D0D0D] space-y-8">
+      <div className="p-5 md:p-8 rounded-2xl border border-white/20 bg-[#0D0D0D] space-y-6 md:space-y-8 min-w-0 w-full">
         <div className="flex items-center gap-2 mb-6">
           <div className="p-1 rounded-full bg-white/10 text-white border border-white/20">
             <IconTrophy size={16} />
@@ -118,15 +116,15 @@ const ClubProfile = () => {
           <h3 className="text-xl font-bold text-white italic uppercase tracking-tight">Achievements</h3>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 min-w-0 w-full">
           <SettingsInput label="Year" placeholder="Enter Year" />
           <SettingsInput label="Championship" placeholder="Enter Championship" />
           <SettingsInput label="Venue" placeholder="Enter Venue" />
         </div>
       </div>
 
-      <div className="flex justify-end pt-4">
-        <button className="px-12 py-4 rounded-xl bg-[#E31B23] text-white text-sm font-black uppercase tracking-widest hover:bg-[#C1161D] transition-all shadow-[0_10px_40px_rgba(227,27,35,0.2)]">
+      <div className="flex flex-col sm:flex-row sm:justify-end pt-4 min-w-0 w-full">
+        <button className="w-full sm:w-auto px-12 py-4 rounded-xl bg-[#E31B23] text-white text-sm font-black uppercase tracking-widest hover:bg-[#C1161D] transition-all shadow-[0_10px_40px_rgba(227,27,35,0.2)]">
           Save Changes
         </button>
       </div>

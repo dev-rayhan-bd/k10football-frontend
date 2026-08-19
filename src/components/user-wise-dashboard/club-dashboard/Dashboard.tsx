@@ -2,8 +2,6 @@
 import Image from "next/image";
 import React from "react";
 import {
-  IconSchool,
-  IconAffiliate,
   IconUsers,
   IconTrophy,
   IconHeart,
@@ -134,7 +132,15 @@ const ClubDashboard = () => {
       key: "name",
       render: (p) => (
         <div className="flex items-center gap-3">
-          <Image src={p.avatar} className="w-10 h-10 rounded-full object-cover" alt="avatar" />
+          <Image
+            width={500}
+            height={500}
+            src={p.avatar}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.srcset = "";
+              target.src = "/placeholder_img.jpg";
+            }} className="w-10 h-10 rounded-full object-cover" alt="avatar" />
           <div>
             <div className="text-sm font-bold text-white">{p.name}</div>
             <div className="text-[10px] text-red-500 font-bold uppercase tracking-widest">{p.position}</div>
@@ -150,7 +156,7 @@ const ClubDashboard = () => {
       header: "Actions",
       key: "actions",
       align: "right",
-      render: () => <TableActionButtons onView={() => {}} onHeart={() => {}} onShare={() => {}} />,
+      render: () => <TableActionButtons onView={() => { }} onHeart={() => { }} onShare={() => { }} />,
     },
   ];
   const favCoachColumns: Column<typeof favCoachData[0]>[] = [
@@ -159,7 +165,16 @@ const ClubDashboard = () => {
       key: "name",
       render: (c) => (
         <div className="flex items-center gap-3">
-          <Image src={c.avatar} className="w-10 h-10 rounded-full object-cover" alt="avatar" />
+          <Image
+            src={c.avatar} className="w-10 h-10 rounded-full object-cover" alt="avatar"
+            width={500}
+            height={500}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.srcset = "";
+              target.src = "/placeholder_img.jpg";
+            }}
+          />
           <div>
             <div className="text-sm font-bold text-white">{c.name}</div>
             <div className="text-[10px] text-red-500 font-bold uppercase tracking-widest">{c.role}</div>
@@ -175,7 +190,7 @@ const ClubDashboard = () => {
       header: "Actions",
       key: "actions",
       align: "right",
-      render: () => <TableActionButtons onView={() => {}} onHeart={() => {}} onShare={() => {}} />,
+      render: () => <TableActionButtons onView={() => { }} onHeart={() => { }} onShare={() => { }} />,
     },
   ];
   return (
@@ -215,7 +230,7 @@ const ClubDashboard = () => {
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-4">
               <div>
                 <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6 italic">Players & Coaches Monitored</h4>
-                <div className="h-[250px]">
+                <div className="h-62.5">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={timelineData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
@@ -230,7 +245,7 @@ const ClubDashboard = () => {
               </div>
               <div>
                 <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6 italic">Position Interest Distribution</h4>
-                <div className="h-[250px]">
+                <div className="h-62.5">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={distributionData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
@@ -264,10 +279,10 @@ const ClubDashboard = () => {
           {/* Images */}
           <DashboardSection
             title="Images"
-            action={<button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all"><IconUpload size={16} /> Upload Image</button>}
+            action={<button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all shrink-0"><IconUpload size={16} /> <span className="hidden sm:inline">Upload Image</span></button>}
           >
-            <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-8">Match highlights & training</p>
-            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-4 md:mb-8 wrap-break-word">Match highlights & training</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 w-full">
               {mediaData.map((item) => (
                 <MediaCard key={item.id} {...item} />
               ))}
@@ -276,10 +291,10 @@ const ClubDashboard = () => {
           {/* Videos */}
           <DashboardSection
             title="Videos"
-            action={<button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all"><IconUpload size={16} /> Upload Video</button>}
+            action={<button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all shrink-0"><IconUpload size={16} /> <span className="hidden sm:inline">Upload Video</span></button>}
           >
-            <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-8">Match highlights & training</p>
-            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-4 md:mb-8 wrap-break-word">Match highlights & training</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 w-full">
               {mediaData.map((item) => (
                 <MediaCard key={item.id} {...item} isVideo />
               ))}
@@ -324,7 +339,7 @@ const ClubDashboard = () => {
   );
 };
 const ActivityItem = ({ icon, text, time }: { icon: React.ReactNode, text: string, time: string }) => (
-  <div className="p-5 rounded-2xl border border-white/5 bg-white/[0.02] flex gap-4 hover:border-red-500/30 transition-all group">
+  <div className="p-5 rounded-2xl border border-white/5 bg-white/2 flex gap-4 hover:border-red-500/30 transition-all group">
     <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/40 group-hover:bg-red-500/10 group-hover:text-red-500 transition-colors">
       {icon}
     </div>
@@ -335,9 +350,19 @@ const ActivityItem = ({ icon, text, time }: { icon: React.ReactNode, text: strin
   </div>
 );
 const MediaCard = ({ title, date, views, likes, image, isVideo }: { title: string, date: string, views: number, likes: number, image: string, isVideo?: boolean }) => (
-  <div className="rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden group hover:border-[#E31B23]/30 transition-all">
+  <div className="rounded-2xl border border-white/10 bg-white/2 overflow-hidden group hover:border-[#E31B23]/30 transition-all">
     <div className="relative aspect-video overflow-hidden">
-      <Image src={image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={title} />
+      <Image
+        width={500} height={500}
+        src={image}
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+        alt={title}
+        onError={(e) => {
+          const target = e.target as HTMLImageElement;
+          target.srcset = "";
+          target.src = "/placeholder_img.jpg";
+        }}
+      />
       {isVideo && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/20">
           <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white group-hover:bg-[#E31B23] group-hover:scale-110 transition-all">
