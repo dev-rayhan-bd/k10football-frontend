@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React from "react";
 import { 
   IconUsers, 
   IconUser, 
@@ -18,19 +18,17 @@ import {
   Cell,
   BarChart,
   Bar,
-  AreaChart,
-  Area
 } from "recharts";
 import { useAppSelector } from "@/lib/hooks/reduxHooks";
 
 const AnalyticsStatCard = ({ icon: Icon, value, label }: { icon: any, value: string | number, label: string }) => (
-  <div className="bg-[#0A0A0A] border border-white/20 rounded-2xl p-6 flex flex-col gap-4 flex-1 min-w-0">
-    <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/60">
-       <Icon size={20} />
+  <div className="bg-[#0A0A0A] border border-white/20 rounded-2xl p-4 md:p-6 flex flex-col gap-3 md:gap-4 flex-1 min-w-0">
+    <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/60 shrink-0">
+       <Icon className="w-4 h-4 md:w-5 md:h-5" />
     </div>
-    <div>
-      <p className="text-white text-3xl font-black font-orbitron">{value}</p>
-      <p className="text-white/40 text-[11px] font-bold uppercase tracking-wider">{label}</p>
+    <div className="truncate">
+      <p className="text-white text-2xl md:text-3xl font-black font-orbitron truncate">{value}</p>
+      <p className="text-white/40 text-[9px] md:text-[11px] font-bold uppercase tracking-wider truncate">{label}</p>
     </div>
   </div>
 );
@@ -88,16 +86,16 @@ const Analytics = () => {
     else if (age >= 21) ageGroups[7].count++;
   });
   return (
-    <div className="flex flex-col gap-8 pb-10">
+    <div className="flex flex-col gap-6 md:gap-8 pb-10 w-full max-w-full overflow-x-hidden">
       {/* Header */}
       <div>
-        <h1 className="text-5xl font-black text-white font-orbitron uppercase tracking-tight">Analytics</h1>
-        <p className="text-white/60 font-medium mt-2 text-lg">Deep insights into player and team performance</p>
+        <h1 className="text-3xl md:text-5xl font-black text-white font-orbitron uppercase tracking-tight">Analytics</h1>
+        <p className="text-white/60 font-medium mt-2 text-sm md:text-lg">Deep insights into player and team performance</p>
       </div>
 
       {/* Summary Stats */}
-      <div className="bg-[#111111] border border-white/20 rounded-[40px] p-10">
-        <div className="flex gap-6">
+      <div className="bg-[#111111] border border-white/20 rounded-3xl md:rounded-[40px] p-5 md:p-10">
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
           <AnalyticsStatCard icon={IconUsers} value="4" label="Teams" />
           <AnalyticsStatCard icon={IconUser} value="64" label="Players" />
           <AnalyticsStatCard icon={IconSchool} value="12" label="Coaches" />
@@ -109,9 +107,9 @@ const Analytics = () => {
       {/* Main Charts Section */}
       <div className="flex flex-col gap-8">
         {/* Age Category */}
-        <div className="bg-[#111111] border border-white/20 rounded-[40px] p-10 flex flex-col gap-8">
-           <h2 className="text-2xl font-black text-white font-orbitron uppercase tracking-tight">Age Category</h2>
-           <div className="h-[300px] w-full">
+        <div className="bg-[#111111] border border-white/20 rounded-3xl md:rounded-[40px] p-6 md:p-10 flex flex-col gap-6 md:gap-8">
+           <h2 className="text-xl md:text-2xl font-black text-white font-orbitron uppercase tracking-tight">Age Category</h2>
+           <div className="h-75 w-full">
               <ResponsiveContainer width="100%" height="100%">
                  <BarChart data={ageGroups} margin={{ top: 10, right: 15, left: 15, bottom: 5 }}>
                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
@@ -141,11 +139,11 @@ const Analytics = () => {
         </div>
 
         {/* Bottom Charts Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
            {/* CV Status Distribution */}
-           <div className="bg-[#111111] border border-white/20 rounded-[40px] p-10 flex flex-col gap-8">
-              <h2 className="text-2xl font-black text-white font-orbitron uppercase tracking-tight text-center md:text-left">CV Status Distribution</h2>
-              <div className="h-[400px] w-full relative flex flex-col items-center justify-center">
+           <div className="bg-[#111111] border border-white/20 rounded-3xl md:rounded-[40px] p-6 md:p-10 flex flex-col gap-6 md:gap-8">
+              <h2 className="text-xl md:text-2xl font-black text-white font-orbitron uppercase tracking-tight text-center md:text-left">CV Status Distribution</h2>
+              <div className="h-100 w-full relative flex flex-col items-center justify-center">
                  <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                        <Pie
@@ -175,15 +173,15 @@ const Analytics = () => {
                     </div>
                  </div>
                  {/* Percent Labels on the Chart */}
-                 <div className="absolute top-[40%] left-[40%] -translate-x-1/2 -translate-y-1/2 text-white font-black font-orbitron text-2xl rotate-[-45deg]">60%</div>
-                 <div className="absolute top-[55%] left-[55%] -translate-x-1/2 -translate-y-1/2 text-[#111111] font-black font-orbitron text-2xl rotate-[15deg]">40%</div>
+                 <div className="absolute top-[40%] left-[40%] -translate-x-1/2 -translate-y-1/2 text-white font-black font-orbitron text-2xl -rotate-45">60%</div>
+                 <div className="absolute top-[55%] left-[55%] -translate-x-1/2 -translate-y-1/2 text-[#111111] font-black font-orbitron text-2xl rotate-15">40%</div>
               </div>
            </div>
 
            {/* Game Reports Engagement */}
-           <div className="bg-[#111111] border border-white/20 rounded-[40px] p-10 flex flex-col gap-8">
-              <h2 className="text-2xl font-black text-white font-orbitron uppercase tracking-tight">Game Reports Engagement</h2>
-              <div className="h-[400px] w-full">
+           <div className="bg-[#111111] border border-white/20 rounded-3xl md:rounded-[40px] p-6 md:p-10 flex flex-col gap-6 md:gap-8">
+              <h2 className="text-xl md:text-2xl font-black text-white font-orbitron uppercase tracking-tight">Game Reports Engagement</h2>
+              <div className="h-100 w-full">
                  <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={engagementData}>
                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />

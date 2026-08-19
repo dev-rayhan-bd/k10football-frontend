@@ -19,11 +19,16 @@ const ProductCard = ({
     <div className="bg-[#111111] rounded-3xl border border-white/5 p-4 flex flex-col gap-4 group">
       <div className="relative aspect-4/3 rounded-2xl overflow-hidden bg-white/5">
         <Image
-          src={image} 
-          alt={name} 
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+          src={image}
+          alt={name}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           width={100}
           height={100}
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.srcset = "";
+            target.src = "/placeholder_img.jpg";
+          }}
         />
         <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center">
           <Badge variant="secondary" className="bg-black/60 backdrop-blur-md border-white/10 text-[9px] uppercase font-bold tracking-widest px-2 py-0.5">

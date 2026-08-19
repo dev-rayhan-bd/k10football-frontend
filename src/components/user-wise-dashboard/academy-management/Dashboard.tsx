@@ -35,14 +35,14 @@ import { DashboardSidebarPanel, DashboardSidebarItem } from "@/components/dashbo
 import DashboardCharts from "@/components/dashboard/DashboardCharts";
 import ProductCard from "@/components/dashboard/ProductCard";
 const PlayerEvalSidebarItem = ({ player, status }: { player: any, status: any }) => {
-  const playerImgSrc = typeof player.playerImage === 'string'
+  const playerImgSrc = typeof player.playerImage === 'string' && player.playerImage
     ? player.playerImage
-    : (player.playerImage?.src || "/ronaldo.png");
+    : (player.playerImage?.src || "/placeholder_img.jpg");
   return (
-    <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.04] transition-all group flex items-center justify-between gap-3 cursor-pointer">
+    <div className="p-4 bg-white/2 border border-white/5 rounded-2xl hover:bg-white/4 transition-all group flex items-center justify-between gap-3 cursor-pointer">
       <div className="flex items-center gap-3 min-w-0">
-        <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10 shrink-0">
-          <Image src={playerImgSrc} alt={player.fullName} className="w-full h-full object-cover" />
+        <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden border border-white/10 shrink-0">
+          <Image width={100} height={100} src={playerImgSrc} alt={player.fullName} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = "/placeholder_img.jpg"; }} />
         </div>
         <div className="min-w-0">
           <p className="text-xs font-bold text-white group-hover:text-[#E31B23] transition-colors truncate">
@@ -216,12 +216,12 @@ const AcademyManagementDashboard = () => {
     setEditingStory(null);
   };
   return (
-    <div className="flex flex-col gap-8 pb-10">
+    <div className="flex flex-col gap-6 md:gap-8 pb-10 w-full max-w-full overflow-x-hidden">
       {/* Breadcrumbs */}
-      <div className="text-xs text-gray-500 uppercase tracking-widest font-medium">
+      <div className="text-[10px] md:text-xs text-gray-500 uppercase tracking-widest font-medium px-1">
         Academy Dashboard / <span className="text-white">Management</span>
       </div>
-      <div className="flex flex-col xl:flex-row gap-8">
+      <div className="flex flex-col xl:flex-row gap-6 md:gap-8">
         {/* Main Content */}
         <div className="flex-1 min-w-0 flex flex-col gap-6">
           {/* Hero Section */}
@@ -261,18 +261,18 @@ const AcademyManagementDashboard = () => {
             <DashboardCharts />
           </div>
           {/* Product Store Section */}
-          <div className="bg-[#111111] rounded-3xl border border-white/5 p-8 flex flex-col gap-8">
-            <div className="flex justify-between items-center">
+          <div className="bg-[#111111] rounded-3xl border border-white/5 p-6 md:p-8 flex flex-col gap-6 md:gap-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
               <div>
-                <h2 className="text-2xl font-black uppercase text-white font-orbitron">Product Store</h2>
-                <p className="text-xs text-white/40 font-bold uppercase tracking-widest">Match highlights & training</p>
+                <h2 className="text-xl md:text-2xl font-black uppercase text-white font-orbitron">Product Store</h2>
+                <p className="text-[10px] md:text-xs text-white/40 font-bold uppercase tracking-widest mt-1">Match highlights & training</p>
               </div>
-              <button className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] font-black uppercase tracking-widest text-white px-6 py-2.5 rounded-xl transition-all">
+              <button className="flex shrink-0 w-full sm:w-auto justify-center items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] font-black uppercase tracking-widest text-white px-4 py-3 sm:px-6 sm:py-2.5 rounded-xl transition-all">
                 <IconUpload size={16} />
                 Upload Image
               </button>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               <ProductCard
                 image="https://images.unsplash.com/photo-1575361204480-aadea25e6e68?q=80&w=2071&auto=format&fit=crop"
                 category="Jerseys"
@@ -297,15 +297,15 @@ const AcademyManagementDashboard = () => {
             </div>
           </div>
           {/* Success Story Section */}
-          <div className="bg-[#111111] rounded-3xl border border-white/5 p-8 flex flex-col gap-8">
-            <div className="flex justify-between items-center">
+          <div className="bg-[#111111] rounded-3xl border border-white/5 p-6 md:p-8 flex flex-col gap-6 md:gap-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
               <div>
-                <h2 className="text-2xl font-black uppercase text-white font-orbitron">Success Story</h2>
-                <p className="text-xs text-white/40 font-bold uppercase tracking-widest">Share and view academy milestones</p>
+                <h2 className="text-xl md:text-2xl font-black uppercase text-white font-orbitron">Success Story</h2>
+                <p className="text-[10px] md:text-xs text-white/40 font-bold uppercase tracking-widest mt-1">Share and view academy milestones</p>
               </div>
               <button
                 onClick={handleAddClick}
-                className="flex items-center gap-2 bg-[#E31B23] hover:bg-[#ff2d35] border border-transparent text-[10px] font-black uppercase tracking-widest text-white px-6 py-2.5 rounded-xl transition-all shadow-[0_0_15px_rgba(227,27,35,0.2)] cursor-pointer"
+                className="flex shrink-0 w-full sm:w-auto justify-center items-center gap-2 bg-[#E31B23] hover:bg-[#ff2d35] border border-transparent text-[10px] font-black uppercase tracking-widest text-white px-4 py-3 sm:px-6 sm:py-2.5 rounded-xl transition-all shadow-[0_0_15px_rgba(227,27,35,0.2)] cursor-pointer"
               >
                 <IconPlus size={16} />
                 Add Success Story
@@ -368,7 +368,15 @@ const AcademyManagementDashboard = () => {
                     className="aspect-video w-full bg-black relative overflow-hidden shrink-0 flex items-center justify-center cursor-zoom-in"
                   >
                     {story.mediaType === "image" ? (
-                      <Image src={story.mediaFile} alt={story.title} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300" />
+                      <Image
+                        width={100} height={100} src={story.mediaFile || "/placeholder_img.jpg"}
+                        alt={story.title} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.srcset = "";
+                          target.src = "/placeholder_img.jpg";
+                        }}
+                      />
                     ) : (
                       <div className="relative w-full h-full">
                         <video src={story.mediaFile} className="w-full h-full object-cover pointer-events-none" />
@@ -549,7 +557,7 @@ const AcademyManagementDashboard = () => {
         <DialogContent className="bg-black/95 border border-white/10 text-white rounded-3xl max-w-4xl p-6 flex flex-col items-center justify-center overflow-hidden">
           <div className="w-full flex items-center justify-center max-h-[75vh]">
             {selectedMedia?.mediaType === "image" ? (
-              <Image src={selectedMedia.mediaFile} alt="Preview" className="max-w-full max-h-[70vh] object-contain rounded-xl" />
+              <Image width={100} height={100} src={selectedMedia.mediaFile || "/placeholder_img.jpg"} alt="Preview" className="max-w-full max-h-[70vh] object-contain rounded-xl" onError={(e) => { e.currentTarget.src = "/placeholder_img.jpg"; }} />
             ) : (
               <video src={selectedMedia?.mediaFile} controls autoPlay className="max-w-full max-h-[70vh] object-contain rounded-xl" />
             )}
