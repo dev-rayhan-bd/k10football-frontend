@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React from "react";
 import { 
@@ -13,58 +14,58 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
 const SettingsSection = ({ icon: Icon, title, children }: { icon: any, title: string, children: React.ReactNode }) => (
-  <div className="bg-[#111111] border border-white/20 rounded-[40px] p-10 flex flex-col gap-8">
-    <div className="flex items-center gap-3">
-       <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500">
+  <div className="bg-[#111111] border border-white/20 rounded-3xl sm:rounded-[40px] p-4 sm:p-6 md:p-10 flex flex-col gap-6 sm:gap-8 min-w-0 overflow-hidden w-full">
+    <div className="flex items-start sm:items-center gap-3 min-w-0 shrink-0">
+       <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 shrink-0">
           <Icon size={22} />
        </div>
-       <h2 className="text-2xl font-black text-white font-orbitron uppercase tracking-tight">{title}</h2>
+       <h2 className="text-xl sm:text-2xl font-black text-white font-orbitron uppercase tracking-tight wrap-break-word w-full">{title}</h2>
     </div>
     {children}
   </div>
 );
 
 const SettingField = ({ label, value, type = "text", placeholder, icon: Icon }: any) => (
-  <div className="space-y-2 flex-1 min-w-0">
-    <Label className="text-white/70 text-[11px] font-bold uppercase tracking-wider">{label}</Label>
+  <div className="space-y-1.5 sm:space-y-2 flex-1 min-w-0 w-full">
+    <Label className="text-white/70 text-[9px] sm:text-[11px] font-bold uppercase tracking-wider">{label}</Label>
     <div className="relative">
       <Input 
         type={type} 
         defaultValue={value} 
         placeholder={placeholder}
-        className="bg-black/40 border-white/20 h-14 rounded-xl px-6 text-white/90 placeholder:text-white/20 focus:border-red-500/50 transition-all" 
+        className="bg-black/40 border-white/20 h-12 sm:h-14 rounded-xl px-4 sm:px-6 text-xs sm:text-sm text-white/90 placeholder:text-white/20 focus:border-red-500/50 transition-all w-full min-w-0" 
       />
-      {Icon && <Icon size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20" />}
+      {Icon && <Icon size={18} className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-white/20" />}
     </div>
   </div>
 );
 
 const SuperAdminSettings = () => {
   return (
-    <div className="flex flex-col gap-10 pb-20">
+    <div className="flex flex-col gap-6 sm:gap-10 p-4 sm:p-6 lg:p-8 pb-10 sm:pb-20 w-full min-w-0 overflow-hidden text-white">
       {/* Header */}
-      <div>
-        <h1 className="text-5xl font-black text-white font-orbitron uppercase tracking-tight">Settings</h1>
-        <p className="text-white/60 font-medium mt-2 text-lg">Manage platform configuration and preferences</p>
+      <div className="shrink-0 w-full min-w-0">
+        <h1 className="text-3xl sm:text-5xl font-black text-white font-orbitron uppercase tracking-tight truncate">Settings</h1>
+        <p className="text-white/60 font-medium mt-1 sm:mt-2 text-sm sm:text-lg truncate">Manage platform configuration</p>
       </div>
 
       {/* Super Admin Information */}
       <SettingsSection icon={IconUser} title="Super Admin Information">
-        <div className="flex flex-col xl:flex-row gap-10">
-           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8 min-w-0">
+        <div className="flex flex-col xl:flex-row gap-6 sm:gap-10 w-full min-w-0">
+           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 min-w-0 w-full">
               <SettingField label="Super Admin Name" value="K10 Football" />
               <SettingField label="Contact" value="+55 11 9999-8888" />
               <SettingField label="Default Language" value="English" icon={IconChevronDown} />
               <SettingField label="Email" value="support@k10football.com" />
            </div>
            
-           <div className="xl:w-[380px] space-y-2">
-              <Label className="text-white/70 text-[11px] font-bold uppercase tracking-wider">Upload Cover Photo</Label>
-              <div className="border-2 border-dashed border-white/10 rounded-[32px] h-[200px] flex flex-col items-center justify-center gap-3 bg-white/[0.02] hover:bg-white/[0.05] transition-all cursor-pointer group">
-                 <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 group-hover:text-white transition-colors">
-                    <IconUpload size={20} />
+           <div className="w-full xl:w-95 space-y-1.5 sm:space-y-2 shrink-0">
+              <Label className="text-white/70 text-[9px] sm:text-[11px] font-bold uppercase tracking-wider">Upload Cover Photo</Label>
+              <div className="border-2 border-dashed border-white/10 rounded-2xl sm:rounded-4xl h-37.5 sm:h-50 flex flex-col items-center justify-center gap-2 sm:gap-3 bg-white/2 hover:bg-white/5 transition-all cursor-pointer group w-full min-w-0">
+                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 group-hover:text-white transition-colors">
+                    <IconUpload size={20} className="w-4 h-4 sm:w-5 sm:h-5" />
                  </div>
-                 <p className="text-white/40 text-xs font-medium group-hover:text-white transition-colors">Upload image</p>
+                 <p className="text-white/40 text-[10px] sm:text-xs font-medium group-hover:text-white transition-colors">Upload image</p>
               </div>
            </div>
         </div>
@@ -72,12 +73,12 @@ const SuperAdminSettings = () => {
 
       {/* Security */}
       <SettingsSection icon={IconLock} title="Security">
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4 sm:gap-6 w-full min-w-0">
            <SettingField label="Current Password" type="password" placeholder="••••••••••••" />
            <SettingField label="New Password" type="password" placeholder="••••••••••••" />
            <SettingField label="Confirm New Password" type="password" placeholder="••••••••••••" />
-           <div className="flex justify-end pt-2">
-             <Button className="bg-[#1A1A1A] border border-white/20 hover:bg-white/5 h-12 px-8 rounded-xl text-white font-bold transition-all">
+           <div className="flex justify-start sm:justify-end pt-2">
+             <Button className="bg-[#1A1A1A] border border-white/20 hover:bg-white/5 h-10 sm:h-12 px-6 sm:px-8 rounded-xl text-white text-xs sm:text-sm font-bold transition-all w-full sm:w-auto">
                 Update Password
              </Button>
            </div>
@@ -86,19 +87,19 @@ const SuperAdminSettings = () => {
 
       {/* Notifications */}
       <SettingsSection icon={IconBell} title="Notifications">
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3 sm:gap-4 w-full min-w-0">
            {[
              { title: "New User Registration", desc: "Allow new users to register" },
              { title: "Game Report Submissions", desc: "Enable game report creation" },
              { title: "Pending Approvals", desc: "Alert when action needed" },
              { title: "Payment Notifications", desc: "Notify on transactions" }
            ].map((notif, i) => (
-             <div key={i} className="bg-black/40 border border-white/10 rounded-2xl p-6 flex justify-between items-center">
-                <div className="space-y-1">
-                   <h4 className="text-white font-bold text-sm">{notif.title}</h4>
-                   <p className="text-white/40 text-xs">{notif.desc}</p>
+             <div key={i} className="bg-black/40 border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 flex justify-between items-center gap-4 w-full min-w-0">
+                <div className="space-y-0.5 sm:space-y-1 min-w-0">
+                   <h4 className="text-white font-bold text-xs sm:text-sm truncate">{notif.title}</h4>
+                   <p className="text-white/40 text-[9px] sm:text-xs truncate">{notif.desc}</p>
                 </div>
-                <Switch defaultChecked className="data-[state=checked]:bg-red-600" />
+                <Switch defaultChecked className="data-[state=checked]:bg-red-600 shrink-0" />
              </div>
            ))}
         </div>

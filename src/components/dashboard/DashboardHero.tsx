@@ -67,7 +67,7 @@ const DashboardHero = ({
           }}
         />
       )}
-      <div className="relative p-8 md:p-12 w-full flex flex-col gap-8 z-20">
+      <div className="relative p-6 sm:p-8 md:p-12 w-full flex flex-col gap-6 sm:gap-8 z-20 min-w-0">
         <div className="space-y-6">
           {/* Logo Image */}
           {logoImage && (
@@ -99,7 +99,7 @@ const DashboardHero = ({
               </div>
             )}
             <div className="space-y-2">
-              <h1 className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tighter text-white uppercase leading-none italic">
+              <h1 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tighter text-white uppercase leading-none italic truncate">
                 {title}
               </h1>
               <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-white font-bold text-xs sm:text-sm">
@@ -118,7 +118,7 @@ const DashboardHero = ({
           </div>
         </div>
         {contacts && contacts.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 max-w-3xl pt-8 border-t border-white/10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 sm:gap-x-12 gap-y-4 sm:gap-y-6 max-w-3xl pt-6 sm:pt-8 border-t border-white/10 min-w-0">
             {contacts.map((contact, index) => (
               <div key={index} className="flex items-center gap-4 min-w-0">
                 <div className="p-3 bg-white/5 rounded-2xl border border-white/10 text-white/40 shrink-0">

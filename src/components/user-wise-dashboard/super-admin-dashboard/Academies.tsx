@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import Image from "next/image";
-import React from "react";
 import { 
   IconChevronDown, 
   IconEye,
@@ -14,13 +14,13 @@ import {
 import { Button } from "@/components/ui/button";
 import DashboardTable, { Column } from "@/components/dashboard/DashboardTable";
 const SummaryStatCard = ({ icon: Icon, value, label }: { icon: any, value: string | number, label: string }) => (
-  <div className="bg-[#111111] border border-white/20 rounded-2xl p-6 flex flex-col gap-4 flex-1 min-w-0">
-    <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/60">
-       <Icon size={20} />
+  <div className="bg-[#111111] border border-white/20 rounded-2xl p-4 sm:p-6 flex flex-col gap-2 sm:gap-4 flex-1 min-w-0">
+    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/60 shrink-0">
+       <Icon size={20} className="w-4 h-4 sm:w-5 sm:h-5" />
     </div>
-    <div>
-      <p className="text-white text-3xl font-black font-orbitron">{value}</p>
-      <p className="text-white/40 text-[11px] font-bold uppercase tracking-wider">{label}</p>
+    <div className="min-w-0">
+      <p className="text-white text-xl sm:text-3xl font-black font-orbitron truncate">{value}</p>
+      <p className="text-white/40 text-[9px] sm:text-[11px] font-bold uppercase tracking-wider truncate">{label}</p>
     </div>
   </div>
 );
@@ -45,7 +45,11 @@ const SuperAdminAcademies = () => {
       render: (row) => (
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-white/10 overflow-hidden border border-white/20">
-             <Image src={`https://i.pravatar.cc/150?u=${row.name}`} alt={row.name} className="w-full h-full object-cover" />
+             <Image src={`https://i.pravatar.cc/150?u=${row.name}`} alt={row.name} className="w-full h-full object-cover" width={40} height={40} onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.srcset = "";
+              target.src = "/placeholder_img.jpg";
+            }}/>
           </div>
           <div>
             <p className="text-white text-sm font-black uppercase">{row.name}</p>
@@ -89,25 +93,25 @@ const SuperAdminAcademies = () => {
     { name: "Youth Stars", category: "Premier League Academy", teams: 2, coaches: 10, players: 30, active: true },
   ];
   return (
-    <div className="flex flex-col gap-8 pb-10">
+    <div className="flex flex-col gap-6 sm:gap-8 p-4 sm:p-6 lg:p-8 pb-10 w-full min-w-0 overflow-hidden">
       {/* Header */}
-      <div>
-        <h1 className="text-5xl font-black text-white font-orbitron tracking-tight">Academy</h1>
-        <p className="text-white/60 font-medium mt-2 text-lg">Monitored all registered academies</p>
+      <div className="shrink-0">
+        <h1 className="text-3xl sm:text-5xl font-black text-white font-orbitron tracking-tight truncate">Academy</h1>
+        <p className="text-white/60 font-medium mt-1 sm:mt-2 text-sm sm:text-lg truncate">Monitored all registered academies</p>
       </div>
       {/* Stats Section */}
-      <div className="flex gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full min-w-0">
         <SummaryStatCard icon={IconSchool} value="5" label="Academies" />
         <SummaryStatCard icon={IconTrophy} value="20" label="Total Teams" />
         <SummaryStatCard icon={IconUser} value="16" label="Total Coaches" />
         <SummaryStatCard icon={IconUsers} value="295" label="Total Players" />
       </div>
       {/* Main Container */}
-      <div className="bg-[#111111] border border-white/20 rounded-[40px] p-10 flex flex-col gap-8">
+      <div className="bg-[#111111] border border-white/20 rounded-3xl sm:rounded-[40px] p-4 sm:p-6 md:p-10 flex flex-col gap-6 sm:gap-8 min-w-0 overflow-hidden w-full">
         {/* Table Filters */}
-        <div className="flex justify-end gap-3">
-          <Button variant="outline" className="bg-black/40 border-white/20 h-10 rounded-xl text-white/60 text-[10px] font-black uppercase tracking-wider flex items-center gap-2 px-4">
-            All Status <IconChevronDown size={14} />
+        <div className="flex flex-wrap sm:flex-nowrap sm:justify-end gap-2 sm:gap-3 overflow-x-auto no-scrollbar w-full">
+          <Button variant="outline" className="bg-black/40 border-white/20 h-9 sm:h-10 rounded-xl text-white/60 text-[9px] sm:text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 shrink-0">
+            All Status <IconChevronDown size={14} className="shrink-0" />
           </Button>
         </div>
         {/* Professional Table */}

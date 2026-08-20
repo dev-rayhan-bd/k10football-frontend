@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { 
   IconUsers, 
@@ -130,8 +131,8 @@ const CustomAreaTooltip = ({ active, payload, label }: any) => {
 
 const SuperAdminDashboard = () => {
     return (
-        <div className="flex flex-col xl:flex-row gap-6 p-6">
-            <div className="flex-1 space-y-6 min-w-0">
+        <div className="flex flex-col xl:flex-row gap-4 sm:gap-6 p-4 sm:p-6 min-h-screen">
+            <div className="flex-1 space-y-4 sm:space-y-6 min-w-0 overflow-hidden">
                 <DashboardHero
                   backgroundImage="/707964211aa29e42aa7d522475b870cad9c4ad92.png"
                   badgeText="SUPER ADMIN"
@@ -142,7 +143,7 @@ const SuperAdminDashboard = () => {
                   ]}
                 />
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                     <DashboardStatCard 
                       icon={<IconUsers className="w-6 h-6" />}
                       label="Total Users"
@@ -165,22 +166,22 @@ const SuperAdminDashboard = () => {
                     />
                 </div>
                 
-                <div className="bg-[#111111] border border-white/15 rounded-3xl p-8 space-y-8">
-                    <div className="flex justify-between items-start">
+                <div className="bg-[#111111] border border-white/15 rounded-3xl sm:rounded-4xl p-5 sm:p-8 space-y-6 sm:space-y-8 min-w-0">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
                         <div>
-                            <h2 className="text-2xl font-bold text-white font-orbitron tracking-wide mb-1">Analytics</h2>
-                            <p className="text-sm text-gray-500 font-medium">Deep insights</p>
+                            <h2 className="text-xl sm:text-2xl font-bold text-white font-orbitron tracking-wide mb-1">Analytics</h2>
+                            <p className="text-xs sm:text-sm text-gray-500 font-medium">Deep insights</p>
                         </div>
-                        <Button variant="outline" className="bg-transparent border-white/10 text-gray-300 hover:bg-white/5 hover:text-white rounded-lg px-6">
+                        <Button variant="outline" className="bg-transparent border-white/10 text-gray-300 hover:bg-white/5 hover:text-white rounded-lg px-6 w-full sm:w-auto">
                             Full Analytics
                         </Button>
                     </div>
                     
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
                         {/* Bar Chart */}
                         <div className="space-y-6">
                             <h3 className="text-base font-bold text-white tracking-wide">Revenue Overview</h3>
-                            <div className="h-[220px] w-full">
+                            <div className="h-55 w-full">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={barData} barSize={20} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
@@ -213,7 +214,7 @@ const SuperAdminDashboard = () => {
                         {/* Area Chart */}
                         <div className="space-y-6">
                             <h3 className="text-base font-bold text-white tracking-wide">Membership Growth</h3>
-                            <div className="h-[220px] w-full">
+                            <div className="h-55 w-full">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <AreaChart data={areaData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                         <defs>
@@ -254,13 +255,13 @@ const SuperAdminDashboard = () => {
                     </div>
                 </div>
 
-                <div className="bg-[#111111] border border-white/15 rounded-3xl p-8 space-y-6">
-                    <h2 className="text-2xl font-bold text-white font-orbitron tracking-wide">Recent Activities</h2>
+                <div className="bg-[#111111] border border-white/15 rounded-3xl sm:rounded-4xl p-5 sm:p-8 space-y-4 sm:space-y-6 min-w-0 overflow-hidden">
+                    <h2 className="text-xl sm:text-2xl font-bold text-white font-orbitron tracking-wide">Recent Activities</h2>
                     <DashboardTable columns={columns} data={recentActivitiesData} />
                 </div>
             </div>
             
-            <div className="w-full xl:w-[320px] shrink-0">
+            <div className="w-full xl:w-[320px] shrink-0 mt-4 xl:mt-0">
                 <DashboardSidebarPanel title="Pending Approvals" icon={<IconClock size={20} />} iconColor="text-[#E31B23]">
                     <DashboardSidebarItem
                         avatar="https://i.pravatar.cc/150?u=1"

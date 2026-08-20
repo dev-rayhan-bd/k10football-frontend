@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState } from "react";
@@ -234,33 +235,33 @@ const columns: Column<MembershipRecord>[] = [
 ];
 
 return (
-<div className="flex flex-col gap-8 pb-10">
+<div className="flex flex-col gap-6 sm:gap-8 p-4 sm:p-6 lg:p-8 pb-10 w-full min-w-0 overflow-hidden">
   {/* Header */}
-  <div>
-    <h1 className="text-5xl font-black text-white font-orbitron tracking-tight leading-none uppercase">Grant Membership</h1>
-    <p className="text-white/60 font-bold uppercase tracking-widest text-[11px] mt-2">Bestow direct premium memberships to users</p>
+  <div className="shrink-0">
+    <h1 className="text-2xl sm:text-3xl md:text-5xl font-black text-white font-orbitron tracking-tight leading-none uppercase truncate">Grant Membership</h1>
+    <p className="text-white/60 font-bold uppercase tracking-widest text-[10px] sm:text-[11px] mt-1 sm:mt-2 truncate">Bestow direct premium memberships to users</p>
   </div>
 
-  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 items-start w-full min-w-0">
     {/* Grant Membership Form */}
-    <div className="bg-[#111111] border border-white/15 rounded-[32px] p-6 lg:p-8 flex flex-col gap-6 shadow-2xl">
+    <div className="bg-[#111111] border border-white/15 rounded-3xl sm:rounded-4xl p-4 sm:p-6 lg:p-8 flex flex-col gap-5 sm:gap-6 shadow-2xl min-w-0 overflow-hidden w-full">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-2xl bg-[#E31B23]/10 border border-[#E31B23]/20 flex items-center justify-center text-[#E31B23]">
+        <div className="w-10 h-10 rounded-2xl bg-[#E31B23]/10 border border-[#E31B23]/20 flex items-center justify-center text-[#E31B23] shrink-0">
           <IconShieldCheck size={22} />
         </div>
-        <div>
-          <h2 className="text-lg font-black uppercase text-white font-orbitron">Grant Premium</h2>
-          <p className="text-[10px] text-white/40 uppercase tracking-widest font-semibold mt-0.5">Activate instant premium access</p>
+        <div className="min-w-0">
+          <h2 className="text-base sm:text-lg font-black uppercase text-white font-orbitron truncate">Grant Premium</h2>
+          <p className="text-[9px] sm:text-[10px] text-white/40 uppercase tracking-widest font-semibold mt-0.5 truncate">Activate instant premium access</p>
         </div>
       </div>
 
-      <form onSubmit={handleGrantMembership} className="space-y-5">
+      <form onSubmit={handleGrantMembership} className="space-y-4 sm:space-y-5">
         {/* User Type Selection */}
-        <div className="space-y-2">
-          <label className="text-[11px] font-black uppercase tracking-widest text-white/60">
+        <div className="space-y-1.5 sm:space-y-2">
+          <label className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-white/60">
             User Category
           </label>
-          <div className="grid grid-cols-5 gap-1.5">
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5 sm:gap-2">
             {(Object.keys(MOCK_USERS_BY_ROLE) as Array<keyof typeof MOCK_USERS_BY_ROLE>).map((role) => (
               <button
                 key={role}
@@ -269,10 +270,10 @@ return (
                   setSelectedRole(role);
                   setSelectedUserId("");
                 }}
-                className={`py-2 rounded-xl text-[10px] font-black uppercase transition-all text-center border cursor-pointer ${
+                className={`py-2 rounded-xl text-[9px] sm:text-[10px] font-black uppercase transition-all text-center border cursor-pointer shrink-0 truncate px-1 ${
                   selectedRole === role
                     ? "bg-[#E31B23] border-[#E31B23] text-white shadow-lg shadow-[#E31B23]/25"
-                    : "bg-white/[0.02] border-white/10 text-white/60 hover:text-white hover:border-white/20"
+                    : "bg-white/2 border-white/10 text-white/60 hover:text-white hover:border-white/20"
                 }`}
               >
                 {role}
@@ -282,15 +283,15 @@ return (
         </div>
 
         {/* Select User */}
-        <div className="space-y-2">
-          <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
+        <div className="space-y-1.5 sm:space-y-2">
+          <label className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
             Select {selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)} <span className="text-[#E31B23]">*</span>
           </label>
           <div className="relative">
             <select
               value={selectedUserId}
               onChange={(e) => setSelectedUserId(e.target.value)}
-              className="w-full bg-black/40 border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-white/25 transition-all cursor-pointer appearance-none"
+              className="w-full bg-black/40 border border-white/15 rounded-xl py-3 sm:py-3.5 px-3 sm:px-4 text-xs sm:text-sm text-white focus:outline-none focus:border-white/25 transition-all cursor-pointer appearance-none truncate pr-10"
             >
               <option value="" disabled className="bg-[#111111] text-white/40">Select registered user</option>
               {activeUsers.map((u) => (
@@ -299,18 +300,18 @@ return (
                 </option>
               ))}
             </select>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/20">
+            <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/20">
               <IconClock size={16} />
             </div>
           </div>
         </div>
 
         {/* Duration Selector */}
-        <div className="space-y-2">
-          <label className="text-[11px] font-black uppercase tracking-widest text-white/60">
+        <div className="space-y-1.5 sm:space-y-2">
+          <label className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-white/60">
             Membership Duration
           </label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
             {[
               { value: "3", label: "3 Months" },
               { value: "6", label: "6 Months" },
@@ -320,10 +321,10 @@ return (
                 key={item.value}
                 type="button"
                 onClick={() => setDuration(item.value as any)}
-                className={`py-3.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all text-center border cursor-pointer ${
+                className={`py-3 sm:py-3.5 px-1 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all text-center border cursor-pointer truncate ${
                   duration === item.value
                     ? "bg-white text-black border-white font-black"
-                    : "bg-white/[0.02] border-white/10 text-white/60 hover:text-white hover:border-white/20"
+                    : "bg-white/2 border-white/10 text-white/60 hover:text-white hover:border-white/20"
                 }`}
               >
                 {item.label}
@@ -335,24 +336,26 @@ return (
         {/* Submit Button */}
         <button
           type="submit"
-          className="w-full bg-[#E31B23] hover:bg-[#C2181F] text-white font-black uppercase tracking-widest text-xs py-4 rounded-xl transition-all shadow-lg shadow-[#E31B23]/10 mt-2 font-orbitron cursor-pointer flex items-center justify-center gap-2"
+          className="w-full bg-[#E31B23] hover:bg-[#C2181F] text-white font-black uppercase tracking-widest text-[10px] sm:text-xs py-3.5 sm:py-4 rounded-xl transition-all shadow-lg shadow-[#E31B23]/10 mt-2 font-orbitron cursor-pointer flex items-center justify-center gap-2 truncate px-2"
         >
-          <IconAward size={18} />
-          Grant Premium Access
+          <IconAward size={18} className="shrink-0" />
+          <span className="truncate">Grant Premium Access</span>
         </button>
       </form>
     </div>
 
     {/* Memberships Granted Table */}
-    <div className="bg-[#111111] border border-white/15 rounded-[32px] p-6 lg:p-8 flex flex-col gap-6 lg:col-span-2 shadow-2xl min-w-0">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-black uppercase text-white font-orbitron">Active Grants</h2>
-        <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black text-white/60 uppercase tracking-widest">
+    <div className="bg-[#111111] border border-white/15 rounded-3xl sm:rounded-4xl p-4 sm:p-6 lg:p-8 flex flex-col gap-5 sm:gap-6 lg:col-span-2 shadow-2xl min-w-0 overflow-hidden w-full">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 w-full shrink-0">
+        <h2 className="text-lg sm:text-xl font-black uppercase text-white font-orbitron truncate w-full sm:w-auto">Active Grants</h2>
+        <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-xl text-[9px] sm:text-[10px] font-black text-white/60 uppercase tracking-widest shrink-0">
           Total {memberships.filter((m) => m.status === "Active").length} Grants
         </span>
       </div>
 
-      <DashboardTable columns={columns} data={memberships} />
+      <div className="w-full overflow-x-auto no-scrollbar">
+        <DashboardTable columns={columns} data={memberships} />
+      </div>
     </div>
   </div>
 </div>
