@@ -1,8 +1,7 @@
-import React from 'react'
 
 const ServiceSection = () => {
   return (
-    <div className="container py-20">
+    <div className="container py-12 sm:py-20 px-4 sm:px-6 mx-auto">
         {/* Badge */}
         <div className="flex justify-center mb-8">
           <div className="px-4 py-1.5 rounded-full text-sm font-medium" style={{ backgroundColor: '#00FF62', color: '#000000' }}>

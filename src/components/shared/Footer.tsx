@@ -5,12 +5,12 @@ import Image from 'next/image'
 
 const Footer = () => {
 return (
-<footer className="bg-gradient-to-r from-slate-900 via-[#063D1C] to-slate-950 border-t border-gray-800">
+<footer className="bg-linear-to-r from-slate-900 via-[#063D1C] to-slate-950 border-t border-gray-800">
   {/* Main Footer Content */}
   <div className="container mx-auto px-6 py-16">
-    <div className="grid grid-cols-4 gap-12">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
       {/* Left Section - Logo & Description */}
-      <div className="col-span-1">
+      <div className="col-span-1 sm:col-span-2 lg:col-span-1">
         <div className="flex items-start gap-3 mb-6">
           {/* <div className="w-12 h-12 bg-gradient-to-br from-primary to-green-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
             K10
@@ -19,7 +19,7 @@ return (
             <h3 className="text-white font-bold text-sm">K10 FOOTBALL</h3>
             <p className="text-primary text-xs">ANALYSIS CV</p>
           </div> */}
-          <Image src="/logo.png" className='-ml-5' alt="K10 Football Logo" width={300} height={200} />
+          <Image src="/logo.png" className='w-48 sm:w-[300px] h-auto' alt="K10 Football Logo" width={300} height={200} />
         </div>
         
         <p className="text-gray-300 text-sm leading-relaxed mb-6">

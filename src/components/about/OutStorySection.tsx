@@ -2,16 +2,15 @@ import React from "react";
 
 const OutStorySection = () => {
   return (
-    <div className="mb-5">
-     
-        <div className="container bg-cardBg py-10 rounded-xl">
+    <div className="mb-5 px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto bg-cardBg p-6 sm:p-10 rounded-xl max-w-4xl">
           {/* Heading */}
-          <h2 className="text-4xl font-bold mb-8 font-heading text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 font-heading text-center">
             Our <span style={{ color: "#00FF62" }}>Story</span>
           </h2>
 
           {/* Story Content */}
-          <div className="space-y-6 text-gray-400 text-base leading-relaxed">
+          <div className="space-y-4 sm:space-y-6 text-gray-400 text-sm sm:text-base leading-relaxed text-center sm:text-left">
             <p>
               Founded in 2018 by former professional football titans and tech
               visionaries, Analytics CVs is the first dedicated platform built
@@ -41,7 +40,6 @@ const OutStorySection = () => {
             </p>
           </div>
         </div>
-     
     </div>
   );
 };

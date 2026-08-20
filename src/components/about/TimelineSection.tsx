@@ -2,7 +2,7 @@ import React from 'react'
 
 const TimelineSection = () => {
   return (
-    <div className="container py-20">
+    <div className="container py-12 sm:py-20 px-4 sm:px-6 mx-auto">
         {/* Heading */}
         <h2 className="text-4xl font-heading font-bold mb-12 text-center">
           Our <span style={{ color: '#00FF62' }}>Timeline</span>
@@ -29,7 +29,7 @@ const TimelineSection = () => {
               
               {/* Year circle */}
               <div
-                className="w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm"
+                className="w-14 h-14 rounded-full flex items-center justify-center shrink-0 font-bold text-sm"
                 style={{
                   backgroundColor: '#00FF62',
                   color: '#000000',

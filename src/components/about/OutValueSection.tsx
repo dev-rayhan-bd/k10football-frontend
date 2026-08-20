@@ -3,7 +3,7 @@ import React from "react";
 
 const OutValueSection = () => {
   return (
-    <div className="container py-20">
+    <div className="container py-12 sm:py-20 px-4 sm:px-6 mx-auto">
       {/* Heading */}
       <h2 className="text-4xl font-bold mb-12 text-center font-heading">
         Our <span style={{ color: "#00FF62" }}>Values</span>
