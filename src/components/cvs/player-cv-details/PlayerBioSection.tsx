@@ -444,6 +444,11 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
           height={height || 500}
           layout={layout}
           draggable={false}
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.srcset = "";
+            target.src = "/placeholder_img.jpg";
+          }}
         />
         {canUpload && (
           <>
@@ -587,7 +592,13 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                         alt="birth country flag"
                         layout="fill"
                         className="object-cover"
-                      />
+                      
+onError={(e) => {
+  const target = e.target as HTMLImageElement;
+  target.srcset = "";
+  target.src = "/placeholder_img.jpg";
+}}
+/>
                     </div>
                   </div>
                 </div>
@@ -609,7 +620,13 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                         alt="dual nationality flag"
                         layout="fill"
                         className="object-cover"
-                      />
+                      
+onError={(e) => {
+  const target = e.target as HTMLImageElement;
+  target.srcset = "";
+  target.src = "/placeholder_img.jpg";
+}}
+/>
                     </div>
                   </div>
                 </div>
@@ -738,6 +755,11 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       alt="left leg"
                       className="object-contain"
                       layout="fill"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.srcset = "";
+                        target.src = "/placeholder_img.jpg";
+                      }}
                     />
                   </div>
                   <div className="flex justify-between items-center text-xs sm:text-sm mb-1 w-full min-w-0">
@@ -963,7 +985,13 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                         "pointer-events-none drop-shadow-lg transition-transform group-hover/marker:scale-110",
                         idx === 0 ? "w-6 h-6 sm:w-8 sm:h-8" : "w-5 h-5 sm:w-7 sm:h-7"
                       )}
-                    />
+                    
+onError={(e) => {
+  const target = e.target as HTMLImageElement;
+  target.srcset = "";
+  target.src = "/placeholder_img.jpg";
+}}
+/>
                     {marker.name && (
                       <div className={cn(
                         "mt-1 px-1 sm:px-1.5 py-0.5 rounded bg-black/85 border border-white/10 text-white text-[8px] sm:text-[9px] font-medium text-center whitespace-nowrap shadow-md pointer-events-none tracking-wide select-none transition-all",
@@ -1060,11 +1088,11 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
               />
             </div>
             {/* Player Image */}
-            <div className="relative w-full h-[300px] sm:h-[400px] md:h-130.75 mb-6 sm:mb-8 flex items-end justify-center min-w-0 overflow-hidden">
+            <div className="relative w-full h-75 sm:h-100 md:h-130.75 mb-6 sm:mb-8 flex items-end justify-center min-w-0 overflow-hidden">
               <EditableImage
                 src={playerData.playerImage}
                 alt={playerData.fullName}
-                className="object-contain w-auto mx-auto h-[280px] sm:h-[380px] md:h-125 max-w-full"
+                className="object-contain w-auto mx-auto h-70 sm:h-95 md:h-125 max-w-full"
                 width={800}
                 height={1000}
                 field="playerImage"
@@ -1084,7 +1112,7 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                           <PencilIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="bg-cardBg border-border text-foreground w-[95vw] sm:w-[500px] max-w-lg max-h-[90vh] overflow-y-auto">
+                      <DialogContent className="bg-cardBg border-border text-foreground w-[95vw] sm:w-125 max-w-lg max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                           <DialogTitle>Select Player Styles (Max 4)</DialogTitle>
                         </DialogHeader>
@@ -1796,7 +1824,13 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                         width={36}
                         height={36}
                         className="object-contain drop-shadow-md w-full h-full"
-                      />
+                      
+onError={(e) => {
+  const target = e.target as HTMLImageElement;
+  target.srcset = "";
+  target.src = "/placeholder_img.jpg";
+}}
+/>
                     </div>
                     <div className="flex flex-col gap-0.5 w-full min-w-0">
                       <CMSField

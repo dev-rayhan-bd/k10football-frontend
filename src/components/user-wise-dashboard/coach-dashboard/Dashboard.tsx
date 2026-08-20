@@ -289,13 +289,13 @@ const CoachDashboard = () => {
           <div className="space-y-6">
             <MediaBlock title="My Images" type="image" items={[
               { title: "vs Arsenal U19", date: "Mar 15, 2024", views: 234, likes: 97, img: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=400" },
-              { title: "vs Chelsea U19", date: "Mar 10, 2024", views: 189, likes: 45, img: "https://images.unsplash.com/photo-1526232762682-d2f5f7144f2a?q=80&w=400" },
+              { title: "vs Chelsea U19", date: "Mar 10, 2024", views: 189, likes: 45, img: "/placeholder_img.jpg" },
               { title: "vs Liverpool U19", date: "Mar 5, 2024", views: 312, likes: 227, img: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=400" },
               { title: "Training Highlights", date: "Feb 28, 2024", views: 156, likes: 62, img: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=400" },
             ]} />
             <MediaBlock title="My Videos" type="video" items={[
               { title: "vs Arsenal U19", date: "Mar 15, 2024", views: 234, likes: 97, img: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=400" },
-              { title: "vs Chelsea U19", date: "Mar 10, 2024", views: 189, likes: 45, img: "https://images.unsplash.com/photo-1526232762682-d2f5f7144f2a?q=80&w=400" },
+              { title: "vs Chelsea U19", date: "Mar 10, 2024", views: 189, likes: 45, img: "/placeholder_img.jpg" },
               { title: "vs Liverpool U19", date: "Mar 5, 2024", views: 312, likes: 227, img: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=400" },
               { title: "Training Highlights", date: "Feb 28, 2024", views: 156, likes: 62, img: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=400" },
             ]} />
