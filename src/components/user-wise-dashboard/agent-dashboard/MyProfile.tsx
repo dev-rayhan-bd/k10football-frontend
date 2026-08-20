@@ -1,9 +1,10 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
-import { 
-  IconCircleCheck, 
-  IconEdit, 
+import {
+  IconCircleCheck,
+  IconEdit,
   IconCloudUpload,
   IconShieldCheck,
   IconCertificate,
@@ -56,29 +57,29 @@ const ProfileHero = ({
   return (
     <div className="relative rounded-2xl overflow-hidden min-h-[300px] border border-white/15 group flex flex-col mb-8">
       {/* Background Image */}
-      <div 
+      <div
         className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105 animate-fade-in"
         style={{ backgroundImage: `url(${coverPhoto || "/707964211aa29e42aa7d522475b870cad9c4ad92.png"})` }}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/60 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0A] via-[#0A0A0A]/40 to-transparent" />
-      <div className="relative p-6 w-full flex flex-col h-full justify-between z-10">
+      <div className="relative p-4 sm:p-6 w-full flex flex-col h-full justify-between z-10">
         <div>
           <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
             {/* Progress Circle SVG */}
             <div className="relative w-24 h-24 flex items-center justify-center shrink-0">
               <svg className="w-full h-full transform -rotate-90">
                 <circle cx="48" cy="48" r="44" stroke="currentColor" strokeWidth="6" fill="transparent" className="text-white/10" />
-                <circle 
-                  cx="48" 
-                  cy="48" 
-                  r="44" 
-                  stroke="currentColor" 
-                  strokeWidth="6" 
-                  fill="transparent" 
-                  className="text-[#E31B23] transition-all duration-500 ease-out" 
-                  strokeDasharray={276} 
-                  strokeDashoffset={276 * (1 - completion / 100)} 
+                <circle
+                  cx="48"
+                  cy="48"
+                  r="44"
+                  stroke="currentColor"
+                  strokeWidth="6"
+                  fill="transparent"
+                  className="text-[#E31B23] transition-all duration-500 ease-out"
+                  strokeDasharray={276}
+                  strokeDashoffset={276 * (1 - completion / 100)}
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
@@ -87,17 +88,17 @@ const ProfileHero = ({
               </div>
             </div>
             {/* Simulation controls for demo purposes */}
-            <div className="bg-black/60 backdrop-blur-sm border border-white/10 p-2.5 rounded-xl flex flex-col gap-1.5 self-stretch sm:self-auto sm:max-w-[200px] hover:border-white/20 transition-all">
+            <div className="bg-black/60 backdrop-blur-sm border border-white/10 p-2.5 rounded-xl flex flex-col gap-1.5 self-stretch sm:self-auto sm:max-w-[200px] hover:border-white/20 transition-all z-20 mt-4 sm:mt-0">
               <span className="text-[8px] text-white/40 font-black uppercase tracking-widest text-center">Admin Simulation controls</span>
               <div className="flex gap-1.5">
-                <button 
-                  onClick={onSimulateApprove} 
+                <button
+                  onClick={onSimulateApprove}
                   className="flex-1 py-1.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[9px] font-black uppercase tracking-wider transition-all min-w-0"
                 >
                   Verify
                 </button>
-                <button 
-                  onClick={onSimulateReset} 
+                <button
+                  onClick={onSimulateReset}
                   className="py-1.5 px-2.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-[9px] font-black uppercase tracking-wider transition-all"
                 >
                   Reset
@@ -126,56 +127,56 @@ const ProfileHero = ({
               </span>
             )}
           </div>
-          <h1 className="text-3xl md:text-4xl font-black tracking-tighter text-white uppercase leading-none font-orbitron mb-2">
+          <h1 className="text-3xl md:text-4xl font-black tracking-tighter text-white uppercase leading-none font-orbitron mb-2 break-words">
             {fullName || "John Doe"}
           </h1>
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-400">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-400">
             <span className="text-[#E31B23]">Premium Agent</span>
-            <span>•</span>
+            <span className="hidden sm:inline">•</span>
             <span>58 Years Old</span>
-            <span>•</span>
+            <span className="hidden sm:inline">•</span>
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-2 bg-green-600 border border-white/10 rounded-sm"></span> 
+              <span className="w-3 h-2 bg-green-600 border border-white/10 rounded-sm"></span>
               {nationality || "Brazil"}
             </span>
           </div>
         </div>
         {/* Info Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-6 pt-6 mt-6 border-t border-white/15">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4 sm:gap-y-6 pt-6 mt-6 border-t border-white/15">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/5 rounded-xl border border-white/15 text-white/40">
-              <IconShieldCheck size={18} />
+            <div className="p-2.5 sm:p-3 bg-white/5 rounded-xl border border-white/15 text-white/40 shrink-0">
+              <IconShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div className="space-y-0.5">
-              <p className="text-[9px] text-white/40 uppercase font-black tracking-widest">License ID</p>
-              <p className="text-white text-sm font-bold font-heading">{licenseId || "—"}</p>
+            <div className="space-y-0.5 min-w-0">
+              <p className="text-[9px] text-white/40 uppercase font-black tracking-widest truncate">License ID</p>
+              <p className="text-white text-sm font-bold font-heading truncate">{licenseId || "—"}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/5 rounded-xl border border-white/15 text-white/40">
-              <IconCertificate size={18} />
+            <div className="p-2.5 sm:p-3 bg-white/5 rounded-xl border border-white/15 text-white/40 shrink-0">
+              <IconCertificate className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div className="space-y-0.5">
-              <p className="text-[9px] text-white/40 uppercase font-black tracking-widest">Certifications</p>
-              <p className="text-[#E31B23] text-sm font-bold font-heading">{certifications || "—"}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/5 rounded-xl border border-white/15 text-white/40">
-              <IconPhone size={18} />
-            </div>
-            <div className="space-y-0.5">
-              <p className="text-[9px] text-white/40 uppercase font-black tracking-widest">Contact</p>
-              <p className="text-white text-sm font-bold font-heading">{contact || "—"}</p>
+            <div className="space-y-0.5 min-w-0">
+              <p className="text-[9px] text-white/40 uppercase font-black tracking-widest truncate">Certifications</p>
+              <p className="text-[#E31B23] text-sm font-bold font-heading truncate">{certifications || "—"}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/5 rounded-xl border border-white/15 text-white/40">
-              <IconMail size={18} />
+            <div className="p-2.5 sm:p-3 bg-white/5 rounded-xl border border-white/15 text-white/40 shrink-0">
+              <IconPhone className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div className="space-y-0.5">
-              <p className="text-[9px] text-white/40 uppercase font-black tracking-widest">Email</p>
-              <p className="text-white text-sm font-bold font-heading">{email || "—"}</p>
+            <div className="space-y-0.5 min-w-0">
+              <p className="text-[9px] text-white/40 uppercase font-black tracking-widest truncate">Contact</p>
+              <p className="text-white text-sm font-bold font-heading truncate">{contact || "—"}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 sm:p-3 bg-white/5 rounded-xl border border-white/15 text-white/40 shrink-0">
+              <IconMail className="w-4 h-4 sm:w-5 sm:h-5" />
+            </div>
+            <div className="space-y-0.5 min-w-0">
+              <p className="text-[9px] text-white/40 uppercase font-black tracking-widest truncate">Email</p>
+              <p className="text-white text-sm font-bold font-heading truncate">{email || "—"}</p>
             </div>
           </div>
         </div>
@@ -348,7 +349,7 @@ export const AgentProfile = () => {
       {/* Personal Information */}
       <div className="bg-[#111111] border border-white/15 rounded-3xl p-6 md:p-8">
         <SectionHeader title="Personal Information" />
-        <ProfileHero 
+        <ProfileHero
           completion={completion}
           verificationStatus={verificationStatus}
           fullName={fullName}
@@ -366,79 +367,79 @@ export const AgentProfile = () => {
           <div className="space-y-5">
             <div className="space-y-1.5">
               <Label className="text-gray-300 text-xs ml-1 font-medium">Full Name</Label>
-              <Input 
+              <Input
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Full Name"
-                className="bg-[#0a0a0a] border-white/20 text-white rounded-xl h-11 focus:border-white/40 focus:ring-1 focus:ring-white/40" 
+                className="bg-[#0a0a0a] border-white/20 text-white rounded-xl h-11 focus:border-white/40 focus:ring-1 focus:ring-white/40"
               />
             </div>
             <div className="space-y-1.5">
               <Label className="text-gray-300 text-xs ml-1 font-medium">Nationality</Label>
-              <Input 
+              <Input
                 value={nationality}
                 onChange={(e) => setNationality(e.target.value)}
                 placeholder="Nationality"
-                className="bg-[#0a0a0a] border-white/20 text-white rounded-xl h-11 focus:border-white/40 focus:ring-1 focus:ring-white/40" 
+                className="bg-[#0a0a0a] border-white/20 text-white rounded-xl h-11 focus:border-white/40 focus:ring-1 focus:ring-white/40"
               />
             </div>
             <div className="space-y-1.5">
               <Label className="text-gray-300 text-xs ml-1 font-medium">License ID</Label>
-              <Input 
+              <Input
                 value={licenseId}
                 onChange={(e) => setLicenseId(e.target.value)}
                 placeholder="License ID"
-                className="bg-[#0a0a0a] border-white/20 text-white rounded-xl h-11 focus:border-white/40 focus:ring-1 focus:ring-white/40" 
+                className="bg-[#0a0a0a] border-white/20 text-white rounded-xl h-11 focus:border-white/40 focus:ring-1 focus:ring-white/40"
               />
             </div>
             <div className="space-y-1.5">
               <Label className="text-gray-300 text-xs ml-1 font-medium">Date of Birth</Label>
-              <Input 
-                type="date" 
+              <Input
+                type="date"
                 value={dob}
                 onChange={(e) => setDob(e.target.value)}
-                className="bg-[#0a0a0a] border-white/20 text-white rounded-xl h-11 [color-scheme:dark] focus:border-white/40 focus:ring-1 focus:ring-white/40" 
+                className="bg-[#0a0a0a] border-white/20 text-white rounded-xl h-11 scheme-dark focus:border-white/40 focus:ring-1 focus:ring-white/40"
               />
             </div>
             <div className="space-y-1.5">
               <Label className="text-gray-300 text-xs ml-1 font-medium">Contact</Label>
-              <Input 
+              <Input
                 value={contact}
                 onChange={(e) => setContact(e.target.value)}
                 placeholder="Contact Number"
-                className="bg-[#0a0a0a] border-white/20 text-white rounded-xl h-11 focus:border-white/40 focus:ring-1 focus:ring-white/40" 
+                className="bg-[#0a0a0a] border-white/20 text-white rounded-xl h-11 focus:border-white/40 focus:ring-1 focus:ring-white/40"
               />
             </div>
             <div className="space-y-1.5">
               <Label className="text-gray-300 text-xs ml-1 font-medium">Email</Label>
-              <Input 
+              <Input
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email Address"
-                className="bg-[#0a0a0a] border-white/20 text-white rounded-xl h-11 focus:border-white/40 focus:ring-1 focus:ring-white/40" 
+                className="bg-[#0a0a0a] border-white/20 text-white rounded-xl h-11 focus:border-white/40 focus:ring-1 focus:ring-white/40"
               />
             </div>
           </div>
           {/* Right Column: Upload Cover Photo */}
           <div className="space-y-1.5 flex flex-col">
             <Label className="text-gray-300 text-xs ml-1 font-medium">Upload Cover Photo</Label>
-            <input 
-              type="file" 
-              id="cover-upload-input" 
-              accept="image/*" 
-              onChange={handlePhotoUpload} 
-              className="hidden" 
+            <input
+              type="file"
+              id="cover-upload-input"
+              accept="image/*"
+              onChange={handlePhotoUpload}
+              className="hidden"
             />
-            <div 
+            <div
               onClick={() => document.getElementById("cover-upload-input")?.click()}
-              className="flex-1 min-h-[300px] border border-dashed border-white/15 rounded-2xl flex flex-col items-center justify-center text-gray-500 hover:border-white/30 hover:text-white transition-colors cursor-pointer bg-white/[0.01] relative overflow-hidden group/upload min-w-0"
+              className="flex-1 min-h-75 border border-dashed border-white/15 rounded-2xl flex flex-col items-center justify-center text-gray-500 hover:border-white/30 hover:text-white transition-colors cursor-pointer bg-white/1 relative overflow-hidden group/upload min-w-0"
             >
               {coverPhoto ? (
                 <>
-                  <Image 
-                    src={coverPhoto} 
-                    alt="Cover Preview" 
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover/upload:scale-105" 
+                  <Image
+                    src={coverPhoto}
+                    alt="Cover Preview"
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover/upload:scale-105"
                   />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/upload:opacity-100 transition-opacity flex flex-col items-center justify-center text-white z-10">
                     <IconCloudUpload className="w-8 h-8 mb-2" stroke={1.5} />
@@ -462,29 +463,29 @@ export const AgentProfile = () => {
         <div className="space-y-5">
           <div className="space-y-1.5">
             <Label className="text-gray-300 text-xs ml-1 font-medium">Years of Experience</Label>
-            <Input 
+            <Input
               value={experience}
               onChange={(e) => setExperience(e.target.value)}
               placeholder="e.g. 5"
-              className="bg-[#0a0a0a] border-white/20 text-white rounded-xl h-11 focus:border-white/40 focus:ring-1 focus:ring-white/40" 
+              className="bg-[#0a0a0a] border-white/20 text-white rounded-xl h-11 focus:border-white/40 focus:ring-1 focus:ring-white/40"
             />
           </div>
           <div className="space-y-1.5">
             <Label className="text-gray-300 text-xs ml-1 font-medium">Certifications</Label>
-            <Input 
+            <Input
               value={certifications}
               onChange={(e) => setCertifications(e.target.value)}
               placeholder="e.g. FIFA Licensed Agent, UEFA B License"
-              className="bg-[#0a0a0a] border-white/20 text-white rounded-xl h-11 focus:border-white/40 focus:ring-1 focus:ring-white/40" 
+              className="bg-[#0a0a0a] border-white/20 text-white rounded-xl h-11 focus:border-white/40 focus:ring-1 focus:ring-white/40"
             />
           </div>
           <div className="space-y-1.5">
             <Label className="text-gray-300 text-xs ml-1 font-medium">Achievements</Label>
-            <Input 
+            <Input
               value={achievements}
               onChange={(e) => setAchievements(e.target.value)}
               placeholder="e.g. Represented 10+ professional players"
-              className="bg-[#0a0a0a] border-white/20 text-white rounded-xl h-11 focus:border-white/40 focus:ring-1 focus:ring-white/40" 
+              className="bg-[#0a0a0a] border-white/20 text-white rounded-xl h-11 focus:border-white/40 focus:ring-1 focus:ring-white/40"
             />
           </div>
         </div>
@@ -494,17 +495,17 @@ export const AgentProfile = () => {
         <SectionHeader title="Biography" />
         <div className="space-y-1.5">
           <Label className="text-gray-300 text-xs ml-1 font-medium">Professional Bio</Label>
-          <Textarea 
+          <Textarea
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             placeholder="Introduce yourself and your sports agency work..."
-            className="min-h-[120px] bg-[#0a0a0a] border-white/20 text-white rounded-xl resize-none p-4 text-sm focus:border-white/40 focus:ring-1 focus:ring-white/40" 
+            className="min-h-30 bg-[#0a0a0a] border-white/20 text-white rounded-xl resize-none p-4 text-sm focus:border-white/40 focus:ring-1 focus:ring-white/40"
           />
         </div>
       </div>
       {/* Save Button */}
       <div className="flex justify-end pt-4">
-        <button 
+        <button
           onClick={handleSave}
           className="bg-[#E31B23] hover:bg-[#C2181F] text-white px-8 py-4 rounded-xl font-bold uppercase tracking-widest text-xs transition-all shadow-lg shadow-[#E31B23]/20 hover:scale-[1.02] active:scale-[0.98]"
         >

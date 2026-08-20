@@ -7,6 +7,7 @@ import {
   IconPlus,
   IconDotsVertical,
   IconX,
+  IconChevronLeft,
 } from "@tabler/icons-react";
 interface Message {
   id: string;
@@ -126,6 +127,7 @@ export const AgentChat = () => {
   const [showNewChatModal, setShowNewChatModal] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState("1");
   const [activeConv, setActiveConv] = useState("1");
+  const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
   const [filterTab, setFilterTab] = useState<FilterTab>("All");
   const [inputMessage, setInputMessage] = useState("");
   const filterMap: Record<FilterTab, string | null> = {
@@ -142,26 +144,27 @@ export const AgentChat = () => {
   const activeMessages = messagesByConv[activeConv] ?? [];
   const tabs: FilterTab[] = ["All", "Parents", "Agents", "Clubs", "Academies"];
   return (
-    <div className="flex flex-col gap-6 h-full min-h-[calc(100vh-120px)]">
+    <div className="flex flex-col gap-4 sm:gap-6 h-full min-h-[calc(100vh-120px)] w-full overflow-hidden">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-4xl font-black uppercase text-white italic tracking-tighter">Chat</h1>
-          <p className="text-white/40 font-bold uppercase tracking-widest text-[11px] mt-1">
+      <div className="flex flex-row justify-between items-center gap-3 shrink-0">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-4xl font-black uppercase text-white italic tracking-tighter truncate">Chat</h1>
+          <p className="text-white/40 font-bold uppercase tracking-widest text-[8px] sm:text-[11px] mt-0.5 sm:mt-1 truncate">
             Communicate with parents, agents, clubs &amp; academies
           </p>
         </div>
         <button
           onClick={() => setShowNewChatModal(true)}
-          className="bg-[#E31B23] hover:bg-[#C2181F] text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest text-[11px] flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20"
+          className="bg-[#E31B23] hover:bg-[#C2181F] text-white px-3 sm:px-6 py-2 sm:py-3 rounded-xl font-bold uppercase tracking-widest text-[10px] sm:text-[11px] flex items-center justify-center gap-1.5 transition-all shadow-lg shadow-[#E31B23]/20 shrink-0"
         >
-          <IconPlus size={18} />
-          New Chat
+          <IconPlus size={16} className="sm:w-4.5 sm:h-4.5" />
+          <span className="hidden sm:inline">New Chat</span>
+          <span className="inline sm:hidden">New</span>
         </button>
       </div>
-      <div className="flex flex-1 gap-6 min-h-0 min-w-0">
+      <div className="flex flex-1 gap-0 md:gap-6 min-h-0 min-w-0 relative">
         {/* Sidebar */}
-        <div className="w-[320px] bg-[#111111] rounded-3xl border border-white/10 flex flex-col overflow-hidden shrink-0">
+        <div className={`w-full md:w-[320px] lg:w-87.5 bg-[#111111] rounded-3xl border border-white/10 flex-col overflow-hidden shrink-0 ${isMobileChatOpen ? 'hidden md:flex' : 'flex'}`}>
           {/* Search */}
           <div className="p-4 pb-2">
             <div className="relative">
@@ -179,11 +182,10 @@ export const AgentChat = () => {
               <button
                 key={tab}
                 onClick={() => setFilterTab(tab)}
-                className={`py-1.5 px-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
-                  filterTab === tab
-                    ? "bg-[#E31B23] text-white"
-                    : "bg-white/5 text-white/30 hover:text-white/60"
-                }`}
+                className={`py-1.5 px-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${filterTab === tab
+                  ? "bg-[#E31B23] text-white"
+                  : "bg-white/5 text-white/30 hover:text-white/60"
+                  }`}
               >
                 {tab}
               </button>
@@ -194,13 +196,19 @@ export const AgentChat = () => {
             {filteredConversations.map((conv) => (
               <button
                 key={conv.id}
-                onClick={() => setActiveConv(conv.id)}
-                className={`w-full p-4 flex items-start gap-3 hover:bg-white/[0.03] transition-all text-left border-b border-white/[0.02] last:border-0 ${
-                  conv.id === activeConv ? "bg-white/[0.04] border-l-2 border-l-[#E31B23]" : ""
-                }`}
+                onClick={() => {
+                  setActiveConv(conv.id);
+                  setIsMobileChatOpen(true);
+                }}
+                className={`w-full p-4 flex items-start gap-3 hover:bg-white/3 transition-all text-left border-b border-white/2 last:border-0 ${conv.id === activeConv ? "bg-white/4 md:border-l-2 md:border-l-[#E31B23]" : ""
+                  }`}
               >
                 <div className="w-11 h-11 rounded-full overflow-hidden border border-white/10 shrink-0">
-                  <Image src={conv.user.avatar} alt={conv.user.name} className="w-full h-full object-cover" />
+                  <Image src={conv.user.avatar} alt={conv.user.name} className="w-full h-full object-cover" width={44} height={44} onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.srcset = "";
+                    target.src = "/placeholder_img.jpg";
+                  }} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-center mb-0.5">
@@ -222,13 +230,20 @@ export const AgentChat = () => {
           </div>
         </div>
         {/* Chat Area */}
-        <div className="flex-1 bg-[#111111] rounded-3xl border border-white/10 flex flex-col overflow-hidden min-w-0">
+        <div className={`flex-1 bg-[#111111] rounded-3xl border border-white/10 flex-col overflow-hidden min-w-0 absolute inset-0 md:relative z-20 md:z-0 w-full h-full ${isMobileChatOpen ? 'flex' : 'hidden md:flex'}`}>
           {/* Chat Header */}
-          <div className="p-4 border-b border-white/10 flex justify-between items-center">
+          <div className="p-4 border-b border-white/10 flex justify-between items-center gap-3">
             {activeConvData && (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <button className="md:hidden text-white/40 hover:text-white transition-colors shrink-0" onClick={() => setIsMobileChatOpen(false)}>
+                  <IconChevronLeft size={24} />
+                </button>
                 <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10 shrink-0">
-                  <Image src={activeConvData.user.avatar} alt={activeConvData.user.name} className="w-full h-full object-cover" />
+                  <Image src={activeConvData.user.avatar} alt={activeConvData.user.name} className="w-full h-full object-cover" width={40} height={40} onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.srcset = "";
+                    target.src = "/placeholder_img.jpg";
+                  }} />
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-white">{activeConvData.user.name}</h3>
@@ -247,11 +262,10 @@ export const AgentChat = () => {
             {activeMessages.map((msg) => (
               <div key={msg.id} className={`flex flex-col ${msg.isMe ? "items-end" : "items-start"}`}>
                 <div
-                  className={`max-w-[70%] p-4 rounded-2xl text-sm leading-relaxed ${
-                    msg.isMe
-                      ? "bg-[#E31B23] text-white rounded-tr-none shadow-lg shadow-[#E31B23]/10"
-                      : "bg-white/5 text-white/80 rounded-tl-none border border-white/10"
-                  }`}
+                  className={`max-w-[70%] p-4 rounded-2xl text-sm leading-relaxed ${msg.isMe
+                    ? "bg-[#E31B23] text-white rounded-tr-none shadow-lg shadow-[#E31B23]/10"
+                    : "bg-white/5 text-white/80 rounded-tl-none border border-white/10"
+                    }`}
                 >
                   {msg.text}
                   <div className={`text-[9px] mt-2 font-bold uppercase ${msg.isMe ? "text-white/60" : "text-white/20"}`}>
@@ -262,16 +276,16 @@ export const AgentChat = () => {
             ))}
           </div>
           {/* Input */}
-          <div className="p-4 border-t border-white/10">
+          <div className="p-3 sm:p-4 border-t border-white/10 shrink-0 bg-[#111111] z-10">
             <div className="relative">
               <input
                 type="text"
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 placeholder="Type a message..."
-                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-6 pr-14 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20 transition-all"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 sm:py-4 pl-4 sm:pl-6 pr-12 sm:pr-14 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20 transition-all"
               />
-              <button className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-[#E31B23] hover:bg-[#C2181F] rounded-xl flex items-center justify-center text-white transition-all shadow-lg shadow-[#E31B23]/20">
+              <button className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-[#E31B23] hover:bg-[#C2181F] rounded-xl flex items-center justify-center text-white transition-all shadow-lg shadow-[#E31B23]/20">
                 <IconSend size={18} />
               </button>
             </div>
@@ -280,35 +294,38 @@ export const AgentChat = () => {
       </div>
       {/* New Chat Modal */}
       {showNewChatModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowNewChatModal(false)} />
-          <div className="relative w-full max-w-lg bg-[#111111] rounded-[32px] border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="relative w-full max-w-lg bg-[#111111] rounded-4xl border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 max-h-[90vh]">
             {/* Modal Header */}
-            <div className="p-8 pb-4 flex justify-between items-center border-b border-white/10">
-              <h2 className="text-2xl font-black uppercase text-white italic tracking-tight">New Chat</h2>
+            <div className="p-6 sm:p-8 pb-4 flex justify-between items-center border-b border-white/10 shrink-0">
+              <h2 className="text-xl sm:text-2xl font-black uppercase text-white italic tracking-tight">New Chat</h2>
               <button
                 onClick={() => setShowNewChatModal(false)}
-                className="w-10 h-10 bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center text-white/40 hover:text-white transition-all"
+                className="w-8 h-8 sm:w-10 sm:h-10 bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center text-white/40 hover:text-white transition-all shrink-0"
               >
                 <IconX size={20} />
               </button>
             </div>
-            <div className="p-8">
+            <div className="p-6 sm:p-8 overflow-y-auto">
               <div className="space-y-3">
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/40">Select Participant</label>
-                <div className="flex flex-col gap-2 max-h-[260px] overflow-y-auto pr-1">
+                <div className="flex flex-col gap-2 max-h-65 overflow-y-auto pr-1">
                   {participants.map((p) => (
                     <button
                       key={p.id}
                       onClick={() => setSelectedParticipant(p.id)}
-                      className={`p-3 rounded-xl border flex items-center gap-3 transition-all text-left ${
-                        selectedParticipant === p.id
-                          ? "bg-[#E31B23]/5 border-[#E31B23] text-white"
-                          : "bg-white/[0.02] border-white/10 text-white hover:border-white/20"
-                      }`}
+                      className={`p-3 rounded-xl border flex items-center gap-3 transition-all text-left ${selectedParticipant === p.id
+                        ? "bg-[#E31B23]/5 border-[#E31B23] text-white"
+                        : "bg-white/2 border-white/10 text-white hover:border-white/20"
+                        }`}
                     >
                       <div className="w-9 h-9 rounded-full overflow-hidden border border-white/10 shrink-0">
-                        <Image src={p.avatar} alt={p.name} className="w-full h-full object-cover" />
+                        <Image src={p.avatar} alt={p.name} className="w-full h-full object-cover" width={36} height={36} onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.srcset = "";
+                          target.src = "/placeholder_img.jpg";
+                        }} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold">{p.name}</p>
@@ -322,14 +339,14 @@ export const AgentChat = () => {
               </div>
             </div>
             {/* Modal Footer */}
-            <div className="p-8 pt-0 flex justify-end gap-4">
+            <div className="p-6 sm:p-8 pt-0 flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 shrink-0 mt-4 sm:mt-0">
               <button
                 onClick={() => setShowNewChatModal(false)}
-                className="px-6 py-3 rounded-xl border border-white/10 text-[11px] font-black uppercase tracking-widest text-white hover:bg-white/5 transition-all"
+                className="w-full sm:w-auto px-6 py-3 rounded-xl border border-white/10 text-[11px] font-black uppercase tracking-widest text-white hover:bg-white/5 transition-all text-center"
               >
                 Cancel
               </button>
-              <button className="px-6 py-3 rounded-xl bg-[#E31B23] hover:bg-[#C2181F] text-[11px] font-black uppercase tracking-widest text-white transition-all shadow-lg shadow-[#E31B23]/20">
+              <button className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#E31B23] hover:bg-[#C2181F] text-[11px] font-black uppercase tracking-widest text-white transition-all shadow-lg shadow-[#E31B23]/20 text-center">
                 Start Chat
               </button>
             </div>

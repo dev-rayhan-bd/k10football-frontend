@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import Image from "next/image";
 import React from "react";
-import { 
-  IconUsers, 
+import {
+  IconUsers,
   IconHeart,
   IconShare,
   IconEye,
@@ -13,17 +14,17 @@ import {
   IconChevronDown
 } from "@tabler/icons-react";
 import DashboardStatCard from "@/components/dashboard/DashboardStatCard";
-import { DashboardSidebarPanel, DashboardSidebarItem } from "@/components/dashboard/DashboardSidebar";
+import { DashboardSidebarPanel } from "@/components/dashboard/DashboardSidebar";
 import DashboardTable, { Column } from "@/components/dashboard/DashboardTable";
 import TableActionButtons from "@/components/dashboard/TableActionButtons";
 import { Button } from "@/components/ui/button";
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   AreaChart,
   Area,
@@ -74,7 +75,7 @@ const columns: Column<Player>[] = [
     align: "left",
     render: (row) => (
       <div className="flex items-center gap-3">
-        <Image src={row.avatar} alt={row.name} className="w-10 h-10 rounded-full border border-white/10" />
+        <Image src={row.avatar} alt={row.name} className="w-10 h-10 rounded-full border border-white/10" width={40} height={40} />
         <div>
           <p className="text-white font-semibold">{row.name}</p>
           <p className="text-[#E31B23] text-xs">{row.position}</p>
@@ -121,10 +122,10 @@ const columns: Column<Player>[] = [
     key: "actions",
     align: "center",
     render: () => (
-      <TableActionButtons 
-        onView={() => {}}
-        onHeart={() => {}}
-        onShare={() => {}}
+      <TableActionButtons
+        onView={() => { }}
+        onHeart={() => { }}
+        onShare={() => { }}
       />
     ),
   },
@@ -158,272 +159,276 @@ const CustomBarTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 const AgentDashboard = () => {
-    return (
-        <div className="space-y-6">
-            {/* Hero & Sidebar Row */}
-            <div className="flex flex-col xl:flex-row gap-6">
-                {/* Custom Agent Hero */}
-                <div className="flex-1 min-w-0">
-                    <div className="relative rounded-3xl overflow-hidden min-h-[450px] border border-white/15 group flex flex-col h-full">
-                      {/* Background Image */}
-                      <div 
-                        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                        style={{ backgroundImage: `url(/707964211aa29e42aa7d522475b870cad9c4ad92.png)` }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-                      <div className="absolute inset-0 bg-gradient-to-r from-black via-black/50 to-transparent" />
-                      <div className="relative p-8 md:p-10 w-full flex flex-col h-full justify-between">
-                        <div>
-                          {/* Progress Circle SVG */}
-                          <div className="relative w-32 h-32 flex items-center justify-center mb-6">
-                            <svg className="w-full h-full transform -rotate-90">
-                              <circle cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-white/10" />
-                              <circle cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-[#E31B23]" strokeDasharray={364.4} strokeDashoffset={364.4 * (1 - 0.74)} />
-                            </svg>
-                            <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
-                              <span className="text-2xl font-black italic">74%</span>
-                              <span className="text-[10px] text-white/60 uppercase font-bold tracking-widest">Profile</span>
-                            </div>
-                          </div>
-                          <div className="bg-black/80 backdrop-blur-md border border-white/20 px-4 py-1.5 rounded-full text-[10px] font-bold text-white uppercase w-fit tracking-[0.2em] mb-4">
-                            ACTIVE AGENT
-                          </div>
-                          <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-white uppercase leading-none font-orbitron mb-3">
-                            John Doe
-                          </h1>
-                          <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-gray-400">
-                            <span className="text-[#E31B23]">Premium Agent</span>
-                            <span>•</span>
-                            <span>58 Years Old</span>
-                            <span>•</span>
-                            <span className="flex items-center gap-1.5"><span className="w-4 h-3 bg-green-600 border border-white/10 rounded-sm"></span> Brazil</span>
-                          </div>
-                        </div>
-                        {/* Info Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-8 mt-8 border-t border-white/15">
-                          <div className="flex items-center gap-4">
-                            <div className="p-3 bg-white/5 rounded-2xl border border-white/15 text-white/40">
-                              <IconShieldCheck size={22} />
-                            </div>
-                            <div className="space-y-0.5">
-                              <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">License ID</p>
-                              <p className="text-white text-base font-bold font-heading">UK-AG-2024-001</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <div className="p-3 bg-white/5 rounded-2xl border border-white/15 text-white/40">
-                              <IconCertificate size={22} />
-                            </div>
-                            <div className="space-y-0.5">
-                              <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">Certifications</p>
-                              <p className="text-[#E31B23] text-base font-bold font-heading">FIFA Licensed Agent</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <div className="p-3 bg-white/5 rounded-2xl border border-white/15 text-white/40">
-                              <IconPhone size={22} />
-                            </div>
-                            <div className="space-y-0.5">
-                              <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">Contact</p>
-                              <p className="text-white text-base font-bold font-heading">+55 11 9999-8888</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <div className="p-3 bg-white/5 rounded-2xl border border-white/15 text-white/40">
-                              <IconMail size={22} />
-                            </div>
-                            <div className="space-y-0.5">
-                              <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">Email</p>
-                              <p className="text-white text-base font-bold font-heading">john.doe@example.com</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+  return (
+    <div className="space-y-6">
+      {/* Hero & Sidebar Row */}
+      <div className="flex flex-col xl:flex-row gap-6">
+        {/* Custom Agent Hero */}
+        <div className="flex-1 min-w-0">
+          <div className="relative rounded-3xl overflow-hidden min-h-112.5 border border-white/15 group flex flex-col h-full">
+            {/* Background Image */}
+            <div
+              className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+              style={{ backgroundImage: `url(/707964211aa29e42aa7d522475b870cad9c4ad92.png)` }}
+            />
+            <div className="absolute inset-0 bg-linear-to-t from-black via-black/40 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-r from-black via-black/50 to-transparent" />
+            <div className="relative p-6 sm:p-8 md:p-10 w-full flex flex-col h-full justify-between">
+              <div>
+                {/* Progress Circle SVG */}
+                <div className="relative w-32 h-32 flex items-center justify-center mb-6">
+                  <svg className="w-full h-full transform -rotate-90">
+                    <circle cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-white/10" />
+                    <circle cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-[#E31B23]" strokeDasharray={364.4} strokeDashoffset={364.4 * (1 - 0.74)} />
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
+                    <span className="text-2xl font-black italic">74%</span>
+                    <span className="text-[10px] text-white/60 uppercase font-bold tracking-widest">Profile</span>
+                  </div>
                 </div>
-                {/* Sidebar */}
-                <div className="w-full xl:w-[320px] shrink-0">
-                    <DashboardSidebarPanel title="Recent Activity" icon={<IconShieldCheck size={20} />} iconColor="text-[#E31B23]">
-                        <div className="space-y-4">
-                          {/* Activity Item 1 */}
-                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.04] transition-all flex items-start gap-4">
-                            <div className="mt-1">
-                              <IconHeart size={18} className="text-gray-400" />
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-white mb-1">
-                                You liked CV James Rodriguez's
-                              </p>
-                              <p className="text-xs text-gray-500">2 hours ago</p>
-                            </div>
-                          </div>
-                          {/* Activity Item 2 */}
-                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.04] transition-all flex items-start gap-4">
-                            <div className="mt-1">
-                              <IconShare size={18} className="text-gray-400" />
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-white mb-1">
-                                You shared profile Sarah Mitchell's
-                              </p>
-                              <p className="text-xs text-gray-500">5 hours ago</p>
-                            </div>
-                          </div>
-                          {/* Activity Item 3 */}
-                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.04] transition-all flex items-start gap-4">
-                            <div className="mt-1">
-                              <IconShieldCheck size={18} className="text-gray-400" />
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-white mb-1">
-                                Verification status updated to Approved
-                              </p>
-                              <p className="text-xs text-gray-500">Yesterday at 3:45 PM</p>
-                            </div>
-                          </div>
-                        </div>
-                    </DashboardSidebarPanel>
+                <div className="bg-black/80 backdrop-blur-md border border-white/20 px-4 py-1.5 rounded-full text-[10px] font-bold text-white uppercase w-fit tracking-[0.2em] mb-4">
+                  ACTIVE AGENT
                 </div>
+                <h1 className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tighter text-white uppercase leading-none font-orbitron mb-3 wrap-break-word">
+                  John Doe
+                </h1>
+                <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-400">
+                  <span className="text-[#E31B23]">Premium Agent</span>
+                  <span className="hidden sm:inline">•</span>
+                  <span>58 Years Old</span>
+                  <span className="hidden sm:inline">•</span>
+                  <span className="flex items-center gap-1.5"><span className="w-4 h-3 bg-green-600 border border-white/10 rounded-sm"></span> Brazil</span>
+                </div>
+              </div>
+              {/* Info Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pt-6 sm:pt-8 mt-6 sm:mt-8 border-t border-white/15">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="p-2.5 sm:p-3 bg-white/5 rounded-xl sm:rounded-2xl border border-white/15 text-white/40 shrink-0">
+                    <IconShieldCheck className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
+                  </div>
+                  <div className="space-y-0.5 min-w-0">
+                    <p className="text-[10px] text-white/40 uppercase font-black tracking-widest truncate">License ID</p>
+                    <p className="text-white text-sm sm:text-base font-bold font-heading truncate">UK-AG-2024-001</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="p-2.5 sm:p-3 bg-white/5 rounded-xl sm:rounded-2xl border border-white/15 text-white/40 shrink-0">
+                    <IconCertificate className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
+                  </div>
+                  <div className="space-y-0.5 min-w-0">
+                    <p className="text-[10px] text-white/40 uppercase font-black tracking-widest truncate">Certifications</p>
+                    <p className="text-[#E31B23] text-sm sm:text-base font-bold font-heading truncate">FIFA Licensed Agent</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="p-2.5 sm:p-3 bg-white/5 rounded-xl sm:rounded-2xl border border-white/15 text-white/40 shrink-0">
+                    <IconPhone className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
+                  </div>
+                  <div className="space-y-0.5 min-w-0">
+                    <p className="text-[10px] text-white/40 uppercase font-black tracking-widest truncate">Contact</p>
+                    <p className="text-white text-sm sm:text-base font-bold font-heading truncate">+55 11 9999-8888</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="p-2.5 sm:p-3 bg-white/5 rounded-xl sm:rounded-2xl border border-white/15 text-white/40 shrink-0">
+                    <IconMail className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
+                  </div>
+                  <div className="space-y-0.5 min-w-0">
+                    <p className="text-[10px] text-white/40 uppercase font-black tracking-widest truncate">Email</p>
+                    <p className="text-white text-sm sm:text-base font-bold font-heading truncate">john.doe@example.com</p>
+                  </div>
+                </div>
+              </div>
             </div>
-            {/* Stats Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <DashboardStatCard 
-                  icon={<IconUsers className="w-6 h-6" />}
-                  label="Players Viewed"
-                  value="24"
-                />
-                <DashboardStatCard 
-                  icon={<IconHeart className="w-6 h-6" />}
-                  label="Liked CVs"
-                  value="8"
-                />
-                <DashboardStatCard 
-                  icon={<IconShare className="w-6 h-6" />}
-                  label="Shared Profiles"
-                  value="5"
-                />
-                <DashboardStatCard 
-                  icon={<IconEye className="w-6 h-6" />}
-                  label="Profile Views"
-                  value="156"
-                />
-            </div>
-            {/* Analytics */}
-            <div className="bg-[#111111] border border-white/15 rounded-3xl p-8 space-y-8">
-                <div className="flex justify-between items-start">
-                    <div>
-                        <h2 className="text-2xl font-bold text-white font-orbitron tracking-wide mb-1">Analytics For Players Monitored</h2>
-                        <p className="text-sm text-gray-500 font-medium">Insights based on Players interactions, profile activity & performance data.</p>
-                    </div>
-                    <Button variant="outline" className="bg-transparent border-white/10 text-gray-300 hover:bg-white/5 hover:text-white rounded-lg px-6">
-                        Full Analytics
-                    </Button>
-                </div>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                    {/* Area Chart */}
-                    <div className="space-y-6">
-                        <div>
-                          <h3 className="text-base font-bold text-white tracking-wide">CV Views Over Time</h3>
-                          <p className="text-xs text-gray-500">Your profile viewing trends</p>
-                        </div>
-                        <div className="h-[220px] w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={areaData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                    <defs>
-                                        <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#E31B23" stopOpacity={0.2}/>
-                                            <stop offset="95%" stopColor="#E31B23" stopOpacity={0}/>
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
-                                    <XAxis 
-                                        dataKey="week" 
-                                        axisLine={false} 
-                                        tickLine={false} 
-                                        tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11, fontWeight: 500 }} 
-                                        dy={10}
-                                    />
-                                    <YAxis 
-                                        axisLine={false} 
-                                        tickLine={false} 
-                                        tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11, fontWeight: 500 }}
-                                        ticks={[0, 7, 14, 21, 28]}
-                                    />
-                                    <Tooltip content={<CustomAreaTooltip />} />
-                                    <Area 
-                                        type="monotone" 
-                                        dataKey="views" 
-                                        name="views"
-                                        stroke="#E31B23" 
-                                        fillOpacity={1} 
-                                        fill="url(#colorViews)" 
-                                        strokeWidth={2}
-                                        activeDot={{ r: 5, fill: '#111', stroke: '#E31B23', strokeWidth: 2 }}
-                                        dot={{ r: 3, fill: '#111', stroke: '#fff', strokeWidth: 1.5 }}
-                                    />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-                    {/* Bar Chart */}
-                    <div className="space-y-6">
-                        <div>
-                          <h3 className="text-base font-bold text-white tracking-wide">Likes & Shares Activity</h3>
-                          <p className="text-xs text-gray-500">Your interaction patterns</p>
-                        </div>
-                        <div className="h-[220px] w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={barData} barSize={12} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
-                                    <XAxis 
-                                        dataKey="week" 
-                                        axisLine={false} 
-                                        tickLine={false} 
-                                        tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11, fontWeight: 500 }} 
-                                        dy={10}
-                                    />
-                                    <YAxis 
-                                        axisLine={false} 
-                                        tickLine={false} 
-                                        tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11, fontWeight: 500 }}
-                                        ticks={[0, 3, 6, 9, 12]}
-                                    />
-                                    <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} content={<CustomBarTooltip />} />
-                                    <Legend 
-                                      iconType="square" 
-                                      wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
-                                    />
-                                    <Bar dataKey="likes" name="Likes" fill="#ffffff" radius={[4, 4, 0, 0]} />
-                                    <Bar dataKey="shares" name="Shares" fill="rgba(255,255,255,0.2)" radius={[4, 4, 0, 0]} />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {/* Monitored Players */}
-            <div className="bg-[#111111] border border-white/15 rounded-3xl p-8 space-y-6">
-                <h2 className="text-2xl font-bold text-white font-orbitron tracking-wide mb-4">Monitored Players</h2>
-                <div className="flex flex-wrap gap-4 justify-end mb-6">
-                  <Button variant="outline" className="bg-transparent border-white/10 text-gray-300 hover:bg-white/5 hover:text-white rounded-lg">
-                    All Positions <IconChevronDown className="ml-2 w-4 h-4" />
-                  </Button>
-                  <Button variant="outline" className="bg-transparent border-white/10 text-gray-300 hover:bg-white/5 hover:text-white rounded-lg">
-                    Country <IconChevronDown className="ml-2 w-4 h-4" />
-                  </Button>
-                  <Button variant="outline" className="bg-transparent border-white/10 text-gray-300 hover:bg-white/5 hover:text-white rounded-lg">
-                    Age Range <IconChevronDown className="ml-2 w-4 h-4" />
-                  </Button>
-                  <Button variant="outline" className="bg-transparent border-white/10 text-gray-300 hover:bg-white/5 hover:text-white rounded-lg">
-                    All Status <IconChevronDown className="ml-2 w-4 h-4" />
-                  </Button>
-                </div>
-                <DashboardTable columns={columns} data={monitoredPlayers} />
-            </div>
-            <MyImagesSection editable={true} />
-            <MyVideosSection editable={true} />
+          </div>
         </div>
-    );
+        {/* Sidebar */}
+        <div className="w-full xl:w-[320px] shrink-0">
+          <DashboardSidebarPanel title="Recent Activity" icon={<IconShieldCheck size={20} />} iconColor="text-[#E31B23]">
+            <div className="space-y-4">
+              {/* Activity Item 1 */}
+              <div className="p-4 bg-white/2 border border-white/5 rounded-2xl hover:bg-white/4 transition-all flex items-start gap-4">
+                <div className="mt-1">
+                  <IconHeart size={18} className="text-gray-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white mb-1">
+                    You liked CV James Rodriguez&apos;s
+                  </p>
+                  <p className="text-xs text-gray-500">2 hours ago</p>
+                </div>
+              </div>
+              {/* Activity Item 2 */}
+              <div className="p-4 bg-white/2 border border-white/5 rounded-2xl hover:bg-white/4 transition-all flex items-start gap-4">
+                <div className="mt-1">
+                  <IconShare size={18} className="text-gray-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white mb-1">
+                    You shared profile Sarah Mitchell&apos;s
+                  </p>
+                  <p className="text-xs text-gray-500">5 hours ago</p>
+                </div>
+              </div>
+              {/* Activity Item 3 */}
+              <div className="p-4 bg-white/2 border border-white/5 rounded-2xl hover:bg-white/4 transition-all flex items-start gap-4">
+                <div className="mt-1">
+                  <IconShieldCheck size={18} className="text-gray-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white mb-1">
+                    Verification status updated to Approved
+                  </p>
+                  <p className="text-xs text-gray-500">Yesterday at 3:45 PM</p>
+                </div>
+              </div>
+            </div>
+          </DashboardSidebarPanel>
+        </div>
+      </div>
+      {/* Stats Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <DashboardStatCard
+          icon={<IconUsers className="w-6 h-6" />}
+          label="Players Viewed"
+          value="24"
+        />
+        <DashboardStatCard
+          icon={<IconHeart className="w-6 h-6" />}
+          label="Liked CVs"
+          value="8"
+        />
+        <DashboardStatCard
+          icon={<IconShare className="w-6 h-6" />}
+          label="Shared Profiles"
+          value="5"
+        />
+        <DashboardStatCard
+          icon={<IconEye className="w-6 h-6" />}
+          label="Profile Views"
+          value="156"
+        />
+      </div>
+      {/* Analytics */}
+      <div className="bg-[#111111] border border-white/15 rounded-3xl p-5 sm:p-8 space-y-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold text-white font-orbitron tracking-wide mb-1">Analytics For Players Monitored</h2>
+            <p className="text-xs sm:text-sm text-gray-500 font-medium">Insights based on Players interactions, profile activity & performance data.</p>
+          </div>
+          <Button variant="outline" className="w-full sm:w-auto bg-transparent border-white/10 text-gray-300 hover:bg-white/5 hover:text-white rounded-lg px-6">
+            Full Analytics
+          </Button>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          {/* Area Chart */}
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-base font-bold text-white tracking-wide">CV Views Over Time</h3>
+              <p className="text-xs text-gray-500">Your profile viewing trends</p>
+            </div>
+            <div className="h-55 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={areaData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#E31B23" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="#E31B23" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
+                  <XAxis
+                    dataKey="week"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11, fontWeight: 500 }}
+                    dy={10}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11, fontWeight: 500 }}
+                    ticks={[0, 7, 14, 21, 28]}
+                  />
+                  <Tooltip content={<CustomAreaTooltip />} />
+                  <Area
+                    type="monotone"
+                    dataKey="views"
+                    name="views"
+                    stroke="#E31B23"
+                    fillOpacity={1}
+                    fill="url(#colorViews)"
+                    strokeWidth={2}
+                    activeDot={{ r: 5, fill: '#111', stroke: '#E31B23', strokeWidth: 2 }}
+                    dot={{ r: 3, fill: '#111', stroke: '#fff', strokeWidth: 1.5 }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          {/* Bar Chart */}
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-base font-bold text-white tracking-wide">Likes & Shares Activity</h3>
+              <p className="text-xs text-gray-500">Your interaction patterns</p>
+            </div>
+            <div className="h-55 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={barData} barSize={12} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
+                  <XAxis
+                    dataKey="week"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11, fontWeight: 500 }}
+                    dy={10}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11, fontWeight: 500 }}
+                    ticks={[0, 3, 6, 9, 12]}
+                  />
+                  <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} content={<CustomBarTooltip />} />
+                  <Legend
+                    iconType="square"
+                    wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
+                  />
+                  <Bar dataKey="likes" name="Likes" fill="#ffffff" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="shares" name="Shares" fill="rgba(255,255,255,0.2)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Monitored Players */}
+      <div className="bg-[#111111] border border-white/15 rounded-3xl p-5 sm:p-8 space-y-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-white font-orbitron tracking-wide mb-4">Monitored Players</h2>
+        <div className="grid grid-cols-2 lg:flex lg:flex-wrap gap-2 sm:gap-4 lg:justify-end mb-6">
+          <Button variant="outline" className="w-full bg-transparent border-white/10 text-gray-300 hover:bg-white/5 hover:text-white rounded-lg text-xs sm:text-sm px-2 sm:px-4">
+            All Positions <IconChevronDown className="ml-1 sm:ml-2 w-3 h-3 sm:w-4 sm:h-4" />
+          </Button>
+          <Button variant="outline" className="w-full bg-transparent border-white/10 text-gray-300 hover:bg-white/5 hover:text-white rounded-lg text-xs sm:text-sm px-2 sm:px-4">
+            Country <IconChevronDown className="ml-1 sm:ml-2 w-3 h-3 sm:w-4 sm:h-4" />
+          </Button>
+          <Button variant="outline" className="w-full bg-transparent border-white/10 text-gray-300 hover:bg-white/5 hover:text-white rounded-lg text-xs sm:text-sm px-2 sm:px-4">
+            Age Range <IconChevronDown className="ml-1 sm:ml-2 w-3 h-3 sm:w-4 sm:h-4" />
+          </Button>
+          <Button variant="outline" className="w-full bg-transparent border-white/10 text-gray-300 hover:bg-white/5 hover:text-white rounded-lg text-xs sm:text-sm px-2 sm:px-4">
+            All Status <IconChevronDown className="ml-1 sm:ml-2 w-3 h-3 sm:w-4 sm:h-4" />
+          </Button>
+        </div>
+        <div className="overflow-x-auto">
+          <div className="min-w-[800px]">
+            <DashboardTable columns={columns} data={monitoredPlayers} />
+          </div>
+        </div>
+      </div>
+      <MyImagesSection editable={true} />
+      <MyVideosSection editable={true} />
+    </div>
+  );
 };
 
 export default AgentDashboard;
