@@ -41,24 +41,24 @@ const [hasAcademy, setHasAcademy] = useState(false);
 const currentSidebarItems = hasAcademy ? coachSidebarItemsWithAcademy : coachSidebarItemsWithoutAcademy;
 
 const customToggle = (
-<div className="flex items-center bg-[#1a1a1a] rounded-lg p-1.5 gap-1.5 border border-white/5 ml-2">
+<div className="flex items-center bg-[#1a1a1a] rounded-lg p-1 sm:p-1.5 gap-1 sm:gap-1.5 border border-white/5 ml-auto sm:ml-2 shrink-0">
   <button
     onClick={() => setHasAcademy(false)}
-    className={`px-4 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all ${!hasAcademy ? 'bg-[#E31B23] text-white' : 'text-white/40 hover:text-white/60'}`}
+    className={`px-2 sm:px-4 py-1.5 rounded-md text-[8px] sm:text-[11px] font-bold uppercase tracking-wider transition-all leading-tight text-center whitespace-nowrap sm:whitespace-normal ${!hasAcademy ? 'bg-[#E31B23] text-white' : 'text-white/40 hover:text-white/60'}`}
   >
-    Individual Coach
+    Individual <span className="hidden sm:inline">Coach</span>
   </button>
   <div
     onClick={() => setHasAcademy(!hasAcademy)}
-    className="w-10 h-5 bg-white/10 rounded-full relative cursor-pointer group border border-white/5"
+    className="w-8 sm:w-10 h-4 sm:h-5 shrink-0 bg-white/10 rounded-full relative cursor-pointer group border border-white/5 mx-0.5 sm:mx-0"
   >
-    <div className={`absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white rounded-full transition-all duration-300 shadow-sm ${hasAcademy ? 'right-0.5' : 'left-0.5'}`}></div>
+    <div className={`absolute top-1/2 -translate-y-1/2 w-3 sm:w-3.5 h-3 sm:h-3.5 bg-white rounded-full transition-all duration-300 shadow-sm ${hasAcademy ? 'right-0.5' : 'left-0.5'}`}></div>
   </div>
   <button
     onClick={() => setHasAcademy(true)}
-    className={`px-4 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all ${hasAcademy ? 'bg-[#E31B23] text-white' : 'text-white/40 hover:text-white/60'}`}
+    className={`px-2 sm:px-4 py-1.5 rounded-md text-[8px] sm:text-[11px] font-bold uppercase tracking-wider transition-all leading-tight text-center whitespace-nowrap sm:whitespace-normal ${hasAcademy ? 'bg-[#E31B23] text-white' : 'text-white/40 hover:text-white/60'}`}
   >
-    Club Coach
+    Club <span className="hidden sm:inline">Coach</span>
   </button>
 </div>
 );

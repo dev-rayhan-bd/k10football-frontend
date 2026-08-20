@@ -57,7 +57,7 @@ return (
     </div>
 
     {customToggle && (
-      <div className="flex">
+      <div className="flex ml-auto sm:ml-0">
         {customToggle}
       </div>
     )}
