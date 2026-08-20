@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/static-components */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import badge1 from "@/assets/cvs/id/coach-badge1.png";
@@ -671,7 +672,7 @@ const CoachBioSection = ({ editable }: { editable?: boolean }) => {
                             }}
                             canEdit={canEdit}
                             type="textarea"
-                            className="text-white text-sm leading-relaxed w-full break-words"
+                            className="text-white text-sm leading-relaxed w-full wrap-break-word"
                           />
                         </div>
                         {canEdit && (
@@ -837,7 +838,7 @@ const CoachBioSection = ({ editable }: { editable?: boolean }) => {
                   {coachData.majorTrophies.map((tournament, index) => (
                     <div
                       key={index}
-                      className="flex items-center justify-between py-3 px-4 border-b border-slate-800"
+                      className="flex items-center justify-between py-3 px-1 sm:px-4 border-b border-slate-800 gap-2 min-w-0"
                     >
                       <CMSField
                         value={tournament.name}
@@ -847,9 +848,9 @@ const CoachBioSection = ({ editable }: { editable?: boolean }) => {
                           handleUpdate("majorTrophies", newTrophies);
                         }}
                         canEdit={canEdit}
-                        className="text-white text-[12px] font-medium tracking-wide flex-1"
+                        className="text-white text-[10px] sm:text-[12px] font-medium tracking-wide flex-1 min-w-0 truncate"
                       />
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                         <CMSField
                           value={tournament.count}
                           onUpdate={(val) => {
@@ -859,17 +860,19 @@ const CoachBioSection = ({ editable }: { editable?: boolean }) => {
                           }}
                           canEdit={canEdit}
                           isNumeric
-                          className="text-white text-sm font-semibold w-12 justify-center"
+                          className="text-white text-sm font-semibold w-8 sm:w-12 justify-center"
                           inputClassName="text-center"
                         />
-                        <IconTrophy />
+                        <div className="shrink-0">
+                          <IconTrophy />
+                        </div>
                         {canEdit && (
                           <button
                             onClick={() => {
                               const newTrophies = coachData.majorTrophies.filter((_, idx) => idx !== index);
                               handleUpdate("majorTrophies", newTrophies);
                             }}
-                            className="text-gray-500 hover:text-red-500 transition-colors ml-1"
+                            className="text-gray-500 hover:text-red-500 transition-colors shrink-0"
                           >
                             <Trash2 size={16} />
                           </button>
@@ -907,7 +910,8 @@ const CoachBioSection = ({ editable }: { editable?: boolean }) => {
                   <Image
                     src={getFlagUrl(coachData.birthCountry)}
                     alt="Birth Country"
-                    layout="fill"
+                    width={100}
+                    height={100}
                     className="object-cover rounded shadow-lg border border-border"
                   />
                   {coachData.dualNationality && (
@@ -946,7 +950,7 @@ const CoachBioSection = ({ editable }: { editable?: boolean }) => {
               />
             </div>
 
-            <div className="relative w-full h-[723px] mb-8 flex items-end justify-center">
+            <div className="relative w-full h-180.75 mb-8 flex items-end justify-center">
               <EditableImage
                 src={coachData.coachImage}
                 alt={coachData.fullName}
@@ -1007,21 +1011,25 @@ const CoachBioSection = ({ editable }: { editable?: boolean }) => {
                   )}
                 </div>
 
-                <div className="space-y-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   {orderedSelectedStyles.map((style: any) => {
                     const icon = COACH_STYLE_ICONS[style.id];
                     const iconSrc = icon ? icon.src : badge2.src;
 
                     return (
-                      <div key={style.id} className="space-y-4">
-                        <div className="flex justify-center">
+                      <div key={style.id} className="flex flex-col items-center justify-center gap-2">
+                        <div className="flex justify-center shrink-0">
                           <Image 
                             src={iconSrc}
-                            className="w-20 h-20 object-contain"
+                            className="w-16 h-16 sm:w-20 sm:h-20 object-contain drop-shadow-md"
                             alt={style.label}
+                            width={80}
+                            height={80}
                           />
                         </div>
-                        <p className="text-lg font-heading">{style.label}</p>
+                        <p className="text-[10px] sm:text-xs md:text-sm font-heading text-white text-center uppercase tracking-widest leading-snug wrap-break-word">
+                          {style.label}
+                        </p>
                       </div>
                     );
                   })}
@@ -1037,50 +1045,50 @@ const CoachBioSection = ({ editable }: { editable?: boolean }) => {
               <h2 className="text-lg text-center font-heading font-normal mb-4">
                 Current Season Stats
               </h2>
-              <div className="text-sm grid grid-cols-2 gap-4">
-                <div className="border flex flex-col min-w-37.5 items-center justify-center p-3 rounded-xl w-full mx-auto">
+              <div className="text-sm grid grid-cols-2 gap-3 sm:gap-4 w-full min-w-0">
+                <div className="border border-white/10 flex flex-col items-center justify-center p-3 rounded-xl w-full min-w-0 bg-white/5">
                   <CMSField
                     value={coachData.seasonStats.matches}
                     onUpdate={(val) => handleUpdate("seasonStats.matches", val)}
                     canEdit={canEdit}
                     isNumeric
-                    className="text-2xl font-medium text-primary mb-2 justify-center"
-                    inputClassName="text-center w-20"
+                    className="text-xl sm:text-2xl font-medium text-primary mb-1 justify-center min-w-0"
+                    inputClassName="text-center w-16 sm:w-20 bg-gray-900/50 border-gray-700 focus:border-primary transition-all rounded"
                   />
-                  <h3 className="text-[12px] uppercase">Matches Coached</h3>
+                  <h3 className="text-[10px] sm:text-xs uppercase text-center wrap-break-word leading-tight w-full px-1">Matches Coached</h3>
                 </div>
-                <div className="border flex flex-col min-w-37.5 items-center justify-center p-3 rounded-xl w-full mx-auto">
+                <div className="border border-white/10 flex flex-col items-center justify-center p-3 rounded-xl w-full min-w-0 bg-white/5">
                   <CMSField
                     value={coachData.seasonStats.wins}
                     onUpdate={(val) => handleUpdate("seasonStats.wins", val)}
                     canEdit={canEdit}
                     isNumeric
-                    className="text-2xl font-medium text-primary mb-2 justify-center"
-                    inputClassName="text-center w-20"
+                    className="text-xl sm:text-2xl font-medium text-primary mb-1 justify-center min-w-0"
+                    inputClassName="text-center w-16 sm:w-20 bg-gray-900/50 border-gray-700 focus:border-primary transition-all rounded"
                   />
-                  <h3 className="text-[12px] uppercase">Win</h3>
+                  <h3 className="text-[10px] sm:text-xs uppercase text-center wrap-break-word leading-tight w-full px-1">Win</h3>
                 </div>
-                <div className="border flex flex-col min-w-37.5 items-center justify-center p-3 rounded-xl w-full mx-auto">
+                <div className="border border-white/10 flex flex-col items-center justify-center p-3 rounded-xl w-full min-w-0 bg-white/5">
                   <CMSField
                     value={Math.max(2, coachData.seasonStats.losses || 0)}
                     onUpdate={(val) => handleUpdate("seasonStats.losses", Number(val))}
                     canEdit={canEdit}
                     isNumeric
-                    className="text-2xl font-medium text-primary mb-2 justify-center"
-                    inputClassName="text-center w-20"
+                    className="text-xl sm:text-2xl font-medium text-primary mb-1 justify-center min-w-0"
+                    inputClassName="text-center w-16 sm:w-20 bg-gray-900/50 border-gray-700 focus:border-primary transition-all rounded"
                   />
-                  <h3 className="text-[12px] uppercase">Losses</h3>
+                  <h3 className="text-[10px] sm:text-xs uppercase text-center wrap-break-word leading-tight w-full px-1">Losses</h3>
                 </div>
-                <div className="border flex flex-col min-w-37.5 items-center justify-center p-3 rounded-xl w-full mx-auto">
+                <div className="border border-white/10 flex flex-col items-center justify-center p-3 rounded-xl w-full min-w-0 bg-white/5">
                   <CMSField
                     value={Math.max(2, coachData.seasonStats.draws || 0)}
                     onUpdate={(val) => handleUpdate("seasonStats.draws", Number(val))}
                     canEdit={canEdit}
                     isNumeric
-                    className="text-2xl font-medium text-primary mb-2 justify-center"
-                    inputClassName="text-center w-20"
+                    className="text-xl sm:text-2xl font-medium text-primary mb-1 justify-center min-w-0"
+                    inputClassName="text-center w-16 sm:w-20 bg-gray-900/50 border-gray-700 focus:border-primary transition-all rounded"
                   />
-                  <h3 className="text-[12px] uppercase">Draws</h3>
+                  <h3 className="text-[10px] sm:text-xs uppercase text-center wrap-break-word leading-tight w-full px-1">Draws</h3>
                 </div>
               </div>
             </div>

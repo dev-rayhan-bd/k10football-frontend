@@ -470,26 +470,26 @@ const GenerateCvCoach = () => {
                         : "bg-red-500/10 text-red-400 border-red-500/20";
                   return (
                     <div key={player.id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 group hover:border-[#E31B23]/50 transition-colors">
-                      <div className="flex items-center gap-3">
-                        <Image width={100} height={100} src={player.playerImage} className="w-10 h-10 rounded-full object-cover border border-white/10" alt={player.fullName} />
-                        <div>
-                          <div className="text-sm font-bold text-white">{player.fullName}</div>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[9px] text-gray-500 uppercase tracking-widest">{player.position}</span>
-                            <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider border ${reasonColors}`}>
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                        <Image width={100} height={100} src={player.playerImage} className="w-10 h-10 sm:w-10 sm:h-10 rounded-full object-cover border border-white/10 shrink-0" alt={player.fullName} />
+                        <div className="min-w-0">
+                          <div className="text-xs sm:text-sm font-bold text-white truncate">{player.fullName}</div>
+                          <div className="flex flex-wrap items-center gap-1 sm:gap-2 mt-0.5">
+                            <span className="text-[9px] text-gray-500 uppercase tracking-widest truncate">{player.position}</span>
+                            <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider border whitespace-nowrap ${reasonColors}`}>
                               {reason}
                             </span>
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <div className="text-lg font-black text-white italic">{player.rating}</div>
+                      <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-2">
+                        <div className="text-base sm:text-lg font-black text-white italic">{player.rating}</div>
                         <button
                           onClick={() => {
                             selectPlayer(player.id);
                             router.push("/cvs/player-cv-details");
                           }}
-                          className="px-3 py-1.5 bg-[#E31B23] hover:bg-[#ff2d35] text-white text-[9px] font-black uppercase tracking-widest rounded-lg transition-all border border-[#E31B23]/50 cursor-pointer"
+                          className="px-2 sm:px-3 py-1.5 bg-[#E31B23] hover:bg-[#ff2d35] text-white text-[8px] sm:text-[9px] font-black uppercase tracking-widest rounded-lg transition-all border border-[#E31B23]/50 cursor-pointer"
                         >
                           Review
                         </button>

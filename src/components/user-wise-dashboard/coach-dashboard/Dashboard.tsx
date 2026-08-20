@@ -150,7 +150,7 @@ const CoachDashboard = () => {
               <div className="h-75">
                 <h3 className="text-sm font-bold text-gray-400 mb-4 uppercase tracking-widest">Coach Profile Analysis</h3>
                 <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={[
+                  <RadarChart cx="50%" cy="50%" outerRadius="65%" data={[
                     { subject: 'Tactics', A: 97, fullMark: 100 },
                     { subject: 'Leadership', A: 88, fullMark: 100 },
                     { subject: 'Communication', A: 92, fullMark: 100 },

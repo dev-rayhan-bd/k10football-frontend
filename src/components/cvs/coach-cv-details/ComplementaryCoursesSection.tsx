@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import Image from 'next/image'
@@ -6,8 +7,6 @@ import {
   Award,
   Plus,
   Trash2,
-  X,
-  Check,
   Trophy,
   Star,
   Target,
@@ -138,10 +137,10 @@ handleUpdate('complementaryCourses', (coachData.complementaryCourses || []).filt
 }
 
 return (
-<div className="py-20 bg-black p-12">
+<div className="py-12 sm:py-20 bg-black px-4 sm:px-12">
   <div className="container mx-auto">
     {/* Title */}
-    <h1 className="text-4xl font-heading text-white text-center mb-12 tracking-wide">
+    <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading text-white text-center mb-8 sm:mb-12 tracking-wide break-words">
       COMPLEMENTARY COURSES
     </h1>
 

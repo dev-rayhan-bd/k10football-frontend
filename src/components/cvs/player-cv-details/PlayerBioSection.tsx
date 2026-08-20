@@ -749,12 +749,13 @@ onError={(e) => {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 w-full min-w-0">
                 <div className="border border-white/10 bg-white/5 p-4 rounded-xl flex flex-col w-full min-w-0">
-                  <div className="relative w-full h-12 sm:h-16 mb-2">
+                  <div className="flex justify-center items-center w-full mb-3 h-12 sm:h-16">
                     <Image
                       src={playerData.leftLegImage}
                       alt="left leg"
-                      className="object-contain"
-                      layout="fill"
+                      className="object-contain w-12 h-12 sm:w-16 sm:h-16 drop-shadow-md"
+                      width={80}
+                      height={80}
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.srcset = "";
@@ -762,7 +763,7 @@ onError={(e) => {
                       }}
                     />
                   </div>
-                  <div className="flex justify-between items-center text-xs sm:text-sm mb-1 w-full min-w-0">
+                  <div className="flex justify-between items-center text-xs sm:text-sm mb-2 w-full min-w-0">
                     <span className="shrink-0 text-white">Left</span>
                     <CMSField
                       value={playerData.leftLegUsage}
@@ -770,12 +771,12 @@ onError={(e) => {
                       canEdit={canEditBio}
                       type="number"
                       editTrigger="doubleClick"
-                      className="text-primary justify-end w-24 sm:w-32 min-w-0"
+                      className="text-primary justify-end w-24 sm:w-32 min-w-0 font-bold"
                       inputClassName="text-right h-7 w-16 sm:w-20 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-md"
                     />
                   </div>
                   {canEditBio ? (
-                    <div className="relative flex items-center h-2 group translate-y-1.25 w-full">
+                    <div className="relative flex items-center h-2 group w-full">
                       <div className="w-full h-1.5 bg-[#333] rounded-full overflow-hidden relative">
                         <div
                           className={cn("h-full transition-all duration-300 ease-out", getIndicatorColor(playerData.leftLegUsage))}
@@ -817,13 +818,13 @@ onError={(e) => {
                   )}
                 </div>
                 <div className="border border-white/10 bg-white/5 p-4 rounded-xl flex flex-col w-full min-w-0">
-                  <div className="relative w-full h-12 sm:h-16 mb-2">
+                  <div className="flex justify-center items-center w-full mb-3 h-12 sm:h-16">
                     <Image
                       src={playerData.rightLegImage}
                       alt="right leg"
-                      className="object-contain"
-                      width={100}
-                      height={100}
+                      className="object-contain w-12 h-12 sm:w-16 sm:h-16 drop-shadow-md"
+                      width={80}
+                      height={80}
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.srcset = "";

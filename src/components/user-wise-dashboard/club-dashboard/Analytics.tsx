@@ -117,9 +117,9 @@ const Analytics = () => {
           <h3 className="text-xs sm:text-sm font-bold text-white mb-6 sm:mb-8 uppercase tracking-widest italic">Players & Coaches Monitored</h3>
           <div className="h-75">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={timelineData}>
+              <LineChart data={timelineData} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#444', fontSize: 10 }} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#444', fontSize: 10 }} tickMargin={10} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#444', fontSize: 10 }} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#000', border: '1px solid #333', borderRadius: '12px' }}
@@ -135,9 +135,9 @@ const Analytics = () => {
           <h3 className="text-xs sm:text-sm font-bold text-white mb-6 sm:mb-8 uppercase tracking-widest italic">Position Interest Distribution</h3>
           <div className="h-75">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={distributionData}>
+              <BarChart data={distributionData} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#444', fontSize: 10 }} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#444', fontSize: 10 }} tickMargin={10} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#444', fontSize: 10 }} domain={[0, 100]} />
                 <Tooltip 
                   cursor={{ fill: 'rgba(255,255,255,0.05)' }}

@@ -230,11 +230,11 @@ const ClubDashboard = () => {
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-4">
               <div>
                 <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6 italic">Players & Coaches Monitored</h4>
-                <div className="h-62.5">
+                <div className="h-64 sm:h-72 w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={timelineData}>
+                    <LineChart data={timelineData} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
-                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#444', fontSize: 10 }} />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#444', fontSize: 10 }} tickMargin={10} />
                       <YAxis axisLine={false} tickLine={false} tick={{ fill: '#444', fontSize: 10 }} />
                       <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #333', borderRadius: '12px' }} />
                       <Line type="monotone" name="Players Monitored" dataKey="players" stroke="#E31B23" strokeWidth={3} dot={{ r: 4, fill: '#E31B23' }} />
@@ -245,11 +245,11 @@ const ClubDashboard = () => {
               </div>
               <div>
                 <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6 italic">Position Interest Distribution</h4>
-                <div className="h-62.5">
+                <div className="h-64 sm:h-72 w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={distributionData}>
+                    <BarChart data={distributionData} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
-                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#444', fontSize: 10 }} />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#444', fontSize: 10 }} tickMargin={10} />
                       <YAxis axisLine={false} tickLine={false} tick={{ fill: '#444', fontSize: 10 }} />
                       <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                         {distributionData.map((entry, index) => (
