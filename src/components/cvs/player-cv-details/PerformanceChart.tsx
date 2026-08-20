@@ -34,7 +34,7 @@ const PerformanceChart = ({ title, percentage, data }: PerformanceChartProps) =>
       <h3 className="text-xl md:text-2xl font-heading font-normal mb-6 uppercase tracking-widest text-primary/90">
         {title}
       </h3>
-      <div className="w-full aspect-square max-w-[400px]">
+      <div className="w-full aspect-square max-w-100">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -126,16 +126,16 @@ const roleData = [
 ];
 
 return (
-<div className="mt-20 container">
-  <h1 className="text-4xl font-light font-heading text-center mb-12 text-foreground">
+<div className="mt-10 sm:mt-20 container w-full min-w-0 overflow-hidden">
+  <h1 className="text-2xl sm:text-4xl font-light font-heading text-center mb-6 sm:mb-12 text-foreground">
     PERFORMANCE ANALYTICS
   </h1>
 
-  <div className=" bg-black/30 rounded-2xl p-6 md:p-10">
+  <div className="bg-black/30 rounded-2xl p-4 sm:p-6 md:p-10 w-full min-w-0">
     {/* Charts Grid */}
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12 items-start">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 mb-8 sm:mb-12 items-start w-full min-w-0">
       {/* Chart 1 - Skills */}
-      <div className="flex justify-center">
+      <div className="flex justify-center w-full min-w-0">
         <PerformanceChart
           title="Skills"
           percentage={skillsAvg}
@@ -144,7 +144,7 @@ return (
       </div>
 
       {/* Chart 2 - Role */}
-      <div className="flex justify-center">
+      <div className="flex justify-center w-full min-w-0">
         <PerformanceChart
           title="Role"
           percentage={90}
@@ -154,8 +154,8 @@ return (
     </div>
 
     {/* Chart 3 - Foot (Bottom Center) */}
-    <div className="flex justify-center">
-      <div className="mb-12">
+    <div className="flex justify-center w-full min-w-0">
+      <div className="mb-6 sm:mb-12 w-full min-w-0 flex justify-center">
         <PerformanceChart
           title="Foot"
           percentage={footAvg}

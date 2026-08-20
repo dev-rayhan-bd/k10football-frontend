@@ -84,8 +84,8 @@ const ClubSection = () => {
   };
 
   return (
-    <div className="container py-10 bg-cardBg rounded-xl mt-10">
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 gap-4">
+    <div className="container py-10 bg-cardBg rounded-xl mt-10 w-full min-w-0 overflow-hidden">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 gap-4 w-full min-w-0">
         <div className="flex items-center gap-2 order-2 sm:order-1 w-full sm:w-1/3 justify-center sm:justify-start">
            <Info size={14} className="text-gray-400" />
            <span className="text-xs text-gray-400">{clubCount}/6 Clubs</span>
@@ -112,23 +112,23 @@ const ClubSection = () => {
         </div>
       </div>
 
-      <div className="border border-border bg-black/30 rounded-2xl p-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="border border-border bg-black/30 rounded-2xl p-4 sm:p-8 w-full min-w-0">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 w-full min-w-0">
           {playerData?.clubs?.map((club) => (
             <div
               key={club.id}
-              className="relative border border-border cursor-pointer hover:bg-cardBg duration-300 bg-black/20 rounded-lg p-6 flex items-center gap-4 group transition"
+              className="relative border border-border cursor-pointer hover:bg-cardBg duration-300 bg-black/20 rounded-lg p-4 sm:p-6 flex items-center gap-3 sm:gap-4 group transition w-full min-w-0"
             >
               <button
                 onClick={(e) => { e.stopPropagation(); removeClub(club.id); }}
-                className="absolute top-2 right-2 p-1 text-gray-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-2 right-2 p-1 text-gray-500 hover:text-red-500 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <Trash2 size={14} />
               </button>
 
               <div className="shrink-0 relative group/logo">
                 <div className={cn(
-                  "w-20 h-20 rounded-full border-2 flex items-center justify-center overflow-hidden bg-gray-900",
+                  "w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 flex items-center justify-center overflow-hidden bg-gray-900",
                   club.color || "border-primary"
                 )}>
                   <Image
@@ -145,9 +145,10 @@ const ClubSection = () => {
                   value={club.name}
                   onUpdate={(val) => updateClub(club.id, "name", val)}
                   canEdit={true}
-                  className="text-lg font-semibold text-foreground wrap-break-word uppercase leading-tight pr-6"
+                  className="text-base sm:text-lg font-semibold text-foreground wrap-break-word uppercase leading-tight pr-6 w-full min-w-0"
+                  inputClassName="w-full min-w-0 truncate"
                 />
-                <div className="flex items-center gap-1 text-sm text-gray-400 mt-1">
+                <div className="flex flex-wrap items-center gap-1 text-xs sm:text-sm text-gray-400 mt-1 w-full min-w-0">
                   <CMSField
                     value={club.from}
                     onUpdate={(val) => updateClub(club.id, "from", val)}
@@ -156,9 +157,10 @@ const ClubSection = () => {
                     options={YEARS}
                     editTrigger="doubleClick"
                     hideIcon={true}
-                    className="w-16"
+                    className="w-14 sm:w-16 min-w-0"
+                    inputClassName="truncate min-w-0"
                   />
-                  <span>-</span>
+                  <span className="shrink-0">-</span>
                   <CMSField
                     value={club.to}
                     onUpdate={(val) => updateClub(club.id, "to", val)}
@@ -167,7 +169,8 @@ const ClubSection = () => {
                     options={TO_YEARS}
                     editTrigger="doubleClick"
                     hideIcon={true}
-                    className="w-20"
+                    className="w-16 sm:w-20 min-w-0"
+                    inputClassName="truncate min-w-0"
                   />
                 </div>
               </div>
@@ -175,25 +178,25 @@ const ClubSection = () => {
           ))}
 
           {isAdding && (
-            <div className="border-2 border-dashed border-primary/50 bg-primary/5 rounded-lg p-6 flex flex-col gap-4 animate-in fade-in zoom-in duration-200">
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-bold text-primary uppercase">New Club Entry</span>
-                <button onClick={() => setIsAdding(false)} className="text-gray-400 hover:text-white">
+            <div className="border-2 border-dashed border-primary/50 bg-primary/5 rounded-lg p-4 sm:p-6 flex flex-col gap-4 animate-in fade-in zoom-in duration-200 w-full min-w-0">
+              <div className="flex justify-between items-center w-full min-w-0">
+                <span className="text-xs font-bold text-primary uppercase shrink-0">New Club Entry</span>
+                <button onClick={() => setIsAdding(false)} className="text-gray-400 hover:text-white shrink-0">
                   <X size={16} />
                 </button>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4 w-full min-w-0">
                 {/* Logo Upload Section */}
-                <div className="flex flex-col items-center gap-3">
+                <div className="flex flex-col items-center gap-2 sm:gap-3 w-full min-w-0">
                   <div 
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-20 h-20 rounded-full border-2 border-dashed border-gray-700 bg-black/40 flex items-center justify-center cursor-pointer hover:border-primary transition-colors overflow-hidden"
+                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-dashed border-gray-700 bg-black/40 flex items-center justify-center cursor-pointer hover:border-primary transition-colors overflow-hidden"
                   >
                     {newClubLogo ? (
                       <Image src={newClubLogo} alt="Preview" width={80} height={80} className="object-contain p-2" />
                     ) : (
-                      <Upload size={24} className="text-gray-500" />
+                      <Upload size={20} className="text-gray-500 sm:w-6 sm:h-6" />
                     )}
                   </div>
                   <span className="text-[10px] text-gray-500 uppercase">Club Logo</span>

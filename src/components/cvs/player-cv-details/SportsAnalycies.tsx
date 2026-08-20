@@ -204,66 +204,66 @@ try {
 };
 
 return (
-<div className="container ">
-  <h1 className="mb-8 text-center text-3xl font-bold text-white font-heading">
+<div className="container w-full min-w-0 overflow-hidden">
+  <h1 className="mb-6 sm:mb-8 text-center text-2xl sm:text-3xl font-bold text-white font-heading">
     GAME SUMMARY (LAST 4 MATCHES)
   </h1>
 
-  <div className="space-y-6">
+  <div className="space-y-4 sm:space-y-6 w-full min-w-0">
     {/* Overall stats cards */}
-    <div className=" grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-      <Card className="border-0 bg-linear-to-br from-[#1B4D2E] to-[#0F3B1F] p-8 text-white rounded-lg">
-        <div className="mb-6 text-xl font-bold text-[#00FF62] uppercase tracking-wide">Overall Performance</div>
-        <div className="mb-6">
-          <div className="text-base text-gray-300 font-medium">Average Rating</div>
-          <div className="text-6xl font-black text-[#00FF62]">{avgRating}</div>
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 w-full min-w-0">
+      <Card className="border-0 bg-linear-to-br from-[#1B4D2E] to-[#0F3B1F] p-4 sm:p-8 text-white rounded-lg w-full min-w-0">
+        <div className="mb-4 sm:mb-6 text-lg sm:text-xl font-bold text-[#00FF62] uppercase tracking-wide truncate">Overall Performance</div>
+        <div className="mb-4 sm:mb-6 w-full min-w-0">
+          <div className="text-sm sm:text-base text-gray-300 font-medium truncate">Average Rating</div>
+          <div className="text-4xl sm:text-6xl font-black text-[#00FF62]">{avgRating}</div>
         </div>
-        <div className="grid grid-cols-2 gap-6">
-          <div>
-            <div className="text-base text-gray-300 font-medium">Total Goals</div>
-            <div className="text-4xl font-black text-white">{totalGoals}</div>
+        <div className="grid grid-cols-2 gap-4 sm:gap-6 w-full min-w-0">
+          <div className="w-full min-w-0">
+            <div className="text-sm sm:text-base text-gray-300 font-medium truncate">Total Goals</div>
+            <div className="text-3xl sm:text-4xl font-black text-white">{totalGoals}</div>
           </div>
-          <div>
-            <div className="text-base text-gray-300 font-medium">Total Assists</div>
-            <div className="text-4xl font-black text-white">{totalAssists}</div>
+          <div className="w-full min-w-0">
+            <div className="text-sm sm:text-base text-gray-300 font-medium truncate">Total Assists</div>
+            <div className="text-3xl sm:text-4xl font-black text-white">{totalAssists}</div>
           </div>
         </div>
       </Card>
 
-      <Card className="border border-border bg-black p-8 text-white rounded-lg">
-        <div className="mb-6 text-xl font-bold text-gray-300 uppercase tracking-wide">Form Guide</div>
-        <div className="mb-6 flex gap-3">
+      <Card className="border border-border bg-black p-4 sm:p-8 text-white rounded-lg w-full min-w-0">
+        <div className="mb-4 sm:mb-6 text-lg sm:text-xl font-bold text-gray-300 uppercase tracking-wide truncate">Form Guide</div>
+        <div className="mb-4 sm:mb-6 flex flex-wrap gap-2 sm:gap-3 w-full min-w-0">
           {matches.map((match, idx) => (
-            <Badge key={idx} className={`h-12 w-12 flex items-center justify-center p-0 rounded-full font-black text-lg ${getResultColor(match.result)} shadow-lg`}>
+            <Badge key={idx} className={`h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center p-0 rounded-full font-black text-base sm:text-lg ${getResultColor(match.result)} shadow-lg`}>
               {getResultText(match.result)}
             </Badge>
           ))}
         </div>
-        <div className="space-y-3 text-lg">
-          <div className="flex justify-between"><span className="text-gray-300">Wins</span><span className="font-bold text-white">{wins}</span></div>
-          <div className="flex justify-between"><span className="text-gray-300">Draws</span><span className="font-bold text-white">{draws}</span></div>
-          <div className="flex justify-between"><span className="text-gray-300">Losses</span><span className="font-bold text-white">{losses}</span></div>
+        <div className="space-y-2 sm:space-y-3 text-base sm:text-lg w-full min-w-0">
+          <div className="flex justify-between w-full min-w-0"><span className="text-gray-300">Wins</span><span className="font-bold text-white">{wins}</span></div>
+          <div className="flex justify-between w-full min-w-0"><span className="text-gray-300">Draws</span><span className="font-bold text-white">{draws}</span></div>
+          <div className="flex justify-between w-full min-w-0"><span className="text-gray-300">Losses</span><span className="font-bold text-white">{losses}</span></div>
         </div>
       </Card>
 
-      <Card className="border border-border bg-black p-8 text-white rounded-lg">
-        <div className="mb-6 text-xl font-bold text-gray-300 uppercase tracking-wide">Key Stats</div>
-        <div className="space-y-5">
-          <div>
-            <div className="mb-2 flex justify-between text-sm md:text-base">
-              <span className="text-gray-300 font-medium">Average Pass Accuracy</span>
-              <span className="text-[#00FF62] font-bold">{avgPassAccuracy}%</span>
+      <Card className="border border-border bg-black p-4 sm:p-8 text-white rounded-lg w-full min-w-0">
+        <div className="mb-4 sm:mb-6 text-lg sm:text-xl font-bold text-gray-300 uppercase tracking-wide truncate">Key Stats</div>
+        <div className="space-y-4 sm:space-y-5 w-full min-w-0">
+          <div className="w-full min-w-0">
+            <div className="mb-1 sm:mb-2 flex justify-between text-xs sm:text-base w-full min-w-0 gap-2">
+              <span className="text-gray-300 font-medium truncate">Average Pass Accuracy</span>
+              <span className="text-[#00FF62] font-bold shrink-0">{avgPassAccuracy}%</span>
             </div>
-            <div className="h-3 bg-gray-700 rounded-full overflow-hidden">
+            <div className="h-2 sm:h-3 bg-gray-700 rounded-full overflow-hidden">
               <div className="h-full bg-[#00FF62]" style={{ width: `${avgPassAccuracy}%` }} />
             </div>
           </div>
-          <div>
-            <div className="mb-2 flex justify-between text-sm md:text-base">
-              <span className="text-gray-300 font-medium">Average Tackles</span>
-              <span className="text-[#00FF62] font-bold">{avgTackles}</span>
+          <div className="w-full min-w-0">
+            <div className="mb-1 sm:mb-2 flex justify-between text-xs sm:text-base w-full min-w-0 gap-2">
+              <span className="text-gray-300 font-medium truncate">Average Tackles</span>
+              <span className="text-[#00FF62] font-bold shrink-0">{avgTackles}</span>
             </div>
-            <div className="h-3 bg-gray-700 rounded-full overflow-hidden">
+            <div className="h-2 sm:h-3 bg-gray-700 rounded-full overflow-hidden">
               <div className="h-full bg-[#00FF62]" style={{ width: "60%" }} />
             </div>
           </div>
@@ -272,13 +272,13 @@ return (
     </div>
 
     {/* Detailed Game Reports */}
-    <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-8 w-full min-w-0">
       {matches.map((match, idx) => (
         <Card
           key={idx}
-          className="border border-border bg-black p-8 text-white rounded-xl hover:border-primary/30 transition-all shadow-xl flex flex-col justify-between"
+          className="border border-border bg-black p-4 sm:p-8 text-white rounded-xl hover:border-primary/30 transition-all shadow-xl flex flex-col justify-between w-full min-w-0"
         >
-          <div>
+          <div className="w-full min-w-0">
             {/* Header Row */}
             <div className="mb-6 flex flex-wrap items-start sm:items-center justify-between gap-4">
               <div className="flex flex-wrap items-center gap-2 sm:gap-4">

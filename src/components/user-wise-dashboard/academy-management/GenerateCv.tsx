@@ -2,7 +2,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 import Image from "next/image";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   IconDownload,
   IconClock,
@@ -235,32 +235,32 @@ const GenerateCv = () => {
     printWindow.document.close();
   };
   return (
-    <div className="flex flex-col gap-8 pb-10">
+    <div className="flex flex-col gap-6 sm:gap-8 pb-10 w-full min-w-0 overflow-hidden text-white">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 print:hidden">
-        <div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white font-orbitron uppercase tracking-tight">Generate CV</h1>
-          <p className="text-white/60 font-medium mt-1 md:mt-2 text-sm md:text-lg">My Professional Football Profile</p>
+      <div className="flex flex-col md:flex-row md:justify-between items-start md:items-end gap-4 print:hidden w-full min-w-0 shrink-0">
+        <div className="w-full min-w-0">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white font-orbitron uppercase tracking-tight truncate">Generate CV</h1>
+          <p className="text-white/60 font-medium mt-1 md:mt-2 text-sm md:text-lg truncate">My Professional Football Profile</p>
         </div>
         <Button
           onClick={generateProfessionalPDF}
-          className="bg-[#222222] hover:bg-[#333333] text-white border border-white/5 gap-2 px-6 py-4 rounded-xl font-bold uppercase tracking-widest text-[10px] h-auto w-full md:w-auto"
+          className="bg-[#222222] hover:bg-[#333333] text-white border border-white/5 gap-2 px-6 py-4 rounded-xl font-bold uppercase tracking-widest text-[10px] h-12 w-full md:w-auto shrink-0 transition-all"
         >
           <IconDownload size={18} /> Download CV PDF
         </Button>
       </div>
       {/* Main Content */}
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 w-full min-w-0">
         {/* Personal Information Hero - Restoring Original Design */}
-        <section className="bg-[#111111] rounded-3xl border border-white/10 p-4 md:p-8 flex flex-col gap-8">
-          <div className="relative rounded-3xl overflow-hidden min-h-100 md:min-h-140 border border-white/10 group flex flex-col justify-end">
+        <section className="bg-[#111111] rounded-3xl border border-white/10 p-4 md:p-8 flex flex-col gap-8 w-full min-w-0 overflow-hidden">
+          <div className="relative rounded-3xl overflow-hidden min-h-100 md:min-h-140 border border-white/10 group flex flex-col justify-end w-full min-w-0">
             <div
               className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
               style={{ backgroundImage: `url('/stadium-night.jpg')` }}
             />
             <div className="absolute inset-0 bg-linear-to-r from-black/95 via-black/40 via-45% to-transparent" />
             <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
-            <div className="absolute right-0 bottom-0 h-full w-[70%] md:w-[55%] flex items-end justify-end pointer-events-none opacity-60 md:opacity-100">
+            <div className="absolute right-0 bottom-0 h-full w-[80%] md:w-[55%] flex items-end justify-end pointer-events-none opacity-50 md:opacity-100 z-0">
               <Image
                 src={typeof playerData.playerImage === 'string' ? playerData.playerImage : (playerData.playerImage?.src || "/ronaldo.png")}
                 alt="Player"
@@ -269,54 +269,54 @@ const GenerateCv = () => {
                 width={500}
               />
             </div>
-            <div className="relative p-6 md:p-10 w-full space-y-8">
-              <div className="flex flex-col gap-6">
-                <div className="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-gold bg-gold/80 flex items-center justify-center backdrop-blur-2xl shadow-2xl">
-                  <span className="text-3xl md:text-4xl font-black text-white font-orbitron">{playerData.rating}</span>
+            <div className="relative p-4 sm:p-6 md:p-10 w-full space-y-8 min-w-0 z-10">
+              <div className="flex flex-col gap-4 sm:gap-6 w-full min-w-0">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full border-4 border-gold bg-gold/80 flex items-center justify-center backdrop-blur-2xl shadow-2xl shrink-0">
+                  <span className="text-2xl sm:text-3xl md:text-4xl font-black text-white font-orbitron">{playerData.rating}</span>
                 </div>
-                <div className="space-y-4">
-                  <div className="bg-[#E31B23] border border-[#E31B23]/20 px-4 py-1.5 rounded-full text-[10px] font-black text-white uppercase w-fit tracking-[0.2em] shadow-[0_0_20px_rgba(227,27,35,0.3)]">{playerData.transferStatus || "Active Player"}</div>
-                  <div className="space-y-2">
-                    <h1 className="text-3xl md:text-6xl font-black text-white font-orbitron uppercase tracking-tighter leading-none">{playerData.fullName}</h1>
-                    <div className="flex flex-wrap items-center gap-3 md:gap-6 text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] pt-1">
-                      <span className="text-[#E31B23]">{getFullWithShortForm(playerData.position)}</span>
-                      <span className="text-white/20 hidden md:inline">/</span>
-                      <span className="text-white">{playerData.age} Years Old</span>
-                      <span className="text-white/20 hidden md:inline">/</span>
-                      <span className="flex items-center gap-3 text-white">
-                        <Image width={16} height={16} src={`https://flagcdn.com/br.svg`} alt={playerData.birthCountry} className="w-4 h-3 md:w-5 md:h-3.5 object-cover rounded-sm shadow-sm" /> {playerData.birthCountry}
+                <div className="space-y-3 sm:space-y-4 w-full min-w-0">
+                  <div className="bg-[#E31B23] border border-[#E31B23]/20 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-[9px] sm:text-[10px] font-black text-white uppercase w-fit tracking-[0.2em] shadow-[0_0_20px_rgba(227,27,35,0.3)]">{playerData.transferStatus || "Active Player"}</div>
+                  <div className="space-y-2 w-full min-w-0">
+                    <h1 className="text-2xl sm:text-3xl md:text-6xl font-black text-white font-orbitron uppercase tracking-tighter leading-none wrap-break-word">{playerData.fullName}</h1>
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-6 text-[8px] sm:text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] pt-1 w-full">
+                      <span className="text-[#E31B23] truncate">{getFullWithShortForm(playerData.position)}</span>
+                      <span className="text-white/20 hidden sm:inline">/</span>
+                      <span className="text-white shrink-0">{playerData.age} Years Old</span>
+                      <span className="text-white/20 hidden sm:inline">/</span>
+                      <span className="flex items-center gap-2 sm:gap-3 text-white shrink-0">
+                        <Image width={16} height={16} src={`https://flagcdn.com/br.svg`} alt={playerData.birthCountry} className="w-3.5 h-2.5 sm:w-4 sm:h-3 md:w-5 md:h-3.5 object-cover rounded-sm shadow-sm" /> {playerData.birthCountry}
                       </span>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-1  md:grid-cols-2 gap-x-12 gap-y-4 md:gap-y-6 pt-4 md:pt-8 max-w-2xl p-4 md:p-6 rounded-2xl">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-white/40"><IconShield size={20} /></div>
-                  <div>
-                    <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">Current Club</p>
-                    <p className="text-sm font-bold text-white">{playerData.clubs[0]?.name || "Unattached"}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 md:gap-y-6 pt-4 md:pt-8 w-full max-w-2xl min-w-0">
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                  <div className="p-2 sm:p-3 bg-white/5 rounded-lg sm:rounded-xl border border-white/10 text-white/40 shrink-0"><IconShield size={18} className="sm:w-5 sm:h-5" /></div>
+                  <div className="min-w-0">
+                    <p className="text-[9px] sm:text-[10px] text-white/40 uppercase font-black tracking-widest truncate">Current Club</p>
+                    <p className="text-xs sm:text-sm font-bold text-white truncate">{playerData.clubs[0]?.name || "Unattached"}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-white/40"><IconPhone size={20} /></div>
-                  <div>
-                    <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">Contact</p>
-                    <p className="text-sm font-bold text-white">{playerData.phone}</p>
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                  <div className="p-2 sm:p-3 bg-white/5 rounded-lg sm:rounded-xl border border-white/10 text-white/40 shrink-0"><IconPhone size={18} className="sm:w-5 sm:h-5" /></div>
+                  <div className="min-w-0">
+                    <p className="text-[9px] sm:text-[10px] text-white/40 uppercase font-black tracking-widest truncate">Contact</p>
+                    <p className="text-xs sm:text-sm font-bold text-white truncate">{playerData.phone}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-white/40"><IconClock size={20} /></div>
-                  <div>
-                    <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">Contract Until</p>
-                    <p className="text-sm font-bold text-[#FBBF24]">{playerData.contractUntil}</p>
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                  <div className="p-2 sm:p-3 bg-white/5 rounded-lg sm:rounded-xl border border-white/10 text-white/40 shrink-0"><IconClock size={18} className="sm:w-5 sm:h-5" /></div>
+                  <div className="min-w-0">
+                    <p className="text-[9px] sm:text-[10px] text-white/40 uppercase font-black tracking-widest truncate">Contract Until</p>
+                    <p className="text-xs sm:text-sm font-bold text-[#FBBF24] truncate">{playerData.contractUntil}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-white/40"><IconMail size={20} /></div>
-                  <div>
-                    <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">Email</p>
-                    <p className="text-sm font-bold text-white truncate max-w-45">{playerData.email}</p>
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                  <div className="p-2 sm:p-3 bg-white/5 rounded-lg sm:rounded-xl border border-white/10 text-white/40 shrink-0"><IconMail size={18} className="sm:w-5 sm:h-5" /></div>
+                  <div className="min-w-0">
+                    <p className="text-[9px] sm:text-[10px] text-white/40 uppercase font-black tracking-widest truncate">Email</p>
+                    <p className="text-xs sm:text-sm font-bold text-white truncate">{playerData.email}</p>
                   </div>
                 </div>
               </div>
@@ -324,59 +324,59 @@ const GenerateCv = () => {
           </div>
         </section>
         {/* Top Squares - As requested by client doc */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 w-full min-w-0">
           {/* Completion Status */}
-          <div className="bg-[#111111] rounded-3xl border border-white/10 p-8 flex flex-col gap-6">
-            <h3 className="text-sm font-black text-white font-orbitron uppercase tracking-widest">Completion Status</h3>
-            <div className="space-y-4">
+          <div className="bg-[#111111] rounded-3xl border border-white/10 p-6 sm:p-8 flex flex-col gap-4 sm:gap-6 min-w-0 w-full overflow-hidden">
+            <h3 className="text-xs sm:text-sm font-black text-white font-orbitron uppercase tracking-widest truncate">Completion Status</h3>
+            <div className="space-y-3 sm:space-y-4">
               <div className="flex justify-between items-end">
-                <span className="text-5xl font-black text-[#E31B23] font-orbitron">85%</span>
+                <span className="text-4xl sm:text-5xl font-black text-[#E31B23] font-orbitron">85%</span>
               </div>
               <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
                 <div className="h-full bg-[#E31B23] rounded-full" style={{ width: "85%" }} />
               </div>
-              <p className="text-[10px] text-white/40 font-bold leading-relaxed uppercase tracking-wider">
+              <p className="text-[9px] sm:text-[10px] text-white/40 font-bold leading-relaxed uppercase tracking-wider line-clamp-2">
                 Complete all sections to unlock Gold tier status
               </p>
             </div>
           </div>
           {/* Tier Status */}
-          <div className="bg-[#111111] rounded-3xl border border-white/10 p-8 flex flex-col gap-6 relative overflow-hidden">
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#FBBF24]/10 blur-3xl rounded-full" />
-            <div className="flex flex-col">
-              <h3 className="text-3xl font-black text-[#FBBF24] font-orbitron italic tracking-tighter leading-none">GOLD</h3>
+          <div className="bg-[#111111] rounded-3xl border border-white/10 p-6 sm:p-8 flex flex-col gap-4 sm:gap-6 relative overflow-hidden min-w-0 w-full">
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#FBBF24]/10 blur-3xl rounded-full pointer-events-none" />
+            <div className="flex flex-col relative z-10">
+              <h3 className="text-2xl sm:text-3xl font-black text-[#FBBF24] font-orbitron italic tracking-tighter leading-none">GOLD</h3>
               <div className="w-full h-1 bg-[#FBBF24] mt-2 opacity-50" />
             </div>
-            <p className="text-[10px] text-white/60 font-bold leading-relaxed uppercase tracking-wider mt-2">
+            <p className="text-[9px] sm:text-[10px] text-white/60 font-bold leading-relaxed uppercase tracking-wider mt-1 sm:mt-2 relative z-10 line-clamp-2">
               Your CV meets Gold standards and is ready to share with top clubs and agents.
             </p>
-            <Button className="bg-white/5 hover:bg-white/10 text-white border border-white/10 gap-2 w-full py-4 rounded-xl font-black uppercase tracking-widest text-[10px] h-auto mt-4">
-              <IconShare size={18} className="text-white/40" /> Request Re-validation
+            <Button className="bg-white/5 hover:bg-white/10 text-white border border-white/10 gap-2 w-full py-3 sm:py-4 rounded-xl font-black uppercase tracking-widest text-[9px] sm:text-[10px] h-auto mt-2 sm:mt-4 relative z-10">
+              <IconShare size={16} className="text-white/40 sm:w-4.5 sm:h-4.5" /> Request Re-validation
             </Button>
           </div>
           {/* Career Journey / Last Evaluated */}
           {/* New Game Reports */}
-          <div className="bg-[#111111] h-fit rounded-3xl border border-white/10 p-8 flex flex-col gap-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-[#E31B23] rounded-lg flex items-center justify-center">
-                <FileText className="w-6 h-6 text-white" />
+          <div className="bg-[#111111] h-fit rounded-3xl border border-white/10 p-6 sm:p-8 flex flex-col gap-4 sm:gap-6 min-w-0 w-full overflow-hidden">
+            <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2 min-w-0 shrink-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#E31B23] rounded-lg flex items-center justify-center shrink-0">
+                <FileText className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
               </div>
-              <h3 className="text-sm font-black text-white font-orbitron uppercase tracking-widest">
+              <h3 className="text-xs sm:text-sm font-black text-white font-orbitron uppercase tracking-widest truncate w-full">
                 New Game Reports
               </h3>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3 min-w-0 w-full">
               {gameReports.map((report) => (
-                <div key={report.id} className="border border-white/10 rounded-xl p-4 flex items-center justify-between hover:bg-white/5 transition group">
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-5 h-5 text-white/40 group-hover:text-[#E31B23] transition-colors" />
-                    <span className="text-white/60 text-sm font-bold">{report.opponent}</span>
+                <div key={report.id} className="border border-white/10 rounded-xl p-3 sm:p-4 flex items-center justify-between hover:bg-white/5 transition group w-full min-w-0 gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-white/40 group-hover:text-[#E31B23] transition-colors shrink-0" />
+                    <span className="text-white/60 text-xs sm:text-sm font-bold truncate">{report.opponent}</span>
                   </div>
-                  <span className="text-white font-black text-xl font-orbitron">{report.rating}</span>
+                  <span className="text-white font-black text-lg sm:text-xl font-orbitron shrink-0">{report.rating}</span>
                 </div>
               ))}
               {gameReports.length === 0 && (
-                <p className="text-white/40 text-[10px] uppercase font-bold text-center py-4">No reports available</p>
+                <p className="text-white/40 text-[9px] sm:text-[10px] uppercase font-bold text-center py-4">No reports available</p>
               )}
             </div>
           </div>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import React, { useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Label } from 'recharts';
@@ -110,15 +111,15 @@ const AttributesAnalysis = ({ editable = false }: { editable?: boolean }) => {
   }, [cards, setAttributesAvg]);
 
   return (
-    <div className="container my-20">
-      <h1 className="text-4xl font-light text-center font-heading mb-12 text-foreground tracking-wide">
+    <div className="container my-10 sm:my-20 w-full min-w-0 overflow-hidden">
+      <h1 className="text-2xl sm:text-4xl font-light text-center font-heading mb-6 sm:mb-12 text-foreground tracking-wide">
         ANALYSIS OF PLAYER ATTRIBUTES
       </h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 w-full min-w-0">
         {cards.map((card, index) => (
           <div
             key={index}
-            className="border border-border bg-black/30 rounded-lg p-8 flex flex-col items-center hover:bg-black/50 transition-colors"
+            className="border border-border bg-black/30 rounded-lg p-4 sm:p-8 flex flex-col items-center hover:bg-black/50 transition-colors w-full min-w-0"
           >
             {/* Title */}
             <h3 className="text-xl font-bold font-heading text-center mb-8 uppercase tracking-widest text-primary/90">

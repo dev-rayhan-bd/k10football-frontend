@@ -1,10 +1,10 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Progress } from "@/components/ui/progress";
 import { usePlayerStats } from "./FullEditablePage";
 import { usePlayer } from "@/lib/hooks/usePlayer";
 import CMSField from "@/components/shared/CMSField";
-import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 interface Skill {
@@ -21,7 +21,6 @@ interface SkillCategory {
 
 const SkillsAttributes = ({ editable = false }: { editable?: boolean }) => {
 const { playerData, handleUpdate: syncToRedux } = usePlayer();
-const [editingField, setEditingField] = useState<string | null>(null);
 
 // Local state initialized from Redux or original defaults
 const [categories, setCategories] = useState<SkillCategory[]>(playerData.skillsCategories || [
@@ -129,38 +128,37 @@ return "#ef4444";
 if (!playerData.skillsCategories) return null;
 
 return (
-<div className="container mt-20">
-  <h1 className="text-4xl font-light text-center font-heading mb-8 text-foreground tracking-wide">
+<div className="container mt-10 sm:mt-20 w-full min-w-0">
+  <h1 className="text-2xl sm:text-4xl font-light text-center font-heading mb-6 sm:mb-8 text-foreground tracking-wide">
     SKILLS ATTRIBUTES
   </h1>
 
-  <div className="border border-border bg-cardBg rounded-2xl p-8">
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+  <div className="border border-border bg-cardBg rounded-2xl p-4 sm:p-8 w-full min-w-0 overflow-hidden">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 w-full min-w-0">
       {categories.map((category, catIdx) => (
-        <div key={category.category} className={`space-y-4 pl-6`}>
-          <h2 className={`text-xl border-l-4 font-heading ${
+        <div key={category.category} className={`space-y-4 sm:pl-4 w-full min-w-0`}>
+          <h2 className={`text-lg sm:text-xl border-l-4 font-heading ${
             category.category === "Technical" ? "border-blue" : 
             category.category === "Physical" ? "border-red" : 
             category.category === "Tactical" ? "border-primary" : 
             "border-yellow"
-            } pl-4 text-foreground`}>
+            } pl-3 sm:pl-4 text-foreground`}>
             {category.category}
           </h2>
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4 w-full min-w-0">
             {category.skills.map((skill, skillIdx) => {
-              const fieldId = `${category.category}.${skill.name}`;
               const color = getHexColor(skill.value);
               
               return (
-                <div key={skill.name} className="grid grid-cols-[100px_1fr_auto] items-center gap-2 p-1.5 bg-[#1a1a1a]/40 border border-border/40 rounded-lg group/skill transition-colors hover:bg-[#1a1a1a]/60">
-                  <div className="truncate">
-                    <span className="text-xs font-bold text-gray-400 uppercase truncate block">
+                <div key={skill.name} className="grid grid-cols-[80px_1fr_auto] sm:grid-cols-[100px_1fr_auto] items-center gap-2 p-1.5 bg-[#1a1a1a]/40 border border-border/40 rounded-lg group/skill transition-colors hover:bg-[#1a1a1a]/60 w-full min-w-0">
+                  <div className="truncate min-w-0">
+                    <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase truncate block">
                       {skill.name}
                     </span>
                   </div>
 
-                  <div className="min-w-0 translate-y-[5px]">
+                  <div className="min-w-0 translate-y-1.25">
                     {editable ? (
                       <div className="relative flex items-center h-2 group">
                         <div className="w-full h-1.5 bg-[#333] rounded-full overflow-hidden relative">

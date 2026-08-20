@@ -527,27 +527,27 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
   };
   return (
     <>
-      <div className="container">
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+      <div className="w-full min-w-0 overflow-hidden px-2 sm:px-4 md:px-0">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6 w-full min-w-0">
           {/* LEFT COLUMN */}
-          <div className="col-span-1 xl:col-span-4 h-fit space-y-6 bg-cardBg">
-            <div className=" p-6">
-              <h2 className="text-lg text-center font-heading font-normal mb-4">
+          <div className="col-span-1 xl:col-span-4 h-fit space-y-4 sm:space-y-6 bg-cardBg rounded-2xl sm:rounded-3xl border border-white/10 w-full min-w-0 overflow-hidden">
+            <div className="p-4 sm:p-6 w-full min-w-0">
+              <h2 className="text-base sm:text-lg text-center font-heading font-normal mb-4 text-white">
                 Personal Information
               </h2>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Full Name</span>
+              <div className="space-y-3 text-xs sm:text-sm w-full min-w-0">
+                <div className="flex justify-between items-center gap-2 w-full min-w-0">
+                  <span className="text-gray-400 shrink-0">Full Name</span>
                   <CMSField
                     value={playerData.fullName}
                     onUpdate={(val) => handleUpdate("fullName", val)}
                     canEdit={canEditBio}
-                    className="w-40 justify-end"
-                    inputClassName="text-right"
+                    className="flex-1 min-w-0 justify-end"
+                    inputClassName="text-right w-full min-w-0 truncate"
                   />
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Date of Birth</span>
+                <div className="flex justify-between items-center gap-2 w-full min-w-0">
+                  <span className="text-gray-400 shrink-0">Date of Birth</span>
                   <CMSField
                     value={playerData.dob}
                     type="date"
@@ -559,29 +559,29 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       }
                     }}
                     canEdit={canEditBio}
-                    className="w-1/2 justify-end"
-                    inputClassName="text-right w-full bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-3 py-1.5 rounded-lg"
+                    className="flex-1 min-w-0 justify-end"
+                    inputClassName="text-right w-full min-w-0 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-sm"
                   />
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Age</span>
-                  <div className="flex items-center gap-1">
-                    <span>{playerData.age || 0}</span> <span className="text-gray-400 text-sm">Years</span>
+                <div className="flex justify-between items-center gap-2 w-full min-w-0">
+                  <span className="text-gray-400 shrink-0">Age</span>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <span className="text-white">{playerData.age || 0}</span> <span className="text-gray-400 text-xs sm:text-sm">Years</span>
                   </div>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Birth Country</span>
-                  <div className="flex items-center gap-2">
+                <div className="flex justify-between items-center gap-2 w-full min-w-0">
+                  <span className="text-gray-400 shrink-0">Birth Country</span>
+                  <div className="flex items-center gap-2 min-w-0 shrink-0">
                     <CMSField
                       value={playerData.birthCountry}
                       onUpdate={(val) => handleUpdate("birthCountry", val)}
                       canEdit={canEditBio}
                       type="combobox"
                       options={ALL_COUNTRIES}
-                      className="w-24 justify-end"
-                      inputClassName="text-right"
+                      className="w-20 sm:w-24 justify-end min-w-0"
+                      inputClassName="text-right w-full min-w-0 truncate text-[10px] sm:text-sm"
                     />
-                    <div className="relative w-6 h-4 overflow-hidden rounded-sm border border-border">
+                    <div className="relative w-5 h-3.5 sm:w-6 sm:h-4 overflow-hidden rounded-sm border border-border shrink-0">
                       <Image
                         src={getFlagUrl(playerData.birthCountry)}
                         alt="birth country flag"
@@ -591,19 +591,19 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Dual Nationality</span>
-                  <div className="flex items-center gap-2">
+                <div className="flex justify-between items-center gap-2 w-full min-w-0">
+                  <span className="text-gray-400 shrink-0">Dual Nationality</span>
+                  <div className="flex items-center gap-2 min-w-0 shrink-0">
                     <CMSField
                       value={playerData.dualNationality}
                       onUpdate={(val) => handleUpdate("dualNationality", val)}
                       canEdit={canEditBio}
                       type="combobox"
                       options={ALL_COUNTRIES}
-                      className="w-24 justify-end"
-                      inputClassName="text-right"
+                      className="w-20 sm:w-24 justify-end min-w-0"
+                      inputClassName="text-right w-full min-w-0 truncate text-[10px] sm:text-sm"
                     />
-                    <div className="relative w-6 h-4 overflow-hidden rounded-sm border border-border">
+                    <div className="relative w-5 h-3.5 sm:w-6 sm:h-4 overflow-hidden rounded-sm border border-border shrink-0">
                       <Image
                         src={getFlagUrl(playerData.dualNationality)}
                         alt="dual nationality flag"
@@ -613,122 +613,126 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Academy</span>
+                <div className="flex justify-between items-center gap-2 w-full min-w-0">
+                  <span className="text-gray-400 shrink-0">Academy</span>
                   <CMSField
                     value={playerData.academyName || "N/A"}
                     onUpdate={(val) => handleUpdate("academyName", val)}
                     canEdit={canEditBio}
-                    className="w-40 justify-end"
-                    inputClassName="text-right"
+                    className="flex-1 min-w-0 justify-end"
+                    inputClassName="text-right w-full min-w-0 truncate"
                   />
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Coach</span>
+                <div className="flex justify-between items-center gap-2 w-full min-w-0">
+                  <span className="text-gray-400 shrink-0">Coach</span>
                   <CMSField
                     value={playerData.coachName || "N/A"}
                     onUpdate={(val) => handleUpdate("coachName", val)}
                     canEdit={canEditBio}
-                    className="w-40 justify-end"
-                    inputClassName="text-right"
+                    className="flex-1 min-w-0 justify-end"
+                    inputClassName="text-right w-full min-w-0 truncate"
                   />
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Club Managed</span>
+                <div className="flex justify-between items-center gap-2 w-full min-w-0">
+                  <span className="text-gray-400 shrink-0">Club Managed</span>
                   <CMSField
                     value={playerData.clubManaged || "N/A"}
                     onUpdate={(val) => handleUpdate("clubManaged", val)}
                     canEdit={canEditBio}
-                    className="w-40 justify-end"
-                    inputClassName="text-right"
+                    className="flex-1 min-w-0 justify-end"
+                    inputClassName="text-right w-full min-w-0 truncate"
                   />
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Coach License</span>
+                <div className="flex justify-between items-center gap-2 w-full min-w-0">
+                  <span className="text-gray-400 shrink-0">Coach License</span>
                   <CMSField
                     value={playerData.coachLicenseNumber || "N/A"}
                     onUpdate={(val) => handleUpdate("coachLicenseNumber", val)}
                     canEdit={canEditBio}
-                    className="w-40 justify-end"
-                    inputClassName="text-right"
+                    className="flex-1 min-w-0 justify-end"
+                    inputClassName="text-right w-full min-w-0 truncate"
                   />
                 </div>
               </div>
             </div>
-            <div className="p-6">
-              <h2 className="text-lg text-center font-heading font-normal mb-4">
+            <div className="p-4 sm:p-6 border-t border-white/5 w-full min-w-0">
+              <h2 className="text-base sm:text-lg text-center font-heading font-normal mb-4 text-white">
                 Contact
               </h2>
-              <div className="space-y-2 text-sm text-primary">
-                <div className="flex items-center gap-2">
-                  <span>📧</span>
+              <div className="space-y-2 text-xs sm:text-sm text-primary w-full min-w-0">
+                <div className="flex items-center gap-2 w-full min-w-0">
+                  <span className="shrink-0">📧</span>
                   <CMSField
                     value={playerData.email}
                     onUpdate={(val) => handleUpdate("email", val)}
                     canEdit={canEditBio}
-                    className="flex-1"
+                    className="flex-1 min-w-0"
+                    inputClassName="w-full min-w-0 truncate"
                   />
                 </div>
-                <div className="flex items-center gap-2">
-                  <span>📱</span>
+                <div className="flex items-center gap-2 w-full min-w-0">
+                  <span className="shrink-0">📱</span>
                   <CMSField
                     value={playerData.phone}
                     onUpdate={(val) => handleUpdate("phone", val)}
                     canEdit={canEditBio}
-                    className="flex-1"
+                    className="flex-1 min-w-0"
+                    inputClassName="w-full min-w-0 truncate"
                   />
                 </div>
-                <div className="flex items-center gap-2">
-                  <span>📍</span>
+                <div className="flex items-center gap-2 w-full min-w-0">
+                  <span className="shrink-0">📍</span>
                   <CMSField
                     value={playerData.location}
                     onUpdate={(val) => handleUpdate("location", val)}
                     canEdit={canEditBio}
-                    className="flex-1"
+                    className="flex-1 min-w-0"
+                    inputClassName="w-full min-w-0 truncate"
                   />
                 </div>
-                <div className="flex items-center gap-2">
-                  <span>🌐</span>
+                <div className="flex items-center gap-2 w-full min-w-0">
+                  <span className="shrink-0">🌐</span>
                   <CMSField
                     value={playerData.website}
                     onUpdate={(val) => handleUpdate("website", val)}
                     canEdit={canEditBio}
-                    className="flex-1"
+                    className="flex-1 min-w-0"
+                    inputClassName="w-full min-w-0 truncate text-primary hover:underline cursor-pointer"
                   />
                 </div>
               </div>
             </div>
-            <div className="p-6">
-              <h2 className="text-lg text-center font-heading font-normal mb-4">
+            <div className="p-4 sm:p-6 border-t border-white/5 w-full min-w-0">
+              <h2 className="text-base sm:text-lg text-center font-heading font-normal mb-4 text-white">
                 Physical Stats
               </h2>
-              <div className="flex justify-around text-center mb-6">
-                <div>
+              <div className="flex justify-around text-center mb-6 w-full min-w-0">
+                <div className="min-w-0">
                   <CMSField
                     value={playerData.height}
                     onUpdate={(val) => handleUpdate("height", val)}
                     canEdit={canEditBio}
                     isNumeric
-                    className="text-2xl font-bold text-primary justify-center"
-                    inputClassName="text-center w-24 h-10 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-lg"
+                    className="text-xl sm:text-2xl font-bold text-primary justify-center min-w-0"
+                    inputClassName="text-center w-20 sm:w-24 h-8 sm:h-10 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-lg"
                   />
-                  <div className="text-xs text-gray-400">HEIGHT (m)</div>
+                  <div className="text-[10px] sm:text-xs text-gray-400">HEIGHT (m)</div>
                 </div>
-                <div>
+                <div className="min-w-0">
                   <CMSField
                     value={playerData.weight}
                     onUpdate={(val) => handleUpdate("weight", val)}
                     canEdit={canEditBio}
                     isNumeric
-                    className="text-2xl font-bold text-primary justify-center"
-                    inputClassName="text-center w-24 h-10 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-lg"
+                    className="text-xl sm:text-2xl font-bold text-primary justify-center min-w-0"
+                    inputClassName="text-center w-20 sm:w-24 h-8 sm:h-10 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-lg"
                   />
-                  <div className="text-xs text-gray-400">WEIGHT (kg)</div>
+                  <div className="text-[10px] sm:text-xs text-gray-400">WEIGHT (kg)</div>
                 </div>
               </div>
-              <div className=" grid grid-cols-2 gap-6">
-                <div className="border-2 bg-gray-600/30 p-3 rounded-xl">
-                  <div className="relative w-full h-16 mb-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 w-full min-w-0">
+                <div className="border border-white/10 bg-white/5 p-4 rounded-xl flex flex-col w-full min-w-0">
+                  <div className="relative w-full h-12 sm:h-16 mb-2">
                     <Image
                       src={playerData.leftLegImage}
                       alt="left leg"
@@ -736,20 +740,20 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       layout="fill"
                     />
                   </div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Left</span>
+                  <div className="flex justify-between items-center text-xs sm:text-sm mb-1 w-full min-w-0">
+                    <span className="shrink-0 text-white">Left</span>
                     <CMSField
                       value={playerData.leftLegUsage}
                       onUpdate={(val) => handleUpdate("leftLegUsage", parseInt(String(val)))}
                       canEdit={canEditBio}
                       type="number"
                       editTrigger="doubleClick"
-                      className="text-primary justify-end w-32"
-                      inputClassName="text-right h-7 w-20 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-md"
+                      className="text-primary justify-end w-24 sm:w-32 min-w-0"
+                      inputClassName="text-right h-7 w-16 sm:w-20 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-md"
                     />
                   </div>
                   {canEditBio ? (
-                    <div className="relative flex items-center h-2 group translate-y-1.25">
+                    <div className="relative flex items-center h-2 group translate-y-1.25 w-full">
                       <div className="w-full h-1.5 bg-[#333] rounded-full overflow-hidden relative">
                         <div
                           className={cn("h-full transition-all duration-300 ease-out", getIndicatorColor(playerData.leftLegUsage))}
@@ -790,8 +794,8 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                     />
                   )}
                 </div>
-                <div className="border-2 bg-gray-600/30 p-3 rounded-xl">
-                  <div className="relative w-full h-16 mb-2">
+                <div className="border border-white/10 bg-white/5 p-4 rounded-xl flex flex-col w-full min-w-0">
+                  <div className="relative w-full h-12 sm:h-16 mb-2">
                     <Image
                       src={playerData.rightLegImage}
                       alt="right leg"
@@ -805,20 +809,20 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       }}
                     />
                   </div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Right</span>
+                  <div className="flex justify-between items-center text-xs sm:text-sm mb-1 w-full min-w-0">
+                    <span className="shrink-0 text-white">Right</span>
                     <CMSField
                       value={playerData.rightLegUsage}
                       onUpdate={(val) => handleUpdate("rightLegUsage", parseInt(String(val)))}
                       canEdit={canEditBio}
                       type="number"
                       editTrigger="doubleClick"
-                      className="text-primary justify-end w-32"
-                      inputClassName="text-right h-7 w-20 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-md"
+                      className="text-primary justify-end w-24 sm:w-32 min-w-0"
+                      inputClassName="text-right h-7 w-16 sm:w-20 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-md"
                     />
                   </div>
                   {canEditBio ? (
-                    <div className="relative flex items-center h-2 group translate-y-1.25">
+                    <div className="relative flex items-center h-2 group translate-y-1.25 w-full">
                       <div className="w-full h-1.5 bg-[#333] rounded-full overflow-hidden relative">
                         <div
                           className={cn("h-full transition-all duration-300 ease-out", getIndicatorColor(playerData.rightLegUsage))}
@@ -861,18 +865,19 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                 </div>
               </div>
             </div>
-            <div className="p-6">
-              <h2 className="text-lg text-center font-heading font-normal mb-4">
+            <div className="p-4 sm:p-6 border-t border-white/5 w-full min-w-0">
+              <h2 className="text-base sm:text-lg text-center font-heading font-normal mb-4 text-white">
                 Languages
               </h2>
-              <div className="space-y-3">
+              <div className="space-y-3 w-full min-w-0">
                 {playerData.languages.map((lang: any, idx: number) => (
-                  <div key={idx} className="flex justify-between items-center p-2 bg-black/20 border border-border/50 rounded-lg group hover:bg-black/40 transition-all">
+                  <div key={idx} className="flex justify-between items-center p-2 sm:p-3 bg-black/20 border border-border/50 rounded-lg group hover:bg-black/40 transition-all w-full min-w-0 gap-2">
                     <CMSField
                       value={lang.name}
                       onUpdate={(val) => handleUpdate(`languages.${idx}.name`, val)}
                       canEdit={canEditBio}
-                      className="flex-1 font-medium text-gray-200"
+                      className="flex-1 min-w-0 font-medium text-gray-200"
+                      inputClassName="w-full min-w-0 truncate text-xs sm:text-sm"
                     />
                     <CMSField
                       value={lang.level || "Fluent"}
@@ -880,8 +885,8 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       canEdit={canEditBio}
                       type="select"
                       options={["Native", "Fluent", "Intermediate", "Beginner"]}
-                      className="w-32 justify-end"
-                      inputClassName="text-right text-primary font-bold"
+                      className="w-24 sm:w-32 justify-end shrink-0"
+                      inputClassName="text-right text-primary font-bold text-[10px] sm:text-sm w-full truncate"
                       hideIcon={true}
                     />
                   </div>
@@ -889,15 +894,15 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
               </div>
             </div>
             {/* Position Map */}
-            <div className="p-6">
+            <div className="p-4 sm:p-6 border-t border-white/5 w-full min-w-0">
               {(() => {
                 const cleanPos = (playerData.position || "").toLowerCase();
                 const isFutsalPos = cleanPos.includes("goalkeeper") || cleanPos.includes("fixo") || cleanPos.includes("alas") || cleanPos.includes("pivot");
                 return (
-                  <div className="flex gap-2 mb-4">
+                  <div className="flex flex-wrap gap-2 mb-4 w-full min-w-0">
                     <button
                       onClick={() => setIsPositionMap(true)}
-                      className={`${isPositionMap ? "px-3 py-1 bg-primary text-black text-xs text-center font-heading font-normal rounded" : "px-3 py-1 border border-border text-xs rounded hover:bg-gray-900"}`}
+                      className={`${isPositionMap ? "px-2 sm:px-3 py-1 bg-primary text-black text-[10px] sm:text-xs text-center font-heading font-normal rounded" : "px-2 sm:px-3 py-1 border border-border text-[10px] sm:text-xs rounded hover:bg-gray-900"}`}
                     >
                       Position Map
                     </button>
@@ -905,7 +910,7 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       disabled={!isFutsalPos}
                       onClick={() => setIsPositionMap(false)}
                       className={cn(
-                        "px-3 py-1 text-xs rounded transition-all",
+                        "px-2 sm:px-3 py-1 text-[10px] sm:text-xs rounded transition-all",
                         !isPositionMap
                           ? "bg-primary text-black font-heading font-normal"
                           : "border border-border hover:bg-gray-900",
@@ -917,7 +922,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                   </div>
                 );
               })()}
-              {/* Add position icon button removed to keep exactly 3 markers */}
               <div
                 ref={mapContainerRef}
                 className="relative w-full h-auto overflow-hidden select-none"
@@ -957,12 +961,12 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       height={idx === 0 ? 34 : 30}
                       className={cn(
                         "pointer-events-none drop-shadow-lg transition-transform group-hover/marker:scale-110",
-                        idx === 0 ? "w-8 h-8 md:w-8.5 md:h-8.5" : "w-7 h-7 md:w-7.5 md:h-7.5"
+                        idx === 0 ? "w-6 h-6 sm:w-8 sm:h-8" : "w-5 h-5 sm:w-7 sm:h-7"
                       )}
                     />
                     {marker.name && (
                       <div className={cn(
-                        "mt-1 px-1.5 py-0.5 rounded bg-black/85 border border-white/10 text-white text-[9px] font-medium text-center whitespace-nowrap shadow-md pointer-events-none tracking-wide select-none transition-all",
+                        "mt-1 px-1 sm:px-1.5 py-0.5 rounded bg-black/85 border border-white/10 text-white text-[8px] sm:text-[9px] font-medium text-center whitespace-nowrap shadow-md pointer-events-none tracking-wide select-none transition-all",
                       )}>
                         position{idx + 1}
                       </div>
@@ -973,11 +977,11 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
             </div>
           </div>
           {/* CENTER COLUMN - PLAYER IMAGE */}
-          <div className="col-span-1 xl:col-span-4 flex flex-col items-center">
+          <div className="col-span-1 xl:col-span-4 flex flex-col items-center w-full min-w-0 overflow-hidden">
             {/* Player Name */}
-            <div className="text-center mb-8">
-              <div className="flex items-center mb-8 justify-center">
-                <div className="relative w-32 h-20">
+            <div className="text-center mb-6 sm:mb-8 w-full min-w-0">
+              <div className="flex items-center mb-6 sm:mb-8 justify-center w-full min-w-0">
+                <div className="relative w-24 h-16 sm:w-32 sm:h-20 shrink-0">
                   <Image
                     src={getFlagUrl(playerData.birthCountry)}
                     alt="Birth Country"
@@ -991,7 +995,7 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                     }}
                   />
                   {playerData.dualNationality && (
-                    <div className="absolute -bottom-2 -right-2 w-12 h-8 border-2 border-white rounded shadow-md overflow-hidden">
+                    <div className="absolute -bottom-2 -right-2 w-10 h-6 sm:w-12 sm:h-8 border-2 border-white rounded shadow-md overflow-hidden">
                       <Image
                         src={getFlagUrl(playerData.dualNationality)}
                         alt="Dual Nationality"
@@ -1008,17 +1012,18 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                   )}
                 </div>
               </div>
-              <h1 className="text-2xl font-bold font-heading mb-2 flex items-center justify-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-bold font-heading mb-2 flex flex-wrap items-center justify-center gap-2 w-full min-w-0">
                 <CMSField
                   value={playerData.fullName}
                   onUpdate={(val) => handleUpdate("fullName", val)}
                   canEdit={canEditBio}
-                  className="text-2xl font-bold font-heading"
+                  className="text-xl sm:text-2xl font-bold font-heading min-w-0 justify-center"
+                  inputClassName="text-center w-full min-w-0"
                 />
-                <span className="text-green-500 ">[{playerData.age}]</span>
+                <span className="text-green-500 shrink-0">[{playerData.age}]</span>
               </h1>
             </div>
-            <div className="mb-8">
+            <div className="mb-6 sm:mb-8 w-full min-w-0 px-2 sm:px-0 flex justify-center">
               <CMSField
                 value={getFullWithShortForm(playerData.position)}
                 onUpdate={(val) => handleUpdate("position", val)}
@@ -1050,39 +1055,40 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                   "Left Winger (LW)",
                   "Right Winger (RW)"
                 ]}
-                className="flex items-center gap-2 border border-border px-4 py-2 rounded hover:bg-gray-900 bg-transparent text-foreground h-auto w-fit mx-auto"
+                className="flex items-center justify-center gap-2 border border-border px-3 sm:px-4 py-2 rounded hover:bg-gray-900 bg-transparent text-foreground h-auto w-full sm:w-fit max-w-full mx-auto min-w-0"
+                inputClassName="w-full text-center sm:text-left text-xs sm:text-sm truncate min-w-0"
               />
             </div>
             {/* Player Image */}
-            <div className="relative w-full h-130.75  mb-8 flex  items-end justify-center">
+            <div className="relative w-full h-[300px] sm:h-[400px] md:h-130.75 mb-6 sm:mb-8 flex items-end justify-center min-w-0 overflow-hidden">
               <EditableImage
                 src={playerData.playerImage}
                 alt={playerData.fullName}
-                className="object-contain w-auto mx-auto h-125"
+                className="object-contain w-auto mx-auto h-[280px] sm:h-[380px] md:h-125 max-w-full"
                 width={800}
                 height={1000}
                 field="playerImage"
               />
             </div>
             {/* Player Style Section */}
-            <div className="w-full space-y-6">
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-4 mb-6">
-                  <h3 className="text-2xl font-bold font-heading">
+            <div className="w-full space-y-4 sm:space-y-6 min-w-0 px-2 sm:px-0">
+              <div className="text-center w-full min-w-0">
+                <div className="flex items-center justify-center gap-2 sm:gap-4 mb-4 sm:mb-6 w-full min-w-0">
+                  <h3 className="text-xl sm:text-2xl font-bold font-heading truncate">
                     Player Style
                   </h3>
                   {canEditBio && (
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-primary hover:bg-primary/10">
-                          <PencilIcon className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" className="h-6 w-6 sm:h-7 sm:w-7 text-primary hover:bg-primary/10 shrink-0">
+                          <PencilIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="bg-cardBg border-border text-foreground">
+                      <DialogContent className="bg-cardBg border-border text-foreground w-[95vw] sm:w-[500px] max-w-lg max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                           <DialogTitle>Select Player Styles (Max 4)</DialogTitle>
                         </DialogHeader>
-                        <div className="grid grid-cols-2 gap-4 py-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 py-4">
                           {ALL_STYLES.map((style) => (
                             <div
                               key={style.id}
@@ -1102,7 +1108,7 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                               />
                               <Label
                                 htmlFor={style.id}
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                className="text-xs sm:text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                               >
                                 {style.label}
                               </Label>
@@ -1113,17 +1119,17 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                     </Dialog>
                   )}
                 </div>
-                <div className="space-y-4">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-2 gap-4 w-full min-w-0">
                   {orderedSelectedStyles.map((style: any) => {
                     const badge = STYLE_ICONS[style.id];
                     const badgeSrc = typeof badge === "string" ? badge : badge?.src || "";
                     return (
-                      <div key={style.id} className="space-y-4">
+                      <div key={style.id} className="space-y-2 sm:space-y-4 w-full min-w-0">
                         <div className="flex justify-center">
                           {badgeSrc ? (
                             <Image
                               src={badgeSrc}
-                              className="w-20 h-20 object-contain"
+                              className="w-16 h-16 sm:w-20 sm:h-20 object-contain drop-shadow-md"
                               alt={style.label}
                               width={200}
                               height={200}
@@ -1134,12 +1140,12 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                               }}
                             />
                           ) : (
-                            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-xs">
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-[10px] sm:text-xs">
                               {style.label}
                             </div>
                           )}
                         </div>
-                        <p className="text-lg font-heading">{style.label}</p>
+                        <p className="text-xs sm:text-base md:text-lg font-heading truncate w-full px-1">{style.label}</p>
                       </div>
                     );
                   })}
@@ -1148,11 +1154,11 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
             </div>
           </div>
           {/* RIGHT COLUMN */}
-          <div className="col-span-1 xl:col-span-4 space-y-6 bg-cardBg">
+          <div className="col-span-1 xl:col-span-4 space-y-4 sm:space-y-6 bg-cardBg rounded-2xl sm:rounded-3xl w-full min-w-0 overflow-hidden">
             {/* Certification Card */}
-            <div className="p-6 bnorder-none rounded-2xl relative overflow-hidden group hover:border-primary/20 transition-all">
+            <div className="p-4 sm:p-6 border-none rounded-2xl relative overflow-hidden group hover:border-primary/20 transition-all w-full min-w-0">
               {/* SVG certificate container */}
-              <div className="w-full aspect-square relative select-none">
+              <div className="w-full max-w-full aspect-square relative select-none">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">
                   <defs>
                     <style>{`
@@ -1712,157 +1718,157 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                 ))}
               </div>
             </div>
-            <div className="p-6">
-              <h2 className="text-lg text-center font-heading font-normal mb-4">
+            <div className="p-4 sm:p-6 border-t border-white/5 w-full min-w-0">
+              <h2 className="text-base sm:text-lg text-center font-heading font-normal mb-4 text-white">
                 Market Value
               </h2>
-              <div className="mb-4">
+              <div className="mb-4 w-full min-w-0">
                 <CMSField
                   value={playerData.marketValue}
                   onUpdate={(val) => handleUpdate("marketValue", val)}
                   canEdit={canEditBio}
-                  className="text-3xl font-bold text-primary mb-1"
-                  inputClassName="text-3xl font-bold h-12"
+                  className="text-2xl sm:text-3xl font-bold text-primary mb-1 justify-center w-full min-w-0"
+                  inputClassName="text-xl sm:text-3xl font-bold h-10 sm:h-12 text-center w-full min-w-0"
                 />
-                <p className="text-xs text-gray-400">Current Market Value</p>
+                <p className="text-[10px] sm:text-xs text-center text-gray-400">Current Market Value</p>
                 <CMSField
                   value={playerData.marketTrend}
                   onUpdate={(val) => handleUpdate("marketTrend", val)}
                   canEdit={canEditBio}
-                  className="text-xs text-primary mt-2"
-                  inputClassName="h-7 text-xs"
+                  className="text-[10px] sm:text-xs text-primary mt-2 justify-center w-full min-w-0"
+                  inputClassName="h-7 text-[10px] sm:text-xs text-center w-full min-w-0"
                 />
               </div>
             </div>
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg text-center font-heading font-normal">
+            <div className="p-4 sm:p-6 border-t border-white/5 w-full min-w-0">
+              <div className="flex justify-between items-center mb-4 w-full min-w-0 gap-2">
+                <h2 className="text-base sm:text-lg text-center font-heading font-normal text-white">
                   Transfer Status
                 </h2>
-                <span className="text-xs bg-primary text-black px-2 py-1 rounded">
+                <span className="text-[10px] sm:text-xs bg-primary text-black px-2 py-1 rounded shrink-0">
                   {playerData.transferStatus}
                 </span>
               </div>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Contract Until</span>
+              <div className="space-y-3 text-xs sm:text-sm w-full min-w-0">
+                <div className="flex justify-between items-center w-full min-w-0 gap-2">
+                  <span className="text-gray-400 shrink-0">Contract Until</span>
                   <CMSField
                     value={playerData.contractUntil}
                     onUpdate={(val) => handleUpdate("contractUntil", val)}
                     canEdit={canEditBio}
-                    className="w-28 justify-end"
-                    inputClassName="text-right"
+                    className="w-24 sm:w-28 justify-end min-w-0"
+                    inputClassName="text-right w-full min-w-0 truncate"
                   />
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Agent</span>
+                <div className="flex justify-between items-center w-full min-w-0 gap-2">
+                  <span className="text-gray-400 shrink-0">Agent</span>
                   <CMSField
                     value={playerData.agent}
                     onUpdate={(val) => handleUpdate("agent", val)}
                     canEdit={canEditBio}
-                    className="w-28 justify-end"
-                    inputClassName="text-right"
+                    className="w-24 sm:w-28 justify-end min-w-0"
+                    inputClassName="text-right w-full min-w-0 truncate"
                   />
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Agency</span>
+                <div className="flex justify-between items-center w-full min-w-0 gap-2">
+                  <span className="text-gray-400 shrink-0">Agency</span>
                   <CMSField
                     value={playerData.agency}
                     onUpdate={(val) => handleUpdate("agency", val)}
                     canEdit={canEditBio}
-                    className="w-28 justify-end"
-                    inputClassName="text-right"
+                    className="w-24 sm:w-28 justify-end min-w-0"
+                    inputClassName="text-right w-full min-w-0 truncate"
                   />
                 </div>
               </div>
             </div>
-            <div className="p-6">
-              <h2 className="text-lg text-center font-heading font-normal mb-4">
+            <div className="p-4 sm:p-6 border-t border-white/5 w-full min-w-0">
+              <h2 className="text-base sm:text-lg text-center font-heading font-normal mb-4 text-white">
                 Accomplishments
               </h2>
-              <div className="space-y-6 border-l-2 border-green-600 pl-4 mt-6">
+              <div className="space-y-4 sm:space-y-6 border-l-2 border-green-600 pl-3 sm:pl-4 mt-4 sm:mt-6 w-full min-w-0">
                 {playerData.careerHighlights.map((highlight: any, idx: number) => (
-                  <div key={idx} className="flex gap-4 items-center">
-                    <div className="relative w-10 h-10 shrink-0 flex items-center justify-center">
+                  <div key={idx} className="flex gap-3 sm:gap-4 items-center w-full min-w-0">
+                    <div className="relative w-8 h-8 sm:w-10 sm:h-10 shrink-0 flex items-center justify-center">
                       <Image
                         src={trofeeIcon}
                         alt="Achievement"
                         width={36}
                         height={36}
-                        className="object-contain drop-shadow-md"
+                        className="object-contain drop-shadow-md w-full h-full"
                       />
                     </div>
-                    <div className="flex flex-col gap-0.5 w-full">
+                    <div className="flex flex-col gap-0.5 w-full min-w-0">
                       <CMSField
                         value={highlight.year}
                         onUpdate={(val) => handleUpdate(`careerHighlights.${idx}.year`, val)}
                         canEdit={canEditBio}
                         type="textarea"
-                        className="text-xs font-black text-primary/80 tracking-widest leading-relaxed uppercase"
-                        inputClassName="text-xs font-black min-h-[30px] py-0.5 uppercase"
+                        className="text-[10px] sm:text-xs font-black text-primary/80 tracking-widest leading-relaxed uppercase w-full min-w-0"
+                        inputClassName="text-[10px] sm:text-xs font-black min-h-[30px] py-0.5 uppercase w-full min-w-0"
                       />
                       <CMSField
                         value={highlight.title}
                         onUpdate={(val) => handleUpdate(`careerHighlights.${idx}.title`, val)}
                         canEdit={canEditBio}
                         type="textarea"
-                        className="text-sm md:text-base text-gray-400 leading-relaxed tracking-tight uppercase"
-                        inputClassName="text-base font-black min-h-[40px] py-1 uppercase"
+                        className="text-xs sm:text-sm md:text-base text-gray-400 leading-relaxed tracking-tight uppercase w-full min-w-0"
+                        inputClassName="text-sm sm:text-base font-black min-h-[40px] py-1 uppercase w-full min-w-0"
                       />
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="p-6">
-              <h2 className="text-lg text-center font-heading font-normal mb-6">
+            <div className="p-4 sm:p-6 border-t border-white/5 w-full min-w-0">
+              <h2 className="text-base sm:text-lg text-center font-heading font-normal mb-4 sm:mb-6 text-white">
                 Current Season Stats
               </h2>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 w-full min-w-0">
+                <div className="text-center w-full min-w-0 border border-white/10 bg-white/5 rounded-xl p-2 sm:p-4">
                   <CMSField
                     value={playerData.seasonStats.matches}
                     onUpdate={(val) => handleUpdate("seasonStats.matches", val)}
                     canEdit={canEditEvaluation}
                     isNumeric
-                    className="text-3xl font-bold text-primary justify-center"
-                    inputClassName="text-center w-24 h-10 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-lg"
+                    className="text-xl sm:text-3xl font-bold text-primary justify-center min-w-0"
+                    inputClassName="text-center w-16 sm:w-24 h-8 sm:h-10 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-lg"
                   />
-                  <div className="text-xs text-gray-400 mt-1">MATCHES</div>
+                  <div className="text-[10px] sm:text-xs text-gray-400 mt-1 truncate">MATCHES</div>
                 </div>
-                <div className="text-center">
+                <div className="text-center w-full min-w-0 border border-white/10 bg-white/5 rounded-xl p-2 sm:p-4">
                   <CMSField
                     value={playerData.seasonStats.goals}
                     onUpdate={(val) => handleUpdate("seasonStats.goals", val)}
                     canEdit={canEditEvaluation}
                     isNumeric
-                    className="text-3xl font-bold text-primary justify-center"
-                    inputClassName="text-center w-24 h-10 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-lg"
+                    className="text-xl sm:text-3xl font-bold text-primary justify-center min-w-0"
+                    inputClassName="text-center w-16 sm:w-24 h-8 sm:h-10 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-lg"
                   />
-                  <div className="text-xs text-gray-400 mt-1">GOALS</div>
+                  <div className="text-[10px] sm:text-xs text-gray-400 mt-1 truncate">GOALS</div>
                 </div>
-                <div className="text-center">
+                <div className="text-center w-full min-w-0 border border-white/10 bg-white/5 rounded-xl p-2 sm:p-4">
                   <CMSField
                     value={playerData.seasonStats.assists}
                     onUpdate={(val) => handleUpdate("seasonStats.assists", val)}
                     canEdit={canEditEvaluation}
                     isNumeric
-                    className="text-3xl font-bold text-primary justify-center"
-                    inputClassName="text-center w-24 h-10 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-lg"
+                    className="text-xl sm:text-3xl font-bold text-primary justify-center min-w-0"
+                    inputClassName="text-center w-16 sm:w-24 h-8 sm:h-10 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-lg"
                   />
-                  <div className="text-xs text-gray-400 mt-1">ASSISTS</div>
+                  <div className="text-[10px] sm:text-xs text-gray-400 mt-1 truncate">ASSISTS</div>
                 </div>
-                <div className="text-center">
+                <div className="text-center w-full min-w-0 border border-white/10 bg-white/5 rounded-xl p-2 sm:p-4">
                   <CMSField
                     value={playerData.seasonStats.avgRating}
                     onUpdate={(val) => handleUpdate("seasonStats.avgRating", val)}
                     canEdit={canEditEvaluation}
                     isNumeric
-                    className="text-3xl font-bold text-primary justify-center"
-                    inputClassName="text-center w-24 h-10 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-lg"
+                    className="text-xl sm:text-3xl font-bold text-primary justify-center min-w-0"
+                    inputClassName="text-center w-16 sm:w-24 h-8 sm:h-10 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-lg"
                   />
-                  <div className="text-xs text-gray-400 mt-1">
-                    AVERAGE RATING
+                  <div className="text-[10px] sm:text-xs text-gray-400 mt-1 truncate">
+                    AVG RATING
                   </div>
                 </div>
               </div>

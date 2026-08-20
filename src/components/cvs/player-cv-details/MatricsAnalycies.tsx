@@ -23,7 +23,6 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { useUpdatePlayerProfileMutation } from '@/lib/features/cv/cvApi'
 import CMSField from '@/components/shared/CMSField'
-import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
 interface MetricRow {
@@ -48,14 +47,6 @@ const getGradeColor = (grade: string) => {
   }
 };
 
-const getProgressColor = (grade: string) => {
-  switch (grade) {
-    case 'Excellent': return '[&>div]:bg-[#22c55e]';
-    case 'Good': return '[&>div]:bg-[#eab308]';
-    case 'Average': return '[&>div]:bg-[#ef4444]';
-    default: return '[&>div]:bg-gray-500';
-  }
-};
 
 const METRIC_CATEGORIES = ['Perception', 'Vision']
 
@@ -78,7 +69,7 @@ Vision: [
 ],
 })
 
-const { setMetricsAvg, role } = usePlayerStats();
+const { setMetricsAvg } = usePlayerStats();
 
 useEffect(() => {
 const allRows = Object.values(metricsData).flat();
@@ -118,28 +109,29 @@ try {
 };
 
 return (
-<div className="w-full py-16 px-6 bg-background">
-  <div className="container mx-auto">
-    <h2 className="font-heading text-4xl md:text-5xl font-bold text-center text-foreground mb-12 tracking-wider">
+<div className="w-full py-10 sm:py-16 px-2 sm:px-6 bg-background min-w-0 overflow-hidden">
+  <div className="container mx-auto w-full min-w-0">
+    <h2 className="font-heading text-2xl sm:text-4xl md:text-5xl font-bold text-center text-foreground mb-8 sm:mb-12 tracking-wider">
       DETAILED ANALYSIS METRICS
     </h2>
 
-    <div className="border border-border rounded-lg  p-8">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-8 p-1 rounded-full">
+    <div className="border border-border rounded-lg p-3 sm:p-8 w-full min-w-0">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full min-w-0">
+        <TabsList className="grid w-full grid-cols-2 mb-6 sm:mb-8 p-1 rounded-full">
           {METRIC_CATEGORIES.map((category) => (
             <TabsTrigger
               key={category}
               value={category}
-              className="rounded-full text-base font-bold transition-all data-[state=active]:bg-primary data-[state=active]:text-black data-[state=inactive]:text-foreground uppercase tracking-widest py-2"
+              className="rounded-full text-xs sm:text-base font-bold transition-all data-[state=active]:bg-primary data-[state=active]:text-black data-[state=inactive]:text-foreground uppercase tracking-widest py-2"
             >
               {category}
             </TabsTrigger>
           ))}
         </TabsList>
 
-        <TabsContent value={activeTab}>
-          <Table className="border border-border">
+        <TabsContent value={activeTab} className="w-full min-w-0">
+          <div className="w-full overflow-x-auto no-scrollbar min-w-0 pb-2">
+            <Table className="border border-border min-w-max w-full">
             <TableHeader>
               <TableRow className="border-border bg-white/5">
                 <TableHead className="border-r border-border text-gray-400 font-black uppercase tracking-wider h-14">
@@ -173,9 +165,9 @@ return (
                     />
                   </TableCell>
 
-                  <TableCell className="border-r border-border min-w-[250px]">
+                  <TableCell className="border-r border-border min-w-62.5">
                     <div className="flex items-center justify-between gap-2">
-                      <div className="relative flex-1 min-w-0 flex items-center h-2 group translate-y-[5px]">
+                      <div className="relative flex-1 min-w-0 flex items-center h-2 group translate-y-1.25">
                         {editable ? (
                           <>
                             <div className="w-full h-1.5 bg-[#333] rounded-full overflow-hidden relative">
@@ -255,7 +247,7 @@ return (
 
                   <TableCell className="text-right">
                     <Badge
-                      className={`font-black text-sm min-w-[100px] py-1.5 justify-center uppercase tracking-tighter ${getGradeColor(metric.grade)} shadow-md`}
+                      className={`font-black text-sm min-w-25 py-1.5 justify-center uppercase tracking-tighter ${getGradeColor(metric.grade)} shadow-md`}
                     >
                       {metric.grade}
                     </Badge>
@@ -264,6 +256,7 @@ return (
               ))}
             </TableBody>
           </Table>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
