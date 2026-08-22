@@ -127,11 +127,11 @@ return (
     {/* Child Profile Preview */}
     <div className="lg:col-span-2 space-y-6 min-w-0">
       <div className="bg-[#0D0D0D]/40 border border-white/5 p-8 rounded-3xl shadow-xl flex flex-col gap-6">
-        <div className="flex justify-between items-start">
-          <h2 className="text-xl font-black uppercase text-white font-orbitron">Youth Profile</h2>
-          <Link href="/dashboard/parent/profiles">
-            <span className="text-xs font-bold text-primary flex items-center gap-1 hover:underline cursor-pointer uppercase tracking-wider">
-              Manage Profile <IconArrowRight size={14} />
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+          <h2 className="text-lg sm:text-xl font-black uppercase text-white font-orbitron">Youth Profile</h2>
+          <Link href="/dashboard/parent/profiles" className="shrink-0">
+            <span className="text-[10px] sm:text-xs font-bold text-primary flex items-center gap-1 hover:underline cursor-pointer uppercase tracking-wider whitespace-nowrap">
+              Manage Profile <IconArrowRight size={14} className="shrink-0" />
             </span>
           </Link>
         </div>

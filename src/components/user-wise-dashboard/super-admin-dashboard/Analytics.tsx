@@ -76,7 +76,7 @@ const CustomBarTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name, value }: any) => {
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, value }: any) => {
   const RADIAN = Math.PI / 180;
   const radius = innerRadius + (outerRadius - innerRadius) * 0.65;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -88,18 +88,18 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
   }
 
   // Hide label if percentage is too small to avoid overlapping
-  if (percent < 0.03) return null;
+  if (percent < 0.05) return null;
 
   // Dynamically set font size based on the slice size
   let fontSize = "10px";
   if (percent >= 0.5) {
-    fontSize = "16px"; // Very large for dominant slices (e.g., 72%)
+    fontSize = "20px"; // Very large for dominant slices (e.g., 72%)
   } else if (percent >= 0.2) {
     fontSize = "16px"; // Medium-large
   } else if (percent >= 0.06) {
-    fontSize = "13px"; // Standard
+    fontSize = "14px"; // Standard
   } else {
-    fontSize = "11px"; // Small for thin slices (e.g., 3-4%)
+    fontSize = "12px"; // Small
   }
 
   return (
@@ -109,11 +109,10 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
       fill="white"
       textAnchor="middle"
       dominantBaseline="central"
-      className="font-black font-orbitron"
+      className="font-black font-orbitron drop-shadow-md"
       style={{ fontSize }}
-      transform={`rotate(${angle}, ${x}, ${y})`}
     >
-      {`${name}: ${value}%`}
+      {`${value}%`}
     </text>
   );
 };
@@ -210,7 +209,7 @@ const SuperAdminAnalytics = () => {
                     cx="50%"
                     cy="45%"
                     innerRadius={0}
-                    outerRadius="95%"
+                    outerRadius="80%"
                     paddingAngle={1}
                     dataKey="value"
                     stroke="none"

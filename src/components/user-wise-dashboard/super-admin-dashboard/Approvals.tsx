@@ -42,6 +42,7 @@ interface StoryRow {
 
 const SuperAdminApprovals = () => {
   const [approvals, setApprovals] = useState<ApprovalRow[]>([]);
+  const [activeTab, setActiveTab] = useState("Academies");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -198,6 +199,13 @@ const SuperAdminApprovals = () => {
     { title: "1-114 Winger Signed by National Talent Centre", role: "Clubs", date: "2023-12-01", status: "Approved" },
   ];
 
+  const filteredApprovals = approvals.filter(item => {
+    if (activeTab === "Academies") return item.role === "Academy";
+    if (activeTab === "Agents") return item.role === "Agent";
+    if (activeTab === "Clubs") return item.role === "Club";
+    return true;
+  });
+
   return (
     <div className="flex flex-col gap-6 sm:gap-8 p-4 sm:p-6 lg:p-8 pb-10 w-full min-w-0 overflow-hidden">
       {/* Header */}
@@ -212,7 +220,16 @@ const SuperAdminApprovals = () => {
           <h2 className="text-lg sm:text-2xl font-black text-white font-orbitron uppercase tracking-tight">Approvals</h2>
           <div className="flex flex-wrap gap-2 w-full sm:w-auto pb-1 sm:pb-0">
             {["Academies", "Agents", "Clubs"].map(tab => (
-              <Button key={tab} variant="outline" className="bg-black/40 border-white/10 h-9 sm:h-10 px-3 sm:px-6 rounded-xl text-white/60 text-[9px] sm:text-[10px] font-black uppercase tracking-wider hover:text-white shrink-0">
+              <Button 
+                key={tab} 
+                onClick={() => setActiveTab(tab)}
+                variant="outline" 
+                className={`border-white/10 h-9 sm:h-10 px-3 sm:px-6 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-wider shrink-0 transition-all ${
+                  activeTab === tab 
+                    ? "bg-white/10 text-white border-white/30" 
+                    : "bg-black/40 text-white/60 hover:text-white"
+                }`}
+              >
                 {tab}
               </Button>
             ))}
@@ -220,7 +237,7 @@ const SuperAdminApprovals = () => {
         </div>
 
         <div className="w-full overflow-x-auto no-scrollbar">
-          <DashboardTable columns={approvalColumns} data={approvals} />
+          <DashboardTable columns={approvalColumns} data={filteredApprovals} />
         </div>
       </div>
 

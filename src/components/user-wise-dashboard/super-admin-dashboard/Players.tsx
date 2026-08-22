@@ -6,7 +6,6 @@ import {
   IconLock,
   IconTrash
 } from "@tabler/icons-react";
-import { Button } from "@/components/ui/button";
 import DashboardTable, { Column } from "@/components/dashboard/DashboardTable";
 const CvPill = ({ type }: { type: "Silver" | "Gold" | "Bronze" }) => {
   const styles = {
@@ -113,11 +112,45 @@ const SuperAdminPlayers = () => {
       <div className="bg-[#111111] border border-white/20 rounded-3xl sm:rounded-[40px] p-4 sm:p-6 md:p-8 flex flex-col gap-6 sm:gap-8 min-w-0 overflow-hidden w-full">
         {/* Table Filters */}
         <div className="flex flex-wrap sm:flex-nowrap sm:justify-end gap-2 sm:gap-3 overflow-x-auto no-scrollbar w-full">
-          {["All Positions", "Country", "Age Range", "All Status"].map((filter) => (
-            <Button key={filter} variant="outline" className="bg-black/40 border-white/20 h-9 sm:h-10 rounded-xl text-white/60 text-[9px] sm:text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 shrink-0">
-              {filter} <IconChevronDown size={14} className="shrink-0" />
-            </Button>
-          ))}
+          <div className="relative shrink-0">
+            <select className="appearance-none bg-black/40 border border-white/20 h-9 sm:h-10 rounded-xl text-white/60 text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-3 sm:px-4 pr-8 sm:pr-10 focus:outline-none focus:border-white/40 transition-colors cursor-pointer">
+              <option value="" className="bg-[#111111] text-white">All Positions</option>
+              <option value="forward" className="bg-[#111111] text-white">Forward</option>
+              <option value="midfielder" className="bg-[#111111] text-white">Midfielder</option>
+              <option value="defender" className="bg-[#111111] text-white">Defender</option>
+              <option value="goalkeeper" className="bg-[#111111] text-white">Goalkeeper</option>
+            </select>
+            <IconChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 pointer-events-none" />
+          </div>
+          <div className="relative shrink-0">
+            <select className="appearance-none bg-black/40 border border-white/20 h-9 sm:h-10 rounded-xl text-white/60 text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-3 sm:px-4 pr-8 sm:pr-10 focus:outline-none focus:border-white/40 transition-colors cursor-pointer">
+              <option value="" className="bg-[#111111] text-white">Country</option>
+              <option value="england" className="bg-[#111111] text-white">England</option>
+              <option value="spain" className="bg-[#111111] text-white">Spain</option>
+              <option value="brazil" className="bg-[#111111] text-white">Brazil</option>
+              <option value="argentina" className="bg-[#111111] text-white">Argentina</option>
+            </select>
+            <IconChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 pointer-events-none" />
+          </div>
+          <div className="relative shrink-0">
+            <select className="appearance-none bg-black/40 border border-white/20 h-9 sm:h-10 rounded-xl text-white/60 text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-3 sm:px-4 pr-8 sm:pr-10 focus:outline-none focus:border-white/40 transition-colors cursor-pointer">
+              <option value="" className="bg-[#111111] text-white">Age Range</option>
+              <option value="u18" className="bg-[#111111] text-white">Under 18</option>
+              <option value="18-21" className="bg-[#111111] text-white">18 - 21</option>
+              <option value="22-25" className="bg-[#111111] text-white">22 - 25</option>
+              <option value="26+" className="bg-[#111111] text-white">26+</option>
+            </select>
+            <IconChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 pointer-events-none" />
+          </div>
+          <div className="relative shrink-0">
+            <select className="appearance-none bg-black/40 border border-white/20 h-9 sm:h-10 rounded-xl text-white/60 text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-3 sm:px-4 pr-8 sm:pr-10 focus:outline-none focus:border-white/40 transition-colors cursor-pointer">
+              <option value="" className="bg-[#111111] text-white">All Status</option>
+              <option value="gold" className="bg-[#111111] text-white">Gold</option>
+              <option value="silver" className="bg-[#111111] text-white">Silver</option>
+              <option value="bronze" className="bg-[#111111] text-white">Bronze</option>
+            </select>
+            <IconChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 pointer-events-none" />
+          </div>
         </div>
         {/* Professional Table */}
         <DashboardTable columns={columns} data={data} />

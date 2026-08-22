@@ -30,7 +30,7 @@ const columns: Column<Player>[] = [
     align: "left",
     render: (row) => (
       <div className="flex items-center gap-3">
-        <Image src={row.avatar} alt={row.name} className="w-10 h-10 rounded-full border border-white/10" />
+        <Image src={row.avatar} alt={row.name} className="w-10 h-10 rounded-full border border-white/10" width={40} height={40}/>
         <div>
           <p className="text-white font-semibold">{row.name}</p>
           <p className="text-[#E31B23] text-xs">{row.position}</p>
@@ -98,16 +98,29 @@ const LikedCVs = () => {
     <div className="p-2 md:p-6 space-y-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white font-orbitron tracking-wide mb-1">Liked CVs</h1>
-        <p className="text-gray-400 text-sm font-medium">Players you've shown interest in</p>
+        <p className="text-gray-400 text-sm font-medium">Players you&apos;ve shown interest in</p>
       </div>
       <div className="bg-[#111111] border border-white/15 rounded-3xl p-6 md:p-8 space-y-6">
         <div className="flex flex-wrap gap-4 justify-end mb-2">
-          <Button variant="outline" className="bg-transparent border-white/10 text-gray-300 hover:bg-white/5 hover:text-white rounded-lg">
-            All Positions <IconChevronDown className="ml-2 w-4 h-4" />
-          </Button>
-          <Button variant="outline" className="bg-transparent border-white/10 text-gray-300 hover:bg-white/5 hover:text-white rounded-lg">
-            All Status <IconChevronDown className="ml-2 w-4 h-4" />
-          </Button>
+          <div className="relative">
+            <select className="appearance-none bg-transparent border border-white/10 text-gray-300 hover:bg-white/5 hover:text-white rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-1 focus:ring-white/20 transition-colors h-10 text-sm font-medium cursor-pointer">
+              <option value="" className="bg-[#111111] text-white">All Positions</option>
+              <option value="forward" className="bg-[#111111] text-white">Forward</option>
+              <option value="midfielder" className="bg-[#111111] text-white">Midfielder</option>
+              <option value="defender" className="bg-[#111111] text-white">Defender</option>
+              <option value="goalkeeper" className="bg-[#111111] text-white">Goalkeeper</option>
+            </select>
+            <IconChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          </div>
+          <div className="relative">
+            <select className="appearance-none bg-transparent border border-white/10 text-gray-300 hover:bg-white/5 hover:text-white rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-1 focus:ring-white/20 transition-colors h-10 text-sm font-medium cursor-pointer">
+              <option value="" className="bg-[#111111] text-white">All Status</option>
+              <option value="gold" className="bg-[#111111] text-white">Gold</option>
+              <option value="silver" className="bg-[#111111] text-white">Silver</option>
+              <option value="bronze" className="bg-[#111111] text-white">Bronze</option>
+            </select>
+            <IconChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          </div>
         </div>
         <DashboardTable columns={columns} data={mockPlayers} />
       </div>

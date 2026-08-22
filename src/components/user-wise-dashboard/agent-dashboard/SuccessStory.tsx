@@ -130,7 +130,7 @@ const SuccessStory = () => {
               <div className="space-y-1.5">
                 <Label className="text-gray-300 text-xs ml-1 font-medium">Signed Club / Achievement</Label>
                 <Select defaultValue="benfica">
-                  <SelectTrigger className="bg-[#111111] border-white/15 text-white h-11 rounded-xl focus:border-white/40 focus:ring-1 focus:ring-white/40">
+                  <SelectTrigger className="w-full bg-[#111111] border-white/15 text-white h-11 rounded-xl focus:border-white/40 focus:ring-1 focus:ring-white/40">
                     <SelectValue placeholder="Select Achievement" />
                   </SelectTrigger>
                   <SelectContent className="bg-[#111111] border-white/15 text-white">
@@ -142,7 +142,7 @@ const SuccessStory = () => {
               <div className="space-y-1.5">
                 <Label className="text-gray-300 text-xs ml-1 font-medium">Category</Label>
                 <Select defaultValue="select">
-                  <SelectTrigger className="bg-[#111111] border-white/15 text-white h-11 rounded-xl focus:border-white/40 focus:ring-1 focus:ring-white/40">
+                  <SelectTrigger className="w-full bg-[#111111] border-white/15 text-white h-11 rounded-xl focus:border-white/40 focus:ring-1 focus:ring-white/40">
                     <SelectValue placeholder="Select Category" />
                   </SelectTrigger>
                   <SelectContent className="bg-[#111111] border-white/15 text-white">
