@@ -57,15 +57,15 @@ const MyImagesAndVideos = () => {
   );
 };
 const MediaSection = ({ title, type, items }: { title: string, type: 'image' | 'video', items: any[] }) => (
-  <div className="p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
-    <div className="flex items-center justify-between mb-8">
+  <div className="p-4 sm:p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
       <div>
-        <h2 className="text-xl font-bold text-white italic uppercase tracking-tight">{title}</h2>
-        <p className="text-sm text-gray-500">Match highlights & training</p>
+        <h2 className="text-lg sm:text-xl font-bold text-white italic uppercase tracking-tight">{title}</h2>
+        <p className="text-xs sm:text-sm text-gray-500">Match highlights & training</p>
       </div>
-      <button className="px-5 py-2.5 rounded-xl bg-white/10 border border-white/20 text-xs font-bold text-white hover:bg-white/20 transition-all flex items-center gap-2">
-        {type === 'image' ? <IconPlus size={16} /> : <IconUpload size={16} />}
-        {type === 'image' ? 'Upload Image' : 'Upload Video'}
+      <button className="w-full sm:w-auto justify-center px-5 py-2.5 rounded-xl bg-white/10 border border-white/20 text-xs font-bold text-white hover:bg-white/20 transition-all flex items-center gap-2 shrink-0">
+        {type === 'image' ? <IconPlus size={16} className="shrink-0" /> : <IconUpload size={16} className="shrink-0" />}
+        <span>{type === 'image' ? 'Upload Image' : 'Upload Video'}</span>
       </button>
     </div>
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

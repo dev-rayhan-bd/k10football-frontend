@@ -90,12 +90,12 @@ const CoachClubsSection = ({ editable = true }: { editable?: boolean }) => {
 
   return (
     <div className="container py-10 bg-cardBg rounded-xl mt-10">
-      <div className="flex justify-between items-center mb-8">
-        <div className="flex items-center gap-2">
-          <Info size={14} className="text-gray-400" />
-          <span className="text-xs text-gray-400">{clubCount}/6 Clubs</span>
+      <div className="flex justify-between items-center mb-8 gap-2">
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          <Info size={14} className="text-gray-400 shrink-0" />
+          <span className="text-[10px] sm:text-xs text-gray-400 whitespace-nowrap">{clubCount}/6 Clubs</span>
         </div>
-        <h1 className="text-4xl font-light text-center text-foreground font-heading">Clubs</h1>
+        <h1 className="text-2xl sm:text-4xl font-light text-center text-foreground font-heading shrink-0 min-w-0 truncate">Clubs</h1>
         {canEdit ? (
           <Button
             onClick={() => {
@@ -107,15 +107,15 @@ const CoachClubsSection = ({ editable = true }: { editable?: boolean }) => {
             }}
             disabled={isLimitReached && !isAdding}
             className={cn(
-              "text-black transition-all font-bold",
+              "text-black transition-all font-bold shrink-0 px-2 sm:px-4",
               isLimitReached ? "bg-gray-600 cursor-not-allowed" : "bg-primary hover:bg-primary/90"
             )}
             size="sm"
           >
-            <Plus className="h-4 w-4 mr-2" /> Add Club
+            <Plus className="h-4 w-4 sm:mr-2 shrink-0" /> <span className="hidden sm:inline">Add Club</span>
           </Button>
         ) : (
-          <div className="w-10" />
+          <div className="w-8 sm:w-24 shrink-0" />
         )}
       </div>
 

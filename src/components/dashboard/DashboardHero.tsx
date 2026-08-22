@@ -48,7 +48,7 @@ const DashboardHero = ({
     <div className="relative rounded-3xl overflow-hidden min-h-125 border border-white/20 bg-[#0D0D0D] group flex flex-col justify-center">
       {/* Background Image */}
       <div
-        className="absolute inset-0 bg-size-[100%_auto] bg-no-repeat bg-center opacity-50"
+        className="absolute inset-0 bg-cover bg-no-repeat bg-center opacity-50"
         style={{ backgroundImage: `url(${backgroundImage})` }}
       />
       <div className="absolute inset-0 bg-linear-to-r from-black/60 via-black/20 to-transparent w-2/3" />

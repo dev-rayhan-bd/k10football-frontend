@@ -143,6 +143,11 @@ const TestimonialCard = ({ testimonial }: { testimonial: any }) => (
       width={200}
       height={200}
       className="w-14 h-14 rounded-full object-cover border border-gray-700"
+      onError={(e) => {
+        const target = e.target as HTMLImageElement;
+        target.srcset = "";
+        target.src = "/placeholder_img.jpg";
+      }}
     />
     <div className="flex-1">
       <p className="text-white font-semibold text-sm">{testimonial.name}</p>
@@ -257,7 +262,7 @@ return (
 
     {/* First Marquee Row */}
     <div className="mb-8">
-      <Marquee gradient gradientColor="#000000" pauseOnHover speed={40}>
+      <Marquee gradient gradientColor="#000000" gradientWidth={50} pauseOnHover speed={40}>
         {(testimonials.slice(0, Math.ceil(testimonials.length / 2)) || []).map((testimonial) => (
           <div key={testimonial.id} className="mr-6">
             <TestimonialCard testimonial={testimonial} />
@@ -268,7 +273,7 @@ return (
 
     {/* Second Marquee Row */}
     <div>
-      <Marquee gradient gradientColor="#000000" pauseOnHover speed={40} direction="right">
+      <Marquee gradient gradientColor="#000000" gradientWidth={50} pauseOnHover speed={40} direction="right">
         {(testimonials.slice(Math.ceil(testimonials.length / 2)) || []).map((testimonial) => (
           <div key={testimonial.id} className="mr-6">
             <TestimonialCard testimonial={testimonial} />

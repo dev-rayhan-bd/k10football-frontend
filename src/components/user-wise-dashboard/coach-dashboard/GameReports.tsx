@@ -1,24 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import Image from "next/image";
-import React, { useState } from "react";
 import {
   IconFileText,
   IconCircleCheck,
   IconClock,
   IconCalendar,
-  IconPlus,
 } from "@tabler/icons-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import DashboardTable, { Column } from "@/components/dashboard/DashboardTable";
 import TableActionButtons from "@/components/dashboard/TableActionButtons";
-const stats = [
-  { label: "Total Reports", value: "6", icon: IconFileText },
-  { label: "Completed", value: "5", icon: IconCircleCheck },
-  { label: "Pending", value: "1", icon: IconClock },
-  { label: "This Month", value: "22", icon: IconCalendar },
-];
 import { usePlayer } from "@/lib/hooks/usePlayer";
-import { MatchStats } from "@/lib/constants/reports";
 import { useAppSelector } from "@/lib/hooks/reduxHooks";
 const GameReports = () => {
   const router = useRouter();
@@ -93,7 +85,7 @@ const GameReports = () => {
         const avatar = player && typeof player.playerImage === "string" ? player.playerImage : "https://i.pravatar.cc/150?u=" + (row.playerId || 1);
         return (
           <div className="flex items-center gap-3">
-            <Image src={avatar} className="w-10 h-10 rounded-full object-cover" alt={row.playerName || "Player"} />
+            <Image src={avatar} className="w-10 h-10 rounded-full object-cover" alt={row.playerName || "Player"} width={40} height={40}/>
             <div>
               <div className="text-sm font-bold text-white">{row.playerName || "Marcus Silva"}</div>
               <div className="text-[10px] text-red-500 font-bold uppercase tracking-widest">{row.playerPosition}</div>
@@ -113,10 +105,10 @@ const GameReports = () => {
         return <span className="text-sm font-black text-red-600 italic">{(row.rating * 10).toFixed(0)}</span>;
       },
     },
-    { 
-      header: "Matches", 
-      key: "team2", 
-      align: "center", 
+    {
+      header: "Matches",
+      key: "team2",
+      align: "center",
       cellClassName: "text-sm text-gray-400",
       render: (row) => {
         if (row.status === "Pending") {
@@ -125,20 +117,20 @@ const GameReports = () => {
         return `${row.team1} vs ${row.team2}`;
       }
     },
-    { 
-      header: "Goals", 
-      key: "goals", 
-      align: "center", 
+    {
+      header: "Goals",
+      key: "goals",
+      align: "center",
       cellClassName: "text-sm text-gray-400",
       render: (row) => {
         if (row.status === "Pending") return <span className="text-gray-600">—</span>;
         return row.goals;
       }
     },
-    { 
-      header: "Assists", 
-      key: "assists", 
-      align: "center", 
+    {
+      header: "Assists",
+      key: "assists",
+      align: "center",
       cellClassName: "text-sm text-gray-400",
       render: (row) => {
         if (row.status === "Pending") return <span className="text-gray-600">—</span>;
@@ -151,9 +143,8 @@ const GameReports = () => {
       header: "Status",
       key: "status",
       render: (row) => (
-        <span className={`px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
-          row.status === 'Paid' ? 'bg-green-500/10 text-green-500' : 'bg-orange-500/10 text-orange-500'
-        }`}>
+        <span className={`px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${row.status === 'Paid' ? 'bg-green-500/10 text-green-500' : 'bg-orange-500/10 text-orange-500'
+          }`}>
           {row.status === 'Paid' ? 'Completed' : 'Pending'}
         </span>
       ),
@@ -187,8 +178,8 @@ const GameReports = () => {
       {playerId && (
         <div className="p-4 rounded-2xl bg-sky-500/10 border border-sky-500/20 text-sky-400 text-sm flex items-center justify-between shadow-lg">
           <span>Showing reports for player: <strong>{players.find(p => p.id === Number(playerId))?.fullName || "Marcus Silva"}</strong></span>
-          <button 
-            onClick={() => router.push('/dashboard/coach/game-reports')} 
+          <button
+            onClick={() => router.push('/dashboard/coach/game-reports')}
             className="text-xs uppercase font-black tracking-widest text-white hover:text-gray-200 underline font-orbitron"
           >
             Clear Filter
@@ -211,10 +202,10 @@ const GameReports = () => {
         ))}
       </div>
       <div className="p-8 rounded-3xl border border-white/20 bg-[#0D0D0D]">
-        <DashboardTable 
-          columns={columns} 
-          data={filteredRows} 
-          className="border-white/10" 
+        <DashboardTable
+          columns={columns}
+          data={filteredRows}
+          className="border-white/10"
           onRowClick={(row) => {
             if (row.status === "Pending") {
               router.push(`/dashboard/coach/game-reports/create?playerId=${row.playerId}&requestId=${row.requestId}`);

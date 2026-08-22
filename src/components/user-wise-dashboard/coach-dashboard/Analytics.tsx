@@ -1,10 +1,9 @@
 "use client";
-import React from "react";
-import { 
-  Radar, 
-  RadarChart, 
-  PolarGrid, 
-  PolarAngleAxis, 
+import {
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
   ResponsiveContainer,
   PieChart,
   Pie,
@@ -73,13 +72,13 @@ const Analytics = () => {
 
       {/* Top Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
+        <div className="p-4 sm:p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
           <h3 className="text-sm font-bold text-white mb-8 uppercase tracking-widest italic">Coach Profile Analysis</h3>
-          <div className="h-[350px]">
+          <div className="h-87.5">
             <ResponsiveContainer width="100%" height="100%">
-              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={profileAnalysisData}>
+              <RadarChart cx="50%" cy="50%" outerRadius="65%" data={profileAnalysisData}>
                 <PolarGrid stroke="#333" />
-                <PolarAngleAxis dataKey="subject" tick={{ fill: '#999', fontSize: 11, fontWeight: 'black' }} />
+                <PolarAngleAxis dataKey="subject" tick={{ fill: '#999', fontSize: 10, fontWeight: 'black' }} />
                 <Radar
                   name="Coach"
                   dataKey="A"
@@ -94,7 +93,7 @@ const Analytics = () => {
 
         <div className="p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
           <h3 className="text-sm font-bold text-white mb-8 uppercase tracking-widest italic">Tournament Stats</h3>
-          <div className="h-[350px]">
+          <div className="h-87.5">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -134,12 +133,12 @@ const Analytics = () => {
                     <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
                   ))}
                 </Pie>
-                <Tooltip 
+                <Tooltip
                   contentStyle={{ backgroundColor: '#111', border: '1px solid #333', color: '#fff' }}
                   itemStyle={{ color: '#fff' }}
                 />
-                <Legend 
-                  verticalAlign="bottom" 
+                <Legend
+                  verticalAlign="bottom"
                   align="center"
                   iconType="square"
                   iconSize={8}
@@ -153,28 +152,28 @@ const Analytics = () => {
       </div>
 
       {/* Bar Chart Section */}
-      <div className="p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
+      <div className="p-4 sm:p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
         <h3 className="text-sm font-bold text-white mb-8 uppercase tracking-widest italic">Major Trophies</h3>
-        <div className="h-[400px] w-full">
+        <div className="h-75 sm:h-100 w-full min-w-0">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={barChartData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
+            <BarChart data={barChartData} margin={{ top: 20, right: 30, left: -25, bottom: 20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
-              <XAxis 
-                dataKey="name" 
-                axisLine={false} 
-                tickLine={false} 
-                tick={{ fill: '#444', fontSize: 9, fontWeight: 'black' }} 
+              <XAxis
+                dataKey="name"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#888', fontSize: 9, fontWeight: 'black' }}
                 dy={15}
               />
-              <YAxis 
-                axisLine={false} 
-                tickLine={false} 
-                tick={{ fill: '#444', fontSize: 10 }}
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#888', fontSize: 10 }}
               />
-              <Tooltip 
+              <Tooltip
                 cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                contentStyle={{ 
-                  backgroundColor: '#000', 
+                contentStyle={{
+                  backgroundColor: '#000',
                   border: '1px solid rgba(255,255,255,0.1)',
                   borderRadius: '12px',
                   padding: '10px 15px',
@@ -183,9 +182,9 @@ const Analytics = () => {
                 itemStyle={{ color: '#E31B23', fontSize: '12px', fontWeight: 'bold' }}
                 labelStyle={{ color: '#888', fontSize: '10px', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.1em' }}
               />
-              <Bar 
-                dataKey="value" 
-                radius={[15, 15, 0, 0]} 
+              <Bar
+                dataKey="value"
+                radius={[15, 15, 0, 0]}
                 barSize={35}
               >
                 {barChartData.map((entry, index) => (
@@ -199,9 +198,9 @@ const Analytics = () => {
 
       {/* Trophies Table Section */}
       <div className="p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
-        <DashboardTable 
-          columns={trophyColumns} 
-          data={trophyStats} 
+        <DashboardTable
+          columns={trophyColumns}
+          data={trophyStats}
           className="border-white/10"
         />
       </div>

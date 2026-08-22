@@ -312,10 +312,10 @@ const CoachDashboard = () => {
                   <IconPlus size={16} /> Add Player
                 </button>
               </div>
-              <DashboardTable 
-                columns={teamColumns} 
-                data={teamData} 
-                className="border-white/20" 
+              <DashboardTable
+                columns={teamColumns}
+                data={teamData}
+                className="border-white/20"
                 onRowClick={(player) => router.push(`/dashboard/coach/game-reports?playerId=${player.id}`)}
               />
             </div>
@@ -333,8 +333,8 @@ const CoachDashboard = () => {
             </div>
             <div className="space-y-4">
               {requests.filter(req => req.status === 'Pending').map((req) => (
-                <div 
-                  key={req.id} 
+                <div
+                  key={req.id}
                   onClick={() => router.push(`/dashboard/coach/game-reports/create?playerId=${req.playerId}&requestId=${req.id}`)}
                   className="flex items-center justify-between p-3 rounded-xl bg-white/10 border border-white/20 group hover:border-[#E31B23]/50 transition-colors cursor-pointer"
                 >
@@ -411,12 +411,12 @@ const MediaBlock = ({ title, type, items }: { title: string, type: 'image' | 'vi
       {items.map((item, idx) => (
         <div key={idx} className="group relative rounded-xl overflow-hidden border border-white/20 bg-[#111]">
           <div className="relative aspect-video overflow-hidden">
-            <Image 
-              width={100} 
-              height={100} 
-              src={item.img} 
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-60" 
-              alt={item.title} 
+            <Image
+              width={100}
+              height={100}
+              src={item.img}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-60"
+              alt={item.title}
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.onerror = null;

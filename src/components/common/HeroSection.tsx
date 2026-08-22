@@ -1,5 +1,6 @@
 "use client"
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import bg_image from "@/assets/home/hero_bg.png"
 import ButtonPrimary from "@/components/shared/ButtonPrimary";
@@ -30,9 +31,9 @@ const HeroSection = () => {
             </p>
             {/* CTA Buttons */}
             <div className="flex flex-col w-full sm:w-auto sm:flex-row gap-4 justify-center pt-4 px-4 sm:px-0">
-              <div className="w-full sm:w-auto">
+              <Link href="/register" className="w-full sm:w-auto">
                 <ButtonPrimary text="Join Now" className="w-full px-8 py-6 text-base font-semibold border-2 border-primary" />
-              </div>
+              </Link>
               <Button className="w-full sm:w-auto bg-transparent cursor-pointer border-2 border-white text-white hover:bg-white hover:text-black rounded-lg px-8 py-6 text-base font-semibold transition">
                 Watch Demo
               </Button>

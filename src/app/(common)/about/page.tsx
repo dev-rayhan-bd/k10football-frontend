@@ -1,5 +1,3 @@
-import Image from "next/image";
-import React from "react";
 import ServiceSection from "@/components/about/ServiceSection";
 import OutStorySection from "@/components/about/OutStorySection";
 import OutValueSection from "@/components/about/OutValueSection";
@@ -10,7 +8,7 @@ import StartJourneySection from "@/components/common/StartJourneySection";
 
 const AboutPage = () => {
   return (
-    <div>
+    <div className="w-full overflow-hidden min-w-0">
       <ServiceSection />
       <OutStorySection/>
       <OutValueSection/>
