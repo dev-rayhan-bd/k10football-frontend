@@ -114,7 +114,7 @@ const DashboardCharts = () => {
   return (
     <div className="flex flex-col gap-8">
       {/* Bar Chart - Game Reports Engagement */}
-      <div className="bg-white/1 border border-white/5 p-8 rounded-3xl space-y-6">
+      <div className="bg-white/1 border border-white/5 p-4 sm:p-8 rounded-3xl space-y-6">
         <div className="flex justify-between items-center">
           <h3 className="text-xl font-black uppercase text-white font-orbitron">Game Reports Engagement</h3>
         </div>
@@ -140,13 +140,13 @@ const DashboardCharts = () => {
       </div>
 
       {/* Age Category */}
-      <div className="bg-white/1 border border-white/5 p-8 rounded-3xl space-y-6">
+      <div className="bg-white/1 border border-white/5 p-4 sm:p-8 rounded-3xl space-y-6">
         <div className="flex justify-between items-center">
           <h3 className="text-xl font-black uppercase text-white font-orbitron">Age Category</h3>
         </div>
         <div className="h-62.5 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={ageGroups} margin={{ top: 10, right: 15, left: 15, bottom: 5 }}>
+            <BarChart data={ageGroups} margin={{ top: 10, right: 0, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
               <XAxis 
                 dataKey="category" 

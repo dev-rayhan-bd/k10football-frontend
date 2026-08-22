@@ -265,9 +265,9 @@ export const TrainingSessions = () => {
             </div>
           </div>
           {/* Player Grid Header & Quick Actions */}
-          <div className="flex justify-between items-center bg-white/2 border-y border-white/10 -mx-10 px-10 py-4">
-            <div className="flex items-center gap-4">
-              <span className="text-[11px] font-bold text-white/40 uppercase tracking-widest">Quick actions:</span>
+          <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white/2 border-y border-white/10 -mx-4 sm:-mx-6 lg:-mx-10 px-4 sm:px-6 lg:px-10 py-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-[11px] font-bold text-white/40 uppercase tracking-widest w-full sm:w-auto mb-2 sm:mb-0">Quick actions:</span>
               <button 
                 onClick={() => markAll('present')}
                 className="bg-[#4ADE80]/10 hover:bg-[#4ADE80]/20 border border-[#4ADE80]/20 rounded-xl px-4 py-2 flex items-center gap-2 text-[10px] font-black text-[#4ADE80] uppercase tracking-widest transition-all"
@@ -289,9 +289,9 @@ export const TrainingSessions = () => {
                 Clear All
               </button>
             </div>
-            <div className="relative">
+            <div className="relative w-full xl:w-auto mt-2 xl:mt-0">
               <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20" size={16} />
-              <input type="text" placeholder="Search" className="bg-white/5 border border-white/15 rounded-xl py-2 pl-10 pr-4 text-xs text-white focus:outline-none focus:border-white/25 w-48" />
+              <input type="text" placeholder="Search" className="bg-white/5 border border-white/15 rounded-xl py-2 pl-10 pr-4 text-xs text-white focus:outline-none focus:border-white/25 w-full xl:w-48" />
             </div>
           </div>
           {/* Players List */}
@@ -299,18 +299,18 @@ export const TrainingSessions = () => {
             {players.map((p, index) => (
               <div 
                 key={p.id} 
-                className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${
+                className={`flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-2xl border transition-all ${
                   p.status === 'present' ? 'bg-[#4ADE80]/5 border-[#4ADE80]/20' :
                   p.status === 'late' ? 'bg-[#FBBF24]/5 border-[#FBBF24]/20' :
                   p.status === 'absent' ? 'bg-[#E31B23]/5 border-[#E31B23]/20' :
                   'bg-white/1 border-white/5 hover:bg-white/3'
                 }`}
               >
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-4 sm:gap-6">
                   <span className="w-6 text-[11px] font-black text-white/20">{index + 1}</span>
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-full overflow-hidden border border-white/15 shrink-0">
-                      <Image src={p.avatar} alt={p.name} className="w-full h-full object-cover" />
+                      <Image src={p.avatar} alt={p.name} className="w-full h-full object-cover" width={100} height={100}/>
                     </div>
                     <div>
                       <p className="text-sm font-black text-white leading-none mb-1">{p.name}</p>
@@ -318,10 +318,10 @@ export const TrainingSessions = () => {
                     </div>
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap sm:flex-nowrap gap-2 md:justify-end mt-2 md:mt-0 w-full md:w-auto">
                   <button 
                     onClick={() => handleStatusChange(p.id, 'present')}
-                    className={`px-4 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all ${
+                    className={`flex-1 sm:flex-none justify-center px-3 sm:px-4 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest flex items-center gap-1 sm:gap-2 transition-all ${
                       p.status === 'present' ? 'bg-[#4ADE80] text-black border-[#4ADE80]' : 'bg-white/5 text-white/40 border-white/10 hover:bg-white/10'
                     }`}
                   >
@@ -330,7 +330,7 @@ export const TrainingSessions = () => {
                   </button>
                   <button 
                     onClick={() => handleStatusChange(p.id, 'late')}
-                    className={`px-4 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all ${
+                    className={`flex-1 sm:flex-none justify-center px-3 sm:px-4 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest flex items-center gap-1 sm:gap-2 transition-all ${
                       p.status === 'late' ? 'bg-[#FBBF24] text-black border-[#FBBF24]' : 'bg-white/5 text-white/40 border-white/10 hover:bg-white/10'
                     }`}
                   >
@@ -339,7 +339,7 @@ export const TrainingSessions = () => {
                   </button>
                   <button 
                     onClick={() => handleStatusChange(p.id, 'absent')}
-                    className={`px-4 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all ${
+                    className={`flex-1 sm:flex-none justify-center px-3 sm:px-4 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest flex items-center gap-1 sm:gap-2 transition-all ${
                       p.status === 'absent' ? 'bg-[#E31B23] text-white border-[#E31B23]' : 'bg-white/5 text-white/40 border-white/10 hover:bg-white/10'
                     }`}
                   >

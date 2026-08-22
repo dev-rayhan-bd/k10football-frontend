@@ -107,18 +107,20 @@ const Analytics = () => {
       {/* Main Charts Section */}
       <div className="flex flex-col gap-8">
         {/* Age Category */}
-        <div className="bg-[#111111] border border-white/20 rounded-3xl md:rounded-[40px] p-6 md:p-10 flex flex-col gap-6 md:gap-8">
-           <h2 className="text-xl md:text-2xl font-black text-white font-orbitron uppercase tracking-tight">Age Category</h2>
-           <div className="h-75 w-full">
+        <div className="bg-[#111111] border border-white/20 rounded-3xl md:rounded-[40px] p-3 sm:p-6 md:p-10 flex flex-col gap-6 md:gap-8 overflow-hidden">
+           <h2 className="text-xl md:text-2xl font-black text-white font-orbitron uppercase tracking-tight px-1">Age Category</h2>
+           <div className="h-[300px] sm:h-[400px] w-full min-w-0">
               <ResponsiveContainer width="100%" height="100%">
-                 <BarChart data={ageGroups} margin={{ top: 10, right: 15, left: 15, bottom: 5 }}>
+                 <BarChart data={ageGroups} margin={{ top: 10, right: 15, left: -25, bottom: 25 }}>
                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
                    <XAxis 
                      dataKey="category" 
                      axisLine={false} 
                      tickLine={false} 
-                     tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10 }} 
+                     tick={{ fill: '#888', fontSize: 9 }} 
                      interval={0}
+                     angle={-45}
+                     textAnchor="end"
                      padding={{ left: 10, right: 10 }}
                      tickMargin={8}
                    />
@@ -141,9 +143,9 @@ const Analytics = () => {
         {/* Bottom Charts Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
            {/* CV Status Distribution */}
-           <div className="bg-[#111111] border border-white/20 rounded-3xl md:rounded-[40px] p-6 md:p-10 flex flex-col gap-6 md:gap-8">
-              <h2 className="text-xl md:text-2xl font-black text-white font-orbitron uppercase tracking-tight text-center md:text-left">CV Status Distribution</h2>
-              <div className="h-100 w-full relative flex flex-col items-center justify-center">
+           <div className="bg-[#111111] border border-white/20 rounded-3xl md:rounded-[40px] p-3 sm:p-6 md:p-10 flex flex-col gap-6 md:gap-8 overflow-hidden">
+              <h2 className="text-xl md:text-2xl font-black text-white font-orbitron uppercase tracking-tight text-center md:text-left px-1">CV Status Distribution</h2>
+              <div className="h-[300px] sm:h-[400px] w-full relative flex flex-col items-center justify-center min-w-0">
                  <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                        <Pie
@@ -179,26 +181,24 @@ const Analytics = () => {
            </div>
 
            {/* Game Reports Engagement */}
-           <div className="bg-[#111111] border border-white/20 rounded-3xl md:rounded-[40px] p-6 md:p-10 flex flex-col gap-6 md:gap-8">
-              <h2 className="text-xl md:text-2xl font-black text-white font-orbitron uppercase tracking-tight">Game Reports Engagement</h2>
-              <div className="h-100 w-full">
+           <div className="bg-[#111111] border border-white/20 rounded-3xl md:rounded-[40px] p-3 sm:p-6 md:p-10 flex flex-col gap-6 md:gap-8 overflow-hidden">
+              <h2 className="text-xl md:text-2xl font-black text-white font-orbitron uppercase tracking-tight px-1">Game Reports Engagement</h2>
+              <div className="h-[300px] sm:h-[400px] w-full min-w-0">
                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={engagementData}>
+                    <BarChart data={engagementData} margin={{ top: 10, right: 15, left: -25, bottom: 10 }}>
                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
                        <XAxis 
                          dataKey="name" 
-                         stroke="#ffffff40" 
-                         fontSize={12} 
+                         tick={{ fill: '#888', fontSize: 10 }} 
                          tickLine={false} 
                          axisLine={false}
+                         interval="preserveStartEnd"
                          dy={10}
                        />
                        <YAxis 
-                         stroke="#ffffff40" 
-                         fontSize={12} 
+                         tick={{ fill: '#888', fontSize: 10 }} 
                          tickLine={false} 
                          axisLine={false}
-                         dx={-10}
                        />
                        <Tooltip 
                          cursor={{ fill: 'rgba(255,255,255,0.05)' }}

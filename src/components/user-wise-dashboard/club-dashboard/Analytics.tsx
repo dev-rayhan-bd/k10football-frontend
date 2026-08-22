@@ -115,12 +115,12 @@ const Analytics = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
         <div className="p-4 sm:p-6 md:p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
           <h3 className="text-xs sm:text-sm font-bold text-white mb-6 sm:mb-8 uppercase tracking-widest italic">Players & Coaches Monitored</h3>
-          <div className="h-75">
+          <div className="h-75 sm:h-100 w-full min-w-0">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={timelineData} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
+              <LineChart data={timelineData} margin={{ top: 10, right: 15, left: -25, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#444', fontSize: 10 }} tickMargin={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#444', fontSize: 10 }} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#888', fontSize: 10 }} tickMargin={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#888', fontSize: 10 }} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#000', border: '1px solid #333', borderRadius: '12px' }}
                   itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
@@ -133,12 +133,12 @@ const Analytics = () => {
         </div>
         <div className="p-4 sm:p-6 md:p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
           <h3 className="text-xs sm:text-sm font-bold text-white mb-6 sm:mb-8 uppercase tracking-widest italic">Position Interest Distribution</h3>
-          <div className="h-75">
+          <div className="h-75 sm:h-100 w-full min-w-0">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={distributionData} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
+              <BarChart data={distributionData} margin={{ top: 10, right: 15, left: -25, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#444', fontSize: 10 }} tickMargin={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#444', fontSize: 10 }} domain={[0, 100]} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#888', fontSize: 10 }} tickMargin={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#888', fontSize: 10 }} domain={[0, 100]} />
                 <Tooltip 
                   cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                   contentStyle={{ backgroundColor: '#000', border: '1px solid #333', borderRadius: '12px' }}
@@ -153,10 +153,10 @@ const Analytics = () => {
           </div>
         </div>
       </div>
-      <div className="p-4 sm:p-6 md:p-8 rounded-2xl border border-white/20 bg-[#0D0D0D]">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
-          <h3 className="text-lg sm:text-xl font-bold text-white italic uppercase tracking-tight">Top Players Engaged</h3>
-          <div className="flex flex-wrap gap-2 sm:gap-3">
+      <div className="p-3 sm:p-6 md:p-8 rounded-2xl border border-white/20 bg-[#0D0D0D] overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-8">
+          <h3 className="text-base sm:text-xl font-bold text-white italic uppercase tracking-tight px-1">Top Players Engaged</h3>
+          <div className="flex flex-wrap gap-2 sm:gap-3 px-1">
              <FilterButton label="All Positions" />
              <FilterButton label="Country" />
              <FilterButton label="Age Range" />

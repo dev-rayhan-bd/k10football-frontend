@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import DashboardModal from "@/components/dashboard/DashboardModal";
 import {
   IconPlus,
@@ -60,6 +60,7 @@ const products = [
 ];
 export const ProductStoreManagement = () => {
   const [showAddModal, setShowAddModal] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedSizes, setSelectedSizes] = useState<string[]>(["XS", "S", "M", "XL"]);
   const [selectedColors, setSelectedColors] = useState<string[]>(["Black", "White", "Red"]);
   const toggleSize = (size: string) => {
@@ -170,7 +171,7 @@ export const ProductStoreManagement = () => {
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
                   Product Name <span className="text-[#E31B23]">*</span>
                 </label>
-                <textarea placeholder="e.g., Official Home Jersey 2024" className="w-full bg-[#111111] border border-white/15 rounded-xl py-4 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all resize-none h-24" />
+                <textarea placeholder="e.g., Official Home Jersey 2024" className="w-full bg-[#111111] border border-white/15 rounded-xl py-4 px-4 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-white/25 transition-all resize-none h-24" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
@@ -186,8 +187,8 @@ export const ProductStoreManagement = () => {
                 </div>
                 <div className="space-y-2">
                   <label className="text-[11px] font-black uppercase tracking-widest text-white/60">SKU (Stock Keeping Unit)</label>
-                  <input type="text" placeholder="e.g., JER-HOME-2024" className="w-full bg-[#111111] border border-white/15 rounded-xl py-4 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all" />
-                  <p className="text-[9px] text-white/20 font-bold uppercase tracking-widest mt-1">Leave blank to auto-generate</p>
+                  <input type="text" placeholder="e.g., JER-HOME-2024" className="w-full bg-[#111111] border border-white/15 rounded-xl py-4 px-4 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-white/25 transition-all" />
+                  <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest mt-1">Leave blank to auto-generate</p>
                 </div>
               </div>
             </div>
@@ -201,15 +202,15 @@ export const ProductStoreManagement = () => {
                   Regular Price <span className="text-[#E31B23]">*</span>
                 </label>
                 <div className="relative">
-                  <input type="text" placeholder="0.00" className="w-full bg-[#111111] border border-white/15 rounded-xl py-4 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all" />
+                  <input type="text" placeholder="0.00" className="w-full bg-[#111111] border border-white/15 rounded-xl py-4 px-4 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-white/25 transition-all" />
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/60">Sale Price</label>
                 <div className="relative">
-                  <input type="text" placeholder="0.00" className="w-full bg-[#111111] border border-white/15 rounded-xl py-4 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all" />
+                  <input type="text" placeholder="0.00" className="w-full bg-[#111111] border border-white/15 rounded-xl py-4 px-4 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-white/25 transition-all" />
                 </div>
-                <p className="text-[9px] text-white/20 font-bold uppercase tracking-widest mt-1">Leave blank if not on sale</p>
+                <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest mt-1">Leave blank if not on sale</p>
               </div>
             </div>
           </div>
@@ -220,14 +221,14 @@ export const ProductStoreManagement = () => {
               <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
                 Product Description <span className="text-[#E31B23]">*</span>
               </label>
-              <textarea placeholder="Describe the product features, materials, care instructions, etc." className="w-full bg-[#111111] border border-white/15 rounded-xl py-4 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all resize-none h-32" />
+              <textarea placeholder="Describe the product features, materials, care instructions, etc." className="w-full bg-[#111111] border border-white/15 rounded-xl py-4 px-4 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-white/25 transition-all resize-none h-32" />
             </div>
           </div>
           {/* Available Sizes */}
           <div className="space-y-4 md:space-y-6 bg-[#0A0A0A] border border-white/15 rounded-3xl md:rounded-4xl p-5 md:p-8 min-w-0 w-full">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Available Sizes</h3>
             <div className="space-y-4">
-              <p className="text-[11px] font-bold text-white/20 uppercase tracking-widest">Select all sizes available for this product</p>
+              <p className="text-[11px] font-bold text-white/40 uppercase tracking-widest">Select all sizes available for this product</p>
               <div className="flex flex-wrap gap-3">
                 {["XS", "S", "M", "L", "XL", "XXL"].map((size) => (
                   <button
@@ -248,7 +249,7 @@ export const ProductStoreManagement = () => {
           <div className="space-y-4 md:space-y-6 bg-[#0A0A0A] border border-white/15 rounded-3xl md:rounded-4xl p-5 md:p-8 min-w-0 w-full">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Available Colors</h3>
             <div className="space-y-4">
-              <p className="text-[11px] font-bold text-white/20 uppercase tracking-widest">Select all colors available for this product</p>
+              <p className="text-[11px] font-bold text-white/40 uppercase tracking-widest">Select all colors available for this product</p>
               <div className="flex flex-wrap gap-3">
                 {["Black", "White", "Red", "Blue", "Green", "Yellow"].map((color) => (
                   <button
@@ -268,22 +269,22 @@ export const ProductStoreManagement = () => {
           {/* Inventory Management */}
           <div className="space-y-4 md:space-y-6 bg-[#0A0A0A] border border-white/15 rounded-3xl md:rounded-4xl p-5 md:p-8 min-w-0 w-full">
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Inventory Management</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
                   Stock Quantity <span className="text-[#E31B23]">*</span>
                 </label>
-                <input type="text" placeholder="0" className="w-full bg-[#111111] border border-white/15 rounded-xl py-4 px-4 text-sm text-white focus:outline-none focus:border-white/25 transition-all" />
+                <input type="text" placeholder="0" className="w-full bg-[#111111] border border-white/15 rounded-xl py-4 px-4 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-white/25 transition-all" />
               </div>
               <div className="space-y-2">
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/60">Minimum Stock Level</label>
-                <input type="text" placeholder="0" className="w-full bg-[#111111] border border-white/15 rounded-xl py-4 px-4 text-sm text-white focus:outline-none focus:border-white/25 transition-all" />
-                <p className="text-[9px] text-white/20 font-bold uppercase tracking-widest mt-1 text-center">Alert when stock falls below this level</p>
+                <input type="text" placeholder="0" className="w-full bg-[#111111] border border-white/15 rounded-xl py-4 px-4 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-white/25 transition-all" />
+                <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest mt-1 text-left">Alert when stock falls below this level</p>
               </div>
               <div className="space-y-2">
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/60">Max Order Quantity</label>
-                <input type="text" placeholder="0" className="w-full bg-[#111111] border border-white/15 rounded-xl py-4 px-4 text-sm text-white focus:outline-none focus:border-white/25 transition-all" />
-                <p className="text-[9px] text-white/20 font-bold uppercase tracking-widest mt-1 text-center">Maximum per customer</p>
+                <input type="text" placeholder="0" className="w-full bg-[#111111] border border-white/15 rounded-xl py-4 px-4 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-white/25 transition-all" />
+                <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest mt-1 text-left">Maximum per customer</p>
               </div>
             </div>
           </div>
@@ -292,10 +293,14 @@ export const ProductStoreManagement = () => {
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Product Image</h3>
             <div className="space-y-2">
               <label className="text-[11px] font-black uppercase tracking-widest text-white/60">Upload Image</label>
-              <div className="w-full border-2 border-dashed border-white/15 rounded-4xl p-12 flex flex-col items-center justify-center gap-4 hover:border-white/25 transition-all cursor-pointer bg-white/1">
-                <IconUpload size={32} className="text-white/20" />
-                <p className="text-sm font-bold text-white/60">Click to upload or drag and drop image/*</p>
-                <p className="text-[9px] text-white/20 font-bold uppercase tracking-widest">Recommended: Square image, at least 800x800 pixels</p>
+              <div 
+                className="w-full border-2 border-dashed border-white/20 rounded-4xl p-6 md:p-12 flex flex-col items-center justify-center gap-4 hover:border-white/30 hover:bg-white/5 transition-all cursor-pointer bg-[#111111]"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" />
+                <IconUpload size={32} className="text-white/60" />
+                <p className="text-sm md:text-base font-bold text-white text-center">Click to upload or drag and drop image</p>
+                <p className="text-[9px] md:text-[10px] text-white/40 font-bold uppercase tracking-widest text-center">Recommended: Square image, at least 800x800 pixels</p>
               </div>
             </div>
           </div>
@@ -306,16 +311,16 @@ export const ProductStoreManagement = () => {
               <div className="bg-[#111111] border border-white/15 rounded-2xl p-6 flex items-center justify-between">
                 <div>
                   <p className="text-[11px] font-black text-white uppercase tracking-widest mb-1">Active / Available for Purchase</p>
-                  <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Product will be visible and available in the store</p>
+                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Product will be visible and available in the store</p>
                 </div>
                 <div className="w-12 h-6 bg-[#E31B23] rounded-full relative p-1 cursor-pointer">
                   <div className="w-4 h-4 bg-white rounded-full ml-auto" />
                 </div>
               </div>
-              <div className="bg-[#111111] border border-white/15 rounded-2xl p-6 flex items-center justify-between opacity-40">
+              <div className="bg-[#111111] border border-white/15 rounded-2xl p-6 flex items-center justify-between opacity-50">
                 <div>
                   <p className="text-[11px] font-black text-white uppercase tracking-widest mb-1">Featured Product</p>
-                  <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Display this product in featured sections</p>
+                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Display this product in featured sections</p>
                 </div>
                 <div className="w-12 h-6 bg-white/10 rounded-full relative p-1 cursor-pointer">
                   <div className="w-4 h-4 bg-white rounded-full" />

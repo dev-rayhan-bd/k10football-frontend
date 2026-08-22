@@ -48,10 +48,12 @@ const DashboardHero = ({
     <div className="relative rounded-3xl overflow-hidden min-h-125 border border-white/20 bg-[#0D0D0D] group flex flex-col justify-center">
       {/* Background Image */}
       <div
-        className="absolute inset-0 bg-cover bg-no-repeat bg-center opacity-50"
+        className="absolute inset-0 bg-cover bg-no-repeat bg-center opacity-70 sm:opacity-80"
         style={{ backgroundImage: `url(${backgroundImage})` }}
       />
-      <div className="absolute inset-0 bg-linear-to-r from-black/60 via-black/20 to-transparent w-2/3" />
+      {/* Dark gradients for text readability */}
+      <div className="absolute inset-0 bg-linear-to-r from-black/80 via-black/40 to-transparent w-full sm:w-2/3" />
+      <div className="absolute inset-0 bg-linear-to-t from-[#0D0D0D] via-black/50 to-transparent sm:hidden" />
       {/* Standing Character */}
       {characterImgSrc && (
         <Image

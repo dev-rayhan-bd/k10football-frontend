@@ -8,8 +8,6 @@ import {
   IconBallFootball,
   IconPlus,
   IconCreditCard,
-  IconCheck,
-  IconDots
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import {
@@ -41,7 +39,7 @@ export const CoachAndPlayer = () => {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
-  
+
   // Forms state
   const [newTeamName, setNewTeamName] = useState("");
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
@@ -83,9 +81,9 @@ export const CoachAndPlayer = () => {
       toast.error("Please fill in all payment details");
       return;
     }
-    
+
     setIsProcessingPayment(true);
-    
+
     // Simulate processing
     setTimeout(() => {
       setIsProcessingPayment(false);
@@ -93,7 +91,7 @@ export const CoachAndPlayer = () => {
       setPlan("Premium");
       setIsPaymentOpen(false);
       toast.success("Payment Successful! Premium Plan Activated.");
-      
+
       // Proceed directly to Add Team Form
       setNewTeamName("");
       setIsAddOpen(true);
@@ -165,7 +163,7 @@ export const CoachAndPlayer = () => {
   const handleDeleteClick = (id: string) => {
     const teamToDelete = teams.find(t => t.id === id);
     if (!teamToDelete) return;
-    
+
     if (confirm(`Are you sure you want to delete "${teamToDelete.name}"?`)) {
       const updatedTeams = teams.filter((t) => t.id !== id);
       saveTeams(updatedTeams);
@@ -186,9 +184,8 @@ export const CoachAndPlayer = () => {
         </div>
         <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-4 py-2">
           <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Current Plan:</span>
-          <span className={`text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded ${
-            plan === "Premium" ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" : "bg-white/10 text-white/80"
-          }`}>
+          <span className={`text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded ${plan === "Premium" ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" : "bg-white/10 text-white/80"
+            }`}>
             {plan}
           </span>
         </div>
@@ -224,7 +221,7 @@ export const CoachAndPlayer = () => {
             <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest font-orbitron">Teams Capacity</p>
           </div>
           {plan === "Free" && (
-            <button 
+            <button
               onClick={() => setIsPaymentOpen(true)}
               className="w-full sm:w-auto flex justify-center items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/20 text-[10px] font-black uppercase tracking-[0.2em] text-white px-8 py-4 rounded-xl transition-all cursor-pointer shrink-0"
             >
@@ -242,7 +239,7 @@ export const CoachAndPlayer = () => {
             <h2 className="text-2xl font-black text-white font-orbitron uppercase tracking-tight truncate">My Teams</h2>
             <p className="text-white/60 font-medium text-xs uppercase tracking-widest mt-1 truncate">Academy Roster Groups</p>
           </div>
-          <button 
+          <button
             onClick={handleAddTeamClick}
             className="w-full sm:w-auto flex justify-center items-center gap-2 bg-[#E31B23] hover:bg-[#ff2d35] border border-transparent text-[10px] font-black uppercase tracking-[0.2em] text-white px-6 py-3 rounded-xl transition-all shadow-[0_0_15px_rgba(227,27,35,0.2)] cursor-pointer shrink-0"
           >
@@ -398,9 +395,9 @@ export const CoachAndPlayer = () => {
       <Dialog open={isPaymentOpen} onOpenChange={setIsPaymentOpen}>
         <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-3xl max-w-md p-8">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-black uppercase text-white font-orbitron tracking-tight flex items-center gap-2">
-              <IconCreditCard className="text-amber-500 animate-pulse" />
-              Upgrade Plan Required
+            <DialogTitle className="text-lg sm:text-2xl font-black uppercase text-white font-orbitron tracking-tight flex items-center gap-2 sm:gap-3 leading-tight">
+              <IconCreditCard className="text-amber-500 animate-pulse shrink-0 w-6 h-6 sm:w-8 sm:h-8" />
+              <span>Upgrade Plan Required</span>
             </DialogTitle>
           </DialogHeader>
           <div className="mt-2 space-y-4">
@@ -458,19 +455,19 @@ export const CoachAndPlayer = () => {
                   />
                 </div>
               </div>
-              
-              <div className="flex gap-4 pt-4 border-t border-white/5 justify-end">
+
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 border-t border-white/5 justify-end w-full mt-2">
                 <button
                   type="button"
                   onClick={() => setIsPaymentOpen(false)}
-                  className="px-6 py-2.5 rounded-xl border border-white/10 text-white/60 hover:text-white bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer"
+                  className="w-full sm:w-auto px-6 py-3 sm:py-2.5 rounded-xl border border-white/10 text-white/60 hover:text-white bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center order-2 sm:order-1"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isProcessingPayment}
-                  className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-black text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.3)] disabled:opacity-50 flex items-center gap-2"
+                  className="w-full sm:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-black text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.3)] disabled:opacity-50 flex items-center justify-center gap-2 order-1 sm:order-2"
                 >
                   {isProcessingPayment ? "Processing..." : "Upgrade Now"}
                 </button>

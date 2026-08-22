@@ -64,7 +64,11 @@ const PlayerEvalSidebarItem = ({ player, status }: { player: any, status: any })
             src={playerImgSrc}
             alt={player.fullName}
             className="w-full h-full object-cover"
-            onError={(e) => { e.currentTarget.src = "/placeholder_img.jpg"; }}
+            onError={(e) => {
+              const target = e.currentTarget as HTMLImageElement;
+              target.srcset = "";
+              target.src = "/placeholder_img.jpg";
+            }}
             width={50}
             height={50}
           />
@@ -403,7 +407,11 @@ const AcademyAnalysisDashboard = () => {
                         className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
                         width={300}
                         height={300}
-                        onError={(e) => { e.currentTarget.src = "/placeholder_img.jpg"; }}
+                        onError={(e) => {
+                          const target = e.currentTarget as HTMLImageElement;
+                          target.srcset = "";
+                          target.src = "/placeholder_img.jpg";
+                        }}
                       />
                     ) : (
                       <div className="relative w-full h-full">
@@ -520,7 +528,11 @@ const AcademyAnalysisDashboard = () => {
                     src={selectedMedia.mediaFile}
                     alt="Preview"
                     className="max-w-full max-h-[70vh] object-contain rounded-xl"
-                    onError={(e) => { e.currentTarget.src = "/placeholder_img.jpg"; }}
+                    onError={(e) => {
+                      const target = e.currentTarget as HTMLImageElement;
+                      target.srcset = "";
+                      target.src = "/placeholder_img.jpg";
+                    }}
                     width={1000}
                     height={1000}
                   />

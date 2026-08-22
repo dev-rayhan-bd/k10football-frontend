@@ -530,10 +530,10 @@ const AcademyValidateCv = () => {
               onChange={(e) => setTierFilter(e.target.value as "All" | CvTier)}
               className="bg-white/5 border border-white/15 rounded-2xl py-3 pl-9 pr-8 text-[11px] font-bold text-white/60 focus:outline-none focus:border-white/25 transition-all cursor-pointer appearance-none"
             >
-              <option value="All">All Tiers</option>
-              <option value="Gold">Gold</option>
-              <option value="Silver">Silver</option>
-              <option value="Bronze">Bronze</option>
+              <option value="All" className="bg-[#111111] text-white">All Tiers</option>
+              <option value="Gold" className="bg-[#111111] text-white">Gold</option>
+              <option value="Silver" className="bg-[#111111] text-white">Silver</option>
+              <option value="Bronze" className="bg-[#111111] text-white">Bronze</option>
             </select>
             <IconChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" />
           </div>
@@ -545,7 +545,7 @@ const AcademyValidateCv = () => {
               className="bg-white/5 border border-white/15 rounded-2xl py-3 px-4 pr-8 text-[11px] font-bold text-white/60 focus:outline-none focus:border-white/25 transition-all cursor-pointer appearance-none"
             >
               {playerTypes.map((t) => (
-                <option key={t} value={t}>{t === "All" ? "All Positions" : t}</option>
+                <option key={t} value={t} className="bg-[#111111] text-white">{t === "All" ? "All Positions" : t}</option>
               ))}
             </select>
             <IconChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" />
@@ -647,7 +647,7 @@ const AcademyValidateCv = () => {
                             dispatch(setSelectedPlayerId(p.id));
                             setSelectedPlayer(p);
                           }}
-                          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/50 hover:text-white transition-all cursor-pointer text-[10px] font-black uppercase tracking-widest"
+                          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/50 hover:text-white transition-all cursor-pointer text-[10px] font-black uppercase tracking-widest whitespace-nowrap"
                         >
                           <IconEye size={14} />
                           View CV

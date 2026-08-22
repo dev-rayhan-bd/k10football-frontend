@@ -3,8 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 "use client";
 import Image from "next/image";
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -439,7 +438,7 @@ const GameReports = () => {
           </div>
         </div>
         {/* Sidebar */}
-        <div className="w-full xl:w-[340px] flex flex-col gap-8 shrink-0 min-w-0">
+        <div className="w-full xl:w-85 flex flex-col gap-8 shrink-0 min-w-0">
           {/* Top Scorers */}
           <div className="bg-[#111111] border border-white/20 rounded-3xl md:rounded-4xl p-6 md:p-8 flex flex-col gap-5 md:gap-6">
             <div className="flex items-center gap-3">
@@ -506,22 +505,22 @@ const GameReports = () => {
       <Dialog open={!!selectedCard} onOpenChange={(open) => !open && setSelectedCard(null)}>
         <DialogContent
           showCloseButton={false}
-          className="w-screen! h-screen! max-w-none! max-h-none! top-0! left-0! translate-x-0! translate-y-0! rounded-none! border-none! bg-black/98 text-white p-8 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
+          className="w-screen! h-screen! max-w-none! max-h-none! top-0! left-0! translate-x-0! translate-y-0! rounded-none! border-none! bg-black/98 text-white p-4 sm:p-6 md:p-8 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
         >
-          <DialogHeader className="flex flex-row justify-between items-center shrink-0 pb-4 border-b border-white/10 mb-6">
-            <div>
-              <DialogTitle className="text-2xl font-black uppercase text-white font-orbitron tracking-tight">
+          <DialogHeader className="flex flex-col md:flex-row justify-between items-center md:items-center gap-4 shrink-0 pb-4 border-b border-white/10 mb-4 md:mb-6">
+            <div className="text-center md:text-left">
+              <DialogTitle className="text-xl md:text-2xl font-black uppercase text-white font-orbitron tracking-tight">
                 Player Game Report
               </DialogTitle>
-              <p className="text-xs text-white/40 font-bold uppercase tracking-widest mt-1">
+              <p className="text-[10px] md:text-xs text-white/40 font-bold uppercase tracking-widest mt-1">
                 Scouted Match Performance Profile for {selectedCard?.playerName}
               </p>
             </div>
-            <div className="flex gap-4 items-center">
+            <div className="flex flex-wrap gap-3 items-center w-full md:w-auto">
               <button
                 onClick={handleDownloadPDF}
                 disabled={isGeneratingPdf}
-                className="flex items-center gap-2 bg-sky-600 hover:bg-sky-500 border border-transparent text-[10px] font-black uppercase tracking-widest text-white px-6 py-2.5 rounded-xl transition-all shadow-[0_0_15px_rgba(14,165,233,0.2)] cursor-pointer disabled:opacity-50 font-orbitron"
+                className="flex items-center justify-center flex-1 md:flex-none gap-2 bg-sky-600 hover:bg-sky-500 border border-transparent text-[10px] font-black uppercase tracking-widest text-white px-4 md:px-6 py-2.5 rounded-xl transition-all shadow-[0_0_15px_rgba(14,165,233,0.2)] cursor-pointer disabled:opacity-50 font-orbitron whitespace-nowrap"
               >
                 {isGeneratingPdf ? (
                   <>
@@ -535,15 +534,16 @@ const GameReports = () => {
               </button>
               <button
                 onClick={() => setSelectedCard(null)}
-                className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] font-black uppercase tracking-widest text-white px-6 py-2.5 rounded-xl transition-all cursor-pointer font-orbitron"
+                className="flex items-center justify-center flex-1 md:flex-none gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] font-black uppercase tracking-widest text-white px-4 md:px-6 py-2.5 rounded-xl transition-all cursor-pointer font-orbitron whitespace-nowrap"
               >
                 <IconX size={16} /> Close
               </button>
             </div>
           </DialogHeader>
           {selectedCard && activeStats && (
-            <div className="flex flex-col items-center gap-8 py-6">
-              {/* Printable Page 1 */}
+            <div className="w-full overflow-x-auto custom-scrollbar pb-8">
+              <div className="flex flex-col items-center gap-8 py-6 min-w-max mx-auto px-4 md:px-0">
+                {/* Printable Page 1 */}
               <div
                 id="report-page-1"
                 className="bg-white text-slate-800 p-10 font-sans relative overflow-hidden select-none"
@@ -551,12 +551,12 @@ const GameReports = () => {
               >
                 {/* Watermark Logo */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none z-0">
-                  <Image src={logo.src} alt="Logo Watermark" className="w-125 object-contain" />
+                  <Image src={logo.src} alt="Logo Watermark" className="w-125 object-contain" width={100} height={100}/>
                 </div>
                 {/* Header */}
                 <div className="relative z-10 flex items-center justify-between border-b-4 border-slate-900 pb-3 mb-4">
                   <div className="flex items-center gap-3">
-                    <Image src={logo.src} alt="K10 Logo" className="w-12 h-12 object-contain" />
+                    <Image src={logo.src} alt="K10 Logo" className="w-12 h-12 object-contain" width={100} height={100}/>
                     <div>
                       <div className="text-xs font-black tracking-widest text-slate-900 font-orbitron">K10 FOOTBALL</div>
                       <div className="text-[8px] text-slate-500 font-bold uppercase tracking-widest font-orbitron">ANALYSIS CV</div>
@@ -575,7 +575,7 @@ const GameReports = () => {
                       <div className="text-xs font-black tracking-widest text-slate-900 font-orbitron">K10 FOOTBALL</div>
                       <div className="text-[8px] text-slate-500 font-bold uppercase tracking-widest font-orbitron">ANALYSIS CV</div>
                     </div>
-                    <Image src={logo.src} alt="K10 Logo" className="w-12 h-12 object-contain" />
+                    <Image src={logo.src} alt="K10 Logo" className="w-12 h-12 object-contain" width={100} height={100}/>
                   </div>
                 </div>
                 {/* Body Content */}
@@ -634,7 +634,7 @@ const GameReports = () => {
                             {selectedCard.playerPosition?.slice(0, 3)}
                           </div>
                         </div>
-                        <Image src={logo.src} alt="Club Logo" className="w-5 h-5 object-contain" />
+                        <Image src={logo.src} alt="Club Logo" className="w-5 h-5 object-contain" width={100} height={100}/>
                       </div>
                       {/* Player image in FUT Card */}
                       <div className="w-24 h-28 overflow-hidden relative mt-1 flex items-end justify-center">
@@ -642,6 +642,8 @@ const GameReports = () => {
                           src={playerImgSrc}
                           alt="Player Card Image"
                           className="h-full object-contain object-bottom"
+                          width={100}
+                          height={100}
                         />
                       </div>
                       {/* FUT card footer */}
@@ -762,11 +764,12 @@ const GameReports = () => {
                   </div>
                   {/* Logo and tag */}
                   <div className="flex flex-col items-center gap-1.5 w-45">
-                    <Image src={logo.src} alt="K10 Logo" className="w-10 h-10 object-contain" />
+                    <Image src={logo.src} alt="K10 Logo" className="w-10 h-10 object-contain" width={100} height={100}/>
                     <div className="text-center leading-none">
                       <div className="text-[10px] font-black tracking-widest text-slate-900 font-orbitron">K10 FOOTBALL</div>
                       <div className="text-[7px] text-slate-500 font-bold uppercase tracking-widest font-orbitron">ANALYSIS CV</div>
                     </div>
+                  </div>
                   </div>
                 </div>
               </div>

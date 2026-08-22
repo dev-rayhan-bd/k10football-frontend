@@ -217,7 +217,7 @@ if (file && file.type.startsWith("image/")) {
 };
 
 return (
-<div className=" text-white p-8">
+<div className="text-white p-4 lg:p-8 w-full overflow-hidden min-w-0">
   <div className="container mt-10">
     <h1 className="text-3xl font-bold flex items-center justify-center font-heading text-white text-center lg:text-left">
       POSITIONAL CO-EFFICIENTS
@@ -379,7 +379,7 @@ return (
         </div>
 
         {/* Player Info */}
-        <div className="text-center p-8 space-y-4">
+        <div className="text-center p-4 sm:p-8 space-y-4">
           <CMSField
             value={playerData.fullName}
             onUpdate={(val) => handleInfoChange("fullName", val)}
@@ -464,7 +464,7 @@ return (
               </div>
 
               {/* Progress Bar / Slider */}
-              <div className="hidden sm:block flex-[2] min-w-0 max-w-xs transition-all duration-300">
+              <div className="hidden sm:block flex-2 min-w-0 max-w-xs transition-all duration-300">
                 {editable ? (
                   <div className="relative flex items-center h-2 group">
                     <input
@@ -523,7 +523,7 @@ return (
               </div>
 
               {/* Status Badge */}
-              <div className="w-[70px] sm:w-32 shrink-0">
+              <div className="w-17.5 sm:w-32 shrink-0">
                 <Badge
                   className={`${getBadgeVariant(attr.status)} border text-[8px] sm:text-sm font-black justify-center w-full py-0.5 sm:py-1 uppercase tracking-tighter`}
                 >

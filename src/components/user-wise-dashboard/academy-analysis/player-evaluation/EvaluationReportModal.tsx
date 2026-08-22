@@ -60,7 +60,7 @@ export const EvaluationReportModal: React.FC<EvaluationReportModalProps> = ({
     <Dialog open={!!selectedCard} onOpenChange={(open) => !open && setSelectedCard(null)}>
       <DialogContent
         showCloseButton={false}
-        className="w-screen! h-screen! max-w-none! max-h-none! top-0! left-0! translate-x-0! translate-y-0! rounded-none! border-none! bg-black/98 text-white p-8 overflow-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
+        className="w-screen! h-screen! max-w-none! max-h-none! top-0! left-0! translate-x-0! translate-y-0! rounded-none! border-none! bg-black/98 text-white p-4 md:p-8 overflow-hidden flex flex-col"
       >
         <DialogHeader className="flex flex-col md:flex-row justify-between items-start md:items-center shrink-0 pb-4 border-b border-white/10 mb-6 gap-4 md:gap-0">
           <div>
@@ -89,8 +89,9 @@ export const EvaluationReportModal: React.FC<EvaluationReportModalProps> = ({
         </DialogHeader>
 
         {selectedCard && (
-          <div className="flex flex-col items-center gap-8 pb-20">
-            <div id="report-page-1" className="w-282.5 h-[1600px] bg-white text-black p-16 shadow-2xl relative overflow-hidden shrink-0" style={{ transformOrigin: 'top center' }}>
+          <div className="w-full overflow-x-auto overflow-y-auto custom-scrollbar pb-10 flex-1">
+            <div className="flex flex-col items-center gap-8 pb-20 min-w-max px-4">
+              <div id="report-page-1" className="w-282.5 h-[1600px] bg-white text-black p-16 shadow-2xl relative overflow-hidden shrink-0" style={{ transformOrigin: 'top center' }}>
               <div className="absolute top-0 right-0 w-150 h-150 bg-gray-50 rounded-bl-[100%] -z-10" />
               <div className="absolute bottom-0 left-0 w-200 h-100 bg-red-50/50 rounded-tr-[100%] -z-10" />
               <div className="flex justify-between items-start border-b-4 border-red-600 pb-10 mb-10 relative">
@@ -183,7 +184,7 @@ export const EvaluationReportModal: React.FC<EvaluationReportModalProps> = ({
                     ].map((skill) => (
                       <div key={skill.key} className="flex justify-between items-center py-0.5 border-b border-gray-50 last:border-0">
                         <span className="text-xs font-bold text-gray-700">{skill.label}</span>
-                        <div className="flex gap-2 w-[180px] justify-between">
+                        <div className="flex gap-2 w-45 justify-between">
                           {renderReadOnlyRatingCircle(skill.key as keyof typeof DEFAULT_EVALUATION, 1, activeEvaluationData)}
                           {renderReadOnlyRatingCircle(skill.key as keyof typeof DEFAULT_EVALUATION, 2, activeEvaluationData)}
                           {renderReadOnlyRatingCircle(skill.key as keyof typeof DEFAULT_EVALUATION, 3, activeEvaluationData)}
@@ -203,7 +204,7 @@ export const EvaluationReportModal: React.FC<EvaluationReportModalProps> = ({
                   <div className="space-y-1">
                     <div className="flex justify-between items-center text-[7px] font-black uppercase text-gray-400 tracking-wider pb-1">
                       <span>Skill</span>
-                      <div className="flex gap-2 w-[180px] justify-between text-center">
+                      <div className="flex gap-2 w-45 justify-between text-center">
                         <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Improvement</span>
                         <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Good</span>
                         <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Excellent</span>
@@ -266,7 +267,7 @@ export const EvaluationReportModal: React.FC<EvaluationReportModalProps> = ({
                   <div className="space-y-1">
                     <div className="flex justify-between items-center text-[7px] font-black uppercase text-gray-400 tracking-wider pb-1">
                       <span>Skill</span>
-                      <div className="flex gap-2 w-[180px] justify-between text-center">
+                      <div className="flex gap-2 w-45 justify-between text-center">
                         <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Improvement</span>
                         <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Good</span>
                         <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Excellent</span>
@@ -291,7 +292,7 @@ export const EvaluationReportModal: React.FC<EvaluationReportModalProps> = ({
                   <div className="space-y-1 mt-6 pt-6 border-t border-gray-100">
                     <div className="flex justify-between items-center text-[7px] font-black uppercase text-gray-400 tracking-wider pb-1">
                       <span>Skill</span>
-                      <div className="flex gap-2 w-[180px] justify-between text-center">
+                      <div className="flex gap-2 w-45 justify-between text-center">
                         <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Improvement</span>
                         <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Good</span>
                         <span className="w-14 text-[8px] font-black uppercase text-gray-400 tracking-wider">Excellent</span>
@@ -304,7 +305,7 @@ export const EvaluationReportModal: React.FC<EvaluationReportModalProps> = ({
                     ].map((skill) => (
                       <div key={skill.key} className="flex justify-between items-center py-0.5 border-b border-gray-50 last:border-0">
                         <span className="text-xs font-bold text-gray-700">{skill.label}</span>
-                        <div className="flex gap-2 w-[180px] justify-between">
+                        <div className="flex gap-2 w-45 justify-between">
                           {renderReadOnlyRatingCircle(skill.key as keyof typeof DEFAULT_EVALUATION, 1, activeEvaluationData)}
                           {renderReadOnlyRatingCircle(skill.key as keyof typeof DEFAULT_EVALUATION, 2, activeEvaluationData)}
                           {renderReadOnlyRatingCircle(skill.key as keyof typeof DEFAULT_EVALUATION, 3, activeEvaluationData)}
@@ -332,6 +333,7 @@ export const EvaluationReportModal: React.FC<EvaluationReportModalProps> = ({
                   <p className="text-gray-300 font-black text-4xl font-orbitron tracking-tighter opacity-50">K10-FOOTBALL</p>
                 </div>
               </div>
+            </div>
             </div>
           </div>
         )}

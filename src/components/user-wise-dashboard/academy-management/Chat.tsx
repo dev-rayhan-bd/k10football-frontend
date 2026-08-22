@@ -180,10 +180,10 @@ const AcademyChat = () => {
       {showNewChatModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowNewChatModal(false)} />
-          <div className="relative w-full max-w-lg bg-[#111111] rounded-4xl border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="relative w-full max-w-lg max-h-[90vh] bg-[#111111] rounded-3xl md:rounded-4xl border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
             {/* Modal Header */}
-            <div className="p-8 pb-4 flex justify-between items-center border-b border-white/10">
-              <h2 className="text-2xl font-black uppercase text-white font-orbitron tracking-tight">Create New Chat</h2>
+            <div className="p-4 sm:p-6 md:p-8 pb-3 sm:pb-4 flex justify-between items-center border-b border-white/10 shrink-0">
+              <h2 className="text-xl md:text-2xl font-black uppercase text-white font-orbitron tracking-tight">Create New Chat</h2>
               <button
                 onClick={() => setShowNewChatModal(false)}
                 className="w-10 h-10 bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center text-white/40 hover:text-white transition-all"
@@ -191,14 +191,14 @@ const AcademyChat = () => {
                 <IconX size={20} />
               </button>
             </div>
-            <div className="p-8 flex flex-col gap-8">
+            <div className="p-4 sm:p-6 md:p-8 flex flex-col gap-6 md:gap-8 overflow-y-auto custom-scrollbar">
               {/* Chat Type Selection */}
               <div className="space-y-4">
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/40">Chat Type</label>
                 <div className="grid grid-cols-2 gap-4">
                   <button
                     onClick={() => setChatType("individual")}
-                    className={`p-6 rounded-2xl border flex flex-col items-center gap-3 transition-all ${chatType === "individual"
+                    className={`p-4 sm:p-6 rounded-2xl border flex flex-col items-center gap-2 sm:gap-3 transition-all ${chatType === "individual"
                         ? "bg-[#E31B23]/5 border-[#E31B23] text-white"
                         : "bg-white/5 border-white/10 text-white/40 hover:border-white/10"
                       }`}
@@ -211,7 +211,7 @@ const AcademyChat = () => {
                   </button>
                   <button
                     onClick={() => setChatType("group")}
-                    className={`p-6 rounded-2xl border flex flex-col items-center gap-3 transition-all ${chatType === "group"
+                    className={`p-4 sm:p-6 rounded-2xl border flex flex-col items-center gap-2 sm:gap-3 transition-all ${chatType === "group"
                         ? "bg-[#E31B23]/5 border-[#E31B23] text-white"
                         : "bg-white/5 border-white/10 text-white/40 hover:border-white/10"
                       }`}
@@ -250,14 +250,14 @@ const AcademyChat = () => {
               </div>
             </div>
             {/* Modal Footer */}
-            <div className="p-8 border-t border-white/5 flex justify-end gap-4">
+            <div className="p-4 sm:p-6 md:p-8 border-t border-white/5 flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 shrink-0">
               <button
                 onClick={() => setShowNewChatModal(false)}
-                className="px-8 py-3 rounded-xl border border-white/10 text-[11px] font-black uppercase tracking-widest text-white hover:bg-white/5 transition-all"
+                className="w-full sm:w-auto px-6 py-3 rounded-xl border border-white/10 text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-white hover:bg-white/5 transition-all text-center"
               >
                 Cancel
               </button>
-              <button className="px-8 py-3 rounded-xl bg-[#E31B23] hover:bg-[#C2181F] text-[11px] font-black uppercase tracking-widest text-white transition-all shadow-lg shadow-[#E31B23]/20">
+              <button className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#E31B23] hover:bg-[#C2181F] text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-white transition-all shadow-lg shadow-[#E31B23]/20 text-center">
                 Create Chat
               </button>
             </div>

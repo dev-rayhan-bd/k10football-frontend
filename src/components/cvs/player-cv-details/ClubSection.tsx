@@ -84,7 +84,7 @@ const ClubSection = () => {
   };
 
   return (
-    <div className="container py-10 bg-cardBg rounded-xl mt-10 w-full min-w-0 overflow-hidden">
+    <div className="w-full px-4 sm:px-6 md:px-10 py-10 bg-cardBg rounded-xl mt-10 min-w-0 overflow-hidden">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 gap-4 w-full min-w-0">
         <div className="flex items-center gap-2 order-2 sm:order-1 w-full sm:w-1/3 justify-center sm:justify-start">
            <Info size={14} className="text-gray-400" />
