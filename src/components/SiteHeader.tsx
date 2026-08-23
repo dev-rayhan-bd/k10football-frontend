@@ -1,7 +1,7 @@
 "use client";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { usePathname, useRouter } from "next/navigation";
-import { ReactNode } from "react";
+import { ReactNode, useState, useEffect } from "react";
 
 const SiteHeader = ({ showToggle = false, customToggle }: { showToggle?: boolean, customToggle?: ReactNode }) => {
 const pathName = usePathname();
@@ -11,6 +11,31 @@ const isParentPage = pathName.startsWith("/dashboard/parent");
 const isParentOrPlayerSpace = isPlayerPage || isParentPage;
 const router = useRouter();
 
+const [isVisible, setIsVisible] = useState(true);
+const [lastScrollY, setLastScrollY] = useState(0);
+
+useEffect(() => {
+  const handleScroll = () => {
+    // Only apply hide/show logic on small devices (mobile)
+    if (window.innerWidth >= 768) {
+      setIsVisible(true);
+      return;
+    }
+    
+    const currentScrollY = window.scrollY;
+    // Hide when scrolling down, show when scrolling up
+    if (currentScrollY > lastScrollY && currentScrollY > 60) {
+      setIsVisible(false);
+    } else {
+      setIsVisible(true);
+    }
+    setLastScrollY(currentScrollY);
+  };
+
+  window.addEventListener("scroll", handleScroll, { passive: true });
+  return () => window.removeEventListener("scroll", handleScroll);
+}, [lastScrollY]);
+
 const handleToggle = () => {
 if (isAnalysis) {
   router.push("/dashboard/academy/management");
@@ -19,17 +44,10 @@ if (isAnalysis) {
 }
 };
 
-// const data = {
-// user: {
-//   name: "shadcn",
-//   email: "m@example.com",
-//   avatar:
-//     "https://i.ibb.co.com/VWkMFBWM/pngtree-user-icon-png-image-1796659.jpg",
-// },
-// };
-
 return (
-<header className="flex h-(--header-height) shrink-0 items-center justify-between gap-4 px-4 lg:px-8 border-b border-white/5 bg-[#0A0A0A]/50 backdrop-blur-sm sticky top-0 z-50">
+<header 
+  className={`flex h-(--header-height) shrink-0 items-center justify-between gap-4 px-4 lg:px-8 border-b border-white/5 bg-[#0A0A0A]/50 backdrop-blur-sm sticky top-0 z-50 transition-transform duration-300 ${!isVisible ? '-translate-y-full' : 'translate-y-0'}`}
+>
   <div className="flex flex-1 items-center gap-4">
     <SidebarTrigger className="text-white" />
 
@@ -65,10 +83,10 @@ return (
 
   <div className="flex items-center gap-4 text-gray-300">
     {isParentOrPlayerSpace && (
-      <div className="flex items-center bg-white/5 rounded-lg p-1 sm:p-1.5 gap-1 sm:gap-1.5 mr-0 sm:mr-2 transform scale-75 origin-right sm:scale-90 lg:scale-100 border border-white/10 shadow-inner">
+      <div className="flex items-center bg-white/5 rounded-lg p-1.5 sm:p-1.5 gap-2 sm:gap-1.5 mr-0 sm:mr-2 border border-white/10 shadow-inner">
         <button
           onClick={() => router.push("/dashboard/parent")}
-          className={`px-2 sm:px-4 py-1 sm:py-1.5 rounded-md text-[10px] sm:text-[11px] font-bold uppercase tracking-wider transition-all duration-300 ${isParentPage ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/35' : 'text-white/40 hover:text-white/60'}`}
+          className={`px-3 sm:px-4 py-1.5 sm:py-1.5 rounded-md text-xs sm:text-[11px] font-bold uppercase tracking-wider transition-all duration-300 ${isParentPage ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/35' : 'text-white/40 hover:text-white/60'}`}
         >
           Parent
         </button>
@@ -80,13 +98,13 @@ return (
               router.push("/dashboard/parent");
             }
           }}
-          className="w-8 sm:w-10 h-4 sm:h-5 bg-white/10 rounded-full relative cursor-pointer group border border-white/5"
+          className="w-10 sm:w-10 h-5 sm:h-5 bg-white/10 rounded-full relative cursor-pointer group border border-white/5"
         >
-          <div className={`absolute top-1/2 -translate-y-1/2 w-3 sm:w-3.5 h-3 sm:h-3.5 bg-white rounded-full transition-all duration-300 shadow-sm ${isPlayerPage ? 'right-0.5' : 'left-0.5'}`}></div>
+          <div className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 sm:w-3.5 sm:h-3.5 bg-white rounded-full transition-all duration-300 shadow-sm ${isPlayerPage ? 'right-0.5' : 'left-0.5'}`}></div>
         </div>
         <button
           onClick={() => router.push("/dashboard/player")}
-          className={`px-2 sm:px-4 py-1 sm:py-1.5 rounded-md text-[10px] sm:text-[11px] font-bold uppercase tracking-wider transition-all duration-300 ${isPlayerPage ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/35 font-extrabold' : 'text-white/40 hover:text-white/60'}`}
+          className={`px-3 sm:px-4 py-1.5 sm:py-1.5 rounded-md text-xs sm:text-[11px] font-bold uppercase tracking-wider transition-all duration-300 ${isPlayerPage ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/35 font-extrabold' : 'text-white/40 hover:text-white/60'}`}
         >
           Athlete
         </button>
@@ -94,22 +112,22 @@ return (
     )}
 
     {showToggle && (
-      <div className="flex items-center bg-[#5a0000] rounded-lg p-1 sm:p-1.5 gap-1 sm:gap-1.5 mr-0 sm:mr-2 transform scale-75 origin-right sm:scale-90 lg:scale-100 border border-white/5">
+      <div className="flex items-center bg-[#5a0000] rounded-lg p-1.5 sm:p-1.5 gap-2 sm:gap-1.5 mr-0 sm:mr-2 border border-white/5">
         <button
           onClick={() => router.push("/dashboard/academy/management")}
-          className={`px-2 sm:px-4 py-1 sm:py-1.5 rounded-md text-[10px] sm:text-[11px] font-bold uppercase tracking-wider transition-all ${!isAnalysis ? 'bg-[#E31B23] text-white' : 'text-white/40 hover:text-white/60'}`}
+          className={`px-3 sm:px-4 py-1.5 sm:py-1.5 rounded-md text-xs sm:text-[11px] font-bold uppercase tracking-wider transition-all ${!isAnalysis ? 'bg-[#E31B23] text-white' : 'text-white/40 hover:text-white/60'}`}
         >
           Management
         </button>
         <div
           onClick={handleToggle}
-          className="w-8 sm:w-10 h-4 sm:h-5 bg-white/10 rounded-full relative cursor-pointer group border border-white/5"
+          className="w-10 sm:w-10 h-5 sm:h-5 bg-white/10 rounded-full relative cursor-pointer group border border-white/5"
         >
-          <div className={`absolute top-1/2 -translate-y-1/2 w-3 sm:w-3.5 h-3 sm:h-3.5 bg-white rounded-full transition-all duration-300 shadow-sm ${isAnalysis ? 'right-0.5' : 'left-0.5'}`}></div>
+          <div className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 sm:w-3.5 sm:h-3.5 bg-white rounded-full transition-all duration-300 shadow-sm ${isAnalysis ? 'right-0.5' : 'left-0.5'}`}></div>
         </div>
         <button
           onClick={() => router.push("/dashboard/academy/analysis")}
-          className={`px-2 sm:px-4 py-1 sm:py-1.5 rounded-md text-[10px] sm:text-[11px] font-bold uppercase tracking-wider transition-all ${isAnalysis ? 'bg-[#E31B23] text-white' : 'text-white/40 hover:text-white/60'}`}
+          className={`px-3 sm:px-4 py-1.5 sm:py-1.5 rounded-md text-xs sm:text-[11px] font-bold uppercase tracking-wider transition-all ${isAnalysis ? 'bg-[#E31B23] text-white' : 'text-white/40 hover:text-white/60'}`}
         >
           Analysis
         </button>
