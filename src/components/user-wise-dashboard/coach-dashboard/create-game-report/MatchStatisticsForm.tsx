@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useEffect } from "react";
@@ -214,7 +215,6 @@ const MatchStatisticsForm = ({
     const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
     setIsDrawing(true);
     setCurrentLine({ x1: x, y1: y, x2: x, y2: y });
-    e.currentTarget.setPointerCapture(e.pointerId);
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -228,10 +228,18 @@ const MatchStatisticsForm = ({
   const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isDrawing || !currentLine) return;
     setIsDrawing(false);
-    e.currentTarget.releasePointerCapture(e.pointerId);
+
+    let finalLine = { ...currentLine };
+    const dx = finalLine.x2 - finalLine.x1;
+    const dy = finalLine.y2 - finalLine.y1;
+    if (Math.sqrt(dx * dx + dy * dy) < 1) {
+      // It was just a click, create a default small arrow pointing up-left
+      finalLine.x2 = finalLine.x1 - 3;
+      finalLine.y2 = finalLine.y1 - 4;
+    }
 
     if (pitchMarkers.length < 15) {
-      setPitchMarkers([...pitchMarkers, currentLine]);
+      setPitchMarkers([...pitchMarkers, finalLine]);
     } else {
       toast.error("You can add a maximum of 15 markers.");
     }
@@ -307,30 +315,48 @@ const MatchStatisticsForm = ({
           Clear
         </button>
       </div>
-      <div className="w-full overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] scrollbar-none">
+      <div className="w-full">
         <div
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
-          className="relative cursor-crosshair overflow-hidden group select-none bg-[#092b15] w-full lg:w-max lg:min-w-full h-auto lg:h-[65vh] xl:h-auto"
+          className="relative cursor-crosshair overflow-hidden group select-none bg-[#092b15] w-full h-auto"
           style={{ touchAction: 'none' }}
         >
+          {/* Vertical pitch for mobile */}
           <Image
             src="/field.png"
             alt="Football Pitch"
             draggable={false}
-            className="w-full h-auto lg:h-full lg:w-auto lg:max-w-none xl:w-full xl:h-auto transition-opacity pointer-events-none select-none block"
+            className="w-full h-auto transition-opacity pointer-events-none select-none block landscape:hidden md:hidden"
             width={500}
+            height={700}
+          />
+          <Image
+            src="/formation-field.png"
+            alt="Football Pitch"
+            draggable={false}
+            className="w-full h-auto transition-opacity pointer-events-none select-none hidden landscape:block md:block"
+            width={800}
             height={500}
           />
+          {/* Horizontal pitch for desktop */}
+          {/* <Image
+            src="/FootballPitch.png"
+            alt="Football Pitch Horizontal"
+            draggable={false}
+            className="w-full h-auto transition-opacity pointer-events-none select-none hidden md:block"
+            width={800}
+            height={531}
+          /> */}
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-40 transition-opacity pointer-events-none">
             <span className="text-white text-xs font-semibold uppercase tracking-widest font-orbitron">Drag on Pitch to draw an arrow</span>
           </div>
 
           <svg className="absolute inset-0 w-full h-full pointer-events-none z-10 overflow-visible">
             <defs>
-              <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto-start-reverse">
-                <polygon points="0 0, 6 3, 0 6" fill="black" />
+              <marker id="arrowhead" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto">
+                <polygon points="0 0, 5 2.5, 0 5" fill="black" />
               </marker>
               <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
                 <feDropShadow dx="0" dy="2" stdDeviation="1" floodColor="rgba(255,255,255,0.5)" />
@@ -361,7 +387,7 @@ const MatchStatisticsForm = ({
               <span className="text-xl select-none leading-none pointer-events-none">⚽</span>
             </div>
           ))}
-          
+
           {currentLine && (
             <div
               className="absolute -ml-3 -mt-3 flex items-center justify-center z-30 opacity-70 pointer-events-none"
