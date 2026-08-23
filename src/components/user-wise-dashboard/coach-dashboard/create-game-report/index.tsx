@@ -62,6 +62,8 @@ export const CreateGameReportWizard = ({
   const [stats, setStats] = useState<Record<string, number>>({});
   const [goalMarkers, setGoalMarkers] = useState<{ x: number; y: number }[]>([]);
   const [pitchMarkers, setPitchMarkers] = useState<PitchLine[]>([]);
+  const [reportCompletedBy, setReportCompletedBy] = useState<"parent" | "coach">("parent");
+  const [selectedCoachEmail, setSelectedCoachEmail] = useState("");
 
   // Detect user role
   useEffect(() => {
@@ -347,8 +349,18 @@ export const CreateGameReportWizard = ({
           setFormData={setFormData}
           characteristics={characteristics}
           setCharacteristics={setCharacteristics}
+          reportCompletedBy={reportCompletedBy}
+          setReportCompletedBy={setReportCompletedBy}
+          selectedCoachEmail={selectedCoachEmail}
+          setSelectedCoachEmail={setSelectedCoachEmail}
           onCancel={userRole === "coach" ? onCancel : () => setStep(1)}
-          onContinue={() => setStep(3)} 
+          onContinue={() => {
+            if (reportCompletedBy === "coach" && userRole !== "coach") {
+              handlePlayerSubmit();
+            } else {
+              setStep(3);
+            }
+          }} 
         />
       )}
       

@@ -49,6 +49,20 @@ return (
     <SidebarContent className={`px-2 pt-4 overflow-hidden ${collapsed ? 'flex-col items-center' : ''}`}>
       <ScrollArea className="flex-1 px-2">
         <NavDocuments items={sidebarItems} />
+        
+        <SidebarMenu className="mt-2">
+          <SidebarMenuItem className="text-[#E31B23] hover:bg-white/5 hover:text-red-400 rounded-lg mb-2">
+            <button 
+              onClick={handleLogout}
+              className="flex w-full items-center gap-2 py-6 px-2 hover:bg-transparent cursor-pointer"
+            >
+              <div className="w-7 flex justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="rotate-180"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+              </div>
+              {!collapsed && <span className="text-[15px] font-medium">Logout</span>}
+            </button>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </ScrollArea>
     </SidebarContent>
     <div className="mt-auto p-4 pb-10 flex flex-col gap-6">
@@ -58,14 +72,6 @@ return (
           <p className="text-xl font-heading font-bold italic" style={{ color: tier.color }}>{tier.name}</p>
         </div>
       )}
-
-      <button 
-        onClick={handleLogout}
-        className="flex items-center gap-3 text-[#E31B23] hover:text-red-400 transition-colors px-2 mb-4 cursor-pointer"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="rotate-180"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-        {!collapsed && <span className="font-medium">Logout</span>}
-      </button>
     </div>
   </div>
 </Sidebar>

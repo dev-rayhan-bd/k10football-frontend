@@ -124,12 +124,12 @@ const CoachClubsSection = ({ editable = true }: { editable?: boolean }) => {
           {(coachData?.clubs || []).map((club) => (
             <div
               key={club.id}
-              className="relative border border-border cursor-pointer hover:bg-cardBg duration-300 bg-black/20 rounded-lg p-6 flex items-center gap-4 group transition"
+              className="relative border border-border cursor-pointer hover:bg-cardBg duration-300 bg-black/20 rounded-lg p-4 sm:p-6 flex flex-col items-center text-center gap-3 sm:gap-4 group transition w-full min-w-0"
             >
               {canEdit && (
                 <button
                   onClick={(e) => { e.stopPropagation(); removeClub(club.id); }}
-                  className="absolute top-2 right-2 p-1 text-gray-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-2 right-2 p-1 text-gray-500 hover:text-red-500 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity z-10"
                 >
                   <Trash2 size={14} />
                 </button>
@@ -137,7 +137,7 @@ const CoachClubsSection = ({ editable = true }: { editable?: boolean }) => {
 
               <div className="shrink-0 relative group/logo">
                 <div className={cn(
-                  "w-20 h-20 rounded-full border-2 flex items-center justify-center overflow-hidden bg-gray-900",
+                  "w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 flex items-center justify-center overflow-hidden bg-gray-900",
                   club.color || "border-primary"
                 )}>
                   <Image
@@ -149,14 +149,15 @@ const CoachClubsSection = ({ editable = true }: { editable?: boolean }) => {
                   />
                 </div>
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 w-full min-w-0 flex flex-col items-center">
                 <CMSField
                   value={club.name}
                   onUpdate={(val) => updateClub(club.id, "name", val)}
                   canEdit={canEdit}
-                  className="text-sm sm:text-base md:text-lg font-semibold text-foreground wrap-break-word line-clamp-2 leading-tight uppercase"
+                  className="text-base sm:text-lg font-semibold text-foreground wrap-break-word uppercase leading-tight w-full min-w-0 flex justify-center text-center px-4"
+                  inputClassName="w-full min-w-0 text-center"
                 />
-                <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-400 mt-1">
+                <div className="flex flex-wrap items-center justify-center gap-1 text-xs sm:text-sm text-gray-400 mt-1 w-full min-w-0">
                   <CMSField
                     value={club.from}
                     onUpdate={(val) => updateClub(club.id, "from", val)}
@@ -165,9 +166,10 @@ const CoachClubsSection = ({ editable = true }: { editable?: boolean }) => {
                     options={YEARS}
                     editTrigger="doubleClick"
                     hideIcon={true}
-                    className="w-16"
+                    className="w-14 sm:w-16 min-w-0"
+                    inputClassName="truncate min-w-0"
                   />
-                  <span>-</span>
+                  <span className="shrink-0">-</span>
                   <CMSField
                     value={club.to}
                     onUpdate={(val) => updateClub(club.id, "to", val)}
@@ -176,7 +178,8 @@ const CoachClubsSection = ({ editable = true }: { editable?: boolean }) => {
                     options={TO_YEARS}
                     editTrigger="doubleClick"
                     hideIcon={true}
-                    className="w-20"
+                    className="w-16 sm:w-20 min-w-0"
+                    inputClassName="truncate min-w-0"
                   />
                 </div>
               </div>

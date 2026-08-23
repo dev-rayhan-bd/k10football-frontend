@@ -417,10 +417,10 @@ return (
             </div>
           </div>
           <CMSField
-            value={getVeryShortPosition(playerData.position)}
+            value={getShortForm(playerData.position)}
             onUpdate={(val) => handleInfoChange("position", val)}
             canEdit={false}
-            className="text-base text-primary/80 font-black justify-center uppercase tracking-[0.2em]"
+            className="text-xl sm:text-2xl text-primary/80 font-black justify-center uppercase tracking-[0.2em]"
             inputClassName="text-center"
           />
 

@@ -21,6 +21,10 @@ interface ReportDetailsFormProps {
   setCharacteristics: (tags: string[]) => void;
   onCancel: () => void;
   onContinue: () => void;
+  reportCompletedBy?: "parent" | "coach";
+  setReportCompletedBy?: (val: "parent" | "coach") => void;
+  selectedCoachEmail?: string;
+  setSelectedCoachEmail?: (val: string) => void;
 }
 
 const ReportDetailsForm = ({
@@ -29,7 +33,11 @@ const ReportDetailsForm = ({
   characteristics,
   setCharacteristics,
   onCancel,
-  onContinue
+  onContinue,
+  reportCompletedBy = "parent",
+  setReportCompletedBy,
+  selectedCoachEmail = "",
+  setSelectedCoachEmail
 }: ReportDetailsFormProps) => {
   const [newTag, setNewTag] = useState("");
   const handleChange = (field: string, val: any) => {
@@ -64,16 +72,14 @@ const ReportDetailsForm = ({
       formData.foot?.trim() &&
       formData.weight?.trim() &&
       formData.height?.trim() &&
-      formData.matchesPlayed?.trim() &&
-      formData.minutesPlayed?.trim() &&
-      formData.manOfTheMatch?.trim() &&
       formData.scoutName?.trim() &&
       formData.gameType?.trim() &&
       formData.gameDate?.trim() &&
       formData.gameLocation?.trim() &&
       formData.matchResult?.trim() &&
       formData.weather?.trim() &&
-      formData.temperature?.trim()
+      formData.temperature?.trim() &&
+      (reportCompletedBy === "parent" || (reportCompletedBy === "coach" && selectedCoachEmail?.trim()))
     );
   };
 
@@ -208,36 +214,6 @@ const ReportDetailsForm = ({
               </div>
             </div>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="space-y-2">
-              <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Matches Played:</Label>
-              <Input 
-                className="bg-[#161616] border-white/10 text-white h-12 font-bold focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]" 
-                value={formData.matchesPlayed}
-                onChange={(e) => handleChange("matchesPlayed", e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Minutes Played:</Label>
-              <div className="relative">
-                <Input 
-                  className="bg-[#161616] border-white/10 text-white h-12 font-bold focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]" 
-                  value={formData.minutesPlayed}
-                  onChange={(e) => handleChange("minutesPlayed", e.target.value)}
-                />
-                <span className="absolute right-4 top-3.5 text-gray-500 text-xs font-bold font-orbitron">min</span>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Man of the Match:</Label>
-              <Input 
-                className="bg-[#161616] border-white/10 text-white h-12 font-bold focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]" 
-                value={formData.manOfTheMatch}
-                onChange={(e) => handleChange("manOfTheMatch", e.target.value)}
-              />
-            </div>
-          </div>
         </div>
 
         {/* Match Information */}
@@ -325,6 +301,63 @@ const ReportDetailsForm = ({
             </div>
           </div>
         </div>
+        {/* Report Completion Selection */}
+        {setReportCompletedBy && (
+          <div className="p-8 rounded-3xl border border-white/10 bg-[#0D0D0D] space-y-6 shadow-xl">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-8 h-8 rounded-full bg-blue-500/10 border border-blue-500 flex items-center justify-center">
+                <IconCheck size={18} className="text-blue-500" />
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black text-white uppercase italic tracking-tight font-orbitron">Report Completion</h2>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-4">
+              <label className={cn("flex-1 p-4 rounded-xl border cursor-pointer transition-all flex flex-col gap-1 items-center justify-center text-center", reportCompletedBy === "parent" ? "bg-[#00FF62]/10 border-[#00FF62]" : "bg-[#161616] border-white/10 hover:border-white/30")}>
+                <input 
+                  type="radio" 
+                  name="reportCompletedBy" 
+                  value="parent" 
+                  checked={reportCompletedBy === "parent"} 
+                  onChange={() => setReportCompletedBy("parent")} 
+                  className="hidden" 
+                />
+                <span className="text-sm font-bold text-white uppercase tracking-wider">I will complete it</span>
+                <span className="text-xs text-gray-500 italic">Continue to match statistics</span>
+              </label>
+              <label className={cn("flex-1 p-4 rounded-xl border cursor-pointer transition-all flex flex-col gap-1 items-center justify-center text-center", reportCompletedBy === "coach" ? "bg-[#00FF62]/10 border-[#00FF62]" : "bg-[#161616] border-white/10 hover:border-white/30")}>
+                <input 
+                  type="radio" 
+                  name="reportCompletedBy" 
+                  value="coach" 
+                  checked={reportCompletedBy === "coach"} 
+                  onChange={() => setReportCompletedBy("coach")} 
+                  className="hidden" 
+                />
+                <span className="text-sm font-bold text-white uppercase tracking-wider">Request from Coach</span>
+                <span className="text-xs text-gray-500 italic">Send form to coach via email</span>
+              </label>
+            </div>
+
+            {reportCompletedBy === "coach" && setSelectedCoachEmail && (
+              <div className="space-y-2 mt-4 animate-in fade-in slide-in-from-top-2">
+                <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Select Coach Email:</Label>
+                <div className="relative">
+                  <select 
+                    className="w-full bg-[#161616] border border-white/10 text-white h-12 rounded-lg px-4 font-bold appearance-none focus:outline-none focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]"
+                    value={selectedCoachEmail}
+                    onChange={(e) => setSelectedCoachEmail(e.target.value)}
+                  >
+                    <option value="">-- SELECT A COACH --</option>
+                    <option value="pep.guardiola@mancity.com">Pep Guardiola (pep.guardiola@mancity.com)</option>
+                    <option value="jurgen.klopp@lfc.com">Jurgen Klopp (jurgen.klopp@lfc.com)</option>
+                    <option value="carlo.ancelotti@realmadrid.com">Carlo Ancelotti (carlo.ancelotti@realmadrid.com)</option>
+                  </select>
+                  <IconChevronDown className="absolute right-4 top-3.5 text-gray-500 pointer-events-none" size={18} />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Actions */}

@@ -145,10 +145,10 @@ return (
     </h1>
 
     {/* Logo Badges (Static 9 Logos) */}
-    <div className="flex justify-center gap-6 mb-16 flex-wrap">
+    <div className="flex justify-center gap-3 mb-10 flex-wrap max-w-4xl mx-auto">
       {STATIC_LOGOS.map((logo) => (
-        <div key={logo.id} className='relative border border-gray-700 p-5 rounded-xl bg-gray-900/50 group'>
-          <Image src={logo.image} className='w-20 h-20 object-contain' alt={logo.name} width={80} height={80} />
+        <div key={logo.id} className='relative border border-gray-700 p-2 sm:p-3 rounded-lg bg-gray-900/50 group'>
+          <Image src={logo.image} className='w-10 h-10 sm:w-14 sm:h-14 object-contain' alt={logo.name} width={56} height={56} />
         </div>
       ))}
     </div>

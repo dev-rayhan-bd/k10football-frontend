@@ -28,6 +28,26 @@ export const EvaluationReportModal: React.FC<EvaluationReportModalProps> = ({
   isGeneratingPdf,
   activeEvaluationData
 }) => {
+  const [scale, setScale] = React.useState(1);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      // 1130px is the width of the PDF page, plus some padding
+      const padding = window.innerWidth < 768 ? 32 : 64; 
+      const availableWidth = window.innerWidth - padding;
+      
+      if (availableWidth < 1130) {
+        setScale(availableWidth / 1130);
+      } else {
+        setScale(1);
+      }
+    };
+    
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const getRatingLabel = (val: number) => {
     if (val === 1) return "Improvement";
     if (val === 2) return "Good";
@@ -89,9 +109,28 @@ export const EvaluationReportModal: React.FC<EvaluationReportModalProps> = ({
         </DialogHeader>
 
         {selectedCard && (
-          <div className="w-full overflow-x-auto overflow-y-auto custom-scrollbar pb-10 flex-1">
-            <div className="flex flex-col items-center gap-8 pb-20 min-w-max px-4">
-              <div id="report-page-1" className="w-282.5 h-[1600px] bg-white text-black p-16 shadow-2xl relative overflow-hidden shrink-0" style={{ transformOrigin: 'top center' }}>
+          <div className="w-full overflow-x-hidden overflow-y-auto custom-scrollbar pb-10 flex-1 flex flex-col items-center">
+            {/* Mobile Scroll Hint */}
+            <div className="md:hidden flex flex-col items-center justify-center text-white/50 mb-4 animate-pulse">
+              <span className="text-[10px] font-bold uppercase tracking-widest">Scroll down to view full report</span>
+            </div>
+
+            <div 
+              className="relative transition-transform duration-200 ease-out" 
+              style={{ 
+                width: `${1130 * scale}px`, 
+                height: `${(1600 * 2 + 32) * scale}px` 
+              }}
+            >
+              <div 
+                className="flex flex-col gap-8 absolute top-0 left-0"
+                style={{ 
+                  transform: `scale(${scale})`, 
+                  transformOrigin: 'top left',
+                  width: '1130px'
+                }}
+              >
+                <div id="report-page-1" className="w-282.5 h-[1600px] bg-white text-black p-16 shadow-2xl relative overflow-hidden shrink-0">
               <div className="absolute top-0 right-0 w-150 h-150 bg-gray-50 rounded-bl-[100%] -z-10" />
               <div className="absolute bottom-0 left-0 w-200 h-100 bg-red-50/50 rounded-tr-[100%] -z-10" />
               <div className="flex justify-between items-start border-b-4 border-red-600 pb-10 mb-10 relative">
@@ -243,7 +282,7 @@ export const EvaluationReportModal: React.FC<EvaluationReportModalProps> = ({
               </div>
             </div>
 
-            <div id="report-page-2" className="w-282.5 h-[1600px] bg-white text-black p-16 shadow-2xl relative overflow-hidden shrink-0" style={{ transformOrigin: 'top center' }}>
+            <div id="report-page-2" className="w-282.5 h-[1600px] bg-white text-black p-16 shadow-2xl relative overflow-hidden shrink-0">
               <div className="absolute top-0 left-0 w-full h-75 bg-gray-50 -z-10" />
 
               <div className="flex justify-between items-start border-b-4 border-gray-200 pb-8 mb-12 relative">
@@ -334,6 +373,7 @@ export const EvaluationReportModal: React.FC<EvaluationReportModalProps> = ({
                 </div>
               </div>
             </div>
+              </div>
             </div>
           </div>
         )}
