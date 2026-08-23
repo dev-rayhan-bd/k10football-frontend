@@ -1,13 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { usePlayer } from "@/lib/hooks/usePlayer";
-import { addReport, completeReportRequest, addReportRequest, REPORT_REQUESTS_DATA, SHARED_REPORTS_DATA, updateReport } from "@/lib/constants/reports";
+import { addReport, completeReportRequest, addReportRequest, updateReport } from "@/lib/constants/reports";
 import ReportDetailsForm from "./ReportDetailsForm";
 import StripePaymentModal from "./StripePaymentModal";
 import MatchStatisticsForm, { PitchLine } from "./MatchStatisticsForm";
 import ReportPdfPreview from "./ReportPdfPreview";
-import { PlayerRequestWizard } from "./PlayerRequestWizard";
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/reduxHooks";
 import { addGameReport, updateGameReport, completeGameReportRequest, addGameReportRequest } from "@/lib/features/reports/reportsSlice";
@@ -233,13 +235,9 @@ export const CreateGameReportWizard = ({
     }
   }, [playerId, requestId, players, searchParams, requests]);
 
-  const handlePay = () => {
-    setStep(3);
-  };
+ 
 
-  const handleStatsSubmit = () => {
-    setStep(4);
-  };
+
 
   const handleSave = (overallRating: number) => {
     const viewOnly = searchParams.get("viewOnly") === "true";
@@ -345,6 +343,8 @@ export const CreateGameReportWizard = ({
       {step === 2 && (
         <MatchStatisticsForm 
           position={formData.position}
+          minutesPlayed={formData.minutesPlayed}
+          setMinutesPlayed={(val) => setFormData({ ...formData, minutesPlayed: val })}
           stats={stats}
           setStats={setStats}
           goalMarkers={goalMarkers}

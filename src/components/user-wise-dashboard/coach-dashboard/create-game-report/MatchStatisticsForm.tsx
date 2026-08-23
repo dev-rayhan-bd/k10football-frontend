@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import Image from "next/image";
-import { IconArrowUpRight } from "@tabler/icons-react";
+import { IconArrowUpRight, IconPlayerPlay, IconPlayerStop } from "@tabler/icons-react";
 
 interface StatInputProps {
   label: string;
@@ -77,6 +78,8 @@ export interface PitchLine {
 
 interface MatchStatisticsFormProps {
   position: string;
+  minutesPlayed: string;
+  setMinutesPlayed: (val: string) => void;
   stats: Record<string, number>;
   setStats: (stats: Record<string, number>) => void;
   goalMarkers: { x: number; y: number }[];
@@ -89,6 +92,8 @@ interface MatchStatisticsFormProps {
 
 const MatchStatisticsForm = ({
   position,
+  minutesPlayed,
+  setMinutesPlayed,
   stats,
   setStats,
   goalMarkers,
@@ -100,6 +105,30 @@ const MatchStatisticsForm = ({
 }: MatchStatisticsFormProps) => {
   const isGK = position === "GOALKEEPER";
   const [mobilePage, setMobilePage] = React.useState(0);
+  const [isTimerRunning, setIsTimerRunning] = React.useState(false);
+  const [secondsElapsed, setSecondsElapsed] = React.useState(Number(minutesPlayed || 0) * 60);
+
+  React.useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isTimerRunning) {
+      interval = setInterval(() => {
+        setSecondsElapsed(prev => {
+          const newSecs = prev + 1;
+          setMinutesPlayed(Math.floor(newSecs / 60).toString());
+          return newSecs;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isTimerRunning, setMinutesPlayed]);
+
+  const toggleTimer = () => setIsTimerRunning(!isTimerRunning);
+
+  const formatTime = (totalSeconds: number) => {
+    const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+    const s = (totalSeconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
 
   const statsLeft = [
     { label: "Shots on Goal", key: "shotsOnGoal", color: "bg-[#00D1FF]" },
@@ -176,16 +205,37 @@ const MatchStatisticsForm = ({
     setGoalMarkers(goalMarkers.filter((_, idx) => idx !== index));
   };
 
-  const handlePitchClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const [isDrawing, setIsDrawing] = React.useState(false);
+  const [currentLine, setCurrentLine] = React.useState<PitchLine | null>(null);
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
     const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
+    setIsDrawing(true);
+    setCurrentLine({ x1: x, y1: y, x2: x, y2: y });
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDrawing || !currentLine) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
+    const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
+    setCurrentLine({ ...currentLine, x2: x, y2: y });
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDrawing || !currentLine) return;
+    setIsDrawing(false);
+    e.currentTarget.releasePointerCapture(e.pointerId);
 
     if (pitchMarkers.length < 15) {
-      setPitchMarkers([...pitchMarkers, { x1: x, y1: y, x2: x, y2: y }]);
+      setPitchMarkers([...pitchMarkers, currentLine]);
     } else {
       toast.error("You can add a maximum of 15 markers.");
     }
+    setCurrentLine(null);
   };
 
   const removePitchMarker = (index: number, e: React.MouseEvent) => {
@@ -216,13 +266,13 @@ const MatchStatisticsForm = ({
       </div>
       <div
         onClick={handleGoalClick}
-        className="aspect-4/5 sm:aspect-square md:aspect-4/3 landscape:aspect-21/9 lg:aspect-video relative cursor-crosshair overflow-hidden group select-none bg-black"
+        className="relative cursor-crosshair overflow-hidden group select-none bg-black w-full"
       >
         <Image
           src="/goal-bar.png"
           alt="Goal"
           draggable={false}
-          className="w-full h-full object-cover transition-opacity pointer-events-none select-none"
+          className="w-full h-auto transition-opacity pointer-events-none select-none block"
           width={500}
           height={500}
         />
@@ -257,36 +307,70 @@ const MatchStatisticsForm = ({
           Clear
         </button>
       </div>
-      <div
-        onClick={handlePitchClick}
-        className="aspect-4/5 sm:aspect-square md:aspect-4/3 landscape:aspect-21/9 lg:aspect-video relative cursor-crosshair overflow-hidden group select-none bg-[#092b15]"
-      >
-        <Image
-          src="/field.png"
-          alt="Football Pitch"
-          draggable={false}
-          className="w-full h-full object-cover transition-opacity pointer-events-none select-none"
-          width={500}
-          height={500}
-        />
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-40 transition-opacity pointer-events-none">
-          <span className="text-white text-xs font-semibold uppercase tracking-widest font-orbitron">Click Pitch to Place Marker</span>
-        </div>
-
-        {pitchMarkers.map((line, idx) => (
-          <div
-            key={idx}
-            onClick={(e) => removePitchMarker(idx, e)}
-            className="absolute -ml-4 -mt-4 flex items-center justify-center hover:scale-125 transition-all cursor-pointer animate-in zoom-in duration-200 z-30 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
-            style={{ left: `${line.x1}%`, top: `${line.y1}%` }}
-            title="Click to remove"
-          >
-            <div className="flex items-center">
-              <span className="text-xl select-none leading-none">⚽</span>
-              <IconArrowUpRight size={24} className="text-black -ml-2 drop-shadow-[0_2px_2px_rgba(255,255,255,0.5)]" stroke={3} />
-            </div>
+      <div className="w-full overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] scrollbar-none">
+        <div
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          className="relative cursor-crosshair overflow-hidden group select-none bg-[#092b15] w-full lg:w-max lg:min-w-full h-auto lg:h-[65vh] xl:h-auto"
+          style={{ touchAction: 'none' }}
+        >
+          <Image
+            src="/field.png"
+            alt="Football Pitch"
+            draggable={false}
+            className="w-full h-auto lg:h-full lg:w-auto lg:max-w-none xl:w-full xl:h-auto transition-opacity pointer-events-none select-none block"
+            width={500}
+            height={500}
+          />
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-40 transition-opacity pointer-events-none">
+            <span className="text-white text-xs font-semibold uppercase tracking-widest font-orbitron">Drag on Pitch to draw an arrow</span>
           </div>
-        ))}
+
+          <svg className="absolute inset-0 w-full h-full pointer-events-none z-10 overflow-visible">
+            <defs>
+              <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto-start-reverse">
+                <polygon points="0 0, 6 3, 0 6" fill="black" />
+              </marker>
+              <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="2" stdDeviation="1" floodColor="rgba(255,255,255,0.5)" />
+              </filter>
+            </defs>
+            {pitchMarkers.map((line, idx) => {
+              const dx = line.x2 - line.x1;
+              const dy = line.y2 - line.y1;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              if (dist < 1) return null;
+              return (
+                <line key={idx} x1={`${line.x1}%`} y1={`${line.y1}%`} x2={`${line.x2}%`} y2={`${line.y2}%`} stroke="black" strokeWidth="4" markerEnd="url(#arrowhead)" strokeLinecap="round" filter="url(#shadow)" />
+              );
+            })}
+            {currentLine && Math.sqrt(Math.pow(currentLine.x2 - currentLine.x1, 2) + Math.pow(currentLine.y2 - currentLine.y1, 2)) > 1 && (
+              <line x1={`${currentLine.x1}%`} y1={`${currentLine.y1}%`} x2={`${currentLine.x2}%`} y2={`${currentLine.y2}%`} stroke="black" strokeWidth="4" markerEnd="url(#arrowhead)" strokeLinecap="round" filter="url(#shadow)" opacity="0.7" />
+            )}
+          </svg>
+
+          {pitchMarkers.map((line, idx) => (
+            <div
+              key={idx}
+              onPointerDown={(e) => { e.stopPropagation(); removePitchMarker(idx, e as any); }}
+              className="absolute -ml-3 -mt-3 flex items-center justify-center hover:scale-125 transition-all cursor-pointer animate-in zoom-in duration-200 z-30 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+              style={{ left: `${line.x1}%`, top: `${line.y1}%` }}
+              title="Click to remove"
+            >
+              <span className="text-xl select-none leading-none pointer-events-none">⚽</span>
+            </div>
+          ))}
+          
+          {currentLine && (
+            <div
+              className="absolute -ml-3 -mt-3 flex items-center justify-center z-30 opacity-70 pointer-events-none"
+              style={{ left: `${currentLine.x1}%`, top: `${currentLine.y1}%` }}
+            >
+              <span className="text-xl select-none leading-none">⚽</span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -299,9 +383,24 @@ const MatchStatisticsForm = ({
       </div>
 
       <div className="bg-[#0A0A0A] rounded-[40px] border border-white/10 p-5 sm:p-8 md:p-12 flex flex-col gap-10 relative overflow-hidden shadow-2xl">
-        <div className="relative w-full">
-          <div className="bg-linear-to-r from-[#00A3FF] to-[#0066FF] font-orbitron text-white w-full py-4 px-2 sm:px-4 rounded-xl font-black uppercase tracking-widest sm:tracking-[0.4em] shadow-[0_0_40px_rgba(0,163,255,0.3)] text-center border border-white/20 text-sm sm:text-lg italic">
+        <div className="relative w-full flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="bg-linear-to-r from-[#00A3FF] to-[#0066FF] font-orbitron text-white w-full py-4 px-2 sm:px-4 rounded-xl font-black uppercase tracking-widest sm:tracking-[0.4em] shadow-[0_0_40px_rgba(0,163,255,0.3)] text-center border border-white/20 text-sm sm:text-lg italic flex-1">
             Match Statistics
+          </div>
+          <div className="flex items-center gap-3 bg-white/5 rounded-xl px-6 py-3 border border-white/10 shrink-0 shadow-lg">
+            <span className="text-xl sm:text-3xl font-black text-white font-orbitron min-w-20 sm:min-w-28 text-center italic tracking-widest">
+              {formatTime(secondsElapsed)}
+            </span>
+            <button
+              type="button"
+              onClick={toggleTimer}
+              className={cn(
+                "flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full text-black transition-all hover:scale-105 active:scale-95 shrink-0",
+                isTimerRunning ? "bg-red-500 hover:bg-red-600 shadow-[0_0_20px_rgba(239,68,68,0.5)]" : "bg-[#00FF62] hover:bg-[#00D150] shadow-[0_0_20px_rgba(0,255,98,0.3)]"
+              )}
+            >
+              {isTimerRunning ? <IconPlayerStop size={24} fill="currentColor" /> : <IconPlayerPlay size={24} fill="currentColor" />}
+            </button>
           </div>
         </div>
 
@@ -327,7 +426,7 @@ const MatchStatisticsForm = ({
               disabled={mobilePage === 0}
               className={cn("p-2 rounded-full transition-all text-white", mobilePage === 0 ? "opacity-30 cursor-not-allowed" : "hover:bg-white/10 active:scale-95 cursor-pointer")}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
             </button>
             <div className="flex gap-2">
               <div className={cn("w-2 h-2 rounded-full transition-all", mobilePage === 0 ? "bg-[#00FF62] scale-125 shadow-[0_0_10px_#00FF62]" : "bg-white/30")} />
@@ -338,7 +437,7 @@ const MatchStatisticsForm = ({
               disabled={mobilePage === 1}
               className={cn("p-2 rounded-full transition-all text-white", mobilePage === 1 ? "opacity-30 cursor-not-allowed" : "hover:bg-white/10 active:scale-95 cursor-pointer")}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
             </button>
           </div>
 
