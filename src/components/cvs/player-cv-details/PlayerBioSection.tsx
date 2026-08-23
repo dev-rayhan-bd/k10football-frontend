@@ -535,7 +535,7 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
       <div className="w-full min-w-0 overflow-hidden px-2 sm:px-4 md:px-0">
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6 w-full min-w-0">
           {/* LEFT COLUMN */}
-          <div className="col-span-1 xl:col-span-4 h-fit space-y-4 sm:space-y-6 bg-cardBg rounded-2xl sm:rounded-3xl border border-white/10 w-full min-w-0 overflow-hidden">
+          <div className="order-2 xl:order-none col-span-1 xl:col-span-4 h-fit space-y-4 sm:space-y-6 bg-cardBg rounded-2xl sm:rounded-3xl border border-white/10 w-full min-w-0 overflow-hidden">
             <div className="p-4 sm:p-6 w-full min-w-0">
               <h2 className="text-base sm:text-lg text-center font-heading font-normal mb-4 text-white">
                 Personal Information
@@ -592,13 +592,13 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                         alt="birth country flag"
                         layout="fill"
                         className="object-cover"
-                      
-onError={(e) => {
-  const target = e.target as HTMLImageElement;
-  target.srcset = "";
-  target.src = "/placeholder_img.jpg";
-}}
-/>
+
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.srcset = "";
+                          target.src = "/placeholder_img.jpg";
+                        }}
+                      />
                     </div>
                   </div>
                 </div>
@@ -620,13 +620,13 @@ onError={(e) => {
                         alt="dual nationality flag"
                         layout="fill"
                         className="object-cover"
-                      
-onError={(e) => {
-  const target = e.target as HTMLImageElement;
-  target.srcset = "";
-  target.src = "/placeholder_img.jpg";
-}}
-/>
+
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.srcset = "";
+                          target.src = "/placeholder_img.jpg";
+                        }}
+                      />
                     </div>
                   </div>
                 </div>
@@ -986,13 +986,13 @@ onError={(e) => {
                         "pointer-events-none drop-shadow-lg transition-transform group-hover/marker:scale-110",
                         idx === 0 ? "w-6 h-6 sm:w-8 sm:h-8" : "w-5 h-5 sm:w-7 sm:h-7"
                       )}
-                    
-onError={(e) => {
-  const target = e.target as HTMLImageElement;
-  target.srcset = "";
-  target.src = "/placeholder_img.jpg";
-}}
-/>
+
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.srcset = "";
+                        target.src = "/placeholder_img.jpg";
+                      }}
+                    />
                     {marker.name && (
                       <div className={cn(
                         "mt-1 px-1 sm:px-1.5 py-0.5 rounded bg-black/85 border border-white/10 text-white text-[8px] sm:text-[9px] font-medium text-center whitespace-nowrap shadow-md pointer-events-none tracking-wide select-none transition-all",
@@ -1006,7 +1006,7 @@ onError={(e) => {
             </div>
           </div>
           {/* CENTER COLUMN - PLAYER IMAGE */}
-          <div className="col-span-1 xl:col-span-4 flex flex-col items-center w-full min-w-0 overflow-hidden">
+          <div className="order-3 xl:order-none col-span-1 xl:col-span-4 flex flex-col items-center w-full min-w-0 overflow-hidden">
             {/* Player Name */}
             <div className="text-center mb-6 sm:mb-8 w-full min-w-0">
               <div className="flex items-center mb-6 sm:mb-8 justify-center w-full min-w-0">
@@ -1183,7 +1183,7 @@ onError={(e) => {
             </div>
           </div>
           {/* RIGHT COLUMN */}
-          <div className="col-span-1 xl:col-span-4 space-y-4 sm:space-y-6 bg-cardBg rounded-2xl sm:rounded-3xl w-full min-w-0 overflow-hidden">
+          <div className="order-1 xl:order-none col-span-1 xl:col-span-4 space-y-4 sm:space-y-6 bg-cardBg rounded-2xl sm:rounded-3xl w-full min-w-0 overflow-hidden">
             {/* Certification Card */}
             <div className="p-4 sm:p-6 border-none rounded-2xl relative overflow-hidden group hover:border-primary/20 transition-all w-full min-w-0">
               {/* SVG certificate container */}
@@ -1825,13 +1825,12 @@ onError={(e) => {
                         width={36}
                         height={36}
                         className="object-contain drop-shadow-md w-full h-full"
-                      
-onError={(e) => {
-  const target = e.target as HTMLImageElement;
-  target.srcset = "";
-  target.src = "/placeholder_img.jpg";
-}}
-/>
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.srcset = "";
+                          target.src = "/placeholder_img.jpg";
+                        }}
+                      />
                     </div>
                     <div className="flex flex-col gap-0.5 w-full min-w-0">
                       <CMSField
