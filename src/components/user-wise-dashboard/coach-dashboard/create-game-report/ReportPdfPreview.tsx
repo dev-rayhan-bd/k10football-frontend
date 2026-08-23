@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import Image from "next/image";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import RadarChart from "./RadarChart";
 import { IconDownload, IconCheck, IconLoader2 } from "@tabler/icons-react";
@@ -28,8 +28,29 @@ const ReportPdfPreview = ({
   isPlayer
 }: ReportPdfPreviewProps) => {
   const previewRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
+  const [scale, setScale] = useState(1);
   const isGK = formData.position === "GOALKEEPER";
+
+  useEffect(() => {
+    const updateScale = () => {
+      if (containerRef.current) {
+        // 794 is the exact width of the PDF content. Add a small padding margin.
+        const containerWidth = containerRef.current.clientWidth;
+        if (containerWidth < 820) {
+          setScale((containerWidth - 20) / 794);
+        } else {
+          setScale(1);
+        }
+      }
+    };
+    
+    updateScale();
+    window.addEventListener("resize", updateScale);
+    return () => window.removeEventListener("resize", updateScale);
+  }, []);
+
   // Helper to scale/normalize stats to a rating between 50 and 99
   const mapStat = (val: number, maxVal = 15) => {
     return Math.min(99, Math.max(50, Math.round(50 + (val / maxVal) * 49)));
@@ -84,26 +105,33 @@ const ReportPdfPreview = ({
         <h1 className="text-4xl font-black text-white uppercase tracking-tighter italic font-orbitron">Report Generated</h1>
         <p className="text-gray-400 text-sm">Preview the generated Player Analysis Profile PDF and save it.</p>
       </div>
-      {/* PDF Container (Styled exactly like the 3rd image, print-friendly white background) */}
-      <div className="w-full border border-white/10 rounded-3xl overflow-x-auto shadow-2xl bg-white/5 p-2 sm:p-6 mb-6 hide-scrollbar">
-        <div className="w-max mx-auto">
+      {/* PDF Container */}
+      <div 
+        ref={containerRef}
+        className="w-full flex justify-center overflow-hidden border border-white/10 rounded-3xl shadow-2xl bg-white/5 mb-6"
+        style={{ height: scale < 1 ? `${(1123 * scale) + 24}px` : 'auto', padding: scale < 1 ? '12px 0' : '1.5rem' }}
+      >
+        <div 
+          className="origin-top flex justify-center"
+          style={{ transform: `scale(${scale})` }}
+        >
           <div 
             ref={previewRef} 
             id="pdf-report-content" 
-            className="bg-white text-slate-800 p-10 font-sans relative overflow-hidden select-none"
-            style={{ width: "794px", height: "1123px", minWidth: "794px", minHeight: "1123px" }} // Exact A4 aspect ratio in pixels (96 DPI)
+            className="bg-white text-slate-800 px-10 py-8 font-sans relative overflow-hidden select-none shrink-0"
+            style={{ width: "794px", height: "1123px" }} // Exact A4 aspect ratio in pixels (96 DPI)
           >
           {/* Watermark Logo */}
           <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none z-0">
             <Image src="/logo.png" alt="Logo Watermark" className="w-125 object-contain" width={500} height={500}/>
           </div>
           {/* Header */}
-          <div className="relative z-10 flex items-center justify-between border-b-4 border-slate-900 pb-4 mb-6">
-            <div className="flex items-center gap-3">
-              <Image src="/logo.png" alt="K10 Logo" className="w-12 h-12 object-contain" width={12} height={12} />
+          <div className="relative z-10 flex items-center justify-between border-b-4 border-slate-900 pb-3 mb-4">
+            <div className="flex items-center gap-4">
+              <Image src="/logo.png" alt="K10 Logo" className="w-20 h-20 object-contain" width={80} height={80} />
               <div>
-                <div className="text-xs font-black tracking-widest text-slate-900 font-orbitron">K10 FOOTBALL</div>
-                <div className="text-[8px] text-slate-500 font-bold uppercase tracking-widest font-orbitron">ANALYSIS CV</div>
+                <div className="text-sm font-black tracking-widest text-slate-900 font-orbitron">K10 FOOTBALL</div>
+                <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest font-orbitron mt-0.5">ANALYSIS CV</div>
               </div>
             </div>
             <div className="text-center">
@@ -114,18 +142,18 @@ const ReportPdfPreview = ({
                 POSITION : {formData.position} ⚽
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <div className="text-right">
-                <div className="text-xs font-black tracking-widest text-slate-900 font-orbitron">K10 FOOTBALL</div>
-                <div className="text-[8px] text-slate-500 font-bold uppercase tracking-widest font-orbitron">ANALYSIS CV</div>
+                <div className="text-sm font-black tracking-widest text-slate-900 font-orbitron">K10 FOOTBALL</div>
+                <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest font-orbitron mt-0.5">ANALYSIS CV</div>
               </div>
-              <Image src="/logo.png" alt="K10 Logo" className="w-12 h-12 object-contain" width={12} height={12}/>
+              <Image src="/logo.png" alt="K10 Logo" className="w-20 h-20 object-contain" width={80} height={80}/>
             </div>
           </div>
           {/* Body Content */}
-          <div className="relative z-10 grid grid-cols-12 gap-6 mb-6">
+          <div className="relative z-10 grid grid-cols-12 gap-6 mb-4">
             {/* Player details */}
-            <div className="col-span-8 grid grid-cols-2 gap-x-6 gap-y-3.5 text-[11px] font-medium text-slate-600">
+            <div className="col-span-8 grid grid-cols-2 gap-x-6 gap-y-2.5 text-[11px] font-medium text-slate-600">
               <div>
                 <span className="font-bold text-slate-900 uppercase font-orbitron">PLAYER NAME:</span>
                 <p className="text-slate-700 text-xs font-bold mt-0.5 uppercase">{formData.playerName}</p>
@@ -195,8 +223,8 @@ const ReportPdfPreview = ({
             </div>
           </div>
           {/* Player Characteristic Section */}
-          <div className="relative z-10 mb-6">
-            <div className="bg-sky-500 text-white font-orbitron px-4 py-1.5 rounded text-[10px] font-black uppercase tracking-wider mb-3 shadow">
+          <div className="relative z-10 mb-4">
+            <div className="bg-sky-500 text-white font-orbitron px-4 py-1.5 rounded text-[10px] font-black uppercase tracking-wider mb-2.5 shadow">
               PLAYER CHARACTERISTIC:
             </div>
             <div className="flex flex-wrap gap-4 pl-2">
@@ -209,11 +237,11 @@ const ReportPdfPreview = ({
             </div>
           </div>
           {/* Match Information Section */}
-          <div className="relative z-10 mb-6">
-            <div className="bg-sky-500 text-white font-orbitron px-4 py-1.5 rounded text-[10px] font-black uppercase tracking-wider mb-4 shadow">
+          <div className="relative z-10 mb-4">
+            <div className="bg-sky-500 text-white font-orbitron px-4 py-1.5 rounded text-[10px] font-black uppercase tracking-wider mb-3 shadow">
               MATCH INFORMATION
             </div>
-            <div className="grid grid-cols-2 gap-x-12 gap-y-3.5 text-[11px] font-medium text-slate-600 pl-2">
+            <div className="grid grid-cols-2 gap-x-12 gap-y-2.5 text-[11px] font-medium text-slate-600 pl-2">
               <div>
                 <span className="font-bold text-slate-950 font-orbitron">SCOUT NAME:</span>
                 <span className="ml-2 text-slate-700 font-bold uppercase">{formData.scoutName}</span>
@@ -241,11 +269,11 @@ const ReportPdfPreview = ({
             </div>
           </div>
           {/* Match Statistics Section */}
-          <div className="relative z-10 mb-6">
-            <div className="bg-sky-500 text-white font-orbitron px-4 py-1.5 rounded text-[10px] font-black uppercase tracking-wider mb-4 shadow">
+          <div className="relative z-10 mb-4">
+            <div className="bg-sky-500 text-white font-orbitron px-4 py-1.5 rounded text-[10px] font-black uppercase tracking-wider mb-3 shadow">
               MATCH STATISTICS
             </div>
-            <div className="grid grid-cols-3 gap-x-8 gap-y-3 text-[10px] pl-2">
+            <div className="grid grid-cols-3 gap-x-8 gap-y-2 text-[10px] pl-2">
               {[
                 { label: "Shots on Goal:", val: stats.shotsOnGoal || 0 },
                 { label: "Stand Tackle:", val: stats.standTackle || 0 },
@@ -280,7 +308,7 @@ const ReportPdfPreview = ({
             </div>
           </div>
           {/* Bottom section (Radar, Overall, Logos) */}
-          <div className="relative z-10 flex items-center justify-between border-t-2 border-slate-200 pt-6 mt-6">
+          <div className="relative z-10 flex items-center justify-between border-t-2 border-slate-200 pt-4 mt-4">
             {/* Radar Chart */}
             <div className="w-45">
               <RadarChart 
@@ -341,7 +369,7 @@ const ReportPdfPreview = ({
           className="flex-1 bg-[#00FF62] hover:bg-[#00D150] text-black h-14 rounded-xl text-sm font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(0,255,98,0.2)] flex items-center justify-center gap-2 font-orbitron min-w-0"
         >
           <IconCheck size={18} />
-          {isPlayer ? "Proceed to Payment" : "Save & Finish"}
+          {isPlayer ? "Submit Request" : "Save & Finish"}
         </Button>
       </div>
     </div>

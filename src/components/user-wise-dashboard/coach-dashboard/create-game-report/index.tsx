@@ -67,6 +67,9 @@ export const CreateGameReportWizard = ({
   useEffect(() => {
     const role = localStorage.getItem("userRole") || "player";
     setUserRole(role);
+    if (role === "coach") {
+      setStep(2); // Coach skips payment
+    }
   }, []);
 
   // Pre-fill from Redux player list and request data
@@ -299,8 +302,7 @@ export const CreateGameReportWizard = ({
     }
   };
 
-  // Delete PlayerRequestWizard import if not used, but I'll just skip the early return
-  const handlePlayerPaySuccess = () => {
+  const handlePlayerSubmit = () => {
     // Add request to REPORT_REQUESTS_DATA
     const newReq = addReportRequest({
       playerName: formData.playerName,
@@ -323,24 +325,34 @@ export const CreateGameReportWizard = ({
     });
 
     dispatch(addGameReportRequest(newReq));
-    toast.success("Payment successful! Request submitted to Coach.");
+    toast.success("Request submitted to Coach successfully!");
     setStep(5);
   };
 
   return (
     <div className="w-full">
-      {step === 1 && (
+      {step === 1 && userRole !== "coach" && (
+        <StripePaymentModal 
+          onPay={() => {
+            toast.success("Payment successful! Please fill out the report details.");
+            setStep(2);
+          }}
+          onBack={onCancel}
+        />
+      )}
+
+      {step === 2 && (
         <ReportDetailsForm 
           formData={formData} 
           setFormData={setFormData}
           characteristics={characteristics}
           setCharacteristics={setCharacteristics}
-          onCancel={onCancel}
-          onContinue={() => setStep(2)} 
+          onCancel={userRole === "coach" ? onCancel : () => setStep(1)}
+          onContinue={() => setStep(3)} 
         />
       )}
       
-      {step === 2 && (
+      {step === 3 && (
         <MatchStatisticsForm 
           position={formData.position}
           minutesPlayed={formData.minutesPlayed}
@@ -351,12 +363,12 @@ export const CreateGameReportWizard = ({
           setGoalMarkers={setGoalMarkers}
           pitchMarkers={pitchMarkers}
           setPitchMarkers={setPitchMarkers}
-          onCancel={() => setStep(1)}
-          onSubmit={() => setStep(3)}
+          onCancel={() => setStep(2)}
+          onSubmit={() => setStep(4)}
         />
       )}
 
-      {step === 3 && (
+      {step === 4 && (
         <ReportPdfPreview 
           formData={formData}
           characteristics={characteristics}
@@ -367,18 +379,11 @@ export const CreateGameReportWizard = ({
             if (userRole === "coach") {
               handleSave(overallRating);
             } else {
-              setStep(4);
+              handlePlayerSubmit();
             }
           }}
-          onBack={() => setStep(2)}
-          isPlayer={userRole !== "coach"}
-        />
-      )}
-
-      {step === 4 && userRole !== "coach" && (
-        <StripePaymentModal 
-          onPay={handlePlayerPaySuccess}
           onBack={() => setStep(3)}
+          isPlayer={userRole !== "coach"}
         />
       )}
 
