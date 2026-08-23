@@ -117,7 +117,7 @@ const ClubSection = () => {
           {playerData?.clubs?.map((club) => (
             <div
               key={club.id}
-              className="relative border border-border cursor-pointer hover:bg-cardBg duration-300 bg-black/20 rounded-lg p-4 sm:p-6 flex items-center gap-3 sm:gap-4 group transition w-full min-w-0"
+              className="relative border border-border cursor-pointer hover:bg-cardBg duration-300 bg-black/20 rounded-lg p-4 sm:p-6 flex flex-col items-center text-center gap-3 sm:gap-4 group transition w-full min-w-0"
             >
               <button
                 onClick={(e) => { e.stopPropagation(); removeClub(club.id); }}
@@ -140,15 +140,15 @@ const ClubSection = () => {
                   />
                 </div>
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 w-full min-w-0 flex flex-col items-center">
                 <CMSField
                   value={club.name}
                   onUpdate={(val) => updateClub(club.id, "name", val)}
                   canEdit={true}
-                  className="text-base sm:text-lg font-semibold text-foreground wrap-break-word uppercase leading-tight pr-6 w-full min-w-0"
-                  inputClassName="w-full min-w-0 truncate"
+                  className="text-base sm:text-lg font-semibold text-foreground wrap-break-word uppercase leading-tight w-full min-w-0 flex justify-center text-center px-4"
+                  inputClassName="w-full min-w-0 text-center"
                 />
-                <div className="flex flex-wrap items-center gap-1 text-xs sm:text-sm text-gray-400 mt-1 w-full min-w-0">
+                <div className="flex flex-wrap items-center justify-center gap-1 text-xs sm:text-sm text-gray-400 mt-1 w-full min-w-0">
                   <CMSField
                     value={club.from}
                     onUpdate={(val) => updateClub(club.id, "from", val)}

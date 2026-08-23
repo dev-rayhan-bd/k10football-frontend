@@ -109,13 +109,13 @@ try {
 };
 
 return (
-<div className="w-full py-10 sm:py-16 px-2 sm:px-6 bg-background min-w-0 overflow-hidden">
+<div className="w-full py-10 sm:py-16 px-0 sm:px-6 bg-background min-w-0 overflow-hidden">
   <div className="container mx-auto w-full min-w-0">
     <h2 className="font-heading text-2xl sm:text-4xl md:text-5xl font-bold text-center text-foreground mb-8 sm:mb-12 tracking-wider">
       DETAILED ANALYSIS METRICS
     </h2>
 
-    <div className="border border-border rounded-lg p-3 sm:p-8 w-full min-w-0">
+    <div className="border-y sm:border border-border rounded-none sm:rounded-lg p-1 sm:p-8 w-full min-w-0">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full min-w-0">
         <TabsList className="grid w-full grid-cols-2 mb-6 sm:mb-8 p-1 rounded-full">
           {METRIC_CATEGORIES.map((category) => (
@@ -131,7 +131,7 @@ return (
 
         <TabsContent value={activeTab} className="w-full min-w-0">
           <div className="w-full overflow-x-auto no-scrollbar min-w-0 pb-2">
-            <Table className="border border-border min-w-max w-full">
+            <Table className="border border-border w-full">
             <TableHeader>
               <TableRow className="border-border bg-white/5">
                 <TableHead className="border-r border-border text-gray-400 font-black uppercase tracking-wider h-14">
@@ -160,8 +160,9 @@ return (
                       value={metric.category}
                       onUpdate={(val) => handleUpdate(activeTab, idx, 'category', val)}
                       canEdit={editable}
-                      className="w-full font-bold text-base uppercase text-gray-200"
-                      inputClassName="text-base font-bold uppercase"
+                      className="w-full font-bold text-xs sm:text-base uppercase text-gray-200"
+                      inputClassName="text-xs sm:text-base font-bold uppercase"
+                      noTruncate={true}
                     />
                   </TableCell>
 

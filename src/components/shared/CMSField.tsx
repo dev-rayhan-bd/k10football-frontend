@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,7 @@ interface CMSFieldProps {
   hideIcon?: boolean;
   style?: React.CSSProperties;
   showEmojis?: boolean;
+  noTruncate?: boolean;
 }
 
 const EMOJIS = ["⚽", "👀", "🎯", "🧠", "💪", "🌍", "🏆", "🔥", "⚡", "📈", "👏", "🙌", "❤️", "👍"];
@@ -44,6 +46,7 @@ const CMSField = ({
   hideIcon = false,
   style,
   showEmojis = false,
+  noTruncate = false,
 }: CMSFieldProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [tempValue, setTempValue] = useState(value);
@@ -116,7 +119,7 @@ const CMSField = ({
               <X className="h-4 w-4" />
             </Button>
           </div>
-          <div className="absolute top-9 left-0 w-full max-h-40 overflow-y-auto bg-gray-900 border border-gray-800 rounded shadow-xl z-[100]">
+          <div className="absolute top-9 left-0 w-full max-h-40 overflow-y-auto bg-gray-900 border border-gray-800 rounded shadow-xl z-100">
             {filteredOptions.length > 0 ? (
               filteredOptions.map((opt, idx) => {
                 const isHeading = opt.startsWith("--") && opt.endsWith("--");
@@ -188,7 +191,7 @@ const CMSField = ({
                   ref={textareaRef}
                   value={tempValue}
                   onChange={(e) => setTempValue(e.target.value)}
-                  className={cn("text-xs bg-gray-800 border-primary/30 min-h-[120px] pr-10", inputClassName)}
+                  className={cn("text-xs bg-gray-800 border-primary/30 min-h-30 pr-10", inputClassName)}
                   autoFocus
                   onKeyDown={(e) => {
                     if (e.key === "Escape") handleCancel();
@@ -285,7 +288,8 @@ const CMSField = ({
       onDoubleClick={() => canEdit && editTrigger === "doubleClick" && setIsEditing(true)}
     >
       <span className={cn(
-        type !== "textarea" && "truncate",
+        type !== "textarea" && !noTruncate && "truncate",
+        type !== "textarea" && noTruncate && "whitespace-normal wrap-break-word",
         type === "textarea" && "whitespace-pre-wrap"
       )}>{value}</span>
       {canEdit && !hideIcon && (
