@@ -25,7 +25,7 @@ const StatInput = ({ label, value, onChange, colorClass, align = "left" }: StatI
           <button
             type="button"
             onClick={() => onChange(Math.max(0, value - 1))}
-            className="flex-1 h-full flex items-center justify-center text-white/85 hover:text-white hover:bg-white/10 active:scale-90 transition-all text-xl font-black font-orbitron cursor-pointer select-none"
+            className="flex-1 h-full flex items-center justify-center text-white/85 hover:text-white hover:bg-white/10 active:scale-90 transition-all text-3xl md:text-4xl pb-1 font-black font-orbitron cursor-pointer select-none"
           >
             -
           </button>
@@ -33,7 +33,7 @@ const StatInput = ({ label, value, onChange, colorClass, align = "left" }: StatI
           <button
             type="button"
             onClick={() => onChange(value + 1)}
-            className="flex-1 h-full flex items-center justify-center text-white/85 hover:text-white hover:bg-white/10 active:scale-90 transition-all text-xl font-black font-orbitron cursor-pointer select-none"
+            className="flex-1 h-full flex items-center justify-center text-white/85 hover:text-white hover:bg-white/10 active:scale-90 transition-all text-3xl md:text-4xl pb-1 font-black font-orbitron cursor-pointer select-none"
           >
             +
           </button>
@@ -99,6 +99,7 @@ const MatchStatisticsForm = ({
   onSubmit
 }: MatchStatisticsFormProps) => {
   const isGK = position === "GOALKEEPER";
+  const [mobilePage, setMobilePage] = React.useState(0);
 
   const statsLeft = [
     { label: "Shots on Goal", key: "shotsOnGoal", color: "bg-[#00D1FF]" },
@@ -306,14 +307,41 @@ const MatchStatisticsForm = ({
 
         {/* ---------------- MOBILE LAYOUT: STACKED ---------------- */}
         <div className="lg:hidden flex flex-col gap-10 w-full pt-4">
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            <div className="flex flex-col gap-4">
-              {renderLeftStats("left")}
-            </div>
-            <div className="flex flex-col gap-4">
-              {renderRightStats("left")}
-            </div>
+          <div className="grid grid-cols-2 landscape:grid-cols-3 gap-3 sm:gap-4">
+            {statsLeft.slice(mobilePage * 6, (mobilePage + 1) * 6).map((s, idx) => {
+              const actualIdx = mobilePage * 6 + idx;
+              return (
+                <React.Fragment key={s.key}>
+                  <StatInput label={s.label} value={stats[s.key] || 0} onChange={(val) => handleStatChange(s.key, val)} colorClass={s.color} align="left" />
+                  {statsRight[actualIdx] && (
+                    <StatInput label={statsRight[actualIdx].label} value={stats[statsRight[actualIdx].key] || 0} onChange={(val) => handleStatChange(statsRight[actualIdx].key, val)} colorClass={statsRight[actualIdx].color} align="left" />
+                  )}
+                </React.Fragment>
+              );
+            })}
           </div>
+
+          <div className="flex items-center justify-center gap-4 bg-white/5 rounded-full p-2 mx-auto -mt-4">
+            <button
+              onClick={() => setMobilePage(Math.max(0, mobilePage - 1))}
+              disabled={mobilePage === 0}
+              className={cn("p-2 rounded-full transition-all text-white", mobilePage === 0 ? "opacity-30 cursor-not-allowed" : "hover:bg-white/10 active:scale-95 cursor-pointer")}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <div className="flex gap-2">
+              <div className={cn("w-2 h-2 rounded-full transition-all", mobilePage === 0 ? "bg-[#00FF62] scale-125 shadow-[0_0_10px_#00FF62]" : "bg-white/30")} />
+              <div className={cn("w-2 h-2 rounded-full transition-all", mobilePage === 1 ? "bg-[#00FF62] scale-125 shadow-[0_0_10px_#00FF62]" : "bg-white/30")} />
+            </div>
+            <button
+              onClick={() => setMobilePage(Math.min(1, mobilePage + 1))}
+              disabled={mobilePage === 1}
+              className={cn("p-2 rounded-full transition-all text-white", mobilePage === 1 ? "opacity-30 cursor-not-allowed" : "hover:bg-white/10 active:scale-95 cursor-pointer")}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+          </div>
+
           <div className="flex flex-col gap-8 w-full">
             {renderGoalDiagram()}
             {renderPitchDiagram()}
