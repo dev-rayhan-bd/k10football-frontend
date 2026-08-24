@@ -117,7 +117,59 @@ const PlayerCVValidations = () => {
         ))}
       </div>
       <div className="p-4 sm:p-6 md:p-8 rounded-3xl border border-white/20 bg-[#0D0D0D] w-full max-w-full overflow-hidden">
-        <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+        {/* Mobile View (Cards) */}
+        <div className="lg:hidden space-y-4">
+          {validationData.map((player, idx) => (
+            <div key={idx} className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                 <div className="flex items-center gap-3">
+                   <Image width={40} height={40} src={player.avatar} className="w-10 h-10 rounded-full object-cover border border-white/10" alt={player.name} />
+                   <div>
+                     <div className="text-sm font-bold text-white">{player.name}</div>
+                     <div className="text-[10px] text-red-500 font-bold uppercase tracking-widest">{player.position}</div>
+                   </div>
+                 </div>
+                 <div className="text-xl font-black text-red-600 italic">{player.rating}</div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-y-3 gap-x-4">
+                <div>
+                  <span className="text-[10px] text-gray-500 uppercase font-black block">Club/Current</span>
+                  <span className="text-xs text-white">{player.match}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-gray-500 uppercase font-black block">Status</span>
+                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest inline-block mt-1 ${player.status === "Verified" ? "bg-green-500/10 text-green-500 border border-green-500/20" :
+                    player.status === "Pending" ? "bg-orange-500/10 text-orange-500 border border-orange-500/20" : "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20"
+                  }`}>
+                    {player.status}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-gray-500 uppercase font-black block">Goals / Assists</span>
+                  <span className="text-xs text-white">{player.goals} / {player.assists}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-gray-500 uppercase font-black block">Last Validated</span>
+                  <span className="text-xs text-white">{player.date}</span>
+                </div>
+              </div>
+              
+              <div className="flex justify-end pt-3 border-t border-white/10 mt-1">
+                 <TableActionButtons
+                   onView={() => {
+                     selectPlayer(player.id);
+                     router.push("/cvs/player-cv-details");
+                   }}
+                   onVerify={player.status !== "Verified" ? () => validatePlayer(player.id) : undefined}
+                 />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop View (Table) */}
+        <div className="hidden lg:block overflow-x-auto">
           <DashboardTable columns={columns} data={validationData} className="border-white/10 min-w-150" />
         </div>
       </div>
