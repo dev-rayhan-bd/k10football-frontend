@@ -205,7 +205,7 @@ const PlayerAnalytics = () => {
 };
 
 const RadarCard = ({ title, subtitle, data, color, score, growth }: any) => (
-  <div className="p-6 sm:p-10 rounded-[30px] sm:rounded-[40px] border border-white/5 bg-[#0D0D0D]/40 backdrop-blur-xl flex flex-col items-center">
+  <div className="p-2 sm:p-10 rounded-[30px] sm:rounded-[40px] border border-white/5 bg-[#0D0D0D]/40 backdrop-blur-xl flex flex-col items-center">
     <div className="w-full mb-6 sm:mb-8">
       <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight uppercase font-heading">{title}</h3>
       <p className="text-xs sm:text-sm text-gray-500 mt-1">{subtitle}</p>

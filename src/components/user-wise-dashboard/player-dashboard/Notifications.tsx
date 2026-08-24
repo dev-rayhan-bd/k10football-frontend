@@ -62,9 +62,10 @@ const PlayerNotifications = () => {
         {notifications.map((item) => (
           <div 
             key={item.id} 
-            className="group flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-6 rounded-2xl bg-[#0A0A0A]/60 border border-white/5 hover:border-white/10 transition-all duration-300 gap-4 sm:gap-0"
+            className="group flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-6 rounded-2xl bg-white/3 border border-white/10 hover:bg-white/6 hover:border-white/20 transition-all duration-300 backdrop-blur-md shadow-lg shadow-black/50 gap-4 sm:gap-0 relative overflow-hidden"
           >
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+            <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 group-hover:text-white group-hover:bg-white/10 transition-all">
                 <IconHeart size={24} stroke={1.5} />
               </div>
@@ -81,7 +82,7 @@ const PlayerNotifications = () => {
                 </div>
               </div>
             </div>
-            <button className="w-full sm:w-auto px-6 py-2.5 rounded-xl border border-green-500/20 bg-green-500/5 text-[11px] font-black text-green-500 uppercase tracking-widest hover:bg-green-500 hover:text-black transition-all">
+            <button className="relative z-10 w-full sm:w-auto px-6 py-2.5 rounded-xl border border-green-500/20 bg-green-500/5 text-[11px] font-black text-green-500 uppercase tracking-widest hover:bg-green-500 hover:text-black transition-all shadow-md shadow-green-500/10">
               Interested
             </button>
           </div>

@@ -27,7 +27,7 @@ const videoItems = [
   { title: "vs Liverpool U19", date: "Mar 5, 2024", views: 312, likes: 227, img: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=400" },
   { title: "Training Highlights", date: "Feb 28, 2024", views: 156, likes: 62, img: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=400" },
   { title: "U16 Championship Final", date: "Mar 10, 2024", views: 234, likes: 45, img: "https://images.unsplash.com/photo-1551958219-acbc608c6377?q=80&w=400" },
-  { title: "Training Session- Skills...", date: "Mar 2, 2024", views: 189, likes: 38, img: "https://images.unsplash.com/photo-1556476272-b52467180b59?q=80&w=400" },
+  { title: "Training Session- Skills...", date: "Mar 2, 2024", views: 189, likes: 38, img: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=400" },
   { title: "vs Liverpool U19", date: "Feb 28, 2024", views: 372, likes: 250, img: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?q=80&w=400" },
   { title: "Regional Cup - Best Moments", date: "Feb 15, 2024", views: 211, likes: 115, img: "https://images.unsplash.com/photo-1560272564-c83b66b1ad12?q=80&w=400" },
 ];

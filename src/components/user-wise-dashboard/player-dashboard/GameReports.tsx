@@ -180,8 +180,9 @@ const GameReports = () => {
           {reports
             .filter(item => statusFilter === 'All' || item.status === statusFilter)
             .map((item) => (
-            <div key={item.id} className="p-5 rounded-2xl bg-[#0A0A0A]/60 border border-white/5 flex flex-col gap-4">
-              <div className="flex items-start justify-between gap-4">
+            <div key={item.id} className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] hover:border-white/20 transition-all duration-300 backdrop-blur-md shadow-lg shadow-black/50 flex flex-col gap-4 group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative z-10 flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 shrink-0 rounded-xl bg-red-600/10 flex items-center justify-center text-red-500">
                     <IconFileText size={20} stroke={1.5} />
@@ -197,7 +198,7 @@ const GameReports = () => {
                 </div>
               </div>
               
-              <div className="flex justify-between items-center pt-3 border-t border-white/5">
+              <div className="relative z-10 flex justify-between items-center pt-3 border-t border-white/10">
                 <div className="flex flex-col gap-0.5">
                   <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Amount</span>
                   <span className="text-gray-300 text-sm font-bold">{item.amount}</span>
@@ -210,7 +211,7 @@ const GameReports = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-1">
+              <div className="relative z-10 flex items-center justify-end gap-2 pt-1">
                 <button
                   onClick={() => handleView(item)}
                   className="flex-1 sm:flex-none flex justify-center items-center gap-2 px-4 py-2.5 rounded-lg bg-red-600/10 text-red-500 hover:bg-red-600/20 text-xs font-bold uppercase transition-colors min-w-0"
