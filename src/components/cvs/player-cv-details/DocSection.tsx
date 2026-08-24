@@ -17,14 +17,14 @@ const DocSection = ({ editable = false }: { editable?: boolean }) => {
       prev.map((doc) => (doc.id === id ? { ...doc, title: value } : doc)),
     );
 
-    try {
-      await updatePlayer({
-        id: "current-player",
-        data: { [`documents.${id}.title`]: value }
-      }).unwrap();
-    } catch (error) {
-      console.error(error);
-    }
+    // try {
+    //   await updatePlayer({
+    //     id: "current-player",
+    //     data: { [`documents.${id}.title`]: value }
+    //   }).unwrap();
+    // } catch (error) {
+    //   console.error(error);
+    // }
   };
 
   return (

@@ -22,14 +22,14 @@ Medical reports indicate excellent physical condition 💪 with no recurring inj
 
   const handleUpdate = async (val: string) => {
     setNotes(val);
-    try {
-      await updatePlayer({
-        id: "current-player",
-        data: { additionalNotes: val }
-      }).unwrap();
-    } catch (error) {
-      console.error(error);
-    }
+    // try {
+    //   await updatePlayer({
+    //     id: "current-player",
+    //     data: { additionalNotes: val }
+    //   }).unwrap();
+    // } catch (error) {
+    //   console.error(error);
+    // }
   };
 
   return (

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 import React, { createContext, useContext, useState, useEffect } from "react";
 import AdditionalNotesSection from "./AdditionalNotesSection";
@@ -88,7 +89,6 @@ const FullEditablePage = ({ editable = false }: { editable?: boolean }) => {
 
     // Logic for role-based editability
     // Player/Parent can edit bio, profile, and documents/media
-    const canEditBio = isActuallyEditable && (role === "player" || role === "parent");
     // Coach, Player, and Parent can edit evaluations
     const canEditEvaluations = isActuallyEditable && (role === "player" || role === "parent" || role === "coach");
     // Player/Parent can edit media

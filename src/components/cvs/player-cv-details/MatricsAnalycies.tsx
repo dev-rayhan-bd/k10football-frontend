@@ -98,14 +98,14 @@ setMetricsData(prev => {
   return newData;
 });
 
-try {
-  await updatePlayer({
-    id: "current-player",
-    data: { [`metrics.${tab}.${metricName}.${field}`]: value }
-  }).unwrap();
-} catch (error) {
-  console.error(error);
-}
+// try {
+//   await updatePlayer({
+//     id: "current-player",
+//     data: { [`metrics.${tab}.${metricName}.${field}`]: value }
+//   }).unwrap();
+// } catch (error) {
+//   console.error(error);
+// }
 };
 
 return (

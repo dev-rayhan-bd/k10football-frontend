@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Eye, Heart, Upload } from "lucide-react";
-import { useUpdatePlayerProfileMutation } from "@/lib/features/cv/cvApi";
 import CMSField from "@/components/shared/CMSField";
 import { cn } from "@/lib/utils";
 interface ImageCard {
@@ -32,7 +31,7 @@ const SAMPLE_IMAGES: ImageCard[] = [
     views: 234,
     likes: 97,
     image:
-      "https://images.pexels.com/photos/35405504/pexels-photo-35405504.jpeg",
+      "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=500&auto=format&fit=crop",
   },
   {
     id: "2",
@@ -41,7 +40,7 @@ const SAMPLE_IMAGES: ImageCard[] = [
     views: 189,
     likes: 45,
     image:
-      "https://images.pexels.com/photos/32205625/pexels-photo-32205625.jpeg",
+      "https://images.unsplash.com/photo-1518605368461-1ee7d5320d36?q=80&w=500&auto=format&fit=crop",
   },
   {
     id: "3",
@@ -50,7 +49,7 @@ const SAMPLE_IMAGES: ImageCard[] = [
     views: 312,
     likes: 227,
     image:
-      "https://images.pexels.com/photos/35405504/pexels-photo-35405504.jpeg",
+      "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=500&auto=format&fit=crop",
   },
   {
     id: "4",
@@ -59,11 +58,10 @@ const SAMPLE_IMAGES: ImageCard[] = [
     views: 156,
     likes: 62,
     image:
-      "https://images.pexels.com/photos/32205625/pexels-photo-32205625.jpeg",
+      "https://images.unsplash.com/photo-1518605368461-1ee7d5320d36?q=80&w=500&auto=format&fit=crop",
   },
 ];
 const MyImagesSection = ({ editable = false }: { editable?: boolean }) => {
-  const [updatePlayer] = useUpdatePlayerProfileMutation();
   const [images, setImages] = useState<ImageCard[]>(SAMPLE_IMAGES);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -88,14 +86,14 @@ const MyImagesSection = ({ editable = false }: { editable?: boolean }) => {
     setImages((prev) =>
       prev.map((img) => (img.id === id ? { ...img, [field]: value } : img)),
     );
-    try {
-      await updatePlayer({
-        id: "current-player",
-        data: { [`gallery.images.${id}.${field}`]: value },
-      }).unwrap();
-    } catch (error) {
-      console.error(error);
-    }
+    // try {
+    //   await updatePlayer({
+    //     id: "current-player",
+    //     data: { [`gallery.images.${id}.${field}`]: value },
+    //   }).unwrap();
+    // } catch (error) {
+    //   console.error(error);
+    // }
   };
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,6 +143,11 @@ const MyImagesSection = ({ editable = false }: { editable?: boolean }) => {
             className="w-full h-full object-cover hover:scale-105 transition-transform"
             onContextMenu={(e) => e.preventDefault()}
             draggable={false}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.srcset = "";
+              target.src = "/placeholder_img.jpg";
+            }}
           />
           {canEdit && (
             <>

@@ -12,12 +12,12 @@ import {
   IconShare,
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
-import FullEditablePage from "@/components/cvs/player-cv-details/FullEditablePage";
 import { usePlayer } from "@/lib/hooks/usePlayer";
 import { usePlayerStats } from "@/components/cvs/player-cv-details/FullEditablePage";
 import { getFullWithShortForm } from "@/lib/utils";
 import { FileText } from 'lucide-react';
 import { useAppSelector } from "@/lib/hooks/reduxHooks";
+import CvEditable from './CvEditable';
 
 const ViewCv = () => {
   const { playerData } = usePlayer();
@@ -385,7 +385,7 @@ const ViewCv = () => {
             </div>
           </div>
         </div>
-        <FullEditablePage editable={true} />
+        <CvEditable editable={true} />
       </div>
       <style dangerouslySetInnerHTML={{
         __html: `

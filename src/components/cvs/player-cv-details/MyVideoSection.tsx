@@ -91,14 +91,14 @@ const MyVideosSection = ({ editable = false }: { editable?: boolean }) => {
       prev.map((vid) => (vid.id === id ? { ...vid, [field]: value } : vid)),
     );
 
-    try {
-      await updatePlayer({
-        id: "current-player",
-        data: { [`gallery.videos.${id}.${field}`]: value },
-      }).unwrap();
-    } catch (error) {
-      console.error(error);
-    }
+    // try {
+    //   await updatePlayer({
+    //     id: "current-player",
+    //     data: { [`gallery.videos.${id}.${field}`]: value },
+    //   }).unwrap();
+    // } catch (error) {
+    //   console.error(error);
+    // }
   };
 
   const handleSubmit = (e: React.FormEvent) => {

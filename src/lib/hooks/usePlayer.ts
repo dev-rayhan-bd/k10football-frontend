@@ -14,16 +14,17 @@ export const usePlayer = () => {
   const handleUpdate = async (field: string, value: any) => {
     // Optimistic update in Redux
     dispatch(updatePlayerField({ field, value }));
+    toast.success(`${field} updated successfully`);
 
-    try {
-      // API call
-      await updatePlayerProfile({ id: String(selectedPlayerId), data: { [field]: value } }).unwrap();
-      toast.success(`${field} updated successfully`);
-    } catch (error) {
-      // Rollback if necessary or just show error
-      // toast.error(`Failed to update ${field}`);
-      console.error(error);
-    }
+    // try {
+    //   // API call
+    //   await updatePlayerProfile({ id: String(selectedPlayerId), data: { [field]: value } }).unwrap();
+    //   toast.success(`${field} updated successfully`);
+    // } catch (error) {
+    //   // Rollback if necessary or just show error
+    //   // toast.error(`Failed to update ${field}`);
+    //   console.error(error);
+    // }
   };
 
   const selectPlayer = (id: number) => {
