@@ -64,6 +64,7 @@ export const CreateGameReportWizard = ({
   const [pitchMarkers, setPitchMarkers] = useState<PitchLine[]>([]);
   const [reportCompletedBy, setReportCompletedBy] = useState<"parent" | "coach">("parent");
   const [selectedCoachEmail, setSelectedCoachEmail] = useState("");
+  const [tempRating, setTempRating] = useState<number>(0);
 
   // Detect user role
   useEffect(() => {
@@ -333,17 +334,7 @@ export const CreateGameReportWizard = ({
 
   return (
     <div className="w-full">
-      {step === 1 && userRole !== "coach" && (
-        <StripePaymentModal 
-          onPay={() => {
-            toast.success("Payment successful! Please fill out the report details.");
-            setStep(2);
-          }}
-          onBack={onCancel}
-        />
-      )}
-
-      {step === 2 && (
+      {step === 1 && (
         <ReportDetailsForm 
           formData={formData} 
           setFormData={setFormData}
@@ -353,18 +344,19 @@ export const CreateGameReportWizard = ({
           setReportCompletedBy={setReportCompletedBy}
           selectedCoachEmail={selectedCoachEmail}
           setSelectedCoachEmail={setSelectedCoachEmail}
-          onCancel={userRole === "coach" ? onCancel : () => setStep(1)}
+          onCancel={onCancel}
           onContinue={() => {
             if (reportCompletedBy === "coach" && userRole !== "coach") {
-              handlePlayerSubmit();
+              // Skip to payment before sending request to coach
+              setStep(4);
             } else {
-              setStep(3);
+              setStep(2);
             }
           }} 
         />
       )}
       
-      {step === 3 && (
+      {step === 2 && (
         <MatchStatisticsForm 
           position={formData.position}
           minutesPlayed={formData.minutesPlayed}
@@ -375,12 +367,12 @@ export const CreateGameReportWizard = ({
           setGoalMarkers={setGoalMarkers}
           pitchMarkers={pitchMarkers}
           setPitchMarkers={setPitchMarkers}
-          onCancel={() => setStep(2)}
-          onSubmit={() => setStep(4)}
+          onCancel={() => setStep(1)}
+          onSubmit={() => setStep(3)}
         />
       )}
 
-      {step === 4 && (
+      {step === 3 && (
         <ReportPdfPreview 
           formData={formData}
           characteristics={characteristics}
@@ -388,29 +380,62 @@ export const CreateGameReportWizard = ({
           goalMarkers={goalMarkers}
           pitchMarkers={pitchMarkers}
           onSave={(overallRating) => {
-            if (userRole === "coach") {
-              handleSave(overallRating);
-            } else {
-              handlePlayerSubmit();
-            }
+            setTempRating(overallRating);
+            // Go to payment step before final save
+            setStep(4);
           }}
-          onBack={() => setStep(3)}
+          onBack={() => setStep(2)}
           isPlayer={userRole !== "coach"}
         />
       )}
 
-      {step === 5 && userRole !== "coach" && (
+      {step === 4 && (
+        <StripePaymentModal 
+          onPay={() => {
+            toast.success("Payment successful! Saving report...");
+            if (reportCompletedBy === "coach" && userRole !== "coach") {
+              handlePlayerSubmit();
+            } else {
+              if (userRole === "coach") {
+                handleSave(tempRating);
+              } else {
+                handlePlayerSubmit();
+              }
+            }
+          }}
+          onBack={() => {
+            if (reportCompletedBy === "coach" && userRole !== "coach") {
+              setStep(1);
+            } else {
+              setStep(3);
+            }
+          }}
+        />
+      )}
+
+      {step === 5 && (
         <div className="space-y-8 max-w-lg mx-auto text-center py-12 animate-in zoom-in-95 duration-500">
           <div className="w-24 h-24 rounded-full bg-green-500/10 border border-green-500/30 flex items-center justify-center mx-auto mb-6 text-green-500">
             <IconCircleCheck size={48} stroke={1.5} />
           </div>
-          <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter font-orbitron">Request Submitted</h2>
+          <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter font-orbitron">
+            {reportCompletedBy === "coach" && userRole !== "coach" ? "Request Submitted" : "Report Saved"}
+          </h2>
           <p className="text-gray-400 text-sm leading-relaxed">
-            Your payment of **$6.99** was processed successfully. We have notified your coach of your analysis request. Once complete, the verified report will appear on your CV.
+            Your payment of **$6.99** was processed successfully. 
+            {reportCompletedBy === "coach" && userRole !== "coach" 
+              ? " We have notified your coach of your analysis request. Once complete, the verified report will appear on your CV." 
+              : " Your game report has been saved successfully and added to your profile."}
           </p>
 
           <Button 
-            onClick={() => router.push("/dashboard/player/game-reports")}
+            onClick={() => {
+              if (userRole === "coach") {
+                router.push("/dashboard/coach/game-reports");
+              } else {
+                router.push("/dashboard/player/game-reports");
+              }
+            }}
             className="w-full h-14 rounded-xl bg-[#00FF62] hover:bg-[#00D150] text-black font-bold uppercase tracking-widest transition-all font-orbitron"
           >
             Back to Reports
