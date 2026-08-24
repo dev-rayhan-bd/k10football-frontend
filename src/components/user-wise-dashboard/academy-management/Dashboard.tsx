@@ -557,13 +557,13 @@ const AcademyManagementDashboard = () => {
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="px-6 py-2.5 rounded-xl border border-white/10 text-white/60 hover:text-white bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer font-bold"
+                className="px-6 py-2.5 rounded-xl border border-white/10 text-white/60 hover:text-white bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-6 py-2.5 rounded-xl bg-[#E31B23] hover:bg-[#ff2d35] text-white text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-[0_0_15px_rgba(227,27,35,0.3)] font-bold"
+                className="px-6 py-2.5 rounded-xl bg-[#E31B23] hover:bg-[#ff2d35] text-white text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-[0_0_15px_rgba(227,27,35,0.3)]"
               >
                 {editingStory ? "Save Changes" : "Publish Story"}
               </button>
@@ -590,7 +590,7 @@ const AcademyManagementDashboard = () => {
           <DialogHeader className="flex flex-row justify-between items-center mb-2 p-0">
             <div className="flex items-center gap-2">
               <span className="px-2 py-1 rounded border border-[#FBBF24]/30 bg-[#FBBF24]/10 text-[#FBBF24] font-black uppercase text-[10px] whitespace-nowrap">Gold CV</span>
-              <DialogTitle className="text-base sm:text-lg font-black uppercase font-orbitron truncate w-[200px]">
+              <DialogTitle className="text-base sm:text-lg font-black uppercase font-orbitron truncate w-50">
                 {selectedNotifyPlayer?.fullName || selectedNotifyPlayer?.title || "Unknown Player"}
               </DialogTitle>
             </div>
@@ -606,7 +606,7 @@ const AcademyManagementDashboard = () => {
           </div>
 
           {/* Mock Player Card */}
-          <div className="mt-2 relative rounded-3xl overflow-hidden border border-white/10 bg-gradient-to-b from-blue-900/40 to-black aspect-[3/4] p-6 flex flex-col justify-end">
+          <div className="mt-2 relative rounded-3xl overflow-hidden border border-white/10 bg-linear-to-b from-blue-900/40 to-black aspect-3/4 p-6 flex flex-col justify-end">
             <div className="absolute top-4 left-4 w-12 h-12 bg-gold rounded-full flex items-center justify-center font-black text-xl text-black shadow-lg">
               {selectedNotifyPlayer?.rating || 88}
             </div>
@@ -618,7 +618,7 @@ const AcademyManagementDashboard = () => {
               className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity" 
               onError={(e) => { e.currentTarget.src = "/placeholder_img.jpg"; }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-black via-black/40 to-transparent" />
             <div className="relative z-10 flex flex-col gap-2">
               <span className="px-2 py-0.5 rounded-full bg-[#E31B23] text-white font-black uppercase text-[8px] w-fit">Active</span>
               <h3 className="text-2xl font-black uppercase font-orbitron leading-none text-white">

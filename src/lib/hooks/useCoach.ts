@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAppDispatch, useAppSelector } from "./reduxHooks";
-import { updateCoachField, CoachData } from "../features/coach/coachSlice";
+import { updateCoachField } from "../features/coach/coachSlice";
 import { useUpdateCoachProfileMutation } from "../features/cv/cvApi";
-import { toast } from "sonner";
 
 export const useCoach = () => {
   const dispatch = useAppDispatch();

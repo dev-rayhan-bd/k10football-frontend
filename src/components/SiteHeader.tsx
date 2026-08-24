@@ -23,11 +23,22 @@ useEffect(() => {
     }
     
     const currentScrollY = window.scrollY;
-    // Hide when scrolling down, show when scrolling up
-    if (currentScrollY > lastScrollY && currentScrollY > 60) {
-      setIsVisible(false);
+    const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+    
+    if (isLandscape) {
+      // In landscape, only show when at the very top
+      if (currentScrollY > 10) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
     } else {
-      setIsVisible(true);
+      // Hide when scrolling down, show when scrolling up
+      if (currentScrollY > lastScrollY && currentScrollY > 60) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
     }
     setLastScrollY(currentScrollY);
   };

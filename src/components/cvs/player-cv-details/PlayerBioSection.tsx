@@ -311,9 +311,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
     if (playerData.position !== prevPositionRef.current) {
       setIsPositionMap(!shouldBeFutsal);
       prevPositionRef.current = playerData.position;
-    } else if (!shouldBeFutsal && !isPositionMap) {
-      // Force Position Map if it's a soccer position and Futsal Map is active
-      setIsPositionMap(true);
     }
   }, [playerData.position, isPositionMap]);
   // Synchronize markers for the active map
@@ -954,14 +951,12 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       Position Map
                     </button>
                     <button
-                      disabled={!isFutsalPos}
                       onClick={() => setIsPositionMap(false)}
                       className={cn(
                         "px-2 sm:px-3 py-1 text-[10px] sm:text-xs rounded transition-all",
                         !isPositionMap
                           ? "bg-primary text-black font-heading font-normal"
-                          : "border border-border hover:bg-gray-900",
-                        !isFutsalPos && "opacity-40 cursor-not-allowed hover:bg-transparent"
+                          : "border border-border hover:bg-gray-900"
                       )}
                     >
                       Futsal Map
@@ -971,7 +966,7 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
               })()}
               <div
                 ref={mapContainerRef}
-                className="relative w-full h-auto overflow-hidden select-none"
+                className="relative w-full h-auto mx-auto overflow-hidden select-none max-w-[350px] sm:max-w-md landscape:max-w-[280px] sm:landscape:max-w-[350px] md:landscape:max-w-md lg:landscape:max-w-lg"
               >
                 <Image
                   src={isPositionMap ? (playerData.positionMap || positionMap) : (playerData.futsalMap || positionMap)}
