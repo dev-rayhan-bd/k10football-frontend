@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import Image from "next/image";
 
@@ -44,7 +45,14 @@ const VALIDATION_BADGE: Record<string, { label: string; color: string; border: s
 
 
 
-// ─── Main Component ────────────────────────────────────────────────────────
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle
+} from "@/components/ui/dialog";
+import { IconBell } from "@tabler/icons-react";
+
 const AcademyValidateCv = () => {
   const players = useAppSelector((state) => state.player.players);
   const router = useRouter();
@@ -52,6 +60,7 @@ const AcademyValidateCv = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [tierFilter, setTierFilter] = useState<"All" | CvTier>("All");
   const [typeFilter, setTypeFilter] = useState("All");
+  const [selectedNotifyPlayer, setSelectedNotifyPlayer] = useState<any | null>(null);
 
   const playerTypes = useMemo(() => {
     const types = new Set(players.map((p) => getPlayerType(p.position)));
@@ -242,6 +251,15 @@ const AcademyValidateCv = () => {
                       <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => {
+                            setSelectedNotifyPlayer(p);
+                          }}
+                          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-[#FBBF24]/20 hover:border-[#FBBF24]/40 text-[#FBBF24]/80 hover:text-[#FBBF24] transition-all cursor-pointer text-[10px] font-black uppercase tracking-widest whitespace-nowrap"
+                        >
+                          <IconBell size={14} />
+                          Notify
+                        </button>
+                        <button
+                          onClick={() => {
                             router.push(`/dashboard/academy/management/validate-cv/${p.id}`);
                           }}
                           className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/50 hover:text-white transition-all cursor-pointer text-[10px] font-black uppercase tracking-widest whitespace-nowrap"
@@ -328,15 +346,26 @@ const AcademyValidateCv = () => {
                 </div>
 
                 {/* Action */}
-                <button
-                  onClick={() => {
-                    router.push(`/dashboard/academy/management/validate-cv/${p.id}`);
-                  }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white transition-all cursor-pointer text-[10px] font-black uppercase tracking-widest mt-1 relative z-10"
-                >
-                  <IconEye size={14} />
-                  View CV
-                </button>
+                <div className="flex gap-2 relative z-10 mt-1">
+                  <button
+                    onClick={() => {
+                      setSelectedNotifyPlayer(p);
+                    }}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#E31B23]/10 hover:bg-[#E31B23]/20 border border-[#E31B23]/30 text-[#E31B23] transition-all cursor-pointer text-[10px] font-black uppercase tracking-widest"
+                  >
+                    <IconBell size={14} />
+                    Notify
+                  </button>
+                  <button
+                    onClick={() => {
+                      router.push(`/dashboard/academy/management/validate-cv/${p.id}`);
+                    }}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white transition-all cursor-pointer text-[10px] font-black uppercase tracking-widest"
+                  >
+                    <IconEye size={14} />
+                    View CV
+                  </button>
+                </div>
               </div>
             );
           })}
@@ -347,6 +376,66 @@ const AcademyValidateCv = () => {
           )}
         </div>
       </div>
+      
+      {/* Notify Coach Modal */}
+      <Dialog open={!!selectedNotifyPlayer} onOpenChange={(open) => !open && setSelectedNotifyPlayer(null)}>
+        <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-3xl max-w-sm p-6 flex flex-col gap-4">
+          <DialogHeader className="flex flex-row justify-between items-center mb-2 p-0">
+            <div className="flex items-center gap-2">
+              <span className={`px-2 py-1 rounded border ${selectedNotifyPlayer ? TIER_STYLES[getCvTier(selectedNotifyPlayer.rating)].border : ''} ${selectedNotifyPlayer ? TIER_STYLES[getCvTier(selectedNotifyPlayer.rating)].bg : ''} ${selectedNotifyPlayer ? TIER_STYLES[getCvTier(selectedNotifyPlayer.rating)].color : ''} font-black uppercase text-[10px] whitespace-nowrap`}>
+                 {selectedNotifyPlayer ? getCvTier(selectedNotifyPlayer.rating) : 'N/A'} CV
+              </span>
+              <DialogTitle className="text-base sm:text-lg font-black uppercase font-orbitron truncate w-[200px]">
+                {selectedNotifyPlayer?.fullName || "Unknown Player"}
+              </DialogTitle>
+            </div>
+          </DialogHeader>
+          
+          <div className="flex flex-col gap-3 w-full">
+            <button className="w-full flex justify-center items-center gap-2 bg-[#E31B23] hover:bg-[#ff2d35] text-white font-black uppercase text-[10px] py-4 rounded-xl shadow-[0_0_15px_rgba(227,27,35,0.3)] transition-all">
+              <IconBell size={16} /> Select & Notify Coach
+            </button>
+            <button className="w-full flex justify-center items-center gap-2 bg-transparent border-2 border-white/10 hover:bg-white/5 text-white/70 hover:text-white font-black uppercase text-[10px] py-4 rounded-xl transition-all">
+              <IconBell size={16} /> Auto Notify (Pep Guardiola)
+            </button>
+          </div>
+
+          {/* Mock Player Card */}
+          <div className="mt-2 relative rounded-3xl overflow-hidden border border-white/10 bg-gradient-to-b from-blue-900/40 to-black aspect-[3/4] p-6 flex flex-col justify-end">
+            <div className={`absolute top-4 left-4 w-12 h-12 ${selectedNotifyPlayer ? (getCvTier(selectedNotifyPlayer.rating) === 'Gold' ? 'bg-[#FBBF24] text-black' : getCvTier(selectedNotifyPlayer.rating) === 'Silver' ? 'bg-[#CBD5E1] text-black' : 'bg-[#F97316] text-white') : ''} rounded-full flex items-center justify-center font-black text-xl shadow-lg`}>
+              {selectedNotifyPlayer?.rating || 88}
+            </div>
+            <Image 
+              src={selectedNotifyPlayer?.playerImage?.src || selectedNotifyPlayer?.playerImage || selectedNotifyPlayer?.avatar || "/placeholder_img.jpg"} 
+              alt="player" 
+              width={300} 
+              height={400} 
+              className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity" 
+              onError={(e) => { e.currentTarget.src = "/placeholder_img.jpg"; }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+            <div className="relative z-10 flex flex-col gap-2">
+              <span className={`px-2 py-0.5 rounded-full ${selectedNotifyPlayer?.validationStatus === 'verified' ? 'bg-[#4ADE80]' : 'bg-[#E31B23]'} text-white font-black uppercase text-[8px] w-fit`}>
+                 {selectedNotifyPlayer?.validationStatus === 'verified' ? 'Verified' : 'Active'}
+              </span>
+              <h3 className="text-2xl font-black uppercase font-orbitron leading-none text-white">
+                {selectedNotifyPlayer?.fullName || "Unknown"}
+              </h3>
+              <p className="text-[#E31B23] text-[10px] font-black uppercase">
+                {selectedNotifyPlayer?.position || "Defensive Midfielder (CDM)"}
+              </p>
+              <div className="flex items-center gap-2 text-[9px] font-bold text-white/70 uppercase">
+                <span>{selectedNotifyPlayer?.age || 24} Years Old</span>
+                <span>•</span>
+                <span className="flex items-center gap-1">
+                  <Image src="https://flagcdn.com/br.svg" alt="country" width={12} height={8} className="object-cover" />
+                  {selectedNotifyPlayer?.birthCountry || "Brazil"}
+                </span>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

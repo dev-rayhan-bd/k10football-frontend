@@ -1,20 +1,20 @@
 "use client";
 import DashboardLayout from "@/components/DashboardLayout";
-import { 
-  IconDashboard, 
-  IconMessage, 
-  IconUsers, 
-  IconUserCheck, 
-  IconCalendarEvent, 
-  IconCreditCard, 
-  IconBallFootball, 
-  IconStar, 
-  IconUsersGroup, 
-  IconNews, 
-  IconTrophy, 
-  IconFileText, 
-  IconChartBar, 
-  IconBuildingStore, 
+import {
+  IconDashboard,
+  IconMessage,
+  IconUsers,
+  IconUserCheck,
+  IconCalendarEvent,
+  IconCreditCard,
+  IconBallFootball,
+  IconStar,
+  IconUsersGroup,
+  IconNews,
+  IconTrophy,
+  IconFileText,
+  IconChartBar,
+  IconBuildingStore,
   IconSettings,
   IconCoins,
   IconInbox
@@ -37,19 +37,20 @@ const managementSidebarItems = [
   { name: "Success Story", url: "/dashboard/academy/management/success-story", icon: IconTrophy },
   { name: "Game Reports", url: "/dashboard/academy/management/game-reports", icon: IconFileText },
   { name: "Validate CV", url: "/dashboard/academy/management/validate-cv", icon: IconFileText },
+  { name: "Player Evaluation", url: "/dashboard/academy/management/player-evaluation", icon: IconUsers },
   { name: "Analytics Report", url: "/dashboard/academy/management/analytics-report", icon: IconChartBar },
   { name: "Product Store", url: "/dashboard/academy/management/product-store", icon: IconBuildingStore },
   { name: "Settings", url: "/dashboard/academy/management/settings", icon: IconSettings },
 ];
 
 const AcademyManagementLayout = ({ children }: { children: ReactNode }) => {
-return (
-<DashboardLayout 
-  sidebarItems={managementSidebarItems}
-  showToggle={true}
->
-  {children}
-</DashboardLayout>
-);
+  return (
+    <DashboardLayout
+      sidebarItems={managementSidebarItems}
+      showToggle={true}
+    >
+      {children}
+    </DashboardLayout>
+  );
 }
 export default AcademyManagementLayout;

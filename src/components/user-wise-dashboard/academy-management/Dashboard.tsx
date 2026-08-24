@@ -18,7 +18,8 @@ import {
   IconDotsVertical,
   IconPencil,
   IconTrash,
-  IconVideo
+  IconVideo,
+  IconBell
 } from "@tabler/icons-react";
 import { useAppSelector } from "@/lib/hooks/reduxHooks";
 import { useForm } from "react-hook-form";
@@ -34,19 +35,19 @@ import DashboardStatCard from "@/components/dashboard/DashboardStatCard";
 import { DashboardSidebarPanel, DashboardSidebarItem } from "@/components/dashboard/DashboardSidebar";
 import DashboardCharts from "@/components/dashboard/DashboardCharts";
 import ProductCard from "@/components/dashboard/ProductCard";
-const PlayerEvalSidebarItem = ({ player, status }: { player: any, status: any }) => {
+const PlayerEvalSidebarItem = ({ player, status, onClick }: { player: any, status: any, onClick?: () => void }) => {
   const playerImgSrc = typeof player.playerImage === 'string' && player.playerImage
     ? player.playerImage
-    : (player.playerImage?.src || "/placeholder_img.jpg");
+    : (player.playerImage?.src || player.avatar || "/placeholder_img.jpg");
   return (
-    <div className="p-4 bg-white/2 border border-white/5 rounded-2xl hover:bg-white/4 transition-all group flex items-center justify-between gap-3 cursor-pointer">
+    <div onClick={onClick} className="p-4 bg-white/2 border border-white/5 rounded-2xl hover:bg-white/4 transition-all group flex items-center justify-between gap-3 cursor-pointer">
       <div className="flex items-center gap-3 min-w-0">
         <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden border border-white/10 shrink-0">
-          <Image width={100} height={100} src={playerImgSrc} alt={player.fullName} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = "/placeholder_img.jpg"; }} />
+          <Image width={100} height={100} src={playerImgSrc} alt={player.fullName || player.title} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = "/placeholder_img.jpg"; }} />
         </div>
         <div className="min-w-0">
           <p className="text-xs font-bold text-white group-hover:text-[#E31B23] transition-colors truncate">
-            {player.fullName}
+            {player.fullName || player.title}
           </p>
           <p className="text-[9px] font-bold text-white/40 uppercase tracking-wider truncate">
             Coach: {player.coachName || "N/A"}
@@ -72,6 +73,7 @@ const PlayerEvalSidebarItem = ({ player, status }: { player: any, status: any })
   );
 };
 const AcademyManagementDashboard = () => {
+  const [selectedNotifyPlayer, setSelectedNotifyPlayer] = React.useState<any | null>(null);
   const players = useAppSelector((state) => state.player.players);
   const evaluationRecords = useAppSelector((state) => state.evaluation.records);
   const getEvaluationStatus = (player: any) => {
@@ -241,20 +243,22 @@ const AcademyManagementDashboard = () => {
             ]}
           />
           {/* Stats Section */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <DashboardStatCard icon={<IconBallFootball size={24} />} label="Teams" value="4" />
             <DashboardStatCard icon={<IconUsers size={24} />} label="Players" value="64" />
             <DashboardStatCard icon={<IconTrophy size={24} />} label="Coaches" value="12" />
             <DashboardStatCard icon={<IconFileAnalytics size={24} />} label="Game Reports" value="12" />
+            <DashboardStatCard icon={<IconClipboardText size={24} />} label="Pending Evaluations" value="8" />
+            <DashboardStatCard icon={<IconFileAnalytics size={24} />} label="Pending CVs" value="5" />
           </div>
           {/* Analytics Section */}
-          <div className="bg-[#111111] rounded-3xl border border-white/5 p-8 flex flex-col gap-8">
-            <div className="flex justify-between items-center">
+          <div className="bg-[#111111] rounded-3xl border border-white/5 p-5 md:p-8 flex flex-col gap-6 md:gap-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
               <div>
-                <h2 className="text-2xl font-black uppercase text-white font-orbitron">Analytics</h2>
-                <p className="text-xs text-white/40 font-bold uppercase tracking-widest">Deep insights into Revenue</p>
+                <h2 className="text-xl md:text-2xl font-black uppercase text-white font-orbitron">Analytics</h2>
+                <p className="text-[10px] md:text-xs text-white/40 font-bold uppercase tracking-widest mt-1">Deep insights into Revenue</p>
               </div>
-              <button className="bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] font-black uppercase tracking-widest text-white px-6 py-2.5 rounded-xl transition-all">
+              <button className="w-full sm:w-auto bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] font-black uppercase tracking-widest text-white px-6 py-3 sm:py-2.5 rounded-xl transition-all">
                 Full Analytics
               </button>
             </div>
@@ -407,6 +411,7 @@ const AcademyManagementDashboard = () => {
               subtitle="Forward"
               subtitleColor="text-[#E31B23]"
               extraInfo="9.2"
+              onClick={() => setSelectedNotifyPlayer({ fullName: "Marcus Silva", subtitle: "Forward", rating: 88, age: 24, playerImage: "https://i.pravatar.cc/100?u=marcus" })}
             />
             <DashboardSidebarItem
               avatar="https://i.pravatar.cc/100?u=david"
@@ -414,6 +419,7 @@ const AcademyManagementDashboard = () => {
               subtitle="Midfielder"
               subtitleColor="text-[#E31B23]"
               extraInfo="8.8"
+              onClick={() => setSelectedNotifyPlayer({ fullName: "David Chen", subtitle: "Midfielder", rating: 85, age: 21, playerImage: "https://i.pravatar.cc/100?u=david" })}
             />
             <DashboardSidebarItem
               avatar="https://i.pravatar.cc/100?u=alex"
@@ -421,12 +427,25 @@ const AcademyManagementDashboard = () => {
               subtitle="Defender"
               subtitleColor="text-[#E31B23]"
               extraInfo="8.5"
+              onClick={() => setSelectedNotifyPlayer({ fullName: "Alex Jonson", subtitle: "Defender", rating: 82, age: 22, playerImage: "https://i.pravatar.cc/100?u=alex" })}
+            />
+          </DashboardSidebarPanel>
+          <DashboardSidebarPanel title="Pending CV Validations" icon={<IconFileAnalytics size={24} />}>
+            <PlayerEvalSidebarItem 
+               player={{ id: "cv-1", fullName: "Lucas Paquetá", coachName: "Pep Guardiola", playerImage: "https://i.pravatar.cc/100?u=lucas" }} 
+               status={{ expired: true, remainingDays: -3, label: "Expired" }} 
+               onClick={() => setSelectedNotifyPlayer({ fullName: "Lucas Paquetá", subtitle: "Midfielder", rating: 91, age: 26, playerImage: "https://i.pravatar.cc/100?u=lucas" })}
+            />
+            <PlayerEvalSidebarItem 
+               player={{ id: "cv-2", fullName: "Vinícius Júnior", coachName: "Carlo Ancelotti", playerImage: "https://i.pravatar.cc/100?u=vini" }} 
+               status={{ expired: false, remainingDays: 12, label: "12d left" }} 
+               onClick={() => setSelectedNotifyPlayer({ fullName: "Vinícius Júnior", subtitle: "Forward", rating: 95, age: 23, playerImage: "https://i.pravatar.cc/100?u=vini" })}
             />
           </DashboardSidebarPanel>
           <DashboardSidebarPanel title="Player Evaluations" icon={<IconClipboardText size={24} />}>
             <div className="max-h-75 overflow-y-auto pr-1 flex flex-col gap-3 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
               {playersWithStatus.map(({ player, status }) => (
-                <PlayerEvalSidebarItem key={player.id} player={player} status={status} />
+                <PlayerEvalSidebarItem key={player.id} player={player} status={status} onClick={() => setSelectedNotifyPlayer(player)} />
               ))}
             </div>
           </DashboardSidebarPanel>
@@ -561,6 +580,62 @@ const AcademyManagementDashboard = () => {
             ) : (
               <video src={selectedMedia?.mediaFile} controls autoPlay className="max-w-full max-h-[70vh] object-contain rounded-xl" />
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Notify Coach Modal */}
+      <Dialog open={!!selectedNotifyPlayer} onOpenChange={(open) => !open && setSelectedNotifyPlayer(null)}>
+        <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-3xl max-w-sm p-6 flex flex-col gap-4">
+          <DialogHeader className="flex flex-row justify-between items-center mb-2 p-0">
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-1 rounded border border-[#FBBF24]/30 bg-[#FBBF24]/10 text-[#FBBF24] font-black uppercase text-[10px] whitespace-nowrap">Gold CV</span>
+              <DialogTitle className="text-base sm:text-lg font-black uppercase font-orbitron truncate w-[200px]">
+                {selectedNotifyPlayer?.fullName || selectedNotifyPlayer?.title || "Unknown Player"}
+              </DialogTitle>
+            </div>
+          </DialogHeader>
+          
+          <div className="flex flex-col gap-3 w-full">
+            <button className="w-full flex justify-center items-center gap-2 bg-[#E31B23] hover:bg-[#ff2d35] text-white font-black uppercase text-[10px] py-4 rounded-xl shadow-[0_0_15px_rgba(227,27,35,0.3)] transition-all">
+              <IconBell size={16} /> Select & Notify Coach
+            </button>
+            <button className="w-full flex justify-center items-center gap-2 bg-transparent border-2 border-white/10 hover:bg-white/5 text-white/70 hover:text-white font-black uppercase text-[10px] py-4 rounded-xl transition-all">
+              <IconBell size={16} /> Auto Notify (Pep Guardiola)
+            </button>
+          </div>
+
+          {/* Mock Player Card */}
+          <div className="mt-2 relative rounded-3xl overflow-hidden border border-white/10 bg-gradient-to-b from-blue-900/40 to-black aspect-[3/4] p-6 flex flex-col justify-end">
+            <div className="absolute top-4 left-4 w-12 h-12 bg-gold rounded-full flex items-center justify-center font-black text-xl text-black shadow-lg">
+              {selectedNotifyPlayer?.rating || 88}
+            </div>
+            <Image 
+              src={selectedNotifyPlayer?.playerImage?.src || selectedNotifyPlayer?.playerImage || selectedNotifyPlayer?.avatar || "/placeholder_img.jpg"} 
+              alt="player" 
+              width={300} 
+              height={400} 
+              className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity" 
+              onError={(e) => { e.currentTarget.src = "/placeholder_img.jpg"; }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+            <div className="relative z-10 flex flex-col gap-2">
+              <span className="px-2 py-0.5 rounded-full bg-[#E31B23] text-white font-black uppercase text-[8px] w-fit">Active</span>
+              <h3 className="text-2xl font-black uppercase font-orbitron leading-none text-white">
+                {selectedNotifyPlayer?.fullName || selectedNotifyPlayer?.title || "Unknown"}
+              </h3>
+              <p className="text-[#E31B23] text-[10px] font-black uppercase">
+                {selectedNotifyPlayer?.subtitle || selectedNotifyPlayer?.position || "Defensive Midfielder (CDM)"}
+              </p>
+              <div className="flex items-center gap-2 text-[9px] font-bold text-white/70 uppercase">
+                <span>{selectedNotifyPlayer?.age || 24} Years Old</span>
+                <span>•</span>
+                <span className="flex items-center gap-1">
+                  <Image src="https://flagcdn.com/br.svg" alt="country" width={12} height={8} className="object-cover" />
+                  {selectedNotifyPlayer?.birthCountry || "Brazil"}
+                </span>
+              </div>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

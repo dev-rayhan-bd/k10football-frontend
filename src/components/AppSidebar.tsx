@@ -49,23 +49,23 @@ return (
     <SidebarContent className={`px-2 pt-4 overflow-hidden ${collapsed ? 'flex-col items-center' : ''}`}>
       <ScrollArea className="flex-1 px-2">
         <NavDocuments items={sidebarItems} />
-        
-        <SidebarMenu className="mt-2">
-          <SidebarMenuItem className="text-[#E31B23] hover:bg-white/5 hover:text-red-400 rounded-lg mb-2">
-            <button 
-              onClick={handleLogout}
-              className="flex w-full items-center gap-2 py-6 px-2 hover:bg-transparent cursor-pointer"
-            >
-              <div className="w-7 flex justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="rotate-180"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-              </div>
-              {!collapsed && <span className="text-[15px] font-medium">Logout</span>}
-            </button>
-          </SidebarMenuItem>
-        </SidebarMenu>
       </ScrollArea>
     </SidebarContent>
-    <div className="mt-auto p-4 pb-10 flex flex-col gap-6">
+    <div className="mt-auto px-6 pb-24 flex flex-col gap-4">
+      <SidebarMenu>
+        <SidebarMenuItem className="text-[#E31B23] hover:bg-white/5 hover:text-red-400 rounded-lg">
+          <button 
+            onClick={handleLogout}
+            className="flex w-full items-center gap-2 py-4 px-2 hover:bg-transparent cursor-pointer"
+          >
+            <div className="w-7 flex justify-center shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="rotate-180"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            </div>
+            {!collapsed && <span className="text-[15px] font-medium truncate">Logout</span>}
+          </button>
+        </SidebarMenuItem>
+      </SidebarMenu>
+      
       {tier && !collapsed && (
         <div className="bg-white/5 rounded-xl p-4 border border-white/10">
           <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Current Tier</p>
