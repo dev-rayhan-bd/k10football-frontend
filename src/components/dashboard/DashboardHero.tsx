@@ -59,7 +59,7 @@ const DashboardHero = ({
         <Image
           src={characterImgSrc}
           alt="Character"
-          className="absolute right-16 bottom-6 h-[88%] object-contain object-right z-10 hidden lg:block"
+          className="absolute right-0 lg:right-16 bottom-0 lg:bottom-6 h-[75%] sm:h-[80%] lg:h-[88%] w-[60%] sm:w-[50%] lg:w-auto object-contain object-right-bottom z-10 opacity-50 lg:opacity-100 pointer-events-none"
           width={200}
           height={200}
           onError={(e) => {

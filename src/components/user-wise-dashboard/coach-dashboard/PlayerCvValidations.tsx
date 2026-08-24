@@ -101,16 +101,16 @@ const PlayerCVValidations = () => {
           </button>
         </AddPlayerModal>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         {stats.map((stat, idx) => (
-          <div key={idx} className="p-4 sm:p-6 rounded-2xl border border-white/20 bg-[#0D0D0D]">
-            <div className="flex flex-col gap-4">
-              <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40">
-                <stat.icon size={20} />
+          <div key={idx} className="p-3 sm:p-6 rounded-2xl border border-white/20 bg-[#0D0D0D] flex flex-col justify-between">
+            <div className="flex flex-col gap-3 sm:gap-4">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40">
+                <stat.icon className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
               <div>
-                <div className="text-2xl md:text-3xl font-black text-white italic mb-1">{stat.value}</div>
-                <div className="text-[10px] text-gray-500 uppercase font-black tracking-widest">{stat.label}</div>
+                <div className="text-xl sm:text-2xl md:text-3xl font-black text-white italic mb-1">{stat.value}</div>
+                <div className="text-[9px] sm:text-[10px] text-gray-500 uppercase font-black tracking-widest sm:tracking-widest leading-tight line-clamp-2">{stat.label}</div>
               </div>
             </div>
           </div>
