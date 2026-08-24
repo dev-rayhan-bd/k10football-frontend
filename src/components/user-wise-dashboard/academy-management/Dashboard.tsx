@@ -201,7 +201,7 @@ const AcademyManagementDashboard = () => {
             : s
         )
       );
-      toast.success("Success story updated successfully!");
+      // toast.success("Success story updated successfully!");
     } else {
       const newStory = {
         id: String(Date.now()),

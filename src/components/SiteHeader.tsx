@@ -49,7 +49,11 @@ return (
   className={`flex h-(--header-height) shrink-0 items-center justify-between gap-4 px-4 lg:px-8 border-b border-white/5 bg-[#0A0A0A]/50 backdrop-blur-sm sticky top-0 z-50 transition-transform duration-300 ${!isVisible ? '-translate-y-full' : 'translate-y-0'}`}
 >
   <div className="flex flex-1 items-center gap-4">
-    <SidebarTrigger className="text-white" />
+    <div className="relative">
+      {/* Glow effect behind the trigger */}
+      <div className="absolute inset-0 bg-white/20 rounded-md animate-ping" style={{ animationDuration: '2s' }}></div>
+      <SidebarTrigger className="text-white relative z-10 scale-125 md:scale-150 transition-transform duration-300 hover:text-[#E31B23] drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
+    </div>
 
     <div className="hidden sm:relative sm:block w-full max-w-2xl">
       <svg

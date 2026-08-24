@@ -328,11 +328,25 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
     }
   }, [playerData.position, isPositionMap]);
 
-  const updateMarkerPosition = (e: MouseEvent | React.MouseEvent) => {
+  const updateMarkerPosition = (e: MouseEvent | React.MouseEvent | TouchEvent | React.TouchEvent) => {
     if (!activeMarker || !mapContainerRef.current) return;
     const rect = mapContainerRef.current.getBoundingClientRect();
-    let x = ((e.clientX - rect.left) / rect.width) * 100;
-    let y = ((e.clientY - rect.top) / rect.height) * 100;
+    
+    // Support both mouse and touch events
+    let clientX, clientY;
+    if ('touches' in e) {
+      // It's a touch event
+      clientX = e.touches[0]?.clientX;
+      clientY = e.touches[0]?.clientY;
+      if (clientX === undefined || clientY === undefined) return;
+    } else {
+      // It's a mouse event
+      clientX = (e as MouseEvent).clientX;
+      clientY = (e as MouseEvent).clientY;
+    }
+
+    let x = ((clientX - rect.left) / rect.width) * 100;
+    let y = ((clientY - rect.top) / rect.height) * 100;
     // Constrain to bounds
     x = Math.max(0, Math.min(100, x));
     y = Math.max(0, Math.min(100, y));
@@ -344,21 +358,31 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
     handleUpdate(field, newMarkers);
   };
   useEffect(() => {
-    const handleGlobalMouseMove = (e: MouseEvent) => {
+    const handleGlobalMove = (e: MouseEvent | TouchEvent) => {
       if (activeMarker) {
+        // Prevent default scrolling on mobile when dragging
+        if ('touches' in e && e.cancelable) {
+          e.preventDefault();
+        }
         updateMarkerPosition(e);
       }
     };
-    const handleGlobalMouseUp = () => {
+    const handleGlobalEnd = () => {
       setActiveMarker(null);
     };
     if (activeMarker) {
-      window.addEventListener('mousemove', handleGlobalMouseMove);
-      window.addEventListener('mouseup', handleGlobalMouseUp);
+      window.addEventListener('mousemove', handleGlobalMove);
+      window.addEventListener('mouseup', handleGlobalEnd);
+      window.addEventListener('touchmove', handleGlobalMove, { passive: false });
+      window.addEventListener('touchend', handleGlobalEnd);
+      window.addEventListener('touchcancel', handleGlobalEnd);
     }
     return () => {
-      window.removeEventListener('mousemove', handleGlobalMouseMove);
-      window.removeEventListener('mouseup', handleGlobalMouseUp);
+      window.removeEventListener('mousemove', handleGlobalMove);
+      window.removeEventListener('mouseup', handleGlobalEnd);
+      window.removeEventListener('touchmove', handleGlobalMove);
+      window.removeEventListener('touchend', handleGlobalEnd);
+      window.removeEventListener('touchcancel', handleGlobalEnd);
     };
   }, [activeMarker]);
   const getIndicatorColor = (val: number) => {
@@ -973,6 +997,10 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       transform: 'translate(-50%, -50%)'
                     }}
                     onMouseDown={(e) => {
+                      e.stopPropagation();
+                      setActiveMarker({ id: marker.id, type: isPositionMap ? 'position' : 'futsal' });
+                    }}
+                    onTouchStart={(e) => {
                       e.stopPropagation();
                       setActiveMarker({ id: marker.id, type: isPositionMap ? 'position' : 'futsal' });
                     }}

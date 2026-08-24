@@ -15,7 +15,7 @@ export const useCoach = () => {
     try {
       // API call
       await updateCoachProfile({ id: "current-coach", data: { [field]: value } }).unwrap();
-      toast.success(`${field} updated successfully`);
+      // toast.success(`${field} updated successfully`);
     } catch (error) {
       // Rollback if necessary or just show error
       console.error(error);

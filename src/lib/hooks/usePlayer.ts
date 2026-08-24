@@ -14,7 +14,7 @@ export const usePlayer = () => {
   const handleUpdate = async (field: string, value: any) => {
     // Optimistic update in Redux
     dispatch(updatePlayerField({ field, value }));
-    toast.success(`${field} updated successfully`);
+    // toast.success(`${field} updated successfully`);
 
     // try {
     //   // API call
