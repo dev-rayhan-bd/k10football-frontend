@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import React, { createContext, useContext, useState, useEffect } from "react";
-import AdditionalNotesSection from "@/components/cvs/player-cv-details/AdditionalNotesSection";
-import AttributesAnalysis from "@/components/cvs/player-cv-details/AttributeAnalycies";
-import CvClubSection from "@/components/user-wise-dashboard/academy-management/CvClubSection";
-import DocSection from "@/components/cvs/player-cv-details/DocSection";
-import MetricsAnalysis from "@/components/cvs/player-cv-details/MatricsAnalycies";
-import MyImagesSection from "@/components/cvs/player-cv-details/MyImageSection";
-import MyVideosSection from "@/components/cvs/player-cv-details/MyVideoSection";
-import PerformanceAnalytics from "@/components/cvs/player-cv-details/PerformanceChart";
-import PlayerBioSection from "@/components/cvs/player-cv-details/PlayerBioSection";
-import PlayerProfile from "@/components/cvs/player-cv-details/PlayerProfile";
-import SkillsAttributes from "@/components/cvs/player-cv-details/SkillAttributeSection";
-import SportsAnalytics from "@/components/cvs/player-cv-details/SportsAnalycies";
+import AdditionalNotesSection from "@/components/user-wise-dashboard/academy-management/cv/AdditionalNotesSection";
+import AttributesAnalysis from "@/components/user-wise-dashboard/academy-management/cv/AttributeAnalycies";
+import CvClubSection from "@/components/user-wise-dashboard/academy-management/cv/CvClubSection";
+import DocSection from "@/components/user-wise-dashboard/academy-management/cv/DocSection";
+import MetricsAnalysis from "@/components/user-wise-dashboard/academy-management/cv/MatricsAnalycies";
+import MyImagesSection from "@/components/user-wise-dashboard/academy-management/cv/MyImageSection";
+import MyVideosSection from "@/components/user-wise-dashboard/academy-management/cv/MyVideoSection";
+import PerformanceAnalytics from "@/components/user-wise-dashboard/academy-management/cv/PerformanceChart";
+import PlayerBioSection from "@/components/user-wise-dashboard/academy-management/cv/PlayerBioSection";
+import PlayerProfile from "@/components/user-wise-dashboard/academy-management/cv/PlayerProfile";
+import SkillsAttributes from "@/components/user-wise-dashboard/academy-management/cv/SkillAttributeSection";
+import SportsAnalytics from "@/components/user-wise-dashboard/academy-management/cv/SportsAnalycies";
 import { useAppSelector } from "@/lib/hooks/reduxHooks";
 import { AuthState } from "@/redux/features/auth";
 
@@ -80,7 +80,7 @@ export const PlayerStatsProvider = ({ children }: { children: React.ReactNode })
     );
 };
 
-const CvEditable = ({ editable = false }: { editable?: boolean }) => {
+const CvNotEditable = ({ editable = false }: { editable?: boolean }) => {
     const { role } = usePlayerStats() || { role: 'player' };
     const { accessToken } = useAppSelector((state) => state.auth as AuthState);
 
@@ -99,7 +99,7 @@ const CvEditable = ({ editable = false }: { editable?: boolean }) => {
         <>
             <div id="player-bio"></div>
             <PlayerBioSection editable={isActuallyEditable} />
-            <CvClubSection />
+            <CvClubSection editable={canEditBio} />
             <SkillsAttributes editable={canEditEvaluations} />
             <PerformanceAnalytics />
             <AttributesAnalysis editable={canEditEvaluations} />
@@ -116,7 +116,7 @@ const CvEditable = ({ editable = false }: { editable?: boolean }) => {
 
 const FullEditablePageWrapper = (props: { editable?: boolean }) => (
     <PlayerStatsProvider>
-        <CvEditable {...props} />
+        <CvNotEditable {...props} />
     </PlayerStatsProvider>
 );
 

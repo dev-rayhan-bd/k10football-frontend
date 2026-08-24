@@ -13,7 +13,7 @@ import Image from 'next/image';
 const YEARS = Array.from({ length: 30 }, (_, i) => String(new Date().getFullYear() - i));
 const TO_YEARS = ["Present", ...YEARS];
 
-const CvClubSection = () => {
+const CvClubSection = ({ editable = false }: { editable?: boolean }) => {
     const { playerData, handleUpdate } = usePlayer();
     const [isAdding, setIsAdding] = useState(false);
 
@@ -100,12 +100,14 @@ const CvClubSection = () => {
                             key={club.id}
                             className="relative border border-border cursor-pointer hover:bg-cardBg duration-300 bg-black/20 rounded-lg p-4 sm:p-6 flex flex-col items-center text-center gap-3 sm:gap-4 group transition w-full min-w-0"
                         >
-                            <button
-                                onClick={(e) => { e.stopPropagation(); removeClub(club.id); }}
-                                className="absolute top-2 right-2 p-1 text-gray-500 hover:text-red-500 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                                <Trash2 size={14} />
-                            </button>
+                            {editable && (
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); removeClub(club.id); }}
+                                    className="absolute top-2 right-2 p-1 text-gray-500 hover:text-red-500 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                    <Trash2 size={14} />
+                                </button>
+                            )}
 
                             <div className="shrink-0 relative group/logo">
                                 <div className={cn(
@@ -125,7 +127,7 @@ const CvClubSection = () => {
                                 <CMSField
                                     value={club.name}
                                     onUpdate={(val) => updateClub(club.id, "name", val)}
-                                    canEdit={true}
+                                    canEdit={editable}
                                     className="text-base sm:text-lg font-semibold text-foreground wrap-break-word uppercase leading-tight w-full min-w-0 flex justify-center text-center px-4"
                                     inputClassName="w-full min-w-0 text-center"
                                 />
@@ -133,7 +135,7 @@ const CvClubSection = () => {
                                     <CMSField
                                         value={club.from}
                                         onUpdate={(val) => updateClub(club.id, "from", val)}
-                                        canEdit={true}
+                                        canEdit={editable}
                                         type="combobox"
                                         options={YEARS}
                                         editTrigger="doubleClick"
@@ -145,7 +147,7 @@ const CvClubSection = () => {
                                     <CMSField
                                         value={club.to}
                                         onUpdate={(val) => updateClub(club.id, "to", val)}
-                                        canEdit={true}
+                                        canEdit={editable}
                                         type="combobox"
                                         options={TO_YEARS}
                                         editTrigger="doubleClick"

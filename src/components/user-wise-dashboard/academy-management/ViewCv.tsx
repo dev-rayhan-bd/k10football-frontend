@@ -17,7 +17,7 @@ import { usePlayerStats } from "@/components/cvs/player-cv-details/FullEditableP
 import { getFullWithShortForm } from "@/lib/utils";
 import { FileText } from 'lucide-react';
 import { useAppSelector } from "@/lib/hooks/reduxHooks";
-import CvEditable from './CvEditable';
+import CvNotEditable from "./CvNotEditable";
 
 const ViewCv = () => {
   const { playerData } = usePlayer();
@@ -340,7 +340,7 @@ const ViewCv = () => {
                 <div className="h-full bg-[#E31B23] rounded-full" style={{ width: "85%" }} />
               </div>
               <p className="text-[9px] sm:text-[10px] text-white/40 font-bold leading-relaxed uppercase tracking-wider line-clamp-2">
-                Complete all sections to unlock Gold tier status
+                All sections to unlock Gold tier status
               </p>
             </div>
           </div>
@@ -352,11 +352,11 @@ const ViewCv = () => {
               <div className="w-full h-1 bg-[#FBBF24] mt-2 opacity-50" />
             </div>
             <p className="text-[9px] sm:text-[10px] text-white/60 font-bold leading-relaxed uppercase tracking-wider mt-1 sm:mt-2 relative z-10 line-clamp-2">
-              Your CV meets Gold standards and is ready to share with top clubs and agents.
+              CV meets Gold standards and is ready to share with top clubs and agents.
             </p>
-            <Button className="bg-white/5 hover:bg-white/10 text-white border border-white/10 gap-2 w-full py-3 sm:py-4 rounded-xl font-black uppercase tracking-widest text-[9px] sm:text-[10px] h-auto mt-2 sm:mt-4 relative z-10">
+            {/* <Button className="bg-white/5 hover:bg-white/10 text-white border border-white/10 gap-2 w-full py-3 sm:py-4 rounded-xl font-black uppercase tracking-widest text-[9px] sm:text-[10px] h-auto mt-2 sm:mt-4 relative z-10">
               <IconShare size={16} className="text-white/40 sm:w-4.5 sm:h-4.5" /> Request Re-validation
-            </Button>
+            </Button> */}
           </div>
           {/* Career Journey / Last Evaluated */}
           {/* New Game Reports */}
@@ -385,7 +385,7 @@ const ViewCv = () => {
             </div>
           </div>
         </div>
-        <CvEditable editable={true} />
+        <CvNotEditable editable={false} />
       </div>
       <style dangerouslySetInnerHTML={{
         __html: `
