@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
@@ -7,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import Image from "next/image";
-import { IconArrowUpRight, IconPlayerPlay, IconPlayerStop } from "@tabler/icons-react";
+import { IconPlayerPlay, IconPlayerStop } from "@tabler/icons-react";
 
 interface StatInputProps {
   label: string;
@@ -21,9 +22,9 @@ const StatInput = ({ label, value, onChange, colorClass, align = "left" }: StatI
   return (
     <div className={cn("flex flex-col gap-1.5 w-full", align === "right" ? "items-end text-right" : "items-start text-left")}>
       <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest font-orbitron">{label}</Label>
-      <div className={cn("h-11 w-full rounded-lg relative overflow-hidden shadow-lg", colorClass)}>
+      <div className={cn("h-14 w-full rounded-lg relative overflow-hidden shadow-lg", colorClass)}>
         {/* Plus / Minus Buttons */}
-        <div className={cn("absolute top-0 bottom-0 flex items-center justify-center w-[50%]", align === "right" ? "right-0" : "left-0")}>
+        <div className={cn("absolute top-0 bottom-0 flex items-center justify-center w-[65%]", align === "right" ? "right-0" : "left-0")}>
           <button
             type="button"
             onClick={() => onChange(Math.max(0, value - 1))}
@@ -31,7 +32,7 @@ const StatInput = ({ label, value, onChange, colorClass, align = "left" }: StatI
           >
             -
           </button>
-          <div className="w-px h-4 bg-white/20" />
+          <div className="w-px h-5 bg-white/20" />
           <button
             type="button"
             onClick={() => onChange(value + 1)}
@@ -42,13 +43,13 @@ const StatInput = ({ label, value, onChange, colorClass, align = "left" }: StatI
         </div>
         <div
           className={cn(
-            "absolute top-0 bottom-0 bg-white w-[50%] flex items-center justify-center",
+            "absolute top-0 bottom-0 bg-white w-[45%] flex items-center justify-center",
             align === "right" ? "left-0 shadow-[4px_0_10px_rgba(0,0,0,0.1)]" : "right-0 shadow-[-4px_0_10px_rgba(0,0,0,0.1)]"
           )}
           style={{
             clipPath: align === "right"
-              ? 'polygon(0 0, 100% 0, 85% 100%, 0% 100%)'
-              : 'polygon(15% 0, 100% 0, 100% 100%, 0% 100%)'
+              ? 'polygon(0 0, 100% 0, 75% 100%, 0% 100%)'
+              : 'polygon(25% 0, 100% 0, 100% 100%, 0% 100%)'
           }}
         >
           <input
@@ -59,8 +60,8 @@ const StatInput = ({ label, value, onChange, colorClass, align = "left" }: StatI
               onChange(isNaN(val) ? 0 : val);
             }}
             className={cn(
-              "h-full w-full bg-transparent border-none text-[#111111] font-black font-orbitron text-xl focus:outline-none focus:ring-0 text-center",
-              align === "right" ? "pr-4" : "pl-4"
+              "h-full w-full bg-transparent border-none text-[#111111] font-black font-orbitron text-2xl focus:outline-none focus:ring-0 text-center",
+              align === "right" ? "pr-6" : "pl-6"
             )}
           />
         </div>

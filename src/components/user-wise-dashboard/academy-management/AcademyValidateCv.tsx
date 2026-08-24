@@ -7,24 +7,10 @@ import {
   IconFilter,
   IconChevronDown,
   IconEye,
-  IconBell,
-  IconX,
   IconDownload,
-  IconShield,
-  IconPhone,
-  IconMail,
-  IconLoader2,
-  IconCheck,
-  IconClock,
-  IconShare,
 } from "@tabler/icons-react";
-import { useAppSelector, useAppDispatch } from "@/lib/hooks/reduxHooks";
-import { PlayerStateItem, setSelectedPlayerId } from "@/lib/features/player/playerSlice";
-import { toast } from "sonner";
-import { COACH_POOL } from "@/components/user-wise-dashboard/academy-analysis/TeamDataStore";
-import FullEditablePage from "@/components/cvs/player-cv-details/FullEditablePage";
-import { getFullWithShortForm } from "@/lib/utils";
-import { FileText } from 'lucide-react';
+import { useAppSelector } from "@/lib/hooks/reduxHooks";
+import { useRouter } from "next/navigation";
 
 // ─── CV Tier calculation ───────────────────────────────────────────────────
 type CvTier = "Gold" | "Silver" | "Bronze";
@@ -56,405 +42,16 @@ const VALIDATION_BADGE: Record<string, { label: string; color: string; border: s
   pending: { label: "Pending", color: "text-[#FBBF24]", border: "border-[#FBBF24]/30", bg: "bg-[#FBBF24]/10" },
 };
 
-// ─── CV Detail Dialog ──────────────────────────────────────────────────────
-const CvDetailDialog = ({
-  player,
-  onClose,
-}: {
-  player: PlayerStateItem;
-  onClose: () => void;
-}) => {
-  const [notifying, setNotifying] = useState(false);
-  const [notified, setNotified] = useState(false);
-  const tier = getCvTier(player.rating);
-  const tierStyle = TIER_STYLES[tier];
 
-  // State for Select & Notify Coach feature
-  const [showCoachSelector, setShowCoachSelector] = useState(false);
-  const [coachSearch, setCoachSearch] = useState("");
-  const [selectedCoachIds, setSelectedCoachIds] = useState<string[]>([]);
-  const [isNotifyingCoaches, setIsNotifyingCoaches] = useState(false);
-
-  const filteredCoaches = useMemo(() => {
-    return COACH_POOL.filter(c =>
-      c.name.toLowerCase().includes(coachSearch.toLowerCase()) ||
-      c.role.toLowerCase().includes(coachSearch.toLowerCase())
-    );
-  }, [coachSearch]);
-
-  const toggleCoachSelection = (coachId: string) => {
-    setSelectedCoachIds(prev =>
-      prev.includes(coachId)
-        ? prev.filter(id => id !== coachId)
-        : [...prev, coachId]
-    );
-  };
-
-  const handleNotifySelectedCoaches = async () => {
-    if (selectedCoachIds.length === 0) return;
-    setIsNotifyingCoaches(true);
-
-    const coachNames = COACH_POOL
-      .filter(c => selectedCoachIds.includes(c.id))
-      .map(c => c.name)
-      .join(", ");
-
-    const tid = toast.loading(`Sending CV of ${player.fullName} to selected coaches...`);
-    await new Promise((r) => setTimeout(r, 1800));
-
-    toast.success(`Successfully notified coaches: ${coachNames}!`, { id: tid, duration: 5000 });
-
-    setIsNotifyingCoaches(false);
-    setShowCoachSelector(false);
-    setSelectedCoachIds([]);
-  };
-
-  const handleNotifyCoach = async () => {
-    if (notified) return;
-    setNotifying(true);
-    const coachName = player.coachName || "the assigned coach";
-    const tid = toast.loading(`Sending validation request to ${coachName}...`);
-    await new Promise((r) => setTimeout(r, 1600));
-    toast.success(`Validation request sent to ${coachName}! They will review ${player.fullName}'s CV shortly.`, { id: tid, duration: 5000 });
-    setNotifying(false);
-    setNotified(true);
-  };
-
-
-
-  const reports = useAppSelector(state => state.reports.reports);
-  const gameReports = useMemo(() => {
-    return (reports || [])
-      .filter(r => r.status === "Paid")
-      .slice(0, 3)
-      .map(r => ({
-        id: r.id,
-        opponent: `vs ${r.team2}`,
-        rating: r.rating
-      }));
-  }, [reports]);
-
-  return (
-    <div className="fixed inset-0 z-50 bg-[#0a0a0a] flex flex-col">
-      <div className="relative w-full h-full overflow-y-auto flex flex-col">
-        {/* Dialog Header */}
-        <div className="sticky top-0 z-30 bg-[#0a0a0a]/95 backdrop-blur-lg border-b border-white/10 py-4 sm:py-5">
-          <div className="w-full flex flex-col md:flex-row items-start md:items-center justify-between px-4 sm:px-6 md:px-8 gap-4 md:gap-0">
-            <div className="flex items-center gap-3 sm:gap-4 pr-12 md:pr-0">
-              <div className={`px-3 sm:px-4 py-1.5 rounded-full text-[10px] sm:text-[11px] font-black uppercase tracking-widest border shrink-0 ${tierStyle.bg} ${tierStyle.border} ${tierStyle.color}`}>
-                {tier} CV
-              </div>
-              <h2 className="text-lg sm:text-xl font-black uppercase text-white font-orbitron tracking-tight truncate">{player.fullName}</h2>
-            </div>
-            <div className="flex flex-wrap md:flex-nowrap items-center gap-2 sm:gap-3 w-full md:w-auto">
-              {/* NEW: Select & Notify Coach Button */}
-              <div className="relative w-full sm:w-auto flex-1 md:flex-none">
-                <button
-                  onClick={() => setShowCoachSelector(!showCoachSelector)}
-                  className="flex items-center justify-center gap-2 px-3 sm:px-5 py-2.5 rounded-2xl text-[9px] sm:text-[11px] font-black uppercase tracking-widest transition-all cursor-pointer bg-[#E31B23] hover:bg-[#C2181F] border-[#E31B23]/40 text-white shadow-lg shadow-[#E31B23]/20 w-full"
-                >
-                  <IconBell size={16} className="shrink-0" />
-                  <span className="truncate">Select & Notify Coach</span>
-                </button>
-
-                {showCoachSelector && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setShowCoachSelector(false)} />
-                    <div className="absolute right-0 top-12 w-80 bg-[#0d0d0d] border border-white/15 backdrop-blur-md rounded-2xl p-4 shadow-2xl z-50 flex flex-col gap-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[10px] font-black text-white/50 uppercase tracking-widest">Select Coaches</span>
-                        <button
-                          onClick={() => setShowCoachSelector(false)}
-                          className="text-white/40 hover:text-white"
-                        >
-                          <IconX size={14} />
-                        </button>
-                      </div>
-
-                      {/* Search */}
-                      <div className="relative">
-                        <IconSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
-                        <input
-                          type="text"
-                          placeholder="Search coaches..."
-                          value={coachSearch}
-                          onChange={(e) => setCoachSearch(e.target.value)}
-                          className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-[11px] text-white placeholder:text-white/30 focus:outline-none focus:border-white/20"
-                        />
-                      </div>
-
-                      {/* Coaches list */}
-                      <div className="max-h-60 overflow-y-auto flex flex-col gap-1.5 pr-1">
-                        {filteredCoaches.map(coach => {
-                          const isSelected = selectedCoachIds.includes(coach.id);
-                          return (
-                            <div
-                              key={coach.id}
-                              onClick={() => toggleCoachSelection(coach.id)}
-                              className={`flex items-center justify-between p-2 rounded-xl border transition-all cursor-pointer ${isSelected
-                                ? "bg-[#E31B23]/10 border-[#E31B23]/30"
-                                : "bg-white/5 border-transparent hover:bg-white/10"
-                                }`}
-                            >
-                              <div className="flex items-center gap-2 min-w-0">
-                                <div className="w-8 h-8 rounded-full overflow-hidden bg-white/5 border border-white/10 shrink-0">
-                                  <Image width={100} height={100} src={coach.avatar} alt={coach.name} className="w-full h-full object-cover" onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    target.srcset = "";
-                                    target.src = "/placeholder_img.jpg";
-                                  }} />
-                                </div>
-                                <div className="min-w-0">
-                                  <p className="text-[11px] font-black text-white truncate">{coach.name}</p>
-                                  <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest">{coach.role}</p>
-                                </div>
-                              </div>
-                              <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all ${isSelected
-                                ? "bg-[#E31B23] border-[#E31B23] text-white"
-                                : "border-white/20 text-transparent"
-                                }`}>
-                                <IconCheck size={10} strokeWidth={3} />
-                              </div>
-                            </div>
-                          );
-                        })}
-                        {filteredCoaches.length === 0 && (
-                          <p className="text-center text-[10px] text-white/30 py-4 uppercase font-bold">No coaches found</p>
-                        )}
-                      </div>
-
-                      {/* Select options */}
-                      <div className="flex gap-2 pt-2 border-t border-white/10">
-                        <button
-                          onClick={() => setSelectedCoachIds(COACH_POOL.map(c => c.id))}
-                          className="flex-1 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[9px] font-black uppercase text-white/60 hover:text-white tracking-widest transition-all min-w-0"
-                        >
-                          Select All
-                        </button>
-                        <button
-                          onClick={() => setSelectedCoachIds([])}
-                          className="flex-1 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[9px] font-black uppercase text-white/60 hover:text-white tracking-widest transition-all min-w-0"
-                        >
-                          Clear
-                        </button>
-                      </div>
-
-                      {/* Submit */}
-                      <button
-                        onClick={handleNotifySelectedCoaches}
-                        disabled={selectedCoachIds.length === 0 || isNotifyingCoaches}
-                        className="w-full py-2.5 rounded-xl bg-[#E31B23] hover:bg-[#C2181F] border-[#E31B23]/40 text-white text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 shadow-lg shadow-[#E31B23]/20"
-                      >
-                        {isNotifyingCoaches ? (
-                          <><IconLoader2 size={12} className="animate-spin" /> Sending...</>
-                        ) : (
-                          <>Notify ({selectedCoachIds.length})</>
-                        )}
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* Original Auto Notify Coach Button */}
-              <button
-                onClick={handleNotifyCoach}
-                disabled={notifying || notified}
-                className={`flex items-center justify-center gap-2 px-3 sm:px-5 py-2.5 rounded-2xl text-[9px] sm:text-[11px] font-black uppercase tracking-widest transition-all cursor-pointer disabled:cursor-default border w-full sm:w-auto flex-1 md:flex-none ${notified
-                  ? "bg-[#4ADE80]/10 border-[#4ADE80]/30 text-[#4ADE80]"
-                  : "bg-white/5 hover:bg-white/10 border border-white/10 text-white/50 hover:text-white"
-                  }`}
-              >
-                {notifying ? (
-                  <><IconLoader2 size={16} className="animate-spin shrink-0" /> <span className="truncate">Sending...</span></>
-                ) : notified ? (
-                  <><IconCheck size={16} className="shrink-0" /> <span className="truncate">Coach Notified</span></>
-                ) : (
-                  <><IconBell size={16} className="shrink-0" /> <span className="truncate">Auto Notify ({player.coachName || "Coach"})</span></>
-                )}
-              </button>
-              <button
-                onClick={onClose}
-                className="absolute top-4 right-4 md:static w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white transition-all cursor-pointer shrink-0"
-              >
-                <IconX size={18} />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* CV Body - Adjusted to full width */}
-        <div className="p-4 sm:p-6 md:p-8 flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
-          {/* Personal Information Hero - Restoring Original Design */}
-          <section className="bg-[#111111] rounded-3xl border border-white/10 p-4 md:p-8 flex flex-col gap-8">
-            <div className="relative rounded-3xl overflow-hidden min-h-100 md:min-h-140 border border-white/10 group flex flex-col justify-end">
-              <div
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                style={{ backgroundImage: `url('/stadium-night.jpg')` }}
-              />
-              <div className="absolute inset-0 bg-linear-to-r from-black/95 via-black/40 via-45% to-transparent" />
-              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
-
-              <div className="absolute right-0 bottom-0 h-full w-[70%] md:w-[55%] flex items-end justify-end pointer-events-none opacity-60 md:opacity-100">
-                <Image
-                  src={typeof player.playerImage === 'string' ? player.playerImage : (player.playerImage?.src || "/ronaldo.png")}
-                  alt="Player"
-                  className="h-[90%] md:h-[105%] object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.9)]"
-                  width={500}
-                  height={500}
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.srcset = "";
-                    target.src = "/placeholder_img.jpg";
-                  }}
-                />
-              </div>
-
-              <div className="relative p-6 md:p-10 w-full space-y-8">
-                <div className="flex flex-col gap-6">
-                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-gold bg-gold/80 flex items-center justify-center backdrop-blur-2xl shadow-2xl">
-                    <span className="text-3xl md:text-4xl font-black text-white font-orbitron">{player.rating}</span>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="bg-[#E31B23] border border-[#E31B23]/20 px-4 py-1.5 rounded-full text-[10px] font-black text-white uppercase w-fit tracking-[0.2em] shadow-[0_0_20px_rgba(227,27,35,0.3)]">{player.transferStatus || "Active Player"}</div>
-                    <div className="space-y-2">
-                      <h1 className="text-3xl md:text-6xl font-black text-white font-orbitron uppercase tracking-tighter leading-none">{player.fullName}</h1>
-                      <div className="flex flex-wrap items-center gap-3 md:gap-6 text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] pt-1">
-                        <span className="text-[#E31B23]">{getFullWithShortForm(player.position)}</span>
-                        <span className="text-white/20 hidden md:inline">/</span>
-                        <span className="text-white">{player.age} Years Old</span>
-                        <span className="text-white/20 hidden md:inline">/</span>
-                        <span className="flex items-center gap-3 text-white">
-                          <Image
-                            width={20}
-                            height={20}
-                            src={`https://flagcdn.com/br.svg`}
-                            alt={player.birthCountry}
-                            className="w-4 h-3 md:w-5 md:h-3.5 object-cover rounded-sm shadow-sm"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.srcset = "";
-                              target.src = "/placeholder_img.jpg";
-                            }}
-                          />
-                          {player.birthCountry}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 md:gap-y-6 pt-4 md:pt-8 max-w-2xl p-4 md:p-6 rounded-2xl">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-white/40"><IconShield size={20} /></div>
-                    <div>
-                      <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">Current Club</p>
-                      <p className="text-sm font-bold text-white">{player.clubs[0]?.name || "Unattached"}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-white/40"><IconPhone size={20} /></div>
-                    <div>
-                      <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">Contact</p>
-                      <p className="text-sm font-bold text-white">{player.phone}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-white/40"><IconClock size={20} /></div>
-                    <div>
-                      <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">Contract Until</p>
-                      <p className="text-sm font-bold text-[#FBBF24]">{player.contractUntil}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-white/40"><IconMail size={20} /></div>
-                    <div>
-                      <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">Email</p>
-                      <p className="text-sm font-bold text-white truncate max-w-45">{player.email}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Top Squares */}
-          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 w-full max-w-full">
-            {/* Completion Status */}
-            <div className="bg-[#111111] rounded-3xl border border-white/10 p-5 sm:p-8 flex flex-col gap-6 w-full">
-              <h3 className="text-xs sm:text-sm font-black text-white font-orbitron uppercase tracking-widest truncate">Completion Status</h3>
-              <div className="space-y-4">
-                <div className="flex justify-between items-end">
-                  <span className="text-4xl sm:text-5xl font-black text-[#E31B23] font-orbitron">85%</span>
-                </div>
-                <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                  <div className="h-full bg-[#E31B23] rounded-full" style={{ width: "85%" }} />
-                </div>
-                <p className="text-[10px] text-white/40 font-bold leading-relaxed uppercase tracking-wider">
-                  Complete all sections to unlock Gold tier status
-                </p>
-              </div>
-            </div>
-
-            {/* Tier Status */}
-            <div className="bg-[#111111] rounded-3xl border border-white/10 p-5 sm:p-8 flex flex-col gap-6 relative overflow-hidden w-full">
-              <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#FBBF24]/10 blur-3xl rounded-full" />
-              <div className="flex flex-col">
-                <h3 className="text-2xl sm:text-3xl font-black text-[#FBBF24] font-orbitron italic tracking-tighter leading-none">GOLD</h3>
-                <div className="w-full h-1 bg-[#FBBF24] mt-2 opacity-50" />
-              </div>
-              <p className="text-[10px] text-white/60 font-bold leading-relaxed uppercase tracking-wider mt-2">
-                Your CV meets Gold standards and is ready to share with top clubs and agents.
-              </p>
-              <button className="bg-white/5 hover:bg-white/10 text-white border border-white/10 gap-2 w-full py-4 rounded-xl font-black uppercase tracking-widest text-[10px] h-auto mt-4 cursor-pointer flex items-center justify-center">
-                <IconShare size={18} className="text-white/40" /> Request Re-validation
-              </button>
-            </div>
-
-            {/* New Game Reports */}
-            <div className="bg-[#111111] h-fit rounded-3xl border border-white/10 p-5 sm:p-8 flex flex-col gap-4 sm:gap-6 min-w-0 w-full">
-              <div className="flex items-center gap-2 sm:gap-3 mb-2 min-w-0">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#E31B23] rounded-lg flex items-center justify-center shrink-0">
-                  <FileText className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
-                </div>
-                <h3 className="text-xs sm:text-sm font-black text-white font-orbitron uppercase tracking-widest truncate flex-1 min-w-0">
-                  New Game Reports
-                </h3>
-              </div>
-
-              <div className="space-y-2 sm:space-y-3 min-w-0">
-                {gameReports.map((report) => (
-                  <div key={report.id} className="border border-white/10 rounded-xl p-3 sm:p-4 flex flex-row items-center justify-between hover:bg-white/5 transition group gap-2 min-w-0">
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <FileText className="w-4 h-4 shrink-0 text-white/40 group-hover:text-[#E31B23] transition-colors hidden sm:block" />
-                      <span className="text-white/60 text-xs sm:text-sm font-bold truncate block">{report.opponent}</span>
-                    </div>
-                    <span className="text-white font-black text-sm sm:text-xl font-orbitron shrink-0">{report.rating}</span>
-                  </div>
-                ))}
-                {gameReports.length === 0 && (
-                  <p className="text-white/40 text-[10px] uppercase font-bold text-center py-4">No reports available</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <FullEditablePage editable={false} />
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ─── Main Component ────────────────────────────────────────────────────────
 const AcademyValidateCv = () => {
-  const dispatch = useAppDispatch();
   const players = useAppSelector((state) => state.player.players);
+  const router = useRouter();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [tierFilter, setTierFilter] = useState<"All" | CvTier>("All");
   const [typeFilter, setTypeFilter] = useState("All");
-  const [selectedPlayer, setSelectedPlayer] = useState<PlayerStateItem | null>(null);
 
   const playerTypes = useMemo(() => {
     const types = new Set(players.map((p) => getPlayerType(p.position)));
@@ -560,7 +157,8 @@ const AcademyValidateCv = () => {
           <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest shrink-0">Click &ldquo;View CV&rdquo; to open full profile</span>
         </div>
 
-        <div className="rounded-2xl border border-white/15 overflow-x-auto custom-scrollbar">
+        {/* Desktop Table View */}
+        <div className="hidden lg:block rounded-2xl border border-white/15 overflow-x-auto custom-scrollbar">
           <table className="w-full text-left border-collapse min-w-250">
             <thead>
               <tr className="border-b border-white/15 bg-white/1">
@@ -644,8 +242,7 @@ const AcademyValidateCv = () => {
                       <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => {
-                            dispatch(setSelectedPlayerId(p.id));
-                            setSelectedPlayer(p);
+                            router.push(`/dashboard/academy/management/validate-cv/${p.id}`);
                           }}
                           className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/50 hover:text-white transition-all cursor-pointer text-[10px] font-black uppercase tracking-widest whitespace-nowrap"
                         >
@@ -667,15 +264,89 @@ const AcademyValidateCv = () => {
             </tbody>
           </table>
         </div>
-      </div>
 
-      {/* CV Detail Dialog */}
-      {selectedPlayer && (
-        <CvDetailDialog
-          player={selectedPlayer}
-          onClose={() => setSelectedPlayer(null)}
-        />
-      )}
+        {/* Mobile/Tablet Card View */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:hidden">
+          {filtered.map((p) => {
+            const tier = getCvTier(p.rating);
+            const tierStyle = TIER_STYLES[tier];
+            const pType = getPlayerType(p.position);
+            const displayStatus = p.validationStatus === "verified" ? "verified" : "pending";
+            const vBadge = VALIDATION_BADGE[displayStatus];
+            const imgSrc = typeof p.playerImage === "string" ? p.playerImage : p.playerImage?.src || "/ronaldo.png";
+
+            return (
+              <div key={p.id} className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col gap-4 relative overflow-hidden">
+                {/* Tier Glow */}
+                <div className={`absolute -top-10 -right-10 w-24 h-24 ${tierStyle.bg} blur-2xl rounded-full opacity-50`} />
+
+                {/* Header: Player Info & Validation */}
+                <div className="flex justify-between items-start relative z-10 gap-2">
+                  <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-white/15 shrink-0 bg-white/5">
+                      <Image width={48} height={48} src={imgSrc} alt={p.fullName} className="w-full h-full object-cover" onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.srcset = "";
+                        target.src = "/placeholder_img.jpg";
+                      }} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm font-black text-white truncate">{p.fullName}</p>
+                      <div className="flex items-center gap-2 mt-0.5 min-w-0">
+                        <p className="text-[9px] sm:text-[10px] font-bold text-white/40 uppercase tracking-widest truncate">{p.birthCountry}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <span className={`px-2 py-1 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest border ${vBadge.bg} ${vBadge.border} ${vBadge.color} shrink-0`}>
+                    {vBadge.label}
+                  </span>
+                </div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 gap-x-2 gap-y-3 sm:gap-3 mt-2 bg-black/20 p-2.5 sm:p-3 rounded-xl border border-white/5 relative z-10 min-w-0">
+                  <div className="min-w-0">
+                    <p className="text-[8px] sm:text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1 truncate">Rating</p>
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                      <span className={`text-base sm:text-lg font-black font-orbitron ${tierStyle.color}`}>{p.rating}</span>
+                      <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[7px] sm:text-[8px] font-black uppercase tracking-widest border ${tierStyle.bg} ${tierStyle.border} ${tierStyle.color} shrink-0`}>
+                        {tier}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[8px] sm:text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1 truncate">Position</p>
+                    <p className="text-[10px] sm:text-xs font-bold text-white/80 truncate" title={p.position}>{p.position}</p>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[8px] sm:text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1 truncate">Type</p>
+                    <p className="text-[10px] sm:text-xs font-bold text-white/80 truncate" title={pType}>{pType}</p>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[8px] sm:text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1 truncate">Coach</p>
+                    <p className="text-[10px] sm:text-xs font-bold text-white/80 truncate" title={p.coachName || "Unassigned"}>{p.coachName || "Unassigned"}</p>
+                  </div>
+                </div>
+
+                {/* Action */}
+                <button
+                  onClick={() => {
+                    router.push(`/dashboard/academy/management/validate-cv/${p.id}`);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white transition-all cursor-pointer text-[10px] font-black uppercase tracking-widest mt-1 relative z-10"
+                >
+                  <IconEye size={14} />
+                  View CV
+                </button>
+              </div>
+            );
+          })}
+          {filtered.length === 0 && (
+            <div className="col-span-full py-12 text-center text-white/40 text-sm font-medium border border-white/10 rounded-2xl bg-white/5">
+              No player CVs match the current filters.
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
