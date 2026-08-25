@@ -1,14 +1,12 @@
 "use client";
 import Image from "next/image";
 import React from "react";
-import { 
-  IconDownload, 
-  IconCircleCheck, 
-  IconPencil, 
+import {
+  IconDownload,
+  IconCircleCheck,
+  IconPencil,
   IconPlus,
   IconCalendar,
-  IconTrophy,
-  IconCertificate,
   IconBriefcase
 } from "@tabler/icons-react";
 import DashboardHero from "@/components/dashboard/DashboardHero";
@@ -65,7 +63,7 @@ const MyCV = () => {
                 { name: "Liverpool FC", role: "U9-U12", years: "2007-2010", type: "LOAN TRANSFER", logo: "https://upload.wikimedia.org/wikipedia/en/0/0c/Liverpool_FC.svg" },
                 { name: "Chelsea FC", role: "U12-U16", years: "2012-2015", type: "$ 250000.00", logo: "https://upload.wikimedia.org/wikipedia/en/c/cc/Chelsea_FC.svg" },
               ].map((club, idx) => (
-                <div key={idx} className="p-4 rounded-xl border border-white/10 bg-white/[0.02] flex items-start gap-4 group hover:border-[#E31B23]/30 transition-all">
+                <div key={idx} className="p-4 rounded-xl border border-white/10 bg-white/2 flex items-start gap-4 group hover:border-[#E31B23]/30 transition-all">
                   <Image src={club.logo} className="w-10 h-10 object-contain" alt={club.name} />
                   <div>
                     <div className="text-sm font-bold text-white">{club.name}</div>
@@ -87,7 +85,7 @@ const MyCV = () => {
           <Section title="Personal Information">
             <div className="space-y-8">
               <div className="rounded-2xl overflow-hidden border border-white/10">
-                <DashboardHero 
+                <DashboardHero
                   backgroundImage="/stadium-night.jpg"
                   rating={74}
                   badgeText="Active Coach"
@@ -117,7 +115,7 @@ const MyCV = () => {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-2">Upload image</span>
-                  <div className="flex-1 rounded-2xl border-2 border-dashed border-white/10 bg-white/[0.02] flex flex-col items-center justify-center p-8 group hover:border-[#E31B23]/30 transition-all min-w-0">
+                  <div className="flex-1 rounded-2xl border-2 border-dashed border-white/10 bg-white/2 flex flex-col items-center justify-center p-8 group hover:border-[#E31B23]/30 transition-all min-w-0">
                     <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white/40 mb-4 group-hover:bg-[#E31B23]/10 group-hover:text-[#E31B23] transition-all">
                       <IconPlus size={24} />
                     </div>
@@ -148,7 +146,7 @@ const MyCV = () => {
           </Section>
           {/* Key Accomplishments */}
           <Section title="Key Accomplishments">
-            <div className="h-24 rounded-xl border border-white/5 bg-white/[0.02]" />
+            <div className="h-24 rounded-xl border border-white/5 bg-white/2" />
           </Section>
           {/* Major Trophies */}
           <Section title="Major Trophies">
@@ -213,25 +211,25 @@ const InputField = ({ label, value, isDate }: { label: string, value: string, is
   <div className="space-y-2">
     {label && <label className="text-[10px] text-gray-500 uppercase font-black tracking-widest">{label}</label>}
     <div className="relative">
-      <input 
-        type="text" 
-        readOnly 
-        value={value} 
-        className="w-full h-12 bg-white/[0.02] border border-white/10 rounded-xl px-4 text-sm font-bold text-white focus:outline-none focus:border-[#E31B23]/50 transition-all" 
+      <input
+        type="text"
+        readOnly
+        value={value}
+        className="w-full h-12 bg-white/2 border border-white/10 rounded-xl px-4 text-sm font-bold text-white focus:outline-none focus:border-[#E31B23]/50 transition-all"
       />
       {isDate && <IconCalendar className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />}
     </div>
   </div>
 );
 const FormationCard = ({ title, subtitle, wins, usage, image }: { title: string, subtitle: string, wins: string, usage: string, image: string }) => (
-  <div className="rounded-[32px] border border-white/10 bg-[#050505] overflow-hidden group hover:border-[#E31B23]/30 transition-all flex flex-col h-full">
-    <div className="relative aspect-[4/3] w-full overflow-hidden">
-      <Image 
-        src={image} 
-        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
-        alt="Formation" 
+  <div className="rounded-4xl border border-white/10 bg-[#050505] overflow-hidden group hover:border-[#E31B23]/30 transition-all flex flex-col h-full">
+    <div className="relative aspect-4/3 w-full overflow-hidden">
+      <Image
+        src={image}
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+        alt="Formation"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#050505] to-transparent opacity-20" />
+      <div className="absolute inset-0 bg-linear-to-t from-[#050505] to-transparent opacity-20" />
     </div>
     <div className="p-8 text-center flex-1 flex flex-col justify-center bg-[#080808] min-w-0">
       <div className="text-4xl font-bold text-white mb-2 tracking-tight">{title}</div>

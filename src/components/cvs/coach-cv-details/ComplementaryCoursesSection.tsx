@@ -138,9 +138,9 @@ handleUpdate('complementaryCourses', (coachData.complementaryCourses || []).filt
 
 return (
 <div className="py-12 sm:py-20 bg-black px-4 sm:px-12">
-  <div className="container mx-auto">
+  <div className="mx-auto">
     {/* Title */}
-    <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading text-white text-center mb-8 sm:mb-12 tracking-wide break-words">
+    <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading text-white text-center mb-8 sm:mb-12 tracking-wide wrap-break-word">
       COMPLEMENTARY COURSES
     </h1>
 
@@ -154,7 +154,7 @@ return (
     </div>
 
     {/* Course Cards - Styled like Accomplishments Section */}
-    <div className="mx-auto">
+    <div className="">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 w-full">
         {(coachData.complementaryCourses || []).map((course, index) => {
           const IconComponent = COURSE_ICONS[course.icon || ""] || Award;
@@ -192,7 +192,7 @@ return (
               {editable && (
                 <button
                   onClick={() => removeCourse(course.id)}
-                  className="absolute right-3 top-3 text-gray-500 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                  className="absolute right-3 top-3 text-gray-500 hover:text-red-500 transition-colors opacity-100 md:opacity-0 group-hover:opacity-100"
                 >
                   <Trash2 size={16} />
                 </button>
