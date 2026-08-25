@@ -60,8 +60,8 @@ const StatInput = ({ label, value, onChange, colorClass, align = "left" }: StatI
               onChange(isNaN(val) ? 0 : val);
             }}
             className={cn(
-              "h-full w-full bg-transparent border-none text-[#111111] font-black font-orbitron text-2xl focus:outline-none focus:ring-0 text-center",
-              align === "right" ? "pr-6" : "pl-6"
+              "h-full w-full bg-transparent border-none text-[#111111] font-black font-orbitron text-[22px] sm:text-2xl focus:outline-none focus:ring-0 text-center",
+              align === "right" ? "pr-3 sm:pr-6" : "pl-3 sm:pl-6"
             )}
           />
         </div>
@@ -403,13 +403,13 @@ const MatchStatisticsForm = ({
   );
 
   return (
-    <div className="flex flex-col gap-8 pb-10 animate-in fade-in duration-500">
+    <div className="flex flex-col px-0 gap-8 pb-10 animate-in fade-in duration-500">
       <div>
         <h1 className="text-3xl md:text-5xl font-black text-white font-orbitron uppercase tracking-tight wrap-break-word">Create Game Reports</h1>
         <p className="text-white/60 font-medium mt-2 text-sm sm:text-base md:text-lg">Create Professional Football Player Game Reports</p>
       </div>
 
-      <div className="bg-[#0A0A0A] rounded-[40px] border border-white/10 p-5 sm:p-8 md:p-12 flex flex-col gap-10 relative overflow-hidden shadow-2xl">
+      <div className="bg-[#0A0A0A] py-4 sm:px-8 sm:py-8 md:px-12 flex flex-col gap-10 relative overflow-hidden shadow-2xl">
         <div className="relative w-full flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="bg-linear-to-r from-[#00A3FF] to-[#0066FF] font-orbitron text-white w-full py-4 px-2 sm:px-4 rounded-xl font-black uppercase tracking-widest sm:tracking-[0.4em] shadow-[0_0_40px_rgba(0,163,255,0.3)] text-center border border-white/20 text-sm sm:text-lg italic flex-1">
             Match Statistics

@@ -1015,11 +1015,11 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                     <Image
                       src={positionIcon}
                       alt="position icon"
-                      width={idx === 0 ? 34 : 30}
-                      height={idx === 0 ? 34 : 30}
+                      width={idx === 0 ? 40 : 28}
+                      height={idx === 0 ? 40 : 28}
                       className={cn(
                         "pointer-events-none drop-shadow-lg transition-transform group-hover/marker:scale-110",
-                        idx === 0 ? "w-6 h-6 sm:w-8 sm:h-8" : "w-5 h-5 sm:w-7 sm:h-7"
+                        idx === 0 ? "w-8 h-8 sm:w-10 sm:h-10" : "w-5 h-5 sm:w-7 sm:h-7"
                       )}
 
                       onError={(e) => {
@@ -1032,7 +1032,7 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       <div className={cn(
                         "mt-1 px-1 sm:px-1.5 py-0.5 rounded bg-black/85 border border-white/10 text-white text-[8px] sm:text-[9px] font-medium text-center whitespace-nowrap shadow-md pointer-events-none tracking-wide select-none transition-all",
                       )}>
-                        position{idx + 1}
+                        Position-{idx + 1}
                       </div>
                     )}
                   </div>

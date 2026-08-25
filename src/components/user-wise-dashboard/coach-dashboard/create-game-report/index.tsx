@@ -48,7 +48,7 @@ export const CreateGameReportWizard = ({
     weight: "45",
     height: "1.20",
     matchesPlayed: "1",
-    minutesPlayed: "90",
+    minutesPlayed: "0",
     manOfTheMatch: "1",
     scoutName: "MARIO LOPEZ",
     gameType: "FRIENDLY CHAMPIONSHIP CATARINESE",
@@ -85,7 +85,7 @@ export const CreateGameReportWizard = ({
     let pWeight = "45";
     let pHeight = "1.20";
     let pMatches = "1";
-    let pMinutes = "90";
+    let pMinutes = "0";
     let pScout = "MARIO LOPEZ";
 
     // check if viewOnly
