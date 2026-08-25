@@ -5,6 +5,7 @@
 "use client";
 import Image from "next/image";
 import positionMap from "@/assets/cvs/id/position-map.png";
+import { PlayerBadgeSVG } from "./bio-components/PlayerBadgeSVG";
 import technicalIcon from "@/assets/cvs/id/player-styles-icons/technical.png";
 import finesseShotIcon from "@/assets/cvs/id/player-styles-icons/finesse shot.png";
 import incisivePassIcon from "@/assets/cvs/id/player-styles-icons/incisiver pass.png";
@@ -328,7 +329,7 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
   const updateMarkerPosition = (e: MouseEvent | React.MouseEvent | TouchEvent | React.TouchEvent) => {
     if (!activeMarker || !mapContainerRef.current) return;
     const rect = mapContainerRef.current.getBoundingClientRect();
-    
+
     // Support both mouse and touch events
     let clientX, clientY;
     if ('touches' in e) {
@@ -551,12 +552,18 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
     if (!code) return "";
     return `https://flagcdn.com/w160/${code}.png`;
   };
+
   return (
     <>
       <div className="w-full min-w-0 overflow-hidden px-2 sm:px-4 md:px-0">
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6 w-full min-w-0">
-          {/* LEFT COLUMN */}
-          <div className="order-2 xl:order-none col-span-1 xl:col-span-4 h-fit space-y-4 sm:space-y-6 bg-cardBg rounded-2xl sm:rounded-3xl border border-white/10 w-full min-w-0 overflow-hidden">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6 xl:gap-y-0 w-full min-w-0">
+          {/* MOBILE ONLY: VERIFIED BADGE */}
+          <div className="block xl:hidden order-1 col-span-1 w-full min-w-0">
+            <PlayerBadgeSVG playerData={playerData} className="bg-cardBg rounded-2xl sm:rounded-3xl border border-white/10 overflow-hidden w-full" />
+          </div>
+
+          {/* PART 1: Personal Info & Contact (Above Image on mobile) */}
+          <div className="order-2 xl:order-0 xl:col-start-1 xl:col-span-4 xl:row-start-1 bg-cardBg rounded-2xl xl:rounded-t-3xl xl:rounded-b-none border border-white/10 xl:border-b-0 overflow-hidden w-full min-w-0 flex flex-col space-y-4 sm:space-y-6 h-fit">
             <div className="p-4 sm:p-6 w-full min-w-0">
               <h2 className="text-base sm:text-lg text-center font-heading font-normal mb-4 text-white">
                 Personal Information
@@ -740,7 +747,12 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                 </div>
               </div>
             </div>
-            <div className="p-4 sm:p-6 border-t border-white/5 w-full min-w-0">
+
+          </div>
+
+          {/* PART 2: Physical, Languages, Map (Below Image on mobile) */}
+          <div className="order-4 xl:order-0 xl:col-start-1 xl:col-span-4 xl:row-start-2 bg-cardBg rounded-2xl xl:rounded-b-3xl xl:rounded-t-none border border-white/10 xl:border-t-0 overflow-hidden w-full min-w-0 flex flex-col space-y-4 sm:space-y-6 h-fit">
+            <div className="p-4 sm:p-6 border-t-0 xl:border-t xl:border-white/5 w-full min-w-0">
               <h2 className="text-base sm:text-lg text-center font-heading font-normal mb-4 text-white">
                 Physical Stats
               </h2>
@@ -1028,8 +1040,9 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
               </div>
             </div>
           </div>
+
           {/* CENTER COLUMN - PLAYER IMAGE */}
-          <div className="order-3 xl:order-none col-span-1 xl:col-span-4 flex flex-col items-center w-full min-w-0 overflow-hidden">
+          <div className="order-3 xl:order-0 xl:col-start-5 xl:col-span-4 xl:row-start-1 xl:row-span-2 flex flex-col items-center w-full min-w-0 overflow-hidden">
             {/* Player Name */}
             <div className="text-center mb-6 sm:mb-8 w-full min-w-0">
               <div className="flex items-center mb-6 sm:mb-8 justify-center w-full min-w-0">
@@ -1206,9 +1219,9 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
             </div>
           </div>
           {/* RIGHT COLUMN */}
-          <div className="order-1 xl:order-none col-span-1 xl:col-span-4 space-y-4 sm:space-y-6 bg-cardBg rounded-2xl sm:rounded-3xl w-full min-w-0 overflow-hidden">
+          <div className="order-5 xl:order-0 xl:col-start-9 xl:col-span-4 xl:row-start-1 xl:row-span-2 space-y-4 sm:space-y-6 bg-cardBg rounded-2xl sm:rounded-3xl w-full min-w-0 overflow-hidden h-fit">
             {/* Certification Card */}
-            <div className="p-4 sm:p-6 border-none rounded-2xl relative overflow-hidden group hover:border-primary/20 transition-all w-full min-w-0">
+            <div className="hidden xl:block p-4 sm:p-6 border-none rounded-2xl relative overflow-hidden group hover:border-primary/20 transition-all w-full min-w-0">
               {/* SVG certificate container */}
               <div className="w-full max-w-full aspect-square relative select-none">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">
@@ -1933,7 +1946,6 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
           </div>
         </div>
       </div>
-      {/* Certificate is not downloadable */}
     </>
   );
 };
