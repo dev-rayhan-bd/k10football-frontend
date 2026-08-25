@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 const StatBar = ({ label, value, colorClass, align = "left" }: { label: string; value: number | string; colorClass: string; align?: "left" | "right" }) => (
   <div className={`flex flex-col gap-1.5 w-full max-w-[2280px] ${align === "right" ? "items-end text-right" : "items-start text-left"}`}>
-    <Label className="text-[10px] font-black text-white uppercase tracking-[0.1em]">{label}</Label>
+    <Label className="text-[10px] font-black text-white uppercase tracking-widest">{label}</Label>
     <div className={`h-11 w-full rounded-lg relative overflow-hidden ${colorClass} shadow-lg`}>
        <div 
          className={`absolute top-0 bottom-0 bg-white w-[50%] ${align === "right" ? "left-0 shadow-[4px_0_10px_rgba(0,0,0,0.1)]" : "right-0 shadow-[-4px_0_10px_rgba(0,0,0,0.1)]"}`} 
@@ -50,7 +50,7 @@ const GameReportsOverview = () => {
         </div>
         <div className="relative flex justify-between gap-20">
            {/* Left Column */}
-           <div className="flex flex-col gap-4 flex-1 max-w-[300px] min-w-0">
+           <div className="flex flex-col gap-4 flex-1 max-w-75 min-w-0">
               <StatBar label="Shots on Goal" value="8" colorClass="bg-[#00D1FF]" />
               <StatBar label="Goal Scored" value="3" colorClass="bg-[#8B5CF6]" />
               <StatBar label="Assists" value="6" colorClass="bg-[#2DD4BF]" />
@@ -73,7 +73,7 @@ const GameReportsOverview = () => {
               />
            </div>
            {/* Right Column */}
-           <div className="flex flex-col gap-4 items-end flex-1 max-w-[300px] min-w-0">
+           <div className="flex flex-col gap-4 items-end flex-1 max-w-75 min-w-0">
               <StatBar label="Goal Unsave" value="1" colorClass="bg-[#8B5CF6]" align="right" />
               <StatBar label="Penalties Saves" value="1" colorClass="bg-[#F59E0B]" align="right" />
               <StatBar label="Appearances" value="15" colorClass="bg-[#00D1FF]" align="right" />

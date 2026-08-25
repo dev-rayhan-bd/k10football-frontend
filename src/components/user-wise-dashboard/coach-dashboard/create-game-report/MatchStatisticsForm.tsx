@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -109,6 +110,19 @@ const MatchStatisticsForm = ({
   const [mobilePage, setMobilePage] = React.useState(0);
   const [isTimerRunning, setIsTimerRunning] = React.useState(false);
   const [secondsElapsed, setSecondsElapsed] = React.useState(Number(minutesPlayed || 0) * 60);
+  const [showOnboarding, setShowOnboarding] = React.useState(false);
+
+  React.useEffect(() => {
+    const hasSeen = localStorage.getItem("k10_game_report_onboarding");
+    if (!hasSeen) {
+      setShowOnboarding(true);
+    }
+  }, []);
+
+  const dismissOnboarding = () => {
+    setShowOnboarding(false);
+    localStorage.setItem("k10_game_report_onboarding", "true");
+  };
 
   React.useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -281,7 +295,7 @@ const MatchStatisticsForm = ({
           src="/goal-bar.png"
           alt="Goal"
           draggable={false}
-          className="w-full h-auto transition-opacity pointer-events-none select-none block"
+          className="w-full h-auto transition-opacity pointer-events-none select-none block scale-[1.25] origin-[50%_90%]"
           width={500}
           height={500}
         />
@@ -316,7 +330,20 @@ const MatchStatisticsForm = ({
           Clear
         </button>
       </div>
-      <div className="w-full">
+      <div className="w-full relative">
+        {showOnboarding && (
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-64 bg-[#8B5CF6] rounded-xl p-4 shadow-2xl z-50 animate-in fade-in zoom-in border border-white/20">
+            <div className="flex justify-between items-start gap-2 mb-2">
+              <h4 className="text-white font-bold font-orbitron text-sm uppercase tracking-wider">How to use Pitch</h4>
+              <button onClick={dismissOnboarding} className="text-white/70 hover:text-white p-1 -m-1 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+            </div>
+            <p className="text-white/90 text-xs leading-relaxed font-medium">
+              Press and slide down on the pitch to draw movement arrows. Tap once to place a simple marker!
+            </p>
+          </div>
+        )}
         <div
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
@@ -404,9 +431,26 @@ const MatchStatisticsForm = ({
 
   return (
     <div className="flex flex-col px-0 gap-8 pb-10 animate-in fade-in duration-500">
-      <div>
+      <div className="relative">
         <h1 className="text-3xl md:text-5xl font-black text-white font-orbitron uppercase tracking-tight wrap-break-word">Create Game Reports</h1>
-        <p className="text-white/60 font-medium mt-2 text-sm sm:text-base md:text-lg">Create Professional Football Player Game Reports</p>
+        <p className="text-white/60 font-medium mt-2 text-sm sm:text-base md:text-lg w-fit relative">
+          Create Professional Football Player Game Reports
+          
+          {showOnboarding && (
+            <div className="absolute top-full left-0 mt-3 w-72 bg-[#8B5CF6] rounded-xl p-4 shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 border border-white/20">
+              <div className="flex justify-between items-start gap-2 mb-2">
+                <h4 className="text-white font-bold font-orbitron text-sm uppercase tracking-wider">Getting Started</h4>
+                <button onClick={dismissOnboarding} className="text-white/70 hover:text-white p-1 -m-1 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+              </div>
+              <p className="text-white/90 text-xs leading-relaxed font-medium">
+                Welcome! Add stats using the + and - buttons, run the timer during the game, and use the interactive diagrams below to record actions.
+              </p>
+              <div className="absolute -top-2 left-6 w-4 h-4 bg-[#8B5CF6] rotate-45 border-l border-t border-white/20" />
+            </div>
+          )}
+        </p>
       </div>
 
       <div className="bg-[#0A0A0A] py-4 sm:px-8 sm:py-8 md:px-12 flex flex-col gap-10 relative overflow-hidden shadow-2xl">
