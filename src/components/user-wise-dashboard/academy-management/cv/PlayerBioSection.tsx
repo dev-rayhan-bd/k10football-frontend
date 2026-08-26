@@ -64,6 +64,7 @@ import { PencilIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { usePlayerStats } from "../CvNotEditable";
+import { PlayerBadgeSVG } from "@/components/cvs/player-cv-details/bio-components/PlayerBadgeSVG";
 const ALL_STYLES = [
   { id: "technical", label: "Technical" },
   { id: "finesse-shot", label: "Finesse Shot" },
@@ -329,7 +330,7 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
   const updateMarkerPosition = (e: MouseEvent | React.MouseEvent | TouchEvent | React.TouchEvent) => {
     if (!activeMarker || !mapContainerRef.current) return;
     const rect = mapContainerRef.current.getBoundingClientRect();
-    
+
     // Support both mouse and touch events
     let clientX, clientY;
     if ('touches' in e) {
@@ -555,9 +556,14 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
   return (
     <>
       <div className="w-full min-w-0 overflow-hidden px-2 sm:px-4 md:px-0">
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6 w-full min-w-0">
-          {/* LEFT COLUMN */}
-          <div className="order-2 xl:order-none col-span-1 xl:col-span-4 h-fit space-y-4 sm:space-y-6 bg-cardBg rounded-2xl sm:rounded-3xl border border-white/10 w-full min-w-0 overflow-hidden">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6 xl:gap-y-0 w-full min-w-0">
+          {/* MOBILE ONLY: VERIFIED BADGE */}
+          <div className="block xl:hidden order-1 col-span-1 w-full min-w-0">
+            <PlayerBadgeSVG playerData={playerData} className="bg-cardBg rounded-2xl sm:rounded-3xl border border-white/10 overflow-hidden w-full" />
+          </div>
+
+          {/* PART 1: Personal Info & Contact (Above Image on mobile) */}
+          <div className="order-2 xl:order-0 xl:col-start-1 xl:col-span-4 xl:row-start-1 bg-cardBg rounded-2xl xl:rounded-t-3xl xl:rounded-b-none border border-white/10 xl:border-b-0 overflow-hidden w-full min-w-0 flex flex-col space-y-4 sm:space-y-6 h-fit">
             <div className="p-4 sm:p-6 w-full min-w-0">
               <h2 className="text-base sm:text-lg text-center font-heading font-normal mb-4 text-white">
                 Personal Information
@@ -741,7 +747,11 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                 </div>
               </div>
             </div>
-            <div className="p-4 sm:p-6 border-t border-white/5 w-full min-w-0">
+          </div>
+
+          {/* PART 2: Physical, Languages, Map (Below Image on mobile) */}
+          <div className="order-4 xl:order-0 xl:col-start-1 xl:col-span-4 xl:row-start-2 bg-cardBg rounded-2xl xl:rounded-b-3xl xl:rounded-t-none border border-white/10 xl:border-t-0 overflow-hidden w-full min-w-0 flex flex-col space-y-4 sm:space-y-6 h-fit">
+            <div className="p-4 sm:p-6 border-white/5 w-full min-w-0">
               <h2 className="text-base sm:text-lg text-center font-heading font-normal mb-4 text-white">
                 Physical Stats
               </h2>
@@ -1008,7 +1018,7 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       height={idx === 0 ? 34 : 30}
                       className={cn(
                         "pointer-events-none drop-shadow-lg transition-transform group-hover/marker:scale-110",
-                        idx === 0 ? "w-6 h-6 sm:w-8 sm:h-8" : "w-5 h-5 sm:w-7 sm:h-7"
+                        idx === 0 ? "w-8 h-8 sm:w-10 sm:h-10" : "w-5 h-5 sm:w-7 sm:h-7"
                       )}
 
                       onError={(e) => {
@@ -1021,7 +1031,7 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
                       <div className={cn(
                         "mt-1 px-1 sm:px-1.5 py-0.5 rounded bg-black/85 border border-white/10 text-white text-[8px] sm:text-[9px] font-medium text-center whitespace-nowrap shadow-md pointer-events-none tracking-wide select-none transition-all",
                       )}>
-                        position{idx + 1}
+                        Position-{idx + 1}
                       </div>
                     )}
                   </div>
@@ -1030,7 +1040,7 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
             </div>
           </div>
           {/* CENTER COLUMN - PLAYER IMAGE */}
-          <div className="order-3 xl:order-0 col-span-1 xl:col-span-4 flex flex-col items-center w-full min-w-0 overflow-hidden">
+          <div className="order-3 xl:order-0 xl:col-start-5 xl:col-span-4 xl:row-start-1 xl:row-span-2 flex flex-col items-center w-full min-w-0 overflow-hidden">
             {/* Player Name */}
             <div className="text-center mb-6 sm:mb-8 w-full min-w-0">
               <div className="flex items-center mb-6 sm:mb-8 justify-center w-full min-w-0">
@@ -1206,8 +1216,8 @@ const PlayerBioSection = ({ editable = true }: { editable?: boolean }) => {
               </div>
             </div>
           </div>
-          {/* RIGHT COLUMN */}
-          <div className="order-1 xl:order-none col-span-1 xl:col-span-4 space-y-4 sm:space-y-6 bg-cardBg rounded-2xl sm:rounded-3xl w-full min-w-0 overflow-hidden">
+          {/* RIGHT COLUMN (Desktop only) */}
+          <div className="hidden xl:flex order-5 xl:order-0 xl:col-start-9 xl:col-span-4 xl:row-start-1 xl:row-span-2 flex-col space-y-4 sm:space-y-6 bg-cardBg rounded-2xl sm:rounded-3xl w-full min-w-0 overflow-hidden">
             {/* Certification Card */}
             <div className="p-4 sm:p-6 border-none rounded-2xl relative overflow-hidden group hover:border-primary/20 transition-all w-full min-w-0">
               {/* SVG certificate container */}
