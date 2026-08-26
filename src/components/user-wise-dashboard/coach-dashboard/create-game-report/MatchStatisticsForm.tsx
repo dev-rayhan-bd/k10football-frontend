@@ -348,25 +348,17 @@ const MatchStatisticsForm = ({
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
-          className="relative cursor-crosshair overflow-hidden group select-none bg-[#092b15] w-full h-auto"
-          style={{ touchAction: 'none' }}
+          className="relative cursor-crosshair overflow-hidden group select-none bg-[#092b15] w-full h-auto mx-auto max-w-[500px]"
+          style={{ touchAction: 'none', aspectRatio: '500/700' }}
         >
-          {/* Vertical pitch for mobile */}
+          {/* Pitch for all devices (Vertical to match PDF exactly) */}
           <Image
             src="/field.png"
             alt="Football Pitch"
             draggable={false}
-            className="w-full h-auto transition-opacity pointer-events-none select-none block landscape:hidden md:hidden"
+            className="w-full h-full object-cover transition-opacity pointer-events-none select-none block"
             width={500}
             height={700}
-          />
-          <Image
-            src="/formation-field.png"
-            alt="Football Pitch"
-            draggable={false}
-            className="w-full h-auto transition-opacity pointer-events-none select-none hidden landscape:block md:block"
-            width={800}
-            height={500}
           />
           {/* Horizontal pitch for desktop */}
           {/* <Image

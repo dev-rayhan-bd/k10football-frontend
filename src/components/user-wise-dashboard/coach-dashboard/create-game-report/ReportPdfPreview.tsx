@@ -48,16 +48,22 @@ const ReportPdfPreview = ({
           setScale(1);
         }
       }
-      // Measure actual content height after render
+    };
+
+    updateScale();
+    window.addEventListener("resize", updateScale);
+    return () => window.removeEventListener("resize", updateScale);
+  }, []);
+
+  useEffect(() => {
+    if (!previewRef.current) return;
+    const observer = new ResizeObserver(() => {
       if (previewRef.current) {
         setContentHeight(previewRef.current.scrollHeight);
       }
-    };
-
-    // Small delay to let content render first
-    const t = setTimeout(updateScale, 100);
-    window.addEventListener("resize", updateScale);
-    return () => { clearTimeout(t); window.removeEventListener("resize", updateScale); };
+    });
+    observer.observe(previewRef.current);
+    return () => observer.disconnect();
   }, []);
 
   // Helper to scale/normalize stats to a rating between 50 and 99
@@ -96,9 +102,9 @@ const ReportPdfPreview = ({
         logging: false
       });
       const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", [210, 396.7]);
       const imgWidth = 210;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const pdf = new jsPDF("p", "mm", [210, Math.max(297, imgHeight)]);
       pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
       pdf.save(`Player_Analysis_Profile_${formData.playerName.replace(/\s+/g, "_")}.pdf`);
     } catch (err) {
@@ -131,19 +137,19 @@ const ReportPdfPreview = ({
           >
             {/* Watermark Logo */}
             <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none z-0">
-              <Image src="/logo.png" alt="Logo Watermark" className="w-125 object-contain" width={500} height={500} />
+              <Image src="/pdf_logo.jpg" alt="Logo Watermark" className="w-24 h-24 object-contain" width={500} height={500} />
             </div>
             {/* Header */}
             <div className="relative z-10 flex items-center justify-between border-b-4 border-slate-900 pb-3 mb-4">
               <div className="flex items-center gap-4">
-                <Image src="/logo.png" alt="K10 Logo" className="w-20 h-20 object-contain" width={80} height={80} />
+                <Image src="/pdf_logo.jpg" alt="K10 Logo" className="w-28 h-28 object-contain" width={80} height={80} />
                 <div>
                   <div className="text-sm font-black tracking-widest text-slate-900 font-orbitron">K10 FOOTBALL</div>
                   <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest font-orbitron mt-0.5">ANALYSIS CV</div>
                 </div>
               </div>
               <div className="text-center">
-                <h2 className="text-3xl font-black text-sky-500 font-orbitron uppercase tracking-tighter italic">
+                <h2 className="text-3xl font-black text-[#E31B23] font-orbitron uppercase tracking-tighter italic">
                   PLAYER ANALYSIS PROFILE
                 </h2>
                 <div className="text-[10px] text-slate-900 font-black uppercase tracking-widest mt-1">
@@ -155,7 +161,7 @@ const ReportPdfPreview = ({
                   <div className="text-sm font-black tracking-widest text-slate-900 font-orbitron">K10 FOOTBALL</div>
                   <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest font-orbitron mt-0.5">ANALYSIS CV</div>
                 </div>
-                <Image src="/logo.png" alt="K10 Logo" className="w-20 h-20 object-contain" width={80} height={80} />
+                <Image src="/pdf_logo.jpg" alt="K10 Logo" className="w-28 h-28 object-contain" width={80} height={80} />
               </div>
             </div>
             {/* Body Content */}
@@ -232,7 +238,7 @@ const ReportPdfPreview = ({
             </div>
             {/* Player Characteristic Section */}
             <div className="relative z-10 mb-4">
-              <div className="bg-sky-500 text-white font-orbitron px-4 py-1.5 rounded text-[10px] font-black uppercase tracking-wider mb-2.5 shadow">
+              <div className="bg-[#E31B23] text-white font-orbitron px-4 py-1.5 rounded text-[10px] font-black uppercase tracking-wider mb-2.5 shadow">
                 PLAYER CHARACTERISTIC:
               </div>
               <div className="flex flex-wrap gap-4 pl-2">
@@ -246,7 +252,7 @@ const ReportPdfPreview = ({
             </div>
             {/* Match Information Section */}
             <div className="relative z-10 mb-4">
-              <div className="bg-sky-500 text-white font-orbitron px-4 py-1.5 rounded text-[10px] font-black uppercase tracking-wider mb-3 shadow">
+              <div className="bg-[#E31B23] text-white font-orbitron px-4 py-1.5 rounded text-[10px] font-black uppercase tracking-wider mb-3 shadow">
                 MATCH INFORMATION
               </div>
               <div className="grid grid-cols-2 gap-x-12 gap-y-2.5 text-[11px] font-medium text-slate-600 pl-2">
@@ -278,7 +284,7 @@ const ReportPdfPreview = ({
             </div>
             {/* Match Statistics Section */}
             <div className="relative z-10 mb-4">
-              <div className="bg-sky-500 text-white font-orbitron px-4 py-1.5 rounded text-[10px] font-black uppercase tracking-wider mb-3 shadow">
+              <div className="bg-[#E31B23] text-white font-orbitron px-4 py-1.5 rounded text-[10px] font-black uppercase tracking-wider mb-3 shadow">
                 MATCH STATISTICS
               </div>
               <div className="grid grid-cols-3 gap-x-8 gap-y-2 text-[10px] pl-2">
@@ -334,7 +340,7 @@ const ReportPdfPreview = ({
               </div>
               {/* Logo and tag */}
               <div className="flex flex-col items-center gap-1.5 w-45">
-                <Image src="/logo.png" alt="K10 Logo" className="w-10 h-10 object-contain" width={10} height={10} />
+                <Image src="/pdf_logo.jpg" alt="K10 Logo" className="w-24 h-24 object-contain" width={10} height={10} />
                 <div className="text-center leading-none">
                   <div className="text-[10px] font-black tracking-widest text-slate-900 font-orbitron">K10 FOOTBALL</div>
                   <div className="text-[7px] text-slate-500 font-bold uppercase tracking-widest font-orbitron">ANALYSIS CV</div>
@@ -344,14 +350,14 @@ const ReportPdfPreview = ({
             {/* Diagrams Section */}
             <div className="relative z-10 grid grid-cols-2 gap-8 mt-4 mb-4 shrink-0">
               {/* Goal Diagram */}
-              <div className="bg-[#121212]/90 border border-slate-200 rounded-3xl overflow-hidden shadow-xl h-48">
-                <div className="bg-slate-100 py-2 px-4 text-center border-b border-slate-200">
+              <div className="bg-slat-200 border border-slate-200 rounded-3xl overflow-hidden flex flex-col items-center w-full">
+                <div className="bg-slate-100 py-2 px-4 text-center border-b border-slate-200 w-full">
                   <span className="text-[10px] font-black text-slate-800 uppercase tracking-widest font-orbitron">
                     {isGK ? "Accurate Save" : "Accurate Shots"}
                   </span>
                 </div>
-                <div className="relative overflow-hidden w-full h-full bg-black">
-                  <Image src="/goal-bar.png" alt="Goal" className="w-full h-auto block scale-[1.4] origin-[50%_90%]" width={100} height={100} />
+                <div className="relative overflow-hidden w-full bg-white" style={{ aspectRatio: "800/500" }}>
+                  <Image src="/goal-bar.png" alt="Goal" className="w-full h-auto block scale-[1.4] origin-[50%_90%]" width={800} height={500} />
                   {goalMarkers?.map((marker: any, idx: number) => (
                     <div key={idx} className="absolute w-6 h-6 -ml-3 -mt-3 flex items-center justify-center drop-shadow-lg" style={{ left: `${marker.x}%`, top: `${marker.y}%` }}>
                       <span className="text-lg leading-none">{isGK ? "🧤" : "⚽"}</span>
@@ -361,19 +367,19 @@ const ReportPdfPreview = ({
               </div>
 
               {/* Pitch Diagram */}
-              <div className="bg-[#121212]/90 border border-slate-200 rounded-3xl overflow-hidden shadow-xl h-48">
-                <div className="bg-slate-100 py-2 px-4 text-center border-b border-slate-200">
+              <div className="bg-[#121212]/90 border border-slate-200 rounded-3xl overflow-hidden shadow-xl flex flex-col items-center w-full">
+                <div className="bg-slate-100 py-2 px-4 text-center border-b border-slate-200 w-full">
                   <span className="text-[10px] font-black text-slate-800 uppercase tracking-widest font-orbitron">
                     {isGK ? "Accurate Saves" : "Accurate Assist"}
                   </span>
                 </div>
-                <div className="relative w-full h-full bg-[#092b15]">
-                  <Image src="/formation-field.png" alt="Pitch" className="w-full h-full object-cover" width={100} height={100} />
+                <div className="relative w-full bg-[#092b15]" style={{ aspectRatio: "500/700" }}>
+                  <Image src="/field.png" alt="Pitch" className="w-full h-full object-cover" width={500} height={700} />
                   {pitchMarkers?.map((line: any, idx: number) => (
-                    <svg key={idx} className="absolute inset-0 w-full h-full pointer-events-none drop-shadow-md">
+                    <svg key={idx} className="absolute inset-0 w-full h-full pointer-events-none drop-shadow-md overflow-visible">
                       <defs>
-                        <marker id={`arrowhead-pdf2-${idx}`} markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-                          <polygon points="0 0, 10 3.5, 0 7" fill="black" />
+                        <marker id={`arrowhead-pdf2-${idx}`} markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                          <polygon points="0 0, 8 3, 0 6" fill="black" />
                         </marker>
                       </defs>
                       <line x1={`${line.x1}%`} y1={`${line.y1}%`} x2={`${line.x2}%`} y2={`${line.y2}%`} stroke="black" strokeWidth="3" markerEnd={`url(#arrowhead-pdf2-${idx})`} />
