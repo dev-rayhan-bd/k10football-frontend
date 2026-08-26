@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useMemo, useState, useEffect, useRef } from "react";
@@ -19,7 +21,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import logo from "@/assets/sort_logo.png";
 import RadarChart from "@/components/user-wise-dashboard/coach-dashboard/create-game-report/RadarChart";
 
 import {
@@ -154,8 +155,8 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
   const overallPercent =
     radarStats.length > 0
       ? Math.round(
-          radarStats.reduce((acc, curr) => acc + curr.value, 0) / radarStats.length
-        )
+        radarStats.reduce((acc, curr) => acc + curr.value, 0) / radarStats.length
+      )
       : 0;
 
   const handleDownloadPDF = async () => {
@@ -218,6 +219,21 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
     }
   }
 
+  const pitchMarkers = [
+    {
+      x1: 50,
+      y1: 72,
+      x2: 68,
+      y2: 52,
+    },
+  ];
+
+  const goalMarkers = [
+    { x: 20, y: 35 },
+    { x: 50, y: 55 },
+    { x: 80, y: 35 },
+  ];
+
   if (!selectedCard) return null;
 
   return (
@@ -277,14 +293,11 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
           </div>
         </DialogHeader>
 
-        {activeStats && (
+        <div className="overflow-y-auto h-[97dvh] pb-5">
           <div
             ref={containerRef}
-            className="w-full flex justify-center border border-white/10 rounded-3xl shadow-2xl bg-white mb-6 overflow-hidden"
-            style={{
-              height: scale < 1 ? `${(contentHeight * scale) + 24}px` : 'auto',
-              padding: scale < 1 ? '12px 0' : '1.5rem'
-            }}
+            className="w-full flex justify-center border border-white/10 rounded-3xl shadow-2xl bg-white mb-6"
+            style={{ height: scale < 1 ? `${(contentHeight * scale) + 24}px` : 'auto', padding: scale < 1 ? '12px 0' : '1.5rem' }}
           >
             <div
               className="origin-top flex justify-center"
@@ -292,82 +305,50 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
             >
               <div
                 ref={previewRef}
-                id="report-page-1"
-                className="bg-white text-slate-800 p-10 font-sans relative overflow-hidden select-none flex flex-col"
-                style={{
-                  width: "794px",
-                  minHeight: "1123px"
-                }}
+                id="pdf-report-content"
+                className="bg-white text-slate-800 px-10 py-8 font-sans relative select-none shrink-0 flex flex-col"
+                style={{ width: "794px" }}
               >
-                {/* Watermark */}
+                {/* Watermark Logo */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none z-0">
-                  <Image
-                    src="/pdf_logo.jpg"
-                    alt="Logo Watermark"
-                    className="w-24 h-24 object-contain"
-                    width={500}
-                    height={500}
-                  />
+                  <Image src="/pdf_logo.jpg" alt="Logo Watermark" className="w-24 h-24 object-contain" width={500} height={500} />
                 </div>
-
-                {/* Report Header */}
+                {/* Header */}
                 <div className="relative z-10 flex items-center justify-between border-b-4 border-slate-900 pb-3 mb-4 shrink-0">
-                  <div className="flex items-center gap-3">
-                    <Image
-                      src="/pdf_logo.jpg"
-                      alt="K10 Logo"
-                      className="w-28 h-28 object-contain"
-                      width={80}
-                      height={80}
-                    />
+                  <div className="flex items-center gap-4">
+                    <Image src="/pdf_logo.jpg" alt="K10 Logo" className="w-28 h-28 object-contain" width={80} height={80} />
                     <div>
-                      <div className="text-xs font-black tracking-widest text-slate-900 font-orbitron">
-                        K10 FOOTBALL
-                      </div>
-                      <div className="text-[8px] text-slate-500 font-bold uppercase tracking-widest font-orbitron">
-                        ANALYSIS CV
-                      </div>
+                      <div className="text-sm font-black tracking-widest text-slate-900 font-orbitron">K10 FOOTBALL</div>
+                      <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest font-orbitron mt-0.5">ANALYSIS CV</div>
                     </div>
                   </div>
-
                   <div className="text-center">
                     <h2 className="text-3xl font-black text-[#E31B23] font-orbitron uppercase tracking-tighter italic">
                       PLAYER ANALYSIS PROFILE
                     </h2>
                     <div className="text-[10px] text-slate-900 font-black uppercase tracking-widest mt-1">
-                      POSITION : {selectedCard.playerPosition} ⚽
+                      POSITION : {safeString(selectedCard.playerPosition)} ⚽
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <div className="text-xs font-black tracking-widest text-slate-900 font-orbitron">
-                        K10 FOOTBALL
-                      </div>
-                      <div className="text-[8px] text-slate-500 font-bold uppercase tracking-widest font-orbitron">
-                        ANALYSIS CV
-                      </div>
+                      <div className="text-sm font-black tracking-widest text-slate-900 font-orbitron">K10 FOOTBALL</div>
+                      <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest font-orbitron mt-0.5">ANALYSIS CV</div>
                     </div>
-                    <Image
-                      src={logo.src}
-                      alt="K10 Logo"
-                      className="w-12 h-12 object-contain"
-                      width={100}
-                      height={100}
-                    />
+                    <Image src="/pdf_logo.jpg" alt="K10 Logo" className="w-28 h-28 object-contain" width={80} height={80} />
                   </div>
                 </div>
 
-                {/* Player Details */}
-                <div className="relative z-10 grid grid-cols-12 gap-4 mb-4 shrink-0">
+                {/* Player details */}
+                <div className="relative z-10 grid grid-cols-12 gap-6 mb-4 shrink-0">
                   <div className="col-span-8 grid grid-cols-2 gap-x-6 gap-y-2 text-[11px] font-medium text-slate-600">
                     <div>
                       <span className="font-bold text-slate-900 uppercase font-orbitron">PLAYER NAME:</span>
-                      <p className="text-slate-700 text-xs font-bold mt-0.5 uppercase">{selectedCard.playerName}</p>
+                      <p className="text-slate-700 text-xs font-bold mt-0.5 uppercase">{safeString(selectedCard.playerName)}</p>
                     </div>
                     <div>
                       <span className="font-bold text-slate-900 uppercase font-orbitron">CLUB NAME:</span>
-                      <p className="text-slate-700 text-xs font-bold mt-0.5 uppercase">{selectedCard.team1}</p>
+                      <p className="text-slate-700 text-xs font-bold mt-0.5 uppercase">{safeString(selectedCard.team1)}</p>
                     </div>
                     <div>
                       <span className="font-bold text-slate-900 uppercase font-orbitron">DOB:</span>
@@ -399,62 +380,67 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
                     </div>
                   </div>
 
+                  {/* FUT player card photo preview */}
                   <div className="col-span-4 flex justify-end">
-                    <div className="bg-sky-50 border-2 border-sky-200 rounded-xl p-2 w-40 relative shadow-sm">
-                      <div className="absolute top-2 left-2 text-sky-600 font-black text-xl italic font-orbitron leading-none">
-                        {normalizeRating(selectedCard.rating).toFixed(0)}
+                    <div className="w-36 h-48 border-2 border-sky-400 bg-sky-50 rounded-2xl p-2 relative shadow-md flex flex-col items-center justify-between">
+                      <div className="flex justify-between w-full items-start">
+                        <div className="flex flex-col items-center">
+                          <div className="text-2xl font-black text-sky-600 font-orbitron italic leading-none">{overallPercent}</div>
+                          <div className="text-[8px] font-bold text-sky-500 uppercase font-orbitron leading-none mt-0.5">{safeString(selectedCard.playerPosition).substring(0, 3)}</div>
+                        </div>
+                        <Image src="/logo.png" alt="Club Logo" className="w-5 h-5 object-contain" width={50} height={50} />
                       </div>
-                      <div className="absolute top-7 left-2 text-slate-400 text-[8px] font-black font-orbitron">
-                        {safeString(selectedCard.playerPosition).substring(0, 3).toUpperCase() || "MID"}
+                      <div className="w-24 h-28 overflow-hidden relative mt-1 flex items-end justify-center">
+                        <Image
+                          src={"/sergio-ramos.png"}
+                          alt="Player Card Image"
+                          className="h-full object-contain"
+                          onError={(e) => {
+                            e.currentTarget.src = isGK ? "/pngegg.png" : "/ronaldo.png";
+                          }}
+                          width={50}
+                          height={50}
+                        />
                       </div>
-                      <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
-                        <Image src="/Brazil.png" alt="Brazil" className="w-4 h-3 object-cover rounded-[2px]" width={16} height={12} />
-                        <Image src={logo.src} alt="K10" className="w-4 h-4 object-contain opacity-50" width={16} height={16} />
-                      </div>
-                      <div className="mt-3 flex justify-center">
-                        <Image src={playerImgSrc} alt="Player" className="h-28 object-contain object-bottom drop-shadow-md" width={100} height={100} />
-                      </div>
-                      <div className="text-center bg-sky-500 text-white text-[9px] font-black uppercase tracking-wider py-1 rounded mt-1 font-orbitron">
-                        {safeString(selectedCard.playerName).split(" ")[0] || "PLAYER"}
+                      <div className="w-full text-center bg-sky-500/10 py-0.5 rounded border border-sky-400/20 mt-1">
+                        <div className="text-[10px] font-black text-sky-600 truncate uppercase font-orbitron leading-none">{safeString(selectedCard.playerName).split(" ")[0] || "PLAYER"}</div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Characteristics */}
-                <div className="relative z-10 mb-4">
+                {/* Player Characteristic Section */}
+                <div className="relative z-10 mb-4 shrink-0">
                   <div className="bg-[#E31B23] text-white font-orbitron px-4 py-1.5 rounded text-[10px] font-black uppercase tracking-wider mb-2.5 shadow">
                     PLAYER CHARACTERISTIC:
                   </div>
-                  <div className="flex gap-4 pl-2">
-                    {(selectedCard.characteristics || ["FAST", "SKILLFUL", "FINISHER"]).map((characteristic, index) => (
-                      <div key={`${characteristic}-${index}`} className="flex items-center gap-1.5 text-[10px] font-bold text-slate-700 uppercase tracking-wide">
-                        <IconCheck size={12} className="text-sky-500" />
-                        {characteristic}
+                  <div className="flex flex-wrap gap-4 pl-2">
+                    {(selectedCard.characteristics || ["FAST", "SKILLFUL", "FINISHER"]).map((tag, idx) => (
+                      <div key={idx} className="flex items-center gap-1.5 text-[10px] font-bold text-slate-800">
+                        <span className="text-sky-500">⚽</span>
+                        <span className="font-orbitron">{tag}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Match Information */}
-                <div className="relative z-10 mb-4">
+                {/* Match Information Section */}
+                <div className="relative z-10 mb-4 shrink-0">
                   <div className="bg-[#E31B23] text-white font-orbitron px-4 py-1.5 rounded text-[10px] font-black uppercase tracking-wider mb-3 shadow">
                     MATCH INFORMATION
                   </div>
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-[10px] pl-2">
+                  <div className="grid grid-cols-2 gap-x-12 gap-y-1.5 text-[10px] font-medium text-slate-600 pl-2">
                     <div>
                       <span className="font-bold text-slate-950 font-orbitron">SCOUT NAME:</span>
                       <span className="ml-2 text-slate-700 font-bold uppercase">{selectedCard.scoutName || "MARIO LOPEZ"}</span>
                     </div>
                     <div>
                       <span className="font-bold text-slate-950 font-orbitron">GAME DATE:</span>
-                      <span className="ml-2 text-slate-700 font-bold uppercase">{selectedCard.date || "N/A"}</span>
+                      <span className="ml-2 text-slate-700 font-bold">{selectedCard.date || "N/A"}</span>
                     </div>
                     <div>
                       <span className="font-bold text-slate-950 font-orbitron">MATCH RESULT:</span>
-                      <span className="ml-2 text-slate-700 font-bold uppercase">
-                        {safeString(selectedCard.playerName).split(" ")[0] || "PLAYER"} {selectedCard.score || "N/A"} {selectedCard.team2 || "N/A"}
-                      </span>
+                      <span className="ml-2 text-slate-700 font-bold uppercase">{safeString(selectedCard.playerName).split(" ")[0]} {selectedCard.score || "N/A"} {selectedCard.team2 || "N/A"}</span>
                     </div>
                     <div>
                       <span className="font-bold text-slate-950 font-orbitron">GAME LOCATION:</span>
@@ -462,9 +448,7 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
                     </div>
                     <div>
                       <span className="font-bold text-slate-950 font-orbitron">WEATHER/TEMPERATURE:</span>
-                      <span className="ml-2 text-slate-700 font-bold uppercase">
-                        {selectedCard.weather || "RAINY"} {selectedCard.temperature ?? "19"}C
-                      </span>
+                      <span className="ml-2 text-slate-700 font-bold uppercase">{selectedCard.weather || "RAINY"} {selectedCard.temperature ?? "19"}C</span>
                     </div>
                     <div>
                       <span className="font-bold text-slate-950 font-orbitron">GAME TYPE:</span>
@@ -473,39 +457,39 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
                   </div>
                 </div>
 
-                {/* Match Statistics */}
-                <div className="relative z-10 mb-4">
+                {/* Match Statistics Section */}
+                <div className="relative z-10 mb-4 shrink-0">
                   <div className="bg-[#E31B23] text-white font-orbitron px-4 py-1.5 rounded text-[10px] font-black uppercase tracking-wider mb-3 shadow">
                     MATCH STATISTICS
                   </div>
                   <div className="grid grid-cols-3 gap-x-8 gap-y-1 text-[10px] pl-2">
                     {[
-                      { label: "Shots on Goal:", val: activeStats.shotsOnGoal },
-                      { label: "Stand Tackle:", val: activeStats.standTackle },
-                      { label: "Appearances:", val: activeStats.appearances },
-                      { label: "Goals Scored:", val: activeStats.goalScored },
-                      { label: "Sliding Tackle:", val: activeStats.slidingTackle },
-                      { label: "Fault:", val: activeStats.fault },
-                      { label: "Assists:", val: activeStats.assists },
-                      { label: "Interception:", val: activeStats.interception },
-                      { label: "Punching:", val: activeStats.punching },
-                      { label: "Pass Accurate:", val: activeStats.passAccurate },
-                      { label: "Saves Accurate:", val: activeStats.savesAccurate },
-                      { label: "Handling:", val: activeStats.handling },
-                      { label: "Wrong Pass:", val: activeStats.wrongPass },
-                      { label: "Goals Unsave:", val: activeStats.goalUnsave },
-                      { label: "Reflex:", val: activeStats.reflex },
-                      { label: "Free Kick:", val: activeStats.freeKick },
-                      { label: "Penalties Save:", val: activeStats.penaltiesSaves },
-                      { label: "Aerial Ability:", val: activeStats.aerialAbility },
-                      { label: "Corner Kick:", val: activeStats.cornerKick },
-                      { label: "Red Card:", val: activeStats.redCard },
-                      { label: "Throwing:", val: activeStats.throwing },
-                      { label: "Penalties Taken:", val: activeStats.penaltiesTaken },
-                      { label: "Yellow Card:", val: activeStats.yellowCard },
-                      { label: "Reactions:", val: activeStats.reactions },
-                    ].map((item, index) => (
-                      <div key={`${item.label}-${index}`} className="flex justify-between border-b border-slate-100 py-0.5 pr-2">
+                      { label: "Shots on Goal:", val: activeStats?.shotsOnGoal || 0 },
+                      { label: "Stand Tackle:", val: activeStats?.standTackle || 0 },
+                      { label: "Appearances:", val: activeStats?.appearances || 0 },
+                      { label: "Goals Scored:", val: activeStats?.goalScored || 0 },
+                      { label: "Sliding Tackle:", val: activeStats?.slidingTackle || 0 },
+                      { label: "Fault:", val: activeStats?.fault || 0 },
+                      { label: "Assists:", val: activeStats?.assists || 0 },
+                      { label: "Interception:", val: activeStats?.interception || 0 },
+                      { label: "Punching:", val: activeStats?.punching || 0 },
+                      { label: "Pass Accurate:", val: activeStats?.passAccurate || 0 },
+                      { label: "Saves Accurate:", val: activeStats?.savesAccurate || 0 },
+                      { label: "Handling:", val: activeStats?.handling || 0 },
+                      { label: "Wrong Pass:", val: activeStats?.wrongPass || 0 },
+                      { label: "Goals Unsave:", val: activeStats?.goalUnsave || 0 },
+                      { label: "Reflex:", val: activeStats?.reflex || 0 },
+                      { label: "Free Kick:", val: activeStats?.freeKick || 0 },
+                      { label: "Penalties Save:", val: activeStats?.penaltiesSaves || 0 },
+                      { label: "Aerial Ability:", val: activeStats?.aerialAbility || 0 },
+                      { label: "Corner Kick:", val: activeStats?.cornerKick || 0 },
+                      { label: "Red Card:", val: activeStats?.redCard || 0 },
+                      { label: "Throwing:", val: activeStats?.throwing || 0 },
+                      { label: "Penalties Taken:", val: activeStats?.penaltiesTaken || 0 },
+                      { label: "Yellow Card:", val: activeStats?.yellowCard || 0 },
+                      { label: "Reactions:", val: activeStats?.reactions || 0 }
+                    ].map((item, idx) => (
+                      <div key={idx} className="flex justify-between border-b border-slate-100 py-1 pr-2">
                         <span className="text-slate-500 font-bold uppercase font-orbitron">{item.label}</span>
                         <span className="text-slate-800 font-black font-orbitron">{item.val}</span>
                       </div>
@@ -513,16 +497,26 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
                   </div>
                 </div>
 
-                {/* Bottom Section */}
-                <div className="relative z-10 flex items-center justify-between border-t-2 border-slate-200 pt-4 mt-auto mb-4">
+                {/* Bottom section (Radar, Overall, Logos) */}
+                <div className="relative z-10 flex items-center justify-between border-t-2 border-slate-200 pt-3 mt-auto mb-3 shrink-0">
+                  {/* Radar Chart */}
                   <div className="flex-none" style={{ width: 140 }}>
-                    <RadarChart stats={radarStats} size={140} color="#0284c7" fillColor="rgba(2, 132, 199, 0.25)" textColor="#475569" gridColor="rgba(0, 0, 0, 0.1)" />
+                    <RadarChart
+                      stats={radarStats}
+                      size={140}
+                      color="#0284c7"
+                      fillColor="rgba(2, 132, 199, 0.25)"
+                      textColor="#475569"
+                      gridColor="rgba(0, 0, 0, 0.1)"
+                    />
                   </div>
+                  {/* Overall score */}
                   <div className="text-center flex-1 min-w-0">
                     <div className="text-4xl font-black text-emerald-600 font-orbitron tracking-tighter italic">
                       OVERALL = {overallPercent}%
                     </div>
                   </div>
+                  {/* Logo and tag */}
                   <div className="flex flex-col items-center gap-1.5 flex-none" style={{ width: 140 }}>
                     <Image src="/pdf_logo.jpg" alt="K10 Logo" className="w-24 h-24 object-contain" width={96} height={96} />
                     <div className="text-center leading-none">
@@ -532,41 +526,42 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
                   </div>
                 </div>
 
-                {/* Diagrams */}
-                <div className="relative z-10 grid grid-cols-2 gap-8 mt-4 mb-4 shrink-0">
-                  <div className="bg-slat-200 border border-slate-200 rounded-3xl overflow-hidden flex flex-col items-center w-full">
-                    <div className="bg-slate-100 py-2 px-4 text-center border-b border-slate-200 w-full">
-                      <span className="text-[10px] font-black text-slate-800 uppercase tracking-widest font-orbitron">
+                {/* Diagrams Section */}
+                <div className="relative z-10 grid grid-cols-2 gap-8 shrink-0 items-start">
+                  {/* Goal Diagram */}
+                  <div className="bg-slate-200 border border-slate-200 rounded-2xl overflow-hidden flex flex-col items-center w-full shadow-md">
+                    <div className="bg-slate-100 py-1.5 px-4 text-center border-b border-slate-200 w-full shrink-0">
+                      <span className="text-[9px] font-black text-slate-800 uppercase tracking-widest font-orbitron">
                         {isGK ? "Accurate Save" : "Accurate Shots"}
                       </span>
                     </div>
                     <div className="relative overflow-hidden w-full bg-white" style={{ aspectRatio: "800/500" }}>
                       <Image src="/goal-bar.png" alt="Goal" className="w-full h-auto block scale-[1.4] origin-[50%_90%]" width={800} height={500} />
-                      {selectedCard.goalMarkers?.map((marker, index) => (
-                        <div key={`goal-marker-${index}`} className="absolute w-6 h-6 -ml-3 -mt-3 flex items-center justify-center drop-shadow-lg" style={{ left: `${marker.x}%`, top: `${marker.y}%` }}>
-                          <span className="text-lg leading-none">{isGK ? "🧤" : "⚽"}</span>
+                      {goalMarkers?.map((marker: any, idx: number) => (
+                        <div key={idx} className="absolute w-6 h-6 -ml-3 -mt-3 flex items-center justify-center drop-shadow-lg" style={{ left: `${marker.x}%`, top: `${marker.y}%` }}>
+                          <span className="text-lg leading-none">{isGK ? "⚽" : "⚽"}</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
                   {/* Pitch Diagram */}
-                  <div className="bg-[#121212]/90 border border-slate-200 rounded-3xl overflow-hidden shadow-xl flex flex-col items-center w-full">
-                    <div className="bg-slate-100 py-2 px-4 text-center border-b border-slate-200 w-full">
-                      <span className="text-[10px] font-black text-slate-800 uppercase tracking-widest font-orbitron">
+                  <div className="bg-[#121212]/90 border border-slate-200 rounded-2xl overflow-hidden shadow-xl flex flex-col items-center w-full">
+                    <div className="bg-slate-100 py-1.5 px-4 text-center border-b border-slate-200 w-full shrink-0">
+                      <span className="text-[9px] font-black text-slate-800 uppercase tracking-widest font-orbitron">
                         {isGK ? "Accurate Saves" : "Accurate Assist"}
                       </span>
                     </div>
-                    <div className="relative w-full bg-[#092b15]" style={{ aspectRatio: "500/700" }}>
-                      <Image src="/field.png" alt="Pitch" className="w-full h-full object-cover" width={500} height={700} />
-                      {selectedCard.pitchMarkers?.map((line, index) => (
-                        <svg key={`pitch-marker-${index}`} className="absolute inset-0 w-full h-full pointer-events-none drop-shadow-md">
+                    <div className="relative w-full bg-[#092b15]" style={{ aspectRatio: "500/680" }}>
+                      <Image src="/field.png" alt="Pitch" className="w-full h-full object-cover" width={500} height={680} />
+                      {pitchMarkers?.map((line: any, idx: number) => (
+                        <svg key={idx} className="absolute inset-0 w-full h-full pointer-events-none drop-shadow-md overflow-visible">
                           <defs>
-                            <marker id={`arrowhead-pdf-${index}`} markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-                              <polygon points="0 0, 10 3.5, 0 7" fill="black" />
+                            <marker id={`arrowhead-pdf2-${idx}`} markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                              <polygon points="0 0, 8 3, 0 6" fill="black" />
                             </marker>
                           </defs>
-                          <line x1={`${line.x1}%`} y1={`${line.y1}%`} x2={`${line.x2}%`} y2={`${line.y2}%`} stroke="black" strokeWidth="3" markerEnd={`url(#arrowhead-pdf-${index})`} />
+                          <line x1={`${line.x1}%`} y1={`${line.y1}%`} x2={`${line.x2}%`} y2={`${line.y2}%`} stroke="black" strokeWidth="3" markerEnd={`url(#arrowhead-pdf2-${idx})`} />
                           <foreignObject x={`calc(${line.x1}% - 8px)`} y={`calc(${line.y1}% - 8px)`} width="16" height="16">
                             <div className="w-full h-full flex items-center justify-center bg-white/20 rounded-full backdrop-blur-sm shadow-sm border border-white/50">
                               <span className="text-[10px] leading-none drop-shadow-md">⚽</span>
@@ -578,10 +573,11 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
                   </div>
                 </div>
 
+
               </div>
             </div>
           </div>
-        )}
+        </div>
       </DialogContent>
     </Dialog>
   );
