@@ -1,6 +1,5 @@
 "use client";
 import Image from "next/image";
-import React from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 const StatBar = ({ label, value, colorClass, align = "left" }: { label: string; value: number | string; colorClass: string; align?: "left" | "right" }) => (
