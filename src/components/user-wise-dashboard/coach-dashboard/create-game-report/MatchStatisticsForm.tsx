@@ -348,7 +348,7 @@ const MatchStatisticsForm = ({
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
-          className="relative cursor-crosshair overflow-hidden group select-none bg-[#092b15] w-full h-auto mx-auto max-w-[500px]"
+          className="relative cursor-crosshair overflow-hidden group select-none px-4 w-full h-auto mx-auto max-w-125"
           style={{ touchAction: 'none', aspectRatio: '500/700' }}
         >
           {/* Pitch for all devices (Vertical to match PDF exactly) */}

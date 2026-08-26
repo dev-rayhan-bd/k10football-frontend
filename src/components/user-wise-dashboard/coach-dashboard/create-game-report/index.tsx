@@ -66,6 +66,15 @@ export const CreateGameReportWizard = ({
   const [selectedCoachEmail, setSelectedCoachEmail] = useState("");
   const [tempRating, setTempRating] = useState<number>(0);
 
+  // Scroll to top whenever the wizard step changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const scrollContainers = document.querySelectorAll('.overflow-y-auto, .overflow-auto, main');
+    scrollContainers.forEach((container) => {
+      container.scrollTo(0, 0);
+    });
+  }, [step]);
+
   // Detect user role
   useEffect(() => {
     const role = localStorage.getItem("userRole") || "player";

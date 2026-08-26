@@ -5,6 +5,7 @@ import AuthGuard from "@/providers/AuthGuard";
 import { Toaster } from "@/components/ui/sonner";
 import StoreProvider from "@/providers/StoreProvider";
 import NextTopLoader from "nextjs-toploader";
+import ScrollToTop from "@/components/ScrollToTop";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -71,6 +72,7 @@ return (
     <StoreProvider>
       <AuthGuard>
         {children}
+        <ScrollToTop />
         <Toaster />
       </AuthGuard>
     </StoreProvider>
