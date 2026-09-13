@@ -187,7 +187,7 @@ const MatchStatisticsForm = ({
           punching: 5, handling: 10, reflex: 1, aerialAbility: 5, throwing: 8, reactions: 1
         });
         setGoalMarkers([{ x: 15, y: 25 }, { x: 85, y: 25 }, { x: 50, y: 50 }]);
-        setPitchMarkers([{ x1: 35, y1: 50, x2: 35, y2: 50 }]);
+        setPitchMarkers([{ x1: 45, y1: 65, x2: 56, y2: 40 }]);
       } else {
         setStats({
           shotsOnGoal: 8, goalScored: 3, assists: 6, passAccurate: 12, wrongPass: 2, penaltiesTaken: 4,
@@ -196,7 +196,7 @@ const MatchStatisticsForm = ({
           punching: 5, handling: 10, reflex: 1, aerialAbility: 5, throwing: 8, reactions: 1
         });
         setGoalMarkers([{ x: 15, y: 25 }, { x: 85, y: 25 }, { x: 50, y: 50 }]);
-        setPitchMarkers([{ x1: 50, y1: 50, x2: 50, y2: 50 }]);
+        setPitchMarkers([{ x1: 48, y1: 62, x2: 56, y2: 46 }]);
       }
     }
   }, [isGK, stats, setStats, setGoalMarkers, setPitchMarkers]);
@@ -226,8 +226,11 @@ const MatchStatisticsForm = ({
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
-    const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
+    const x = Math.max(0, Math.min(100, Math.round(((e.clientX - rect.left) / rect.width) * 100)));
+    const y = Math.max(0, Math.min(100, Math.round(((e.clientY - rect.top) / rect.height) * 100)));
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {}
     setIsDrawing(true);
     setCurrentLine({ x1: x, y1: y, x2: x, y2: y });
   };
@@ -235,22 +238,25 @@ const MatchStatisticsForm = ({
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isDrawing || !currentLine) return;
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
-    const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
+    const x = Math.max(0, Math.min(100, Math.round(((e.clientX - rect.left) / rect.width) * 100)));
+    const y = Math.max(0, Math.min(100, Math.round(((e.clientY - rect.top) / rect.height) * 100)));
     setCurrentLine({ ...currentLine, x2: x, y2: y });
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isDrawing || !currentLine) return;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {}
     setIsDrawing(false);
 
     let finalLine = { ...currentLine };
     const dx = finalLine.x2 - finalLine.x1;
     const dy = finalLine.y2 - finalLine.y1;
-    if (Math.sqrt(dx * dx + dy * dy) < 1) {
-      // It was just a click, create a default small arrow pointing up-left
-      finalLine.x2 = finalLine.x1 - 3;
-      finalLine.y2 = finalLine.y1 - 4;
+    if (Math.sqrt(dx * dx + dy * dy) < 2) {
+      // It was just a single click/tap, create a clear forward assist pass arrow
+      finalLine.x2 = Math.min(92, Math.max(8, finalLine.x1 + 6));
+      finalLine.y2 = Math.max(8, finalLine.y1 - 16);
     }
 
     if (pitchMarkers.length < 15) {
@@ -282,7 +288,7 @@ const MatchStatisticsForm = ({
         </span>
         <button
           onClick={() => setGoalMarkers([])}
-          className="text-[9px] font-black text-red-500 hover:text-red-400 uppercase tracking-widest transition-colors font-orbitron"
+          className="text-[9px] font-black text-red-500 hover:text-red-400 uppercase tracking-widest transition-colors font-orbitron cursor-pointer"
         >
           Clear
         </button>
@@ -317,7 +323,7 @@ const MatchStatisticsForm = ({
     </div>
   );
 
-  const renderPitchDiagram = () => (
+  const renderPitchDiagram = (idPrefix = "main") => (
     <div className="bg-[#121212]/90 border border-white/10 rounded-3xl overflow-hidden shadow-xl">
       <div className="bg-white/5 py-3.5 px-6 text-center border-b border-white/10 flex justify-between items-center">
         <span className="text-[10px] font-black text-white uppercase tracking-[0.3em] font-orbitron">
@@ -325,7 +331,7 @@ const MatchStatisticsForm = ({
         </span>
         <button
           onClick={() => setPitchMarkers([])}
-          className="text-[9px] font-black text-red-500 hover:text-red-400 uppercase tracking-widest transition-colors font-orbitron"
+          className="text-[9px] font-black text-red-500 hover:text-red-400 uppercase tracking-widest transition-colors font-orbitron cursor-pointer"
         >
           Clear
         </button>
@@ -348,7 +354,7 @@ const MatchStatisticsForm = ({
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
-          className="relative cursor-crosshair overflow-hidden group select-none px-4 w-full h-auto mx-auto max-w-125"
+          className="relative cursor-crosshair overflow-hidden group select-none w-full h-auto mx-auto max-w-125"
           style={{ touchAction: 'none', aspectRatio: '500/700' }}
         >
           {/* Pitch for all devices (Vertical to match PDF exactly) */}
@@ -360,26 +366,17 @@ const MatchStatisticsForm = ({
             width={500}
             height={700}
           />
-          {/* Horizontal pitch for desktop */}
-          {/* <Image
-            src="/FootballPitch.png"
-            alt="Football Pitch Horizontal"
-            draggable={false}
-            className="w-full h-auto transition-opacity pointer-events-none select-none hidden md:block"
-            width={800}
-            height={531}
-          /> */}
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-40 transition-opacity pointer-events-none">
             <span className="text-white text-xs font-semibold uppercase tracking-widest font-orbitron">Drag on Pitch to draw an arrow</span>
           </div>
 
           <svg className="absolute inset-0 w-full h-full pointer-events-none z-10 overflow-visible">
             <defs>
-              <marker id="arrowhead" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto">
+              <marker id={`arrowhead-${idPrefix}`} markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto">
                 <polygon points="0 0, 5 2.5, 0 5" fill="black" />
               </marker>
-              <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="2" stdDeviation="1" floodColor="rgba(255,255,255,0.5)" />
+              <filter id={`shadow-${idPrefix}`} x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="1.5" stdDeviation="1" floodColor="rgba(255,255,255,0.7)" />
               </filter>
             </defs>
             {pitchMarkers.map((line, idx) => {
@@ -388,11 +385,33 @@ const MatchStatisticsForm = ({
               const dist = Math.sqrt(dx * dx + dy * dy);
               if (dist < 1) return null;
               return (
-                <line key={idx} x1={`${line.x1}%`} y1={`${line.y1}%`} x2={`${line.x2}%`} y2={`${line.y2}%`} stroke="black" strokeWidth="4" markerEnd="url(#arrowhead)" strokeLinecap="round" filter="url(#shadow)" />
+                <line
+                  key={idx}
+                  x1={`${line.x1}%`}
+                  y1={`${line.y1}%`}
+                  x2={`${line.x2}%`}
+                  y2={`${line.y2}%`}
+                  stroke="black"
+                  strokeWidth="3.5"
+                  markerEnd={`url(#arrowhead-${idPrefix})`}
+                  strokeLinecap="round"
+                  filter={`url(#shadow-${idPrefix})`}
+                />
               );
             })}
             {currentLine && Math.sqrt(Math.pow(currentLine.x2 - currentLine.x1, 2) + Math.pow(currentLine.y2 - currentLine.y1, 2)) > 1 && (
-              <line x1={`${currentLine.x1}%`} y1={`${currentLine.y1}%`} x2={`${currentLine.x2}%`} y2={`${currentLine.y2}%`} stroke="black" strokeWidth="4" markerEnd="url(#arrowhead)" strokeLinecap="round" filter="url(#shadow)" opacity="0.7" />
+              <line
+                x1={`${currentLine.x1}%`}
+                y1={`${currentLine.y1}%`}
+                x2={`${currentLine.x2}%`}
+                y2={`${currentLine.y2}%`}
+                stroke="black"
+                strokeWidth="3.5"
+                markerEnd={`url(#arrowhead-${idPrefix})`}
+                strokeLinecap="round"
+                filter={`url(#shadow-${idPrefix})`}
+                opacity="0.8"
+              />
             )}
           </svg>
 
@@ -400,7 +419,7 @@ const MatchStatisticsForm = ({
             <div
               key={idx}
               onPointerDown={(e) => { e.stopPropagation(); removePitchMarker(idx, e as any); }}
-              className="absolute -ml-3 -mt-3 flex items-center justify-center hover:scale-125 transition-all cursor-pointer animate-in zoom-in duration-200 z-30 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+              className="absolute -ml-3.5 -mt-3.5 w-7 h-7 flex items-center justify-center hover:scale-125 transition-all cursor-pointer animate-in zoom-in duration-200 z-30 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
               style={{ left: `${line.x1}%`, top: `${line.y1}%` }}
               title="Click to remove"
             >
@@ -410,7 +429,7 @@ const MatchStatisticsForm = ({
 
           {currentLine && (
             <div
-              className="absolute -ml-3 -mt-3 flex items-center justify-center z-30 opacity-70 pointer-events-none"
+              className="absolute -ml-3.5 -mt-3.5 w-7 h-7 flex items-center justify-center z-30 opacity-70 pointer-events-none"
               style={{ left: `${currentLine.x1}%`, top: `${currentLine.y1}%` }}
             >
               <span className="text-xl select-none leading-none">⚽</span>
@@ -506,7 +525,7 @@ const MatchStatisticsForm = ({
 
           <div className="flex flex-col gap-8 w-full">
             {renderGoalDiagram()}
-            {renderPitchDiagram()}
+            {renderPitchDiagram("mobile")}
           </div>
         </div>
         {/* -------------------------------------------------------- */}
@@ -552,7 +571,7 @@ const MatchStatisticsForm = ({
           <div className="mt-12">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
               {renderGoalDiagram()}
-              {renderPitchDiagram()}
+              {renderPitchDiagram("desktop")}
             </div>
           </div>
         </div>

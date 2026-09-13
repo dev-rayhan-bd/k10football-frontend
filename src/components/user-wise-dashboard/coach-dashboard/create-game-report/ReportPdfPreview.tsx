@@ -374,21 +374,28 @@ const ReportPdfPreview = ({
                 </div>
                 <div className="relative w-full bg-[#092b15]" style={{ aspectRatio: "500/700" }}>
                   <Image src="/field.png" alt="Pitch" className="w-full h-full object-cover" width={500} height={700} />
-                  {pitchMarkers?.map((line: any, idx: number) => (
-                    <svg key={idx} className="absolute inset-0 w-full h-full pointer-events-none drop-shadow-md overflow-visible">
-                      <defs>
-                        <marker id={`arrowhead-pdf2-${idx}`} markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-                          <polygon points="0 0, 8 3, 0 6" fill="black" />
-                        </marker>
-                      </defs>
-                      <line x1={`${line.x1}%`} y1={`${line.y1}%`} x2={`${line.x2}%`} y2={`${line.y2}%`} stroke="black" strokeWidth="3" markerEnd={`url(#arrowhead-pdf2-${idx})`} />
-                      <foreignObject x={`calc(${line.x1}% - 8px)`} y={`calc(${line.y1}% - 8px)`} width="16" height="16">
-                        <div className="w-full h-full flex items-center justify-center bg-white/20 rounded-full backdrop-blur-sm shadow-sm border border-white/50">
-                          <span className="text-[10px] leading-none drop-shadow-md">⚽</span>
-                        </div>
-                      </foreignObject>
-                    </svg>
-                  ))}
+                  {pitchMarkers?.map((line: any, idx: number) => {
+                    const dx = line.x2 - line.x1;
+                    const dy = line.y2 - line.y1;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    return (
+                      <svg key={idx} className="absolute inset-0 w-full h-full pointer-events-none drop-shadow-md overflow-visible">
+                        <defs>
+                          <marker id={`arrowhead-pdf2-${idx}`} markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                            <polygon points="0 0, 6 3, 0 6" fill="black" />
+                          </marker>
+                        </defs>
+                        {dist >= 1 && (
+                          <line x1={`${line.x1}%`} y1={`${line.y1}%`} x2={`${line.x2}%`} y2={`${line.y2}%`} stroke="black" strokeWidth="3" markerEnd={`url(#arrowhead-pdf2-${idx})`} />
+                        )}
+                        <foreignObject x={`calc(${line.x1}% - 8px)`} y={`calc(${line.y1}% - 8px)`} width="16" height="16">
+                          <div className="w-full h-full flex items-center justify-center bg-white/20 rounded-full backdrop-blur-sm shadow-sm border border-white/50">
+                            <span className="text-[10px] leading-none drop-shadow-md">⚽</span>
+                          </div>
+                        </foreignObject>
+                      </svg>
+                    );
+                  })}
                 </div>
               </div>
             </div>

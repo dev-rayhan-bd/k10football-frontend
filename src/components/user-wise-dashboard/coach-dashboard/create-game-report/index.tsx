@@ -146,9 +146,9 @@ export const CreateGameReportWizard = ({
       } else {
         const isGK = savedReport.playerPosition.toUpperCase() === "GOALKEEPER";
         if (isGK) {
-          setPitchMarkers([{ x1: 35, y1: 50, x2: 12, y2: 50 }]);
+          setPitchMarkers([{ x1: 45, y1: 65, x2: 56, y2: 40 }]);
         } else {
-          setPitchMarkers([{ x1: 50, y1: 50, x2: 88, y2: 50 }]);
+          setPitchMarkers([{ x1: 48, y1: 62, x2: 56, y2: 46 }]);
         }
       }
 
