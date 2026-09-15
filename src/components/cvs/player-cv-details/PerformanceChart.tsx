@@ -63,15 +63,20 @@ const PerformanceChart = ({ title, percentage, data }: PerformanceChartProps) =>
         </ResponsiveContainer>
       </div>
 
-      {/* ✅ Enhanced Legend */}
+      {/* Enhanced Legend */}
       <div className="flex flex-wrap justify-center gap-6 mt-8">
         {data.map((item, index) => (
-          <div key={index} className="flex items-center gap-3 bg-white/5 px-3 py-1.5 rounded-full border border-white/10 hover:bg-white/10 transition-colors">
+          <div
+            key={index}
+            className="flex items-center gap-3 bg-white/5 px-3 py-1.5 rounded-full border border-white/10 hover:bg-white/10 transition-colors"
+          >
             <div
               className="w-2.5 h-2.5 rounded-full"
               style={{ backgroundColor: item.color }}
             />
-            <span className="text-sm md:text-base font-bold text-white uppercase tracking-wider">{item.name}</span>
+            <span className="text-sm md:text-base font-bold text-white uppercase tracking-wider">
+              {item.name}
+            </span>
           </div>
         ))}
       </div>
@@ -86,86 +91,88 @@ const getHexColor = (val: number) => {
 };
 
 const PerformanceAnalytics = () => {
-const { playerData } = usePlayer();
+  const { playerData } = usePlayer();
 
-const skillData = (playerData.skillsCategories || []).map((cat: any) => {
-const avg = Math.round(cat.skills.reduce((sum: number, s: any) => sum + s.value, 0) / cat.skills.length);
-return {
-  name: cat.category,
-  value: avg,
-  color: getHexColor(avg)
+  const skillData = (playerData.skillsCategories || []).map((cat: any) => {
+    const avg = Math.round(
+      cat.skills.reduce((sum: number, s: any) => sum + s.value, 0) / cat.skills.length
+    );
+    return {
+      name: cat.category,
+      value: avg,
+      color: getHexColor(avg),
+    };
+  });
+
+  const skillsAvg =
+    skillData.length > 0
+      ? Math.round(skillData.reduce((sum, d) => sum + d.value, 0) / skillData.length)
+      : 0;
+
+  const footData = [
+    {
+      name: 'Right Foot',
+      value: playerData.rightLegUsage || 0,
+      color: getHexColor(playerData.rightLegUsage || 0),
+    },
+    {
+      name: 'Left Foot',
+      value: playerData.leftLegUsage || 0,
+      color: getHexColor(playerData.leftLegUsage || 0),
+    },
+  ];
+
+  // Derive heading from strengths or skillsCategories
+  const headingVal =
+    playerData.strengths?.heading ??
+    (playerData.skillsCategories || [])
+      .flatMap((c: any) => c.skills)
+      .find((s: any) => s.name.toLowerCase() === "heading" || s.name.toLowerCase() === "jumping")
+      ?.value;
+
+  if (headingVal !== undefined) {
+    footData.push({
+      name: 'Heading',
+      value: headingVal,
+      color: getHexColor(headingVal),
+    });
+  }
+
+  const footAvg =
+    footData.length > 0
+      ? Math.round(footData.reduce((sum, d) => sum + d.value, 0) / footData.length)
+      : 0;
+
+  return (
+    <div className="mt-10 sm:mt-20 container w-full min-w-0 overflow-hidden">
+      <h1 className="text-2xl sm:text-4xl font-light font-heading text-center mb-6 sm:mb-12 text-foreground">
+        PERFORMANCE ANALYTICS
+      </h1>
+
+      <div className="bg-black/30 rounded-2xl p-4 sm:p-6 md:p-10 w-full min-w-0">
+        {/* Charts Grid - 2 side-by-side charts: Skills and Foot */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 items-start w-full min-w-0">
+          {/* Chart 1 - Skills */}
+          <div className="flex justify-center w-full min-w-0">
+            <PerformanceChart
+              title="Skills"
+              percentage={skillsAvg}
+              data={skillData}
+            />
+          </div>
+
+          {/* Chart 2 - Foot */}
+          <div className="flex justify-center w-full min-w-0">
+            <PerformanceChart
+              title="Foot"
+              percentage={footAvg}
+              data={footData}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
-});
-
-const skillsAvg = skillData.length > 0 
-? Math.round(skillData.reduce((sum, d) => sum + d.value, 0) / skillData.length)
-: 0;
-
-const footData = [
-{ name: 'Right Foot', value: playerData.rightLegUsage || 0, color: getHexColor(playerData.rightLegUsage || 0) },
-{ name: 'Left Foot', value: playerData.leftLegUsage || 0, color: getHexColor(playerData.leftLegUsage || 0) },
-];
-
-// Derive head from skills if available
-const headingSkill = (playerData.skillsCategories || [])
-.flatMap((c: any) => c.skills)
-.find((s: any) => s.name === "Heading" || s.name === "Jumping");
-
-if (headingSkill) {
-footData.push({ name: 'Heading', value: headingSkill.value, color: getHexColor(headingSkill.value) });
-}
-
-const footAvg = footData.length > 0 
-? Math.round(footData.reduce((sum, d) => sum + d.value, 0) / footData.length)
-: 0;
-
-const roleData = [
-{ name: 'Midfield', value: 45, color: '#0077FF' },
-{ name: 'Attack', value: 40, color: '#FF1010' },
-{ name: 'Defense', value: 15, color: '#00FF62' },
-];
-
-return (
-<div className="mt-10 sm:mt-20 container w-full min-w-0 overflow-hidden">
-  <h1 className="text-2xl sm:text-4xl font-light font-heading text-center mb-6 sm:mb-12 text-foreground">
-    PERFORMANCE ANALYTICS
-  </h1>
-
-  <div className="bg-black/30 rounded-2xl p-4 sm:p-6 md:p-10 w-full min-w-0">
-    {/* Charts Grid */}
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 mb-8 sm:mb-12 items-start w-full min-w-0">
-      {/* Chart 1 - Skills */}
-      <div className="flex justify-center w-full min-w-0">
-        <PerformanceChart
-          title="Skills"
-          percentage={skillsAvg}
-          data={skillData}
-        />
-      </div>
-
-      {/* Chart 2 - Role */}
-      <div className="flex justify-center w-full min-w-0">
-        <PerformanceChart
-          title="Role"
-          percentage={90}
-          data={roleData}
-        />
-      </div>
-    </div>
-
-    {/* Chart 3 - Foot (Bottom Center) */}
-    <div className="flex justify-center w-full min-w-0">
-      <div className="mb-6 sm:mb-12 w-full min-w-0 flex justify-center">
-        <PerformanceChart
-          title="Foot"
-          percentage={footAvg}
-          data={footData}
-        />
-      </div>
-    </div>
-  </div>
-</div>
-)
-}
 
 export default PerformanceAnalytics;

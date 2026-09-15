@@ -39,6 +39,7 @@ export const calculateWeightedRating = (
     dribbling?: number;
     defending?: number;
     physical?: number;
+    heading?: number;
   }
 ): number => {
   const shortPos = getShortPositionForm(position);

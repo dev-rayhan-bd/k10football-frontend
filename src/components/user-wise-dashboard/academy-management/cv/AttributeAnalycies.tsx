@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Label } from 'recharts';
 import { usePlayerStats } from "../CvNotEditable";
 import { usePlayer } from '@/lib/hooks/usePlayer';
@@ -9,7 +9,7 @@ const AttributeDonut = ({ score, color }: { score: number; color: string }) => {
   const data = [
     { name: 'filled', value: score },
     { name: 'empty', value: 100 - score },
-  ]
+  ];
 
   return (
     <ResponsiveContainer width={120} height={120}>
@@ -35,8 +35,8 @@ const AttributeDonut = ({ score, color }: { score: number; color: string }) => {
         </Pie>
       </PieChart>
     </ResponsiveContainer>
-  )
-}
+  );
+};
 
 const getHexColor = (val: number) => {
   if (val >= 80) return "#22c55e";
@@ -48,67 +48,43 @@ const AttributesAnalysis = ({ editable = false }: { editable?: boolean }) => {
   const { setAttributesAvg } = usePlayerStats();
   const { playerData } = usePlayer();
 
-  const getSkillValue = (name: string): number => {
-    if (!playerData.skillsCategories) return 0;
-    for (const cat of playerData.skillsCategories) {
-      const skill = cat.skills.find(s => s.name.toLowerCase() === name.toLowerCase());
-      if (skill) return skill.value;
-    }
-    // Fallbacks for similar names
-    if (name === "Passing") return (getSkillValue("Short Passing") + getSkillValue("Long Passing")) / 2;
-    if (name === "Speed") return getSkillValue("Sprint Speed");
-    if (name === "Decision Making") return getSkillValue("Decisions");
-    if (name === "First Touch") return getSkillValue("Ball Control"); // Approximate
-    if (name === "Composure") return getSkillValue("Composition");
-    if (name === "Tackling") return 70; // Placeholder if missing
-    return 0;
-  };
+  // Dynamically derive 6 analysis cards from Skills Attributes categories, each taking 4 key skills
+  const cards = useMemo(() => {
+    const categories = playerData.skillsCategories || [];
+    return categories.map((cat) => {
+      // First 4 attributes from this skill category
+      const attrs = (cat.skills || []).slice(0, 4).map((skill) => ({
+        name: skill.name,
+        value: skill.value,
+      }));
 
-  const cards = [
-    {
-      title: 'Technical Ability',
-      color: '#00FF62',
-      attributes: ['Ball Control', 'Passing', 'Dribbling', 'First Touch'],
-    },
-    {
-      title: 'Reaction Skills',
-      color: '#0077FF',
-      attributes: ['Positioning', 'Vision', 'Decision Making', 'Teamwork'],
-    },
-    {
-      title: 'Physical Attributes',
-      color: '#FF1010',
-      attributes: ['Speed', 'Stamina', 'Strength', 'Agility'],
-    },
-    {
-      title: 'Mental Strength',
-      color: '#FDC700',
-      attributes: ['Composure', 'Determination', 'Leadership', 'Bravery'],
-    },
-    {
-      title: 'Attacking Skills',
-      color: '#F200FF',
-      attributes: ['Shooting', 'Finishing', 'Long Shots', 'Att. Position'],
-    },
-    {
-      title: 'Defensive Skills',
-      color: '#FF8010',
-      attributes: ['Tackling', 'Interceptions', 'Marking', 'Heading'],
-    },
-  ].map(card => {
-    const attrs = card.attributes.map(name => ({
-      name,
-      value: Math.round(getSkillValue(name))
-    }));
-    const score = Math.round(attrs.reduce((sum, a) => sum + a.value, 0) / attrs.length);
-    const color = getHexColor(score);
-    return { ...card, attributes: attrs, score, color };
-  });
+      // Average score of the 4 key attributes
+      const score =
+        attrs.length > 0
+          ? Math.round(attrs.reduce((sum, a) => sum + a.value, 0) / attrs.length)
+          : (cat.skills && cat.skills.length > 0)
+          ? Math.round(cat.skills.reduce((sum, s) => sum + s.value, 0) / cat.skills.length)
+          : 0;
+
+      const color = getHexColor(score);
+
+      return {
+        title: cat.category,
+        color,
+        attributes: attrs,
+        score,
+      };
+    });
+  }, [playerData.skillsCategories]);
 
   useEffect(() => {
-    const avg = Math.round(cards.reduce((sum, c) => sum + c.score, 0) / cards.length);
-    setAttributesAvg(avg);
+    if (cards.length > 0) {
+      const avg = Math.round(cards.reduce((sum, c) => sum + c.score, 0) / cards.length);
+      setAttributesAvg(avg);
+    }
   }, [cards, setAttributesAvg]);
+
+  if (!playerData.skillsCategories || playerData.skillsCategories.length === 0) return null;
 
   return (
     <div className="container my-10 sm:my-20 w-full min-w-0 overflow-hidden">
@@ -118,11 +94,11 @@ const AttributesAnalysis = ({ editable = false }: { editable?: boolean }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 w-full min-w-0">
         {cards.map((card, index) => (
           <div
-            key={index}
+            key={`${card.title}-${index}`}
             className="border border-border bg-black/30 rounded-lg p-4 sm:p-8 flex flex-col items-center hover:bg-black/50 transition-colors w-full min-w-0"
           >
             {/* Title */}
-            <h3 className="text-xl font-bold font-heading text-center mb-8 uppercase tracking-widest text-primary/90">
+            <h3 className="text-xl font-bold font-heading text-center mb-8 uppercase tracking-widest text-primary/90 truncate max-w-full">
               {card.title}
             </h3>
 
@@ -135,17 +111,23 @@ const AttributesAnalysis = ({ editable = false }: { editable?: boolean }) => {
             </div>
 
             {/* Score Text */}
-            <p className="text-xs uppercase tracking-widest text-gray-500 font-black text-center mb-8">Overall Score</p>
+            <p className="text-xs uppercase tracking-widest text-gray-500 font-black text-center mb-8">
+              Overall Score
+            </p>
 
-            {/* Attributes List */}
-            <div className="w-full space-y-4">
+            {/* Attributes List (4 key attributes from category) */}
+            <div className="w-full flex flex-col gap-4">
               {card.attributes.map((attr, attrIndex) => (
                 <div
-                  key={attrIndex}
+                  key={`${attr.name}-${attrIndex}`}
                   className="flex justify-between border-b border-white/10 pb-2 items-center text-base"
                 >
-                  <span className="text-gray-400 font-bold uppercase tracking-wide">{attr.name}</span>
-                  <span className="font-black text-white text-lg">{attr.value}</span>
+                  <span className="text-gray-400 font-bold uppercase tracking-wide truncate mr-2">
+                    {attr.name}
+                  </span>
+                  <span className="font-black text-white text-lg shrink-0">
+                    {attr.value}
+                  </span>
                 </div>
               ))}
             </div>
@@ -153,7 +135,7 @@ const AttributesAnalysis = ({ editable = false }: { editable?: boolean }) => {
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default AttributesAnalysis;

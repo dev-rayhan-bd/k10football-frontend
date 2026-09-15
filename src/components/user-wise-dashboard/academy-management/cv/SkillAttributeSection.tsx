@@ -23,74 +23,106 @@ const SkillsAttributes = ({ editable = false }: { editable?: boolean }) => {
   const { playerData, handleUpdate: syncToRedux } = usePlayer();
 
   // Local state initialized from Redux or original defaults
-  const [categories, setCategories] = useState<SkillCategory[]>(playerData.skillsCategories || [
-    {
-      category: "Technical",
-      color: "#0077FF",
-      borderColor: "border-l-blue-500",
-      skills: [
-        { name: "Ball Control", value: 90 },
-        { name: "Dribbling", value: 85 },
-        { name: "Short Passing", value: 92 },
-        { name: "Long Passing", value: 88 },
-        { name: "Crossing", value: 82 },
-        { name: "Shooting", value: 78 },
-        { name: "Finishing", value: 75 },
-        { name: "Long Shots", value: 80 },
-      ],
-    },
-    {
-      category: "Tactical",
-      color: "#00FF62",
-      borderColor: "border-l-green-500",
-      skills: [
-        { name: "Positioning", value: 88 },
-        { name: "Vision", value: 91 },
-        { name: "Anticipation", value: 86 },
-        { name: "Composition", value: 84 },
-        { name: "Teamwork", value: 89 },
-        { name: "Work Rate", value: 87 },
-        { name: "Decisions", value: 85 },
-        { name: "Att. Position", value: 83 },
-      ],
-    },
-    {
-      category: "Physical",
-      color: "#FF1010",
-      borderColor: "border-l-red-500",
-      skills: [
-        { name: "Acceleration", value: 78 },
-        { name: "Sprint Speed", value: 76 },
-        { name: "Stamina", value: 85 },
-        { name: "Strength", value: 72 },
-        { name: "Balance", value: 83 },
-        { name: "Agility", value: 81 },
-        { name: "Reactions", value: 86 },
-        { name: "Jumping", value: 70 },
-      ],
-    },
-    {
-      category: "Mental",
-      color: "#ffffff",
-      borderColor: "border-l-yellow-500",
-      skills: [
-        { name: "Aggression", value: 65 },
-        { name: "Interceptions", value: 74 },
-        { name: "Marking", value: 87 },
-        { name: "Leadership", value: 79 },
-        { name: "Bravery", value: 73 },
-        { name: "Determination", value: 88 },
-        { name: "Heading", value: 85 },
-        { name: "Influence", value: 82 },
-      ],
-    },
-  ]);
+  const [categories, setCategories] = useState<SkillCategory[]>(
+    playerData.skillsCategories || [
+      {
+        category: "Technical",
+        color: "#0077FF",
+        borderColor: "border-l-blue-500",
+        skills: [
+          { name: "Ball Control", value: 90 },
+          { name: "Dribbling", value: 85 },
+          { name: "Short Passing", value: 92 },
+          { name: "Long Passing", value: 88 },
+          { name: "Crossing", value: 82 },
+          { name: "Shooting", value: 78 },
+          { name: "Finishing", value: 75 },
+          { name: "Long Shots", value: 80 },
+        ],
+      },
+      {
+        category: "Tactical",
+        color: "#00FF62",
+        borderColor: "border-l-green-500",
+        skills: [
+          { name: "Positioning", value: 88 },
+          { name: "Vision", value: 91 },
+          { name: "Anticipation", value: 86 },
+          { name: "Composition", value: 84 },
+          { name: "Teamwork", value: 89 },
+          { name: "Work Rate", value: 87 },
+          { name: "Decisions", value: 85 },
+          { name: "Att. Position", value: 83 },
+        ],
+      },
+      {
+        category: "Physical",
+        color: "#FF1010",
+        borderColor: "border-l-red-500",
+        skills: [
+          { name: "Acceleration", value: 78 },
+          { name: "Sprint Speed", value: 76 },
+          { name: "Stamina", value: 85 },
+          { name: "Strength", value: 72 },
+          { name: "Balance", value: 83 },
+          { name: "Agility", value: 81 },
+          { name: "Reactions", value: 86 },
+          { name: "Jumping", value: 70 },
+        ],
+      },
+      {
+        category: "Mental",
+        color: "#ffffff",
+        borderColor: "border-l-yellow-500",
+        skills: [
+          { name: "Aggression", value: 65 },
+          { name: "Interceptions", value: 74 },
+          { name: "Marking", value: 87 },
+          { name: "Leadership", value: 79 },
+          { name: "Bravery", value: 73 },
+          { name: "Determination", value: 88 },
+          { name: "Heading", value: 85 },
+          { name: "Influence", value: 82 },
+        ],
+      },
+      {
+        category: "Attacking",
+        color: "#F200FF",
+        borderColor: "border-l-purple-500",
+        skills: [
+          { name: "First Touch", value: 86 },
+          { name: "Shot Power", value: 84 },
+          { name: "Curve", value: 80 },
+          { name: "Free Kick", value: 78 },
+          { name: "Penalties", value: 82 },
+          { name: "Volleys", value: 75 },
+          { name: "Heading Accuracy", value: 83 },
+          { name: "Weak Foot", value: 79 },
+        ],
+      },
+      {
+        category: "Defending",
+        color: "#FF8010",
+        borderColor: "border-l-orange-500",
+        skills: [
+          { name: "Standing Tackle", value: 76 },
+          { name: "Sliding Tackle", value: 72 },
+          { name: "Interception", value: 85 },
+          { name: "Marking", value: 80 },
+          { name: "Aerial Duels", value: 78 },
+          { name: "Clearance", value: 74 },
+          { name: "Pressing", value: 86 },
+          { name: "Defensive Awareness", value: 82 },
+        ],
+      },
+    ]
+  );
 
   const { setSkillsAvg } = usePlayerStats();
 
   // Sync with Redux and calculate average
   useEffect(() => {
-    const allSkills = categories.flatMap(c => c.skills);
+    const allSkills = categories.flatMap((c) => c.skills);
     const avg = allSkills.reduce((sum, s) => sum + s.value, 0) / allSkills.length;
     setSkillsAvg(Math.round(avg));
 
@@ -98,16 +130,26 @@ const SkillsAttributes = ({ editable = false }: { editable?: boolean }) => {
     syncToRedux("skillsCategories", categories);
   }, [categories, setSkillsAvg]);
 
+  // Keep in sync if Redux playerData.skillsCategories changes externally (e.g. from Strength section)
+  useEffect(() => {
+    if (playerData.skillsCategories) {
+      const isDiff = JSON.stringify(playerData.skillsCategories) !== JSON.stringify(categories);
+      if (isDiff) {
+        setCategories(playerData.skillsCategories);
+      }
+    }
+  }, [playerData.skillsCategories]);
+
   const handleUpdate = (catIdx: number, skillIdx: number, value: number) => {
     setCategories((prev) => {
       const newCats = [...prev];
       newCats[catIdx] = {
         ...newCats[catIdx],
-        skills: [...newCats[catIdx].skills]
+        skills: [...newCats[catIdx].skills],
       };
       newCats[catIdx].skills[skillIdx] = {
         ...newCats[catIdx].skills[skillIdx],
-        value: value
+        value: value,
       };
       return newCats;
     });
@@ -125,6 +167,25 @@ const SkillsAttributes = ({ editable = false }: { editable?: boolean }) => {
     return "#ef4444";
   };
 
+  const getCategoryBorderClass = (category: string) => {
+    switch (category.toLowerCase()) {
+      case "technical":
+        return "border-blue";
+      case "physical":
+        return "border-red";
+      case "tactical":
+        return "border-primary";
+      case "mental":
+        return "border-yellow";
+      case "attacking":
+        return "border-purple";
+      case "defending":
+        return "border-orange";
+      default:
+        return "border-primary";
+    }
+  };
+
   if (!playerData.skillsCategories) return null;
 
   return (
@@ -134,23 +195,26 @@ const SkillsAttributes = ({ editable = false }: { editable?: boolean }) => {
       </h1>
 
       <div className="border border-border bg-cardBg rounded-2xl p-4 sm:p-8 w-full min-w-0 overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 w-full min-w-0">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 w-full min-w-0">
           {categories.map((category, catIdx) => (
-            <div key={category.category} className={`space-y-4 sm:pl-4 w-full min-w-0`}>
-              <h2 className={`text-lg sm:text-xl border-l-4 font-heading ${category.category === "Technical" ? "border-blue" :
-                  category.category === "Physical" ? "border-red" :
-                    category.category === "Tactical" ? "border-primary" :
-                      "border-yellow"
-                } pl-3 sm:pl-4 text-foreground`}>
+            <div key={category.category} className="flex flex-col gap-4 sm:pl-4 w-full min-w-0">
+              <h2
+                className={`text-lg sm:text-xl border-l-4 font-heading ${getCategoryBorderClass(
+                  category.category
+                )} pl-3 sm:pl-4 text-foreground`}
+              >
                 {category.category}
               </h2>
 
-              <div className="space-y-3 sm:space-y-4 w-full min-w-0">
+              <div className="flex flex-col gap-3 sm:gap-4 w-full min-w-0">
                 {category.skills.map((skill, skillIdx) => {
                   const color = getHexColor(skill.value);
 
                   return (
-                    <div key={skill.name} className="grid grid-cols-[80px_1fr_auto] sm:grid-cols-[100px_1fr_auto] items-center gap-2 p-1.5 bg-[#1a1a1a]/40 border border-border/40 rounded-lg group/skill transition-colors hover:bg-[#1a1a1a]/60 w-full min-w-0">
+                    <div
+                      key={skill.name}
+                      className="grid grid-cols-[80px_1fr_auto] sm:grid-cols-[100px_1fr_auto] items-center gap-2 p-1.5 bg-[#1a1a1a]/40 border border-border/40 rounded-lg group/skill transition-colors hover:bg-[#1a1a1a]/60 w-full min-w-0"
+                    >
                       <div className="truncate min-w-0">
                         <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase truncate block">
                           {skill.name}
@@ -162,7 +226,10 @@ const SkillsAttributes = ({ editable = false }: { editable?: boolean }) => {
                           <div className="relative flex items-center h-2 group">
                             <div className="w-full h-1.5 bg-[#333] rounded-full overflow-hidden relative">
                               <div
-                                className={cn("h-full transition-all duration-300 ease-out", getIndicatorColor(skill.value))}
+                                className={cn(
+                                  "h-full transition-all duration-300 ease-out",
+                                  getIndicatorColor(skill.value)
+                                )}
                                 style={{ width: `${skill.value}%` }}
                               />
                             </div>
@@ -172,7 +239,9 @@ const SkillsAttributes = ({ editable = false }: { editable?: boolean }) => {
                               min="0"
                               max="100"
                               value={skill.value}
-                              onChange={(e) => handleUpdate(catIdx, skillIdx, parseInt(e.target.value))}
+                              onChange={(e) =>
+                                handleUpdate(catIdx, skillIdx, parseInt(e.target.value))
+                              }
                               style={{
                                 background: `linear-gradient(to right, ${color} ${skill.value}%, #333 ${skill.value}%)`,
                               }}
@@ -184,7 +253,9 @@ const SkillsAttributes = ({ editable = false }: { editable?: boolean }) => {
                               min="0"
                               max="100"
                               value={skill.value}
-                              onChange={(e) => handleUpdate(catIdx, skillIdx, parseInt(e.target.value))}
+                              onChange={(e) =>
+                                handleUpdate(catIdx, skillIdx, parseInt(e.target.value))
+                              }
                               className="w-full h-6 opacity-0 cursor-pointer absolute inset-0 z-20"
                             />
                           </div>
@@ -193,7 +264,7 @@ const SkillsAttributes = ({ editable = false }: { editable?: boolean }) => {
                             value={skill.value}
                             indicatorClassName={getIndicatorColor(skill.value)}
                             className="h-1.5"
-                            style={{ backgroundColor: '#333' }}
+                            style={{ backgroundColor: "#333" }}
                           />
                         )}
                       </div>
@@ -201,7 +272,9 @@ const SkillsAttributes = ({ editable = false }: { editable?: boolean }) => {
                       <div className="flex justify-end">
                         <CMSField
                           value={skill.value}
-                          onUpdate={(val) => handleUpdate(catIdx, skillIdx, parseInt(String(val)))}
+                          onUpdate={(val) =>
+                            handleUpdate(catIdx, skillIdx, parseInt(String(val)))
+                          }
                           canEdit={editable}
                           type="number"
                           editTrigger="doubleClick"
@@ -221,6 +294,6 @@ const SkillsAttributes = ({ editable = false }: { editable?: boolean }) => {
       </div>
     </div>
   );
-}
+};
 
 export default SkillsAttributes;

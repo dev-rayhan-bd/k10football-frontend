@@ -53,6 +53,7 @@ export interface PlayerData {
     dribbling: number;
     defending: number;
     physical: number;
+    heading?: number;
   };
   performanceMetrics: {
     passAccuracy: number;
@@ -148,6 +149,7 @@ const basePlayerData: PlayerData = {
     dribbling: 85,
     defending: 78,
     physical: 70,
+    heading: 85,
   },
   performanceMetrics: {
     passAccuracy: 92,
@@ -293,6 +295,36 @@ const basePlayerData: PlayerData = {
         { name: "Influence", value: 82 },
       ],
     },
+    {
+      category: "Attacking",
+      color: "#F200FF",
+      borderColor: "border-l-purple-500",
+      skills: [
+        { name: "First Touch", value: 86 },
+        { name: "Shot Power", value: 84 },
+        { name: "Curve", value: 80 },
+        { name: "Free Kick", value: 78 },
+        { name: "Penalties", value: 82 },
+        { name: "Volleys", value: 75 },
+        { name: "Heading Accuracy", value: 83 },
+        { name: "Weak Foot", value: 79 },
+      ],
+    },
+    {
+      category: "Defending",
+      color: "#FF8010",
+      borderColor: "border-l-orange-500",
+      skills: [
+        { name: "Standing Tackle", value: 76 },
+        { name: "Sliding Tackle", value: 72 },
+        { name: "Interception", value: 85 },
+        { name: "Marking", value: 80 },
+        { name: "Aerial Duels", value: 78 },
+        { name: "Clearance", value: 74 },
+        { name: "Pressing", value: 86 },
+        { name: "Defensive Awareness", value: 82 },
+      ],
+    },
   ],
   futsalMap: futsalMap,
   positionMap: positionMap,
@@ -365,6 +397,7 @@ const createMockPlayer = (
       dribbling: Math.min(100, rating + 2),
       defending: Math.max(0, rating - 5),
       physical: rating,
+      heading: rating,
     },
     // Keep player image same as original template
     playerImage: basePlayerData.playerImage,
@@ -403,6 +436,24 @@ export const playerSlice = createSlice({
       const activePlayer = state.players.find((p) => p.id === state.selectedPlayerId);
       if (activePlayer) {
         Object.assign(activePlayer, action.payload);
+
+        // Sync heading if present in payload
+        if (action.payload.strengths?.heading !== undefined && activePlayer.skillsCategories) {
+          for (const cat of activePlayer.skillsCategories) {
+            const headingSkill = cat.skills?.find((s) => s.name.toLowerCase() === "heading");
+            if (headingSkill) {
+              headingSkill.value = action.payload.strengths.heading;
+            }
+          }
+        } else if (action.payload.skillsCategories && activePlayer.strengths) {
+          for (const cat of action.payload.skillsCategories) {
+            const headingSkill = cat.skills?.find((s) => s.name.toLowerCase() === "heading");
+            if (headingSkill) {
+              activePlayer.strengths.heading = headingSkill.value;
+            }
+          }
+        }
+
         activePlayer.rating = calculateWeightedRating(activePlayer.position, activePlayer.strengths);
       }
     },
@@ -420,6 +471,35 @@ export const playerSlice = createSlice({
           }
           current[keys[keys.length - 1]] = value;
         }
+
+        // Two-way synchronization for Heading
+        if (field === "strengths.heading") {
+          if (activePlayer.skillsCategories) {
+            for (const cat of activePlayer.skillsCategories) {
+              const headingSkill = cat.skills?.find((s) => s.name.toLowerCase() === "heading");
+              if (headingSkill) {
+                headingSkill.value = value;
+              }
+            }
+          }
+        } else if (field === "skillsCategories" && Array.isArray(value)) {
+          for (const cat of value) {
+            const headingSkill = cat.skills?.find((s: any) => s.name.toLowerCase() === "heading");
+            if (headingSkill && activePlayer.strengths) {
+              activePlayer.strengths.heading = headingSkill.value;
+            }
+          }
+        } else if (field.startsWith("skillsCategories.")) {
+          if (activePlayer.skillsCategories && activePlayer.strengths) {
+            for (const cat of activePlayer.skillsCategories) {
+              const headingSkill = cat.skills?.find((s) => s.name.toLowerCase() === "heading");
+              if (headingSkill) {
+                activePlayer.strengths.heading = headingSkill.value;
+              }
+            }
+          }
+        }
+
         if (field === "position" || field.startsWith("strengths")) {
           activePlayer.rating = calculateWeightedRating(activePlayer.position, activePlayer.strengths);
         }
