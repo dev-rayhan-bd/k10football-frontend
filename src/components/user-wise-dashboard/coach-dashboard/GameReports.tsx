@@ -10,8 +10,8 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import DashboardTable, { Column } from "@/components/dashboard/DashboardTable";
 import TableActionButtons from "@/components/dashboard/TableActionButtons";
-import { usePlayer } from "@/lib/hooks/usePlayer";
-import { useAppSelector } from "@/lib/hooks/reduxHooks";
+import { usePlayer } from "@/hooks/usePlayer";
+import { useAppSelector } from "@/hooks/reduxHooks";
 const GameReports = () => {
   const router = useRouter();
   const searchParams = useSearchParams();

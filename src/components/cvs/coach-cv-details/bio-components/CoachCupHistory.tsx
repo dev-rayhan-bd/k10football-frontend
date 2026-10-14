@@ -1,7 +1,7 @@
 import Image from "next/image";
 import CMSField from "@/components/shared/CMSField";
 import trophyIcon from "@/assets/cvs/id/trofeeIcon.png";
-import { useCoach } from "@/lib/hooks/useCoach";
+import { useCoach } from "@/hooks/useCoach";
 
 export const CoachCupHistory = ({
   canEdit,

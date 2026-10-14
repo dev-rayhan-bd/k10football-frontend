@@ -12,8 +12,8 @@ import {
   IconLoader2
 } from "@tabler/icons-react";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks/reduxHooks";
-import { addParent, deleteParent } from "@/lib/features/parent/parentSlice";
+import { useAppDispatch, useAppSelector } from "@/hooks/reduxHooks";
+import { addParent, deleteParent } from "@/redux/features/parent/parentSlice";
 export const ParentsManagement = () => {
   const dispatch = useAppDispatch();
   const parents = useAppSelector((state) => state.parent.parents);

@@ -58,7 +58,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { usePlayer } from "@/lib/hooks/usePlayer";
+import { usePlayer } from "@/hooks/usePlayer";
 import { cn, getFullWithShortForm } from "@/lib/utils";
 import { PencilIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";

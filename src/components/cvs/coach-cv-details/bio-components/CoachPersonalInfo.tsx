@@ -1,6 +1,6 @@
 import CMSField from "@/components/shared/CMSField";
 import Image from "next/image";
-import { useCoach } from "@/lib/hooks/useCoach";
+import { useCoach } from "@/hooks/useCoach";
 import { ALL_COUNTRIES } from "./constants";
 import { calculateAge, getFlagUrl } from "./utils";
 

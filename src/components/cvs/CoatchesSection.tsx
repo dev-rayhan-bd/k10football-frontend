@@ -7,7 +7,7 @@ import goldCard from "@/assets/cvs/gold-card.png";
 import pinkCard from "@/assets/cvs/pink-card.png";
 import whiteCard from "@/assets/cvs/white-card.png";
 import { useRouter } from "next/navigation";
-import { useCoach } from "@/lib/hooks/useCoach";
+import { useCoach } from "@/hooks/useCoach";
 interface Coach {
   id: number;
   name: string;

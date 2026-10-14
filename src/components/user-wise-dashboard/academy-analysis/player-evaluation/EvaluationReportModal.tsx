@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { IconDownload, IconTrophy, IconFlame, IconTarget, IconActivity } from "@tabler/icons-react";
-import { EvaluationData } from "@/lib/features/evaluation/evaluationSlice";
+import { EvaluationData } from "@/redux/features/evaluation/evaluationSlice";
 import {
   DEFAULT_EVALUATION
 } from "./utils";

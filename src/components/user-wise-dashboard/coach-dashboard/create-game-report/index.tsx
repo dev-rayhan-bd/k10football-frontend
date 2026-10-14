@@ -4,15 +4,15 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { usePlayer } from "@/lib/hooks/usePlayer";
+import { usePlayer } from "@/hooks/usePlayer";
 import { addReport, completeReportRequest, addReportRequest, updateReport } from "@/lib/constants/reports";
 import ReportDetailsForm from "./ReportDetailsForm";
 import StripePaymentModal from "./StripePaymentModal";
 import MatchStatisticsForm, { PitchLine } from "./MatchStatisticsForm";
 import ReportPdfPreview from "./ReportPdfPreview";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks/reduxHooks";
-import { addGameReport, updateGameReport, completeGameReportRequest, addGameReportRequest } from "@/lib/features/reports/reportsSlice";
+import { useAppDispatch, useAppSelector } from "@/hooks/reduxHooks";
+import { addGameReport, updateGameReport, completeGameReportRequest, addGameReportRequest } from "@/redux/features/reports/reportsSlice";
 import { IconCircleCheck } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 

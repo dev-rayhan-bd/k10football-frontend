@@ -2,8 +2,8 @@
 
 import React from "react";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from 'recharts';
-import { usePlayer } from "@/lib/hooks/usePlayer";
-import { useAppSelector } from "@/lib/hooks/reduxHooks";
+import { usePlayer } from "@/hooks/usePlayer";
+import { useAppSelector } from "@/hooks/reduxHooks";
 
 const PerformanceChart = () => {
   const { playerData } = usePlayer();

@@ -1,7 +1,7 @@
 
-import { baseApi } from "@/redux/api/baseApi";
+import { apiSlice } from "@/redux/features/api/apiSlice";
 
-const couponApi = baseApi.injectEndpoints({
+const couponApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     createCoupons: builder.mutation({
       query: ({ payload }) => ({

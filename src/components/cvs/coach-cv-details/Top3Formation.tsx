@@ -2,7 +2,7 @@
 
 import formation1 from "@/assets/cvs/id/position-map.png"
 import formationPin from "@/assets/cvs/id/positionIcon.png"
-import { useCoach } from "@/lib/hooks/useCoach"
+import { useCoach } from "@/hooks/useCoach"
 import { cn } from "@/lib/utils"
 import Image from 'next/image'
 import { useRef, useState, useEffect } from "react"

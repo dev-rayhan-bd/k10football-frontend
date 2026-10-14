@@ -3,7 +3,7 @@
 import Image from "next/image";
 import React, { useContext } from "react";
 import { useRouter } from "next/navigation";
-import { useAppSelector } from "@/lib/hooks/reduxHooks";
+import { useAppSelector } from "@/hooks/reduxHooks";
 import { CoachContext } from "@/app/dashboard/coach/layout";
 import {
   IconBallFootball,
@@ -46,7 +46,7 @@ const teamData = [
   { id: 3, name: "Alex Jonson", position: "Defender", rating: 8.5, matches: 29, goals: 2, assists: 3, status: "Injured", avatar: "https://i.pravatar.cc/150?u=3" },
   { id: 4, name: "James Brown", position: "Goalkeeper", rating: 9.0, matches: 30, goals: 0, assists: 0, status: "Active", avatar: "https://i.pravatar.cc/150?u=4" },
 ];
-import { useCoach } from "@/lib/hooks/useCoach";
+import { useCoach } from "@/hooks/useCoach";
 const CoachDashboard = () => {
   const { hasAcademy } = useContext(CoachContext);
   const { coachData } = useCoach();

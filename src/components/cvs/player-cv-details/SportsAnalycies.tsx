@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { CalendarIcon, MapPinIcon } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { useAppSelector } from "@/lib/hooks/reduxHooks";
+import { useAppSelector } from "@/hooks/reduxHooks";
 import {
   Dialog,
   DialogContent,

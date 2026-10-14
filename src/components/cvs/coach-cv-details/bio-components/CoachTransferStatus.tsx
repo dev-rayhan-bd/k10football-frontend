@@ -1,5 +1,5 @@
 import CMSField from "@/components/shared/CMSField";
-import { useCoach } from "@/lib/hooks/useCoach";
+import { useCoach } from "@/hooks/useCoach";
 
 export const CoachTransferStatus = ({
   canEdit,

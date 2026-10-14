@@ -1,6 +1,6 @@
-import { baseApi } from "@/redux/api/baseApi";
+import { apiSlice } from "@/redux/features/api/apiSlice";
 
-const analyticsApi = baseApi.injectEndpoints({
+const analyticsApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getAnalytics: builder.query({
       query: () => ({

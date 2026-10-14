@@ -1,7 +1,7 @@
 "use client";
 import { Dock } from "lucide-react";
 import { useState } from "react";
-import { useUpdatePlayerProfileMutation } from "@/lib/features/cv/cvApi";
+import { useUpdatePlayerProfileMutation } from "@/redux/features/cv/cvApi";
 import CMSField from "@/components/shared/CMSField";
 
 const DocSection = ({ editable = false }: { editable?: boolean }) => {

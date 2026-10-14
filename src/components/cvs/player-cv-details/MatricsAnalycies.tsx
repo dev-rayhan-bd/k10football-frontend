@@ -21,7 +21,7 @@ import {
 
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { useUpdatePlayerProfileMutation } from '@/lib/features/cv/cvApi'
+import { useUpdatePlayerProfileMutation } from '@/redux/features/cv/cvApi'
 import CMSField from '@/components/shared/CMSField'
 import { cn } from '@/lib/utils'
 

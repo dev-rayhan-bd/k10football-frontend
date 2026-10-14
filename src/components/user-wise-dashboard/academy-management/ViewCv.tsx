@@ -12,11 +12,11 @@ import {
   IconShare,
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
-import { usePlayer } from "@/lib/hooks/usePlayer";
+import { usePlayer } from "@/hooks/usePlayer";
 import { usePlayerStats } from "@/components/cvs/player-cv-details/FullEditablePage";
 import { getFullWithShortForm } from "@/lib/utils";
 import { FileText } from 'lucide-react';
-import { useAppSelector } from "@/lib/hooks/reduxHooks";
+import { useAppSelector } from "@/hooks/reduxHooks";
 import CvNotEditable from "./CvNotEditable";
 
 const ViewCv = () => {

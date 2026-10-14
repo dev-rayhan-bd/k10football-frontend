@@ -1,7 +1,7 @@
 import { Star, Plus, Trash2, Quote } from 'lucide-react'
 import Image from 'next/image'
 import Marquee from 'react-fast-marquee'
-import { useCoach } from '@/lib/hooks/useCoach'
+import { useCoach } from '@/hooks/useCoach'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {

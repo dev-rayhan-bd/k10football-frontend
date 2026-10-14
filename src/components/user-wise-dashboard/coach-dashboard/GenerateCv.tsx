@@ -14,9 +14,9 @@ import {
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import FullEditableCv from "@/components/cvs/coach-cv-details/FullEditableCv";
-import { useCoach } from "@/lib/hooks/useCoach";
+import { useCoach } from "@/hooks/useCoach";
 import { usePlayerStats } from "@/components/cvs/player-cv-details/FullEditablePage";
-import { usePlayer } from "@/lib/hooks/usePlayer";
+import { usePlayer } from "@/hooks/usePlayer";
 import { useRouter } from "next/navigation";
 import { IconUserCheck } from "@tabler/icons-react";
 const COUNTRY_CODES: Record<string, string> = {

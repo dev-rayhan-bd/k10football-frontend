@@ -1,6 +1,6 @@
-import { baseApi } from "@/redux/api/baseApi";
+import { apiSlice } from "@/redux/features/api/apiSlice";
 
-const userApi = baseApi.injectEndpoints({
+const userApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getAllUsers: builder.query({
       query: (params) => ({

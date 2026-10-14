@@ -7,7 +7,7 @@ import playerImage from "@/assets/cvs/id/player-short-image.png";
 import pinkCard from "@/assets/cvs/pink-card.png";
 import whiteCard from "@/assets/cvs/white-card.png";
 import { useRouter } from "next/navigation";
-import { usePlayer } from "@/lib/hooks/usePlayer";
+import { usePlayer } from "@/hooks/usePlayer";
 import { getShortForm } from "@/lib/utils";
 const COUNTRY_CODES: Record<string, string> = {
   "france": "fr",

@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { baseApi } from "@/redux/api/baseApi";
+import { apiSlice } from "@/redux/features/api/apiSlice";
 
-const videoApi = baseApi.injectEndpoints({
+const videoApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     createVideo: builder.mutation({
       query: ({ payload }: { payload: FormData }) => ({

@@ -6,7 +6,7 @@ import backgroundImage from "@/assets/player-dashboard/backgroundImage.png";
 import { Clock, Mail, Phone, Shield } from 'lucide-react';
 import { useRouter } from "next/navigation";
 
-import { usePlayer } from "@/lib/hooks/usePlayer";
+import { usePlayer } from "@/hooks/usePlayer";
 import { getFullWithShortForm } from "@/lib/utils";
 
 const PlayerBioSection = () => {

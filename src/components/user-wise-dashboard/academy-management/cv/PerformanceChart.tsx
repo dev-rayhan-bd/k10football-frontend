@@ -2,7 +2,7 @@
 'use client'
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Label } from 'recharts'
-import { usePlayer } from '@/lib/hooks/usePlayer'
+import { usePlayer } from '@/hooks/usePlayer'
 
 interface ChartDataItem {
   name: string

@@ -19,7 +19,7 @@ import {
   BarChart,
   Bar,
 } from "recharts";
-import { useAppSelector } from "@/lib/hooks/reduxHooks";
+import { useAppSelector } from "@/hooks/reduxHooks";
 
 const AnalyticsStatCard = ({ icon: Icon, value, label }: { icon: any, value: string | number, label: string }) => (
   <div className="bg-[#0A0A0A] border border-white/20 rounded-2xl p-4 md:p-6 flex flex-col gap-3 md:gap-4 flex-1 min-w-0">

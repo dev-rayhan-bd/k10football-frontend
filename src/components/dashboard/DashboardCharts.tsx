@@ -15,7 +15,7 @@ import {
   Pie,
   Cell
 } from "recharts";
-import { useAppSelector } from "@/lib/hooks/reduxHooks";
+import { useAppSelector } from "@/hooks/reduxHooks";
 
 const barData = [
   { month: "Jan-Feb", value: 6 },

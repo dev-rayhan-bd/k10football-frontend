@@ -2,9 +2,9 @@
 import Image from "next/image";
 
 import { useState } from "react";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks/reduxHooks";
-import { PlayerStateItem } from "@/lib/features/player/playerSlice";
-import { saveEvaluation, EvaluationData } from "@/lib/features/evaluation/evaluationSlice";
+import { useAppDispatch, useAppSelector } from "@/hooks/reduxHooks";
+import { PlayerStateItem } from "@/redux/features/player/playerSlice";
+import { saveEvaluation, EvaluationData } from "@/redux/features/evaluation/evaluationSlice";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {

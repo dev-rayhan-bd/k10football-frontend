@@ -9,7 +9,7 @@ import {
 } from "@tabler/icons-react";
 import DashboardTable, { Column } from "@/components/dashboard/DashboardTable";
 import TableActionButtons from "@/components/dashboard/TableActionButtons";
-import { usePlayer } from "@/lib/hooks/usePlayer";
+import { usePlayer } from "@/hooks/usePlayer";
 import { useRouter } from "next/navigation";
 import AddPlayerModal from "./AddPlayerModal";
 const PlayerCVValidations = () => {

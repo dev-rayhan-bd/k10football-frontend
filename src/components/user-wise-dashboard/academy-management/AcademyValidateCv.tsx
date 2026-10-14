@@ -10,7 +10,7 @@ import {
   IconEye,
   IconDownload,
 } from "@tabler/icons-react";
-import { useAppSelector } from "@/lib/hooks/reduxHooks";
+import { useAppSelector } from "@/hooks/reduxHooks";
 import { useRouter } from "next/navigation";
 
 // ─── CV Tier calculation ───────────────────────────────────────────────────

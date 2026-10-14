@@ -22,7 +22,7 @@ import { Badge } from "@/components/ui/badge";
 
 import { MatchStats } from "@/lib/constants/reports";
 import { cn } from "@/lib/utils";
-import { useAppSelector } from "@/lib/hooks/reduxHooks";
+import { useAppSelector } from "@/hooks/reduxHooks";
 
 const GameReports = () => {
   const reports = useAppSelector(state => state.reports.reports);

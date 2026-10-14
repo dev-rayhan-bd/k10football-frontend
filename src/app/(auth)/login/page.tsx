@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useAppDispatch } from "@/lib/hooks/reduxHooks";
+import { useAppDispatch } from "@/hooks/reduxHooks";
 import { setAccessToken, setUser } from "@/redux/features/auth";
 
 interface LoginForm {

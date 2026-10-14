@@ -20,7 +20,7 @@ import {
   IconTrash,
   IconVideo
 } from "@tabler/icons-react";
-import { useAppSelector } from "@/lib/hooks/reduxHooks";
+import { useAppSelector } from "@/hooks/reduxHooks";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import {

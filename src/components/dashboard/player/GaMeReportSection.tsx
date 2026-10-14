@@ -4,8 +4,8 @@
 import React, { useState } from 'react';
 import { FileText, Eye, Plus, CheckCircle, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { usePlayer } from "@/lib/hooks/usePlayer";
-import { useAppSelector } from "@/lib/hooks/reduxHooks";
+import { usePlayer } from "@/hooks/usePlayer";
+import { useAppSelector } from "@/hooks/reduxHooks";
 import {
   Sheet,
   SheetContent,

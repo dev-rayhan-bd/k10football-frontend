@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAppDispatch, useAppSelector } from "./reduxHooks";
-import { updatePlayerField, setSelectedPlayerId, validatePlayerCv, addPlayer, PlayerData } from "../features/player/playerSlice";
-import { useUpdatePlayerProfileMutation } from "../features/cv/cvApi";
+import {
+  updatePlayerField,
+  setSelectedPlayerId,
+  validatePlayerCv,
+  addPlayer,
+  PlayerData
+} from "@/redux/features/player/playerSlice";
 import { toast } from "sonner";
 
 export const usePlayer = () => {
@@ -9,22 +14,9 @@ export const usePlayer = () => {
   const players = useAppSelector((state) => state.player.players);
   const selectedPlayerId = useAppSelector((state) => state.player.selectedPlayerId);
   const playerData = players.find((p) => p.id === selectedPlayerId) || players[0];
-  const [updatePlayerProfile] = useUpdatePlayerProfileMutation();
 
   const handleUpdate = async (field: string, value: any) => {
-    // Optimistic update in Redux
     dispatch(updatePlayerField({ field, value }));
-    // toast.success(`${field} updated successfully`);
-
-    // try {
-    //   // API call
-    //   await updatePlayerProfile({ id: String(selectedPlayerId), data: { [field]: value } }).unwrap();
-    //   toast.success(`${field} updated successfully`);
-    // } catch (error) {
-    //   // Rollback if necessary or just show error
-    //   // toast.error(`Failed to update ${field}`);
-    //   console.error(error);
-    // }
   };
 
   const selectPlayer = (id: number) => {
@@ -51,4 +43,3 @@ export const usePlayer = () => {
     handleCreatePlayer,
   };
 };
-

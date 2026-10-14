@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { EvaluationData } from "@/lib/features/evaluation/evaluationSlice";
+import { EvaluationData } from "@/redux/features/evaluation/evaluationSlice";
 
 export const technicalKeys: (keyof EvaluationData)[] = [
   "dribbling", "ballMastery", "runningWithBall", "rangePassing",

@@ -19,7 +19,7 @@ import {
   IconFileText,
 } from "@tabler/icons-react";
 
-import { useAppSelector } from "@/lib/hooks/reduxHooks";
+import { useAppSelector } from "@/hooks/reduxHooks";
 import { MatchStats } from "@/lib/constants/reports";
 
 import { ReportView, SummaryCardProps, GameReportCardProps, Player } from "./GameReportTypes";

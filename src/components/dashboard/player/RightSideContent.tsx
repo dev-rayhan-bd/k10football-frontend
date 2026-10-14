@@ -5,7 +5,7 @@ import { FileText, Heart } from 'lucide-react';
 import Image from 'next/image';
 import clubLogo from "@/assets/cvs/club1.png";
 
-import { useAppSelector } from "@/lib/hooks/reduxHooks";
+import { useAppSelector } from "@/hooks/reduxHooks";
 
 const RightSideContent = () => {
   const reports = useAppSelector(state => state.reports.reports);

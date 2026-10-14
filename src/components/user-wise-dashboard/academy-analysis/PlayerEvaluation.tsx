@@ -15,8 +15,8 @@ import { toast } from "sonner";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 
-import { useAppSelector } from "@/lib/hooks/reduxHooks";
-import { EvaluationData } from "@/lib/features/evaluation/evaluationSlice";
+import { useAppSelector } from "@/hooks/reduxHooks";
+import { EvaluationData } from "@/redux/features/evaluation/evaluationSlice";
 
 import { 
   DEFAULT_EVALUATION, 

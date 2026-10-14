@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Label } from 'recharts';
 import { usePlayerStats } from './FullEditablePage';
-import { usePlayer } from '@/lib/hooks/usePlayer';
+import { usePlayer } from '@/hooks/usePlayer';
 
 const AttributeDonut = ({ score, color }: { score: number; color: string }) => {
   const data = [

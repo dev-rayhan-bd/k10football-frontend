@@ -16,7 +16,7 @@ import {
   IconCopy
 } from "@tabler/icons-react";
 import { toast } from "sonner";
-import { useAppSelector } from "@/lib/hooks/reduxHooks";
+import { useAppSelector } from "@/hooks/reduxHooks";
 export const TOURNAMENT_PRESET_LOGOS = [
   {
     id: "preset-cup",

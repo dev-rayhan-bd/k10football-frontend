@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useRef } from 'react';
-import { usePlayer } from '@/lib/hooks/usePlayer';
+import { usePlayer } from '@/hooks/usePlayer';
 import CMSField from '@/components/shared/CMSField';
 import { cn } from '@/lib/utils';
 import { Trash2, X, Check, Info, Upload } from 'lucide-react';

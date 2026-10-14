@@ -2,7 +2,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useCoach } from '@/lib/hooks/useCoach'
+import { useCoach } from '@/hooks/useCoach'
 import {
   Award,
   Plus,

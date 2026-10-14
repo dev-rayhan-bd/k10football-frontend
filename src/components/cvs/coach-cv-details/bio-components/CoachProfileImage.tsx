@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { PencilIcon } from "lucide-react";
-import { useCoach } from "@/lib/hooks/useCoach";
+import { useCoach } from "@/hooks/useCoach";
 import { ALL_COACH_STYLES, COACH_TYPES } from "./constants";
 import { getFlagUrl, handleImageUpload } from "./utils";
 

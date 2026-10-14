@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { Eye, Heart, Upload } from 'lucide-react'
-import { useUpdatePlayerProfileMutation } from '@/lib/features/cv/cvApi'
+import { useUpdatePlayerProfileMutation } from '@/redux/features/cv/cvApi'
 import CMSField from '@/components/shared/CMSField'
 
 interface VideoCard {

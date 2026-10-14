@@ -1,13 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import clubImage from "@/assets/cvs/club1.png";
-import badge1 from "@/assets/cvs/id/coach-badge1.png";
-import badge2 from "@/assets/cvs/id/coach-badge2.png";
-import badge3 from "@/assets/cvs/id/coach-badge3.png";
 import flagImage from "@/assets/cvs/id/coach-bio-flag.png";
 import coachStyleImage from "@/assets/cvs/id/coach-style-image.png";
 import flagFr from "@/assets/cvs/id/flag-fr.png";
 import flagIt from "@/assets/cvs/id/flag-itally.png";
-import trophyIcon from "@/assets/cvs/id/trofeeIcon.png";
 import courseLogo1 from "@/assets/cvs/id/courses-logo1.png";
 import courseLogo2 from "@/assets/cvs/id/courses-logo2.png";
 import courseLogo3 from "@/assets/cvs/id/courses-logo3.png";

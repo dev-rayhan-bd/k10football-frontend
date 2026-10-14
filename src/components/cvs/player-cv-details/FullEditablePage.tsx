@@ -13,7 +13,7 @@ import PlayerBioSection from "./PlayerBioSection";
 import PlayerProfile from "./PlayerProfile";
 import SkillsAttributes from "./SkillAttributeSection";
 import SportsAnalytics from "./SportsAnalycies";
-import { useAppSelector } from "@/lib/hooks/reduxHooks";
+import { useAppSelector } from "@/hooks/reduxHooks";
 import { AuthState } from "@/redux/features/auth";
 
 type UserRole = "player" | "parent" | "coach" | "academy" | "club" | "agent" | "admin" | "";

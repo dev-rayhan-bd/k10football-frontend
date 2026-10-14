@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAppDispatch, useAppSelector } from "./reduxHooks";
-import { updateCoachField } from "../features/coach/coachSlice";
-import { useUpdateCoachProfileMutation } from "../features/cv/cvApi";
+import { updateCoachField } from "@/redux/features/coach/coachSlice";
+import { useUpdateCoachProfileMutation } from "@/redux/features/cv/cvApi";
 
 export const useCoach = () => {
   const dispatch = useAppDispatch();
@@ -15,9 +15,7 @@ export const useCoach = () => {
     try {
       // API call
       await updateCoachProfile({ id: "current-coach", data: { [field]: value } }).unwrap();
-      // toast.success(`${field} updated successfully`);
     } catch (error) {
-      // Rollback if necessary or just show error
       console.error(error);
     }
   };

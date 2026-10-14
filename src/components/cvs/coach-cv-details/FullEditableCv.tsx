@@ -13,7 +13,7 @@ import {
   PlayerStatsProvider,
   usePlayerStats,
 } from "@/components/cvs/player-cv-details/FullEditablePage";
-import { useAppSelector } from "@/lib/hooks/reduxHooks";
+import { useAppSelector } from "@/hooks/reduxHooks";
 import { AuthState } from "@/redux/features/auth";
 
 const FullEditableCv = ({ editable = true }: { editable?: boolean }) => {

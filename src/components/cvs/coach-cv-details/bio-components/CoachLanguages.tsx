@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import CMSField from "@/components/shared/CMSField";
-import { useCoach } from "@/lib/hooks/useCoach";
+import { useCoach } from "@/hooks/useCoach";
 
 export const CoachLanguages = ({ canEdit }: { canEdit: boolean }) => {
   const { coachData, handleUpdate } = useCoach();

@@ -1,11 +1,14 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
-import { cvApi } from "./features/cv/cvApi";
-import { playerSlice } from "./features/player/playerSlice";
-import { coachSlice } from "./features/coach/coachSlice";
-import authReducer from "@/redux/features/auth";
-import evaluationReducer from "./features/evaluation/evaluationSlice";
-import reportsReducer from "./features/reports/reportsSlice";
-import { parentSlice } from "./features/parent/parentSlice";
+import { apiSlice } from "../features/api/apiSlice";
+import { cvApi } from "@/redux/features/cv/cvApi";
+import { playerSlice } from "@/redux/features/player/playerSlice";
+import { coachSlice } from "@/redux/features/coach/coachSlice";
+import authReducer from "../features/auth";
+import evaluationReducer from "@/redux/features/evaluation/evaluationSlice";
+import reportsReducer from "@/redux/features/reports/reportsSlice";
+import { parentSlice } from "@/redux/features/parent/parentSlice";
+import faqSliceReducer from "../features/faq/faqSlice";
+import contentSliceReducer from "../features/content/contentSlice";
 import {
   persistReducer,
   persistStore,
@@ -65,6 +68,7 @@ const persistedParentReducer = persistReducer(
 );
 
 const rootReducer = combineReducers({
+  [apiSlice.reducerPath]: apiSlice.reducer,
   [cvApi.reducerPath]: cvApi.reducer,
   player: playerSlice.reducer,
   coach: coachSlice.reducer,
@@ -72,9 +76,11 @@ const rootReducer = combineReducers({
   evaluation: persistedEvaluationReducer,
   reports: persistedReportsReducer,
   parent: persistedParentReducer,
+  faq: faqSliceReducer,
+  content: contentSliceReducer,
 });
 
-// Single store instance — shared across the entire app
+// Single store instance — main store in redux folder
 export const store = configureStore({
   reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
@@ -82,10 +88,9 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(cvApi.middleware),
+    }).concat(apiSlice.middleware, cvApi.middleware),
 });
 
-// Single persistor bound to the single store
 export const persistor = persistStore(store);
 
 export type AppStore = typeof store;

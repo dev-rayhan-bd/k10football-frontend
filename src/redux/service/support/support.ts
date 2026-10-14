@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { baseApi } from "@/redux/api/baseApi";
+import { apiSlice } from "@/redux/features/api/apiSlice";
 
-const supportApi = baseApi.injectEndpoints({
+const supportApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getSupportRequests: builder.query({
       query: (params) => ({
