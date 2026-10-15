@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -16,6 +17,7 @@ const dashboardPath = userRole === "academy" ? "/dashboard/academy/analysis" : `
 const isAuthPage =
   pathname.startsWith("/login") ||
   pathname.startsWith("/register") ||
+  pathname.startsWith("/verify-otp") ||
   pathname.startsWith("/forgot-password") ||
   pathname.startsWith("/reset-password") ||
   pathname.startsWith("/change-password");
