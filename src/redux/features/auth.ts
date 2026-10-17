@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { getDecodedToken } from "@/helpers/SessionHelper";
 
 export interface AuthState {
   user: any;
@@ -9,14 +10,16 @@ export interface AuthState {
 
 const getInitialAuth = () => {
   if (typeof window === "undefined") return { user: null, accessToken: null, refreshToken: null };
-  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-  const userRole = localStorage.getItem("userRole");
-  const userEmail = localStorage.getItem("userEmail");
+  const token = localStorage.getItem("token");
+  const decoded = getDecodedToken(token);
+  const userRole = decoded?.role ? decoded.role.toLowerCase() : null;
+  const userEmail = decoded?.email || localStorage.getItem("userEmail") || localStorage.getItem("email");
+  const fullName = localStorage.getItem("fullName") || "";
 
-  if (isLoggedIn) {
+  if (token && decoded && userRole) {
     return {
-      user: { email: userEmail, role: userRole },
-      accessToken: "dummy-token",
+      user: { email: userEmail, role: userRole, fullName },
+      accessToken: token,
       refreshToken: null,
     };
   }
@@ -46,6 +49,14 @@ const authSlice = createSlice({
     logout(state) {
       state.user = null;
       state.accessToken = null;
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("userRole");
+        localStorage.removeItem("role");
+        localStorage.removeItem("userEmail");
+        localStorage.removeItem("fullName");
+      }
       window.location.href = "/login";
     },
   },

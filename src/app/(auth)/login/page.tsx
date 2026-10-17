@@ -1,190 +1,203 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { Eye, EyeOff, Lock, Mail, LogIn, Loader2, CheckCircle2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useAppDispatch } from "@/hooks/reduxHooks";
 import { setAccessToken, setUser } from "@/redux/features/auth";
+import { useLoginMutation } from "@/redux/features/auth/authApi";
+import { setToken, setUserInfo, getUserRoleFromToken } from "@/helpers/SessionHelper";
 
 interface LoginForm {
   email: string;
   password: string;
 }
 
-const REDIRECT_MAP: Record<string, string> = {
-  "player@gmail.com": "/dashboard/player",
-  "coach@gmail.com": "/dashboard/coach",
-  "academy@gmail.com": "/dashboard/academy/analysis",
-  "club@gmail.com": "/dashboard/club",
-  "agent@gmail.com": "/dashboard/agent",
-  "admin@gmail.com": "/dashboard/admin",
-  "parent@gmail.com": "/dashboard/parent",
-};
-
 const LoginPage = () => {
-const router = useRouter();
-const dispatch = useAppDispatch();
-const [showPassword, setShowPassword] = useState(false);
-const {
-register,
-handleSubmit,
-formState: { errors, isSubmitting },
-} = useForm<LoginForm>({
-defaultValues: {
-  email: "",
-  password: "",
-},
-});
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const [showPassword, setShowPassword] = useState(false);
+  const [login, { isLoading }] = useLoginMutation();
 
-const onSubmit = async (data: LoginForm) => {
-const email = data.email.toLowerCase();
-const redirectPath = REDIRECT_MAP[email] || "/dashboard/player"; // Default to player if not matched
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginForm>({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-// Simulate API call
-await new Promise((resolve) => setTimeout(resolve, 1000));
+  const onSubmit = async (data: LoginForm) => {
+    try {
+      const res = await login({
+        email: data.email.trim().toLowerCase(),
+        password: data.password,
+      }).unwrap();
 
-localStorage.setItem("isLoggedIn", "true");
-localStorage.setItem("userEmail", email);
-const role = redirectPath.startsWith("/dashboard/") ? redirectPath.split("/")[2] : "player";
-localStorage.setItem("userRole", role);
+      const user = res?.data?.user || res?.data;
+      const token = res?.data?.accessToken;
+      const decodedRole = getUserRoleFromToken(token);
+      const normalizedRole = (decodedRole || user?.role || "player").toLowerCase();
+      const email = user?.email || data.email;
+      const fullName = user?.name || user?.fullName || "";
+      const profileImg = user?.profileImg || "";
 
-// Sync with Redux
-dispatch(setAccessToken("dummy-token"));
-dispatch(setUser({ user: { email, role } }));
+      // Store credentials and accessToken
+      if (token) {
+        setToken(token);
+        localStorage.setItem("token", token);
+      }
+      setUserInfo({ fullName, email, profileImg, role: normalizedRole });
 
-router.push(redirectPath);
+      // Sync Redux
+      if (token) {
+        dispatch(setAccessToken(token));
+      }
+      dispatch(
+        setUser({
+          user: {
+            ...user,
+            email,
+            role: normalizedRole,
+          },
+        })
+      );
+
+      // Role-based destination
+      const dashboardPath =
+        normalizedRole === "academy"
+          ? "/dashboard/academy/analysis"
+          : `/dashboard/${normalizedRole}`;
+
+      router.push(dashboardPath);
+    } catch {
+      // ErrorToast is automatically triggered in authApi onQueryStarted
+    }
+  };
+
+  return (
+    <div className="w-full max-w-lg bg-[#0f1312]/95 backdrop-blur-2xl border border-white/15 p-8 sm:p-10 rounded-3xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95)] ring-1 ring-white/10 animate-in fade-in zoom-in-95 duration-500 flex flex-col items-center text-center">
+      {/* Glowing Header Icon */}
+      <div className="size-16 rounded-2xl bg-primary/10 border border-primary/30 flex items-center justify-center text-primary mb-6 shadow-[0_0_30px_-5px_rgba(0,255,98,0.4)]">
+        <LogIn className="size-8" />
+      </div>
+
+      {/* Header */}
+      <h2 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight font-heading">
+        Welcome <span className="text-primary italic">Back!</span>
+      </h2>
+      <p className="text-zinc-300 text-xs sm:text-sm mt-2 font-normal leading-relaxed max-w-sm">
+        Sign in to access your professional football dashboard.
+      </p>
+
+      {/* Form */}
+      <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col gap-5 mt-8 text-left">
+        {/* Email Field */}
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-bold text-zinc-200 uppercase tracking-wider flex items-center justify-between">
+            <span>Email Address</span>
+            <span className="text-primary font-black">*</span>
+          </label>
+          <div className="relative group">
+            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-zinc-400 group-focus-within:text-primary transition-colors pointer-events-none" />
+            <input
+              type="email"
+              placeholder="e.g. player@gmail.com"
+              {...register("email", {
+                required: "Email is required",
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Invalid email address",
+                },
+              })}
+              className="w-full pl-10 pr-4 py-3.5 rounded-xl border border-white/20 bg-[#161a18] text-white placeholder:text-zinc-500 font-medium text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-inner"
+            />
+          </div>
+          {errors.email && (
+            <p className="text-red-400 text-xs font-bold tracking-wide mt-1">
+              {errors.email.message}
+            </p>
+          )}
+        </div>
+
+        {/* Password Field */}
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-bold text-zinc-200 uppercase tracking-wider flex items-center gap-1">
+              <span>Password</span>
+              <span className="text-primary font-black">*</span>
+            </label>
+            <Link
+              href="/forgot-password"
+              className="text-xs font-bold text-primary hover:underline transition-colors tracking-wide"
+            >
+              Forgot Password?
+            </Link>
+          </div>
+          <div className="relative group">
+            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-zinc-400 group-focus-within:text-primary transition-colors pointer-events-none" />
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••"
+              {...register("password", {
+                required: "Password is required",
+                minLength: {
+                  value: 6,
+                  message: "Password must be at least 6 characters",
+                },
+              })}
+              className="w-full pl-10 pr-10 py-3.5 rounded-xl border border-white/20 bg-[#161a18] text-white placeholder:text-zinc-500 font-medium text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-inner"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors cursor-pointer p-1"
+            >
+              {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            </button>
+          </div>
+          {errors.password && (
+            <p className="text-red-400 text-xs font-bold tracking-wide mt-1">
+              {errors.password.message}
+            </p>
+          )}
+        </div>
+
+        {/* Sign In Button */}
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className="w-full py-4 rounded-xl font-black text-black text-sm uppercase tracking-wider bg-primary hover:bg-primary/95 transition-all shadow-[0_0_25px_-5px_rgba(0,255,98,0.5)] hover:shadow-[0_0_35px_-5px_rgba(0,255,98,0.7)] disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2 mt-2"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              Authenticating...
+            </>
+          ) : (
+            <>
+              <CheckCircle2 className="size-4" />
+              Sign In
+            </>
+          )}
+        </Button>
+
+        {/* Register Link */}
+        <p className="text-center text-zinc-400 text-xs sm:text-sm font-medium mt-2">
+          Don&apos;t have an account?{" "}
+          <Link href="/register" className="text-primary hover:underline font-bold transition-all ml-1">
+            Sign Up
+          </Link>
+        </p>
+      </form>
+    </div>
+  );
 };
 
-return (
-<div className="w-full max-w-md p-8 rounded-2xl bg-cardBg/50 backdrop-blur-xl border border-white/10 shadow-2xl">
-  {/* Header */}
-  <div className="text-center mb-10">
-    <h1 className="text-4xl font-bold text-white mb-2 font-heading tracking-tight">
-      Welcome <span className="text-primary italic">Back!</span>
-    </h1>
-    <p className="text-gray-400 text-sm leading-relaxed">
-      Access your professional football dashboard.
-    </p>
-  </div>
-
-  {/* Form */}
-  <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-    {/* Email Field */}
-    <div className="space-y-1.5">
-      <label className="text-xs font-semibold text-gray-400 uppercase tracking-widest ml-1">
-        Email Address
-      </label>
-      <div className="relative group">
-        <div className="absolute inset-0 bg-primary/20 rounded-lg blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
-        <Mail
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-primary/70 group-focus-within:text-primary transition-colors"
-          size={18}
-        />
-        <input
-          type="email"
-          placeholder="e.g. player@gmail.com"
-          {...register("email", {
-            required: "Email is required",
-            pattern: {
-              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-              message: "Invalid email address",
-            },
-          })}
-          className="relative w-full pl-10 pr-4 py-3.5 rounded-lg border border-white/5 bg-black/40 text-white placeholder:text-gray-600 focus:outline-none focus:border-primary/50 transition-all"
-        />
-      </div>
-      {errors.email && (
-        <p className="text-red-500 text-[10px] font-medium uppercase tracking-wider ml-1 mt-1">
-          {errors.email.message}
-        </p>
-      )}
-      {!errors.email && (
-        <div className="text-[10px] ml-1 mt-1 leading-relaxed">
-          <span className="text-gray-500">Test Emails: </span>
-          {Object.keys(REDIRECT_MAP).map((email, i) => (
-            <span key={email}>
-              <span className="text-primary/70">{email}</span>
-              {i < Object.keys(REDIRECT_MAP).length - 1 && <span className="text-gray-600">, </span>}
-            </span>
-          ))}
-        </div>
-      )}
-    </div>
-
-    {/* Password Field */}
-    <div className="space-y-1.5">
-      <label className="text-xs font-semibold text-gray-400 uppercase tracking-widest ml-1">
-        Password
-      </label>
-      <div className="relative group">
-        <div className="absolute inset-0 bg-primary/20 rounded-lg blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
-        <Lock
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-primary/70 group-focus-within:text-primary transition-colors"
-          size={18}
-        />
-        <input
-          type={showPassword ? "text" : "password"}
-          placeholder="••••••••"
-          {...register("password", {
-            required: "Password is required",
-            minLength: {
-              value: 6,
-              message: "At least 6 characters",
-            },
-          })}
-          className="relative w-full pl-10 pr-12 py-3.5 rounded-lg border border-white/5 bg-black/40 text-white placeholder:text-gray-600 focus:outline-none focus:border-primary/50 transition-all"
-        />
-        <button
-          type="button"
-          onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
-        >
-          {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
-        </button>
-      </div>
-      {errors.password && (
-        <p className="text-red-500 text-[10px] font-medium uppercase tracking-wider ml-1 mt-1">
-          {errors.password.message}
-        </p>
-      )}
-      {!errors.password && (
-        <p className="text-gray-500 text-[10px] ml-1 mt-1">
-          Test Password: <span className="text-primary/80">1 to 6</span>
-        </p>
-      )}
-    </div>
-
-    {/* Forgot Password Link */}
-    <div className="flex justify-end">
-      <Link
-        href="/forgot-password"
-        className="text-primary text-xs font-bold hover:text-primary/80 transition-colors tracking-wide"
-      >
-        FORGOT PASSWORD?
-      </Link>
-    </div>
-
-    {/* Sign In Button */}
-    <Button
-      type="submit"
-      disabled={isSubmitting}
-      className="w-full py-7 rounded-lg font-bold text-black text-sm uppercase tracking-[0.2em] bg-primary hover:bg-primary/90 transition-all shadow-[0_0_20px_-5px_rgba(0,255,100,0.4)] hover:shadow-[0_0_25px_-5px_rgba(0,255,100,0.6)] disabled:opacity-50"
-    >
-      {isSubmitting ? "Authenticating..." : "Sign In"}
-    </Button>
-
-    {/* Register Hint */}
-    <p className="text-center text-gray-500 text-xs mt-6 uppercase tracking-widest">
-      Don&apos;t have an account?{" "}
-      <Link href="/register" className="text-white hover:text-primary transition-colors">
-        Sign Up
-      </Link>
-    </p>
-  </form>
-</div>
-);
-}
 export default LoginPage;

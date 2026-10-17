@@ -69,7 +69,7 @@ export const authApi = apiSlice.injectEndpoints({
     }),
     login: builder.mutation({
       query: (data) => ({
-        url: "/auth/login-admin",
+        url: "/users/login",
         method: "POST",
         body: data,
       }),
@@ -77,11 +77,20 @@ export const authApi = apiSlice.injectEndpoints({
         try {
           const res = await queryFulfilled;
           const token = res?.data?.data?.accessToken;
-          removeToken();
-          setToken(token);
-          const { fullName, email, profileImg, role } = res?.data?.data || {};
+          const user = res?.data?.data?.user || res?.data?.data || {};
+          const rawRole = user?.role || "PLAYER";
+          const role = rawRole.toLowerCase();
+          const fullName = user?.name || user?.fullName || "";
+          const email = user?.email || "";
+          const profileImg = user?.profileImg || "";
+
+          if (token) {
+            removeToken();
+            setToken(token);
+          }
+
           setUserInfo({ fullName, email, profileImg, role });
-          SuccessToast("Login Successfull");
+          SuccessToast(res?.data?.message || "Login Successful");
         } catch (err: any) {
           const status = err?.error?.status;
           const message = err?.error?.data?.message || "Something Went Wrong";
@@ -147,7 +156,7 @@ export const authApi = apiSlice.injectEndpoints({
     }),
     forgotPasswordSendOtp: builder.mutation({
       query: (data) => ({
-        url: "/auth/forgot-password/send-otp",
+        url: "/users/forgot-password",
         method: "POST",
         body: data,
       }),
@@ -191,7 +200,7 @@ export const authApi = apiSlice.injectEndpoints({
     }),
     forgotPasswordVerifyOtp: builder.mutation({
       query: (data) => ({
-        url: "/auth/forgot-password/verify-otp",
+        url: "/users/verify-reset-otp",
         method: "POST",
         body: data,
       }),
@@ -235,7 +244,7 @@ export const authApi = apiSlice.injectEndpoints({
     }),
     forgotPasswordReset: builder.mutation({
       query: (data) => ({
-        url: `/auth/forgot-password/set-new-password`,
+        url: `/users/reset-password`,
         method: "POST",
         body: data,
       }),

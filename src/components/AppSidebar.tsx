@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import logo from "@/assets/logo.png";
 import NavDocuments from "@/components/NavDocuments";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
+import { removeToken, removeUserInfo } from "@/helpers/SessionHelper";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Icon } from "@tabler/icons-react";
 export type SidebarItem = {
@@ -26,10 +27,9 @@ const { state } = useSidebar();
 const collapsed = state === "collapsed";
 
 const handleLogout = () => {
-localStorage.removeItem("isLoggedIn");
-localStorage.removeItem("userEmail");
-localStorage.removeItem("userRole");
-router.replace("/login");
+  removeToken();
+  removeUserInfo();
+  router.replace("/login");
 };
 
 return (

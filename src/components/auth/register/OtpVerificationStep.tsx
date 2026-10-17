@@ -1,4 +1,5 @@
-import { FC } from "react";
+import { FC, ReactNode } from "react";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { Button } from "@/components/ui/button";
 import {
   InputOTP,
@@ -20,6 +21,11 @@ interface OtpVerificationStepProps {
   resendTimer: number;
   onBack: () => void;
   backButtonText?: string;
+  title?: ReactNode;
+  subtitle?: ReactNode;
+  icon?: ReactNode;
+  verifyButtonText?: string;
+  verifyingButtonText?: string;
 }
 
 const OtpVerificationStep: FC<OtpVerificationStepProps> = ({
@@ -33,29 +39,47 @@ const OtpVerificationStep: FC<OtpVerificationStepProps> = ({
   canResend,
   resendTimer,
   onBack,
-  backButtonText = "← Back to registration"
+  backButtonText = "← Back to registration",
+  title,
+  subtitle,
+  icon,
+  verifyButtonText = "Verify & Activate Account",
+  verifyingButtonText = "Verifying OTP..."
 }) => {
   return (
     <div className="w-full max-w-lg bg-[#0f1312]/95 backdrop-blur-2xl border border-white/15 p-8 sm:p-10 rounded-3xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95)] ring-1 ring-white/10 animate-in fade-in zoom-in-95 duration-500 flex flex-col items-center text-center">
       {/* Glowing Shield Icon */}
       <div className="size-16 rounded-2xl bg-primary/10 border border-primary/30 flex items-center justify-center text-primary mb-6 shadow-[0_0_30px_-5px_rgba(0,255,98,0.4)]">
-        <ShieldCheck className="size-8" />
+        {icon || <ShieldCheck className="size-8" />}
       </div>
 
       <h2 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight font-heading">
-        Verify <span className="text-primary italic">Account</span>
+        {title || (
+          <>
+            Verify <span className="text-primary italic">Account</span>
+          </>
+        )}
       </h2>
       <p className="text-zinc-300 text-sm mt-2 font-normal leading-relaxed max-w-sm">
-        We sent a 6-digit verification code to{" "}
-        <span className="text-white font-bold block mt-1">{registeredEmail}</span>
+        {subtitle || (
+          <>
+            We sent a 6-digit verification code to{" "}
+            <span className="text-white font-bold block mt-1">{registeredEmail}</span>
+          </>
+        )}
       </p>
 
       {/* Shadcn InputOTP Component */}
       <div className="my-8 flex flex-col items-center gap-3">
         <InputOTP
           maxLength={6}
+          pattern={REGEXP_ONLY_DIGITS}
+          inputMode="numeric"
           value={otpValue}
-          onChange={(value) => setOtpValue(value)}
+          onChange={(value) => {
+            const numericValue = value.replace(/\D/g, "");
+            setOtpValue(numericValue);
+          }}
         >
           <InputOTPGroup>
             <InputOTPSlot index={0} />
@@ -79,18 +103,18 @@ const OtpVerificationStep: FC<OtpVerificationStepProps> = ({
         <Button
           type="button"
           onClick={onVerifyOtp}
-          disabled={isVerifyingOtp || otpValue.length < 6}
+          disabled={isVerifyingOtp || otpValue.length < 6 || !/^\d{6}$/.test(otpValue)}
           className="w-full py-4 rounded-xl font-black text-black text-sm uppercase tracking-wider bg-primary hover:bg-primary/95 transition-all shadow-[0_0_25px_-5px_rgba(0,255,98,0.5)] hover:shadow-[0_0_35px_-5px_rgba(0,255,98,0.7)] disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
         >
           {isVerifyingOtp ? (
             <>
               <Loader2 className="size-4 animate-spin" />
-              Verifying OTP...
+              {verifyingButtonText}
             </>
           ) : (
             <>
               <CheckCircle2 className="size-4" />
-              Verify & Activate Account
+              {verifyButtonText}
             </>
           )}
         </Button>

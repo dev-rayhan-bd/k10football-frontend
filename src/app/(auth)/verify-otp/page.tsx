@@ -41,8 +41,8 @@ const VerifyOtpContent = () => {
 
   // Verify OTP
   const handleVerifyOtp = async () => {
-    if (otpValue.length < 6) {
-      toast.error("Please enter the 6-digit verification code");
+    if (otpValue.length < 6 || !/^\d{6}$/.test(otpValue)) {
+      toast.error("Please enter a valid 6-digit numeric verification code");
       return;
     }
 
