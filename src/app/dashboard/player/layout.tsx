@@ -10,6 +10,10 @@ import {
   IconSettings
 } from "@tabler/icons-react";
 import { ReactNode } from "react";
+import {
+  MediaUploadProvider,
+  GlobalUploadWidget,
+} from "@/providers/MediaUploadProvider";
 
 const playerSidebarItems = [
   { name: "Dashboard", url: "/dashboard/player", icon: IconDashboard },
@@ -23,12 +27,15 @@ const playerSidebarItems = [
 
 const PlayerLayout = ({ children }: { children: ReactNode }) => {
   return (
-    <DashboardLayout
-      sidebarItems={playerSidebarItems}
-      tier={{ name: "GOLD", color: "var(--gold)" }}
-    >
-      {children}
-    </DashboardLayout>
+    <MediaUploadProvider>
+      <DashboardLayout
+        sidebarItems={playerSidebarItems}
+        tier={{ name: "GOLD", color: "var(--gold)" }}
+      >
+        <GlobalUploadWidget />
+        {children}
+      </DashboardLayout>
+    </MediaUploadProvider>
   );
-}
+};
 export default PlayerLayout;

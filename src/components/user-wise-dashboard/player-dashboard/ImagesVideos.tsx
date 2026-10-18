@@ -8,6 +8,7 @@ import {
   IconUpload,
 } from "@tabler/icons-react";
 import { useGetMyPlayerMediaQuery } from "@/redux/features/player/playerApi";
+import { useMediaUpload } from "@/providers/MediaUploadProvider";
 import {
   MediaItem,
   MediaStat,
@@ -17,9 +18,13 @@ import {
   MediaSection,
   UploadMediaModal,
   MediaViewerModal,
+  MediaUploadProgressWidget,
 } from "./images-videos";
 
 const PlayerImagesAndVideos = () => {
+  // Global Upload Context
+  const { activeUploadTask, startUpload, cancelUpload, dismissUpload } = useMediaUpload();
+
   // Fetch Images from API
   const {
     data: imagesResponse,
@@ -116,6 +121,15 @@ const PlayerImagesAndVideos = () => {
 
   return (
     <div className="flex flex-col gap-10 pb-16">
+      {/* Live Upload Percentage Widget (Above Header Cards) */}
+      {activeUploadTask && (
+        <MediaUploadProgressWidget
+          task={activeUploadTask}
+          onCancel={cancelUpload}
+          onDismiss={dismissUpload}
+        />
+      )}
+
       {/* Header & Stats */}
       <MediaStatsHeader stats={stats} />
 
@@ -155,6 +169,7 @@ const PlayerImagesAndVideos = () => {
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
         type={uploadModalType}
+        onStartUpload={startUpload}
       />
 
       {/* Lightbox / Video Viewer Modal */}

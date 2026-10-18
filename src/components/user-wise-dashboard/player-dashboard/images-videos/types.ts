@@ -24,3 +24,14 @@ export interface PreviewMedia {
   url: string;
   title: string;
 }
+
+export interface UploadTask {
+  title: string;
+  fileName: string;
+  type: UploadMediaType;
+  progress: number;
+  status: "uploading" | "processing" | "success" | "error";
+  thumbnailPreview?: string | null;
+  errorMessage?: string;
+}
+

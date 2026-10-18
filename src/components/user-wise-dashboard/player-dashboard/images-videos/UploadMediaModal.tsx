@@ -24,16 +24,26 @@ import { useUploadPlayerMediaMutation } from "@/redux/features/player/playerApi"
 import { ErrorToast } from "@/helpers/ValidationHelper";
 import { UploadMediaType } from "./types";
 
+export interface UploadStartPayload {
+  formData: FormData;
+  title: string;
+  fileName: string;
+  type: UploadMediaType;
+  thumbnailPreview?: string | null;
+}
+
 interface UploadMediaModalProps {
   isOpen: boolean;
   onClose: () => void;
   type: UploadMediaType;
+  onStartUpload?: (payload: UploadStartPayload) => void;
 }
 
 export const UploadMediaModal: React.FC<UploadMediaModalProps> = ({
   isOpen,
   onClose,
   type,
+  onStartUpload,
 }) => {
   const [uploadPlayerMedia, { isLoading: isUploading }] = useUploadPlayerMediaMutation();
 
@@ -131,19 +141,32 @@ export const UploadMediaModal: React.FC<UploadMediaModalProps> = ({
       return;
     }
 
-    try {
-      const formData = new FormData();
-      formData.append("data", JSON.stringify({ title: title.trim() }));
+    const formData = new FormData();
+    formData.append("data", JSON.stringify({ title: title.trim() }));
 
-      if (type === "image") {
-        formData.append("image", selectedFile);
-      } else {
-        formData.append("video", selectedFile);
-        if (selectedThumbnailFile) {
-          formData.append("thumbnail", selectedThumbnailFile);
-        }
+    if (type === "image") {
+      formData.append("image", selectedFile);
+    } else {
+      formData.append("video", selectedFile);
+      if (selectedThumbnailFile) {
+        formData.append("thumbnail", selectedThumbnailFile);
       }
+    }
 
+    if (onStartUpload) {
+      onStartUpload({
+        formData,
+        title: title.trim(),
+        fileName: selectedFile.name,
+        type,
+        thumbnailPreview: type === "video" ? thumbnailPreviewUrl : previewUrl,
+      });
+      resetForm();
+      onClose();
+      return;
+    }
+
+    try {
       await uploadPlayerMedia(formData).unwrap();
       resetForm();
       onClose();

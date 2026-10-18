@@ -294,17 +294,16 @@ export const authApi = apiSlice.injectEndpoints({
     }),
     changePassword: builder.mutation({
       query: (data) => ({
-        url: "/auth/change-password",
-        method: "PATCH",
+        url: "/users/change-password",
+        method: "POST",
         body: data,
       }),
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
-          const res = await queryFulfilled;
+          await queryFulfilled;
           SuccessToast("Password is updated successfully");
-          const token = res?.data?.data?.accessToken;
-          removeToken();
-          setToken(token);
+          localStorage.clear();
+          window.location.href = "/login";
         } catch (err: any) {
           const status = err?.error?.status;
           const message = err?.error?.data?.message || "Something Went Wrong";

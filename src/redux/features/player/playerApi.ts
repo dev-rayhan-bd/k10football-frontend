@@ -3,6 +3,7 @@ import { apiSlice } from "../api/apiSlice";
 import TagTypes from "@/constants/tagType.constant";
 import { SuccessToast, ErrorToast } from "@/helpers/ValidationHelper";
 import { IParam } from "@/types/global.type";
+import { IPlayerProfileResponse } from "@/types/player.type";
 
 export const playerApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
@@ -31,7 +32,7 @@ export const playerApi = apiSlice.injectEndpoints({
             providesTags: [TagTypes.PLAYERS],
         }),
 
-        getMyPlayerProfile: builder.query({
+        getMyPlayerProfile: builder.query<IPlayerProfileResponse, void>({
             query: () => ({
                 url: "/players/me",
                 method: "GET",
@@ -39,12 +40,72 @@ export const playerApi = apiSlice.injectEndpoints({
             providesTags: [TagTypes.PLAYERS],
         }),
 
-        getMyPlayerAttributes: builder.query({
+        updateMyPlayerProfile: builder.mutation({
+            query: (data) => ({
+                url: "/players/me",
+                method: "PATCH",
+                body: data,
+            }),
+            invalidatesTags: (result) => {
+                if (result?.success) {
+                    return [TagTypes.PLAYERS, TagTypes.PROFILE];
+                }
+                return [];
+            },
+            async onQueryStarted(_arg, { queryFulfilled }) {
+                try {
+                    await queryFulfilled;
+                    SuccessToast("Update Success");
+                } catch (err: any) {
+                    const status = err?.error?.status;
+                    const message = err?.error?.data?.message || "Something Went Wrong";
+                    if (status === 500) {
+                        ErrorToast("Something went wrong.");
+                        return;
+                    }
+                    if (status !== 401) {
+                        ErrorToast(message);
+                    }
+                }
+            },
+        }),
+
+        getMyPlayerAttributes: builder.query<any, void>({
             query: () => ({
                 url: "/players/me/attributes",
                 method: "GET",
             }),
             providesTags: [TagTypes.PLAYERS],
+        }),
+
+        updateMyPlayerAttributes: builder.mutation({
+            query: (data) => ({
+                url: "/players/me/attributes",
+                method: "PATCH",
+                body: data,
+            }),
+            invalidatesTags: (result) => {
+                if (result?.success) {
+                    return [TagTypes.PLAYERS];
+                }
+                return [];
+            },
+            async onQueryStarted(_arg, { queryFulfilled }) {
+                try {
+                    await queryFulfilled;
+                    SuccessToast("Player attributes updated successfully");
+                } catch (err: any) {
+                    const status = err?.error?.status;
+                    const message = err?.error?.data?.message || "Something Went Wrong";
+                    if (status === 500) {
+                        ErrorToast("Something Went Wrong");
+                        return;
+                    }
+                    if (status !== 401) {
+                        ErrorToast(message);
+                    }
+                }
+            },
         }),
 
         getPlayerById: builder.query({
@@ -117,8 +178,14 @@ export const playerApi = apiSlice.injectEndpoints({
 export const {
     useGetPlayersQuery,
     useGetMyPlayerProfileQuery,
+    useUpdateMyPlayerProfileMutation,
     useGetMyPlayerAttributesQuery,
+    useUpdateMyPlayerAttributesMutation,
     useGetPlayerByIdQuery,
     useGetMyPlayerMediaQuery,
     useUploadPlayerMediaMutation,
 } = playerApi;
+
+// Export aliases for convenience
+export const useGetMyProfileQuery = useGetMyPlayerProfileQuery;
+export const useGetMyPlayerQuery = useGetMyPlayerProfileQuery;

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { IconCalendar } from "@tabler/icons-react";
+import { IconCalendar, IconLock } from "@tabler/icons-react";
 
 interface SettingsSectionProps {
   title: string;
@@ -21,32 +21,131 @@ export const SettingsSection = ({ title, icon, children, className = "" }: Setti
   </div>
 );
 
-interface SettingsInputProps {
+import { Eye, EyeOff } from "lucide-react";
+
+export interface SettingsInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
   placeholder?: string;
   type?: string;
   isDate?: boolean;
   icon?: React.ReactNode;
   value?: string;
+  defaultValue?: string;
+  disabled?: boolean;
+  readOnly?: boolean;
+  name?: string;
+  className?: string;
+  inputClassName?: string;
+  error?: string;
+  showPasswordToggle?: boolean;
+  required?: boolean;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export const SettingsInput = ({ label, placeholder, type = "text", isDate, icon, value, onChange }: SettingsInputProps) => (
-  <div className="space-y-2">
-    <label className="text-[10px] text-gray-400 uppercase font-black tracking-widest">{label}</label>
-    <div className="relative">
-      <input 
-        type={type} 
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className="w-full h-11 sm:h-12 bg-white/2 border border-white/25 rounded-xl px-3 sm:px-4 text-xs sm:text-sm font-bold text-white focus:outline-none focus:border-[#E31B23]/50 placeholder:text-gray-700 transition-all" 
-      />
-      {isDate && !icon && <IconCalendar className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />}
-      {icon && <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400">{icon}</div>}
+export const SettingsInput = React.forwardRef<HTMLInputElement, SettingsInputProps>(({
+  label,
+  placeholder,
+  type = "text",
+  isDate,
+  icon,
+  value,
+  defaultValue,
+  disabled,
+  readOnly,
+  name,
+  className = "",
+  inputClassName = "",
+  error,
+  showPasswordToggle = true,
+  required,
+  onChange,
+  ...props
+}, ref) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const dateInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  const setRefs = (element: HTMLInputElement | null) => {
+    dateInputRef.current = element;
+    if (typeof ref === "function") {
+      ref(element);
+    } else if (ref) {
+      ref.current = element;
+    }
+  };
+
+  const isPassword = type === "password";
+  const inputType = isDate ? "date" : (isPassword ? (showPassword ? "text" : "password") : type);
+
+  return (
+    <div className={`space-y-1.5 ${className}`}>
+      <label className="text-[10px] sm:text-[11px] text-gray-400 uppercase font-black tracking-widest font-orbitron flex items-center justify-between">
+        <span>{label}</span>
+        {required && <span className="text-[#E31B23] font-bold text-xs">*</span>}
+      </label>
+      <div className="relative">
+        <input
+          ref={setRefs}
+          type={inputType}
+          name={name}
+          value={value}
+          defaultValue={defaultValue}
+          disabled={disabled}
+          readOnly={readOnly}
+          onChange={onChange}
+          placeholder={placeholder}
+          className={`w-full h-11 sm:h-12 bg-white/2 border ${
+            error 
+              ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500/30" 
+              : "border-white/25 hover:border-white/40 focus:border-[#E31B23] focus:ring-1 focus:ring-[#E31B23]/40"
+          } disabled:cursor-not-allowed disabled:text-gray-200 disabled:bg-white/[0.03] disabled:border-white/20 disabled:hover:border-white/20 disabled:focus:border-white/20 disabled:focus:ring-0 rounded-xl px-3 sm:px-4 text-xs sm:text-sm font-bold text-white focus:outline-none placeholder:text-gray-600 transition-all ${
+            isPassword ? "pr-11" : ""
+          } ${
+            isDate
+              ? "[color-scheme:dark] cursor-pointer [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-10 [&::-webkit-calendar-picker-indicator]:h-full"
+              : ""
+          } ${inputClassName}`}
+          {...props}
+        />
+        {isDate && !icon && (
+          <button
+            type="button"
+            tabIndex={-1}
+            onClick={() => dateInputRef.current?.showPicker?.()}
+            className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors cursor-pointer"
+          >
+            <IconCalendar size={18} />
+          </button>
+        )}
+        {isPassword && showPasswordToggle && !disabled && (
+          <button
+            type="button"
+            tabIndex={-1}
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors cursor-pointer p-1"
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        )}
+        {disabled && !icon && !isDate && !isPassword && (
+          <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+            <IconLock size={16} />
+          </div>
+        )}
+        {icon && (
+          <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400">
+            {icon}
+          </div>
+        )}
+      </div>
+      {error && (
+        <p className="text-red-400 text-xs font-bold tracking-wide mt-1 animate-in fade-in duration-200">
+          {error}
+        </p>
+      )}
     </div>
-  </div>
-);
+  );
+});
+SettingsInput.displayName = "SettingsInput";
 
 interface SettingsToggleProps {
   title: string;
