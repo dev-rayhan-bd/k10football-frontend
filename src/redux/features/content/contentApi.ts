@@ -2,15 +2,11 @@
 import { apiSlice } from "../api/apiSlice";
 import TagTypes from "@/constants/tagType.constant";
 import { ErrorToast, SuccessToast } from "@/helpers/ValidationHelper";
-import {
-  IContentResponse,
-  ICreateOrUpdateContentPayload,
-} from "@/types/content.type";
 import { SetCreateUpdateContentError } from "./contentSlice";
 
 export const contentApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getContentByType: builder.query<IContentResponse, string>({
+    getContentByType: builder.query({
       query: (type: string) => ({
         url: `/content/content-by-type/${type}`,
         method: "GET",
@@ -21,10 +17,7 @@ export const contentApi = apiSlice.injectEndpoints({
       ],
     }),
 
-    createUpdateContent: builder.mutation<
-      IContentResponse,
-      ICreateOrUpdateContentPayload
-    >({
+    createUpdateContent: builder.mutation({
       query: (data) => ({
         url: "/content/create-update",
         method: "PATCH",

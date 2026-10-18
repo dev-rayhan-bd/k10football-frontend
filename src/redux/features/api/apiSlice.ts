@@ -23,7 +23,7 @@ export const apiSlice = createApi({
         if (result?.error?.status === 401) {
             removeToken();
             removeUserInfo();
-            window.location.href = "/login";
+            window.location.href = "/";
         }
         return result;
     },

@@ -1,11 +1,10 @@
+import { IParam } from "@/types/global.type";
 import { apiSlice } from "../api/apiSlice";
 import TagTypes from "@/constants/tagType.constant";
-import { IParam } from "@/types/global.type";
-import { ISupportResponse } from "@/types/support.type";
 
 export const supportApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getSupports: builder.query<ISupportResponse, IParam[] | undefined>({
+    getSupports: builder.query({
       query: (args) => {
         const params = new URLSearchParams();
         if (args !== undefined && args.length > 0) {

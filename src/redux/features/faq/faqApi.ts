@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { apiSlice } from "../api/apiSlice";
 import TagTypes from "@/constants/tagType.constant";
-import { ErrorToast, SuccessToast } from "@/helpers/ValidationHelper";
-import { IParam } from "@/types/global.type";
+import { SuccessToast } from "@/helpers/ValidationHelper";
 import { SetCreateFaqError, SetUpdateFaqError, SetDeleteFaqError } from "./faqSlice";
+import { IParam } from "@/types/global.type";
 
 export const faqApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({

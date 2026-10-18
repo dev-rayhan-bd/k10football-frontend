@@ -9,6 +9,8 @@ const TagTypes = {
     CONTENT: "Content",
     PROFILE: "Profile",
     DASHBOARD: "Dashboard",
+    PLAYERS: "Players",
+    players: "Players",
 } as const;
 
 export default TagTypes;

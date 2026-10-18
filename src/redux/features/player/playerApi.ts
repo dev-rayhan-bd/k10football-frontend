@@ -1,0 +1,124 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { apiSlice } from "../api/apiSlice";
+import TagTypes from "@/constants/tagType.constant";
+import { SuccessToast, ErrorToast } from "@/helpers/ValidationHelper";
+import { IParam } from "@/types/global.type";
+
+export const playerApi = apiSlice.injectEndpoints({
+    endpoints: (builder) => ({
+        getPlayers: builder.query({
+            query: (args) => {
+                const params = new URLSearchParams();
+                if (Array.isArray(args)) {
+                    args.forEach((item: IParam) => {
+                        if (item.value !== undefined && item.value !== null && item.value !== "") {
+                            params.append(item.name, String(item.value));
+                        }
+                    });
+                } else if (args && typeof args === "object") {
+                    Object.entries(args).forEach(([key, value]) => {
+                        if (value !== undefined && value !== null && value !== "") {
+                            params.append(key, String(value));
+                        }
+                    });
+                }
+                return {
+                    url: "/players",
+                    method: "GET",
+                    params: params,
+                };
+            },
+            providesTags: [TagTypes.PLAYERS],
+        }),
+
+        getMyPlayerProfile: builder.query({
+            query: () => ({
+                url: "/players/me",
+                method: "GET",
+            }),
+            providesTags: [TagTypes.PLAYERS],
+        }),
+
+        getMyPlayerAttributes: builder.query({
+            query: () => ({
+                url: "/players/me/attributes",
+                method: "GET",
+            }),
+            providesTags: [TagTypes.PLAYERS],
+        }),
+
+        getPlayerById: builder.query({
+            query: (id: string | number) => ({
+                url: `/players/${id}`,
+                method: "GET",
+            }),
+            providesTags: [TagTypes.PLAYERS],
+        }),
+
+        getMyPlayerMedia: builder.query({
+            query: (args) => {
+                const params = new URLSearchParams();
+                if (Array.isArray(args)) {
+                    args.forEach((item: IParam) => {
+                        if (item.value !== undefined && item.value !== null && item.value !== "") {
+                            params.append(item.name, String(item.value));
+                        }
+                    });
+                } else if (args && typeof args === "object") {
+                    Object.entries(args).forEach(([key, value]) => {
+                        if (value !== undefined && value !== null && value !== "") {
+                            params.append(key, String(value));
+                        }
+                    });
+                }
+                return {
+                    url: "/players/me/media",
+                    method: "GET",
+                    params: params,
+                };
+            },
+            providesTags: [TagTypes.PLAYERS],
+        }),
+
+        uploadPlayerMedia: builder.mutation({
+            query: (data) => {
+                return {
+                    url: `/players/me/media`,
+                    method: "POST",
+                    body: data,
+                };
+            },
+            invalidatesTags: (result) => {
+                if (result?.success) {
+                    return [TagTypes.PLAYERS];
+                }
+                return [];
+            },
+            async onQueryStarted(_arg, { queryFulfilled }) {
+                try {
+                    await queryFulfilled;
+                    SuccessToast("Media uploaded successfully");
+                } catch (err: any) {
+                    const status = err?.error?.status;
+                    const message = err?.error?.data?.message || "Something Went Wrong";
+                    if (status === 500) {
+                        ErrorToast("Something Went Wrong");
+                        return;
+                    }
+                    if (status !== 401) {
+                        ErrorToast(message);
+                    }
+                }
+            },
+        }),
+    }),
+});
+
+export const {
+    useGetPlayersQuery,
+    useGetMyPlayerProfileQuery,
+    useGetMyPlayerAttributesQuery,
+    useGetPlayerByIdQuery,
+    useGetMyPlayerMediaQuery,
+    useUploadPlayerMediaMutation,
+} = playerApi;

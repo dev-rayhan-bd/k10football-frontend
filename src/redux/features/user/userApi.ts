@@ -4,8 +4,6 @@ import TagTypes from "@/constants/tagType.constant";
 import { ErrorToast, SuccessToast } from "@/helpers/ValidationHelper";
 import { setUserInfo, getUserInfo } from "@/helpers/SessionHelper";
 import { IParam } from "@/types/global.type";
-import { IProfileResponse } from "@/types/user.type";
-import { SetProfileError } from "../auth/authSlice";
 
 export const userApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -50,7 +48,7 @@ export const userApi = apiSlice.injectEndpoints({
     }),
 
 
-    getMyProfile: builder.query<IProfileResponse, void>({
+    getMyProfile: builder.query({
       query: () => ({
         url: "/user/my-profile",
         method: "GET",
@@ -58,10 +56,7 @@ export const userApi = apiSlice.injectEndpoints({
       providesTags: [TagTypes.PROFILE, TagTypes.USERS],
     }),
 
-    updateProfile: builder.mutation<
-      IProfileResponse,
-      FormData | { fullName: string; phone: string; image?: File | null }
-    >({
+    updateProfile: builder.mutation({
       query: (data) => {
         let body: FormData | any = data;
         if (!(data instanceof FormData)) {
@@ -83,7 +78,7 @@ export const userApi = apiSlice.injectEndpoints({
         }
         return [];
       },
-      async onQueryStarted(_arg, { queryFulfilled, dispatch }) {
+      async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           const res = await queryFulfilled;
           const updated = res?.data?.data;
@@ -108,12 +103,10 @@ export const userApi = apiSlice.injectEndpoints({
           const message =
             err?.error?.data?.message || "Something Went Wrong";
           if (status === 500) {
-            dispatch(SetProfileError("Something Went Wrong"));
             ErrorToast("Something Went Wrong");
             return;
           }
           if (status !== 401) {
-            dispatch(SetProfileError(message));
             ErrorToast(message);
           }
         }
