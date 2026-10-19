@@ -102,6 +102,7 @@ export const usePlayer = () => {
           break;
         case "birthCountry":
         case "country":
+        case "location":
           backendPayload = { country: String(value) };
           break;
         case "dualNationality":
@@ -259,9 +260,9 @@ export const usePlayer = () => {
           backendPayload = { additionalNotes: String(value) };
           break;
         default:
-          if (!field.includes(".")) {
-            backendPayload = { [field]: value };
-          }
+          // Local or UI-only fields (e.g., skillsCategories, age, rating) are updated in Redux only
+          // and must not trigger backend PATCH mutations or unprompted toasts.
+          backendPayload = null;
           break;
       }
 

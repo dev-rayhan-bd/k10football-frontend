@@ -11,6 +11,7 @@ import {
   useGetMyPlayerAttributesQuery,
   useUpdateMyPlayerAttributesMutation,
 } from "@/redux/features/player/playerApi";
+import { updatePlayerField } from "@/redux/features/player/playerSlice";
 import { IconDeviceFloppy, IconLoader2 } from "@tabler/icons-react";
 
 export interface Skill {
@@ -127,7 +128,7 @@ export const INITIAL_SKILL_CATEGORIES: SkillCategory[] = [
 ];
 
 const SkillsAttributes = ({ editable = false }: { editable?: boolean }) => {
-  const { handleUpdate: syncToRedux } = usePlayer();
+  const { dispatch } = usePlayer();
   const { setSkillsAvg } = usePlayerStats();
 
   // RTK Query API Hooks
@@ -178,9 +179,9 @@ const SkillsAttributes = ({ editable = false }: { editable?: boolean }) => {
     const avg = allSkills.reduce((sum, s) => sum + s.value, 0) / (allSkills.length || 1);
     setSkillsAvg(Math.round(avg));
 
-    // Sync to Redux so other CV sections (Attribute Analysis, etc.) see it
-    syncToRedux("skillsCategories", categories);
-  }, [categories, setSkillsAvg]);
+    // Sync to Redux so other CV sections (Attribute Analysis, etc.) see it locally without calling API
+    dispatch(updatePlayerField({ field: "skillsCategories", value: categories }));
+  }, [categories, setSkillsAvg, dispatch]);
 
   const handleSkillChange = (catIdx: number, skillIdx: number, rawVal: number) => {
     const clamped = Math.max(0, Math.min(100, isNaN(rawVal) ? 0 : rawVal));

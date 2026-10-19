@@ -7,6 +7,8 @@ import futsalPitch from "@/assets/cvs/id/Futsal Pitch.jpg";
 import positionIcon from "@/assets/cvs/id/positionIcon.png";
 import { cn } from "@/lib/utils";
 import { getMarkersForPosition } from "./bioConstants";
+import { useAppDispatch } from "@/hooks/reduxHooks";
+import { updatePlayerField } from "@/redux/features/player/playerSlice";
 
 interface PitchMapCardProps {
   playerData: any;
@@ -17,6 +19,7 @@ export const PitchMapCard = ({
   playerData,
   handleUpdate,
 }: PitchMapCardProps) => {
+  const dispatch = useAppDispatch();
   const [isPositionMap, setIsPositionMap] = useState(true);
   const [activeMarker, setActiveMarker] = useState<{
     id: string;
@@ -24,6 +27,7 @@ export const PitchMapCard = ({
   } | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const prevPositionRef = useRef<string>("");
+  const draggedMarkersRef = useRef<{ field: string; markers: any[] } | null>(null);
 
   // Auto-switch maps when position changes
   useEffect(() => {
@@ -42,7 +46,7 @@ export const PitchMapCard = ({
     }
   }, [playerData.position]);
 
-  // Synchronize markers for the active map
+  // Synchronize markers for the active map in local Redux state only (do not call API on mount)
   useEffect(() => {
     if (!playerData || !playerData.position) return;
     const expected = getMarkersForPosition(playerData.position, !isPositionMap);
@@ -54,9 +58,9 @@ export const PitchMapCard = ({
       current.length !== 3 ||
       current.some((m: any, idx: number) => m.name !== expected[idx]?.name);
     if (needsReset) {
-      handleUpdate(field, expected);
+      dispatch(updatePlayerField({ field, value: expected }));
     }
-  }, [playerData.position, isPositionMap]);
+  }, [playerData.position, isPositionMap, dispatch]);
 
   const updateMarkerPosition = (
     e: MouseEvent | React.MouseEvent | TouchEvent | React.TouchEvent
@@ -89,7 +93,9 @@ export const PitchMapCard = ({
     const newMarkers = markers.map((m: any) =>
       m.id === activeMarker.id ? { ...m, x, y } : m
     );
-    handleUpdate(field, newMarkers);
+    // Smoothly update local Redux state during drag without spamming API
+    dispatch(updatePlayerField({ field, value: newMarkers }));
+    draggedMarkersRef.current = { field, markers: newMarkers };
   };
 
   useEffect(() => {
@@ -102,6 +108,11 @@ export const PitchMapCard = ({
       }
     };
     const handleGlobalEnd = () => {
+      if (draggedMarkersRef.current) {
+        const { field, markers } = draggedMarkersRef.current;
+        handleUpdate(field, markers);
+        draggedMarkersRef.current = null;
+      }
       setActiveMarker(null);
     };
     if (activeMarker) {
