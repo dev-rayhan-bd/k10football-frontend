@@ -3,7 +3,7 @@ import { apiSlice } from "../api/apiSlice";
 import TagTypes from "@/constants/tagType.constant";
 import { SuccessToast, ErrorToast } from "@/helpers/ValidationHelper";
 import { IParam } from "@/types/global.type";
-import { IPlayerProfileResponse } from "@/types/player.type";
+import { IPlayerProfileResponse, IUpdatePlayerPayload } from "@/types/player.type";
 
 export const playerApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
@@ -32,6 +32,14 @@ export const playerApi = apiSlice.injectEndpoints({
             providesTags: [TagTypes.PLAYERS],
         }),
 
+        getMyPlayerCv: builder.query<IPlayerProfileResponse, void>({
+            query: () => ({
+                url: "/players/me/cv",
+                method: "GET",
+            }),
+            providesTags: [TagTypes.PLAYERS],
+        }),
+
         getMyPlayerProfile: builder.query<IPlayerProfileResponse, void>({
             query: () => ({
                 url: "/players/me",
@@ -40,7 +48,7 @@ export const playerApi = apiSlice.injectEndpoints({
             providesTags: [TagTypes.PLAYERS],
         }),
 
-        updateMyPlayerProfile: builder.mutation({
+        updateMyPlayerProfile: builder.mutation<IPlayerProfileResponse, Partial<IUpdatePlayerPayload>>({
             query: (data) => ({
                 url: "/players/me",
                 method: "PATCH",
@@ -55,7 +63,7 @@ export const playerApi = apiSlice.injectEndpoints({
             async onQueryStarted(_arg, { queryFulfilled }) {
                 try {
                     await queryFulfilled;
-                    SuccessToast("Update Success");
+                    SuccessToast("Player updated successfully");
                 } catch (err: any) {
                     const status = err?.error?.status;
                     const message = err?.error?.data?.message || "Something Went Wrong";
@@ -177,6 +185,8 @@ export const playerApi = apiSlice.injectEndpoints({
 
 export const {
     useGetPlayersQuery,
+    useGetMyPlayerCvQuery,
+    useLazyGetMyPlayerCvQuery,
     useGetMyPlayerProfileQuery,
     useUpdateMyPlayerProfileMutation,
     useGetMyPlayerAttributesQuery,
@@ -189,3 +199,6 @@ export const {
 // Export aliases for convenience
 export const useGetMyProfileQuery = useGetMyPlayerProfileQuery;
 export const useGetMyPlayerQuery = useGetMyPlayerProfileQuery;
+export const useGetMyCvQuery = useGetMyPlayerCvQuery;
+export const useLazyGetMyCvQuery = useLazyGetMyPlayerCvQuery;
+

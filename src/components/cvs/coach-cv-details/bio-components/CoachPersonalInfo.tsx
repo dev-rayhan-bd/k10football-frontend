@@ -107,8 +107,8 @@ export const CoachPersonalInfo = ({ canEdit }: { canEdit: boolean }) => {
             <span className="shrink-0">📧</span>
             <CMSField
               value={coachData.email}
-              onUpdate={(val) => handleUpdate("email", val)}
-              canEdit={canEdit}
+              onUpdate={() => {}}
+              canEdit={false}
               className="flex-1 min-w-0"
               inputClassName="w-full truncate text-left bg-transparent border-none focus:ring-0 p-0"
             />

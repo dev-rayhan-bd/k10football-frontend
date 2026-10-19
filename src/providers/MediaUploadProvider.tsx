@@ -200,7 +200,12 @@ export const GlobalUploadWidget: React.FC = () => {
 export const useMediaUpload = () => {
   const context = useContext(MediaUploadContext);
   if (!context) {
-    throw new Error("useMediaUpload must be used within a MediaUploadProvider");
+    return {
+      activeUploadTask: null,
+      startUpload: async () => {},
+      cancelUpload: () => {},
+      dismissUpload: () => {},
+    };
   }
   return context;
 };

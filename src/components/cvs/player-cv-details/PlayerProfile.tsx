@@ -7,7 +7,6 @@ import playerImage from "@/assets/cvs/id/player-short-image.png";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { usePlayerStats } from "./FullEditablePage";
-import { useUpdatePlayerProfileMutation } from "@/redux/features/cv/cvApi";
 import CMSField from "@/components/shared/CMSField";
 import { toast } from "sonner";
 import { cn, getShortForm, getVeryShortPosition } from "@/lib/utils";
@@ -111,7 +110,6 @@ const router = useRouter();
 const { bioRating, skillsAvg, metricsAvg, attributesAvg, role } =
 usePlayerStats();
 const { playerData, handleUpdate: updatePlayerData, validatePlayer } = usePlayer();
-const [updatePlayer] = useUpdatePlayerProfileMutation();
 
 const getFlagUrlWithFallback = () => {
 const url = getFlagUrl(playerData.birthCountry);

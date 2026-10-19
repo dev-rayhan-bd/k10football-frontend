@@ -1,16 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
-import { useState } from "react";
-import { useUpdatePlayerProfileMutation } from "@/redux/features/cv/cvApi";
+import { useState, useEffect } from "react";
 import CMSField from "@/components/shared/CMSField";
+import { usePlayer } from "@/hooks/usePlayer";
 
-const AdditionalNotesSection = ({
-  editable = false,
-}: {
-  editable?: boolean;
-}) => {
-  const [updatePlayer] = useUpdatePlayerProfileMutation();
-  const [notes, setNotes] =
-    useState(`Marcus Silva is a highly skilled attacking midfielder ⚽ with exceptional vision 👀, precise passing 🎯, and strong tactical intelligence 🧠.
+const DEFAULT_NOTES = `Marcus Silva is a highly skilled attacking midfielder ⚽ with exceptional vision 👀, precise passing 🎯, and strong tactical intelligence 🧠.
 
 Versatile across multiple midfield positions, he remains a reliable asset to any squad.
 
@@ -18,18 +13,26 @@ Calm under pressure and consistent in chance creation, he has maintained top-lev
 
 Currently open to transfer opportunities with top European clubs 🌍 and available for immediate first-team integration.
 
-Medical reports indicate excellent physical condition 💪 with no recurring injuries.`);
+Medical reports indicate excellent physical condition 💪 with no recurring injuries.`;
+
+const AdditionalNotesSection = ({
+  editable = false,
+}: {
+  editable?: boolean;
+}) => {
+  const { playerData, handleUpdate: updatePlayerData } = usePlayer();
+  const currentNotes = (playerData as any).additionalNotes || DEFAULT_NOTES;
+  const [notes, setNotes] = useState(currentNotes);
+
+  useEffect(() => {
+    if ((playerData as any).additionalNotes) {
+      setNotes((playerData as any).additionalNotes);
+    }
+  }, [(playerData as any).additionalNotes]);
 
   const handleUpdate = async (val: string) => {
     setNotes(val);
-    // try {
-    //   await updatePlayer({
-    //     id: "current-player",
-    //     data: { additionalNotes: val }
-    //   }).unwrap();
-    // } catch (error) {
-    //   console.error(error);
-    // }
+    updatePlayerData("additionalNotes", val);
   };
 
   return (

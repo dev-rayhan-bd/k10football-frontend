@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { usePlayer } from "@/hooks/usePlayer";
 import { usePlayerStats } from "@/components/cvs/player-cv-details/FullEditablePage";
-import { getFullWithShortForm } from "@/lib/utils";
+import { getFullWithShortForm, formatDate } from "@/lib/utils";
 import { FileText } from 'lucide-react';
 import { useAppSelector } from "@/hooks/reduxHooks";
 import CvNotEditable from "./CvNotEditable";
@@ -149,7 +149,7 @@ const ViewCv = () => {
               <div class="section-header">Scouting Summary</div>
               <table class="attribute-table">
                 <tr class="attribute-row"><td class="attribute-cell attr-label">Market Value</td><td class="attribute-cell attr-value">€${playerData.marketValue}</td></tr>
-                <tr class="attribute-row"><td class="attribute-cell attr-label">Contract Until</td><td class="attribute-cell attr-value">${playerData.contractUntil}</td></tr>
+                <tr class="attribute-row"><td class="attribute-cell attr-label">Contract Until</td><td class="attribute-cell attr-value">${formatDate(playerData.contractUntil)}</td></tr>
                 <tr class="attribute-row"><td class="attribute-cell attr-label">Agency</td><td class="attribute-cell attr-value">${playerData.agency}</td></tr>
                 <tr class="attribute-row"><td class="attribute-cell attr-label">Agent</td><td class="attribute-cell attr-value">${playerData.agent}</td></tr>
               </table>
@@ -313,7 +313,7 @@ const ViewCv = () => {
                   <div className="p-2 sm:p-3 bg-white/5 rounded-lg sm:rounded-xl border border-white/10 text-white/40 shrink-0"><IconClock size={18} className="sm:w-5 sm:h-5" /></div>
                   <div className="min-w-0">
                     <p className="text-[9px] sm:text-[10px] text-white/40 uppercase font-black tracking-widest truncate">Contract Until</p>
-                    <p className="text-xs sm:text-sm font-bold text-[#FBBF24] truncate">{playerData.contractUntil}</p>
+                    <p className="text-xs sm:text-sm font-bold text-[#FBBF24] truncate">{formatDate(playerData.contractUntil)}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 sm:gap-4 min-w-0">

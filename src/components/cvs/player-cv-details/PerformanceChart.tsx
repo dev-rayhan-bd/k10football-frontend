@@ -91,7 +91,7 @@ const getHexColor = (val: number) => {
 };
 
 const PerformanceAnalytics = () => {
-  const { playerData } = usePlayer();
+  const { playerData, cvData } = usePlayer();
 
   const skillData = (playerData.skillsCategories || []).map((cat: any) => {
     const avg = Math.round(
@@ -105,30 +105,34 @@ const PerformanceAnalytics = () => {
   });
 
   const skillsAvg =
-    skillData.length > 0
-      ? Math.round(skillData.reduce((sum, d) => sum + d.value, 0) / skillData.length)
-      : 0;
+    cvData?.skillsDonutScore !== undefined
+      ? Math.round(Number(cvData.skillsDonutScore))
+      : skillData.length > 0
+        ? Math.round(skillData.reduce((sum, d) => sum + d.value, 0) / skillData.length)
+        : 0;
 
-  const footData = [
-    {
-      name: 'Right Foot',
-      value: playerData.rightLegUsage || 0,
-      color: getHexColor(playerData.rightLegUsage || 0),
-    },
-    {
-      name: 'Left Foot',
-      value: playerData.leftLegUsage || 0,
-      color: getHexColor(playerData.leftLegUsage || 0),
-    },
-  ];
-
-  // Derive heading from strengths or skillsCategories
+  const rightFootVal = cvData?.footDonut?.right ?? playerData.rightLegUsage ?? 0;
+  const leftFootVal = cvData?.footDonut?.left ?? playerData.leftLegUsage ?? 0;
   const headingVal =
+    cvData?.footDonut?.heading ??
     playerData.strengths?.heading ??
     (playerData.skillsCategories || [])
       .flatMap((c: any) => c.skills)
       .find((s: any) => s.name.toLowerCase() === "heading" || s.name.toLowerCase() === "jumping")
       ?.value;
+
+  const footData = [
+    {
+      name: 'Right Foot',
+      value: rightFootVal,
+      color: getHexColor(rightFootVal),
+    },
+    {
+      name: 'Left Foot',
+      value: leftFootVal,
+      color: getHexColor(leftFootVal),
+    },
+  ];
 
   if (headingVal !== undefined) {
     footData.push({

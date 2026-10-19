@@ -1,12 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect, useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "./reduxHooks";
 import {
   updatePlayerField,
   setSelectedPlayerId,
   validatePlayerCv,
   addPlayer,
-  PlayerData
+  syncFromCvResponse,
+  PlayerData,
 } from "@/redux/features/player/playerSlice";
+import {
+  useGetMyPlayerCvQuery,
+  useUpdateMyPlayerProfileMutation,
+} from "@/redux/features/player/playerApi";
+import { IUpdatePlayerPayload } from "@/types/player.type";
 import { toast } from "sonner";
 
 export const usePlayer = () => {
@@ -15,9 +22,260 @@ export const usePlayer = () => {
   const selectedPlayerId = useAppSelector((state) => state.player.selectedPlayerId);
   const playerData = players.find((p) => p.id === selectedPlayerId) || players[0];
 
-  const handleUpdate = async (field: string, value: any) => {
-    dispatch(updatePlayerField({ field, value }));
-  };
+  const hasToken =
+    typeof window !== "undefined" &&
+    Boolean(localStorage.getItem("token") || localStorage.getItem("accessToken"));
+
+  // 1. GET CV API: Fetch complete player CV from {{baseUrl}}/players/me/cv
+  const {
+    data: cvResponse,
+    isLoading: isCvLoading,
+    isFetching: isCvFetching,
+    error: cvError,
+    refetch: refetchCv,
+  } = useGetMyPlayerCvQuery(undefined, {
+    skip: !hasToken,
+  });
+
+  // 2. PATCH Player API: Update player profile / CV from {{baseUrl}}/players/me
+  const [updatePlayerMutation, { isLoading: isUpdating }] = useUpdateMyPlayerProfileMutation();
+
+  // Sync API data into Redux player state whenever API responds
+  useEffect(() => {
+    if (cvResponse?.data) {
+      dispatch(syncFromCvResponse(cvResponse.data));
+    }
+  }, [cvResponse, dispatch]);
+
+  // Update whole section or partial payload via PATCH /players/me
+  const updatePlayerProfile = useCallback(
+    async (payload: Partial<IUpdatePlayerPayload>) => {
+      try {
+        const response = await updatePlayerMutation(payload).unwrap();
+        if (response?.data) {
+          dispatch(syncFromCvResponse(response.data));
+        }
+        return response;
+      } catch (err: any) {
+        console.error("Failed to update player:", err);
+        throw err;
+      }
+    },
+    [updatePlayerMutation, dispatch]
+  );
+
+  // Section-based update helper: can update any section/portion directly
+  const updateSection = useCallback(
+    async (
+      sectionOrPayload: string | Partial<IUpdatePlayerPayload>,
+      sectionData?: any
+    ) => {
+      let payload: Partial<IUpdatePlayerPayload> = {};
+      if (typeof sectionOrPayload === "string") {
+        payload = { [sectionOrPayload]: sectionData };
+      } else {
+        payload = sectionOrPayload;
+      }
+      return updatePlayerProfile(payload);
+    },
+    [updatePlayerProfile]
+  );
+
+  // Field-based update handler with automatic mapping to backend PATCH payload
+  const handleUpdate = useCallback(
+    async (field: string, value: any) => {
+      // 1. Optimistically update local redux state
+      dispatch(updatePlayerField({ field, value }));
+
+      // 2. Build partial payload for PATCH /players/me
+      if (!hasToken) return;
+
+      let backendPayload: Partial<IUpdatePlayerPayload> | null = null;
+
+      switch (field) {
+        case "fullName":
+          backendPayload = { fullName: String(value) };
+          break;
+        case "dob":
+        case "dateOfBirth":
+          backendPayload = { dateOfBirth: String(value) };
+          break;
+        case "birthCountry":
+        case "country":
+          backendPayload = { country: String(value) };
+          break;
+        case "dualNationality":
+          backendPayload = { dualNationality: String(value) };
+          break;
+        case "academyName":
+        case "academy":
+          backendPayload = { academy: String(value) };
+          break;
+        case "coachName":
+          backendPayload = { coachName: String(value) };
+          break;
+        case "clubManaged":
+          backendPayload = { clubManaged: String(value) };
+          break;
+        case "coachLicenseNumber":
+        case "licenseNumber":
+          backendPayload = { licenseNumber: String(value) };
+          break;
+        case "phone":
+          backendPayload = { phone: String(value) };
+          break;
+        case "website":
+          backendPayload = { website: String(value) };
+          break;
+        case "height":
+          backendPayload = { height: parseFloat(String(value)) || 0 };
+          break;
+        case "weight":
+          backendPayload = { weight: parseFloat(String(value)) || 0 };
+          break;
+        case "preferredFoot":
+          backendPayload = { preferredFoot: String(value) };
+          break;
+        case "rightLegUsage":
+        case "rightFootDominance":
+          backendPayload = { rightFootDominance: Number(value) };
+          break;
+        case "leftLegUsage":
+        case "leftFootDominance":
+          backendPayload = { leftFootDominance: Number(value) };
+          break;
+        case "position":
+          backendPayload = { position: String(value) };
+          break;
+        case "secondaryPositions":
+          backendPayload = {
+            secondaryPositions: Array.isArray(value) ? value : [String(value)],
+          };
+          break;
+        case "contractUntil":
+          backendPayload = { contractUntil: String(value) };
+          break;
+        case "agent":
+        case "agentName":
+          backendPayload = { agentName: String(value) };
+          break;
+        case "agency":
+        case "agencyName":
+          backendPayload = { agencyName: String(value) };
+          break;
+        case "agentStatus":
+          backendPayload = { agentStatus: String(value) };
+          break;
+        case "clubStatus":
+          backendPayload = { clubStatus: String(value) };
+          break;
+        case "currentClub":
+          backendPayload = { currentClub: String(value) };
+          break;
+        case "marketValue":
+          backendPayload = {
+            marketValue:
+              typeof value === "number"
+                ? value
+                : parseFloat(String(value).replace(/[^0-9.]/g, "")) || 0,
+          };
+          break;
+        case "languages":
+          backendPayload = {
+            languages: Array.isArray(value)
+              ? value.map((l: any) => ({
+                  language: l.language || l.name || "",
+                  proficiency: l.proficiency || l.level || "Native",
+                }))
+              : value,
+          };
+          break;
+        case "selectedStyleIds":
+        case "playerStyles":
+          backendPayload = {
+            playerStyles: Array.isArray(value) ? value : [String(value)],
+          };
+          break;
+        case "clubs":
+        case "clubHistory":
+          backendPayload = {
+            clubHistory: Array.isArray(value)
+              ? value.map((c: any) => ({
+                  clubName: c.name || c.clubName || "",
+                  period: c.period || `${c.from || "2020"} - ${c.to || "Present"}`,
+                  isCurrent:
+                    c.isCurrent ?? (c.to === "Present" || String(c.period || "").includes("Present")),
+                  logoUrl: c.logo?.startsWith("http") ? c.logo : undefined,
+                }))
+              : value,
+          };
+          break;
+        case "careerHighlights":
+        case "accomplishments":
+          backendPayload = {
+            accomplishments: Array.isArray(value)
+              ? value.map((a: any) => ({
+                  year: Number(a.year) || 2024,
+                  title: a.title || "",
+                }))
+              : value,
+          };
+          break;
+        case "positionMarkers":
+        case "positionMap":
+          backendPayload = {
+            positionMap: Array.isArray(value)
+              ? value.map((m: any, idx: number) => ({
+                  slot: idx === 0 ? "Primary" : idx === 1 ? "Secondary" : "Third Position",
+                  position: m.name || "Defensive Midfielder",
+                  role: "Anchor Man",
+                  x: Math.round(m.x),
+                  y: Math.round(m.y),
+                }))
+              : value,
+          };
+          break;
+        case "futsalMarkers":
+        case "futsalMap":
+          backendPayload = {
+            futsalMap: Array.isArray(value)
+              ? value.map((m: any, idx: number) => ({
+                  slot: idx === 0 ? "Primary" : idx === 1 ? "Secondary" : "Third Position",
+                  position: m.name || "Pivot",
+                  role: "Attacker",
+                  x: Math.round(m.x),
+                  y: Math.round(m.y),
+                }))
+              : value,
+          };
+          break;
+        case "perceptionMetrics":
+          backendPayload = { perceptionMetrics: value };
+          break;
+        case "visionMetrics":
+          backendPayload = { visionMetrics: value };
+          break;
+        case "additionalNotes":
+          backendPayload = { additionalNotes: String(value) };
+          break;
+        default:
+          if (!field.includes(".")) {
+            backendPayload = { [field]: value };
+          }
+          break;
+      }
+
+      if (backendPayload) {
+        try {
+          await updatePlayerMutation(backendPayload).unwrap();
+        } catch (err: any) {
+          console.error(`Failed to patch field ${field}:`, err);
+          toast.error(err?.data?.message || "Failed to save changes. Please try again.");
+        }
+      }
+    },
+    [dispatch, hasToken, updatePlayerMutation]
+  );
 
   const selectPlayer = (id: number) => {
     dispatch(setSelectedPlayerId(id));
@@ -34,10 +292,18 @@ export const usePlayer = () => {
   };
 
   return {
+    dispatch,
     playerData,
     players,
     selectedPlayerId,
+    cvData: cvResponse?.data || (playerData as any).cvData,
+    isLoading: isCvLoading || isCvFetching,
+    isUpdating,
+    error: cvError,
+    refetchCv,
     handleUpdate,
+    updatePlayerProfile,
+    updateSection,
     selectPlayer,
     validatePlayer,
     handleCreatePlayer,

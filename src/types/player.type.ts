@@ -133,3 +133,100 @@ export interface IPlayerProfileResponse {
   message: string;
   data: IPlayerProfileData;
 }
+
+export interface IUpdatePlayerPayload {
+  fullName?: string;
+  position?: string;
+  secondaryPositions?: string[];
+  dateOfBirth?: string;
+  country?: string;
+  dualNationality?: string;
+  academy?: string;
+  coachName?: string;
+  licenseNumber?: string;
+  clubManaged?: string;
+
+  height?: number;
+  weight?: number;
+  preferredFoot?: string;
+  rightFootDominance?: number;
+  leftFootDominance?: number;
+
+  phone?: string;
+  website?: string;
+
+  languages?: Array<{
+    language: string;
+    proficiency: string;
+  }>;
+
+  agentStatus?: string;
+  agentName?: string;
+  agencyName?: string;
+  clubStatus?: string;
+  currentClub?: string;
+  contractUntil?: string;
+  marketValue?: number;
+
+  playerStyles?: string[];
+
+  positionMap?: Array<{
+    slot: string;
+    position: string;
+    role: string;
+    x: number;
+    y: number;
+  }>;
+  futsalMap?: Array<{
+    slot: string;
+    position: string;
+    role: string;
+    x: number;
+    y: number;
+  }>;
+
+  accomplishments?: Array<{
+    year: number;
+    title: string;
+  }>;
+
+  clubHistory?: Array<{
+    clubName: string;
+    period: string;
+    isCurrent: boolean;
+    logoUrl?: string;
+  }>;
+
+  perceptionMetrics?: {
+    spaceAwareness?: { score: number; trend: number; grade?: string };
+    opponentReading?: { score: number; trend: number; grade?: string };
+    gameFlowUnderstanding?: { score: number; trend: number; grade?: string };
+    pressureHandling?: { score: number; trend: number; grade?: string };
+    [key: string]: any;
+  };
+
+  visionMetrics?: {
+    peripheralVision?: { score: number; trend: number; grade?: string };
+    focusControl?: { score: number; trend: number; grade?: string };
+    patternRecognition?: { score: number; trend: number; grade?: string };
+    decisionSpeed?: { score: number; trend: number; grade?: string };
+    visualAcuity?: { score: number; trend: number; grade?: string };
+    visionField?: { score: number; trend: number; grade?: string };
+    targetFinding?: { score: number; trend: number; grade?: string };
+    [key: string]: any;
+  };
+
+  strength?: {
+    pace?: number;
+    shooting?: number;
+    passing?: number;
+    dribbling?: number;
+    defending?: number;
+    physical?: number;
+    heading?: number;
+    [key: string]: any;
+  };
+
+  [key: string]: any;
+}
+

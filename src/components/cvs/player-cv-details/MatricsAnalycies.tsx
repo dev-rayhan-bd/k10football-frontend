@@ -21,7 +21,7 @@ import {
 
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { useUpdatePlayerProfileMutation } from '@/redux/features/cv/cvApi'
+import { usePlayer } from '@/hooks/usePlayer'
 import CMSField from '@/components/shared/CMSField'
 import { cn } from '@/lib/utils'
 
@@ -29,7 +29,7 @@ interface MetricRow {
   category: string
   score: number
   trend: number
-  grade: 'Excellent' | 'Good' | 'Average' | 'Average'
+  grade: 'Excellent' | 'Good' | 'Average'
 }
 
 const getGrade = (score: number): 'Excellent' | 'Good' | 'Average' => {
@@ -47,66 +47,114 @@ const getGradeColor = (grade: string) => {
   }
 };
 
-
 const METRIC_CATEGORIES = ['Perception', 'Vision']
 
 const MetricsAnalysis = ({ editable = false }: { editable?: boolean }) => {
-const [updatePlayer] = useUpdatePlayerProfileMutation();
-const [activeTab, setActiveTab] = useState('Perception')
-const [metricsData, setMetricsData] = useState<Record<string, MetricRow[]>>({
-Perception: [
-  { category: 'Space Awareness', score: 92, trend: 3, grade: 'Excellent' },
-  { category: 'Opponent Reading', score: 88, trend: 5, grade: 'Good' },
-  { category: 'Game Flow Understanding', score: 85, trend: 2, grade: 'Good' },
-  { category: 'Pressure Handling', score: 90, trend: 4, grade: 'Excellent' },
-],
-Vision: [
-  { category: 'Peripheral Vision', score: 87, trend: 3, grade: 'Good' },
-  { category: 'Focus Control', score: 92, trend: 2, grade: 'Excellent' },
-  { category: 'Pattern Recognition', score: 89, trend: 4, grade: 'Good' },
-  { category: 'Decision Speed', score: 91, trend: 5, grade: 'Excellent' },
-  { category: 'Visual Acuity', score: 86, trend: 1, grade: 'Good' },
-],
-})
+  const { cvData, updateSection } = usePlayer();
+  const [activeTab, setActiveTab] = useState('Perception')
+  const [metricsData, setMetricsData] = useState<Record<string, MetricRow[]>>({
+    Perception: [
+      { category: 'Space Awareness', score: 92, trend: 3, grade: 'Excellent' },
+      { category: 'Opponent Reading', score: 88, trend: 5, grade: 'Good' },
+      { category: 'Game Flow Understanding', score: 85, trend: 2, grade: 'Good' },
+      { category: 'Pressure Handling', score: 90, trend: 4, grade: 'Excellent' },
+    ],
+    Vision: [
+      { category: 'Peripheral Vision', score: 87, trend: 3, grade: 'Good' },
+      { category: 'Focus Control', score: 92, trend: 2, grade: 'Excellent' },
+      { category: 'Pattern Recognition', score: 89, trend: 4, grade: 'Good' },
+      { category: 'Decision Speed', score: 91, trend: 5, grade: 'Excellent' },
+      { category: 'Visual Acuity', score: 86, trend: 1, grade: 'Good' },
+    ],
+  })
 
-const { setMetricsAvg } = usePlayerStats();
+  // Synchronize metrics from cvData if present
+  useEffect(() => {
+    if (cvData?.perceptionMetrics || cvData?.visionMetrics) {
+      setMetricsData(prev => {
+        const next = { ...prev };
+        if (cvData.perceptionMetrics) {
+          next.Perception = [
+            { category: 'Space Awareness', score: cvData.perceptionMetrics.spaceAwareness?.score ?? 92, trend: cvData.perceptionMetrics.spaceAwareness?.trend ?? 3, grade: getGrade(cvData.perceptionMetrics.spaceAwareness?.score ?? 92) },
+            { category: 'Opponent Reading', score: cvData.perceptionMetrics.opponentReading?.score ?? 88, trend: cvData.perceptionMetrics.opponentReading?.trend ?? 5, grade: getGrade(cvData.perceptionMetrics.opponentReading?.score ?? 88) },
+            { category: 'Game Flow Understanding', score: cvData.perceptionMetrics.gameFlowUnderstanding?.score ?? 85, trend: cvData.perceptionMetrics.gameFlowUnderstanding?.trend ?? 2, grade: getGrade(cvData.perceptionMetrics.gameFlowUnderstanding?.score ?? 85) },
+            { category: 'Pressure Handling', score: cvData.perceptionMetrics.pressureHandling?.score ?? 90, trend: cvData.perceptionMetrics.pressureHandling?.trend ?? 4, grade: getGrade(cvData.perceptionMetrics.pressureHandling?.score ?? 90) },
+          ];
+        }
+        if (cvData.visionMetrics) {
+          next.Vision = [
+            { category: 'Peripheral Vision', score: cvData.visionMetrics.peripheralVision?.score ?? 87, trend: cvData.visionMetrics.peripheralVision?.trend ?? 3, grade: getGrade(cvData.visionMetrics.peripheralVision?.score ?? 87) },
+            { category: 'Focus Control', score: cvData.visionMetrics.focusControl?.score ?? 92, trend: cvData.visionMetrics.focusControl?.trend ?? 2, grade: getGrade(cvData.visionMetrics.focusControl?.score ?? 92) },
+            { category: 'Pattern Recognition', score: cvData.visionMetrics.patternRecognition?.score ?? 89, trend: cvData.visionMetrics.patternRecognition?.trend ?? 4, grade: getGrade(cvData.visionMetrics.patternRecognition?.score ?? 89) },
+            { category: 'Decision Speed', score: cvData.visionMetrics.decisionSpeed?.score ?? 91, trend: cvData.visionMetrics.decisionSpeed?.trend ?? 5, grade: getGrade(cvData.visionMetrics.decisionSpeed?.score ?? 91) },
+            { category: 'Visual Acuity', score: cvData.visionMetrics.visualAcuity?.score ?? 86, trend: cvData.visionMetrics.visualAcuity?.trend ?? 1, grade: getGrade(cvData.visionMetrics.visualAcuity?.score ?? 86) },
+          ];
+        }
+        return next;
+      });
+    }
+  }, [cvData]);
 
-useEffect(() => {
-const allRows = Object.values(metricsData).flat();
-const avg = allRows.reduce((sum, r) => sum + r.score, 0) / allRows.length;
-setMetricsAvg(Math.round(avg));
-}, [metricsData, setMetricsAvg]);
+  const { setMetricsAvg } = usePlayerStats();
 
-const handleUpdate = async (tab: string, idx: number, field: keyof MetricRow, value: any) => {
-const metricName = metricsData[tab][idx].category;
+  useEffect(() => {
+    const allRows = Object.values(metricsData).flat();
+    const avg = allRows.reduce((sum, r) => sum + r.score, 0) / allRows.length;
+    setMetricsAvg(Math.round(avg));
+  }, [metricsData, setMetricsAvg]);
 
-setMetricsData(prev => {
-  const newData = { ...prev };
-  const row = { ...newData[tab][idx] };
+  const handleUpdate = async (tab: string, idx: number, field: keyof MetricRow, value: any) => {
+    setMetricsData(prev => {
+      const newData = { ...prev };
+      const row = { ...newData[tab][idx] };
 
-  if (field === 'score') {
-    const score = Math.max(0, Math.min(100, parseInt(value) || 0));
-    row.score = score;
-    row.grade = getGrade(score);
-  } else if (field === 'trend') {
-    row.trend = Math.max(0, parseInt(value) || 0);
-  } else {
-    (row as any)[field] = value;
-  }
+      if (field === 'score') {
+        const score = Math.max(0, Math.min(100, parseInt(value) || 0));
+        row.score = score;
+        row.grade = getGrade(score);
+      } else if (field === 'trend') {
+        row.trend = Math.max(0, parseInt(value) || 0);
+      } else {
+        (row as any)[field] = value;
+      }
 
-  newData[tab][idx] = row;
-  return newData;
-});
+      newData[tab][idx] = row;
 
-// try {
-//   await updatePlayer({
-//     id: "current-player",
-//     data: { [`metrics.${tab}.${metricName}.${field}`]: value }
-//   }).unwrap();
-// } catch (error) {
-//   console.error(error);
-// }
-};
+      // Update backend via PATCH /players/me
+      const updatedRows = newData[tab];
+      if (tab === 'Perception') {
+        const mapKey: Record<string, string> = {
+          'Space Awareness': 'spaceAwareness',
+          'Opponent Reading': 'opponentReading',
+          'Game Flow Understanding': 'gameFlowUnderstanding',
+          'Pressure Handling': 'pressureHandling',
+        };
+        const perceptionMetrics: Record<string, any> = {};
+        updatedRows.forEach(r => {
+          const key = mapKey[r.category] || r.category.toLowerCase().replace(/ /g, '');
+          perceptionMetrics[key] = { score: r.score, trend: r.trend };
+        });
+        updateSection('perceptionMetrics', perceptionMetrics);
+      } else if (tab === 'Vision') {
+        const mapKey: Record<string, string> = {
+          'Peripheral Vision': 'peripheralVision',
+          'Focus Control': 'focusControl',
+          'Pattern Recognition': 'patternRecognition',
+          'Decision Speed': 'decisionSpeed',
+          'Visual Acuity': 'visualAcuity',
+        };
+        const visionMetrics: Record<string, any> = {};
+        updatedRows.forEach(r => {
+          const key = mapKey[r.category] || r.category.toLowerCase().replace(/ /g, '');
+          visionMetrics[key] = { score: r.score, trend: r.trend };
+        });
+        updateSection('visionMetrics', visionMetrics);
+      }
+
+      return newData;
+    });
+  };
+
 
 return (
 <div className="w-full py-10 sm:py-16 px-0 sm:px-6 bg-background min-w-0 overflow-hidden">

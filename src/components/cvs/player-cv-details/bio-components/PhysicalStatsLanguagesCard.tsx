@@ -1,0 +1,246 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+import React from "react";
+import Image from "next/image";
+import CMSField from "@/components/shared/CMSField";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
+import { getIndicatorColor, getHexColor } from "./bioConstants";
+import { PitchMapCard } from "./PitchMapCard";
+
+interface PhysicalStatsLanguagesCardProps {
+  playerData: any;
+  handleUpdate: (field: string, value: any) => void;
+  canEditBio: boolean;
+}
+
+export const PhysicalStatsLanguagesCard = ({
+  playerData,
+  handleUpdate,
+  canEditBio,
+}: PhysicalStatsLanguagesCardProps) => {
+  return (
+    <div className="order-4 xl:order-0 xl:col-start-1 xl:col-span-4 xl:row-start-2 bg-cardBg rounded-2xl xl:rounded-b-3xl xl:rounded-t-none border border-white/10 xl:border-t-0 overflow-hidden w-full min-w-0 flex flex-col space-y-4 sm:space-y-6 h-fit">
+      <div className="p-4 sm:p-6 border-t-0 xl:border-t xl:border-white/5 w-full min-w-0">
+        <h2 className="text-base sm:text-lg text-center font-heading font-normal mb-4 text-white">
+          Physical Stats
+        </h2>
+        <div className="flex justify-around text-center mb-6 w-full min-w-0">
+          <div className="min-w-0">
+            <CMSField
+              value={playerData.height}
+              onUpdate={(val) => handleUpdate("height", val)}
+              canEdit={canEditBio}
+              isNumeric
+              className="text-xl sm:text-2xl font-bold text-primary justify-center min-w-0"
+              inputClassName="text-center w-20 sm:w-24 h-8 sm:h-10 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-lg"
+            />
+            <div className="text-[10px] sm:text-xs text-gray-400">HEIGHT (m)</div>
+          </div>
+          <div className="min-w-0">
+            <CMSField
+              value={playerData.weight}
+              onUpdate={(val) => handleUpdate("weight", val)}
+              canEdit={canEditBio}
+              isNumeric
+              className="text-xl sm:text-2xl font-bold text-primary justify-center min-w-0"
+              inputClassName="text-center w-20 sm:w-24 h-8 sm:h-10 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-lg"
+            />
+            <div className="text-[10px] sm:text-xs text-gray-400">WEIGHT (kg)</div>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 w-full min-w-0">
+          <div className="border border-white/10 bg-white/5 p-4 rounded-xl flex flex-col w-full min-w-0">
+            <div className="flex justify-center items-center w-full mb-3 h-12 sm:h-16">
+              <Image
+                src={playerData.leftLegImage}
+                alt="left leg"
+                className="object-contain w-12 h-12 sm:w-16 sm:h-16 drop-shadow-md"
+                width={80}
+                height={80}
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.srcset = "";
+                  target.src = "/placeholder_img.jpg";
+                }}
+              />
+            </div>
+            <div className="flex justify-between items-center text-xs sm:text-sm mb-2 w-full min-w-0">
+              <span className="shrink-0 text-white">Left</span>
+              <CMSField
+                value={playerData.leftLegUsage}
+                onUpdate={(val) =>
+                  handleUpdate("leftLegUsage", parseInt(String(val)))
+                }
+                canEdit={canEditBio}
+                type="number"
+                editTrigger="doubleClick"
+                className="text-primary justify-end w-24 sm:w-32 min-w-0 font-bold"
+                inputClassName="text-right h-7 w-16 sm:w-20 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-md"
+              />
+            </div>
+            {canEditBio ? (
+              <div className="relative flex items-center h-2 group w-full">
+                <div className="w-full h-1.5 bg-[#333] rounded-full overflow-hidden relative">
+                  <div
+                    className={cn(
+                      "h-full transition-all duration-300 ease-out",
+                      getIndicatorColor(playerData.leftLegUsage)
+                    )}
+                    style={{ width: `${playerData.leftLegUsage}%` }}
+                  />
+                </div>
+                {/* Visible Slider on Hover */}
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={playerData.leftLegUsage}
+                  onChange={(e) =>
+                    handleUpdate("leftLegUsage", parseInt(e.target.value))
+                  }
+                  style={{
+                    background: `linear-gradient(to right, ${getHexColor(
+                      playerData.leftLegUsage
+                    )} ${playerData.leftLegUsage}%, #333 ${
+                      playerData.leftLegUsage
+                    }%)`,
+                  }}
+                  className="w-full h-1.5 rounded-full appearance-none cursor-pointer transition-all absolute inset-0 z-10 opacity-0 group-hover:opacity-100 accent-primary"
+                />
+                {/* Always Active Invisible Slider for Dragging */}
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={playerData.leftLegUsage}
+                  onChange={(e) =>
+                    handleUpdate("leftLegUsage", parseInt(e.target.value))
+                  }
+                  className="w-full h-6 opacity-0 cursor-pointer absolute inset-0 z-20"
+                />
+              </div>
+            ) : (
+              <Progress
+                value={playerData.leftLegUsage}
+                style={{ backgroundColor: "#333" }}
+                indicatorClassName="bg-green-500"
+              />
+            )}
+          </div>
+          <div className="border border-white/10 bg-white/5 p-4 rounded-xl flex flex-col w-full min-w-0">
+            <div className="flex justify-center items-center w-full mb-3 h-12 sm:h-16">
+              <Image
+                src={playerData.rightLegImage}
+                alt="right leg"
+                className="object-contain w-12 h-12 sm:w-16 sm:h-16 drop-shadow-md"
+                width={80}
+                height={80}
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.srcset = "";
+                  target.src = "/placeholder_img.jpg";
+                }}
+              />
+            </div>
+            <div className="flex justify-between items-center text-xs sm:text-sm mb-1 w-full min-w-0">
+              <span className="shrink-0 text-white">Right</span>
+              <CMSField
+                value={playerData.rightLegUsage}
+                onUpdate={(val) =>
+                  handleUpdate("rightLegUsage", parseInt(String(val)))
+                }
+                canEdit={canEditBio}
+                type="number"
+                editTrigger="doubleClick"
+                className="text-primary justify-end w-24 sm:w-32 min-w-0"
+                inputClassName="text-right h-7 w-16 sm:w-20 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-md"
+              />
+            </div>
+            {canEditBio ? (
+              <div className="relative flex items-center h-2 group translate-y-1.25 w-full">
+                <div className="w-full h-1.5 bg-[#333] rounded-full overflow-hidden relative">
+                  <div
+                    className={cn(
+                      "h-full transition-all duration-300 ease-out",
+                      getIndicatorColor(playerData.rightLegUsage)
+                    )}
+                    style={{ width: `${playerData.rightLegUsage}%` }}
+                  />
+                </div>
+                {/* Visible Slider on Hover */}
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={playerData.rightLegUsage}
+                  onChange={(e) =>
+                    handleUpdate("rightLegUsage", parseInt(e.target.value))
+                  }
+                  style={{
+                    background: `linear-gradient(to right, ${getHexColor(
+                      playerData.rightLegUsage
+                    )} ${playerData.rightLegUsage}%, #333 ${
+                      playerData.rightLegUsage
+                    }%)`,
+                  }}
+                  className="w-full h-1.5 rounded-full appearance-none cursor-pointer transition-all absolute inset-0 z-10 opacity-0 group-hover:opacity-100 accent-primary"
+                />
+                {/* Always Active Invisible Slider for Dragging */}
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={playerData.rightLegUsage}
+                  onChange={(e) =>
+                    handleUpdate("rightLegUsage", parseInt(e.target.value))
+                  }
+                  className="w-full h-6 opacity-0 cursor-pointer absolute inset-0 z-20"
+                />
+              </div>
+            ) : (
+              <Progress
+                value={playerData.rightLegUsage}
+                style={{ backgroundColor: "#333" }}
+                indicatorClassName="bg-green-500"
+              />
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="p-4 sm:p-6 border-t border-white/5 w-full min-w-0">
+        <h2 className="text-base sm:text-lg text-center font-heading font-normal mb-4 text-white">
+          Languages
+        </h2>
+        <div className="space-y-3 w-full min-w-0">
+          {playerData.languages.map((lang: any, idx: number) => (
+            <div
+              key={idx}
+              className="flex justify-between items-center p-2 sm:p-3 bg-black/20 border border-border/50 rounded-lg group hover:bg-black/40 transition-all w-full min-w-0 gap-2"
+            >
+              <CMSField
+                value={lang.name}
+                onUpdate={(val) => handleUpdate(`languages.${idx}.name`, val)}
+                canEdit={canEditBio}
+                className="flex-1 min-w-0 font-medium text-gray-200"
+                inputClassName="w-full min-w-0 truncate text-xs sm:text-sm"
+              />
+              <CMSField
+                value={lang.level || "Fluent"}
+                onUpdate={(val) => handleUpdate(`languages.${idx}.level`, val)}
+                canEdit={canEditBio}
+                type="select"
+                options={["Native", "Fluent", "Intermediate", "Beginner"]}
+                className="w-24 sm:w-32 justify-end shrink-0"
+                inputClassName="text-right text-primary font-bold text-[10px] sm:text-sm w-full truncate"
+                hideIcon={true}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Position & Futsal Map */}
+      <PitchMapCard playerData={playerData} handleUpdate={handleUpdate} />
+    </div>
+  );
+};

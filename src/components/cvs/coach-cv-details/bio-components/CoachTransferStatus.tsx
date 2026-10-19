@@ -1,5 +1,6 @@
 import CMSField from "@/components/shared/CMSField";
 import { useCoach } from "@/hooks/useCoach";
+import { formatDate } from "@/lib/utils";
 
 export const CoachTransferStatus = ({
   canEdit,
@@ -28,7 +29,7 @@ export const CoachTransferStatus = ({
         <div className="flex justify-between border-b pb-2">
           <span className="text-gray-400">Contract Until</span>
           <CMSField
-            value={coachData.contractUntil}
+            value={formatDate(coachData.contractUntil)}
             onUpdate={(val) => handleUpdate("contractUntil", val)}
             canEdit={canEdit}
             className="w-28 justify-end"

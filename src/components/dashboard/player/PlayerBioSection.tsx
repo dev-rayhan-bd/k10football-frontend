@@ -7,7 +7,7 @@ import { Clock, Mail, Phone, Shield } from 'lucide-react';
 import { useRouter } from "next/navigation";
 
 import { usePlayer } from "@/hooks/usePlayer";
-import { getFullWithShortForm } from "@/lib/utils";
+import { getFullWithShortForm, formatDate } from "@/lib/utils";
 
 const PlayerBioSection = () => {
   const { playerData } = usePlayer();
@@ -100,7 +100,7 @@ const PlayerBioSection = () => {
                   <Clock className="w-4 h-4 text-orange-400 shrink-0" />
                   <span className="text-gray-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">Contract Until</span>
                 </div>
-                <p className="text-orange-400 font-bold text-xs sm:text-sm truncate">{playerData.contractUntil}</p>
+                <p className="text-orange-400 font-bold text-xs sm:text-sm truncate">{formatDate(playerData.contractUntil)}</p>
               </div>
 
               {/* Email */}

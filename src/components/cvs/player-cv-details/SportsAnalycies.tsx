@@ -18,6 +18,8 @@ import {
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { IconDownload } from "@tabler/icons-react";
+import { usePlayer } from "@/hooks/usePlayer";
+
 const getResultColor = (result: "W" | "D" | "L") => {
   switch (result) {
     case "W":
@@ -30,29 +32,60 @@ const getResultColor = (result: "W" | "D" | "L") => {
 };
 const getResultText = (result: "W" | "D" | "L") => result;
 const SportsAnalycies = ({ editable = false }: { editable?: boolean }) => {
-const reports = useAppSelector(state => state.reports.reports);
-const paidMatches = reports.filter(m => m.status === "Paid");
-const matches = paidMatches.slice(0, 4);
+  const { cvData } = usePlayer();
+  const reports = useAppSelector(state => state.reports.reports);
+  const paidMatches = reports.filter(m => m.status === "Paid");
 
-const [showArchive, setShowArchive] = useState(false);
-const [downloadingReportId, setDownloadingReportId] = useState<number | null>(null);
+  const effectiveMatches: any[] = paidMatches.length > 0
+    ? paidMatches
+    : (cvData?.recentMatches || []).map((m: any, idx: number) => ({
+        id: m._id || idx + 1,
+        date: m.date ? new Date(m.date).toLocaleDateString() : "2026-09-12",
+        team1: "K10 Academy",
+        team2: m.opponent || m.team2 || "Opponent",
+        team1Logo: "/teams/default.png",
+        team2Logo: "/teams/default.png",
+        score: m.score || `${m.goals || 0} - 0`,
+        result: (m.result || "W") as "W" | "D" | "L",
+        rating: m.rating || 7.5,
+        goals: m.goals || 0,
+        assists: m.assists || 0,
+        passAccuracy: m.passAccuracy || 80,
+        minutesPlayed: m.minutesPlayed || 90,
+        yellowCards: m.yellowCards || 0,
+        redCards: m.redCards || 0,
+        league: m.league || "Championship",
+        stadium: m.stadium || "Home Stadium",
+        scoutName: m.scoutName || "Scout Analyst",
+        status: "Paid",
+      }));
 
-const wins = matches.filter((m) => m.result === "W").length;
-const draws = matches.filter((m) => m.result === "D").length;
-const losses = matches.filter((m) => m.result === "L").length;
-const totalGoals = matches.reduce((sum, m) => sum + m.goals, 0);
-const totalAssists = matches.reduce((sum, m) => sum + m.assists, 0);
+  const matches: any[] = effectiveMatches.slice(0, 4);
 
-const avgRating = matches.length > 0 
-? (matches.reduce((sum, m) => sum + m.rating, 0) / matches.length).toFixed(1)
-: "0.0";
+  const [showArchive, setShowArchive] = useState(false);
+  const [downloadingReportId, setDownloadingReportId] = useState<number | null>(null);
 
-const avgPassAccuracy = matches.length > 0
-? Math.round(matches.reduce((sum, m) => sum + m.passAccuracy, 0) / matches.length)
-: 0;
+  const summary = cvData?.matchSummary;
+  const wins = summary?.wins ?? matches.filter((m: any) => m.result === "W").length;
+  const draws = summary?.draws ?? matches.filter((m: any) => m.result === "D").length;
+  const losses = summary?.losses ?? matches.filter((m: any) => m.result === "L").length;
+  const totalGoals = summary?.totalGoals ?? matches.reduce((sum: number, m: any) => sum + (m.goals || 0), 0);
+  const totalAssists = summary?.totalAssists ?? matches.reduce((sum: number, m: any) => sum + (m.assists || 0), 0);
 
-const avgTackles = (2.4).toFixed(1);
-const avgInterceptions = (2.4).toFixed(1);
+  const avgRating = summary?.avgRating !== undefined || summary?.avgMatchRating !== undefined
+    ? Number(summary.avgRating ?? summary.avgMatchRating).toFixed(1)
+    : matches.length > 0 
+      ? (matches.reduce((sum: number, m: any) => sum + (m.rating || 0), 0) / matches.length).toFixed(1)
+      : "0.0";
+
+  const avgPassAccuracy = summary?.avgPassAccuracy !== undefined || summary?.passAccuracy !== undefined
+    ? Math.round(Number(summary.avgPassAccuracy ?? summary.passAccuracy))
+    : matches.length > 0
+      ? Math.round(matches.reduce((sum: number, m: any) => sum + (m.passAccuracy || 0), 0) / matches.length)
+      : 0;
+
+  const avgTackles = (2.4).toFixed(1);
+  const avgInterceptions = (2.4).toFixed(1);
 
 const handleDownloadPDF = async (match: any) => {
 setDownloadingReportId(match.id);
@@ -233,7 +266,7 @@ return (
       <Card className="border border-border bg-black p-4 sm:p-8 text-white rounded-lg w-full min-w-0">
         <div className="mb-4 sm:mb-6 text-lg sm:text-xl font-bold text-gray-300 uppercase tracking-wide truncate">Form Guide</div>
         <div className="mb-4 sm:mb-6 flex flex-wrap gap-2 sm:gap-3 w-full min-w-0">
-          {matches.map((match, idx) => (
+          {matches.map((match: any, idx: number) => (
             <Badge key={idx} className={`h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center p-0 rounded-full font-black text-base sm:text-lg ${getResultColor(match.result)} shadow-lg`}>
               {getResultText(match.result)}
             </Badge>
@@ -273,7 +306,7 @@ return (
 
     {/* Detailed Game Reports */}
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-8 w-full min-w-0">
-      {matches.map((match, idx) => (
+      {matches.map((match: any, idx: number) => (
         <Card
           key={idx}
           className="border border-border bg-black p-4 sm:p-8 text-white rounded-xl hover:border-primary/30 transition-all shadow-xl flex flex-col justify-between w-full min-w-0"
@@ -376,7 +409,7 @@ return (
     </div>
 
     {/* View All / Archive Button */}
-    {paidMatches.length > 4 && (
+    {effectiveMatches.length > 4 && (
       <div className="flex justify-center mt-10">
         <button
           onClick={() => setShowArchive(true)}
@@ -400,7 +433,7 @@ return (
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto space-y-4 pr-2">
-          {paidMatches.map((match) => (
+          {effectiveMatches.map((match: any) => (
             <div 
               key={match.id} 
               className="bg-black/40 border border-white/5 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-white/15 transition-all"

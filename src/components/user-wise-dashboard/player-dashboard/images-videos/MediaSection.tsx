@@ -28,14 +28,16 @@ export const MediaSection: React.FC<MediaSectionProps> = ({
           <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">{title}</h2>
           <p className="text-xs sm:text-sm text-gray-500 mt-1">Match highlights & training</p>
         </div>
-        <button
-          onClick={onUploadClick}
-          type="button"
-          className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-[#1A1A1A] border border-white/10 text-[10px] sm:text-xs font-bold text-white hover:bg-[#252525] hover:border-white/20 transition-all flex items-center justify-center sm:justify-start gap-2.5 uppercase tracking-wider cursor-pointer"
-        >
-          {type === "image" ? <IconPlus size={16} className="sm:size-4.5" /> : <IconUpload size={16} className="sm:size-4.5" />}
-          {type === "image" ? "Upload Image" : "Upload Video"}
-        </button>
+        {onUploadClick && (
+          <button
+            onClick={onUploadClick}
+            type="button"
+            className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-[#1A1A1A] border border-white/10 text-[10px] sm:text-xs font-bold text-white hover:bg-[#252525] hover:border-white/20 transition-all flex items-center justify-center sm:justify-start gap-2.5 uppercase tracking-wider cursor-pointer"
+          >
+            {type === "image" ? <IconPlus size={16} className="sm:size-4.5" /> : <IconUpload size={16} className="sm:size-4.5" />}
+            {type === "image" ? "Upload Image" : "Upload Video"}
+          </button>
+        )}
       </div>
 
       {isLoading ? (

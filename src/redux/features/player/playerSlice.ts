@@ -12,6 +12,7 @@ import right from "@/assets/cvs/id/right_foot.png";
 import trofeeIcon from "@/assets/cvs/id/trofeeIcon.png";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { calculateWeightedRating } from "@/lib/utils/rating";
+import { formatDate } from "@/lib/utils";
 
 export interface Club {
   id: string;
@@ -457,6 +458,115 @@ export const playerSlice = createSlice({
         activePlayer.rating = calculateWeightedRating(activePlayer.position, activePlayer.strengths);
       }
     },
+    syncFromCvResponse: (state, action: PayloadAction<any>) => {
+      const data = action.payload;
+      if (!data) return;
+      const activePlayer = state.players.find((p) => p.id === state.selectedPlayerId) || state.players[0];
+      if (activePlayer) {
+        if (data.fullName) activePlayer.fullName = data.fullName;
+        if (data.position) activePlayer.position = data.position;
+        if (data.dateOfBirth) {
+          activePlayer.dob = data.dateOfBirth.includes("T") ? data.dateOfBirth.split("T")[0] : data.dateOfBirth;
+        }
+        if (data.age !== undefined && data.age !== null) activePlayer.age = String(data.age);
+        if (data.country) activePlayer.birthCountry = data.country;
+        if (data.dualNationality !== undefined) activePlayer.dualNationality = data.dualNationality;
+        if (data.email) activePlayer.email = data.email;
+        if (data.phone) activePlayer.phone = data.phone;
+        if (data.website !== undefined) activePlayer.website = data.website;
+        if (data.height !== undefined && data.height !== null) activePlayer.height = String(data.height);
+        if (data.weight !== undefined && data.weight !== null) activePlayer.weight = String(data.weight);
+        if (data.rightFootDominance !== undefined) activePlayer.rightLegUsage = data.rightFootDominance;
+        if (data.leftFootDominance !== undefined) activePlayer.leftLegUsage = data.leftFootDominance;
+        if (data.preferredFoot) (activePlayer as any).preferredFoot = data.preferredFoot;
+        if (data.overallRating !== undefined) activePlayer.rating = data.overallRating;
+        if (data.profileImage) activePlayer.playerImage = data.profileImage;
+        if (data.marketValue !== undefined) activePlayer.marketValue = String(data.marketValue);
+        if (data.contractUntil !== undefined) activePlayer.contractUntil = formatDate(data.contractUntil);
+        if (data.agentName !== undefined) activePlayer.agent = data.agentName;
+        if (data.agencyName !== undefined) activePlayer.agency = data.agencyName;
+        if (data.agentStatus) (activePlayer as any).agentStatus = data.agentStatus;
+        if (data.clubStatus) (activePlayer as any).clubStatus = data.clubStatus;
+        if (data.currentClub) (activePlayer as any).currentClub = data.currentClub;
+        if (data.cvTier) (activePlayer as any).cvTier = data.cvTier;
+        if (data.profileCompletion !== undefined) (activePlayer as any).profileCompletion = data.profileCompletion;
+        if (data.transferStatus) {
+          activePlayer.transferStatus = typeof data.transferStatus === 'string' ? data.transferStatus : (data.transferStatus.status || "Active");
+        }
+        if (Array.isArray(data.languages) && data.languages.length > 0) {
+          activePlayer.languages = data.languages.map((l: any, i: number) => ({
+            name: l.language || l.name || "",
+            level: l.proficiency || l.level || "",
+            color: i === 0 ? "text-primary" : i === 1 ? "text-yellow" : "text-orange"
+          }));
+        }
+        if (Array.isArray(data.clubHistory) && data.clubHistory.length > 0) {
+          activePlayer.clubs = data.clubHistory.map((c: any, i: number) => {
+            const periods = (c.period || "").split("-").map((s: string) => s.trim());
+            return {
+              id: c._id || String(i + 1),
+              name: c.clubName || c.name || "",
+              from: periods[0] || "2020",
+              to: periods[1] || (c.isCurrent ? "Present" : "2022"),
+              logo: c.logoUrl || c.logo || "bg-blue-600",
+              color: "border-blue-500",
+              shortName: (c.clubName || "").slice(0, 3).toUpperCase(),
+              isCurrent: c.isCurrent
+            };
+          });
+        }
+        if (Array.isArray(data.positionMap) && data.positionMap.length > 0) {
+          activePlayer.positionMarkers = data.positionMap.map((m: any, idx: number) => ({
+            id: m._id || `pos-${idx + 1}`,
+            name: `position${idx + 1}`,
+            x: m.x,
+            y: m.y
+          }));
+        }
+        if (Array.isArray(data.futsalMap) && data.futsalMap.length > 0) {
+          activePlayer.futsalMarkers = data.futsalMap.map((m: any, idx: number) => ({
+            id: m._id || `futsal-${idx + 1}`,
+            name: `futsal${idx + 1}`,
+            x: m.x,
+            y: m.y
+          }));
+        }
+        if (data.strength) {
+          activePlayer.strengths = {
+            pace: data.strength.pace ?? 50,
+            shooting: data.strength.shooting ?? 50,
+            passing: data.strength.passing ?? 50,
+            dribbling: data.strength.dribbling ?? 50,
+            defending: data.strength.defending ?? 50,
+            physical: data.strength.physical ?? 50,
+            heading: data.strength.heading ?? 88,
+          };
+        }
+        if (data.performanceStats) {
+          activePlayer.seasonStats = {
+            matches: data.performanceStats.matches ?? 0,
+            goals: data.performanceStats.goals ?? 0,
+            assists: data.performanceStats.assists ?? 0,
+            avgRating: data.matchSummary?.avgMatchRating ?? 0
+          };
+        }
+        if (Array.isArray(data.playerStyles)) {
+          activePlayer.selectedStyleIds = data.playerStyles;
+        }
+        if (Array.isArray(data.accomplishments) && data.accomplishments.length > 0) {
+          activePlayer.careerHighlights = data.accomplishments.map((a: any) => ({
+            year: String(a.year || ""),
+            title: a.title || "",
+            club: a.club || (activePlayer as any).currentClub || "",
+            icon: trofeeIcon
+          }));
+        }
+        if (data.additionalNotes !== undefined) {
+          (activePlayer as any).additionalNotes = data.additionalNotes;
+        }
+        (activePlayer as any).cvData = data;
+      }
+    },
     updatePlayerField: (state, action: PayloadAction<{ field: string; value: any }>) => {
       const { field, value } = action.payload;
       const activePlayer = state.players.find((p) => p.id === state.selectedPlayerId);
@@ -539,6 +649,7 @@ export const playerSlice = createSlice({
 
 export const {
   setPlayerData,
+  syncFromCvResponse,
   updatePlayerField,
   setSelectedPlayerId,
   validatePlayerCv,

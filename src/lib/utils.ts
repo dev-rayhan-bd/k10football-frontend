@@ -76,3 +76,43 @@ export const getVeryShortPosition = (position: string): string => {
   }
   return pos;
 };
+
+export const formatDate = (val: string | number | Date | null | undefined): string => {
+  if (!val) return "N/A";
+  const strVal = String(val).trim();
+  if (!strVal || strVal === "N/A" || strVal === "undefined" || strVal === "null") return "N/A";
+
+  // If it's already a clean string like "June, 2026" or "June 2026"
+  if (/^[A-Za-z]+,?\s*\d{4}$/.test(strVal)) {
+    return strVal;
+  }
+
+  // Handle ISO format YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss...
+  const isoMatch = strVal.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) {
+    const [, year, month, day] = isoMatch;
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    const monthIndex = parseInt(month, 10) - 1;
+    if (monthIndex >= 0 && monthIndex < 12) {
+      return `${parseInt(day, 10)} ${monthNames[monthIndex]} ${year}`;
+    }
+  }
+
+  try {
+    const d = new Date(strVal);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+    }
+  } catch {
+    // fallback
+  }
+
+  return strVal;
+};

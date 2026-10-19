@@ -1,11 +1,9 @@
 "use client";
 import { Dock } from "lucide-react";
 import { useState } from "react";
-import { useUpdatePlayerProfileMutation } from "@/redux/features/cv/cvApi";
 import CMSField from "@/components/shared/CMSField";
 
 const DocSection = ({ editable = false }: { editable?: boolean }) => {
-  const [updatePlayer] = useUpdatePlayerProfileMutation();
   const [docs, setDocs] = useState([
     { id: 1, title: "GAMES-REPORTS-16276JPG" },
     { id: 2, title: "GAMES-REPORTS-16276JPG" },

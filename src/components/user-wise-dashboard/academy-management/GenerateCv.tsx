@@ -15,22 +15,31 @@ import { Button } from "@/components/ui/button";
 import FullEditablePage from "@/components/cvs/player-cv-details/FullEditablePage";
 import { usePlayer } from "@/hooks/usePlayer";
 import { usePlayerStats } from "@/components/cvs/player-cv-details/FullEditablePage";
-import { getFullWithShortForm } from "@/lib/utils";
+import { getFullWithShortForm, formatDate } from "@/lib/utils";
 import { FileText } from 'lucide-react';
 import { useAppSelector } from "@/hooks/reduxHooks";
 const GenerateCv = () => {
-  const { playerData } = usePlayer();
+  const { playerData, cvData } = usePlayer();
   const { role: contextRole } = usePlayerStats();
   const [role, setRole] = useState<string>("player");
   const reports = useAppSelector(state => state.reports.reports);
-  const gameReports = reports
-    .filter(r => r.status === "Paid")
-    .slice(0, 3)
-    .map(r => ({
-      id: r.id,
-      opponent: `vs ${r.team2}`,
-      rating: r.rating
-    }));
+  interface IDisplayReport {
+    id: string | number;
+    opponent: string;
+    rating: number;
+  }
+  const paidReports = reports.filter(r => r.status === "Paid");
+  const gameReports: IDisplayReport[] = paidReports.length > 0
+    ? paidReports.slice(0, 3).map(r => ({
+        id: r.id,
+        opponent: `vs ${r.team2}`,
+        rating: r.rating
+      }))
+    : (cvData?.recentMatches || []).slice(0, 3).map((m: any) => ({
+        id: m._id,
+        opponent: m.title || `vs ${m.awayTeam || "Opponent"}`,
+        rating: m.playerRating || m.rating || 6
+      }));
   useEffect(() => {
     const userRole = localStorage.getItem("userRole") || "player";
     setRole(userRole);
@@ -148,7 +157,7 @@ const GenerateCv = () => {
               <div class="section-header">Scouting Summary</div>
               <table class="attribute-table">
                 <tr class="attribute-row"><td class="attribute-cell attr-label">Market Value</td><td class="attribute-cell attr-value">€${playerData.marketValue}</td></tr>
-                <tr class="attribute-row"><td class="attribute-cell attr-label">Contract Until</td><td class="attribute-cell attr-value">${playerData.contractUntil}</td></tr>
+                <tr class="attribute-row"><td class="attribute-cell attr-label">Contract Until</td><td class="attribute-cell attr-value">${formatDate(playerData.contractUntil)}</td></tr>
                 <tr class="attribute-row"><td class="attribute-cell attr-label">Agency</td><td class="attribute-cell attr-value">${playerData.agency}</td></tr>
                 <tr class="attribute-row"><td class="attribute-cell attr-label">Agent</td><td class="attribute-cell attr-value">${playerData.agent}</td></tr>
               </table>
@@ -309,7 +318,7 @@ const GenerateCv = () => {
                   <div className="p-2 sm:p-3 bg-white/5 rounded-lg sm:rounded-xl border border-white/10 text-white/40 shrink-0"><IconClock size={18} className="sm:w-5 sm:h-5" /></div>
                   <div className="min-w-0">
                     <p className="text-[9px] sm:text-[10px] text-white/40 uppercase font-black tracking-widest truncate">Contract Until</p>
-                    <p className="text-xs sm:text-sm font-bold text-[#FBBF24] truncate">{playerData.contractUntil}</p>
+                    <p className="text-xs sm:text-sm font-bold text-[#FBBF24] truncate">{formatDate(playerData.contractUntil)}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 sm:gap-4 min-w-0">
@@ -330,10 +339,15 @@ const GenerateCv = () => {
             <h3 className="text-xs sm:text-sm font-black text-white font-orbitron uppercase tracking-widest truncate">Completion Status</h3>
             <div className="space-y-3 sm:space-y-4">
               <div className="flex justify-between items-end">
-                <span className="text-4xl sm:text-5xl font-black text-[#E31B23] font-orbitron">85%</span>
+                <span className="text-4xl sm:text-5xl font-black text-[#E31B23] font-orbitron">
+                  {cvData?.profileCompletion ?? (playerData as any).profileCompletion ?? 100}%
+                </span>
               </div>
               <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                <div className="h-full bg-[#E31B23] rounded-full" style={{ width: "85%" }} />
+                <div
+                  className="h-full bg-[#E31B23] rounded-full transition-all duration-500"
+                  style={{ width: `${cvData?.profileCompletion ?? (playerData as any).profileCompletion ?? 100}%` }}
+                />
               </div>
               <p className="text-[9px] sm:text-[10px] text-white/40 font-bold leading-relaxed uppercase tracking-wider line-clamp-2">
                 Complete all sections to unlock Gold tier status
@@ -344,11 +358,13 @@ const GenerateCv = () => {
           <div className="bg-[#111111] rounded-3xl border border-white/10 p-6 sm:p-8 flex flex-col gap-4 sm:gap-6 relative overflow-hidden min-w-0 w-full">
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#FBBF24]/10 blur-3xl rounded-full pointer-events-none" />
             <div className="flex flex-col relative z-10">
-              <h3 className="text-2xl sm:text-3xl font-black text-[#FBBF24] font-orbitron italic tracking-tighter leading-none">GOLD</h3>
+              <h3 className="text-2xl sm:text-3xl font-black text-[#FBBF24] font-orbitron italic tracking-tighter leading-none">
+                {cvData?.cvTier || (playerData as any).cvTier || "GOLD"}
+              </h3>
               <div className="w-full h-1 bg-[#FBBF24] mt-2 opacity-50" />
             </div>
             <p className="text-[9px] sm:text-[10px] text-white/60 font-bold leading-relaxed uppercase tracking-wider mt-1 sm:mt-2 relative z-10 line-clamp-2">
-              Your CV meets Gold standards and is ready to share with top clubs and agents.
+              Your CV meets {cvData?.cvTier || (playerData as any).cvTier || "GOLD"} standards and is ready to share with top clubs and agents.
             </p>
             <Button className="bg-white/5 hover:bg-white/10 text-white border border-white/10 gap-2 w-full py-3 sm:py-4 rounded-xl font-black uppercase tracking-widest text-[9px] sm:text-[10px] h-auto mt-2 sm:mt-4 relative z-10">
               <IconShare size={16} className="text-white/40 sm:w-4.5 sm:h-4.5" /> Request Re-validation
