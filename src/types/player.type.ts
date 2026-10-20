@@ -230,3 +230,135 @@ export interface IUpdatePlayerPayload {
   [key: string]: any;
 }
 
+export interface ICreateSelfGameReportPayload {
+  playerInfo: {
+    playerName: string;
+    dateOfBirth: string;
+    clubName: string;
+    position: string;
+    foot: string;
+    characteristics: string[];
+    weight: number;
+    height: number;
+  };
+  scoutName: string;
+  gameType: string;
+  gameDate: string;
+  gameLocation: string;
+  matchResult: string;
+  weather: string;
+  temperature: number;
+  opponentTeam: string;
+  ownTeam: string;
+  homeScore: number;
+  awayScore: number;
+  minutesPlayed: string;
+  stats: {
+    shotsOnGoal: number;
+    goalScored: number;
+    assists: number;
+    passAccurate: number;
+    wrongPass: number;
+    penaltiesTaken: number;
+    standTackle: number;
+    slidingTackle: number;
+    interception: number;
+    appearances: number;
+    fault: number;
+    redCard: number;
+    yellowCard: number;
+    punching: number;
+    handling: number;
+    reflex: number;
+    aerialAbility: number;
+    throwing: number;
+    reactions: number;
+    savesAccurate: number;
+    freeKick: number;
+    cornerKick: number;
+    goalUnsave: number;
+    penaltiesSaves: number;
+    [key: string]: number;
+  };
+  accurateShots: Array<{
+    x: number;
+    y: number;
+  }>;
+  accurateAssists: Array<{
+    fromX: number;
+    fromY: number;
+    toX: number;
+    toY: number;
+  }>;
+}
+
+export interface IGameReportResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: any;
+}
+
+export interface IGameReportPerformanceMetrics {
+  goals: number;
+  assists: number;
+  passes: number;
+  [key: string]: number;
+}
+
+export interface IGameReportItem {
+  _id: string;
+  reportId?: string;
+  report?: string;
+  title: string;
+  subtitle?: string;
+  homeTeam?: string;
+  awayTeam?: string;
+  position?: string;
+  league?: string;
+  score?: string;
+  homeScore?: number;
+  awayScore?: number;
+  rating?: number;
+  scoutRating?: number;
+  amount?: string;
+  amountNumber?: number;
+  approvalDate?: string;
+  date?: string;
+  status: "PAID" | "PENDING" | string;
+  paymentStatus?: "PAID" | "UNPAID" | "FREE" | string;
+  evaluationStatus?: "PENDING" | "UNREQUESTED" | "COMPLETED" | string;
+  performanceMetrics?: IGameReportPerformanceMetrics;
+  scoutAnalysis?: string;
+  reportPdfUrl?: string | null;
+  action?: {
+    view?: boolean;
+    download?: boolean;
+  };
+}
+
+export interface IGameReportsSummary {
+  totalReports: number;
+  averageRating: number;
+  completed: number;
+  pending: number;
+}
+
+export interface IGameReportsData {
+  summary: IGameReportsSummary;
+  reports: IGameReportItem[];
+  pagination?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export interface IPlayerGameReportsResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: IGameReportsData;
+}
+

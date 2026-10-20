@@ -9,12 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 interface StripePaymentModalProps {
-  onPay: () => void;
+  onPay: () => void | Promise<void>;
   onBack: () => void;
+  buttonText?: string;
+  isSubmitting?: boolean;
 }
 
-const StripePaymentModal = ({ onPay, onBack }: StripePaymentModalProps) => {
-  const [paymentData, setPaymentData] = useState({ card: "", expiry: "", cvc: "", name: "EDDIE RICCI" });
+const StripePaymentModal = ({ onPay, onBack, buttonText, isSubmitting = false }: StripePaymentModalProps) => {
+  const [paymentData, setPaymentData] = useState({ card: "4242 4242 4242 4242", expiry: "12/28", cvc: "123", name: "EDDIE RICCI" });
   const [loading, setLoading] = useState(false);
 
   const handleCardChange = (val: string) => {
@@ -42,15 +44,16 @@ const StripePaymentModal = ({ onPay, onBack }: StripePaymentModalProps) => {
     setPaymentData({ ...paymentData, cvc: digits });
   };
 
-  const handleFinalSubmit = () => {
+  const handleFinalSubmit = async () => {
     const rawCard = paymentData.card.replace(/\s/g, "");
     if (rawCard.length === 16 && paymentData.expiry.length === 5 && paymentData.cvc.length === 3) {
       setLoading(true);
-      // Simulate Stripe API call
-      setTimeout(() => {
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 600));
+        await onPay();
+      } finally {
         setLoading(false);
-        onPay();
-      }, 1500);
+      }
     }
   };
 
@@ -127,15 +130,15 @@ const StripePaymentModal = ({ onPay, onBack }: StripePaymentModalProps) => {
           <Button 
             className="w-full h-14 sm:h-16 rounded-2xl bg-[#00FF62] hover:bg-[#00D150] text-black font-black uppercase tracking-wider sm:tracking-widest text-xs sm:text-sm md:text-lg transition-all shadow-[0_0_30px_rgba(0,255,98,0.2)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-orbitron text-center leading-tight px-2"
             onClick={handleFinalSubmit}
-            disabled={!isValid || loading}
+            disabled={!isValid || loading || isSubmitting}
           >
-            {loading ? (
+            {loading || isSubmitting ? (
               <>
                 <IconLoader2 className="animate-spin" size={20} />
                 Processing Payment...
               </>
             ) : (
-              "Pay & Continue to Form"
+              buttonText || "Pay & Continue to Form"
             )}
           </Button>
           <Button 

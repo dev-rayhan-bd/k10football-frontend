@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Star, Plus, Trash2, Quote } from 'lucide-react'
 import Image from 'next/image'
 import Marquee from 'react-fast-marquee'
@@ -193,6 +194,8 @@ return (
                       src={formData.avatar} 
                       alt="Avatar Preview" 
                       className="w-full h-full object-cover"
+                      width={80}
+                      height={80}
                     />
                   ) : (
                     <Plus className="text-gray-400 group-hover:text-primary transition-colors" size={24} />

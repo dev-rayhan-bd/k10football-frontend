@@ -3,7 +3,13 @@ import { apiSlice } from "../api/apiSlice";
 import TagTypes from "@/constants/tagType.constant";
 import { SuccessToast, ErrorToast } from "@/helpers/ValidationHelper";
 import { IParam } from "@/types/global.type";
-import { IPlayerProfileResponse, IUpdatePlayerPayload } from "@/types/player.type";
+import { 
+    IPlayerProfileResponse, 
+    IUpdatePlayerPayload, 
+    ICreateSelfGameReportPayload, 
+    IGameReportResponse,
+    IPlayerGameReportsResponse 
+} from "@/types/player.type";
 
 export const playerApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
@@ -180,6 +186,44 @@ export const playerApi = apiSlice.injectEndpoints({
                 }
             },
         }),
+
+        createSelfGameReport: builder.mutation<IGameReportResponse, ICreateSelfGameReportPayload>({
+            query: (data) => ({
+                url: "/players/me/game-reports/self",
+                method: "POST",
+                body: data,
+            }),
+            invalidatesTags: (result) => {
+                if (result?.success) {
+                    return [TagTypes.PLAYERS, TagTypes.GAME_REPORTS];
+                }
+                return [];
+            },
+            async onQueryStarted(_arg, { queryFulfilled }) {
+                try {
+                    const { data } = await queryFulfilled;
+                    SuccessToast(data?.message || "Game report created successfully");
+                } catch (err: any) {
+                    const status = err?.error?.status;
+                    const message = err?.error?.data?.message || "Something went wrong creating game report";
+                    if (status === 500) {
+                        ErrorToast("Something went wrong on the server");
+                        return;
+                    }
+                    if (status !== 401) {
+                        ErrorToast(message);
+                    }
+                }
+            },
+        }),
+
+        getMyGameReports: builder.query<IPlayerGameReportsResponse, void>({
+            query: () => ({
+                url: "/players/me/game-reports",
+                method: "GET",
+            }),
+            providesTags: [TagTypes.GAME_REPORTS],
+        }),
     }),
 });
 
@@ -194,6 +238,8 @@ export const {
     useGetPlayerByIdQuery,
     useGetMyPlayerMediaQuery,
     useUploadPlayerMediaMutation,
+    useCreateSelfGameReportMutation,
+    useGetMyGameReportsQuery,
 } = playerApi;
 
 // Export aliases for convenience
@@ -201,4 +247,5 @@ export const useGetMyProfileQuery = useGetMyPlayerProfileQuery;
 export const useGetMyPlayerQuery = useGetMyPlayerProfileQuery;
 export const useGetMyCvQuery = useGetMyPlayerCvQuery;
 export const useLazyGetMyCvQuery = useLazyGetMyPlayerCvQuery;
+
 

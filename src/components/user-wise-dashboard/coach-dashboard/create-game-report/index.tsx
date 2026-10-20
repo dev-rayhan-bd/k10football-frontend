@@ -13,8 +13,38 @@ import ReportPdfPreview from "./ReportPdfPreview";
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHooks";
 import { addGameReport, updateGameReport, completeGameReportRequest, addGameReportRequest } from "@/redux/features/reports/reportsSlice";
+import { useCreateSelfGameReportMutation, useGetMyPlayerProfileQuery } from "@/redux/features/player/playerApi";
+import { ICreateSelfGameReportPayload } from "@/types/player.type";
 import { IconCircleCheck } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
+
+const formatDateToYMD = (dateStr: string): string => {
+  if (!dateStr) return "";
+  const trimmed = dateStr.trim();
+  const ddmmyyyy = trimmed.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/);
+  if (ddmmyyyy) {
+    const [, day, month, year] = ddmmyyyy;
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  }
+  const yyyymmdd = trimmed.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
+  if (yyyymmdd) {
+    const [, year, month, day] = yyyymmdd;
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  }
+  return trimmed;
+};
+
+const formatMinutesPlayed = (val: string): string => {
+  if (!val) return "00:00";
+  const trimmed = String(val).trim();
+  if (trimmed.includes(":")) {
+    const [m, s] = trimmed.split(":");
+    return `${(m || "0").padStart(2, "0")}:${(s || "00").padStart(2, "0")}`;
+  }
+  const num = parseInt(trimmed, 10);
+  if (isNaN(num)) return "00:00";
+  return `${String(num).padStart(2, "0")}:00`;
+};
 
 interface CreateGameReportWizardProps {
   onCancel: () => void;
@@ -29,6 +59,8 @@ export const CreateGameReportWizard = ({
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const { players } = usePlayer();
+  const [createSelfGameReport, { isLoading: isCreatingSelfReport }] = useCreateSelfGameReportMutation();
+  const { data: myProfileResponse } = useGetMyPlayerProfileQuery();
 
   const reports = useAppSelector(state => state.reports.reports);
   const requests = useAppSelector(state => state.reports.requests);
@@ -41,22 +73,26 @@ export const CreateGameReportWizard = ({
   const [characteristics, setCharacteristics] = useState<string[]>(["FAST", "SKILLFUL", "FINISHER"]);
   const [formData, setFormData] = useState({
     playerName: "EDEGELSON RICCI",
-    dob: "27-03-2014",
+    dob: "2014-03-27",
     clubName: "INTER MIAMI",
     position: "STRIKER",
     foot: "RIGHT",
     weight: "45",
     height: "1.20",
     matchesPlayed: "1",
-    minutesPlayed: "0",
+    minutesPlayed: "08:08",
     manOfTheMatch: "1",
     scoutName: "MARIO LOPEZ",
     gameType: "FRIENDLY CHAMPIONSHIP CATARINESE",
     gameDate: "2021-02-22",
     gameLocation: "LONDON",
-    matchResult: "INTER MIAMI 2 x 0 LA FC",
+    matchResult: "EDEGELSON RICCI 2 X 0 OPPONENT",
     weather: "RAINY",
-    temperature: "19"
+    temperature: "19",
+    opponentTeam: "Chelsea U19",
+    ownTeam: "FC Barcelona",
+    homeScore: 2,
+    awayScore: 1
   });
 
   const [stats, setStats] = useState<Record<string, number>>({});
@@ -128,7 +164,11 @@ export const CreateGameReportWizard = ({
         gameLocation: savedReport.stadium || "LONDON",
         matchResult: `${savedReport.team1} ${savedReport.score} ${savedReport.team2}`,
         weather: savedReport.weather.toUpperCase() || "SUNNY",
-        temperature: savedReport.temperature || "22"
+        temperature: savedReport.temperature || "22",
+        opponentTeam: savedReport.team2 || "Chelsea U19",
+        ownTeam: savedReport.team1 || "FC Barcelona",
+        homeScore: 2,
+        awayScore: 1
       });
       if (savedReport.characteristics) {
         setCharacteristics(savedReport.characteristics.map(c => c.toUpperCase()));
@@ -245,7 +285,11 @@ export const CreateGameReportWizard = ({
         gameLocation: mLocation,
         matchResult: mResult,
         weather: mWeather,
-        temperature: mTemp
+        temperature: mTemp,
+        opponentTeam: "Chelsea U19",
+        ownTeam: "FC Barcelona",
+        homeScore: 2,
+        awayScore: 1
       });
     }
   }, [playerId, requestId, players, searchParams, requests]);
@@ -254,9 +298,91 @@ export const CreateGameReportWizard = ({
 
 
 
-  const handleSave = (overallRating: number) => {
+  const buildPayload = (): ICreateSelfGameReportPayload => {
+    const statsPayload = {
+      shotsOnGoal: Number(stats.shotsOnGoal ?? 8),
+      goalScored: Number(stats.goalScored ?? 3),
+      assists: Number(stats.assists ?? 6),
+      passAccurate: Number(stats.passAccurate ?? 12),
+      wrongPass: Number(stats.wrongPass ?? 2),
+      penaltiesTaken: Number(stats.penaltiesTaken ?? 4),
+      standTackle: Number(stats.standTackle ?? 12),
+      slidingTackle: Number(stats.slidingTackle ?? 12),
+      interception: Number(stats.interception ?? 2),
+      appearances: Number(stats.appearances ?? 15),
+      fault: Number(stats.fault ?? 1),
+      redCard: Number(stats.redCard ?? 0),
+      yellowCard: Number(stats.yellowCard ?? 1),
+      punching: Number(stats.punching ?? 5),
+      handling: Number(stats.handling ?? 10),
+      reflex: Number(stats.reflex ?? 1),
+      aerialAbility: Number(stats.aerialAbility ?? 5),
+      throwing: Number(stats.throwing ?? 8),
+      reactions: Number(stats.reactions ?? 1),
+      savesAccurate: Number(stats.savesAccurate ?? 10),
+      freeKick: Number(stats.freeKick ?? 12),
+      cornerKick: Number(stats.cornerKick ?? 4),
+      goalUnsave: Number(stats.goalUnsave ?? 1),
+      penaltiesSaves: Number(stats.penaltiesSaves ?? 1),
+    };
+
+    const accurateShots = (goalMarkers && goalMarkers.length > 0 ? goalMarkers : [{ x: 15.2, y: 28.4 }, { x: 84.6, y: 22.1 }]).map((m) => ({
+      x: Number(Number(m.x).toFixed(1)),
+      y: Number(Number(m.y).toFixed(1)),
+    }));
+
+    const accurateAssists = (pitchMarkers && pitchMarkers.length > 0 ? pitchMarkers : [{ x1: 45.0, y1: 70.0, x2: 50.0, y2: 55.0 }]).map((m) => ({
+      fromX: Number(Number(m.x1).toFixed(1)),
+      fromY: Number(Number(m.y1).toFixed(1)),
+      toX: Number(Number(m.x2).toFixed(1)),
+      toY: Number(Number(m.y2).toFixed(1)),
+    }));
+
+    let hScore = typeof formData.homeScore === "number" ? formData.homeScore : parseInt(String(formData.homeScore ?? "2"), 10);
+    let aScore = typeof formData.awayScore === "number" ? formData.awayScore : parseInt(String(formData.awayScore ?? "1"), 10);
+    if (isNaN(hScore)) hScore = 2;
+    if (isNaN(aScore)) aScore = 1;
+
+    return {
+      playerInfo: {
+        playerName: formData.playerName?.trim() || "EDEGELSON RICCI",
+        dateOfBirth: formatDateToYMD(formData.dob) || "2014-03-27",
+        clubName: formData.clubName?.trim() || "INTER MIAMI",
+        position: formData.position?.trim().toUpperCase() || "STRIKER",
+        foot: formData.foot?.trim().toUpperCase() || "RIGHT",
+        characteristics: characteristics && characteristics.length > 0 ? characteristics : ["FAST", "SKILLFUL", "FINISHER"],
+        weight: Number(String(formData.weight).replace(/[^\d.]/g, "")) || 45,
+        height: Number(String(formData.height).replace(/[^\d.]/g, "")) || 1.20,
+      },
+      scoutName: formData.scoutName?.trim() || "MARIO LOPEZ",
+      gameType: formData.gameType?.trim().toUpperCase() || "FRIENDLY CHAMPIONSHIP CATARINESE",
+      gameDate: formatDateToYMD(formData.gameDate) || "2021-02-22",
+      gameLocation: formData.gameLocation?.trim().toUpperCase() || "LONDON",
+      matchResult: formData.matchResult?.trim() || "EDEGELSON RICCI 2 X 0 OPPONENT",
+      weather: formData.weather?.trim().toUpperCase() || "RAINY",
+      temperature: Number(String(formData.temperature).replace(/[^\d.-]/g, "")) || 19,
+      opponentTeam: formData.opponentTeam?.trim() || "Chelsea U19",
+      ownTeam: formData.ownTeam?.trim() || "FC Barcelona",
+      homeScore: hScore,
+      awayScore: aScore,
+      minutesPlayed: formatMinutesPlayed(formData.minutesPlayed) || "08:08",
+      stats: statsPayload,
+      accurateShots,
+      accurateAssists,
+    };
+  };
+
+  const handleSave = async (overallRating: number) => {
     const viewOnly = searchParams.get("viewOnly") === "true";
     const existingReport = viewOnly ? reports.find(r => r.playerId === Number(playerId)) : null;
+
+    const payload = buildPayload();
+
+    try {
+      await createSelfGameReport(payload).unwrap();
+    } catch (err: any) {
+      console.error("Failed to create self game report via API:", err);
+    }
 
     const finalReport = {
       id: existingReport ? existingReport.id : Math.floor(Math.random() * 10000),
@@ -270,7 +396,7 @@ export const CreateGameReportWizard = ({
       goals: stats.goalScored || 0,
       assists: stats.assists || 0,
       passes: stats.passAccurate || 50,
-      timePlayedMinutes: Number(formData.minutesPlayed),
+      timePlayedMinutes: Number(formData.minutesPlayed.replace(/[^\d]/g, "")) || 90,
       yellowCards: stats.yellowCard || 0,
       redCards: stats.redCard || 0,
       passAccuracy: Math.round(((stats.passAccurate || 1) / ((stats.passAccurate || 1) + (stats.wrongPass || 0))) * 100) || 85,
@@ -310,7 +436,7 @@ export const CreateGameReportWizard = ({
     if (onContinue) {
       onContinue(finalReport);
     } else {
-      router.push("/dashboard/coach/game-reports");
+      setStep(5);
     }
   };
 
@@ -400,16 +526,13 @@ export const CreateGameReportWizard = ({
 
       {step === 4 && (
         <StripePaymentModal 
-          onPay={() => {
-            toast.success("Payment successful! Saving report...");
+          buttonText={reportCompletedBy === "coach" && userRole !== "coach" ? "Pay $6.99 & Submit Request" : "Pay $6.99 & Save Report"}
+          isSubmitting={isCreatingSelfReport}
+          onPay={async () => {
             if (reportCompletedBy === "coach" && userRole !== "coach") {
               handlePlayerSubmit();
             } else {
-              if (userRole === "coach") {
-                handleSave(tempRating);
-              } else {
-                handlePlayerSubmit();
-              }
+              await handleSave(tempRating);
             }
           }}
           onBack={() => {

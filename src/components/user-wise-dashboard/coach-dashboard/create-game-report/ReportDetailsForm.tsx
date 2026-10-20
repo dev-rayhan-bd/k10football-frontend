@@ -268,9 +268,55 @@ const ReportDetailsForm = ({
               <Input 
                 className="bg-[#161616] border-white/10 text-white h-12 uppercase font-bold focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]" 
                 value={formData.matchResult}
-                placeholder="e.g. INTER MIAMI 2 x 0 LA FC"
+                placeholder="e.g. EDEGELSON RICCI 2 X 0 OPPONENT"
                 onChange={(e) => handleChange("matchResult", e.target.value)}
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Own Team:</Label>
+              <Input 
+                className="bg-[#161616] border-white/10 text-white h-12 uppercase font-bold focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]" 
+                value={formData.ownTeam || ""}
+                placeholder="e.g. FC Barcelona"
+                onChange={(e) => handleChange("ownTeam", e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Opponent Team:</Label>
+              <Input 
+                className="bg-[#161616] border-white/10 text-white h-12 uppercase font-bold focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]" 
+                value={formData.opponentTeam || ""}
+                placeholder="e.g. Chelsea U19"
+                onChange={(e) => handleChange("opponentTeam", e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Scores (Home / Away):</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="relative">
+                  <Input 
+                    type="number"
+                    className="bg-[#161616] border-white/10 text-white h-12 font-bold focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]" 
+                    value={formData.homeScore ?? 2}
+                    placeholder="Home"
+                    onChange={(e) => handleChange("homeScore", parseInt(e.target.value, 10) || 0)}
+                  />
+                  <span className="absolute right-4 top-3.5 text-gray-500 text-[10px] font-bold uppercase font-orbitron">Home</span>
+                </div>
+                <div className="relative">
+                  <Input 
+                    type="number"
+                    className="bg-[#161616] border-white/10 text-white h-12 font-bold focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]" 
+                    value={formData.awayScore ?? 1}
+                    placeholder="Away"
+                    onChange={(e) => handleChange("awayScore", parseInt(e.target.value, 10) || 0)}
+                  />
+                  <span className="absolute right-4 top-3.5 text-gray-500 text-[10px] font-bold uppercase font-orbitron">Away</span>
+                </div>
+              </div>
             </div>
             <div className="space-y-2">
               <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Weather/Temperature:</Label>

@@ -11,6 +11,8 @@ const TagTypes = {
     DASHBOARD: "Dashboard",
     PLAYERS: "Players",
     players: "Players",
+    GAME_REPORTS: "GameReports",
+    REPORTS: "Reports",
 } as const;
 
 export default TagTypes;

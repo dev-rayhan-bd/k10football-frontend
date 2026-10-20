@@ -108,8 +108,27 @@ const MatchStatisticsForm = ({
 }: MatchStatisticsFormProps) => {
   const isGK = position === "GOALKEEPER";
   const [mobilePage, setMobilePage] = React.useState(0);
+  const parseTimeToSeconds = (val: string): number => {
+    if (!val) return 0;
+    if (typeof val === "string" && val.includes(":")) {
+      const parts = val.split(":");
+      const m = parseInt(parts[0], 10) || 0;
+      const s = parseInt(parts[1], 10) || 0;
+      return m * 60 + s;
+    }
+    const mins = parseInt(val, 10);
+    return isNaN(mins) ? 0 : mins * 60;
+  };
+
+  const formatTime = (totalSeconds: number) => {
+    const safeSecs = isNaN(totalSeconds) ? 0 : Math.max(0, totalSeconds);
+    const m = Math.floor(safeSecs / 60).toString().padStart(2, '0');
+    const s = (safeSecs % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
+
   const [isTimerRunning, setIsTimerRunning] = React.useState(false);
-  const [secondsElapsed, setSecondsElapsed] = React.useState(Number(minutesPlayed || 0) * 60);
+  const [secondsElapsed, setSecondsElapsed] = React.useState(() => parseTimeToSeconds(minutesPlayed));
   const [showOnboarding, setShowOnboarding] = React.useState(false);
 
   React.useEffect(() => {
@@ -130,7 +149,7 @@ const MatchStatisticsForm = ({
       interval = setInterval(() => {
         setSecondsElapsed(prev => {
           const newSecs = prev + 1;
-          setMinutesPlayed(Math.floor(newSecs / 60).toString());
+          setMinutesPlayed(formatTime(newSecs));
           return newSecs;
         });
       }, 1000);
@@ -139,12 +158,6 @@ const MatchStatisticsForm = ({
   }, [isTimerRunning, setMinutesPlayed]);
 
   const toggleTimer = () => setIsTimerRunning(!isTimerRunning);
-
-  const formatTime = (totalSeconds: number) => {
-    const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
-    const s = (totalSeconds % 60).toString().padStart(2, '0');
-    return `${m}:${s}`;
-  };
 
   const statsLeft = [
     { label: "Shots on Goal", key: "shotsOnGoal", color: "bg-[#00D1FF]" },
@@ -186,8 +199,8 @@ const MatchStatisticsForm = ({
           goalUnsave: 1, penaltiesSaves: 1, appearances: 15, fault: 1, redCard: 0, yellowCard: 1,
           punching: 5, handling: 10, reflex: 1, aerialAbility: 5, throwing: 8, reactions: 1
         });
-        setGoalMarkers([{ x: 15, y: 25 }, { x: 85, y: 25 }, { x: 50, y: 50 }]);
-        setPitchMarkers([{ x1: 45, y1: 65, x2: 56, y2: 40 }]);
+        setGoalMarkers([{ x: 15.2, y: 28.4 }, { x: 84.6, y: 22.1 }]);
+        setPitchMarkers([{ x1: 45.0, y1: 70.0, x2: 50.0, y2: 55.0 }]);
       } else {
         setStats({
           shotsOnGoal: 8, goalScored: 3, assists: 6, passAccurate: 12, wrongPass: 2, penaltiesTaken: 4,
@@ -195,8 +208,8 @@ const MatchStatisticsForm = ({
           goalUnsave: 1, penaltiesSaves: 1, appearances: 15, fault: 1, redCard: 0, yellowCard: 1,
           punching: 5, handling: 10, reflex: 1, aerialAbility: 5, throwing: 8, reactions: 1
         });
-        setGoalMarkers([{ x: 15, y: 25 }, { x: 85, y: 25 }, { x: 50, y: 50 }]);
-        setPitchMarkers([{ x1: 48, y1: 62, x2: 56, y2: 46 }]);
+        setGoalMarkers([{ x: 15.2, y: 28.4 }, { x: 84.6, y: 22.1 }]);
+        setPitchMarkers([{ x1: 45.0, y1: 70.0, x2: 50.0, y2: 55.0 }]);
       }
     }
   }, [isGK, stats, setStats, setGoalMarkers, setPitchMarkers]);
@@ -444,8 +457,10 @@ const MatchStatisticsForm = ({
     <div className="flex flex-col px-0 gap-8 pb-10 animate-in fade-in duration-500">
       <div className="relative">
         <h1 className="text-3xl md:text-5xl font-black text-white font-orbitron uppercase tracking-tight wrap-break-word">Create Game Reports</h1>
-        <p className="text-white/60 font-medium mt-2 text-sm sm:text-base md:text-lg w-fit relative">
-          Create Professional Football Player Game Reports
+        <div className="relative w-fit">
+          <p className="text-white/60 font-medium mt-2 text-sm sm:text-base md:text-lg">
+            Create Professional Football Player Game Reports
+          </p>
           
           {showOnboarding && (
             <div className="absolute top-full left-0 mt-3 w-72 bg-[#8B5CF6] rounded-xl p-4 shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 border border-white/20">
@@ -461,7 +476,7 @@ const MatchStatisticsForm = ({
               <div className="absolute -top-2 left-6 w-4 h-4 bg-[#8B5CF6] rotate-45 border-l border-t border-white/20" />
             </div>
           )}
-        </p>
+        </div>
       </div>
 
       <div className="bg-[#0A0A0A] py-4 sm:px-8 sm:py-8 md:px-12 flex flex-col gap-10 relative overflow-hidden shadow-2xl">
