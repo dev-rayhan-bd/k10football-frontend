@@ -11,6 +11,7 @@ import {
 } from "@/redux/features/player/playerSlice";
 import {
   useGetMyPlayerCvQuery,
+  useGetMyPlayerProfileQuery,
   useUpdateMyPlayerProfileMutation,
 } from "@/redux/features/player/playerApi";
 import { IUpdatePlayerPayload } from "@/types/player.type";
@@ -37,6 +38,17 @@ export const usePlayer = () => {
     skip: !hasToken,
   });
 
+  // 1b. GET Profile API: Fetch player profile from {{baseUrl}}/players/me
+  const {
+    data: profileResponse,
+    isLoading: isProfileLoading,
+    isFetching: isProfileFetching,
+    error: profileError,
+    refetch: refetchProfile,
+  } = useGetMyPlayerProfileQuery(undefined, {
+    skip: !hasToken,
+  });
+
   // 2. PATCH Player API: Update player profile / CV from {{baseUrl}}/players/me
   const [updatePlayerMutation, { isLoading: isUpdating }] = useUpdateMyPlayerProfileMutation();
 
@@ -46,6 +58,12 @@ export const usePlayer = () => {
       dispatch(syncFromCvResponse(cvResponse.data));
     }
   }, [cvResponse, dispatch]);
+
+  useEffect(() => {
+    if (profileResponse?.data) {
+      dispatch(syncFromCvResponse(profileResponse.data));
+    }
+  }, [profileResponse, dispatch]);
 
   // Update whole section or partial payload via PATCH /players/me
   const updatePlayerProfile = useCallback(
@@ -297,11 +315,21 @@ export const usePlayer = () => {
     playerData,
     players,
     selectedPlayerId,
-    cvData: cvResponse?.data || (playerData as any).cvData,
-    isLoading: isCvLoading || isCvFetching,
+    cvData: cvResponse?.data || profileResponse?.data || (playerData as any).cvData,
+    profileData: profileResponse?.data,
+    certificates:
+      profileResponse?.data?.certificates ||
+      profileResponse?.data?.documents ||
+      cvResponse?.data?.certificates ||
+      cvResponse?.data?.documents ||
+      (playerData as any).certificates ||
+      (playerData as any).documents ||
+      [],
+    isLoading: isCvLoading || isCvFetching || isProfileLoading || isProfileFetching,
     isUpdating,
-    error: cvError,
+    error: cvError || profileError,
     refetchCv,
+    refetchProfile,
     handleUpdate,
     updatePlayerProfile,
     updateSection,

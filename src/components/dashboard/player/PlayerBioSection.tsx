@@ -10,8 +10,15 @@ import { usePlayer } from "@/hooks/usePlayer";
 import { getFullWithShortForm, formatDate } from "@/lib/utils";
 
 const PlayerBioSection = () => {
-  const { playerData } = usePlayer();
+  const { playerData, cvData } = usePlayer();
   const router = useRouter();
+
+  const currentClub =
+    playerData.currentClub ||
+    cvData?.currentClub ||
+    cvData?.playerEvaluation?.currentClub ||
+    playerData.clubs?.[0]?.name ||
+    "Unattached";
 
   return (
     <div className="pb-8 sm:pb-16 md:pb-20">
@@ -82,7 +89,7 @@ const PlayerBioSection = () => {
                   <Shield className="w-4 h-4 text-red-500 shrink-0" />
                   <span className="text-gray-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">Current Club</span>
                 </div>
-                <p className="text-white font-bold text-xs sm:text-sm truncate">{playerData.agency}</p>
+                <p className="text-white font-bold text-xs sm:text-sm truncate">{currentClub}</p>
               </div>
 
               {/* Contact */}

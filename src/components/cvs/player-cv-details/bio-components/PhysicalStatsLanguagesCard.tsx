@@ -240,7 +240,11 @@ export const PhysicalStatsLanguagesCard = ({
         </div>
       </div>
       {/* Position & Futsal Map */}
-      <PitchMapCard playerData={playerData} handleUpdate={handleUpdate} />
+      <PitchMapCard
+        playerData={playerData}
+        handleUpdate={handleUpdate}
+        canEditBio={canEditBio}
+      />
     </div>
   );
 };

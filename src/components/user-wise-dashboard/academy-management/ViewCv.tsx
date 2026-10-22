@@ -299,7 +299,7 @@ const ViewCv = () => {
                   <div className="p-2 sm:p-3 bg-white/5 rounded-lg sm:rounded-xl border border-white/10 text-white/40 shrink-0"><IconShield size={18} className="sm:w-5 sm:h-5" /></div>
                   <div className="min-w-0">
                     <p className="text-[9px] sm:text-[10px] text-white/40 uppercase font-black tracking-widest truncate">Current Club</p>
-                    <p className="text-xs sm:text-sm font-bold text-white truncate">{playerData.clubs[0]?.name || "Unattached"}</p>
+                    <p className="text-xs sm:text-sm font-bold text-white truncate">{playerData.currentClub || (playerData as any).cvData?.currentClub || playerData.clubs[0]?.name || "Unattached"}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 sm:gap-4 min-w-0">

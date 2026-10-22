@@ -13,8 +13,8 @@ import ReportPdfPreview from "./ReportPdfPreview";
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHooks";
 import { addGameReport, updateGameReport, completeGameReportRequest, addGameReportRequest } from "@/redux/features/reports/reportsSlice";
-import { useCreateSelfGameReportMutation, useGetMyPlayerProfileQuery } from "@/redux/features/player/playerApi";
-import { ICreateSelfGameReportPayload } from "@/types/player.type";
+import { useCreateSelfGameReportMutation, useRequestCoachGameReportMutation, useGetMyPlayerProfileQuery } from "@/redux/features/player/playerApi";
+import { ICreateSelfGameReportPayload, IRequestCoachGameReportPayload } from "@/types/player.type";
 import { IconCircleCheck } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 
@@ -60,6 +60,7 @@ export const CreateGameReportWizard = ({
   const dispatch = useAppDispatch();
   const { players } = usePlayer();
   const [createSelfGameReport, { isLoading: isCreatingSelfReport }] = useCreateSelfGameReportMutation();
+  const [requestCoachGameReport, { isLoading: isRequestingCoachReport }] = useRequestCoachGameReportMutation();
   const { data: myProfileResponse } = useGetMyPlayerProfileQuery();
 
   const reports = useAppSelector(state => state.reports.reports);
@@ -99,6 +100,7 @@ export const CreateGameReportWizard = ({
   const [goalMarkers, setGoalMarkers] = useState<{ x: number; y: number }[]>([]);
   const [pitchMarkers, setPitchMarkers] = useState<PitchLine[]>([]);
   const [reportCompletedBy, setReportCompletedBy] = useState<"parent" | "coach">("parent");
+  const [selectedCoachId, setSelectedCoachId] = useState("");
   const [selectedCoachEmail, setSelectedCoachEmail] = useState("");
   const [tempRating, setTempRating] = useState<number>(0);
 
@@ -440,16 +442,79 @@ export const CreateGameReportWizard = ({
     }
   };
 
-  const handlePlayerSubmit = () => {
-    // Add request to REPORT_REQUESTS_DATA
+  // Pre-fill from player profile query if available
+  useEffect(() => {
+    if (myProfileResponse?.data && !playerId && !requestId) {
+      const p = myProfileResponse.data;
+      setFormData(prev => ({
+        ...prev,
+        playerName: p.fullName || prev.playerName,
+        dob: p.dateOfBirth ? formatDateToYMD(p.dateOfBirth) : prev.dob,
+        clubName: p.currentClub || prev.clubName,
+        position: p.position ? p.position.toUpperCase() : prev.position,
+        foot: p.preferredFoot ? p.preferredFoot.toUpperCase() : prev.foot,
+        weight: p.weight ? String(p.weight) : prev.weight,
+        height: p.height ? String(p.height) : prev.height,
+      }));
+      if (p.playerStyles && p.playerStyles.length > 0) {
+        setCharacteristics(p.playerStyles.map(s => String(s).toUpperCase()));
+      }
+    }
+  }, [myProfileResponse, playerId, requestId]);
+
+  const handlePlayerSubmit = async () => {
+    if (!selectedCoachId) {
+      toast.error("Please select a coach first");
+      setStep(1);
+      return;
+    }
+
+    let hScore = typeof formData.homeScore === "number" ? formData.homeScore : parseInt(String(formData.homeScore ?? "2"), 10);
+    let aScore = typeof formData.awayScore === "number" ? formData.awayScore : parseInt(String(formData.awayScore ?? "1"), 10);
+    if (isNaN(hScore)) hScore = 2;
+    if (isNaN(aScore)) aScore = 1;
+
+    const payload: IRequestCoachGameReportPayload = {
+      coachId: selectedCoachId,
+      playerInfo: {
+        playerName: formData.playerName?.trim() || "EDEGELSON RICCI",
+        dateOfBirth: formatDateToYMD(formData.dob) || "2014-03-27",
+        clubName: formData.clubName?.trim() || "INTER MIAMI",
+        position: formData.position?.trim().toUpperCase() || "STRIKER",
+        foot: formData.foot?.trim().toUpperCase() || "RIGHT",
+        characteristics: characteristics && characteristics.length > 0 ? characteristics : ["FAST", "SKILLFUL", "FINISHER"],
+        weight: Number(String(formData.weight).replace(/[^\d.]/g, "")) || 45,
+        height: Number(String(formData.height).replace(/[^\d.]/g, "")) || 1.20,
+      },
+      scoutName: formData.scoutName?.trim() || "MARIO LOPEZ",
+      gameType: formData.gameType?.trim().toUpperCase() || "FRIENDLY CHAMPIONSHIP CATARINESE",
+      gameDate: formatDateToYMD(formData.gameDate) || "2021-02-22",
+      gameLocation: formData.gameLocation?.trim().toUpperCase() || "LONDON",
+      matchResult: formData.matchResult?.trim() || `${formData.playerName} ${hScore} X ${aScore} OPPONENT`,
+      weather: formData.weather?.trim().toUpperCase() || "RAINY",
+      temperature: Number(String(formData.temperature).replace(/[^\d.-]/g, "")) || 19,
+      ownTeam: formData.ownTeam?.trim() || formData.clubName?.trim() || "FC Barcelona",
+      opponentTeam: formData.opponentTeam?.trim() || "Chelsea U19",
+      homeScore: hScore,
+      awayScore: aScore,
+    };
+
+    try {
+      await requestCoachGameReport(payload).unwrap();
+    } catch (err: any) {
+      console.error("Failed to request coach game report via API:", err);
+      return;
+    }
+
+    // Add request to REPORT_REQUESTS_DATA for local state sync
     const newReq = addReportRequest({
       playerName: formData.playerName,
       playerPosition: formData.position,
       date: formData.gameDate,
       status: "Pending",
-      coachName: formData.scoutName || "Pep Guardiola",
+      coachName: formData.scoutName || "Coach",
       playerId: playerId ? Number(playerId) : (players[0]?.id || 1),
-      opponent: formData.clubName,
+      opponent: formData.opponentTeam || formData.clubName,
       location: formData.gameLocation,
       league: formData.gameType,
       weather: formData.weather,
@@ -463,7 +528,6 @@ export const CreateGameReportWizard = ({
     });
 
     dispatch(addGameReportRequest(newReq));
-    toast.success("Request submitted to Coach successfully!");
     setStep(5);
   };
 
@@ -477,6 +541,8 @@ export const CreateGameReportWizard = ({
           setCharacteristics={setCharacteristics}
           reportCompletedBy={reportCompletedBy}
           setReportCompletedBy={setReportCompletedBy}
+          selectedCoachId={selectedCoachId}
+          setSelectedCoachId={setSelectedCoachId}
           selectedCoachEmail={selectedCoachEmail}
           setSelectedCoachEmail={setSelectedCoachEmail}
           onCancel={onCancel}
@@ -527,10 +593,10 @@ export const CreateGameReportWizard = ({
       {step === 4 && (
         <StripePaymentModal 
           buttonText={reportCompletedBy === "coach" && userRole !== "coach" ? "Pay $6.99 & Submit Request" : "Pay $6.99 & Save Report"}
-          isSubmitting={isCreatingSelfReport}
+          isSubmitting={isCreatingSelfReport || isRequestingCoachReport}
           onPay={async () => {
             if (reportCompletedBy === "coach" && userRole !== "coach") {
-              handlePlayerSubmit();
+              await handlePlayerSubmit();
             } else {
               await handleSave(tempRating);
             }

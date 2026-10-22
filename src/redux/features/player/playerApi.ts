@@ -7,6 +7,7 @@ import {
     IPlayerProfileResponse, 
     IUpdatePlayerPayload, 
     ICreateSelfGameReportPayload, 
+    IRequestCoachGameReportPayload,
     IGameReportResponse,
     IPlayerGameReportsResponse 
 } from "@/types/player.type";
@@ -217,12 +218,145 @@ export const playerApi = apiSlice.injectEndpoints({
             },
         }),
 
+        requestCoachGameReport: builder.mutation<any, IRequestCoachGameReportPayload>({
+            query: (data) => ({
+                url: "/players/me/game-reports/request-coach",
+                method: "POST",
+                body: data,
+            }),
+            invalidatesTags: (result) => {
+                if (result?.success || !result?.error) {
+                    return [TagTypes.PLAYERS, TagTypes.GAME_REPORTS, TagTypes.REPORTS];
+                }
+                return [];
+            },
+            async onQueryStarted(_arg, { queryFulfilled }) {
+                try {
+                    const { data } = await queryFulfilled;
+                    SuccessToast(data?.message || "Game report requested from coach successfully");
+                } catch (err: any) {
+                    const status = err?.error?.status;
+                    const message = err?.error?.data?.message || "Failed to request game report from coach";
+                    if (status === 500) {
+                        ErrorToast("Something went wrong on the server");
+                        return;
+                    }
+                    if (status !== 401) {
+                        ErrorToast(message);
+                    }
+                }
+            },
+        }),
+
         getMyGameReports: builder.query<IPlayerGameReportsResponse, void>({
             query: () => ({
                 url: "/players/me/game-reports",
                 method: "GET",
             }),
             providesTags: [TagTypes.GAME_REPORTS],
+        }),
+
+        uploadPlayerDocument: builder.mutation<any, FormData | { file: File; title: string }>({
+            query: (arg) => {
+                let body: FormData;
+                if (arg instanceof FormData) {
+                    body = arg;
+                } else {
+                    body = new FormData();
+                    if (arg.file) body.append("file", arg.file);
+                    if (arg.title) body.append("title", arg.title);
+                }
+                return {
+                    url: "/players/me/documents",
+                    method: "POST",
+                    body,
+                };
+            },
+            invalidatesTags: (result) => {
+                if (result?.success || !result?.error) {
+                    return [TagTypes.PLAYERS, TagTypes.PROFILE];
+                }
+                return [];
+            },
+            async onQueryStarted(_arg, { queryFulfilled }) {
+                try {
+                    await queryFulfilled;
+                    SuccessToast("Certificate uploaded successfully");
+                } catch (err: any) {
+                    const status = err?.error?.status;
+                    const message = err?.error?.data?.message || "Failed to upload certificate";
+                    if (status === 500) {
+                        ErrorToast("Something went wrong on the server");
+                        return;
+                    }
+                    if (status !== 401) {
+                        ErrorToast(message);
+                    }
+                }
+            },
+        }),
+
+        deletePlayerDocument: builder.mutation<any, string>({
+            query: (documentId) => ({
+                url: `/players/me/documents/${documentId}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: (result) => {
+                if (result?.success || !result?.error) {
+                    return [TagTypes.PLAYERS, TagTypes.PROFILE];
+                }
+                return [];
+            },
+            async onQueryStarted(_arg, { queryFulfilled }) {
+                try {
+                    await queryFulfilled;
+                    SuccessToast("Certificate deleted successfully");
+                } catch (err: any) {
+                    const status = err?.error?.status;
+                    const message = err?.error?.data?.message || "Failed to delete certificate";
+                    if (status === 500) {
+                        ErrorToast("Something went wrong on the server");
+                        return;
+                    }
+                    if (status !== 401) {
+                        ErrorToast(message);
+                    }
+                }
+            },
+        }),
+
+        updatePlayerDocument: builder.mutation<any, { documentId: string; title: string }>({
+            query: ({ documentId, title }) => {
+                const formData = new FormData();
+                formData.append("title", title);
+                return {
+                    url: `/players/me/documents/${documentId}`,
+                    method: "PATCH",
+                    body: formData,
+                };
+            },
+            invalidatesTags: (result) => {
+                if (result?.success || !result?.error) {
+                    return [TagTypes.PLAYERS, TagTypes.PROFILE];
+                }
+                return [];
+            },
+            async onQueryStarted(_arg, { queryFulfilled }) {
+                try {
+                    await queryFulfilled;
+                    SuccessToast("Document title updated successfully");
+                } catch (err: any) {
+                    const status = err?.error?.status;
+                    const message = err?.error?.data?.message || "Failed to update document title";
+                    if (status === 500) {
+                        ErrorToast("Something went wrong on the server");
+                        return;
+                    }
+                    if (status !== 401) {
+                        ErrorToast(message);
+                    }
+                }
+            },
         }),
     }),
 });
@@ -239,7 +373,11 @@ export const {
     useGetMyPlayerMediaQuery,
     useUploadPlayerMediaMutation,
     useCreateSelfGameReportMutation,
+    useRequestCoachGameReportMutation,
     useGetMyGameReportsQuery,
+    useUploadPlayerDocumentMutation,
+    useDeletePlayerDocumentMutation,
+    useUpdatePlayerDocumentMutation,
 } = playerApi;
 
 // Export aliases for convenience

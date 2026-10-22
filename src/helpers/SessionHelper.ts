@@ -31,7 +31,7 @@ export const isTokenExpired = (token?: string | null): boolean => {
 };
 
 class SessionHelper {
-  setToken(token: string) {
+  setToken = (token: string) => {
     if (!token) return;
 
     if (typeof window !== "undefined" && window.localStorage) {
@@ -48,22 +48,22 @@ class SessionHelper {
       }
       localStorage.setItem("isLoggedIn", "true");
     }
-  }
+  };
 
-  getToken() {
+  getToken = (): string => {
     if (typeof window !== "undefined" && window.localStorage) {
       return localStorage.getItem("token") || "";
     }
     return "";
-  }
+  };
 
-  removeToken() {
+  removeToken = () => {
     if (typeof window !== "undefined" && window.localStorage) {
       localStorage.removeItem("token");
     }
-  }
+  };
 
-  isLoggedIn() {
+  isLoggedIn = (): boolean => {
     const token = this.getToken();
     if (!token) return false;
     const decoded = getDecodedToken(token);
@@ -72,14 +72,14 @@ class SessionHelper {
       return false;
     }
     return true;
-  }
+  };
 
-  getUserRole() {
+  getUserRole = (): string => {
     const token = this.getToken();
     return getUserRoleFromToken(token);
-  }
+  };
 
-  setUserInfo(userInfo: { fullName: string; email: string; profileImg: string; role: string }) {
+  setUserInfo = (userInfo: { fullName: string; email: string; profileImg: string; role: string }) => {
     if (typeof window !== "undefined" && window.localStorage) {
       const normalizedRole = (userInfo.role || "").toLowerCase();
       localStorage.setItem("fullName", userInfo.fullName || "");
@@ -90,9 +90,9 @@ class SessionHelper {
       localStorage.setItem("userRole", normalizedRole);
       localStorage.setItem("isLoggedIn", "true");
     }
-  }
+  };
 
-  getUserInfo() {
+  getUserInfo = () => {
     if (typeof window !== "undefined" && window.localStorage) {
       const token = this.getToken();
       const decoded = getDecodedToken(token);
@@ -106,9 +106,9 @@ class SessionHelper {
       };
     }
     return { fullName: "", email: "", profileImg: "", role: "" };
-  }
+  };
 
-  removeUserInfo() {
+  removeUserInfo = () => {
     if (typeof window !== "undefined" && window.localStorage) {
       localStorage.removeItem("fullName");
       localStorage.removeItem("email");
@@ -118,7 +118,7 @@ class SessionHelper {
       localStorage.removeItem("userRole");
       localStorage.removeItem("isLoggedIn");
     }
-  }
+  };
 }
 
 const sessionHelperInstance = new SessionHelper();

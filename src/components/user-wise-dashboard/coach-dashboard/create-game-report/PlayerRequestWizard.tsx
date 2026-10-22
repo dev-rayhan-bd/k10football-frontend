@@ -17,12 +17,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
+import { useGetAllCoachesQuery } from "@/redux/features/coach/coachApi";
+import { useRequestCoachGameReportMutation, useGetMyPlayerProfileQuery } from "@/redux/features/player/playerApi";
+import { IRequestCoachGameReportPayload } from "@/types/player.type";
+
 export const PlayerRequestWizard = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { playerData } = usePlayer();
+  const { data: coachesResponse, isLoading: isLoadingCoaches } = useGetAllCoachesQuery({ limit: 100 });
+  const coaches = coachesResponse?.data || [];
+  const { data: myProfileResponse } = useGetMyPlayerProfileQuery();
+  const [requestCoachGameReport, { isLoading: isRequestingCoach }] = useRequestCoachGameReportMutation();
 
   const [step, setStep] = useState(1);
+  const [selectedCoachId, setSelectedCoachId] = useState("");
+  const [selectedCoachName, setSelectedCoachName] = useState("");
   const [formData, setFormData] = useState({
     opponent: "Chelsea U19",
     gameDate: new Date().toISOString().split("T")[0],
@@ -39,23 +49,57 @@ export const PlayerRequestWizard = () => {
 
   const isFormValid = () => {
     return (
-      formData.opponent.trim() &&
-      formData.gameDate.trim() &&
-      formData.gameLocation.trim() &&
-      formData.league.trim() &&
-      formData.weather.trim() &&
-      formData.temperature.trim()
+      Boolean(selectedCoachId) &&
+      Boolean(formData.opponent.trim()) &&
+      Boolean(formData.gameDate.trim()) &&
+      Boolean(formData.gameLocation.trim()) &&
+      Boolean(formData.league.trim()) &&
+      Boolean(formData.weather.trim()) &&
+      Boolean(formData.temperature.trim())
     );
   };
 
-  const handlePaySuccess = () => {
+  const handlePaySuccess = async () => {
+    const p = myProfileResponse?.data;
+    const payload: IRequestCoachGameReportPayload = {
+      coachId: selectedCoachId,
+      playerInfo: {
+        playerName: p?.fullName || playerData.fullName || "EDEGELSON RICCI",
+        dateOfBirth: p?.dateOfBirth ? p.dateOfBirth.split("T")[0] : (playerData.dob || "2014-03-27"),
+        clubName: p?.currentClub || playerData.academyName || "INTER MIAMI",
+        position: (p?.position || playerData.position || "STRIKER").toUpperCase(),
+        foot: (p?.preferredFoot || "RIGHT").toUpperCase(),
+        characteristics: (p?.playerStyles && p.playerStyles.length > 0) ? p.playerStyles.map(s => String(s).toUpperCase()) : ["FAST", "SKILLFUL", "FINISHER"],
+        weight: p?.weight ? Number(p.weight) : 45,
+        height: p?.height ? Number(p.height) : 1.20,
+      },
+      scoutName: selectedCoachName || "Coach",
+      gameType: formData.league,
+      gameDate: formData.gameDate,
+      gameLocation: formData.gameLocation,
+      matchResult: `${p?.fullName || playerData.fullName || "Player"} vs ${formData.opponent}`,
+      weather: formData.weather,
+      temperature: Number(formData.temperature) || 20,
+      ownTeam: p?.currentClub || playerData.academyName || "FC Barcelona",
+      opponentTeam: formData.opponent,
+      homeScore: 2,
+      awayScore: 1,
+    };
+
+    try {
+      await requestCoachGameReport(payload).unwrap();
+    } catch (err) {
+      console.error("Failed to request coach game report:", err);
+      return;
+    }
+
     // Add request to REPORT_REQUESTS_DATA
     const newReq = addReportRequest({
-      playerName: playerData.fullName,
-      playerPosition: playerData.position,
+      playerName: p?.fullName || playerData.fullName,
+      playerPosition: p?.position || playerData.position,
       date: formData.gameDate,
       status: "Pending",
-      coachName: playerData.coachName || "Pep Guardiola",
+      coachName: selectedCoachName || playerData.coachName || "Coach",
       playerId: playerData.id,
       opponent: formData.opponent,
       location: formData.gameLocation,
@@ -67,8 +111,6 @@ export const PlayerRequestWizard = () => {
 
     // Sync to Redux store
     dispatch(addGameReportRequest(newReq));
-
-    toast.success("Payment successful! Request submitted to Coach.");
     setStep(3);
   };
 
@@ -168,12 +210,42 @@ export const PlayerRequestWizard = () => {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest font-orbitron">Assigned Coach:</Label>
-                <Input 
-                  className="bg-[#161616]/50 border-white/5 text-gray-500 h-12 uppercase font-bold cursor-not-allowed" 
-                  value={playerData.coachName || "Pep Guardiola"} 
-                  disabled
-                />
+                <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest font-orbitron">
+                  Select Coach <span className="text-red-500">*</span>:
+                </Label>
+                <div className="relative">
+                  <select 
+                    className="w-full bg-[#161616] border border-white/10 text-white h-12 rounded-lg px-4 font-bold appearance-none focus:outline-none focus:border-[#E31B23]"
+                    value={selectedCoachId}
+                    onChange={(e) => {
+                      const selId = e.target.value;
+                      setSelectedCoachId(selId);
+                      const matched = coaches.find((c: any) => {
+                        const cUserId = typeof c.userId === "object" ? c.userId?._id : (c.userId || c._id);
+                        return cUserId === selId || c._id === selId;
+                      });
+                      if (matched) {
+                        const name = matched.fullName || (typeof matched.userId === "object" ? matched.userId?.name : "") || "Coach";
+                        setSelectedCoachName(name);
+                      }
+                    }}
+                  >
+                    <option value="">
+                      {isLoadingCoaches ? "-- LOADING COACHES... --" : "-- SELECT A COACH --"}
+                    </option>
+                    {coaches.map((coach: any) => {
+                      const coachUserId = typeof coach.userId === "object" ? coach.userId?._id : (coach.userId || coach._id);
+                      const name = coach.fullName || (typeof coach.userId === "object" ? coach.userId?.name : "") || "Coach";
+                      const roleOrClub = coach.title || coach.currentClub || coach.speciality || (typeof coach.userId === "object" ? coach.userId?.email : "") || "";
+                      return (
+                        <option key={coach._id} value={coachUserId}>
+                          {name} {roleOrClub ? `(${roleOrClub})` : ""}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <IconChevronDown className="absolute right-4 top-3.5 text-gray-500 pointer-events-none" size={18} />
+                </div>
               </div>
             </div>
 
@@ -209,6 +281,8 @@ export const PlayerRequestWizard = () => {
 
       {step === 2 && (
         <StripePaymentModal 
+          buttonText="Pay $6.99 & Submit Request"
+          isSubmitting={isRequestingCoach}
           onPay={handlePaySuccess}
           onBack={() => setStep(1)}
         />

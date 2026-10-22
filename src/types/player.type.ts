@@ -125,6 +125,19 @@ export interface IPlayerProfileData {
   };
   recentMatches: IPlayerRecentMatch[];
   professionalReports: any[];
+  documents?: IPlayerDocument[];
+  certificates?: IPlayerDocument[];
+}
+
+export interface IPlayerDocument {
+  _id: string;
+  id?: string;
+  title: string;
+  url: string;
+  fileUrl?: string;
+  fileType?: string;
+  size?: number;
+  uploadedAt?: string;
 }
 
 export interface IPlayerProfileResponse {
@@ -290,6 +303,32 @@ export interface ICreateSelfGameReportPayload {
     toX: number;
     toY: number;
   }>;
+}
+
+export interface IRequestCoachGameReportPayload {
+  coachId: string;
+  playerInfo: {
+    playerName: string;
+    dateOfBirth: string;
+    clubName: string;
+    position: string;
+    foot: string;
+    characteristics: string[];
+    weight: number;
+    height: number;
+  };
+  scoutName?: string;
+  gameType?: string;
+  gameDate?: string;
+  gameLocation?: string;
+  matchResult?: string;
+  weather?: string;
+  temperature?: number;
+  ownTeam?: string;
+  opponentTeam?: string;
+  homeScore?: number;
+  awayScore?: number;
+  [key: string]: any;
 }
 
 export interface IGameReportResponse {

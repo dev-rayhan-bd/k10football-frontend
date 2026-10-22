@@ -58,6 +58,7 @@ const CoachClubsSection = ({ editable = true }: { editable?: boolean }) => {
   const removeClub = (id: string) => {
     const newClubs = (coachData?.clubs || []).filter(club => club.id !== id);
     handleUpdate("clubs", newClubs);
+    toast.success("Club removed successfully");
   };
 
   const addClub = () => {

@@ -13,6 +13,7 @@ import trofeeIcon from "@/assets/cvs/id/trofeeIcon.png";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { calculateWeightedRating } from "@/lib/utils/rating";
 import { formatDate } from "@/lib/utils";
+import { IPlayerDocument } from "@/types/player.type";
 
 export interface Club {
   id: string;
@@ -96,6 +97,9 @@ export interface PlayerData {
   clubManaged?: string;
   evaluation?: any;
   evaluationDate?: string;
+  currentClub?: string;
+  certificates?: IPlayerDocument[];
+  documents?: IPlayerDocument[];
 }
 
 export interface Marker {
@@ -164,6 +168,7 @@ const basePlayerData: PlayerData = {
   contractUntil: "June, 2026",
   agent: "John Morrison",
   agency: "Elite Sports Mgmt",
+  currentClub: "Manchester City",
   mainFlag: flagImage,
   position: "Defensive Midfielder",
   selectedStyleIds: ["technical", "finesse-shot", "incisive-pass"],
@@ -487,7 +492,7 @@ export const playerSlice = createSlice({
         if (data.agencyName !== undefined) activePlayer.agency = data.agencyName;
         if (data.agentStatus) (activePlayer as any).agentStatus = data.agentStatus;
         if (data.clubStatus) (activePlayer as any).clubStatus = data.clubStatus;
-        if (data.currentClub) (activePlayer as any).currentClub = data.currentClub;
+        if (data.currentClub) activePlayer.currentClub = data.currentClub;
         if (data.cvTier) (activePlayer as any).cvTier = data.cvTier;
         if (data.profileCompletion !== undefined) (activePlayer as any).profileCompletion = data.profileCompletion;
         if (data.transferStatus) {
@@ -563,6 +568,14 @@ export const playerSlice = createSlice({
         }
         if (data.additionalNotes !== undefined) {
           (activePlayer as any).additionalNotes = data.additionalNotes;
+        }
+        if (Array.isArray(data.certificates)) {
+          (activePlayer as any).certificates = data.certificates;
+        } else if (Array.isArray(data.documents)) {
+          (activePlayer as any).certificates = data.documents;
+        }
+        if (Array.isArray(data.documents)) {
+          (activePlayer as any).documents = data.documents;
         }
         (activePlayer as any).cvData = data;
       }

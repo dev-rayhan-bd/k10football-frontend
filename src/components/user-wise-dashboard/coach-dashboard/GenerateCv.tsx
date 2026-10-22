@@ -94,11 +94,11 @@ const CareerItem = ({ logo, name, role, years, type }: { logo: string; name: str
 );
 const GenerateCvCoach = () => {
   const router = useRouter();
-  const { coachData } = useCoach();
+  const { coachData, assignedPlayerReviews } = useCoach();
   const { bioRating, skillsAvg, metricsAvg, attributesAvg } = usePlayerStats();
   const { players, selectPlayer } = usePlayer();
   const [role, setRole] = useState<string>("coach");
-  const overallRating = 88;
+  const overallRating = coachData.overallRatingScore ?? 88;
   // Filter players who need validation
   const validationNeededPlayers = players.filter((player) => {
     return (
@@ -347,16 +347,16 @@ const GenerateCvCoach = () => {
           <div className="relative rounded-3xl overflow-hidden min-h-100 md:min-h-140 border border-white/10 group flex flex-col justify-end">
             <div
               className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-              style={{ backgroundImage: `url('/stadium-night.jpg')` }}
+              style={{ backgroundImage: `url('${coachData.coverImage || "/stadium-night.jpg"}')` }}
             />
             <div className="absolute inset-0 bg-linear-to-r from-black/95 via-black/40 via-45% to-transparent" />
             <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
             <div className="absolute right-0 bottom-0 h-full w-[70%] p-8  md:w-[40%] flex items-center justify-center pointer-events-none opacity-60 md:opacity-100">
               <Image
-                src={coachData.coachImage?.src || coachData.coachImage}
+                src={coachData.profileImage || coachData.coachImage?.src || coachData.coachImage || "/coach-image.png"}
                 alt={coachData.fullName}
-                width={100}
-                height={100}
+                width={400}
+                height={500}
                 className="h-[90%] md:h-[105%] object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.9)]"
               />
             </div>
@@ -366,13 +366,13 @@ const GenerateCvCoach = () => {
                   <span className="text-3xl md:text-4xl font-black text-white font-orbitron">{overallRating}</span>
                 </div>
                 <div className="space-y-4">
-                  <div className="bg-[#E31B23] border border-[#E31B23]/20 px-4 py-1.5 rounded-full text-[10px] font-black text-white uppercase w-fit tracking-[0.2em] shadow-[0_0_20px_rgba(227,27,35,0.3)]">{coachData.transferStatus}</div>
+                  <div className="bg-[#E31B23] border border-[#E31B23]/20 px-4 py-1.5 rounded-full text-[10px] font-black text-white uppercase w-fit tracking-[0.2em] shadow-[0_0_20px_rgba(227,27,35,0.3)]">{coachData.statusBadge || coachData.transferStatus}</div>
                   <div className="space-y-2">
                     <h1 className="text-3xl md:text-6xl font-black text-white font-orbitron uppercase tracking-tighter leading-none">{coachData.fullName}</h1>
                     <div className="flex flex-wrap items-center gap-3 md:gap-6 text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] pt-1">
-                      <span className="text-[#E31B23]">{coachData.coachType}</span>
+                      <span className="text-[#E31B23]">{coachData.title || coachData.coachType}</span>
                       <span className="text-white/20 hidden md:inline">/</span>
-                      <span className="text-white">15+ Years Experience</span>
+                      <span className="text-white">{coachData.yearsExperience ? `${coachData.yearsExperience}+ Years Experience` : "15+ Years Experience"}</span>
                       <span className="text-white/20 hidden md:inline">/</span>
                       <span className="flex items-center gap-3 text-white">
                         <Image
@@ -392,7 +392,7 @@ const GenerateCvCoach = () => {
                   <div className="p-2 md:p-3 bg-white/5 rounded-xl border border-white/10 text-white/40 shrink-0"><IconShield size={16} className="md:w-5 md:h-5" /></div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[9px] md:text-[10px] text-white/40 uppercase font-black tracking-widest truncate">Current Club</p>
-                    <p className="text-xs md:text-sm font-bold text-white truncate">{coachData.clubs[0]?.name || "N/A"}</p>
+                    <p className="text-xs md:text-sm font-bold text-white truncate">{coachData.currentClub || coachData.clubs?.[0]?.name || "N/A"}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 md:gap-4 min-w-0">
@@ -406,7 +406,7 @@ const GenerateCvCoach = () => {
                   <div className="p-2 md:p-3 bg-white/5 rounded-xl border border-white/10 text-white/40 shrink-0"><IconClock size={16} className="md:w-5 md:h-5" /></div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[9px] md:text-[10px] text-white/40 uppercase font-black tracking-widest truncate">Validation Status</p>
-                    <p className="text-xs md:text-sm font-bold text-[#FBBF24] truncate">15 days until re-validation</p>
+                    <p className="text-xs md:text-sm font-bold text-[#FBBF24] truncate">{coachData.validationStatus || "15 days until re-validation"}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 md:gap-4 min-w-0">
@@ -426,13 +426,18 @@ const GenerateCvCoach = () => {
             <h3 className="text-sm font-black text-white font-orbitron uppercase tracking-widest">Completion Status</h3>
             <div className="space-y-4">
               <div className="flex justify-between items-end">
-                <span className="text-5xl font-black text-[#E31B23] font-orbitron">85%</span>
+                <span className="text-5xl font-black text-[#E31B23] font-orbitron">
+                  {coachData.profileCompletion ?? coachData.completionPercentage ?? 100}%
+                </span>
               </div>
               <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                <div className="h-full bg-[#E31B23] rounded-full" style={{ width: "85%" }} />
+                <div
+                  className="h-full bg-[#E31B23] rounded-full transition-all duration-500"
+                  style={{ width: `${coachData.profileCompletion ?? coachData.completionPercentage ?? 100}%` }}
+                />
               </div>
               <p className="text-[10px] text-white/40 font-bold leading-relaxed uppercase tracking-wider">
-                Complete all sections to unlock Gold tier status
+                {coachData.tierStatus?.label || "Complete all sections to unlock Gold tier status"}
               </p>
             </div>
           </div>
@@ -440,11 +445,13 @@ const GenerateCvCoach = () => {
           <div className="bg-[#111111] rounded-3xl border border-white/10 p-6 md:p-8 flex flex-col gap-4 md:gap-6 relative overflow-hidden">
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#FBBF24]/10 blur-3xl rounded-full" />
             <div className="flex flex-col">
-              <h3 className="text-2xl md:text-3xl font-black text-[#FBBF24] font-orbitron italic tracking-tighter leading-none">GOLD</h3>
+              <h3 className="text-2xl md:text-3xl font-black text-[#FBBF24] font-orbitron italic tracking-tighter leading-none">
+                {(coachData.cvTier || coachData.tierStatus?.currentTier || "BRONZE").toUpperCase()}
+              </h3>
               <div className="w-full h-1 bg-[#FBBF24] mt-2 opacity-50" />
             </div>
             <p className="text-[9px] md:text-[10px] text-white/60 font-bold leading-relaxed uppercase tracking-wider mt-0 md:mt-2">
-              Your CV meets Gold standards and is ready to share with top clubs and agents.
+              Your CV meets {coachData.cvTier || coachData.tierStatus?.currentTier || "Bronze"} standards and is ready to share with top clubs and agents.
             </p>
             <Button className="bg-white/5 hover:bg-white/10 text-white border border-white/10 gap-2 w-full py-3 md:py-4 rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] h-auto mt-auto">
               <IconShare size={16} className="text-white/40" /> Request Re-validation
@@ -459,7 +466,40 @@ const GenerateCvCoach = () => {
               <h2 className="text-sm font-bold text-white uppercase tracking-widest">Player CV Validations</h2>
             </div>
             <div className="space-y-4">
-              {validationNeededPlayers.length > 0 ? (
+              {assignedPlayerReviews && assignedPlayerReviews.length > 0 ? (
+                assignedPlayerReviews.map((review: any) => (
+                  <div key={review._id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 group hover:border-[#E31B23]/50 transition-colors">
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                      <Image width={100} height={100} src={review.playerAvatar || "/avatar-placeholder.png"} className="w-10 h-10 sm:w-10 sm:h-10 rounded-full object-cover border border-white/10 shrink-0" alt={review.playerName} />
+                      <div className="min-w-0">
+                        <div className="text-xs sm:text-sm font-bold text-white truncate">{review.playerName}</div>
+                        <div className="flex flex-wrap items-center gap-1 sm:gap-2 mt-0.5">
+                          <span className="text-[9px] text-gray-500 uppercase tracking-widest truncate">{review.playerPosition}</span>
+                          <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider border whitespace-nowrap bg-blue-500/10 text-blue-400 border-blue-500/20">
+                            {review.status || "Requested"}
+                          </span>
+                          {review.amount && (
+                            <span className="text-[8px] text-white/60 font-medium">
+                              {review.amount}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-2">
+                      <div className="text-base sm:text-lg font-black text-white italic">{review.rating ?? 0}</div>
+                      <button
+                        onClick={() => {
+                          router.push("/dashboard/coach/player-cv-validations");
+                        }}
+                        className="px-2 sm:px-3 py-1.5 bg-[#E31B23] hover:bg-[#ff2d35] text-white text-[8px] sm:text-[9px] font-black uppercase tracking-widest rounded-lg transition-all border border-[#E31B23]/50 cursor-pointer"
+                      >
+                        {review.action || "Review"}
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : validationNeededPlayers.length > 0 ? (
                 validationNeededPlayers.map((player) => {
                   const reason = getValidationReason(player);
                   const reasonColors =

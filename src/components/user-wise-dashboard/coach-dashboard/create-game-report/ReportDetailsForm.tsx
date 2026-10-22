@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { useGetAllCoachesQuery } from "@/redux/features/coach/coachApi";
 
 interface ReportDetailsFormProps {
   formData: any;
@@ -25,6 +26,8 @@ interface ReportDetailsFormProps {
   setReportCompletedBy?: (val: "parent" | "coach") => void;
   selectedCoachEmail?: string;
   setSelectedCoachEmail?: (val: string) => void;
+  selectedCoachId?: string;
+  setSelectedCoachId?: (val: string) => void;
 }
 
 const ReportDetailsForm = ({
@@ -37,8 +40,13 @@ const ReportDetailsForm = ({
   reportCompletedBy = "parent",
   setReportCompletedBy,
   selectedCoachEmail = "",
-  setSelectedCoachEmail
+  setSelectedCoachEmail,
+  selectedCoachId = "",
+  setSelectedCoachId,
 }: ReportDetailsFormProps) => {
+  const { data: coachesResponse, isLoading: isLoadingCoaches } = useGetAllCoachesQuery({ limit: 100 });
+  const coaches = coachesResponse?.data || [];
+
   const [newTag, setNewTag] = useState("");
   const handleChange = (field: string, val: any) => {
     setFormData({ ...formData, [field]: val });
@@ -64,22 +72,23 @@ const ReportDetailsForm = ({
   };
 
   const isFormValid = () => {
+    const isCoachSelected = Boolean(selectedCoachId?.trim() || selectedCoachEmail?.trim());
     return (
-      formData.playerName?.trim() &&
-      formData.dob?.trim() &&
-      formData.clubName?.trim() &&
-      formData.position?.trim() &&
-      formData.foot?.trim() &&
-      formData.weight?.trim() &&
-      formData.height?.trim() &&
-      formData.scoutName?.trim() &&
-      formData.gameType?.trim() &&
-      formData.gameDate?.trim() &&
-      formData.gameLocation?.trim() &&
-      formData.matchResult?.trim() &&
-      formData.weather?.trim() &&
-      formData.temperature?.trim() &&
-      (reportCompletedBy === "parent" || (reportCompletedBy === "coach" && selectedCoachEmail?.trim()))
+      Boolean(formData.playerName?.trim()) &&
+      Boolean(formData.dob?.trim()) &&
+      Boolean(formData.clubName?.trim()) &&
+      Boolean(formData.position?.trim()) &&
+      Boolean(formData.foot?.trim()) &&
+      Boolean(formData.weight?.trim()) &&
+      Boolean(formData.height?.trim()) &&
+      Boolean(formData.scoutName?.trim()) &&
+      Boolean(formData.gameType?.trim()) &&
+      Boolean(formData.gameDate?.trim()) &&
+      Boolean(formData.gameLocation?.trim()) &&
+      Boolean(formData.matchResult?.trim()) &&
+      Boolean(formData.weather?.trim()) &&
+      Boolean(formData.temperature?.trim()) &&
+      (reportCompletedBy === "parent" || (reportCompletedBy === "coach" && isCoachSelected))
     );
   };
 
@@ -384,22 +393,54 @@ const ReportDetailsForm = ({
               </label>
             </div>
 
-            {reportCompletedBy === "coach" && setSelectedCoachEmail && (
+            {reportCompletedBy === "coach" && (
               <div className="space-y-2 mt-4 animate-in fade-in slide-in-from-top-2">
-                <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Select Coach Email:</Label>
+                <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest font-orbitron">
+                  Select Coach <span className="text-red-500">*</span>:
+                </Label>
                 <div className="relative">
                   <select 
                     className="w-full bg-[#161616] border border-white/10 text-white h-12 rounded-lg px-4 font-bold appearance-none focus:outline-none focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]"
-                    value={selectedCoachEmail}
-                    onChange={(e) => setSelectedCoachEmail(e.target.value)}
+                    value={selectedCoachId}
+                    onChange={(e) => {
+                      const selId = e.target.value;
+                      setSelectedCoachId?.(selId);
+                      const matchedCoach = coaches.find((c: any) => {
+                        const cUserId = typeof c.userId === "object" ? c.userId?._id : (c.userId || c._id);
+                        return cUserId === selId || c._id === selId;
+                      });
+                      if (matchedCoach) {
+                        const email = typeof matchedCoach.userId === "object" ? matchedCoach.userId?.email : "";
+                        const coachName = matchedCoach.fullName || (typeof matchedCoach.userId === "object" ? matchedCoach.userId?.name : "") || "Coach";
+                        if (email) setSelectedCoachEmail?.(email);
+                        setFormData({
+                          ...formData,
+                          scoutName: coachName,
+                        });
+                      }
+                    }}
                   >
-                    <option value="">-- SELECT A COACH --</option>
-                    <option value="pep.guardiola@mancity.com">Pep Guardiola (pep.guardiola@mancity.com)</option>
-                    <option value="jurgen.klopp@lfc.com">Jurgen Klopp (jurgen.klopp@lfc.com)</option>
-                    <option value="carlo.ancelotti@realmadrid.com">Carlo Ancelotti (carlo.ancelotti@realmadrid.com)</option>
+                    <option value="">
+                      {isLoadingCoaches ? "-- LOADING COACHES... --" : "-- SELECT A COACH --"}
+                    </option>
+                    {coaches.map((coach: any) => {
+                      const coachUserId = typeof coach.userId === "object" ? coach.userId?._id : (coach.userId || coach._id);
+                      const name = coach.fullName || (typeof coach.userId === "object" ? coach.userId?.name : "") || "Coach";
+                      const roleOrClub = coach.title || coach.currentClub || coach.speciality || (typeof coach.userId === "object" ? coach.userId?.email : "") || "";
+                      return (
+                        <option key={coach._id} value={coachUserId}>
+                          {name} {roleOrClub ? `(${roleOrClub})` : ""}
+                        </option>
+                      );
+                    })}
                   </select>
                   <IconChevronDown className="absolute right-4 top-3.5 text-gray-500 pointer-events-none" size={18} />
                 </div>
+                {selectedCoachEmail && (
+                  <p className="text-[11px] text-gray-400 mt-1">
+                    Selected coach email: <span className="text-[#00FF62]">{selectedCoachEmail}</span>
+                  </p>
+                )}
               </div>
             )}
           </div>

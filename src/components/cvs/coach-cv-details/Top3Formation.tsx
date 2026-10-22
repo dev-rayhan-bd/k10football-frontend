@@ -19,12 +19,12 @@ const TacticalMap = ({
   formationIndex: number; 
   image: any; 
   pinIcon: any; 
-  markers: { id: number; x: number; y: number }[]; 
+  markers: { id: string | number; x: number; y: number }[]; 
   editable: boolean; 
   onUpdate: (markers: any[]) => void 
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const [activeMarkerId, setActiveMarkerId] = useState<number | null>(null);
+  const [activeMarkerId, setActiveMarkerId] = useState<string | number | null>(null);
 
   const addMarker = () => {
     const newMarker = {
