@@ -9,7 +9,8 @@ import {
     ICreateSelfGameReportPayload, 
     IRequestCoachGameReportPayload,
     IGameReportResponse,
-    IPlayerGameReportsResponse 
+    IPlayerGameReportsResponse,
+    IPlayerAnalyticsResponse 
 } from "@/types/player.type";
 
 export const playerApi = apiSlice.injectEndpoints({
@@ -358,6 +359,14 @@ export const playerApi = apiSlice.injectEndpoints({
                 }
             },
         }),
+
+        getMyPlayerAnalytics: builder.query<IPlayerAnalyticsResponse, void>({
+            query: () => ({
+                url: "/players/me/analytics",
+                method: "GET",
+            }),
+            providesTags: [TagTypes.PLAYERS],
+        }),
     }),
 });
 
@@ -378,6 +387,8 @@ export const {
     useUploadPlayerDocumentMutation,
     useDeletePlayerDocumentMutation,
     useUpdatePlayerDocumentMutation,
+    useGetMyPlayerAnalyticsQuery,
+    useLazyGetMyPlayerAnalyticsQuery,
 } = playerApi;
 
 // Export aliases for convenience

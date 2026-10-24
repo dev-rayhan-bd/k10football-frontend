@@ -401,3 +401,108 @@ export interface IPlayerGameReportsResponse {
   data: IGameReportsData;
 }
 
+// Player Analytics Types
+export interface IPlayerAnalyticsSummaryItem {
+  value: number | string;
+  label: string;
+  icon: string;
+}
+
+export interface IPlayerAnalyticsSummary {
+  overallRating?: IPlayerAnalyticsSummaryItem;
+  goals?: IPlayerAnalyticsSummaryItem;
+  assists?: IPlayerAnalyticsSummaryItem;
+  improvement?: IPlayerAnalyticsSummaryItem;
+  [key: string]: IPlayerAnalyticsSummaryItem | undefined;
+}
+
+export interface IRadarDataItem {
+  attribute?: string;
+  subject?: string;
+  value?: number;
+  A?: number;
+  fullMark?: number;
+}
+
+export interface IFullPotentialAnalytics {
+  title?: string;
+  subtitle?: string;
+  overallScore?: number;
+  overallScoreDisplay?: string;
+  scoreColor?: string;
+  growth?: number;
+  growthDisplay?: string;
+  growthDirection?: "up" | "down" | string;
+  growthText?: string;
+  radarColor?: string;
+  radarData?: IRadarDataItem[];
+  attributes?: Record<string, number>;
+}
+
+export interface IMentalAnalysisAnalytics {
+  title?: string;
+  subtitle?: string;
+  overallScore?: number;
+  overallScoreDisplay?: string;
+  scoreColor?: string;
+  growth?: number;
+  growthDisplay?: string;
+  growthDirection?: "up" | "down" | string;
+  growthText?: string;
+  radarColor?: string;
+  radarData?: IRadarDataItem[];
+  attributes?: Record<string, number>;
+}
+
+export interface ISubSkillItem {
+  key?: string;
+  name: string;
+  value: number;
+  percentage?: string;
+  color?: string;
+}
+
+export interface ISkillAnalysisItem {
+  id?: string;
+  title: string;
+  score?: number;
+  percentage?: string | number;
+  color?: string;
+  subSkills?: ISubSkillItem[];
+  subMetrics?: ISubSkillItem[];
+}
+
+export interface IPerformanceTrendItem {
+  month: string;
+  monthFull?: string;
+  goals: number;
+  assists: number;
+  rating: number;
+}
+
+export interface IPlayerAnalyticsInfo {
+  fullName?: string;
+  position?: string;
+  currentClub?: string;
+  profileImage?: string;
+  tier?: string;
+}
+
+export interface IPlayerAnalyticsData {
+  playerId?: string;
+  playerInfo?: IPlayerAnalyticsInfo;
+  summary?: IPlayerAnalyticsSummary;
+  fullPotential?: IFullPotentialAnalytics;
+  mentalAnalysis?: IMentalAnalysisAnalytics;
+  skillsAnalysis?: ISkillAnalysisItem[];
+  performanceTrend?: IPerformanceTrendItem[];
+}
+
+export interface IPlayerAnalyticsResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: IPlayerAnalyticsData;
+}
+
+
