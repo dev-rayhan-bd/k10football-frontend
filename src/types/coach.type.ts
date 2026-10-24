@@ -282,3 +282,64 @@ export interface ICoachListResponse {
   };
   data: ICoachListItem[];
 }
+
+export interface ICoachProfileAnalysis {
+  tactics: number;
+  leadership: number;
+  communication: number;
+  adaptability: number;
+  discipline: number;
+  development: number;
+  overall?: number;
+}
+
+export interface ITournamentPercentages {
+  win: number;
+  loss: number;
+  draw: number;
+  runnerUp: number;
+  champion: number;
+}
+
+export interface ITournamentStats {
+  win: number;
+  loss: number;
+  draw: number;
+  runnerUp: number;
+  champion: number;
+  totalMatches: number;
+  percentages: ITournamentPercentages;
+}
+
+export interface ICoachMajorTrophyItem {
+  name: string;
+  value: number;
+}
+
+export interface ICoachTrophyTableRow {
+  _id?: string;
+  trophyName: string;
+  number: number;
+  win: number;
+  loss: number;
+  draw: number;
+  runnerUp: number;
+  champion: number;
+}
+
+export interface ICoachAnalyticsData {
+  coachType?: string;
+  cvTier?: string;
+  coachProfileAnalysis: ICoachProfileAnalysis;
+  tournamentStats: ITournamentStats;
+  majorTrophies: ICoachMajorTrophyItem[];
+  trophiesTable: ICoachTrophyTableRow[];
+}
+
+export interface ICoachAnalyticsResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: ICoachAnalyticsData;
+}
+

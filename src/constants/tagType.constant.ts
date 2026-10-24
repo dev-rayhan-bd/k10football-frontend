@@ -16,6 +16,10 @@ const TagTypes = {
     GAME_REPORTS: "GameReports",
     REPORTS: "Reports",
     TESTIMONIALS: "Testimonials",
+    ACADEMY: "Academy",
+    TEAMS: "Teams",
+    MEDIA: "Media",
+    media: "Media",
 } as const;
 
 export default TagTypes;

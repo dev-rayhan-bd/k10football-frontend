@@ -7,7 +7,8 @@ import {
     IUpdateCoachPayload,
     ICoachTestimonialsResponse,
     ICreateCoachTestimonialPayload,
-    ICoachListResponse
+    ICoachListResponse,
+    ICoachAnalyticsResponse,
 } from "@/types/coach.type";
 
 export const coachApi = apiSlice.injectEndpoints({
@@ -330,6 +331,14 @@ export const coachApi = apiSlice.injectEndpoints({
             },
             providesTags: [TagTypes.COACHES],
         }),
+
+        getMyCoachAnalytics: builder.query<ICoachAnalyticsResponse, void>({
+            query: () => ({
+                url: "/coaches/my-analytics",
+                method: "GET",
+            }),
+            providesTags: [TagTypes.COACHES],
+        }),
     }),
 });
 
@@ -347,5 +356,7 @@ export const {
     useDeleteCoachTestimonialMutation,
     useGetAllCoachesQuery,
     useLazyGetAllCoachesQuery,
+    useGetMyCoachAnalyticsQuery,
+    useLazyGetMyCoachAnalyticsQuery,
 } = coachApi;
 
