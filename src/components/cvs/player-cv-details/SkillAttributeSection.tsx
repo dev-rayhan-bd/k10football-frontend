@@ -129,17 +129,30 @@ export const INITIAL_SKILL_CATEGORIES: SkillCategory[] = [
 ];
 
 const SkillsAttributes = ({ editable = false }: { editable?: boolean }) => {
-  const { dispatch } = usePlayer();
+  const { dispatch, playerData } = usePlayer();
   const { setSkillsAvg } = usePlayerStats();
 
-  // RTK Query API Hooks
-  const { data: attributesResponse, isLoading } = useGetMyPlayerAttributesQuery(undefined);
+  const isViewingSpecificPlayer =
+    typeof window !== "undefined" &&
+    Boolean(new URLSearchParams(window.location.search).get("playerId"));
+
+  // RTK Query API Hooks (skip when viewing another player's CV or not editable)
+  const { data: attributesResponse, isLoading } = useGetMyPlayerAttributesQuery(undefined, {
+    skip: !editable || isViewingSpecificPlayer,
+  });
   const [updateMyPlayerAttributes, { isLoading: isUpdating }] = useUpdateMyPlayerAttributesMutation();
 
   const [categories, setCategories] = useState<SkillCategory[]>(INITIAL_SKILL_CATEGORIES);
   const [isDirty, setIsDirty] = useState(false);
 
-  // Sync state when API data arrives
+  // Sync state when playerData.skillsCategories is populated (e.g. from syncFromCvResponse)
+  useEffect(() => {
+    if (playerData?.skillsCategories && playerData.skillsCategories.length > 0) {
+      setCategories(playerData.skillsCategories as any);
+    }
+  }, [playerData?.skillsCategories]);
+
+  // Sync state when API data arrives (only for self-editing player)
   useEffect(() => {
     const apiCategories = attributesResponse?.data?.categories;
     if (apiCategories && typeof apiCategories === "object") {
@@ -180,9 +193,11 @@ const SkillsAttributes = ({ editable = false }: { editable?: boolean }) => {
     const avg = allSkills.reduce((sum, s) => sum + s.value, 0) / (allSkills.length || 1);
     setSkillsAvg(Math.round(avg));
 
-    // Sync to Redux so other CV sections (Attribute Analysis, etc.) see it locally without calling API
-    dispatch(updatePlayerField({ field: "skillsCategories", value: categories }));
-  }, [categories, setSkillsAvg, dispatch]);
+    // Only dispatch updatePlayerField if editable and user has made dirty changes
+    if (editable && isDirty) {
+      dispatch(updatePlayerField({ field: "skillsCategories", value: categories }));
+    }
+  }, [categories, setSkillsAvg, dispatch, editable, isDirty]);
 
   const handleSkillChange = (catIdx: number, skillIdx: number, rawVal: number) => {
     const clamped = Math.max(0, Math.min(100, isNaN(rawVal) ? 0 : rawVal));

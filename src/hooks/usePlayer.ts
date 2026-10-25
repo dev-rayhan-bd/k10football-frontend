@@ -27,6 +27,11 @@ export const usePlayer = () => {
     typeof window !== "undefined" &&
     Boolean(localStorage.getItem("token") || localStorage.getItem("accessToken"));
 
+  // Check if viewing a specific player via query parameter (e.g. ?playerId=...)
+  const isViewingSpecificPlayer =
+    typeof window !== "undefined" &&
+    Boolean(new URLSearchParams(window.location.search).get("playerId"));
+
   // 1. GET CV API: Fetch complete player CV from {{baseUrl}}/players/me/cv
   const {
     data: cvResponse,
@@ -35,7 +40,7 @@ export const usePlayer = () => {
     error: cvError,
     refetch: refetchCv,
   } = useGetMyPlayerCvQuery(undefined, {
-    skip: !hasToken,
+    skip: !hasToken || isViewingSpecificPlayer,
   });
 
   // 1b. GET Profile API: Fetch player profile from {{baseUrl}}/players/me
@@ -46,24 +51,24 @@ export const usePlayer = () => {
     error: profileError,
     refetch: refetchProfile,
   } = useGetMyPlayerProfileQuery(undefined, {
-    skip: !hasToken,
+    skip: !hasToken || isViewingSpecificPlayer,
   });
 
   // 2. PATCH Player API: Update player profile / CV from {{baseUrl}}/players/me
   const [updatePlayerMutation, { isLoading: isUpdating }] = useUpdateMyPlayerProfileMutation();
 
-  // Sync API data into Redux player state whenever API responds
+  // Sync API data into Redux player state whenever API responds (only for self player)
   useEffect(() => {
-    if (cvResponse?.data) {
+    if (!isViewingSpecificPlayer && cvResponse?.data) {
       dispatch(syncFromCvResponse(cvResponse.data));
     }
-  }, [cvResponse, dispatch]);
+  }, [cvResponse, dispatch, isViewingSpecificPlayer]);
 
   useEffect(() => {
-    if (profileResponse?.data) {
+    if (!isViewingSpecificPlayer && profileResponse?.data) {
       dispatch(syncFromCvResponse(profileResponse.data));
     }
-  }, [profileResponse, dispatch]);
+  }, [profileResponse, dispatch, isViewingSpecificPlayer]);
 
   // Update whole section or partial payload via PATCH /players/me
   const updatePlayerProfile = useCallback(
@@ -102,11 +107,15 @@ export const usePlayer = () => {
   // Field-based update handler with automatic mapping to backend PATCH payload
   const handleUpdate = useCallback(
     async (field: string, value: any) => {
-      // 1. Optimistically update local redux state
-      dispatch(updatePlayerField({ field, value }));
+      const isClubField = field === "clubs" || field === "clubHistory";
 
-      // 2. Build partial payload for PATCH /players/me
-      if (!hasToken) return;
+      // Optimistically update local redux state for non-club fields only
+      if (!isClubField) {
+        dispatch(updatePlayerField({ field, value }));
+      }
+
+      // 2. Build partial payload for PATCH /players/me (skip if viewing another player's CV)
+      if (!hasToken || isViewingSpecificPlayer) return;
 
       let backendPayload: Partial<IUpdatePlayerPayload> | null = null;
 
@@ -216,19 +225,25 @@ export const usePlayer = () => {
           };
           break;
         case "clubs":
-        case "clubHistory":
-          backendPayload = {
-            clubHistory: Array.isArray(value)
-              ? value.map((c: any) => ({
-                  clubName: c.name || c.clubName || "",
-                  period: c.period || `${c.from || "2020"} - ${c.to || "Present"}`,
-                  isCurrent:
-                    c.isCurrent ?? (c.to === "Present" || String(c.period || "").includes("Present")),
-                  logoUrl: c.logo?.startsWith("http") ? c.logo : undefined,
-                }))
-              : value,
-          };
+        case "clubHistory": {
+          const clubList = Array.isArray(value)
+            ? value.map((c: any) => ({
+                clubName: c.name || c.clubName || "",
+                from: c.from || (c.period ? c.period.split("-")[0]?.trim() : "2020"),
+                to: c.to || (c.period ? c.period.split("-")[1]?.trim() : (c.isCurrent ? "present" : "2022")),
+                isCurrent:
+                  c.isCurrent ??
+                  (String(c.to || "").toLowerCase() === "present" ||
+                    String(c.period || "").toLowerCase().includes("present")),
+                logoUrl: typeof c.logo === "string" && c.logo.startsWith("http") ? c.logo : undefined,
+              }))
+            : value;
+
+          const formData = new FormData();
+          formData.append("data", JSON.stringify({ clubHistory: clubList }));
+          backendPayload = formData as any;
           break;
+        }
         case "careerHighlights":
         case "accomplishments":
           backendPayload = {
@@ -286,14 +301,71 @@ export const usePlayer = () => {
 
       if (backendPayload) {
         try {
-          await updatePlayerMutation(backendPayload).unwrap();
+          const res = await updatePlayerMutation(backendPayload).unwrap();
+          if (isClubField && res?.data) {
+            dispatch(syncFromCvResponse(res.data));
+          }
         } catch (err: any) {
           console.error(`Failed to patch field ${field}:`, err);
           toast.error(err?.data?.message || "Failed to save changes. Please try again.");
         }
       }
     },
-    [dispatch, hasToken, updatePlayerMutation]
+    [dispatch, hasToken, isViewingSpecificPlayer, updatePlayerMutation]
+  );
+
+  const handleAddClub = useCallback(
+    async ({
+      name,
+      from,
+      to,
+      logoFile,
+    }: {
+      name: string;
+      from: string;
+      to: string;
+      logoFile?: File | null;
+      previewLogo?: string | null;
+    }) => {
+      const isCurrent = to.toLowerCase() === "present";
+
+      if (!hasToken || isViewingSpecificPlayer) return;
+
+      // Build FormData matching Postman screenshot:
+      // - data: JSON string with single new club in clubHistory array:
+      //   { "clubHistory": [{ "clubName": "...", "from": "...", "to": "...", "isCurrent": true/false }] }
+      // - clubLogo_0: File object (the uploaded club logo)
+      const formData = new FormData();
+      const clubHistoryObj = {
+        clubName: name,
+        from,
+        to,
+        isCurrent,
+      };
+      formData.append(
+        "data",
+        JSON.stringify({
+          clubHistory: [clubHistoryObj],
+        })
+      );
+
+      if (logoFile) {
+        formData.append("clubLogo_0", logoFile);
+      }
+
+      // Pure API call: UI updates ONLY when API responds successfully
+      try {
+        const response = await updatePlayerMutation(formData).unwrap();
+        if (response?.data) {
+          dispatch(syncFromCvResponse(response.data));
+        }
+        return response;
+      } catch (err: any) {
+        console.error("Failed to add club:", err);
+        throw err;
+      }
+    },
+    [dispatch, hasToken, isViewingSpecificPlayer, updatePlayerMutation]
   );
 
   const selectPlayer = (id: number) => {
@@ -331,6 +403,7 @@ export const usePlayer = () => {
     refetchCv,
     refetchProfile,
     handleUpdate,
+    handleAddClub,
     updatePlayerProfile,
     updateSection,
     selectPlayer,

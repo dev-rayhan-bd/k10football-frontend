@@ -8,16 +8,10 @@ import { addReport } from "@/lib/constants/reports";
 const CreateGameReportPage = () => {
   const router = useRouter();
 
-  const handleContinue = (data: any) => {
-    addReport(data);
-    router.push("/dashboard/player/game-reports");
-  };
-
   return (
     <div className="py-10">
       <CreateGameReport 
-        onCancel={() => router.back()} 
-        onContinue={handleContinue} 
+        onCancel={() => router.push("/dashboard/player/game-reports")} 
       />
     </div>
   );

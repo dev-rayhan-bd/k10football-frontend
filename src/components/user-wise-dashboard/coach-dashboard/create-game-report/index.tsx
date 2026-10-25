@@ -3,7 +3,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 import React, { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { usePlayer } from "@/hooks/usePlayer";
 import { addReport, completeReportRequest, addReportRequest, updateReport } from "@/lib/constants/reports";
 import ReportDetailsForm from "./ReportDetailsForm";
@@ -14,6 +14,10 @@ import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHooks";
 import { addGameReport, updateGameReport, completeGameReportRequest, addGameReportRequest } from "@/redux/features/reports/reportsSlice";
 import { useCreateSelfGameReportMutation, useRequestCoachGameReportMutation, useGetMyPlayerProfileQuery } from "@/redux/features/player/playerApi";
+import {
+  useCompleteCoachGameReportMutation,
+  useGetCoachGameReportsQuery,
+} from "@/redux/features/coach/coachApi";
 import { ICreateSelfGameReportPayload, IRequestCoachGameReportPayload } from "@/types/player.type";
 import { IconCircleCheck } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
@@ -34,16 +38,39 @@ const formatDateToYMD = (dateStr: string): string => {
   return trimmed;
 };
 
-const formatMinutesPlayed = (val: string): string => {
-  if (!val) return "00:00";
-  const trimmed = String(val).trim();
-  if (trimmed.includes(":")) {
-    const [m, s] = trimmed.split(":");
-    return `${(m || "0").padStart(2, "0")}:${(s || "00").padStart(2, "0")}`;
+const formatMinutesPlayed = (val: string | number | undefined | null): string => {
+  if (val === undefined || val === null) return "42:00";
+  const str = String(val).trim();
+  if (!str) return "42:00";
+
+  let m = 0;
+  let s = 0;
+
+  if (str.includes(":")) {
+    const parts = str.split(":");
+    m = parseInt(parts[0], 10);
+    s = parseInt(parts[1], 10);
+  } else {
+    m = parseInt(str.replace(/[^\d]/g, ""), 10);
+    s = 0;
   }
-  const num = parseInt(trimmed, 10);
-  if (isNaN(num)) return "00:00";
-  return `${String(num).padStart(2, "0")}:00`;
+
+  if (isNaN(m)) m = 0;
+  if (isNaN(s)) s = 0;
+
+  if (s >= 60) {
+    m += Math.floor(s / 60);
+    s = s % 60;
+  }
+  if (s < 0) s = 0;
+  if (m < 0) m = 0;
+
+  // Format must be "mm:ss" with seconds between 00-59 and time > 0
+  if (m === 0 && s === 0) {
+    return "42:00";
+  }
+
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 };
 
 interface CreateGameReportWizardProps {
@@ -57,10 +84,13 @@ export const CreateGameReportWizard = ({
 }: CreateGameReportWizardProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const dispatch = useAppDispatch();
   const { players } = usePlayer();
   const [createSelfGameReport, { isLoading: isCreatingSelfReport }] = useCreateSelfGameReportMutation();
   const [requestCoachGameReport, { isLoading: isRequestingCoachReport }] = useRequestCoachGameReportMutation();
+  const [completeCoachGameReport, { isLoading: isCompletingCoachReport }] = useCompleteCoachGameReportMutation();
+  const { data: coachGameReportsResponse } = useGetCoachGameReportsQuery();
   const { data: myProfileResponse } = useGetMyPlayerProfileQuery();
 
   const reports = useAppSelector(state => state.reports.reports);
@@ -68,10 +98,16 @@ export const CreateGameReportWizard = ({
 
   const playerId = searchParams.get("playerId");
   const requestId = searchParams.get("requestId");
+  const reportId = searchParams.get("reportId") || requestId;
+  const viewOnly = searchParams.get("viewOnly") === "true";
 
   const [userRole, setUserRole] = useState<string>("player");
+  const isCoach = pathname?.includes("/coach") || userRole === "coach";
   const [step, setStep] = useState(1);
   const [characteristics, setCharacteristics] = useState<string[]>(["FAST", "SKILLFUL", "FINISHER"]);
+  const [coachFeedback, setCoachFeedback] = useState<string>(
+    "Impressive tactical positioning, clinical shooting and accurate ball distribution throughout the game."
+  );
   const [formData, setFormData] = useState({
     playerName: "EDEGELSON RICCI",
     dob: "2014-03-27",
@@ -81,7 +117,7 @@ export const CreateGameReportWizard = ({
     weight: "45",
     height: "1.20",
     matchesPlayed: "1",
-    minutesPlayed: "08:08",
+    minutesPlayed: "42:00",
     manOfTheMatch: "1",
     scoutName: "MARIO LOPEZ",
     gameType: "FRIENDLY CHAMPIONSHIP CATARINESE",
@@ -113,14 +149,18 @@ export const CreateGameReportWizard = ({
     });
   }, [step]);
 
-  // Detect user role
+  // Detect user role & initial step
   useEffect(() => {
-    const role = localStorage.getItem("userRole") || "player";
+    const role = localStorage.getItem("userRole") || (pathname?.includes("/coach") ? "coach" : "player");
     setUserRole(role);
-    if (role === "coach") {
-      setStep(2); // Coach skips payment
+    if (role === "coach" || pathname?.includes("/coach")) {
+      if (viewOnly) {
+        setStep(3); // View only directly opens PDF review
+      } else {
+        setStep(2); // Coach skips details to statistics form directly
+      }
     }
-  }, []);
+  }, [pathname, viewOnly]);
 
   // Pre-fill from Redux player list and request data
   useEffect(() => {
@@ -132,7 +172,7 @@ export const CreateGameReportWizard = ({
     let pWeight = "45";
     let pHeight = "1.20";
     let pMatches = "1";
-    let pMinutes = "0";
+    let pMinutes = "42:00";
     let pScout = "MARIO LOPEZ";
 
     // check if viewOnly
@@ -143,7 +183,7 @@ export const CreateGameReportWizard = ({
       // Find player dob from player list if available
       let foundDob = pDob;
       if (playerId) {
-        const player = players.find(p => p.id === Number(playerId));
+        const player = players.find(p => String(p.id) === String(playerId) || (p as any)._id === playerId);
         if (player) {
           foundDob = player.dob || "15-03-1996";
         }
@@ -158,7 +198,7 @@ export const CreateGameReportWizard = ({
         weight: savedReport.weight.replace("kg", "") || pWeight,
         height: savedReport.height.replace("m", "") || pHeight,
         matchesPlayed: "1",
-        minutesPlayed: savedReport.timePlayedMinutes.toString() || pMinutes,
+        minutesPlayed: formatMinutesPlayed(savedReport.timePlayedMinutes || pMinutes),
         manOfTheMatch: "1",
         scoutName: savedReport.scoutName || pScout,
         gameType: savedReport.league || "COMPETITIVE MATCH",
@@ -214,7 +254,7 @@ export const CreateGameReportWizard = ({
     } else {
       // 1. Fill player details
       if (playerId) {
-        const player = players.find(p => p.id === Number(playerId));
+        const player = players.find(p => String(p.id) === String(playerId) || (p as any)._id === playerId);
         if (player) {
           pName = player.fullName;
           pDob = player.dob || "15-03-1996";
@@ -223,7 +263,7 @@ export const CreateGameReportWizard = ({
           pWeight = player.weight || "45";
           pHeight = player.height || "1.20";
           pMatches = player.seasonStats?.matches ? player.seasonStats.matches.toString() : "1";
-          pMinutes = player.seasonStats?.matches ? (player.seasonStats.matches * 90).toString() : "90";
+          pMinutes = player.seasonStats?.matches ? `${player.seasonStats.matches * 90}:00` : "42:00";
           pScout = player.coachName && player.coachName !== "N/A" ? player.coachName : "MARIO LOPEZ";
 
           const posUpper = player.position.toUpperCase();
@@ -247,6 +287,20 @@ export const CreateGameReportWizard = ({
       let mResult = `${pName.toUpperCase()} 2 x 0 OPPONENT`;
       let mWeather = "RAINY";
       let mTemp = "19";
+
+      // Check coach game reports list for coach report requests
+      const coachReport = coachGameReportsResponse?.data?.reports?.find(
+        (r) =>
+          r._id === requestId ||
+          (playerId && (r.player?._id === playerId || (r.player as any)?.id === playerId))
+      );
+
+      if (coachReport) {
+        if (coachReport.player?.name) pName = coachReport.player.name;
+        if (coachReport.player?.position) pPos = coachReport.player.position.toUpperCase();
+        if (coachReport.matches) mResult = coachReport.matches;
+        if (coachReport.date) mDate = coachReport.date;
+      }
 
       if (requestId) {
         const request = requests.find(r => r.id === Number(requestId));
@@ -279,7 +333,7 @@ export const CreateGameReportWizard = ({
         weight: pWeight,
         height: pHeight,
         matchesPlayed: pMatches,
-        minutesPlayed: pMinutes,
+        minutesPlayed: formatMinutesPlayed(pMinutes),
         manOfTheMatch: "1",
         scoutName: pScout,
         gameType: mType,
@@ -294,7 +348,7 @@ export const CreateGameReportWizard = ({
         awayScore: 1
       });
     }
-  }, [playerId, requestId, players, searchParams, requests]);
+  }, [playerId, requestId, players, searchParams, requests, coachGameReportsResponse]);
 
  
 
@@ -442,6 +496,136 @@ export const CreateGameReportWizard = ({
     }
   };
 
+  // Complete game report for coach (no payment!)
+  const handleCoachComplete = async (overallRating: number) => {
+    const targetReportId = requestId || reportId || "";
+    if (!targetReportId) {
+      toast.error("Game report ID not found");
+      return;
+    }
+
+    const statsPayload = {
+      shotsOnGoal: Number(stats.shotsOnGoal ?? 8),
+      goalScored: Number(stats.goalScored ?? 3),
+      assists: Number(stats.assists ?? 6),
+      passAccurate: Number(stats.passAccurate ?? 12),
+      wrongPass: Number(stats.wrongPass ?? 2),
+      penaltiesTaken: Number(stats.penaltiesTaken ?? 4),
+      standTackle: Number(stats.standTackle ?? 12),
+      slidingTackle: Number(stats.slidingTackle ?? 12),
+      interception: Number(stats.interception ?? 2),
+      appearances: Number(stats.appearances ?? 15),
+      fault: Number(stats.fault ?? 1),
+      redCard: Number(stats.redCard ?? 0),
+      yellowCard: Number(stats.yellowCard ?? 1),
+      punching: Number(stats.punching ?? 5),
+      handling: Number(stats.handling ?? 10),
+      reflex: Number(stats.reflex ?? 1),
+      aerialAbility: Number(stats.aerialAbility ?? 5),
+      throwing: Number(stats.throwing ?? 8),
+      reactions: Number(stats.reactions ?? 1),
+      savesAccurate: Number(stats.savesAccurate ?? 10),
+      freeKick: Number(stats.freeKick ?? 12),
+      cornerKick: Number(stats.cornerKick ?? 4),
+      goalUnsave: Number(stats.goalUnsave ?? 1),
+      penaltiesSaves: Number(stats.penaltiesSaves ?? 1),
+    };
+
+    const accurateShots = (goalMarkers && goalMarkers.length > 0
+      ? goalMarkers
+      : [{ x: 15.2, y: 28.4 }, { x: 84.6, y: 22.1 }]
+    ).map((m) => ({
+      x: Number(Number(m.x).toFixed(1)),
+      y: Number(Number(m.y).toFixed(1)),
+    }));
+
+    const accurateAssists = (pitchMarkers && pitchMarkers.length > 0
+      ? pitchMarkers
+      : [{ x1: 45.0, y1: 70.0, x2: 50.0, y2: 55.0 }]
+    ).map((m) => ({
+      fromX: Number(Number(m.x1).toFixed(1)),
+      fromY: Number(Number(m.y1).toFixed(1)),
+      toX: Number(Number(m.x2).toFixed(1)),
+      toY: Number(Number(m.y2).toFixed(1)),
+    }));
+
+    const payload = {
+      reportId: targetReportId,
+      minutesPlayed: formatMinutesPlayed(formData.minutesPlayed) || "42:00",
+      stats: statsPayload,
+      accurateShots,
+      accurateAssists,
+      coachFeedback:
+        coachFeedback?.trim() ||
+        "Impressive tactical positioning, clinical shooting and accurate ball distribution throughout the game.",
+    };
+
+    try {
+      await completeCoachGameReport(payload).unwrap();
+
+      // Sync local redux request if applicable
+      if (requestId) {
+        dispatch(completeGameReportRequest(Number(requestId)));
+        completeReportRequest(Number(requestId));
+      }
+
+      const finalReport = {
+        id: Math.floor(Math.random() * 10000),
+        date: formData.gameDate,
+        league: formData.gameType,
+        team1: formData.clubName,
+        team2: formData.matchResult.includes(" vs ")
+          ? formData.matchResult.split(" vs ")[1]
+          : formData.matchResult.split(" x ")[1] || "OPPONENT",
+        score: formData.matchResult.includes(" x ")
+          ? formData.matchResult.split(" ").slice(-3).join(" ")
+          : "2-1",
+        result: "W" as const,
+        stadium: formData.gameLocation,
+        goals: stats.goalScored || 0,
+        assists: stats.assists || 0,
+        passes: stats.passAccurate || 50,
+        timePlayedMinutes:
+          Number(formData.minutesPlayed.replace(/[^\d]/g, "")) || 90,
+        yellowCards: stats.yellowCard || 0,
+        redCards: stats.redCard || 0,
+        passAccuracy:
+          Math.round(
+            ((stats.passAccurate || 1) /
+              ((stats.passAccurate || 1) + (stats.wrongPass || 0))) *
+              100
+          ) || 85,
+        rating: overallRating / 10,
+        scoutName: formData.scoutName,
+        gameType: formData.gameType,
+        weather: formData.weather,
+        temperature: formData.temperature,
+        playerPosition: formData.position,
+        foot: formData.foot,
+        characteristics,
+        weight: `${formData.weight}kg`,
+        height: `${formData.height}m`,
+        status: "Completed" as const,
+        amount: "$ 6.99",
+        playerId: playerId ? Number(playerId) : undefined,
+        playerName: formData.playerName,
+        pitchMarkers,
+        goalMarkers,
+      };
+
+      dispatch(addGameReport(finalReport));
+      addReport(finalReport);
+
+      if (onContinue) {
+        onContinue(finalReport);
+      } else {
+        setStep(5);
+      }
+    } catch (err: any) {
+      console.error("Failed to complete coach game report:", err);
+    }
+  };
+
   // Pre-fill from player profile query if available
   useEffect(() => {
     if (myProfileResponse?.data && !playerId && !requestId) {
@@ -547,7 +731,9 @@ export const CreateGameReportWizard = ({
           setSelectedCoachEmail={setSelectedCoachEmail}
           onCancel={onCancel}
           onContinue={() => {
-            if (reportCompletedBy === "coach" && userRole !== "coach") {
+            if (isCoach) {
+              setStep(2);
+            } else if (reportCompletedBy === "coach" && userRole !== "coach") {
               // Skip to payment before sending request to coach
               setStep(4);
             } else {
@@ -568,7 +754,15 @@ export const CreateGameReportWizard = ({
           setGoalMarkers={setGoalMarkers}
           pitchMarkers={pitchMarkers}
           setPitchMarkers={setPitchMarkers}
-          onCancel={() => setStep(1)}
+          coachFeedback={coachFeedback}
+          setCoachFeedback={setCoachFeedback}
+          onCancel={() => {
+            if (isCoach) {
+              router.push("/dashboard/coach/game-reports");
+            } else {
+              setStep(1);
+            }
+          }}
           onSubmit={() => setStep(3)}
         />
       )}
@@ -580,35 +774,54 @@ export const CreateGameReportWizard = ({
           stats={stats}
           goalMarkers={goalMarkers}
           pitchMarkers={pitchMarkers}
-          onSave={(overallRating) => {
-            setTempRating(overallRating);
-            // Go to payment step before final save
-            setStep(4);
+          coachFeedback={coachFeedback}
+          isSubmitting={isCompletingCoachReport}
+          viewOnly={viewOnly}
+          onSave={async (overallRating) => {
+            if (isCoach) {
+              await handleCoachComplete(overallRating);
+            } else {
+              setTempRating(overallRating);
+              // Go to payment step before final save for player
+              setStep(4);
+            }
           }}
           onBack={() => setStep(2)}
-          isPlayer={userRole !== "coach"}
+          isPlayer={!isCoach}
         />
       )}
 
       {step === 4 && (
-        <StripePaymentModal 
-          buttonText={reportCompletedBy === "coach" && userRole !== "coach" ? "Pay $6.99 & Submit Request" : "Pay $6.99 & Save Report"}
-          isSubmitting={isCreatingSelfReport || isRequestingCoachReport}
-          onPay={async () => {
-            if (reportCompletedBy === "coach" && userRole !== "coach") {
-              await handlePlayerSubmit();
-            } else {
-              await handleSave(tempRating);
-            }
-          }}
-          onBack={() => {
-            if (reportCompletedBy === "coach" && userRole !== "coach") {
-              setStep(1);
-            } else {
-              setStep(3);
-            }
-          }}
-        />
+        isCoach ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <Button
+              onClick={() => handleCoachComplete(tempRating)}
+              disabled={isCompletingCoachReport}
+              className="bg-[#00FF62] hover:bg-[#00D150] text-black font-bold uppercase tracking-widest px-8 py-4 rounded-xl font-orbitron"
+            >
+              {isCompletingCoachReport ? "Completing Report..." : "Complete Game Report"}
+            </Button>
+          </div>
+        ) : (
+          <StripePaymentModal 
+            buttonText={reportCompletedBy === "coach" && userRole !== "coach" ? "Pay $6.99 & Submit Request" : "Pay $6.99 & Save Report"}
+            isSubmitting={isCreatingSelfReport || isRequestingCoachReport}
+            onPay={async () => {
+              if (reportCompletedBy === "coach" && userRole !== "coach") {
+                await handlePlayerSubmit();
+              } else {
+                await handleSave(tempRating);
+              }
+            }}
+            onBack={() => {
+              if (reportCompletedBy === "coach" && userRole !== "coach") {
+                setStep(1);
+              } else {
+                setStep(3);
+              }
+            }}
+          />
+        )
       )}
 
       {step === 5 && (
@@ -617,18 +830,23 @@ export const CreateGameReportWizard = ({
             <IconCircleCheck size={48} stroke={1.5} />
           </div>
           <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter font-orbitron">
-            {reportCompletedBy === "coach" && userRole !== "coach" ? "Request Submitted" : "Report Saved"}
+            {isCoach
+              ? "Report Completed"
+              : reportCompletedBy === "coach" && userRole !== "coach"
+              ? "Request Submitted"
+              : "Report Saved"}
           </h2>
           <p className="text-gray-400 text-sm leading-relaxed">
-            Your payment of **$6.99** was processed successfully. 
-            {reportCompletedBy === "coach" && userRole !== "coach" 
-              ? " We have notified your coach of your analysis request. Once complete, the verified report will appear on your CV." 
-              : " Your game report has been saved successfully and added to your profile."}
+            {isCoach
+              ? "The game report has been successfully finalized and verified. The player's performance analysis and stats have been updated."
+              : reportCompletedBy === "coach" && userRole !== "coach"
+              ? "Your payment of **$6.99** was processed successfully. We have notified your coach of your analysis request. Once complete, the verified report will appear on your CV."
+              : "Your payment of **$6.99** was processed successfully. Your game report has been saved successfully and added to your profile."}
           </p>
 
           <Button 
             onClick={() => {
-              if (userRole === "coach") {
+              if (isCoach) {
                 router.push("/dashboard/coach/game-reports");
               } else {
                 router.push("/dashboard/player/game-reports");
@@ -636,7 +854,7 @@ export const CreateGameReportWizard = ({
             }}
             className="w-full h-14 rounded-xl bg-[#00FF62] hover:bg-[#00D150] text-black font-bold uppercase tracking-widest transition-all font-orbitron"
           >
-            Back to Reports
+            Back to Game Reports
           </Button>
         </div>
       )}

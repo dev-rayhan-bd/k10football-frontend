@@ -110,12 +110,14 @@ export interface Marker {
 }
 
 export interface Skill {
+  key?: string;
   name: string;
   value: number;
 }
 
 export interface SkillCategory {
   category: string;
+  categoryKey?: string;
   color: string;
   skills: Skill[];
   borderColor: string;
@@ -511,12 +513,12 @@ export const playerSlice = createSlice({
             return {
               id: c._id || String(i + 1),
               name: c.clubName || c.name || "",
-              from: periods[0] || "2020",
-              to: periods[1] || (c.isCurrent ? "Present" : "2022"),
+              from: c.from || periods[0] || "2020",
+              to: c.to || periods[1] || (c.isCurrent ? "Present" : "2022"),
               logo: c.logoUrl || c.logo || "bg-blue-600",
-              color: "border-blue-500",
-              shortName: (c.clubName || "").slice(0, 3).toUpperCase(),
-              isCurrent: c.isCurrent
+              color: "border-primary",
+              shortName: (c.clubName || c.name || "").slice(0, 3).toUpperCase(),
+              isCurrent: c.isCurrent ?? (String(c.to || "").toLowerCase() === "present")
             };
           });
         }
@@ -565,6 +567,101 @@ export const playerSlice = createSlice({
             club: a.club || (activePlayer as any).currentClub || "",
             icon: trofeeIcon
           }));
+        }
+        if (data.coachVerification) {
+          if (data.coachVerification.coachName) activePlayer.coachName = data.coachVerification.coachName;
+          if (data.coachVerification.licenseNumber) activePlayer.coachLicenseNumber = data.coachVerification.licenseNumber;
+          if (data.coachVerification.clubManaged) activePlayer.clubManaged = data.coachVerification.clubManaged;
+          if (data.coachVerification.isVerified) activePlayer.validationStatus = "verified";
+        }
+        if (data.academy || data.academyDoc?.name || data.academyDetails?.name) {
+          activePlayer.academyName = data.academy || data.academyDoc?.name || data.academyDetails?.name;
+        }
+        if (Array.isArray(data.clubsInterested) && data.clubsInterested.length > 0 && (!data.clubHistory || data.clubHistory.length === 0)) {
+          activePlayer.clubs = data.clubsInterested.map((c: any, i: number) => ({
+            id: String(i + 1),
+            name: c.clubName || "Club",
+            from: "2024",
+            to: "Present",
+            logo: c.logoUrl || "bg-blue-600",
+            color: "border-blue-500",
+            shortName: (c.clubName || "").slice(0, 3).toUpperCase(),
+            isCurrent: true,
+          }));
+        }
+        if (data.attributes?.categories) {
+          const cats = data.attributes.categories;
+          activePlayer.skillsCategories = [
+            {
+              category: "Technical",
+              categoryKey: "technical",
+              color: "#0077FF",
+              borderColor: "border-l-blue-500",
+              skills: Object.entries(cats.technical || {}).map(([key, value]) => ({
+                key,
+                name: key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase()),
+                value: Number(value) || 50,
+              })),
+            },
+            {
+              category: "Tactical",
+              categoryKey: "tactical",
+              color: "#00FF62",
+              borderColor: "border-l-green-500",
+              skills: Object.entries(cats.tactical || {}).map(([key, value]) => ({
+                key,
+                name: key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase()),
+                value: Number(value) || 50,
+              })),
+            },
+            {
+              category: "Physical",
+              categoryKey: "physical",
+              color: "#FF1010",
+              borderColor: "border-l-red-500",
+              skills: Object.entries(cats.physical || {}).map(([key, value]) => ({
+                key,
+                name: key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase()),
+                value: Number(value) || 50,
+              })),
+            },
+            {
+              category: "Mental",
+              categoryKey: "mental",
+              color: "#FFD700",
+              borderColor: "border-l-yellow-500",
+              skills: Object.entries(cats.mental || {}).map(([key, value]) => ({
+                key,
+                name: key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase()),
+                value: Number(value) || 50,
+              })),
+            },
+            {
+              category: "Attacking",
+              categoryKey: "attacking",
+              color: "#FF0055",
+              borderColor: "border-l-pink-500",
+              skills: Object.entries(cats.attacking || {}).map(([key, value]) => ({
+                key,
+                name: key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase()),
+                value: Number(value) || 50,
+              })),
+            },
+            {
+              category: "Defending",
+              categoryKey: "defending",
+              color: "#00FFFF",
+              borderColor: "border-l-cyan-500",
+              skills: Object.entries(cats.defending || {}).map(([key, value]) => ({
+                key,
+                name: key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase()),
+                value: Number(value) || 50,
+              })),
+            },
+          ];
+        }
+        if (Array.isArray(data.recentMatches) && data.recentMatches.length > 0) {
+          (activePlayer as any).recentMatches = data.recentMatches;
         }
         if (data.additionalNotes !== undefined) {
           (activePlayer as any).additionalNotes = data.additionalNotes;

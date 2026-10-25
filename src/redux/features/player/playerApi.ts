@@ -56,22 +56,63 @@ export const playerApi = apiSlice.injectEndpoints({
             providesTags: [TagTypes.PLAYERS],
         }),
 
-        updateMyPlayerProfile: builder.mutation<IPlayerProfileResponse, Partial<IUpdatePlayerPayload>>({
-            query: (data) => ({
-                url: "/players/me",
-                method: "PATCH",
-                body: data,
-            }),
+        updateMyPlayerProfile: builder.mutation<IPlayerProfileResponse, FormData | Partial<IUpdatePlayerPayload> | any>({
+            query: (payload) => {
+                let body = payload;
+                if (typeof window !== "undefined" && !(payload instanceof FormData)) {
+                    if (
+                        payload?.clubLogo_0 instanceof File ||
+                        payload?.profileImage instanceof File ||
+                        payload?.highlightVideo instanceof File ||
+                        payload?.coverImage instanceof File ||
+                        payload?.data
+                    ) {
+                        const formData = new FormData();
+                        if (payload.profileImage instanceof File) formData.append("profileImage", payload.profileImage);
+                        if (payload.highlightVideo instanceof File) formData.append("highlightVideo", payload.highlightVideo);
+                        if (payload.coverImage instanceof File) formData.append("coverImage", payload.coverImage);
+                        if (payload.clubLogo_0 instanceof File) formData.append("clubLogo_0", payload.clubLogo_0);
+                        if (payload.clubLogo_1 instanceof File) formData.append("clubLogo_1", payload.clubLogo_1);
+
+                        if (typeof payload.data === "string") {
+                            formData.append("data", payload.data);
+                        } else if (typeof payload.data === "object" && payload.data !== null) {
+                            formData.append("data", JSON.stringify(payload.data));
+                        } else {
+                            const cleanPayload = { ...payload };
+                            delete cleanPayload.profileImage;
+                            delete cleanPayload.highlightVideo;
+                            delete cleanPayload.coverImage;
+                            delete cleanPayload.clubLogo_0;
+                            delete cleanPayload.clubLogo_1;
+                            formData.append("data", JSON.stringify(cleanPayload));
+                        }
+                        body = formData;
+                    }
+                }
+                return {
+                    url: "/players/me",
+                    method: "PATCH",
+                    body,
+                };
+            },
             invalidatesTags: (result) => {
                 if (result?.success) {
                     return [TagTypes.PLAYERS, TagTypes.PROFILE];
                 }
                 return [];
             },
-            async onQueryStarted(_arg, { queryFulfilled }) {
+            async onQueryStarted(arg, { queryFulfilled }) {
                 try {
                     await queryFulfilled;
-                    SuccessToast("Player updated successfully");
+                    const isClubUpdate = Boolean(
+                        (arg && typeof arg === "object" && ("clubHistory" in arg || "clubs" in arg || (arg as any).suppressToast)) ||
+                        (typeof FormData !== "undefined" && arg instanceof FormData && arg.has("data") && arg.get("data")?.toString().includes('"clubHistory"'))
+                    );
+
+                    if (!isClubUpdate) {
+                        SuccessToast("Player updated successfully");
+                    }
                 } catch (err: any) {
                     const status = err?.error?.status;
                     const message = err?.error?.data?.message || "Something Went Wrong";
@@ -127,6 +168,14 @@ export const playerApi = apiSlice.injectEndpoints({
         getPlayerById: builder.query({
             query: (id: string | number) => ({
                 url: `/players/${id}`,
+                method: "GET",
+            }),
+            providesTags: [TagTypes.PLAYERS],
+        }),
+
+        getPlayerCvById: builder.query<any, string>({
+            query: (playerId: string) => ({
+                url: `/players/${playerId}/cv`,
                 method: "GET",
             }),
             providesTags: [TagTypes.PLAYERS],
@@ -379,6 +428,8 @@ export const {
     useGetMyPlayerAttributesQuery,
     useUpdateMyPlayerAttributesMutation,
     useGetPlayerByIdQuery,
+    useGetPlayerCvByIdQuery,
+    useLazyGetPlayerCvByIdQuery,
     useGetMyPlayerMediaQuery,
     useUploadPlayerMediaMutation,
     useCreateSelfGameReportMutation,

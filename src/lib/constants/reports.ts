@@ -24,7 +24,7 @@ export interface MatchStats {
   characteristics: string[];
   weight: string;
   height: string;
-  status: "Paid" | "Pending";
+  status: "Paid" | "Pending" | "Completed";
   amount: string;
   playerId?: number;
   playerName?: string;

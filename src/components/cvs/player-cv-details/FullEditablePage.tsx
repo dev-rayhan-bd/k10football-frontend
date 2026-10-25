@@ -50,22 +50,33 @@ export const usePlayerStats = () => {
     return context;
 };
 
-export const PlayerStatsProvider = ({ children }: { children: React.ReactNode }) => {
+export const PlayerStatsProvider = ({
+    children,
+    forcedRole,
+}: {
+    children: React.ReactNode;
+    forcedRole?: UserRole;
+}) => {
     const [bioRating, setBioRating] = useState(94);
     const [skillsAvg, setSkillsAvg] = useState(85);
     const [metricsAvg, setMetricsAvg] = useState(88);
     const [attributesAvg, setAttributesAvg] = useState(82);
     const { user } = useAppSelector((state) => state.auth as AuthState);
     const [role, setRole] = useState<UserRole>(() => {
+        if (forcedRole) return forcedRole;
         if (typeof window === "undefined") return "";
         return (user?.role as UserRole) || (localStorage.getItem("userRole") as UserRole) || "";
     });
 
     useEffect(() => {
+        if (forcedRole) {
+            setRole(forcedRole);
+            return;
+        }
         if (user?.role) {
             setRole(user.role as UserRole);
         }
-    }, [user?.role]);
+    }, [user?.role, forcedRole]);
 
     return (
         <PlayerStatsContext.Provider value={{

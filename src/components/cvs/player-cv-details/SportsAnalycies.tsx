@@ -36,29 +36,29 @@ const SportsAnalycies = ({ editable = false }: { editable?: boolean }) => {
   const reports = useAppSelector(state => state.reports.reports);
   const paidMatches = reports.filter(m => m.status === "Paid");
 
-  const effectiveMatches: any[] = paidMatches.length > 0
-    ? paidMatches
-    : (cvData?.recentMatches || []).map((m: any, idx: number) => ({
-        id: m._id || idx + 1,
-        date: m.date ? new Date(m.date).toLocaleDateString() : "2026-09-12",
-        team1: "K10 Academy",
-        team2: m.opponent || m.team2 || "Opponent",
-        team1Logo: "/teams/default.png",
-        team2Logo: "/teams/default.png",
-        score: m.score || `${m.goals || 0} - 0`,
-        result: (m.result || "W") as "W" | "D" | "L",
-        rating: m.rating || 7.5,
-        goals: m.goals || 0,
-        assists: m.assists || 0,
-        passAccuracy: m.passAccuracy || 80,
-        minutesPlayed: m.minutesPlayed || 90,
-        yellowCards: m.yellowCards || 0,
-        redCards: m.redCards || 0,
-        league: m.league || "Championship",
-        stadium: m.stadium || "Home Stadium",
-        scoutName: m.scoutName || "Scout Analyst",
-        status: "Paid",
-      }));
+  const cvMatches = (cvData?.recentMatches || []).map((m: any, idx: number) => ({
+    id: m._id || idx + 1,
+    date: m.date ? new Date(m.date).toLocaleDateString() : "2026-09-15",
+    team1: m.homeTeam || "K10 Academy",
+    team2: m.awayTeam || m.opponent || m.team2 || "Opponent",
+    team1Logo: "/teams/default.png",
+    team2Logo: "/teams/default.png",
+    score: m.score || `${m.homeScore ?? 0} - ${m.awayScore ?? 0}`,
+    result: (m.result || "W") as "W" | "D" | "L",
+    rating: m.rating || 10,
+    goals: m.goals || 0,
+    assists: m.assists || 0,
+    passAccuracy: m.accuracy ? parseInt(m.accuracy) || 80 : 80,
+    minutesPlayed: m.minutes ? parseInt(m.minutes) || 76 : 90,
+    yellowCards: m.yellowCards || 0,
+    redCards: m.redCards || 0,
+    league: m.gameType || m.league || "Youth Premier League",
+    stadium: m.location || m.stadium || "London",
+    scoutName: m.coachReview?.coachName || m.scoutName || "Scout Analyst",
+    status: "Paid",
+  }));
+
+  const effectiveMatches: any[] = cvMatches.length > 0 ? cvMatches : paidMatches;
 
   const matches: any[] = effectiveMatches.slice(0, 4);
 

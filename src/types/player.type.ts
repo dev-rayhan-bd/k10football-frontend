@@ -205,7 +205,9 @@ export interface IUpdatePlayerPayload {
 
   clubHistory?: Array<{
     clubName: string;
-    period: string;
+    period?: string;
+    from?: string;
+    to?: string;
     isCurrent: boolean;
     logoUrl?: string;
   }>;

@@ -10,23 +10,32 @@ import {
   UploadMediaModal,
   MediaViewerModal,
 } from "@/components/user-wise-dashboard/player-dashboard/images-videos";
+import { usePlayer } from "@/hooks/usePlayer";
 
 const MyImagesSection = ({ editable = true }: { editable?: boolean }) => {
+  const { cvData, playerData } = usePlayer();
   const { startUpload } = useMediaUpload();
 
-  // Fetch Images from API: GET /players/me/media?mediaType=IMAGE
-  const { data: imagesResponse, isLoading } = useGetMyPlayerMediaQuery([
-    { name: "mediaType", value: "IMAGE" },
-    { name: "page", value: "1" },
-    { name: "limit", value: "50" },
-  ]);
+  const isViewingSpecificPlayer =
+    typeof window !== "undefined" &&
+    Boolean(new URLSearchParams(window.location.search).get("playerId"));
+
+  // Fetch Images from API: GET /players/me/media?mediaType=IMAGE (skip if viewing specific player)
+  const { data: imagesResponse, isLoading } = useGetMyPlayerMediaQuery(
+    [
+      { name: "mediaType", value: "IMAGE" },
+      { name: "page", value: "1" },
+      { name: "limit", value: "50" },
+    ],
+    { skip: isViewingSpecificPlayer }
+  );
 
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [previewMedia, setPreviewMedia] = useState<PreviewMedia | null>(null);
 
   const apiImages = imagesResponse?.data?.media ?? [];
 
-  const images: MediaItem[] = apiImages.map((item: any) => {
+  const mappedApiImages: MediaItem[] = apiImages.map((item: any) => {
     const hasImage = typeof item.url === "string" && item.url.trim().length > 0;
     return {
       id: item._id,
@@ -44,6 +53,23 @@ const MyImagesSection = ({ editable = true }: { editable?: boolean }) => {
       mediaType: "IMAGE",
     };
   });
+
+  const fallbackImages: MediaItem[] =
+    (playerData.playerImage || cvData?.profileImage)
+      ? [
+          {
+            id: "profile-1",
+            title: playerData.fullName || "Player Profile Image",
+            date: "Recent",
+            views: cvData?.profileViews ?? 127,
+            likes: cvData?.totalLikes ?? 8,
+            img: playerData.playerImage || cvData?.profileImage,
+            mediaType: "IMAGE",
+          },
+        ]
+      : [];
+
+  const images: MediaItem[] = mappedApiImages.length > 0 ? mappedApiImages : fallbackImages;
 
   return (
     <div className="mt-10 sm:mt-20 container w-full min-w-0 overflow-hidden">

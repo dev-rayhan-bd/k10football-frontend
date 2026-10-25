@@ -9,6 +9,14 @@ import {
     ICreateCoachTestimonialPayload,
     ICoachListResponse,
     ICoachAnalyticsResponse,
+    ICoachTeamResponse,
+    ICoachGameReportsResponse,
+    ICoachPlayerCvValidationsResponse,
+    ICoachPlayerEvaluationsResponse,
+    IUpdatePlayerFitnessStatusResponse,
+    IUpdatePlayerFitnessStatusPayload,
+    ICoachCompleteGameReportResponse,
+    ICoachCompleteGameReportPayload,
 } from "@/types/coach.type";
 
 export const coachApi = apiSlice.injectEndpoints({
@@ -339,6 +347,168 @@ export const coachApi = apiSlice.injectEndpoints({
             }),
             providesTags: [TagTypes.COACHES],
         }),
+
+        getMyTeams: builder.query<ICoachTeamResponse, { page?: number; limit?: number; searchTerm?: string } | void>({
+            query: (params) => {
+                const queryParams = new URLSearchParams();
+                if (params?.page) queryParams.append("page", params.page.toString());
+                if (params?.limit) queryParams.append("limit", params.limit.toString());
+                if (params?.searchTerm) queryParams.append("searchTerm", params.searchTerm);
+                const queryString = queryParams.toString();
+                return {
+                    url: queryString ? `/coaches/me/teams?${queryString}` : "/coaches/me/teams",
+                    method: "GET",
+                };
+            },
+            providesTags: [TagTypes.TEAMS, TagTypes.COACHES],
+        }),
+
+        getCoachGameReports: builder.query<
+            ICoachGameReportsResponse,
+            { page?: number; limit?: number; searchTerm?: string; status?: string; playerId?: string } | void
+        >({
+            query: (params) => {
+                const queryParams = new URLSearchParams();
+                if (params?.page) queryParams.append("page", params.page.toString());
+                if (params?.limit) queryParams.append("limit", params.limit.toString());
+                if (params?.searchTerm) queryParams.append("searchTerm", params.searchTerm);
+                if (params?.status) queryParams.append("status", params.status);
+                if (params?.playerId) queryParams.append("playerId", params.playerId);
+                const queryString = queryParams.toString();
+                return {
+                    url: queryString ? `/players/coach/game-reports?${queryString}` : "/players/coach/game-reports",
+                    method: "GET",
+                };
+            },
+            providesTags: [TagTypes.GAME_REPORTS, TagTypes.REPORTS, TagTypes.COACHES],
+        }),
+
+        getCoachPlayerCvValidations: builder.query<
+            ICoachPlayerCvValidationsResponse,
+            { page?: number; limit?: number; searchTerm?: string; status?: string } | void
+        >({
+            query: (params) => {
+                const queryParams = new URLSearchParams();
+                if (params?.page) queryParams.append("page", params.page.toString());
+                if (params?.limit) queryParams.append("limit", params.limit.toString());
+                if (params?.searchTerm) queryParams.append("searchTerm", params.searchTerm);
+                if (params?.status) queryParams.append("status", params.status);
+                const queryString = queryParams.toString();
+                return {
+                    url: queryString ? `/coaches/me/player-cv-validations?${queryString}` : "/coaches/me/player-cv-validations",
+                    method: "GET",
+                };
+            },
+            providesTags: [TagTypes.COACHES, TagTypes.PLAYERS],
+        }),
+
+        getCoachPlayerEvaluations: builder.query<
+            ICoachPlayerEvaluationsResponse,
+            { page?: number; limit?: number; searchTerm?: string; status?: string } | void
+        >({
+            query: (params) => {
+                const queryParams = new URLSearchParams();
+                if (params?.page) queryParams.append("page", params.page.toString());
+                if (params?.limit) queryParams.append("limit", params.limit.toString());
+                if (params?.searchTerm) queryParams.append("searchTerm", params.searchTerm);
+                if (params?.status) queryParams.append("status", params.status);
+                const queryString = queryParams.toString();
+                return {
+                    url: queryString ? `/coaches/me/player-evaluations?${queryString}` : "/coaches/me/player-evaluations",
+                    method: "GET",
+                };
+            },
+            providesTags: [TagTypes.COACHES, TagTypes.PLAYERS],
+        }),
+
+        updatePlayerFitnessStatus: builder.mutation<
+            IUpdatePlayerFitnessStatusResponse,
+            IUpdatePlayerFitnessStatusPayload
+        >({
+            query: ({ playerId, status }) => ({
+                url: `/coaches/me/players/${playerId}/fitness-status`,
+                method: "PATCH",
+                body: { status },
+            }),
+            invalidatesTags: (result) => {
+                if (result?.success) {
+                    return [TagTypes.TEAMS, TagTypes.COACHES, TagTypes.PLAYERS];
+                }
+                return [];
+            },
+            async onQueryStarted({ playerId, status }, { dispatch, queryFulfilled }) {
+                const patchResult = dispatch(
+                    coachApi.util.updateQueryData("getMyTeams", undefined as any, (draft) => {
+                        if (draft?.data?.players) {
+                            const player = draft.data.players.find(
+                                (p) => String(p._id || p.id) === String(playerId)
+                            );
+                            if (player) {
+                                const prevStatus = player.status;
+                                player.status = status;
+                                if (draft.data.summary && prevStatus?.toUpperCase() !== status.toUpperCase()) {
+                                    if (status.toUpperCase() === "ACTIVE") {
+                                        draft.data.summary.active = (draft.data.summary.active ?? 0) + 1;
+                                        draft.data.summary.injured = Math.max(0, (draft.data.summary.injured ?? 1) - 1);
+                                    } else if (status.toUpperCase() === "INJURED") {
+                                        draft.data.summary.injured = (draft.data.summary.injured ?? 0) + 1;
+                                        draft.data.summary.active = Math.max(0, (draft.data.summary.active ?? 1) - 1);
+                                    }
+                                }
+                            }
+                        }
+                    })
+                );
+                try {
+                    const res = await queryFulfilled;
+                    SuccessToast(res?.data?.message || `Player fitness status set to ${status}`);
+                } catch (err: any) {
+                    patchResult.undo();
+                    const status_code = err?.error?.status;
+                    const message = err?.error?.data?.message || "Failed to update player fitness status";
+                    if (status_code === 500) {
+                        ErrorToast("Something went wrong on the server");
+                        return;
+                    }
+                    if (status_code !== 401) {
+                        ErrorToast(message);
+                    }
+                }
+            },
+        }),
+
+        completeCoachGameReport: builder.mutation<
+            ICoachCompleteGameReportResponse,
+            ICoachCompleteGameReportPayload
+        >({
+            query: ({ reportId, ...body }) => ({
+                url: `/players/coach/game-reports/${reportId}/complete`,
+                method: "PATCH",
+                body,
+            }),
+            invalidatesTags: (result) => {
+                if (result?.success) {
+                    return [TagTypes.GAME_REPORTS, TagTypes.REPORTS, TagTypes.COACHES];
+                }
+                return [];
+            },
+            async onQueryStarted({ reportId }, { queryFulfilled }) {
+                try {
+                    const res = await queryFulfilled;
+                    SuccessToast(res?.data?.message || "Game report completed successfully");
+                } catch (err: any) {
+                    const status_code = err?.error?.status;
+                    const message = err?.error?.data?.message || "Failed to complete game report";
+                    if (status_code === 500) {
+                        ErrorToast("Something went wrong on the server");
+                        return;
+                    }
+                    if (status_code !== 401) {
+                        ErrorToast(message);
+                    }
+                }
+            },
+        }),
     }),
 });
 
@@ -358,5 +528,15 @@ export const {
     useLazyGetAllCoachesQuery,
     useGetMyCoachAnalyticsQuery,
     useLazyGetMyCoachAnalyticsQuery,
+    useGetMyTeamsQuery,
+    useLazyGetMyTeamsQuery,
+    useGetCoachGameReportsQuery,
+    useLazyGetCoachGameReportsQuery,
+    useGetCoachPlayerCvValidationsQuery,
+    useLazyGetCoachPlayerCvValidationsQuery,
+    useGetCoachPlayerEvaluationsQuery,
+    useLazyGetCoachPlayerEvaluationsQuery,
+    useUpdatePlayerFitnessStatusMutation,
+    useCompleteCoachGameReportMutation,
 } = coachApi;
 

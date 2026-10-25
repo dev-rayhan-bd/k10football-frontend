@@ -26,7 +26,7 @@ export interface EvaluationData {
 }
 
 export interface SavedEvaluation {
-  playerId: number;
+  playerId: number | string;
   playerName: string;
   evaluation: EvaluationData;
   date: string;
@@ -34,7 +34,7 @@ export interface SavedEvaluation {
 
 export interface EvaluationSliceState {
   /** Map from playerId → saved evaluation record */
-  records: Record<number, SavedEvaluation>;
+  records: Record<string | number, SavedEvaluation>;
 }
 
 const initialState: EvaluationSliceState = {
@@ -49,7 +49,7 @@ export const evaluationSlice = createSlice({
     saveEvaluation: (
       state,
       action: PayloadAction<{
-        playerId: number;
+        playerId: number | string;
         playerName: string;
         evaluation: EvaluationData;
         date: string;
@@ -60,7 +60,7 @@ export const evaluationSlice = createSlice({
     },
 
     /** Remove the saved evaluation for a player */
-    clearEvaluation: (state, action: PayloadAction<number>) => {
+    clearEvaluation: (state, action: PayloadAction<number | string>) => {
       delete state.records[action.payload];
     },
   },

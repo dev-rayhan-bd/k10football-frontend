@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState, useRef } from 'react';
 import { usePlayer } from '@/hooks/usePlayer';
@@ -13,13 +14,15 @@ import Image from 'next/image';
 const YEARS = Array.from({ length: 30 }, (_, i) => String(new Date().getFullYear() - i));
 const TO_YEARS = ["Present", ...YEARS];
 
-const ClubSection = () => {
-  const { playerData, handleUpdate } = usePlayer();
+const ClubSection = ({ editable = true }: { editable?: boolean }) => {
+  const { playerData, handleUpdate, handleAddClub } = usePlayer();
   const [isAdding, setIsAdding] = useState(false);
+  const [isAddingLoading, setIsAddingLoading] = useState(false);
   
   // States for new club entry
   const [newClubName, setNewClubName] = useState("");
   const [newClubLogo, setNewClubLogo] = useState<string | null>(null);
+  const [newClubLogoFile, setNewClubLogoFile] = useState<File | null>(null);
   const [fromDate, setFromDate] = useState(YEARS[0]);
   const [toDate, setToDate] = useState("Present");
   
@@ -35,6 +38,7 @@ const ClubSection = () => {
         toast.error("File size too large. Max 2MB.");
         return;
       }
+      setNewClubLogoFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setNewClubLogo(reader.result as string);
@@ -55,7 +59,7 @@ const ClubSection = () => {
     handleUpdate("clubs", newClubs);
   };
 
-  const addClub = () => {
+  const addClub = async () => {
     if (!newClubName.trim()) {
       toast.error("Please enter a club name");
       return;
@@ -65,22 +69,30 @@ const ClubSection = () => {
       return;
     }
 
-    const newClub = {
-      id: Math.random().toString(36).substr(2, 9),
-      name: newClubName,
-      from: fromDate,
-      to: toDate,
-      logo: newClubLogo || club1, // Use uploaded logo or fallback
-      color: "border-primary", // Default border color for new entries
-    };
+    try {
+      setIsAddingLoading(true);
+      await handleAddClub({
+        name: newClubName.trim(),
+        from: fromDate,
+        to: toDate,
+        logoFile: newClubLogoFile,
+        previewLogo: newClubLogo,
+      });
 
-    handleUpdate("clubs", [...playerData.clubs, newClub]);
-    
-    // Reset state
-    setIsAdding(false);
-    setNewClubName("");
-    setNewClubLogo(null);
-    toast.success("Club added successfully");
+      // Reset state
+      setIsAdding(false);
+      setNewClubName("");
+      setNewClubLogo(null);
+      setNewClubLogoFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      toast.success("Club added successfully");
+    } catch (err: any) {
+      toast.error(err?.data?.message || err?.message || "Failed to add club");
+    } finally {
+      setIsAddingLoading(false);
+    }
   };
 
   return (
@@ -92,23 +104,25 @@ const ClubSection = () => {
         </div>
         <h1 className="text-3xl sm:text-4xl font-light text-center text-foreground font-heading order-1 sm:order-2 w-full sm:w-1/3">Clubs</h1>
         <div className="order-3 w-full sm:w-1/3 flex justify-center sm:justify-end">
-          <Button
-            onClick={() => {
-              if (isLimitReached) {
-                toast.error("Maximum 6 clubs allowed. Remove an entry to add a new one.");
-              } else {
-                setIsAdding(true);
-              }
-            }}
-            disabled={isLimitReached && !isAdding}
-            className={cn(
-              "text-black transition-all font-bold w-full sm:w-auto",
-              isLimitReached ? "bg-gray-600 cursor-not-allowed" : "bg-primary hover:bg-primary/90"
-            )}
-            size="sm"
-          >
-            <Plus className="h-4 w-4 mr-2" /> Add Club
-          </Button>
+          {editable && (
+            <Button
+              onClick={() => {
+                if (isLimitReached) {
+                  toast.error("Maximum 6 clubs allowed. Remove an entry to add a new one.");
+                } else {
+                  setIsAdding(true);
+                }
+              }}
+              disabled={isLimitReached && !isAdding}
+              className={cn(
+                "text-black transition-all font-bold w-full sm:w-auto",
+                isLimitReached ? "bg-gray-600 cursor-not-allowed" : "bg-primary hover:bg-primary/90"
+              )}
+              size="sm"
+            >
+              <Plus className="h-4 w-4 mr-2" /> Add Club
+            </Button>
+          )}
         </div>
       </div>
 
@@ -119,12 +133,14 @@ const ClubSection = () => {
               key={club.id}
               className="relative border border-border cursor-pointer hover:bg-cardBg duration-300 bg-black/20 rounded-lg p-4 sm:p-6 flex flex-col items-center text-center gap-3 sm:gap-4 group transition w-full min-w-0"
             >
-              <button
-                onClick={(e) => { e.stopPropagation(); removeClub(club.id); }}
-                className="absolute top-2 right-2 p-1 text-gray-500 hover:text-red-500 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <Trash2 size={14} />
-              </button>
+              {editable && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); removeClub(club.id); }}
+                  className="absolute top-2 right-2 p-1 text-gray-500 hover:text-red-500 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
 
               <div className="shrink-0 relative group/logo">
                 <div className={cn(
@@ -144,7 +160,7 @@ const ClubSection = () => {
                 <CMSField
                   value={club.name}
                   onUpdate={(val) => updateClub(club.id, "name", val)}
-                  canEdit={true}
+                  canEdit={editable}
                   className="text-base sm:text-lg font-semibold text-foreground wrap-break-word uppercase leading-tight w-full min-w-0 flex justify-center text-center px-4"
                   inputClassName="w-full min-w-0 text-center"
                 />
@@ -152,7 +168,7 @@ const ClubSection = () => {
                   <CMSField
                     value={club.from}
                     onUpdate={(val) => updateClub(club.id, "from", val)}
-                    canEdit={true}
+                    canEdit={editable}
                     type="combobox"
                     options={YEARS}
                     editTrigger="doubleClick"
@@ -164,7 +180,7 @@ const ClubSection = () => {
                   <CMSField
                     value={club.to}
                     onUpdate={(val) => updateClub(club.id, "to", val)}
-                    canEdit={true}
+                    canEdit={editable}
                     type="combobox"
                     options={TO_YEARS}
                     editTrigger="doubleClick"
@@ -181,7 +197,16 @@ const ClubSection = () => {
             <div className="border-2 border-dashed border-primary/50 bg-primary/5 rounded-lg p-4 sm:p-6 flex flex-col gap-4 animate-in fade-in zoom-in duration-200 w-full min-w-0">
               <div className="flex justify-between items-center w-full min-w-0">
                 <span className="text-xs font-bold text-primary uppercase shrink-0">New Club Entry</span>
-                <button onClick={() => setIsAdding(false)} className="text-gray-400 hover:text-white shrink-0">
+                <button
+                  onClick={() => {
+                    setIsAdding(false);
+                    setNewClubName("");
+                    setNewClubLogo(null);
+                    setNewClubLogoFile(null);
+                    if (fileInputRef.current) fileInputRef.current.value = "";
+                  }}
+                  className="text-gray-400 hover:text-white shrink-0"
+                >
                   <X size={16} />
                 </button>
               </div>
@@ -245,11 +270,17 @@ const ClubSection = () => {
 
                 <Button
                   onClick={addClub}
-                  disabled={!newClubName.trim()}
+                  disabled={!newClubName.trim() || isAddingLoading}
                   className="w-full bg-primary text-black font-bold hover:bg-primary/90 mt-2"
                   size="sm"
                 >
-                  <Check className="h-4 w-4 mr-2" /> Confirm Add
+                  {isAddingLoading ? (
+                    <span className="flex items-center gap-2">Adding...</span>
+                  ) : (
+                    <>
+                      <Check className="h-4 w-4 mr-2" /> Confirm Add
+                    </>
+                  )}
                 </Button>
               </div>
             </div>

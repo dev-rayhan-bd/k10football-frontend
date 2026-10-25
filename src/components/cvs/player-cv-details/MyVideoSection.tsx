@@ -10,23 +10,32 @@ import {
   UploadMediaModal,
   MediaViewerModal,
 } from "@/components/user-wise-dashboard/player-dashboard/images-videos";
+import { usePlayer } from "@/hooks/usePlayer";
 
 const MyVideosSection = ({ editable = true }: { editable?: boolean }) => {
+  const { cvData, playerData } = usePlayer();
   const { startUpload } = useMediaUpload();
 
-  // Fetch Videos from API: GET /players/me/media?mediaType=VIDEO
-  const { data: videosResponse, isLoading } = useGetMyPlayerMediaQuery([
-    { name: "mediaType", value: "VIDEO" },
-    { name: "page", value: "1" },
-    { name: "limit", value: "50" },
-  ]);
+  const isViewingSpecificPlayer =
+    typeof window !== "undefined" &&
+    Boolean(new URLSearchParams(window.location.search).get("playerId"));
+
+  // Fetch Videos from API: GET /players/me/media?mediaType=VIDEO (skip if viewing specific player)
+  const { data: videosResponse, isLoading } = useGetMyPlayerMediaQuery(
+    [
+      { name: "mediaType", value: "VIDEO" },
+      { name: "page", value: "1" },
+      { name: "limit", value: "50" },
+    ],
+    { skip: isViewingSpecificPlayer }
+  );
 
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [previewMedia, setPreviewMedia] = useState<PreviewMedia | null>(null);
 
   const apiVideos = videosResponse?.data?.media ?? [];
 
-  const videos: MediaItem[] = apiVideos.map((item: any) => {
+  const mappedApiVideos: MediaItem[] = apiVideos.map((item: any) => {
     const hasThumbnail =
       typeof item.thumbnailUrl === "string" && item.thumbnailUrl.trim().length > 0;
     return {
@@ -46,6 +55,23 @@ const MyVideosSection = ({ editable = true }: { editable?: boolean }) => {
       mediaType: "VIDEO",
     };
   });
+
+  const fallbackVideos: MediaItem[] = cvData?.highlightVideo
+    ? [
+        {
+          id: "highlight-video-1",
+          title: "Player Highlight Video",
+          date: "Recent",
+          views: cvData?.profileViews ?? 127,
+          likes: cvData?.totalLikes ?? 8,
+          img: playerData?.playerImage || cvData?.profileImage || "/placeholder_img.jpg",
+          videoUrl: cvData.highlightVideo,
+          mediaType: "VIDEO",
+        },
+      ]
+    : [];
+
+  const videos: MediaItem[] = mappedApiVideos.length > 0 ? mappedApiVideos : fallbackVideos;
 
   return (
     <div className="mt-10 sm:mt-20 container w-full min-w-0 overflow-hidden">

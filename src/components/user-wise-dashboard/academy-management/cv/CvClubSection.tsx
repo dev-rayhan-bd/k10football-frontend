@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState, useRef } from 'react';
 import { usePlayer } from '@/hooks/usePlayer';
@@ -14,12 +15,14 @@ const YEARS = Array.from({ length: 30 }, (_, i) => String(new Date().getFullYear
 const TO_YEARS = ["Present", ...YEARS];
 
 const CvClubSection = ({ editable = false }: { editable?: boolean }) => {
-    const { playerData, handleUpdate } = usePlayer();
+    const { playerData, handleUpdate, handleAddClub } = usePlayer();
     const [isAdding, setIsAdding] = useState(false);
+    const [isAddingLoading, setIsAddingLoading] = useState(false);
 
     // States for new club entry
     const [newClubName, setNewClubName] = useState("");
     const [newClubLogo, setNewClubLogo] = useState<string | null>(null);
+    const [newClubLogoFile, setNewClubLogoFile] = useState<File | null>(null);
     const [fromDate, setFromDate] = useState(YEARS[0]);
     const [toDate, setToDate] = useState("Present");
 
@@ -35,6 +38,7 @@ const CvClubSection = ({ editable = false }: { editable?: boolean }) => {
                 toast.error("File size too large. Max 2MB.");
                 return;
             }
+            setNewClubLogoFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
                 setNewClubLogo(reader.result as string);
@@ -55,7 +59,7 @@ const CvClubSection = ({ editable = false }: { editable?: boolean }) => {
         handleUpdate("clubs", newClubs);
     };
 
-    const addClub = () => {
+    const addClub = async () => {
         if (!newClubName.trim()) {
             toast.error("Please enter a club name");
             return;
@@ -65,22 +69,30 @@ const CvClubSection = ({ editable = false }: { editable?: boolean }) => {
             return;
         }
 
-        const newClub = {
-            id: Math.random().toString(36).substr(2, 9),
-            name: newClubName,
-            from: fromDate,
-            to: toDate,
-            logo: newClubLogo || club1, // Use uploaded logo or fallback
-            color: "border-primary", // Default border color for new entries
-        };
+        try {
+            setIsAddingLoading(true);
+            await handleAddClub({
+                name: newClubName.trim(),
+                from: fromDate,
+                to: toDate,
+                logoFile: newClubLogoFile,
+                previewLogo: newClubLogo,
+            });
 
-        handleUpdate("clubs", [...playerData.clubs, newClub]);
-
-        // Reset state
-        setIsAdding(false);
-        setNewClubName("");
-        setNewClubLogo(null);
-        toast.success("Club added successfully");
+            // Reset state
+            setIsAdding(false);
+            setNewClubName("");
+            setNewClubLogo(null);
+            setNewClubLogoFile(null);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+            toast.success("Club added successfully");
+        } catch (err: any) {
+            toast.error(err?.data?.message || err?.message || "Failed to add club");
+        } finally {
+            setIsAddingLoading(false);
+        }
     };
 
     return (
@@ -164,7 +176,16 @@ const CvClubSection = ({ editable = false }: { editable?: boolean }) => {
                         <div className="border-2 border-dashed border-primary/50 bg-primary/5 rounded-lg p-4 sm:p-6 flex flex-col gap-4 animate-in fade-in zoom-in duration-200 w-full min-w-0">
                             <div className="flex justify-between items-center w-full min-w-0">
                                 <span className="text-xs font-bold text-primary uppercase shrink-0">New Club Entry</span>
-                                <button onClick={() => setIsAdding(false)} className="text-gray-400 hover:text-white shrink-0">
+                                <button
+                                    onClick={() => {
+                                        setIsAdding(false);
+                                        setNewClubName("");
+                                        setNewClubLogo(null);
+                                        setNewClubLogoFile(null);
+                                        if (fileInputRef.current) fileInputRef.current.value = "";
+                                    }}
+                                    className="text-gray-400 hover:text-white shrink-0"
+                                >
                                     <X size={16} />
                                 </button>
                             </div>
@@ -228,11 +249,17 @@ const CvClubSection = ({ editable = false }: { editable?: boolean }) => {
 
                                 <Button
                                     onClick={addClub}
-                                    disabled={!newClubName.trim()}
+                                    disabled={!newClubName.trim() || isAddingLoading}
                                     className="w-full bg-primary text-black font-bold hover:bg-primary/90 mt-2"
                                     size="sm"
                                 >
-                                    <Check className="h-4 w-4 mr-2" /> Confirm Add
+                                    {isAddingLoading ? (
+                                        <span className="flex items-center gap-2">Adding...</span>
+                                    ) : (
+                                        <>
+                                            <Check className="h-4 w-4 mr-2" /> Confirm Add
+                                        </>
+                                    )}
                                 </Button>
                             </div>
                         </div>

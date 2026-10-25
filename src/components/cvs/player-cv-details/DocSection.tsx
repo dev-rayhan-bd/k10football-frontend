@@ -38,10 +38,13 @@ import {
 const DocSection = ({ editable = false }: { editable?: boolean }) => {
   const { role } = usePlayerStats() || { role: "player" };
   const { coachData, cvData: coachCvData } = useCoach();
-  const isCoach = role === "coach";
+  const isViewingSpecificPlayer =
+    typeof window !== "undefined" &&
+    Boolean(new URLSearchParams(window.location.search).get("playerId"));
+  const isCoach = !isViewingSpecificPlayer && role === "coach";
 
   const { data: profileResponse, isLoading: isProfileLoading } = useGetMyPlayerProfileQuery(undefined, {
-    skip: isCoach,
+    skip: isCoach || isViewingSpecificPlayer,
   });
   const { cvData, playerData } = usePlayer();
 

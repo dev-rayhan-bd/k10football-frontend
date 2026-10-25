@@ -89,6 +89,8 @@ interface MatchStatisticsFormProps {
   setGoalMarkers: (markers: { x: number; y: number }[]) => void;
   pitchMarkers: PitchLine[];
   setPitchMarkers: (markers: PitchLine[]) => void;
+  coachFeedback?: string;
+  setCoachFeedback?: (val: string) => void;
   onCancel: () => void;
   onSubmit: () => void;
 }
@@ -103,25 +105,28 @@ const MatchStatisticsForm = ({
   setGoalMarkers,
   pitchMarkers,
   setPitchMarkers,
+  coachFeedback,
+  setCoachFeedback,
   onCancel,
   onSubmit
 }: MatchStatisticsFormProps) => {
   const isGK = position === "GOALKEEPER";
   const [mobilePage, setMobilePage] = React.useState(0);
   const parseTimeToSeconds = (val: string): number => {
-    if (!val) return 0;
+    if (!val) return 42 * 60;
     if (typeof val === "string" && val.includes(":")) {
       const parts = val.split(":");
       const m = parseInt(parts[0], 10) || 0;
       const s = parseInt(parts[1], 10) || 0;
-      return m * 60 + s;
+      const total = m * 60 + s;
+      return total > 0 ? total : 42 * 60;
     }
     const mins = parseInt(val, 10);
-    return isNaN(mins) ? 0 : mins * 60;
+    return isNaN(mins) || mins <= 0 ? 42 * 60 : mins * 60;
   };
 
   const formatTime = (totalSeconds: number) => {
-    const safeSecs = isNaN(totalSeconds) ? 0 : Math.max(0, totalSeconds);
+    const safeSecs = isNaN(totalSeconds) || totalSeconds <= 0 ? 42 * 60 : totalSeconds;
     const m = Math.floor(safeSecs / 60).toString().padStart(2, '0');
     const s = (safeSecs % 60).toString().padStart(2, '0');
     return `${m}:${s}`;
@@ -142,6 +147,13 @@ const MatchStatisticsForm = ({
     setShowOnboarding(false);
     localStorage.setItem("k10_game_report_onboarding", "true");
   };
+
+  React.useEffect(() => {
+    if (!isTimerRunning) {
+      const secs = parseTimeToSeconds(minutesPlayed);
+      setSecondsElapsed(secs);
+    }
+  }, [minutesPlayed, isTimerRunning]);
 
   React.useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -484,19 +496,46 @@ const MatchStatisticsForm = ({
           <div className="bg-linear-to-r from-[#00A3FF] to-[#0066FF] font-orbitron text-white w-full py-4 px-2 sm:px-4 rounded-xl font-black uppercase tracking-widest sm:tracking-[0.4em] shadow-[0_0_40px_rgba(0,163,255,0.3)] text-center border border-white/20 text-sm sm:text-lg italic flex-1">
             Match Statistics
           </div>
-          <div className="flex items-center gap-3 bg-white/5 rounded-xl px-6 py-3 border border-white/10 shrink-0 shadow-lg">
-            <span className="text-xl sm:text-3xl font-black text-white font-orbitron min-w-20 sm:min-w-28 text-center italic tracking-widest">
-              {formatTime(secondsElapsed)}
-            </span>
+          <div className="flex items-center gap-3 bg-white/5 rounded-xl px-4 sm:px-6 py-2.5 sm:py-3 border border-white/10 shrink-0 shadow-lg">
+            <div className="flex flex-col items-center">
+              <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest font-orbitron">
+                Minutes Played
+              </span>
+              <input
+                type="text"
+                value={formatTime(secondsElapsed)}
+                onChange={(e) => {
+                  const val = e.target.value.trim();
+                  if (val.includes(":")) {
+                    const parts = val.split(":");
+                    const m = parseInt(parts[0], 10) || 0;
+                    const s = parseInt(parts[1], 10) || 0;
+                    const secs = m * 60 + Math.min(59, Math.max(0, s));
+                    setSecondsElapsed(secs);
+                    setMinutesPlayed(formatTime(secs));
+                  } else {
+                    const m = parseInt(val.replace(/[^\d]/g, ""), 10) || 0;
+                    const secs = m * 60;
+                    setSecondsElapsed(secs);
+                    setMinutesPlayed(formatTime(secs));
+                  }
+                }}
+                className="text-xl sm:text-3xl font-black text-white font-orbitron w-24 sm:w-28 text-center italic tracking-widest bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-[#00FF62] rounded px-1"
+                title="Enter minutes:seconds (mm:ss)"
+              />
+            </div>
             <button
               type="button"
               onClick={toggleTimer}
+              title={isTimerRunning ? "Pause timer" : "Start timer"}
               className={cn(
-                "flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full text-black transition-all hover:scale-105 active:scale-95 shrink-0",
-                isTimerRunning ? "bg-red-500 hover:bg-red-600 shadow-[0_0_20px_rgba(239,68,68,0.5)]" : "bg-[#00FF62] hover:bg-[#00D150] shadow-[0_0_20px_rgba(0,255,98,0.3)]"
+                "flex items-center justify-center size-10 sm:size-12 rounded-full text-black transition-all hover:scale-105 active:scale-95 shrink-0",
+                isTimerRunning
+                  ? "bg-red-500 hover:bg-red-600 shadow-[0_0_20px_rgba(239,68,68,0.5)]"
+                  : "bg-[#00FF62] hover:bg-[#00D150] shadow-[0_0_20px_rgba(0,255,98,0.3)]"
               )}
             >
-              {isTimerRunning ? <IconPlayerStop size={24} fill="currentColor" /> : <IconPlayerPlay size={24} fill="currentColor" />}
+              {isTimerRunning ? <IconPlayerStop size={22} fill="currentColor" /> : <IconPlayerPlay size={22} fill="currentColor" />}
             </button>
           </div>
         </div>
@@ -589,6 +628,25 @@ const MatchStatisticsForm = ({
               {renderPitchDiagram("desktop")}
             </div>
           </div>
+
+          {/* Coach Tactical Feedback Section */}
+          <div className="flex flex-col gap-3 p-6 rounded-2xl bg-white/5 border border-white/10 mt-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <Label className="text-xs font-black text-white uppercase tracking-wider font-orbitron">
+                Coach Tactical Feedback & Analysis Notes
+              </Label>
+              <span className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">
+                Professional evaluation visible in report
+              </span>
+            </div>
+            <textarea
+              rows={4}
+              value={coachFeedback ?? ""}
+              onChange={(e) => setCoachFeedback?.(e.target.value)}
+              placeholder="Enter your tactical evaluation, player positioning feedback, and match assessment..."
+              className="w-full rounded-xl bg-black/50 border border-white/10 p-4 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-[#00FF62]/60 transition-all resize-y"
+            />
+          </div>
         </div>
         {/* -------------------------------------------------------- */}
       </div>
@@ -602,7 +660,11 @@ const MatchStatisticsForm = ({
           Cancel
         </Button>
         <Button
-          onClick={onSubmit}
+          onClick={() => {
+            const finalSecs = secondsElapsed > 0 ? secondsElapsed : 42 * 60;
+            setMinutesPlayed(formatTime(finalSecs));
+            onSubmit();
+          }}
           className="flex-1 bg-[#00FF62] hover:bg-[#00D150] text-black h-14 sm:h-16 rounded-xl text-xs sm:text-sm font-black uppercase tracking-widest sm:tracking-[0.2em] transition-all shadow-[0_0_30px_rgba(0,255,98,0.2)] font-orbitron italic"
         >
           Submit Report

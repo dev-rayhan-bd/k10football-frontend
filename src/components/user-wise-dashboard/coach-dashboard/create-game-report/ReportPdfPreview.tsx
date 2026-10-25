@@ -17,6 +17,8 @@ interface ReportPdfPreviewProps {
   onBack: () => void;
   viewOnly?: boolean;
   isPlayer?: boolean;
+  coachFeedback?: string;
+  isSubmitting?: boolean;
 }
 const ReportPdfPreview = ({
   formData,
@@ -26,7 +28,10 @@ const ReportPdfPreview = ({
   pitchMarkers,
   onSave,
   onBack,
-  isPlayer
+  viewOnly,
+  isPlayer,
+  coachFeedback,
+  isSubmitting
 }: ReportPdfPreviewProps) => {
   const previewRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -431,14 +436,33 @@ const ReportPdfPreview = ({
             </>
           )}
         </Button>
-        <Button
-          onClick={() => onSave(overallRating)}
-          disabled={downloading}
-          className="flex-1 bg-[#00FF62] hover:bg-[#00D150] text-black h-14 rounded-xl text-sm font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(0,255,98,0.2)] flex items-center justify-center gap-2 font-orbitron min-w-0"
-        >
-          <IconCheck size={18} />
-          {isPlayer ? "Submit Request" : "Save & Finish"}
-        </Button>
+        {viewOnly ? (
+          <Button
+            variant="outline"
+            disabled
+            className="flex-1 border-white/20 bg-white/5 text-gray-400 h-14 rounded-xl text-sm font-bold uppercase tracking-widest font-orbitron"
+          >
+            Report Completed
+          </Button>
+        ) : (
+          <Button
+            onClick={() => onSave(overallRating)}
+            disabled={downloading || isSubmitting}
+            className="flex-1 bg-[#00FF62] hover:bg-[#00D150] text-black h-14 rounded-xl text-sm font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(0,255,98,0.2)] flex items-center justify-center gap-2 font-orbitron min-w-0"
+          >
+            {isSubmitting ? (
+              <>
+                <IconLoader2 className="animate-spin" size={18} />
+                Completing Report...
+              </>
+            ) : (
+              <>
+                <IconCheck size={18} />
+                {isPlayer ? "Submit Request" : "Save & Complete"}
+              </>
+            )}
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -1,10 +1,11 @@
 "use client";
 import Image from "next/image";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHooks";
-import { PlayerStateItem } from "@/redux/features/player/playerSlice";
 import { saveEvaluation, EvaluationData } from "@/redux/features/evaluation/evaluationSlice";
+import { useGetCoachPlayerEvaluationsQuery } from "@/redux/features/coach/coachApi";
+import { ICoachPlayerEvaluationItem } from "@/types/coach.type";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
@@ -14,7 +15,9 @@ import {
   Download,
   CheckCircle,
   ClipboardCheck,
-  Info
+  Info,
+  AlertCircle,
+  RefreshCw,
 } from "lucide-react";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
@@ -48,55 +51,120 @@ const DEFAULT_EVALUATION = {
   coordination: 2,
 };
 
+export interface EvaluationPlayer {
+  id: string;
+  _id: string;
+  fullName: string;
+  name: string;
+  position: string;
+  rating: number;
+  academyName?: string;
+  academy?: string;
+  playerImage?: string;
+  avatar?: string;
+  age?: number | string;
+  evaluationDate?: string;
+  lastEvaluated?: string;
+  status?: string;
+  raw?: ICoachPlayerEvaluationItem;
+}
+
 const PlayerEvaluationPage = () => {
   const dispatch = useAppDispatch();
-  const players = useAppSelector((state) => state.player.players);
   // Read persisted evaluation records from the evaluation slice
   const evaluationRecords = useAppSelector((state) => state.evaluation.records);
 
   const [activeTab, setActiveTab] = useState<"pending" | "evaluated">("pending");
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedPlayer, setSelectedPlayer] = useState<PlayerStateItem | null>(null);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [selectedPlayer, setSelectedPlayer] = useState<EvaluationPlayer | null>(null);
   const [evaluation, setEvaluation] = useState<EvaluationData>(DEFAULT_EVALUATION as EvaluationData);
 
-  // Check if evaluation is active (within last 3 months) using persisted records
-  const isEvaluationValid = (player: PlayerStateItem) => {
-    const record = evaluationRecords[player.id];
-    if (!record?.date) return false;
-    const evalDate = new Date(record.date);
-    const threeMonthsAgo = new Date();
-    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-    return evalDate >= threeMonthsAgo;
-  };
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
-  const pendingPlayers = players.filter(p => !isEvaluationValid(p));
-  const evaluatedPlayers = players.filter(p => isEvaluationValid(p));
+  const {
+    data: evaluationsResponse,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetCoachPlayerEvaluationsQuery({
+    status: activeTab === "pending" ? "PENDING" : "EVALUATED",
+    searchTerm: debouncedSearch.trim() || undefined,
+  });
 
-  const filteredPlayers = (activeTab === "pending" ? pendingPlayers : evaluatedPlayers).filter(p =>
-    p.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.position.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const summary = evaluationsResponse?.data?.summary;
+  const apiPlayers = useMemo(() => evaluationsResponse?.data?.players || [], [evaluationsResponse]);
 
-  const startEvaluation = (player: PlayerStateItem) => {
-    setSelectedPlayer(player);
-    // Pre-populate with previously saved evaluation if exists
-    const saved = evaluationRecords[player.id];
+  const filteredPlayers = useMemo(() => {
+    return apiPlayers.filter((player) => {
+      // If backend returns players with other status, match active tab
+      if (player.status) {
+        const expectedStatus = activeTab === "pending" ? "PENDING" : "EVALUATED";
+        if (player.status.toUpperCase() !== expectedStatus) {
+          return false;
+        }
+      }
+
+      if (!searchTerm.trim()) return true;
+      const term = searchTerm.toLowerCase();
+      const nameMatch = player.name?.toLowerCase().includes(term);
+      const posMatch = player.position?.toLowerCase().includes(term);
+      const academyMatch = player.academy?.toLowerCase().includes(term);
+      return Boolean(nameMatch || posMatch || academyMatch);
+    });
+  }, [apiPlayers, activeTab, searchTerm]);
+
+  const pendingCount = summary?.pendingCount ?? (activeTab === "pending" ? apiPlayers.length : 0);
+  const evaluatedCount = summary?.evaluatedCount ?? (activeTab === "evaluated" ? apiPlayers.length : 0);
+
+  const startEvaluation = (player: ICoachPlayerEvaluationItem) => {
+    const playerId = player._id || player.id || "";
+    const normalizedPlayer: EvaluationPlayer = {
+      id: playerId,
+      _id: playerId,
+      fullName: player.name || "Unknown Player",
+      name: player.name || "Unknown Player",
+      position: player.position || "N/A",
+      rating: player.rating || 0,
+      academyName: player.academy || "N/A",
+      academy: player.academy || "N/A",
+      playerImage: player.avatar || "/placeholder_img.jpg",
+      avatar: player.avatar || "/placeholder_img.jpg",
+      age: player.age || 18,
+      evaluationDate:
+        player.lastEvaluated && player.lastEvaluated !== "Pending Review"
+          ? player.lastEvaluated
+          : new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      lastEvaluated: player.lastEvaluated,
+      status: player.status,
+      raw: player,
+    };
+
+    setSelectedPlayer(normalizedPlayer);
+    const saved = evaluationRecords[playerId];
     setEvaluation(saved?.evaluation ?? (DEFAULT_EVALUATION as EvaluationData));
   };
 
   const handleRatingChange = (key: keyof EvaluationData, value: number) => {
-    setEvaluation(prev => ({ ...prev, [key]: value }));
+    setEvaluation((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleSave = () => {
     if (!selectedPlayer) return;
 
-    dispatch(saveEvaluation({
-      playerId: selectedPlayer.id,
-      playerName: selectedPlayer.fullName,
-      evaluation,
-      date: new Date().toISOString().split("T")[0],
-    }));
+    dispatch(
+      saveEvaluation({
+        playerId: selectedPlayer.id,
+        playerName: selectedPlayer.fullName,
+        evaluation,
+        date: new Date().toISOString().split("T")[0],
+      })
+    );
 
     toast.success(`Evaluation for ${selectedPlayer.fullName} saved successfully!`);
     setSelectedPlayer(null);
@@ -270,9 +338,7 @@ const PlayerEvaluationPage = () => {
 
   // Evaluation Details Screen
   if (selectedPlayer) {
-    const playerImgSrc = typeof selectedPlayer.playerImage === 'string'
-      ? selectedPlayer.playerImage
-      : (selectedPlayer.playerImage?.src || "/ronaldo.png");
+    const playerImgSrc = selectedPlayer.playerImage || selectedPlayer.avatar || "/ronaldo.png";
 
     return (
       <div className="space-y-6 pb-12">
@@ -595,7 +661,7 @@ const PlayerEvaluationPage = () => {
 
   // Dashboard List Screen
   return (
-    <div className="space-y-8 pb-12">
+    <div className="flex flex-col gap-8 pb-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-4xl font-black text-white italic tracking-tighter uppercase leading-none">Player Evaluation</h1>
@@ -612,7 +678,7 @@ const PlayerEvaluationPage = () => {
             activeTab === "pending" ? "text-white" : "text-white/40 hover:text-white/60"
           )}
         >
-          Pending Evaluation ({pendingPlayers.length})
+          Pending Evaluation ({pendingCount})
           {activeTab === "pending" && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#E31B23]" />}
         </button>
         <button
@@ -622,7 +688,7 @@ const PlayerEvaluationPage = () => {
             activeTab === "evaluated" ? "text-white" : "text-white/40 hover:text-white/60"
           )}
         >
-          Evaluated ({evaluatedPlayers.length})
+          Evaluated ({evaluatedCount})
           {activeTab === "evaluated" && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#E31B23]" />}
         </button>
       </div>
@@ -643,13 +709,70 @@ const PlayerEvaluationPage = () => {
 
       {/* Table grid layout */}
       <div className="p-8 rounded-3xl border border-white/20 bg-[#0D0D0D]">
-        {filteredPlayers.length === 0 ? (
+        {isLoading ? (
+          <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+            <table className="w-full min-w-max text-left border-collapse whitespace-nowrap">
+              <thead>
+                <tr className="border-b border-white/10 text-[10px] text-gray-500 uppercase tracking-widest font-black">
+                  <th className="py-4 px-4">Name</th>
+                  <th className="py-4 px-4 text-center">Rating</th>
+                  <th className="py-4 px-4">Academy / Centre</th>
+                  <th className="py-4 px-4">Last Evaluated</th>
+                  <th className="py-4 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/4">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td className="py-4 px-4">
+                      <div className="flex items-center gap-3">
+                        <div className="size-10 rounded-full bg-white/10 shrink-0" />
+                        <div className="flex flex-col gap-1.5">
+                          <div className="h-4 w-32 bg-white/10 rounded" />
+                          <div className="h-3 w-16 bg-white/5 rounded" />
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-4 px-4 text-center">
+                      <div className="h-4 w-8 bg-white/10 rounded mx-auto" />
+                    </td>
+                    <td className="py-4 px-4">
+                      <div className="h-4 w-36 bg-white/10 rounded" />
+                    </td>
+                    <td className="py-4 px-4">
+                      <div className="h-4 w-28 bg-white/10 rounded" />
+                    </td>
+                    <td className="py-4 px-4 text-right">
+                      <div className="h-8 w-28 bg-white/10 rounded-lg ml-auto" />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : isError ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="p-4 rounded-full bg-red-500/10 text-red-500 mb-4">
+              <AlertCircle size={40} />
+            </div>
+            <h3 className="text-white font-bold text-base mb-1">Failed to Load Evaluations</h3>
+            <p className="text-gray-500 text-xs mb-4">Something went wrong while fetching evaluations data.</p>
+            <button
+              onClick={() => refetch()}
+              className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs font-bold transition-all border border-white/10 cursor-pointer"
+            >
+              <RefreshCw size={14} /> Retry
+            </button>
+          </div>
+        ) : filteredPlayers.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="p-4 rounded-full bg-white/5 text-gray-600 mb-4">
               <ClipboardCheck size={40} />
             </div>
             <h3 className="text-white font-bold text-base mb-1">No Players Found</h3>
-            <p className="text-gray-500 text-xs">All players have been processed or matching search query.</p>
+            <p className="text-gray-500 text-xs">
+              {searchTerm ? "No player evaluations found matching your search query." : "All players have been processed or none available."}
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
@@ -665,48 +788,65 @@ const PlayerEvaluationPage = () => {
               </thead>
               <tbody className="divide-y divide-white/4">
                 {filteredPlayers.map((player) => {
-                  const playerImgSrc = typeof player.playerImage === 'string'
-                    ? player.playerImage
-                    : (player.playerImage?.src || "/ronaldo.png");
+                  const playerId = player._id || player.id || "";
+                  const localSaved = evaluationRecords[playerId];
+                  const isEvaluated = Boolean(
+                    localSaved?.date ||
+                      (player.status && player.status.toUpperCase() === "EVALUATED") ||
+                      (player.lastEvaluated && player.lastEvaluated !== "Pending Review")
+                  );
+                  const evalDateText =
+                    localSaved?.date ||
+                    (player.lastEvaluated && player.lastEvaluated !== "Pending Review" ? player.lastEvaluated : "");
 
                   return (
                     <tr
-                      key={player.id}
+                      key={playerId}
                       onClick={() => startEvaluation(player)}
                       className="group hover:bg-white/2 transition-all cursor-pointer"
                     >
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-3">
-                          <Image
-                            src={playerImgSrc}
-                            className="w-10 h-10 rounded-full object-cover bg-gray-900 border border-white/10"
-                            alt={player.fullName}
-                            width={40}
-                            height={40}
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.srcset = "";
-                              target.src = "/placeholder_img.jpg";
-                            }}
-                          />
+                          <div className="relative size-10 rounded-full overflow-hidden bg-gray-900 border border-white/10 shrink-0">
+                            <Image
+                              src={player.avatar || "/placeholder_img.jpg"}
+                              className="size-full object-cover"
+                              alt={player.name || "Player"}
+                              width={40}
+                              height={40}
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.srcset = "";
+                                target.src = "/placeholder_img.jpg";
+                              }}
+                            />
+                          </div>
                           <div>
-                            <div className="text-sm font-bold text-white">{player.fullName}</div>
-                            <div className="text-[10px] text-red-500 font-bold uppercase tracking-widest">{player.position}</div>
+                            <div className="text-sm font-bold text-white group-hover:text-red-500 transition-colors">
+                              {player.name}
+                            </div>
+                            <div className="text-[10px] text-red-500 font-bold uppercase tracking-widest">
+                              {player.position}
+                            </div>
                           </div>
                         </div>
                       </td>
                       <td className="py-4 px-4 text-center">
-                        <span className="text-sm font-black text-red-600 italic">{player.rating}</span>
+                        <span className="text-sm font-black text-red-600 italic">
+                          {player.rating ?? "—"}
+                        </span>
                       </td>
-                      <td className="py-4 px-4 text-sm text-gray-300 font-semibold">{player.academyName || "Manchester City Academy"}</td>
+                      <td className="py-4 px-4 text-sm text-gray-300 font-semibold">
+                        {player.academy || "N/A"}
+                      </td>
                       <td className="py-4 px-4 text-sm text-gray-400">
-                        {evaluationRecords[player.id]?.date ? (
+                        {isEvaluated ? (
                           <span className="flex items-center gap-1.5 text-xs font-bold text-green-500">
-                            <CheckCircle size={14} /> Evaluated ({evaluationRecords[player.id].date})
+                            <CheckCircle size={14} /> Evaluated {evalDateText ? `(${evalDateText})` : ""}
                           </span>
                         ) : (
                           <span className="flex items-center gap-1.5 text-xs text-gray-500">
-                            <Info size={14} /> Pending Review
+                            <Info size={14} /> {player.lastEvaluated || "Pending Review"}
                           </span>
                         )}
                       </td>
@@ -723,7 +863,7 @@ const PlayerEvaluationPage = () => {
                               : "bg-white/5 hover:bg-white/10 text-white/80 border-white/10"
                           )}
                         >
-                          {activeTab === "pending" ? "Evaluate Player" : "Re-evaluate"}
+                          {activeTab === "pending" ? "EVALUATE PLAYER" : "RE-EVALUATE"}
                         </button>
                       </td>
                     </tr>

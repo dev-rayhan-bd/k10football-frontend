@@ -4,7 +4,7 @@ import { CreateGameReportWizard } from "./create-game-report/index";
 
 interface CreateGameReportProps {
   onCancel: () => void;
-  onContinue: (data: any) => void;
+  onContinue?: (data: any) => void;
 }
 
 const CreateGameReport = ({ onCancel, onContinue }: CreateGameReportProps) => {
