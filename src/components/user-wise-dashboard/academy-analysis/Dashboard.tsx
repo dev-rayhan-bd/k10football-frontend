@@ -32,20 +32,8 @@ import {
 import DashboardHero from "@/components/dashboard/DashboardHero";
 import DashboardStatCard from "@/components/dashboard/DashboardStatCard";
 import DashboardCharts from "@/components/dashboard/DashboardCharts";
-import MediaCard from "@/components/dashboard/MediaCard";
 import { DashboardSidebarPanel, DashboardSidebarItem } from "@/components/dashboard/DashboardSidebar";
-const mediaData = [
-  { id: "1", type: "image" as const, title: "vs Chelsea U19", date: "Mar 10, 2024", views: 189, likes: 45, thumbnail: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=2076" },
-  { id: "2", type: "image" as const, title: "Training Highlights", date: "Feb 28, 2024", views: 156, likes: 62, thumbnail: "https://images.unsplash.com/photo-1518005020250-6759229547b9?q=80&w=2021" },
-  { id: "3", type: "image" as const, title: "vs Liverpool U19", date: "Mar 5, 2024", views: 312, likes: 227, thumbnail: "https://images.unsplash.com/photo-1551958219-acbc608c6377?q=80&w=2070" },
-  { id: "4", type: "image" as const, title: "vs Liverpool U19", date: "Mar 5, 2024", views: 312, likes: 227, thumbnail: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?q=80&w=2071" },
-];
-const videoData = [
-  { id: "1", type: "video" as const, title: "vs Arsenal U19", date: "Mar 15, 2024", views: 234, likes: 97, thumbnail: "https://images.unsplash.com/photo-1556056504-5c7696c4c28d?q=80&w=2076" },
-  { id: "2", type: "video" as const, title: "vs Arsenal U19", date: "Mar 15, 2024", views: 234, likes: 97, thumbnail: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=2070" },
-  { id: "3", type: "video" as const, title: "vs Liverpool U19", date: "Mar 5, 2024", views: 312, likes: 227, thumbnail: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=2070" },
-  { id: "4", type: "video" as const, title: "Training Highlights", date: "Feb 28, 2024", views: 156, likes: 62, thumbnail: "https://images.unsplash.com/photo-1518005020250-6759229547b9?q=80&w=2021" },
-];
+import { AcademyImagesSection, AcademyVideosSection } from "./media";
 // const transactions = [
 //   { id: "1", athlete: { name: "Marcus Silva", role: "Forward", avatar: "https://i.pravatar.cc/100?u=marcus" }, report: "Under 19 vs Chelsea U19", amount: "$ 6.99", myAmount: "$ 2.796", date: "2024-01-15", status: "Completed" as const },
 //   { id: "2", athlete: { name: "David Chen", role: "Midfielder", avatar: "https://i.pravatar.cc/100?u=david" }, report: "Under 18 vs Chelsea U18", amount: "$ 6.99", myAmount: "$ 2.796", date: "2024-02-01", status: "Pending" as const },
@@ -294,41 +282,10 @@ const AcademyAnalysisDashboard = () => {
             <DashboardCharts />
           </div>
           {/* Images Section */}
-          <div className="bg-[#111111] rounded-3xl border border-white/5 p-8 flex flex-col gap-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <h2 className="text-2xl font-black uppercase text-white font-orbitron">Images</h2>
-                <p className="text-xs text-white/40 font-bold uppercase tracking-widest">Match highlights & training</p>
-              </div>
-              <button className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] font-black uppercase tracking-widest text-white px-6 py-2.5 rounded-xl transition-all">
-                <IconUpload size={16} />
-                Upload Image
-              </button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {mediaData.map((item) => (
-                <MediaCard key={item.id} {...item} />
-              ))}
-            </div>
-          </div>
+          <AcademyImagesSection />
+
           {/* Videos Section */}
-          <div className="bg-[#111111] rounded-3xl border border-white/5 p-8 flex flex-col gap-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <h2 className="text-2xl font-black uppercase text-white font-orbitron">Videos</h2>
-                <p className="text-xs text-white/40 font-bold uppercase tracking-widest">Match highlights & training</p>
-              </div>
-              <button className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] font-black uppercase tracking-widest text-white px-6 py-2.5 rounded-xl transition-all">
-                <IconUpload size={16} />
-                Upload Video
-              </button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {videoData.map((item) => (
-                <MediaCard key={item.id} {...item} />
-              ))}
-            </div>
-          </div>
+          <AcademyVideosSection />
           {/* Success Story Section */}
           <div className="bg-[#111111] rounded-3xl border border-white/5 p-8 flex flex-col gap-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

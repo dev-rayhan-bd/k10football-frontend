@@ -13,6 +13,9 @@ import {
   useGetMyPlayerCvQuery,
   useGetMyPlayerProfileQuery,
   useUpdateMyPlayerProfileMutation,
+  useAddPlayerClubMutation,
+  useDeletePlayerClubMutation,
+  useUpdatePlayerClubMutation,
 } from "@/redux/features/player/playerApi";
 import { IUpdatePlayerPayload } from "@/types/player.type";
 import { toast } from "sonner";
@@ -56,6 +59,9 @@ export const usePlayer = () => {
 
   // 2. PATCH Player API: Update player profile / CV from {{baseUrl}}/players/me
   const [updatePlayerMutation, { isLoading: isUpdating }] = useUpdateMyPlayerProfileMutation();
+  const [addPlayerClubMutation, { isLoading: isAddingClub }] = useAddPlayerClubMutation();
+  const [deletePlayerClubMutation, { isLoading: isDeletingClub }] = useDeletePlayerClubMutation();
+  const [updatePlayerClubMutation, { isLoading: isUpdatingClub }] = useUpdatePlayerClubMutation();
 
   // Sync API data into Redux player state whenever API responds (only for self player)
   useEffect(() => {
@@ -331,41 +337,124 @@ export const usePlayer = () => {
 
       if (!hasToken || isViewingSpecificPlayer) return;
 
-      // Build FormData matching Postman screenshot:
-      // - data: JSON string with single new club in clubHistory array:
-      //   { "clubHistory": [{ "clubName": "...", "from": "...", "to": "...", "isCurrent": true/false }] }
-      // - clubLogo_0: File object (the uploaded club logo)
+      // Build FormData matching POST {{baseUrl}}/players/me/clubs:
+      // - image: File object (the uploaded club logo)
+      // - data: JSON string with single club object:
+      //   { "clubName": "...", "name": "...", "from": "...", "to": "...", "isCurrent": true/false, "period": "..." }
       const formData = new FormData();
-      const clubHistoryObj = {
-        clubName: name,
-        from,
-        to,
-        isCurrent,
-      };
-      formData.append(
-        "data",
-        JSON.stringify({
-          clubHistory: [clubHistoryObj],
-        })
-      );
-
-      if (logoFile) {
-        formData.append("clubLogo_0", logoFile);
+      if (logoFile instanceof File) {
+        formData.append("image", logoFile);
       }
 
-      // Pure API call: UI updates ONLY when API responds successfully
+      const clubData = {
+        clubName: name,
+        from: String(from),
+        to: String(to),
+        period: `${from} - ${to}`,
+        isCurrent,
+      };
+
+      formData.append("data", JSON.stringify(clubData));
+
+      // Pure API call: UI updates via Tag invalidation / sync
       try {
-        const response = await updatePlayerMutation(formData).unwrap();
+        const response = await addPlayerClubMutation(formData).unwrap();
         if (response?.data) {
           dispatch(syncFromCvResponse(response.data));
         }
+        await Promise.allSettled([refetchCv(), refetchProfile()]);
         return response;
       } catch (err: any) {
-        console.error("Failed to add club:", err);
+        const errorMsg =
+          err?.data?.message ||
+          err?.data?.errorSources?.[0]?.message ||
+          err?.error ||
+          err?.message ||
+          "Failed to add club";
+        console.warn("Failed to add club:", errorMsg);
         throw err;
       }
     },
-    [dispatch, hasToken, isViewingSpecificPlayer, updatePlayerMutation]
+    [addPlayerClubMutation, dispatch, hasToken, isViewingSpecificPlayer, refetchCv, refetchProfile]
+  );
+
+  const handleDeleteClub = useCallback(
+    async (clubId: string) => {
+      if (!hasToken || isViewingSpecificPlayer || !clubId) return;
+
+      try {
+        const response = await deletePlayerClubMutation(clubId).unwrap();
+        if (response?.data) {
+          dispatch(syncFromCvResponse(response.data));
+        }
+        await Promise.allSettled([refetchCv(), refetchProfile()]);
+        return response;
+      } catch (err: any) {
+        const errorMsg =
+          err?.data?.message ||
+          err?.data?.errorSources?.[0]?.message ||
+          err?.error ||
+          err?.message ||
+          "Failed to delete club";
+        console.warn("Failed to delete club:", errorMsg);
+        throw err;
+      }
+    },
+    [deletePlayerClubMutation, dispatch, hasToken, isViewingSpecificPlayer, refetchCv, refetchProfile]
+  );
+
+  const handleUpdateClub = useCallback(
+    async ({
+      clubId,
+      name,
+      from,
+      to,
+      logoFile,
+    }: {
+      clubId: string;
+      name: string;
+      from: string;
+      to: string;
+      logoFile?: File | null;
+    }) => {
+      const cleanClubId = String(clubId || "").trim();
+      if (!hasToken || isViewingSpecificPlayer || !cleanClubId) return;
+
+      const isCurrent = String(to || "").trim().toLowerCase() === "present";
+      const formattedTo = isCurrent ? "Present" : String(to);
+      const formData = new FormData();
+      if (logoFile instanceof File) {
+        formData.append("image", logoFile);
+      }
+
+      const clubData = {
+        clubName: name,
+        from: String(from),
+        to: formattedTo,
+        isCurrent,
+      };
+
+      formData.append("data", JSON.stringify(clubData));
+
+      try {
+        const response = await updatePlayerClubMutation({ clubId: cleanClubId, data: formData }).unwrap();
+        if (response?.data) {
+          dispatch(syncFromCvResponse(response.data));
+        }
+        await Promise.allSettled([refetchCv(), refetchProfile()]);
+        return response;
+      } catch (err: any) {
+        const errorMsg =
+          err?.data?.message ||
+          err?.data?.errorSources?.[0]?.message ||
+          err?.error ||
+          err?.message ||
+          "Failed to update club";
+        console.warn("Failed to update club:", errorMsg);
+        throw err;
+      }
+    },
+    [updatePlayerClubMutation, dispatch, hasToken, isViewingSpecificPlayer, refetchCv, refetchProfile]
   );
 
   const selectPlayer = (id: number) => {
@@ -399,11 +488,16 @@ export const usePlayer = () => {
       [],
     isLoading: isCvLoading || isCvFetching || isProfileLoading || isProfileFetching,
     isUpdating,
+    isAddingClub,
+    isDeletingClub,
+    isUpdatingClub,
     error: cvError || profileError,
     refetchCv,
     refetchProfile,
     handleUpdate,
     handleAddClub,
+    handleDeleteClub,
+    handleUpdateClub,
     updatePlayerProfile,
     updateSection,
     selectPlayer,

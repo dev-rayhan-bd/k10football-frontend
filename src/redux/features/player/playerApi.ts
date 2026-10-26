@@ -127,6 +127,137 @@ export const playerApi = apiSlice.injectEndpoints({
             },
         }),
 
+        addPlayerClub: builder.mutation<any, FormData | { image?: File | null; data: any }>({
+            query: (payload) => {
+                let body = payload;
+                if (typeof window !== "undefined" && !(payload instanceof FormData)) {
+                    const formData = new FormData();
+                    if (payload.image instanceof File) {
+                        formData.append("image", payload.image);
+                    }
+                    if (typeof payload.data === "string") {
+                        formData.append("data", payload.data);
+                    } else if (typeof payload.data === "object" && payload.data !== null) {
+                        formData.append("data", JSON.stringify(payload.data));
+                    }
+                    body = formData;
+                }
+                return {
+                    url: "/players/me/clubs",
+                    method: "POST",
+                    body,
+                };
+            },
+            invalidatesTags: (result) => {
+                if (result?.success || !result?.error) {
+                    return [TagTypes.PLAYERS, TagTypes.PROFILE];
+                }
+                return [];
+            },
+            async onQueryStarted(_arg, { queryFulfilled }) {
+                try {
+                    await queryFulfilled;
+                    SuccessToast("Club added successfully");
+                } catch (err: any) {
+                    const status = err?.error?.status;
+                    const message =
+                        err?.error?.data?.message ||
+                        err?.error?.data?.errorSources?.[0]?.message ||
+                        err?.error?.message ||
+                        "Failed to add club";
+                    if (status === 500) {
+                        ErrorToast("Something went wrong on the server");
+                        return;
+                    }
+                    if (status !== 401) {
+                        ErrorToast(message);
+                    }
+                }
+            },
+        }),
+
+        deletePlayerClub: builder.mutation<any, string>({
+            query: (clubId) => ({
+                url: `/players/me/clubs/${clubId}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: (result) => {
+                if (result?.success || !result?.error) {
+                    return [TagTypes.PLAYERS, TagTypes.PROFILE];
+                }
+                return [];
+            },
+            async onQueryStarted(_arg, { queryFulfilled }) {
+                try {
+                    await queryFulfilled;
+                    SuccessToast("Club deleted successfully");
+                } catch (err: any) {
+                    const status = err?.error?.status;
+                    const message =
+                        err?.error?.data?.message ||
+                        err?.error?.data?.errorSources?.[0]?.message ||
+                        err?.error?.message ||
+                        "Failed to delete club";
+                    if (status === 500) {
+                        ErrorToast("Something went wrong on the server");
+                        return;
+                    }
+                    if (status !== 401) {
+                        ErrorToast(message);
+                    }
+                }
+            },
+        }),
+
+        updatePlayerClub: builder.mutation<any, { clubId: string; data: FormData | { data: any; image?: File | null } }>({
+            query: ({ clubId, data }) => {
+                let body: any = data;
+                if (typeof window !== "undefined" && !(data instanceof FormData)) {
+                    const formData = new FormData();
+                    if ((data as any)?.image instanceof File) {
+                        formData.append("image", (data as any).image);
+                    }
+                    if (typeof (data as any)?.data === "string") {
+                        formData.append("data", (data as any).data);
+                    } else if (typeof (data as any)?.data === "object" && (data as any).data !== null) {
+                        formData.append("data", JSON.stringify((data as any).data));
+                    }
+                    body = formData;
+                }
+                return {
+                    url: `/players/me/clubs/${clubId}`,
+                    method: "PATCH",
+                    body,
+                };
+            },
+            invalidatesTags: (result) => {
+                if (result?.success || !result?.error) {
+                    return [TagTypes.PLAYERS, TagTypes.PROFILE];
+                }
+                return [];
+            },
+            async onQueryStarted(_arg, { queryFulfilled }) {
+                try {
+                    await queryFulfilled;
+                    SuccessToast("Club updated successfully");
+                } catch (err: any) {
+                    const status = err?.error?.status;
+                    const message =
+                        err?.error?.data?.message ||
+                        err?.error?.data?.errorSources?.[0]?.message ||
+                        err?.error?.message ||
+                        "Failed to update club";
+                    if (status === 500) {
+                        ErrorToast("Something went wrong on the server");
+                        return;
+                    }
+                    if (status !== 401) {
+                        ErrorToast(message);
+                    }
+                }
+            },
+        }),
+
         getMyPlayerAttributes: builder.query<any, void>({
             query: () => ({
                 url: "/players/me/attributes",
@@ -440,6 +571,9 @@ export const {
     useUpdatePlayerDocumentMutation,
     useGetMyPlayerAnalyticsQuery,
     useLazyGetMyPlayerAnalyticsQuery,
+    useAddPlayerClubMutation,
+    useDeletePlayerClubMutation,
+    useUpdatePlayerClubMutation,
 } = playerApi;
 
 // Export aliases for convenience
@@ -447,5 +581,7 @@ export const useGetMyProfileQuery = useGetMyPlayerProfileQuery;
 export const useGetMyPlayerQuery = useGetMyPlayerProfileQuery;
 export const useGetMyCvQuery = useGetMyPlayerCvQuery;
 export const useLazyGetMyCvQuery = useLazyGetMyPlayerCvQuery;
+export const useCreatePlayerClubMutation = useAddPlayerClubMutation;
+export const useRemovePlayerClubMutation = useDeletePlayerClubMutation;
 
 

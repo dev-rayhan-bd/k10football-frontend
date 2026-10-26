@@ -38,6 +38,8 @@
   --border: #474747;
   --input: #1a1a1a;
   --ring: #333333;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
   --popover: #141414;
   --popover-foreground: #ffffff;
 
@@ -53,6 +55,8 @@
 
   --border: #262626;
   --input: #262626;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
   --ring: #444444;
   --popover: #141414;
   --popover-foreground: #ffffff;
@@ -70,6 +74,8 @@
   --color-foreground: var(--foreground);
 
   --color-primary: var(--primary);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-yellow: var(--yellow);
   --color-red: var(--red);
   --color-blue: var(--blue);

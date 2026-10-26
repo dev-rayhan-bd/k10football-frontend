@@ -22,6 +22,7 @@ import {
   IconCheck,
   IconUserCheck,
   IconSparkles,
+  IconTrash,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import {
@@ -34,6 +35,8 @@ import {
   useGetTeamRosterQuery,
   useAssignCoachToTeamMutation,
   useAssignPlayerToTeamMutation,
+  useRemoveCoachFromTeamMutation,
+  useRemovePlayerFromTeamMutation,
 } from "@/redux/features/academy/academyApi";
 import { useGetAllCoachesQuery } from "@/redux/features/coach/coachApi";
 import { useGetPlayersQuery } from "@/redux/features/player/playerApi";
@@ -102,10 +105,14 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
   // Mutations
   const [assignCoach, { isLoading: isAssigningCoach }] = useAssignCoachToTeamMutation();
   const [assignPlayer, { isLoading: isAssigningPlayer }] = useAssignPlayerToTeamMutation();
+  const [removeCoach, { isLoading: isRemovingCoach }] = useRemoveCoachFromTeamMutation();
+  const [removePlayer, { isLoading: isRemovingPlayer }] = useRemovePlayerFromTeamMutation();
 
   // Modals & Search state
   const [isAssignCoachOpen, setIsAssignCoachOpen] = useState(false);
   const [isAssignPlayerOpen, setIsAssignPlayerOpen] = useState(false);
+  const [coachToRemove, setCoachToRemove] = useState<ITeamRosterCoachItem | null>(null);
+  const [playerToRemove, setPlayerToRemove] = useState<ITeamRosterPlayerItem | null>(null);
 
   // Coach modal state
   const [selectedCoachId, setSelectedCoachId] = useState<string>("");
@@ -213,6 +220,28 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
 
       setIsAssignPlayerOpen(false);
       setSelectedPlayerId("");
+      refetch();
+    } catch {
+      // Toast is handled in academyApi.ts
+    }
+  };
+
+  const handleConfirmRemoveCoach = async () => {
+    if (!coachToRemove || !team?._id) return;
+    try {
+      await removeCoach({ teamId: team._id, coachId: coachToRemove._id }).unwrap();
+      setCoachToRemove(null);
+      refetch();
+    } catch {
+      // Toast is handled in academyApi.ts
+    }
+  };
+
+  const handleConfirmRemovePlayer = async () => {
+    if (!playerToRemove || !team?._id) return;
+    try {
+      await removePlayer({ teamId: team._id, playerId: playerToRemove._id }).unwrap();
+      setPlayerToRemove(null);
       refetch();
     } catch {
       // Toast is handled in academyApi.ts
@@ -621,9 +650,17 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
                 </div>
               </div>
 
-              {/* Status Indicator */}
-              <div className="shrink-0 flex items-center gap-2">
+              {/* Status Indicator & Remove Action */}
+              <div className="shrink-0 flex items-center gap-2.5">
                 <span className="size-2 rounded-full bg-[#00FF85] shadow-[0_0_8px_#00FF85]" />
+                <button
+                  type="button"
+                  onClick={() => setCoachToRemove(coach)}
+                  className="p-1.5 rounded-lg bg-destructive/10 hover:bg-destructive/20 border border-destructive/20 text-destructive hover:text-destructive transition-all cursor-pointer hover:scale-105"
+                  title="Remove coach from team"
+                >
+                  <IconTrash size={14} />
+                </button>
               </div>
             </div>
           ))}
@@ -811,7 +848,7 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
                   </div>
                 </div>
 
-                {/* Footer: CV Tier and Status */}
+                {/* Footer: CV Tier, Status & Remove Action */}
                 <div className="flex items-center justify-between gap-2 pt-2 border-t border-white/5">
                   <span
                     className={cn(
@@ -822,16 +859,26 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
                     {player.cvType || "BRONZE"} TIER
                   </span>
 
-                  <span
-                    className={cn(
-                      "px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border",
-                      (player.status || "ACTIVE").toUpperCase() === "ACTIVE"
-                        ? "bg-[#00FF85]/10 text-[#00FF85] border-[#00FF85]/20"
-                        : "bg-[#FF3B30]/10 text-[#FF3B30] border-[#FF3B30]/20"
-                    )}
-                  >
-                    {player.status || "ACTIVE"}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={cn(
+                        "px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border",
+                        (player.status || "ACTIVE").toUpperCase() === "ACTIVE"
+                          ? "bg-[#00FF85]/10 text-[#00FF85] border-[#00FF85]/20"
+                          : "bg-[#FF3B30]/10 text-[#FF3B30] border-[#FF3B30]/20"
+                      )}
+                    >
+                      {player.status || "ACTIVE"}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setPlayerToRemove(player)}
+                      className="p-1.5 rounded-lg bg-destructive/10 hover:bg-destructive/20 border border-destructive/20 text-destructive hover:text-destructive transition-all cursor-pointer"
+                      title="Remove player from team"
+                    >
+                      <IconTrash size={13} />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))
@@ -864,15 +911,18 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
                 <th className="py-4 px-4 text-[11px] font-black uppercase tracking-widest text-white/40 border-r border-white/15 text-center">
                   CV Tier
                 </th>
-                <th className="py-4 px-4 text-[11px] font-black uppercase tracking-widest text-white/40 text-center">
+                <th className="py-4 px-4 text-[11px] font-black uppercase tracking-widest text-white/40 border-r border-white/15 text-center">
                   Status
+                </th>
+                <th className="py-4 px-4 text-[11px] font-black uppercase tracking-widest text-white/40 text-center">
+                  Action
                 </th>
               </tr>
             </thead>
             <tbody>
               {filteredSquadPlayers.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center">
+                  <td colSpan={9} className="py-12 text-center">
                     <div className="flex flex-col items-center justify-center gap-3">
                       <div className="size-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/30">
                         <IconShirt size={22} />
@@ -980,7 +1030,7 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
                     </td>
 
                     {/* Status */}
-                    <td className="py-4 px-4 text-center">
+                    <td className="py-4 px-4 border-r border-white/15 text-center">
                       <span
                         className={cn(
                           "px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border whitespace-nowrap",
@@ -991,6 +1041,18 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
                       >
                         {player.status || "ACTIVE"}
                       </span>
+                    </td>
+
+                    {/* Action */}
+                    <td className="py-4 px-4 text-center">
+                      <button
+                        type="button"
+                        onClick={() => setPlayerToRemove(player)}
+                        className="size-8 rounded-lg bg-destructive/10 hover:bg-destructive/20 border border-destructive/20 text-destructive hover:text-destructive inline-flex items-center justify-center transition-all cursor-pointer hover:scale-105"
+                        title="Remove player from team"
+                      >
+                        <IconTrash size={14} />
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -1296,6 +1358,111 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
               </button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+      {/* Remove Coach Confirmation Dialog */}
+      <Dialog open={Boolean(coachToRemove)} onOpenChange={(open) => !open && setCoachToRemove(null)}>
+        <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-3xl max-w-md p-6 sm:p-8">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="size-10 rounded-full bg-destructive/10 border border-destructive/20 flex items-center justify-center text-destructive shrink-0">
+                <IconTrash size={20} />
+              </div>
+              <div>
+                <DialogTitle className="text-xl font-black uppercase text-white font-orbitron tracking-tight">
+                  Remove Coach
+                </DialogTitle>
+                <p className="text-xs text-white/40 font-bold uppercase tracking-widest mt-0.5">
+                  Remove from team roster
+                </p>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <p className="text-sm text-white/70 mt-2">
+            Are you sure you want to remove{" "}
+            <span className="font-bold text-white uppercase">{coachToRemove?.name}</span> from {team.teamName}?
+          </p>
+
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/5 mt-4">
+            <button
+              type="button"
+              onClick={() => setCoachToRemove(null)}
+              disabled={isRemovingCoach}
+              className="px-5 py-2.5 rounded-xl border border-white/10 text-white/70 hover:text-white bg-white/5 text-xs font-bold uppercase tracking-wider cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleConfirmRemoveCoach}
+              disabled={isRemovingCoach}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-destructive hover:bg-destructive/90 text-white text-xs font-bold uppercase tracking-wider cursor-pointer disabled:opacity-50"
+            >
+              {isRemovingCoach ? (
+                <span className="flex items-center gap-2">
+                  <IconLoader2 size={14} className="animate-spin" /> Removing...
+                </span>
+              ) : (
+                <span className="flex items-center gap-1.5">
+                  <IconTrash size={14} /> Remove Coach
+                </span>
+              )}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Remove Player Confirmation Dialog */}
+      <Dialog open={Boolean(playerToRemove)} onOpenChange={(open) => !open && setPlayerToRemove(null)}>
+        <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-3xl max-w-md p-6 sm:p-8">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="size-10 rounded-full bg-destructive/10 border border-destructive/20 flex items-center justify-center text-destructive shrink-0">
+                <IconTrash size={20} />
+              </div>
+              <div>
+                <DialogTitle className="text-xl font-black uppercase text-white font-orbitron tracking-tight">
+                  Remove Player
+                </DialogTitle>
+                <p className="text-xs text-white/40 font-bold uppercase tracking-widest mt-0.5">
+                  Remove from team roster
+                </p>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <p className="text-sm text-white/70 mt-2">
+            Are you sure you want to remove{" "}
+            <span className="font-bold text-white uppercase">{playerToRemove?.name}</span> from {team.teamName}?
+          </p>
+
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/5 mt-4">
+            <button
+              type="button"
+              onClick={() => setPlayerToRemove(null)}
+              disabled={isRemovingPlayer}
+              className="px-5 py-2.5 rounded-xl border border-white/10 text-white/70 hover:text-white bg-white/5 text-xs font-bold uppercase tracking-wider cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleConfirmRemovePlayer}
+              disabled={isRemovingPlayer}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-destructive hover:bg-destructive/90 text-white text-xs font-bold uppercase tracking-wider cursor-pointer disabled:opacity-50"
+            >
+              {isRemovingPlayer ? (
+                <span className="flex items-center gap-2">
+                  <IconLoader2 size={14} className="animate-spin" /> Removing...
+                </span>
+              ) : (
+                <span className="flex items-center gap-1.5">
+                  <IconTrash size={14} /> Remove Player
+                </span>
+              )}
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

@@ -52,7 +52,7 @@ class SessionHelper {
 
   getToken = (): string => {
     if (typeof window !== "undefined" && window.localStorage) {
-      return localStorage.getItem("token") || "";
+      return localStorage.getItem("token") || localStorage.getItem("accessToken") || "";
     }
     return "";
   };

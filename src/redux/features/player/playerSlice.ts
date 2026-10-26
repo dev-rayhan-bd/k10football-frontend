@@ -17,6 +17,7 @@ import { IPlayerDocument } from "@/types/player.type";
 
 export interface Club {
   id: string;
+  _id?: string;
   name: string;
   from: string;
   to: string;
@@ -24,6 +25,7 @@ export interface Club {
   color: string;
   shortName: string;
   category?: string;
+  isCurrent?: boolean;
 }
 
 export interface PlayerData {
@@ -507,20 +509,49 @@ export const playerSlice = createSlice({
             color: i === 0 ? "text-primary" : i === 1 ? "text-yellow" : "text-orange"
           }));
         }
-        if (Array.isArray(data.clubHistory) && data.clubHistory.length > 0) {
-          activePlayer.clubs = data.clubHistory.map((c: any, i: number) => {
+        const rawClubList = Array.isArray(data.clubHistory)
+          ? data.clubHistory
+          : Array.isArray(data.clubs)
+            ? data.clubs
+            : Array.isArray(data)
+              ? data
+              : null;
+
+        if (rawClubList) {
+          activePlayer.clubs = rawClubList.map((c: any, i: number) => {
             const periods = (c.period || "").split("-").map((s: string) => s.trim());
             return {
-              id: c._id || String(i + 1),
+              id: c._id || c.id || String(i + 1),
+              _id: c._id || c.id,
               name: c.clubName || c.name || "",
               from: c.from || periods[0] || "2020",
               to: c.to || periods[1] || (c.isCurrent ? "Present" : "2022"),
-              logo: c.logoUrl || c.logo || "bg-blue-600",
+              logo: c.logoUrl || c.logo || c.image || "bg-blue-600",
               color: "border-primary",
               shortName: (c.clubName || c.name || "").slice(0, 3).toUpperCase(),
               isCurrent: c.isCurrent ?? (String(c.to || "").toLowerCase() === "present")
             };
           });
+        } else if (data && typeof data === "object" && (data.clubName || data.name) && (data._id || data.from || data.to)) {
+          const periods = (data.period || "").split("-").map((s: string) => s.trim());
+          const newClubItem = {
+            id: data._id || data.id || String(Date.now()),
+            _id: data._id || data.id,
+            name: data.clubName || data.name || "",
+            from: data.from || periods[0] || "2020",
+            to: data.to || periods[1] || (data.isCurrent ? "Present" : "2022"),
+            logo: data.logoUrl || data.logo || data.image || "bg-blue-600",
+            color: "border-primary",
+            shortName: (data.clubName || data.name || "").slice(0, 3).toUpperCase(),
+            isCurrent: data.isCurrent ?? (String(data.to || "").toLowerCase() === "present")
+          };
+          if (!activePlayer.clubs) activePlayer.clubs = [];
+          const existingIndex = activePlayer.clubs.findIndex((c) => c.id === newClubItem.id);
+          if (existingIndex >= 0) {
+            activePlayer.clubs[existingIndex] = newClubItem;
+          } else {
+            activePlayer.clubs.push(newClubItem);
+          }
         }
         if (Array.isArray(data.positionMap) && data.positionMap.length > 0) {
           activePlayer.positionMarkers = data.positionMap.map((m: any, idx: number) => ({

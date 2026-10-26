@@ -9,10 +9,125 @@ import {
   IAssignCoachToTeamPayload,
   IAssignPlayerToTeamPayload,
   ITeamRosterResponse,
+  ISuccessStoriesMetaResponse,
+  ISuccessStoriesResponse,
+  IGetSuccessStoriesParams,
+  IAcademyParentsResponse,
+  IGetAcademyParentsParams,
+  ICreateAcademyParentPayload,
+  IUpdateAcademyParentPayload,
+  ITransferRequestsResponse,
+  ITargetAcademiesResponse,
+  ITransferMyPlayersResponse,
+  ICreateTransferRequestPayload,
+  IFeesPaymentsResponse,
+  IGetFeesPaymentsParams,
+  IFinanceCommitteeResponse,
+  IGetFinanceCommitteeParams,
+  IAcademyMatchesResponse,
+  IGetAcademyMatchesParams,
+  ICreateAcademyMatchPayload,
 } from "@/types/academy.type";
 
 export const academyApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
+    getAcademyParents: builder.query<IAcademyParentsResponse, IGetAcademyParentsParams | void>({
+      query: (params) => ({
+        url: "/academies/parents",
+        method: "GET",
+        params: params || {},
+      }),
+      providesTags: [TagTypes.PARENTS, TagTypes.ACADEMY],
+    }),
+
+    createAcademyParent: builder.mutation<any, ICreateAcademyParentPayload>({
+      query: (data) => ({
+        url: "/academies/parents",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.PARENTS, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Parent created successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to create parent";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    updateAcademyParent: builder.mutation<any, { parentId: string; data: IUpdateAcademyParentPayload }>({
+      query: ({ parentId, data }) => ({
+        url: `/academies/parents/${parentId}`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.PARENTS, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Parent updated successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to update parent";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    deleteAcademyParent: builder.mutation<any, string>({
+      query: (parentId) => ({
+        url: `/academies/parents/${parentId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.PARENTS, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Parent deleted successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to delete parent";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
     getTeamRoster: builder.query<ITeamRosterResponse, string>({
       query: (teamId) => ({
         url: `/academies/teams/${teamId}/roster`,
@@ -27,6 +142,112 @@ export const academyApi = apiSlice.injectEndpoints({
         method: "GET",
       }),
       providesTags: [TagTypes.ACADEMY, TagTypes.TEAMS],
+    }),
+
+    getSuccessStoriesMeta: builder.query<ISuccessStoriesMetaResponse, void>({
+      query: () => ({
+        url: "/academies/success-stories/meta",
+        method: "GET",
+      }),
+      providesTags: [TagTypes.SUCCESS_STORIES],
+    }),
+
+    getSuccessStories: builder.query<ISuccessStoriesResponse, IGetSuccessStoriesParams | void>({
+      query: (params) => ({
+        url: "/academies/success-stories",
+        method: "GET",
+        params: params || {},
+      }),
+      providesTags: [TagTypes.SUCCESS_STORIES],
+    }),
+
+    addSuccessStory: builder.mutation<any, FormData>({
+      query: (formData) => ({
+        url: "/academies/success-stories",
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.SUCCESS_STORIES, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Success story submitted for approval");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to submit success story";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    deleteSuccessStory: builder.mutation<any, string>({
+      query: (storyId) => ({
+        url: `/academies/success-stories/${storyId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.SUCCESS_STORIES, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Success story deleted successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to delete success story";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    updateSuccessStory: builder.mutation<any, { storyId: string; formData: FormData }>({
+      query: ({ storyId, formData }) => ({
+        url: `/academies/success-stories/${storyId}`,
+        method: "PATCH",
+        body: formData,
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.SUCCESS_STORIES, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Success story updated successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to update success story";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
     }),
 
     createAcademyTeam: builder.mutation<any, ICreateAcademyTeamPayload>({
@@ -177,17 +398,309 @@ export const academyApi = apiSlice.injectEndpoints({
         }
       },
     }),
+
+    removeCoachFromTeam: builder.mutation<any, { teamId: string; coachId: string }>({
+      query: ({ teamId, coachId }) => ({
+        url: `/academies/teams/${teamId}/coaches/${coachId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.ACADEMY, TagTypes.TEAMS, TagTypes.COACHES];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Coach removed from team successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to remove coach from team";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    removePlayerFromTeam: builder.mutation<any, { teamId: string; playerId: string }>({
+      query: ({ teamId, playerId }) => ({
+        url: `/academies/teams/${teamId}/players/${playerId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.ACADEMY, TagTypes.TEAMS, TagTypes.PLAYERS];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Player removed from team successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to remove player from team";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    // Transfer Requests Endpoints
+    getTransferRequests: builder.query<ITransferRequestsResponse, void>({
+      query: () => ({
+        url: "/academies/transfer-requests",
+        method: "GET",
+      }),
+      providesTags: [TagTypes.TRANSFERS, TagTypes.ACADEMY],
+    }),
+
+    getTargetAcademies: builder.query<ITargetAcademiesResponse, void>({
+      query: () => ({
+        url: "/academies/transfer-requests/target-academies",
+        method: "GET",
+      }),
+      providesTags: [TagTypes.TRANSFERS, TagTypes.ACADEMY],
+    }),
+
+    getMyPlayersForTransfer: builder.query<ITransferMyPlayersResponse, void>({
+      query: () => ({
+        url: "/academies/transfer-requests/my-players",
+        method: "GET",
+      }),
+      providesTags: [TagTypes.TRANSFERS, TagTypes.PLAYERS],
+    }),
+
+    createTransferRequest: builder.mutation<any, ICreateTransferRequestPayload>({
+      query: (data) => ({
+        url: "/academies/transfer-requests",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.TRANSFERS, TagTypes.ACADEMY, TagTypes.PLAYERS];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Transfer request submitted successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to create transfer request";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    approveTransferRequest: builder.mutation<any, string>({
+      query: (requestId) => ({
+        url: `/academies/transfer-requests/${requestId}/approve`,
+        method: "POST",
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.TRANSFERS, TagTypes.ACADEMY, TagTypes.PLAYERS];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Transfer request approved successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to approve transfer request";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    rejectTransferRequest: builder.mutation<any, { requestId: string; note?: string }>({
+      query: ({ requestId, note }) => ({
+        url: `/academies/transfer-requests/${requestId}/reject`,
+        method: "POST",
+        body: note ? { note } : {},
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.TRANSFERS, TagTypes.ACADEMY, TagTypes.PLAYERS];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Transfer request rejected");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to reject transfer request";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    // Fees & Payments Endpoint
+    getFeesPayments: builder.query<IFeesPaymentsResponse, IGetFeesPaymentsParams | void>({
+      query: (params) => ({
+        url: "/academies/fees-payments",
+        method: "GET",
+        params: params || {},
+      }),
+      providesTags: [TagTypes.FEES, TagTypes.PAYMENTS, TagTypes.ACADEMY],
+    }),
+
+    // Finance Committee Endpoint
+    getFinanceCommittee: builder.query<IFinanceCommitteeResponse, IGetFinanceCommitteeParams | void>({
+      query: (params) => ({
+        url: "/academies/finance-committee",
+        method: "GET",
+        params: params || {},
+      }),
+      providesTags: [TagTypes.FINANCE, TagTypes.ACADEMY],
+    }),
+
+    // Scheduled Matches Endpoints
+    getAcademyMatches: builder.query<IAcademyMatchesResponse, IGetAcademyMatchesParams | void>({
+      query: (params) => ({
+        url: "/academies/matches",
+        method: "GET",
+        params: params || {},
+      }),
+      providesTags: [TagTypes.MATCHES, TagTypes.ACADEMY],
+    }),
+
+    createAcademyMatch: builder.mutation<any, ICreateAcademyMatchPayload>({
+      query: (data) => ({
+        url: "/academies/matches",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.MATCHES, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Match scheduled successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to schedule match";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    deleteAcademyMatch: builder.mutation<any, string>({
+      query: (matchId) => ({
+        url: `/academies/matches/${matchId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.MATCHES, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Match deleted successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to delete match";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
   }),
 });
 
 export const {
+  useGetAcademyParentsQuery,
+  useLazyGetAcademyParentsQuery,
+  useCreateAcademyParentMutation,
+  useUpdateAcademyParentMutation,
+  useDeleteAcademyParentMutation,
   useGetTeamRosterQuery,
   useLazyGetTeamRosterQuery,
   useGetAcademyCoachAndPlayersQuery,
   useLazyGetAcademyCoachAndPlayersQuery,
+  useGetSuccessStoriesMetaQuery,
+  useGetSuccessStoriesQuery,
+  useLazyGetSuccessStoriesQuery,
+  useAddSuccessStoryMutation,
+  useUpdateSuccessStoryMutation,
+  useDeleteSuccessStoryMutation,
   useCreateAcademyTeamMutation,
   useUpdateAcademyTeamMutation,
   useDeleteAcademyTeamMutation,
   useAssignCoachToTeamMutation,
   useAssignPlayerToTeamMutation,
+  useRemoveCoachFromTeamMutation,
+  useRemovePlayerFromTeamMutation,
+  useGetTransferRequestsQuery,
+  useLazyGetTransferRequestsQuery,
+  useGetTargetAcademiesQuery,
+  useLazyGetTargetAcademiesQuery,
+  useGetMyPlayersForTransferQuery,
+  useLazyGetMyPlayersForTransferQuery,
+  useCreateTransferRequestMutation,
+  useApproveTransferRequestMutation,
+  useRejectTransferRequestMutation,
+  useGetFeesPaymentsQuery,
+  useLazyGetFeesPaymentsQuery,
+  useGetFinanceCommitteeQuery,
+  useLazyGetFinanceCommitteeQuery,
+  useGetAcademyMatchesQuery,
+  useLazyGetAcademyMatchesQuery,
+  useCreateAcademyMatchMutation,
+  useDeleteAcademyMatchMutation,
 } = academyApi;
+

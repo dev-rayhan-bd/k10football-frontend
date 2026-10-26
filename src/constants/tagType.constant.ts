@@ -20,6 +20,20 @@ const TagTypes = {
     TEAMS: "Teams",
     MEDIA: "Media",
     media: "Media",
+    SUCCESS_STORIES: "SuccessStories",
+    successStories: "SuccessStories",
+    PARENTS: "Parents",
+    parents: "Parents",
+    TRANSFERS: "Transfers",
+    transfers: "Transfers",
+    FEES: "Fees",
+    fees: "Fees",
+    PAYMENTS: "Payments",
+    payments: "Payments",
+    FINANCE: "Finance",
+    finance: "Finance",
+    MATCHES: "Matches",
+    matches: "Matches",
 } as const;
 
 export default TagTypes;
