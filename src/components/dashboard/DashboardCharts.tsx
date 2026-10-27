@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React from "react";
 import { 
   BarChart, 
   Bar, 
@@ -17,7 +15,9 @@ import {
 } from "recharts";
 import { useAppSelector } from "@/hooks/reduxHooks";
 
-const barData = [
+import { IAcademyDashboardAnalytics } from "@/types/academy.type";
+
+const defaultBarData = [
   { month: "Jan-Feb", value: 6 },
   { month: "Mar-Apr", value: 10 },
   { month: "May-Jun", value: 5 },
@@ -26,16 +26,11 @@ const barData = [
   { month: "Nov-Dec", value: 4 },
 ];
 
-const areaData = [
-  { month: "Jan-Feb", value: 400 },
-  { month: "Mar-Apr", value: 600 },
-  { month: "May-Jun", value: 550 },
-  { month: "Jul-Aug", value: 800 },
-  { month: "Sept-Oct", value: 700 },
-  { month: "Nov-Dec", value: 900 },
-];
+interface DashboardChartsProps {
+  analytics?: IAcademyDashboardAnalytics;
+}
 
-const DashboardCharts = () => {
+const DashboardCharts = ({ analytics }: DashboardChartsProps) => {
   const players = useAppSelector((state) => state.player.players);
   const evaluationRecords = useAppSelector((state) => state.evaluation.records);
 
@@ -52,7 +47,7 @@ const DashboardCharts = () => {
     return mockAges[player.id] || 16;
   };
 
-  const ageGroups = [
+  const defaultAgeGroups = [
     { category: "7-8", count: 0 },
     { category: "9-10", count: 0 },
     { category: "11-12", count: 0 },
@@ -65,14 +60,14 @@ const DashboardCharts = () => {
 
   players.forEach((player) => {
     const age = getPlayerAge(player);
-    if (age >= 7 && age < 9) ageGroups[0].count++;
-    else if (age >= 9 && age < 11) ageGroups[1].count++;
-    else if (age >= 11 && age < 13) ageGroups[2].count++;
-    else if (age >= 13 && age < 15) ageGroups[3].count++;
-    else if (age >= 15 && age < 17) ageGroups[4].count++;
-    else if (age >= 17 && age < 19) ageGroups[5].count++;
-    else if (age >= 19 && age < 21) ageGroups[6].count++;
-    else if (age >= 21) ageGroups[7].count++;
+    if (age >= 7 && age < 9) defaultAgeGroups[0].count++;
+    else if (age >= 9 && age < 11) defaultAgeGroups[1].count++;
+    else if (age >= 11 && age < 13) defaultAgeGroups[2].count++;
+    else if (age >= 13 && age < 15) defaultAgeGroups[3].count++;
+    else if (age >= 15 && age < 17) defaultAgeGroups[4].count++;
+    else if (age >= 17 && age < 19) defaultAgeGroups[5].count++;
+    else if (age >= 19 && age < 21) defaultAgeGroups[6].count++;
+    else if (age >= 21) defaultAgeGroups[7].count++;
   });
 
   let evaluatedCount = 0;
@@ -105,11 +100,36 @@ const DashboardCharts = () => {
     }
   });
 
-  const evaluationStatusData = [
+  const defaultEvaluationStatusData = [
     { name: "Evaluated", value: evaluatedCount, color: "#10B981" },
     { name: "Need Evaluation", value: needEvaluationCount, color: "#3B82F6" },
     { name: "Expired", value: expiredCount, color: "#EF4444" },
   ];
+
+  // Dynamic values from API if available
+  const barData = analytics?.gameReportsEngagement?.periods?.length
+    ? analytics.gameReportsEngagement.periods.map((p) => ({
+        month: p.period,
+        value: p.count,
+      }))
+    : defaultBarData;
+
+  const ageGroups = analytics?.ageCategory?.brackets?.length
+    ? analytics.ageCategory.brackets.map((b) => ({
+        category: b.bracket,
+        count: b.count,
+      }))
+    : defaultAgeGroups;
+
+  const evaluationStatusData = analytics?.playerEvaluationStatus?.slices?.length
+    ? analytics.playerEvaluationStatus.slices.map((s) => ({
+        name: s.label,
+        value: s.count,
+        color: s.color,
+        percentage: s.percentage,
+      }))
+    : defaultEvaluationStatusData;
+
 
   return (
     <div className="flex flex-col gap-8">

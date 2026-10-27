@@ -41,8 +41,14 @@ import {
   IGetTrainingSessionsParams,
   IGetTrainingSessionsResponse,
   ICreateTrainingSessionPayload,
+  IUpdateTrainingSessionArgs,
   ISessionAttendanceResponse,
   IUpdateSessionAttendanceArgs,
+  IAcademyAnalyticsReportResponse,
+  IAcademyDashboardResponse,
+  IAcademyNewsMetaResponse,
+  IAcademyNewsResponse,
+  IGetAcademyNewsParams,
 } from "@/types/academy.type";
 
 export const academyApi = apiSlice.injectEndpoints({
@@ -945,10 +951,290 @@ export const academyApi = apiSlice.injectEndpoints({
         }
       },
     }),
+
+    updateTrainingSession: builder.mutation<any, IUpdateTrainingSessionArgs>({
+      query: ({ sessionId, body }) => ({
+        url: `/academies/training-sessions/${sessionId}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.TRAINING_SESSIONS, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Training session updated successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to update training session";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    deleteTrainingSession: builder.mutation<any, string>({
+      query: (sessionId) => ({
+        url: `/academies/training-sessions/${sessionId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.TRAINING_SESSIONS, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Training session deleted successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to delete training session";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    getAcademyAnalyticsReport: builder.query<IAcademyAnalyticsReportResponse, void>({
+      query: () => ({
+        url: "/academies/analytics-report",
+        method: "GET",
+      }),
+      providesTags: [TagTypes.REPORTS, TagTypes.ACADEMY],
+    }),
+
+    getAcademyDashboard: builder.query<IAcademyDashboardResponse, void>({
+      query: () => ({
+        url: "/academies/dashboard",
+        method: "GET",
+      }),
+      providesTags: [TagTypes.ACADEMY],
+    }),
+
+    getAcademyNewsMeta: builder.query<IAcademyNewsMetaResponse, void>({
+      query: () => ({
+        url: "/academies/academy-news/meta",
+        method: "GET",
+      }),
+      providesTags: [TagTypes.ACADEMY_NEWS],
+    }),
+
+    getAcademyNews: builder.query<IAcademyNewsResponse, IGetAcademyNewsParams | void>({
+      query: (params) => {
+        const queryParams: Record<string, any> = {};
+        if (params?.status) {
+          queryParams.status = params.status;
+        }
+        if (params?.page) queryParams.page = params.page;
+        if (params?.limit) queryParams.limit = params.limit;
+        if (params?.search) queryParams.search = params.search;
+        if (params?.category) queryParams.category = params.category;
+        return {
+          url: "/academies/academy-news",
+          method: "GET",
+          params: queryParams,
+        };
+      },
+      providesTags: [TagTypes.ACADEMY_NEWS],
+    }),
+
+    createAcademyNews: builder.mutation<any, FormData>({
+      query: (formData) => ({
+        url: "/academies/academy-news",
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.ACADEMY_NEWS, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "News article created successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to create news article";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    deleteAcademyNews: builder.mutation<any, string>({
+      query: (id) => ({
+        url: `/academies/academy-news/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.ACADEMY_NEWS, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Article deleted permanently");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to delete article";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    updateAcademyNews: builder.mutation<any, { id: string; formData: FormData }>({
+      query: ({ id, formData }) => ({
+        url: `/academies/academy-news/${id}`,
+        method: "PATCH",
+        body: formData,
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.ACADEMY_NEWS, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "News article updated successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to update news article";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    toggleNewsVisibility: builder.mutation<any, string>({
+      query: (id) => ({
+        url: `/academies/academy-news/${id}/toggle-visibility`,
+        method: "PATCH",
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.ACADEMY_NEWS, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "News visibility updated");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to toggle visibility";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    moveNewsToBin: builder.mutation<any, string>({
+      query: (id) => ({
+        url: `/academies/academy-news/${id}/bin`,
+        method: "PATCH",
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.ACADEMY_NEWS, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "News moved to bin");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to move news to bin";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    restoreNewsFromBin: builder.mutation<any, string>({
+      query: (id) => ({
+        url: `/academies/academy-news/${id}/restore`,
+        method: "PATCH",
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.ACADEMY_NEWS, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "News restored from bin");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to restore news";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
   }),
 });
 
 export const {
+  useGetAcademyDashboardQuery,
+  useLazyGetAcademyDashboardQuery,
   useGetAcademyParentsQuery,
   useLazyGetAcademyParentsQuery,
   useCreateAcademyParentMutation,
@@ -1007,10 +1293,25 @@ export const {
   useGetTrainingSessionsQuery,
   useLazyGetTrainingSessionsQuery,
   useCreateTrainingSessionMutation,
+  useUpdateTrainingSessionMutation,
+  useDeleteTrainingSessionMutation,
   useGetSessionAttendanceQuery,
   useLazyGetSessionAttendanceQuery,
   useUpdateSessionAttendanceMutation,
+  useGetAcademyAnalyticsReportQuery,
+  useLazyGetAcademyAnalyticsReportQuery,
+  useGetAcademyNewsMetaQuery,
+  useLazyGetAcademyNewsMetaQuery,
+  useGetAcademyNewsQuery,
+  useLazyGetAcademyNewsQuery,
+  useCreateAcademyNewsMutation,
+  useUpdateAcademyNewsMutation,
+  useToggleNewsVisibilityMutation,
+  useMoveNewsToBinMutation,
+  useRestoreNewsFromBinMutation,
+  useDeleteAcademyNewsMutation,
 } = academyApi;
+
 
 
 

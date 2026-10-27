@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
@@ -5,17 +6,21 @@ import {
   IconSearch, 
   IconPlus, 
   IconFilter, 
-  IconCalendar,
-  IconClock,
-  IconUser,
-  IconCheck,
-  IconX,
-  IconClockHour4,
-  IconChevronRight,
-  IconAlertCircle
+  IconCalendar, 
+  IconClock, 
+  IconUser, 
+  IconCheck, 
+  IconX, 
+  IconClockHour4, 
+  IconChevronRight, 
+  IconAlertCircle,
+  IconPencil,
+  IconTrash
 } from "@tabler/icons-react";
 import { 
   CreateTrainingSessionModal, 
+  EditTrainingSessionModal,
+  DeleteTrainingSessionModal,
   SessionAttendanceModal 
 } from "./training-sessions/index";
 import { useGetTrainingSessionsQuery } from "@/redux/features/academy/academyApi";
@@ -79,6 +84,8 @@ const defaultSessions: ITrainingSessionListItem[] = [
 export const TrainingSessions = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+  const [selectedSessionForEdit, setSelectedSessionForEdit] = useState<ITrainingSessionListItem | null>(null);
+  const [selectedSessionForDelete, setSelectedSessionForDelete] = useState<ITrainingSessionListItem | null>(null);
 
   // Search & Filter State
   const [searchTerm, setSearchTerm] = useState("");
@@ -335,26 +342,57 @@ export const TrainingSessions = () => {
                 onClick={() => setSelectedSessionId(sessionId)}
                 className="bg-[#111111] rounded-4xl border border-white/15 p-5 md:p-6 flex flex-col gap-5 md:gap-6 hover:border-white/30 transition-all cursor-pointer group shadow-xl"
               >
+                {/* Card Header: Team Badge & Action Buttons */}
                 <div className="flex justify-between items-start gap-2">
                   <span className="bg-white/5 border border-white/15 px-3 md:px-4 py-2 rounded-xl text-[10px] font-black text-white/80 uppercase tracking-widest shrink-0">
                     {team}
                   </span>
-                  <button 
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedSessionId(sessionId);
-                    }}
-                    className={`flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 rounded-xl border text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all shrink-0 min-w-0 cursor-pointer ${
-                      attendance > 50 
-                      ? "bg-[#4ADE80]/10 border-[#4ADE80]/20 text-[#4ADE80] group-hover:bg-[#4ADE80] group-hover:text-black" 
-                      : "bg-[#E31B23]/10 border-[#E31B23]/20 text-[#E31B23] group-hover:bg-[#E31B23] group-hover:text-white"
-                    }`}
-                  >
-                    {attendance > 50 ? <IconCheck size={14} className="shrink-0" /> : <IconAlertCircle size={14} className="shrink-0" />}
-                    <span className="truncate">Attendance</span>
-                    <IconChevronRight size={14} className="shrink-0" />
-                  </button>
+                  
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {/* Edit Session Button */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedSessionForEdit(session);
+                      }}
+                      title="Edit Session"
+                      className="size-8 rounded-xl bg-white/5 hover:bg-white/15 text-white/50 hover:text-white flex items-center justify-center transition-all cursor-pointer border border-white/10"
+                    >
+                      <IconPencil size={15} />
+                    </button>
+
+                    {/* Delete Session Button */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedSessionForDelete(session);
+                      }}
+                      title="Delete Session"
+                      className="size-8 rounded-xl bg-white/5 hover:bg-[#E31B23]/15 text-white/40 hover:text-[#E31B23] flex items-center justify-center transition-all cursor-pointer border border-white/10"
+                    >
+                      <IconTrash size={15} />
+                    </button>
+
+                    {/* Attendance Modal Trigger Button */}
+                    <button 
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedSessionId(sessionId);
+                      }}
+                      className={`flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 rounded-xl border text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all shrink-0 min-w-0 cursor-pointer ${
+                        attendance > 50 
+                        ? "bg-[#4ADE80]/10 border-[#4ADE80]/20 text-[#4ADE80] group-hover:bg-[#4ADE80] group-hover:text-black" 
+                        : "bg-[#E31B23]/10 border-[#E31B23]/20 text-[#E31B23] group-hover:bg-[#E31B23] group-hover:text-white"
+                      }`}
+                    >
+                      {attendance > 50 ? <IconCheck size={14} className="shrink-0" /> : <IconAlertCircle size={14} className="shrink-0" />}
+                      <span className="truncate">Attendance</span>
+                      <IconChevronRight size={14} className="shrink-0" />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-4">
@@ -426,6 +464,20 @@ export const TrainingSessions = () => {
       <CreateTrainingSessionModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
+      />
+
+      {/* Edit Session Modal */}
+      <EditTrainingSessionModal
+        isOpen={Boolean(selectedSessionForEdit)}
+        session={selectedSessionForEdit}
+        onClose={() => setSelectedSessionForEdit(null)}
+      />
+
+      {/* Delete Session Modal (Compact Pop-up) */}
+      <DeleteTrainingSessionModal
+        isOpen={Boolean(selectedSessionForDelete)}
+        session={selectedSessionForDelete}
+        onClose={() => setSelectedSessionForDelete(null)}
       />
     </div>
   );

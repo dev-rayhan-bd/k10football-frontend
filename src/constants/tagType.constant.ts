@@ -40,6 +40,10 @@ const TagTypes = {
     sponsors: "Sponsors",
     TRAINING_SESSIONS: "TrainingSessions",
     trainingSessions: "TrainingSessions",
+    PRODUCTS: "Products",
+    products: "Products",
+    ACADEMY_NEWS: "AcademyNews",
+    academyNews: "AcademyNews",
 } as const;
 
 export default TagTypes;

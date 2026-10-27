@@ -1033,6 +1033,11 @@ export interface ICreateTrainingSessionPayload {
   additionalNotes?: string;
 }
 
+export interface IUpdateTrainingSessionArgs {
+  sessionId: string;
+  body: Partial<ICreateTrainingSessionPayload>;
+}
+
 // Session Attendance Sheet Types
 export interface ISessionAttendanceSession {
   _id: string;
@@ -1098,5 +1103,387 @@ export interface IUpdateSessionAttendanceArgs {
   body: IUpdateSessionAttendancePayload;
 }
 
+// ─── Analytics Report Interfaces ──────────────────────────────────────────
+export interface IAnalyticsCardItem {
+  raw: number;
+  formatted: string;
+}
 
+export interface IAnalyticsOverview {
+  academyId: string;
+  academyName: string;
+  reportingPeriod: string;
+  cards: {
+    totalRevenue: IAnalyticsCardItem;
+    totalExpenses: IAnalyticsCardItem;
+    activePlayers: IAnalyticsCardItem;
+    matchesWon: IAnalyticsCardItem;
+  };
+}
 
+export interface IRevenueBreakdownItem {
+  month: string;
+  fees: number;
+  events: number;
+  store: number;
+  total: number;
+}
+
+export interface IExpenseCategoryItem {
+  key: string;
+  label: string;
+  value: number;
+  percentage: number;
+  color: string;
+}
+
+export interface IFinancialAnalytics {
+  revenueBreakdown: IRevenueBreakdownItem[];
+  expensesDistribution: {
+    total: number;
+    categories: IExpenseCategoryItem[];
+  };
+}
+
+export interface IMonthlyReportVolumeItem {
+  month: string;
+  wins: number;
+  draws: number;
+  losses: number;
+  total: number;
+}
+
+export interface IReportsTrendItem {
+  month: string;
+  reports: number;
+}
+
+export interface IGameReportsAnalytics {
+  monthlyReportVolume: IMonthlyReportVolumeItem[];
+  reportsTrend: IReportsTrendItem[];
+}
+
+export interface IEvaluationStatusItem {
+  month: string;
+  completed: number;
+  pending: number;
+  expired: number;
+  total: number;
+}
+
+export interface IAverageSkillScoreItem {
+  axis: string;
+  value: number;
+  fullMark: number;
+}
+
+export interface IPlayerEvaluationsAnalytics {
+  evaluationStatusByMonth: IEvaluationStatusItem[];
+  averageSkillScores: IAverageSkillScoreItem[];
+}
+
+export interface ITransferActivityItem {
+  month: string;
+  incoming: number;
+  outgoing: number;
+  pending: number;
+}
+
+export interface ITransferStatusSlice {
+  key: string;
+  label: string;
+  count: number;
+  percentage: number;
+  color: string;
+}
+
+export interface ITransfersAnalytics {
+  transferActivityTrend: ITransferActivityItem[];
+  transferStatusOverview: {
+    total: number;
+    slices: ITransferStatusSlice[];
+  };
+}
+
+export interface ICvValidationMonthItem {
+  month: string;
+  gold: number;
+  silver: number;
+  bronze: number;
+  total: number;
+}
+
+export interface ICvTierDistributionSlice {
+  key: string;
+  label: string;
+  count: number;
+  percentage: number;
+  color: string;
+}
+
+export interface IPlayerCvValidationAnalytics {
+  validationsByMonthAndTier: ICvValidationMonthItem[];
+  cvTierDistribution: {
+    total: number;
+    slices: ICvTierDistributionSlice[];
+  };
+  cumulativeCvValidations: ICvValidationMonthItem[];
+}
+
+export interface IDetailedReportItem {
+  id: string;
+  reportType: string;
+  title: string;
+  subtitle: string;
+  period: string;
+  downloadPdfUrl: string;
+}
+
+export interface IAcademyAnalyticsReportData {
+  overview: IAnalyticsOverview;
+  financialAnalytics: IFinancialAnalytics;
+  gameReportsAnalytics: IGameReportsAnalytics;
+  playerEvaluationsAnalytics: IPlayerEvaluationsAnalytics;
+  transfersAnalytics: ITransfersAnalytics;
+  playerCvValidationAnalytics: IPlayerCvValidationAnalytics;
+  detailedReports: IDetailedReportItem[];
+  exportReportUrl: string;
+}
+
+export interface IAcademyAnalyticsReportResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: IAcademyAnalyticsReportData;
+}
+
+// Academy Management Dashboard Types
+export interface IAcademyDashboardAcademy {
+  id: string;
+  name: string;
+  badge: string;
+  coverPhoto: string;
+  category: string;
+  foundedYear: number;
+  foundedText: string;
+  location: string;
+  status: string;
+  isActive: boolean;
+  contactPhone: string;
+  contactEmail: string;
+}
+
+export interface IAcademyDashboardMetricCardItem {
+  label: string;
+  count: number;
+}
+
+export interface IAcademyDashboardMetricCards {
+  teams: IAcademyDashboardMetricCardItem;
+  players: IAcademyDashboardMetricCardItem;
+  coaches: IAcademyDashboardMetricCardItem;
+  gameReports: IAcademyDashboardMetricCardItem;
+  pendingEvaluations: IAcademyDashboardMetricCardItem;
+  pendingCvs: IAcademyDashboardMetricCardItem;
+}
+
+export interface IAcademyDashboardPeriod {
+  period: string;
+  count: number;
+}
+
+export interface IAcademyDashboardGameReportsEngagement {
+  title: string;
+  periods: IAcademyDashboardPeriod[];
+  total: number;
+}
+
+export interface IAcademyDashboardAgeBracket {
+  bracket: string;
+  count: number;
+}
+
+export interface IAcademyDashboardAgeCategory {
+  title: string;
+  brackets: IAcademyDashboardAgeBracket[];
+  totalPlayers: number;
+}
+
+export interface IAcademyDashboardEvaluationSlice {
+  key: string;
+  label: string;
+  count: number;
+  percentage: number;
+  color: string;
+}
+
+export interface IAcademyDashboardPlayerEvaluationStatus {
+  title: string;
+  total: number;
+  slices: IAcademyDashboardEvaluationSlice[];
+}
+
+export interface IAcademyDashboardAnalytics {
+  title: string;
+  subtitle: string;
+  fullAnalyticsUrl: string;
+  gameReportsEngagement: IAcademyDashboardGameReportsEngagement;
+  ageCategory: IAcademyDashboardAgeCategory;
+  playerEvaluationStatus: IAcademyDashboardPlayerEvaluationStatus;
+}
+
+export interface IAcademyDashboardPendingGameReport {
+  id: string;
+  playerId: string;
+  playerName: string;
+  playerAvatar: string | null;
+  position: string;
+  score: string;
+  matchName: string;
+  matchDate: string;
+}
+
+export interface IAcademyDashboardPendingCvValidation {
+  id: string;
+  playerId: string;
+  playerName: string;
+  playerAvatar: string | null;
+  coachName: string;
+  coachLabel: string;
+  badge: string;
+  isOverdue: boolean;
+}
+
+export interface IAcademyDashboardPlayerEvaluation {
+  id: string;
+  playerId: string;
+  playerName: string;
+  playerAvatar: string | null;
+  coachName: string;
+  coachLabel: string;
+  badge: string;
+  status: string;
+}
+
+export interface IAcademyDashboardClubInterested {
+  clubId: string;
+  clubName: string;
+  clubLogo: string | null;
+  action: string;
+  country: string;
+  league: string;
+}
+
+export interface IAcademyDashboardQuickStatItem {
+  raw: number;
+  formatted: string;
+}
+
+export interface IAcademyDashboardQuickStats {
+  profileViews: IAcademyDashboardQuickStatItem;
+  totalLikes: IAcademyDashboardQuickStatItem;
+  reports: IAcademyDashboardQuickStatItem;
+}
+
+export interface IAcademyDashboardSidebar {
+  pendingGameReports: IAcademyDashboardPendingGameReport[];
+  pendingCvValidations: IAcademyDashboardPendingCvValidation[];
+  playerEvaluations: IAcademyDashboardPlayerEvaluation[];
+  clubsInterested: IAcademyDashboardClubInterested[];
+  quickStats: IAcademyDashboardQuickStats;
+}
+
+export interface IAcademyDashboardData {
+  academy: IAcademyDashboardAcademy;
+  metricCards: IAcademyDashboardMetricCards;
+  analytics: IAcademyDashboardAnalytics;
+  sidebar: IAcademyDashboardSidebar;
+}
+
+export interface IAcademyDashboardResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: IAcademyDashboardData;
+}
+
+// ---------------- ACADEMY NEWS ---------------- //
+
+export interface IAcademyNewsMeta {
+  categories: string[];
+  priorities: string[];
+  visibilities: string[];
+  statuses: string[];
+}
+
+export interface IAcademyNewsMetaResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: IAcademyNewsMeta;
+}
+
+export interface IAcademyNewsBadge {
+  label: string;
+  variant: string;
+}
+
+export interface IAcademyNewsItem {
+  _id: string;
+  articleTitle: string;
+  category: string;
+  author: string;
+  publishedBy?: string;
+  publishDate: string;
+  formattedPublishDate?: string;
+  fullArticle?: string;
+  excerpt?: string;
+  featuredImage?: string;
+  tags?: string[];
+  priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT" | string;
+  visibility: "PUBLIC" | "PRIVATE" | string;
+  visibilityBadge?: IAcademyNewsBadge;
+  status: "PUBLISHED" | "DRAFT" | "BIN" | string;
+  statusBadge?: IAcademyNewsBadge;
+  views?: number;
+  sendPushNotification?: boolean;
+  isDeleted?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface IAcademyNewsTabCounts {
+  all: number;
+  published: number;
+  private: number;
+  draft: number;
+  bin: number;
+}
+
+export interface IAcademyNewsPaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface IAcademyNewsData {
+  tabCounts: IAcademyNewsTabCounts;
+  news: IAcademyNewsItem[];
+  meta: IAcademyNewsPaginationMeta;
+}
+
+export interface IAcademyNewsResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: IAcademyNewsData;
+}
+
+export interface IGetAcademyNewsParams {
+  status?: "ALL_NEWS" | "PUBLISHED" | "PRIVATE" | "DRAFT" | "BIN" | string;
+  page?: number;
+  limit?: number;
+  search?: string;
+  category?: string;
+}
