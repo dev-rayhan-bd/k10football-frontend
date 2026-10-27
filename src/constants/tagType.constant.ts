@@ -34,6 +34,12 @@ const TagTypes = {
     finance: "Finance",
     MATCHES: "Matches",
     matches: "Matches",
+    EXTRA_EVENTS: "ExtraEvents",
+    extraEvents: "ExtraEvents",
+    SPONSORS: "Sponsors",
+    sponsors: "Sponsors",
+    TRAINING_SESSIONS: "TrainingSessions",
+    trainingSessions: "TrainingSessions",
 } as const;
 
 export default TagTypes;

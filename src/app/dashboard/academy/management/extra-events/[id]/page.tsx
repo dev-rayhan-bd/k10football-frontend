@@ -13,6 +13,7 @@ import {
   TOURNAMENT_PRESET_LOGOS, 
   CLUB_PRESET_LOGOS 
 } from "@/components/user-wise-dashboard/academy-management/ExtraEvents";
+import { useGetExtraEventsQuery } from "@/redux/features/academy/academyApi";
 import { 
   IconCurrencyDollar, 
   IconUsers, 
@@ -147,7 +148,9 @@ const DEFAULT_MOCK_TEAMS = [
 
 const EventDetailPage = () => {
 const params = useParams();
-const eventId = Number(params?.id);
+const rawId = String(params?.id || "");
+const eventId = rawId;
+const { data: eventsResponse } = useGetExtraEventsQuery();
 
 // States
 const [event, setEvent] = useState<any>(null);
@@ -194,48 +197,76 @@ const [selectedRosterTeam, setSelectedRosterTeam] = useState<any>(null);
 
 // Load event details & local storage state
 useEffect(() => {
-if (!eventId) return;
+if (!rawId) return;
 
-const list = getStoredEvents();
-const found = list.find((e: any) => e.id === eventId);
-if (found) {
-  setEvent(found);
+const apiEvent = eventsResponse?.data?.events?.find(
+  (e: any) => String(e._id) === rawId || String(e.id) === rawId
+);
+
+if (apiEvent) {
+  setEvent({
+    ...apiEvent,
+    id: apiEvent._id,
+    title: apiEvent.eventName,
+    date: apiEvent.formattedDate || (apiEvent.eventDate ? new Date(apiEvent.eventDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "TBA"),
+    fee: apiEvent.feeFormatted || (apiEvent.registrationFee !== undefined ? `${apiEvent.currency || "$"} ${apiEvent.registrationFee}` : "Free"),
+    enrolled: apiEvent.capacityRatio || (apiEvent.maxCapacity ? `${apiEvent.currentAttendees || 0}/${apiEvent.maxCapacity}` : "0/0"),
+    status: apiEvent.statusBadge?.label || apiEvent.status || "Open",
+    group: apiEvent.group,
+    ageGroup: apiEvent.ageGroup,
+    targetGroup: apiEvent.targetAttendees,
+    eventType: apiEvent.eventType,
+    venueName: apiEvent.venueName,
+    address: apiEvent.venueAddress,
+    description: apiEvent.description,
+    requirements: apiEvent.requirements,
+    contactName: apiEvent.contactPerson,
+    contactPhone: apiEvent.contactPhone,
+    contactEmail: apiEvent.contactEmail,
+    bannerImage: apiEvent.bannerImage,
+  });
 } else {
-  // Fallback
-  const fallbackEvent = {
-    id: eventId,
-    title: "Academy Tournament Elite",
-    date: "5 March 2026",
-    fee: "£180",
-    enrolled: "7 Teams",
-    status: "Open",
-    group: "Group A",
-    ageGroup: "U-8, U-9",
-    targetGroup: "Academy Players Only",
-    eventType: "tournament",
-    logoId: "preset-cup",
-    venueName: "London Sports Arena",
-    address: "42 Queen's Road, London",
-    description: "Standard elite-level youth tournament invitation.",
-    requirements: "Shin guards, standard credentials required.",
-    contactName: "Coach Roberto",
-    contactPhone: "+44 7123 987654",
-    contactEmail: "r.coach@k10football.com"
-  };
-  setEvent(fallbackEvent);
+  const list = getStoredEvents();
+  const found = list.find((e: any) => String(e.id) === rawId || String(e._id) === rawId);
+  if (found) {
+    setEvent(found);
+  } else {
+    // Fallback
+    const fallbackEvent = {
+      id: rawId,
+      title: "Academy Tournament Elite",
+      date: "5 March 2026",
+      fee: "£180",
+      enrolled: "7 Teams",
+      status: "Open",
+      group: "Group A",
+      ageGroup: "U-8, U-9",
+      targetGroup: "Academy Players Only",
+      eventType: "tournament",
+      logoId: "preset-cup",
+      venueName: "London Sports Arena",
+      address: "42 Queen's Road, London",
+      description: "Standard elite-level youth tournament invitation.",
+      requirements: "Shin guards, standard credentials required.",
+      contactName: "Coach Roberto",
+      contactPhone: "+44 7123 987654",
+      contactEmail: "r.coach@k10football.com"
+    };
+    setEvent(fallbackEvent);
+  }
 }
 
 // Load registered teams
-const storedTeams = localStorage.getItem(`k10_tournament_teams_${eventId}`);
+const storedTeams = localStorage.getItem(`k10_tournament_teams_${rawId}`);
 if (storedTeams) {
   setTeams(JSON.parse(storedTeams));
 } else {
-  localStorage.setItem(`k10_tournament_teams_${eventId}`, JSON.stringify(DEFAULT_MOCK_TEAMS));
+  localStorage.setItem(`k10_tournament_teams_${rawId}`, JSON.stringify(DEFAULT_MOCK_TEAMS));
   setTeams(DEFAULT_MOCK_TEAMS);
 }
 
 // Load status
-const storedStatus = localStorage.getItem(`k10_tournament_status_${eventId}`);
+const storedStatus = localStorage.getItem(`k10_tournament_status_${rawId}`);
 if (storedStatus) {
   setStatus(storedStatus as any);
 } else {

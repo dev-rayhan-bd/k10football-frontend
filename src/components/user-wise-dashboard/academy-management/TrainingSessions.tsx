@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import Image from "next/image";
-import React, { useState } from "react";
-import DashboardModal from "@/components/dashboard/DashboardModal";
+
+import React, { useState, useEffect, useMemo } from "react";
 import { 
   IconSearch, 
   IconPlus, 
@@ -10,85 +8,129 @@ import {
   IconCalendar,
   IconClock,
   IconUser,
-  IconMapPin,
   IconCheck,
   IconX,
   IconClockHour4,
   IconChevronRight,
-  IconChevronDown,
-  IconArrowLeft,
-  IconDeviceFloppy,
-  IconBallFootball,
   IconAlertCircle
 } from "@tabler/icons-react";
-const sessions = [
+import { 
+  CreateTrainingSessionModal, 
+  SessionAttendanceModal 
+} from "./training-sessions/index";
+import { useGetTrainingSessionsQuery } from "@/redux/features/academy/academyApi";
+import { ITrainingSessionListItem } from "@/types/academy.type";
+
+const defaultSessions: ITrainingSessionListItem[] = [
   {
     id: 1,
-    team: "U-15",
+    _id: "6adc217c118a25d702953410",
+    teamBadge: "U-15",
+    teamName: "U-15",
     date: "Jan 25, 2026",
-    time: "9:00 AM - 11:00 AM",
-    title: "Set Pieces & Dead Balls",
-    coach: "John Smith",
-    attendance: 0,
+    timeRange: "9:00 AM - 11:00 AM",
+    sessionName: "Set Pieces & Dead Balls",
+    coachName: "John Smith",
+    attendancePercentage: 0,
     stats: { present: 0, late: 0, absent: 0, total: 20 },
     color: "#E31B23"
   },
   {
     id: 2,
-    team: "U-16",
+    _id: "6adc217c118a25d702953410",
+    teamBadge: "U-16",
+    teamName: "U-16",
     date: "Jan 25, 2026",
-    time: "9:00 AM - 11:00 AM",
-    title: "Goalkeeper Session",
-    coach: "Mike Williams",
-    attendance: 98,
+    timeRange: "9:00 AM - 11:00 AM",
+    sessionName: "Goalkeeper Session",
+    coachName: "Mike Williams",
+    attendancePercentage: 98,
     stats: { present: 16, late: 4, absent: 2, total: 22 },
     color: "#4ADE80"
   },
   {
     id: 3,
-    team: "U-17",
+    _id: "6adc217c118a25d702953410",
+    teamBadge: "U-17",
+    teamName: "U-17",
     date: "Jan 25, 2026",
-    time: "9:00 AM - 11:00 AM",
-    title: "Tactical Play & Formation",
-    coach: "Sarah Johnson",
-    attendance: 25,
+    timeRange: "9:00 AM - 11:00 AM",
+    sessionName: "Tactical Play & Formation",
+    coachName: "Sarah Johnson",
+    attendancePercentage: 25,
     stats: { present: 5, late: 0, absent: 15, total: 20 },
     color: "#E31B23"
   },
   {
     id: 4,
-    team: "U-19",
+    _id: "6adc217c118a25d702953410",
+    teamBadge: "U-19",
+    teamName: "U-19",
     date: "Jan 25, 2026",
-    time: "9:00 AM - 11:00 AM",
-    title: "Ball Control & Dribbling",
-    coach: "Mike Williams",
-    attendance: 82,
+    timeRange: "9:00 AM - 11:00 AM",
+    sessionName: "Ball Control & Dribbling",
+    coachName: "Mike Williams",
+    attendancePercentage: 82,
     stats: { present: 18, late: 4, absent: 7, total: 25 },
     color: "#FBBF24"
   }
 ];
-const initialPlayers = [
-  { id: 1, name: "Marcus Silva", number: 7, position: "Forward", status: "present", avatar: "https://i.pravatar.cc/100?u=marcus" },
-  { id: 2, name: "Alex Jordan", number: 5, position: "Midfielder", status: "unmarked", avatar: "https://i.pravatar.cc/100?u=alex" },
-  { id: 3, name: "Tyler Brooks", number: 3, position: "Defender", status: "present", avatar: "https://i.pravatar.cc/100?u=tyler" },
-  { id: 4, name: "Noah Carter", number: 9, position: "Forward", status: "unmarked", avatar: "https://i.pravatar.cc/100?u=noah" },
-  { id: 5, name: "Ethan Rivera", number: 11, position: "Winger", status: "absent", avatar: "https://i.pravatar.cc/100?u=ethan" },
-  { id: 6, name: "Liam Foster", number: 2, position: "Right Back", status: "unmarked", avatar: "https://i.pravatar.cc/100?u=liam" },
-  { id: 7, name: "Mason Hayes", number: 6, position: "Central Mid", status: "late", avatar: "https://i.pravatar.cc/100?u=mason" },
-  { id: 8, name: "Oliver Kim", number: 4, position: "Centre Back", status: "unmarked", avatar: "https://i.pravatar.cc/100?u=oliver" },
-  { id: 9, name: "Lucas Grant", number: 8, position: "Midfielder", status: "unmarked", avatar: "https://i.pravatar.cc/100?u=lucas" },
-];
+
 export const TrainingSessions = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedSession, setSelectedSession] = useState<any>(null);
-  const [players, setPlayers] = useState(initialPlayers);
-  const handleStatusChange = (playerId: number, status: string) => {
-    setPlayers(prev => prev.map(p => p.id === playerId ? { ...p, status } : p));
-  };
-  const markAll = (status: string) => {
-    setPlayers(prev => prev.map(p => ({ ...p, status })));
-  };
-  const unmarkedCount = players.filter(p => p.status === "unmarked").length;
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+
+  // Search & Filter State
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  // Debounce search term by 400ms before sending to API
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  // Fetch training sessions from API with searchTerm
+  const { data: sessionsResponse, isLoading } = useGetTrainingSessionsQuery({
+    searchTerm: debouncedSearch.trim() || undefined,
+  });
+
+  // Extract sessions list from API response
+  const apiSessions: ITrainingSessionListItem[] = useMemo(() => {
+    if (!sessionsResponse?.data) return [];
+    if (Array.isArray(sessionsResponse.data)) {
+      return sessionsResponse.data;
+    }
+    if (Array.isArray((sessionsResponse.data as { sessions?: ITrainingSessionListItem[] })?.sessions)) {
+      return (sessionsResponse.data as { sessions: ITrainingSessionListItem[] }).sessions;
+    }
+    return [];
+  }, [sessionsResponse]);
+
+  // Determine active sessions to display (use API data, or fallback with client-side filter if DB unseeded)
+  const displaySessions = useMemo(() => {
+    if (apiSessions.length > 0) {
+      return apiSessions;
+    }
+    // If API returned nothing and user hasn't searched, fallback to default sessions
+    if (!debouncedSearch.trim() && !isLoading) {
+      return defaultSessions;
+    }
+    // If user searched and API returned 0 results, also check fallback items as safe client-side filter
+    if (debouncedSearch.trim() && !isLoading && !sessionsResponse?.data) {
+      const q = debouncedSearch.toLowerCase();
+      return defaultSessions.filter(
+        (s) =>
+          s.sessionName?.toLowerCase().includes(q) ||
+          s.teamBadge?.toLowerCase().includes(q) ||
+          s.coachName?.toLowerCase().includes(q)
+      );
+    }
+    return [];
+  }, [apiSessions, debouncedSearch, isLoading, sessionsResponse]);
+
   return (
     <div className="flex flex-col gap-6 md:gap-8 w-full max-w-full overflow-x-hidden pb-10">
       {/* Header */}
@@ -99,426 +141,294 @@ export const TrainingSessions = () => {
         </div>
         <button 
           onClick={() => setShowCreateModal(true)}
-          className="w-full md:w-auto justify-center bg-[#E31B23] hover:bg-[#C2181F] text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 shrink-0"
+          className="w-full md:w-auto justify-center bg-[#E31B23] hover:bg-[#C2181F] text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 shrink-0 cursor-pointer"
         >
           <IconPlus size={20} />
           <span className="text-sm font-bold uppercase tracking-widest">Create Session</span>
         </button>
       </div>
-      {/* Search Bar */}
+
+      {/* Search Bar with searchTerm Query Integration */}
       <div className="bg-[#111111] rounded-3xl border border-white/15 p-4 flex flex-col sm:flex-row gap-4 shadow-xl">
         <div className="relative flex-1 min-w-0">
           <IconSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={20} />
           <input 
             type="text" 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search sessions by team, coach, or title..."
-            className="w-full bg-white/2 border border-white/15 rounded-2xl py-3 pl-12 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition-all"
+            className="w-full bg-white/2 border border-white/15 rounded-2xl py-3 pl-12 pr-10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition-all"
           />
+          {searchTerm && (
+            <button
+              type="button"
+              onClick={() => setSearchTerm("")}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors cursor-pointer"
+              title="Clear search"
+            >
+              <IconX size={16} />
+            </button>
+          )}
         </div>
-        <button className="w-full sm:w-auto justify-center bg-white/5 hover:bg-white/10 border border-white/15 text-white/60 hover:text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all shrink-0">
+        <button className="w-full sm:w-auto justify-center bg-white/5 hover:bg-white/10 border border-white/15 text-white/60 hover:text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all shrink-0 cursor-pointer">
           <IconFilter size={20} />
           <span className="text-sm font-bold">Filters</span>
         </button>
       </div>
-      {/* Session Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        {sessions.map((session) => (
-          <div 
-            key={session.id} 
-            onClick={() => setSelectedSession(session)}
-            className="bg-[#111111] rounded-4xl border border-white/15 p-5 md:p-6 flex flex-col gap-5 md:gap-6 hover:border-white/30 transition-all cursor-pointer group shadow-xl"
-          >
-            <div className="flex justify-between items-start gap-2">
-              <span className="bg-white/5 border border-white/15 px-3 md:px-4 py-2 rounded-xl text-[10px] font-black text-white/80 uppercase tracking-widest shrink-0">
-                {session.team}
-              </span>
-              <button className={`flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 rounded-xl border text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all shrink-0 min-w-0 ${
-                session.attendance > 50 
-                ? "bg-[#4ADE80]/10 border-[#4ADE80]/20 text-[#4ADE80] group-hover:bg-[#4ADE80] group-hover:text-black" 
-                : "bg-[#E31B23]/10 border-[#E31B23]/20 text-[#E31B23] group-hover:bg-[#E31B23] group-hover:text-white"
-              }`}>
-                {session.attendance > 50 ? <IconCheck size={14} className="shrink-0" /> : <IconAlertCircle size={14} className="shrink-0" />}
-                <span className="truncate">Attendance</span>
-                <IconChevronRight size={14} className="shrink-0" />
-              </button>
-            </div>
-            <div className="space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] md:text-[11px] font-bold text-white/40 uppercase tracking-widest">
-                <div className="flex items-center gap-2">
-                  <IconCalendar size={14} className="shrink-0" />
-                  {session.date}
-                </div>
-                <div className="flex items-center gap-2 text-white/80">
-                  <IconClock size={14} className="shrink-0" />
-                  {session.time}
-                </div>
+
+      {/* Loading Skeletons */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="bg-[#111111] rounded-4xl border border-white/10 p-5 md:p-6 flex flex-col gap-5 md:gap-6 animate-pulse"
+            >
+              <div className="flex justify-between items-center">
+                <div className="h-6 w-16 bg-white/5 rounded-xl" />
+                <div className="h-6 w-24 bg-white/5 rounded-xl" />
               </div>
-              <h3 className="text-lg font-black uppercase text-white font-orbitron leading-tight min-h-12 line-clamp-2 wrap-break-word">
-                {session.title}
-              </h3>
-              <div className="flex items-center gap-2 text-[10px] md:text-[11px] font-bold text-white/40 uppercase tracking-widest wrap-break-word">
-                <IconUser size={14} className="shrink-0" />
-                Coach: <span className="text-white/80">{session.coach}</span>
+              <div className="flex flex-col gap-3">
+                <div className="h-4 w-3/4 bg-white/5 rounded-lg" />
+                <div className="h-7 w-full bg-white/5 rounded-lg" />
+                <div className="h-4 w-1/2 bg-white/5 rounded-lg" />
+              </div>
+              <div className="flex flex-col gap-2 mt-auto">
+                <div className="h-2 w-full bg-white/5 rounded-full" />
+                <div className="h-4 w-full bg-white/5 rounded-lg" />
               </div>
             </div>
-            <div className="space-y-3">
-              <div className="flex justify-between items-end">
-                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest leading-none">Attendance:</span>
-                <span className="text-[10px] font-black text-white/80 uppercase tracking-widest leading-none">({session.attendance}%)</span>
-              </div>
-              <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                <div 
-                  className="h-full transition-all duration-1000" 
-                  style={{ 
-                    width: `${session.attendance}%`,
-                    backgroundColor: session.color
-                  }} 
-                />
-              </div>
-              <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest">
-                <div className="flex items-center gap-1.5 text-[#4ADE80]">
-                  <IconCheck size={12} strokeWidth={4} />
-                  {session.stats.present}
-                </div>
-                <div className="flex items-center gap-1.5 text-[#FBBF24]">
-                  <IconClockHour4 size={12} strokeWidth={4} />
-                  {session.stats.late}
-                </div>
-                <div className="flex items-center gap-1.5 text-[#E31B23]">
-                  <IconX size={12} strokeWidth={4} />
-                  {session.stats.absent}
-                </div>
-                <div className="ml-auto text-white/20">
-                  Total: {session.stats.total}
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-      {/* Attendance Modal */}
-      <DashboardModal
-        isOpen={!!selectedSession}
-        onClose={() => setSelectedSession(null)}
-        title={selectedSession?.title || "Attendance"}
-        maxWidth="max-w-4xl"
-        footer={
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-[#FBBF24]">
-              <IconAlertCircle size={18} className="shrink-0" />
-              <span className="text-[11px] font-bold uppercase tracking-widest">{unmarkedCount} players still unmarked</span>
-            </div>
-            <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3 sm:gap-4">
-              <button 
-                onClick={() => setSelectedSession(null)}
-                className="w-full sm:w-auto px-4 sm:px-8 py-3.5 rounded-xl border border-white/30 text-[11px] font-black uppercase tracking-widest text-white hover:bg-white/5 transition-all flex justify-center items-center shrink-0"
-              >
-                Cancel
-              </button>
-              <button className="w-full sm:w-auto px-4 sm:px-8 py-3.5 rounded-xl bg-[#E31B23] hover:bg-[#C2181F] text-[11px] font-black uppercase tracking-widest text-white flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 shrink-0">
-                <IconDeviceFloppy size={18} />
-                Save Attendance
-              </button>
-            </div>
-          </div>
-        }
-      >
-        <div className="space-y-8">
-          {/* Session Info Bar */}
-          <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
-            <span className="bg-white/5 border border-white/15 px-3 py-1 rounded-full text-[10px] font-black text-white/80 uppercase tracking-widest">
-              {selectedSession?.team}
-            </span>
-            <div className="flex items-center gap-2 text-white/40 text-[11px] font-bold uppercase tracking-widest">
-              <IconCalendar size={14} />
-              {selectedSession?.date} • {selectedSession?.time}
-            </div>
-            <div className="flex items-center gap-2 text-white/40 text-[11px] font-bold uppercase tracking-widest">
-              <IconUser size={14} />
-              {selectedSession?.coach}
-            </div>
-            <div className="flex items-center gap-2 text-white/40 text-[11px] font-bold uppercase tracking-widest">
-              <IconMapPin size={14} />
-              Main Field A
-            </div>
-          </div>
-          {/* Stats Badges */}
-          <div className="flex gap-4 overflow-x-auto pb-2 custom-scrollbar">
-            <div className="bg-[#4ADE80]/10 border border-[#4ADE80]/20 rounded-xl px-4 py-2.5 flex items-center gap-2 shrink-0">
-              <IconCheck size={16} className="text-[#4ADE80]" />
-              <span className="text-[11px] font-black text-[#4ADE80] uppercase tracking-widest">{players.filter(p => p.status === 'present').length} Present</span>
-            </div>
-            <div className="bg-[#FBBF24]/10 border border-[#FBBF24]/20 rounded-xl px-4 py-2.5 flex items-center gap-2 shrink-0">
-              <IconClockHour4 size={16} className="text-[#FBBF24]" />
-              <span className="text-[11px] font-black text-[#FBBF24] uppercase tracking-widest">{players.filter(p => p.status === 'late').length} Late</span>
-            </div>
-            <div className="bg-[#E31B23]/10 border border-[#E31B23]/20 rounded-xl px-4 py-2.5 flex items-center gap-2 shrink-0">
-              <IconX size={16} className="text-[#E31B23]" />
-              <span className="text-[11px] font-black text-[#E31B23] uppercase tracking-widest">{players.filter(p => p.status === 'absent').length} Absent</span>
-            </div>
-            <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 flex items-center gap-2 shrink-0">
-              <IconClock size={16} className="text-white/40" />
-              <span className="text-[11px] font-black text-white/40 uppercase tracking-widest">{unmarkedCount} Unmarked</span>
-            </div>
-            <div className="ml-auto flex items-center text-white/20 text-[11px] font-bold uppercase tracking-widest shrink-0">
-              {players.length} total players
-            </div>
-          </div>
-          {/* Player Grid Header & Quick Actions */}
-          <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white/2 border-y border-white/10 -mx-4 sm:-mx-6 lg:-mx-10 px-4 sm:px-6 lg:px-10 py-4">
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="text-[11px] font-bold text-white/40 uppercase tracking-widest w-full sm:w-auto mb-2 sm:mb-0">Quick actions:</span>
-              <button 
-                onClick={() => markAll('present')}
-                className="bg-[#4ADE80]/10 hover:bg-[#4ADE80]/20 border border-[#4ADE80]/20 rounded-xl px-4 py-2 flex items-center gap-2 text-[10px] font-black text-[#4ADE80] uppercase tracking-widest transition-all"
-              >
-                <IconCheck size={14} />
-                Mark All Present
-              </button>
-              <button 
-                onClick={() => markAll('absent')}
-                className="bg-[#E31B23]/10 hover:bg-[#E31B23]/20 border border-[#E31B23]/20 rounded-xl px-4 py-2 flex items-center gap-2 text-[10px] font-black text-[#E31B23] uppercase tracking-widest transition-all"
-              >
-                <IconX size={14} />
-                Mark All Absent
-              </button>
-              <button 
-                onClick={() => markAll('unmarked')}
-                className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl px-4 py-2 text-[10px] font-black text-white/40 uppercase tracking-widest transition-all"
-              >
-                Clear All
-              </button>
-            </div>
-            <div className="relative w-full xl:w-auto mt-2 xl:mt-0">
-              <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20" size={16} />
-              <input type="text" placeholder="Search" className="bg-white/5 border border-white/15 rounded-xl py-2 pl-10 pr-4 text-xs text-white focus:outline-none focus:border-white/25 w-full xl:w-48" />
-            </div>
-          </div>
-          {/* Players List */}
-          <div className="space-y-2">
-            {players.map((p, index) => (
+          ))}
+        </div>
+      ) : displaySessions.length === 0 ? (
+        /* Empty State */
+        <div className="bg-[#111111] rounded-3xl border border-white/10 p-12 text-center flex flex-col items-center justify-center gap-3">
+          <IconAlertCircle size={32} className="text-white/30" />
+          <p className="text-white text-sm font-bold uppercase tracking-wider font-orbitron">
+            No Training Sessions Found
+          </p>
+          <p className="text-white/40 text-xs">
+            {searchTerm
+              ? `No sessions match "${searchTerm}". Try a different keyword.`
+              : "No training sessions available at the moment."}
+          </p>
+          {searchTerm && (
+            <button
+              type="button"
+              onClick={() => setSearchTerm("")}
+              className="mt-2 px-4 py-2 rounded-xl border border-white/15 text-xs text-white hover:bg-white/5 transition-all cursor-pointer font-bold"
+            >
+              Clear Search
+            </button>
+          )}
+        </div>
+      ) : (
+        /* Session Cards Grid */
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          {displaySessions.map((session) => {
+            const sessionId =
+              session._id ||
+              (session.id ? session.id.toString() : "6adc217c118a25d702953410");
+            const team =
+              typeof session.teamBadge === "string"
+                ? session.teamBadge
+                : typeof session.teamName === "string"
+                ? session.teamName
+                : typeof session.team === "string"
+                ? session.team
+                : (session as any).team?.teamName || (session as any).team?.name || "U-15";
+            const title =
+              typeof session.sessionName === "string"
+                ? session.sessionName
+                : typeof session.title === "string"
+                ? session.title
+                : "Training Session";
+            const date =
+              typeof session.date === "string"
+                ? session.date
+                : typeof session.sessionDate === "string"
+                ? session.sessionDate
+                : typeof session.formattedDate === "string"
+                ? session.formattedDate
+                : "Jan 25, 2026";
+            const time =
+              typeof session.timeRange === "string"
+                ? session.timeRange
+                : session.startTime && session.endTime
+                ? `${session.startTime} - ${session.endTime}`
+                : typeof session.time === "string"
+                ? session.time
+                : "9:00 AM - 11:00 AM";
+            const coach =
+              typeof session.coachName === "string"
+                ? session.coachName
+                : typeof session.coach === "string"
+                ? session.coach
+                : (session as any).coach?.fullName || (session as any).coach?.name || "COACH";
+
+            const attendanceObj =
+              typeof session.attendance === "object" && session.attendance !== null
+                ? (session.attendance as any)
+                : null;
+
+            const attendance: number =
+              typeof session.attendance === "number"
+                ? session.attendance
+                : typeof attendanceObj?.percentage === "number"
+                ? attendanceObj.percentage
+                : typeof session.attendancePercentage === "number"
+                ? session.attendancePercentage
+                : typeof session.attendanceRate === "number"
+                ? session.attendanceRate
+                : 0;
+
+            const stats = {
+              present:
+                typeof attendanceObj?.present === "number"
+                  ? attendanceObj.present
+                  : typeof session.stats?.present === "number"
+                  ? session.stats.present
+                  : typeof session.overviewChips?.presentCount === "number"
+                  ? session.overviewChips.presentCount
+                  : 0,
+              late:
+                typeof attendanceObj?.late === "number"
+                  ? attendanceObj.late
+                  : typeof session.stats?.late === "number"
+                  ? session.stats.late
+                  : typeof session.overviewChips?.lateCount === "number"
+                  ? session.overviewChips.lateCount
+                  : 0,
+              absent:
+                typeof attendanceObj?.absent === "number"
+                  ? attendanceObj.absent
+                  : typeof session.stats?.absent === "number"
+                  ? session.stats.absent
+                  : typeof session.overviewChips?.absentCount === "number"
+                  ? session.overviewChips.absentCount
+                  : 0,
+              total:
+                typeof attendanceObj?.total === "number"
+                  ? attendanceObj.total
+                  : typeof session.stats?.total === "number"
+                  ? session.stats.total
+                  : typeof session.overviewChips?.totalPlayers === "number"
+                  ? session.overviewChips.totalPlayers
+                  : 0,
+            };
+
+            if (!stats.total) {
+              stats.total = stats.present + stats.late + stats.absent;
+            }
+
+            const color =
+              session.color ||
+              (attendance > 75
+                ? "#4ADE80"
+                : attendance > 40
+                ? "#FBBF24"
+                : "#E31B23");
+
+            return (
               <div 
-                key={p.id} 
-                className={`flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-2xl border transition-all ${
-                  p.status === 'present' ? 'bg-[#4ADE80]/5 border-[#4ADE80]/20' :
-                  p.status === 'late' ? 'bg-[#FBBF24]/5 border-[#FBBF24]/20' :
-                  p.status === 'absent' ? 'bg-[#E31B23]/5 border-[#E31B23]/20' :
-                  'bg-white/1 border-white/5 hover:bg-white/3'
-                }`}
+                key={sessionId} 
+                onClick={() => setSelectedSessionId(sessionId)}
+                className="bg-[#111111] rounded-4xl border border-white/15 p-5 md:p-6 flex flex-col gap-5 md:gap-6 hover:border-white/30 transition-all cursor-pointer group shadow-xl"
               >
-                <div className="flex items-center gap-4 sm:gap-6">
-                  <span className="w-6 text-[11px] font-black text-white/20">{index + 1}</span>
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full overflow-hidden border border-white/15 shrink-0">
-                      <Image src={p.avatar} alt={p.name} className="w-full h-full object-cover" width={100} height={100}/>
+                <div className="flex justify-between items-start gap-2">
+                  <span className="bg-white/5 border border-white/15 px-3 md:px-4 py-2 rounded-xl text-[10px] font-black text-white/80 uppercase tracking-widest shrink-0">
+                    {team}
+                  </span>
+                  <button 
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedSessionId(sessionId);
+                    }}
+                    className={`flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 rounded-xl border text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all shrink-0 min-w-0 cursor-pointer ${
+                      attendance > 50 
+                      ? "bg-[#4ADE80]/10 border-[#4ADE80]/20 text-[#4ADE80] group-hover:bg-[#4ADE80] group-hover:text-black" 
+                      : "bg-[#E31B23]/10 border-[#E31B23]/20 text-[#E31B23] group-hover:bg-[#E31B23] group-hover:text-white"
+                    }`}
+                  >
+                    {attendance > 50 ? <IconCheck size={14} className="shrink-0" /> : <IconAlertCircle size={14} className="shrink-0" />}
+                    <span className="truncate">Attendance</span>
+                    <IconChevronRight size={14} className="shrink-0" />
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] md:text-[11px] font-bold text-white/40 uppercase tracking-widest">
+                    <div className="flex items-center gap-2">
+                      <IconCalendar size={14} className="shrink-0" />
+                      {date}
                     </div>
-                    <div>
-                      <p className="text-sm font-black text-white leading-none mb-1">{p.name}</p>
-                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest leading-none">#{p.number} • {p.position}</p>
+                    <div className="flex items-center gap-2 text-white/80">
+                      <IconClock size={14} className="shrink-0" />
+                      {time}
+                    </div>
+                  </div>
+                  <h3 className="text-lg font-black uppercase text-white font-orbitron leading-tight min-h-12 line-clamp-2 wrap-break-word">
+                    {title}
+                  </h3>
+                  <div className="flex items-center gap-2 text-[10px] md:text-[11px] font-bold text-white/40 uppercase tracking-widest wrap-break-word">
+                    <IconUser size={14} className="shrink-0" />
+                    Coach: <span className="text-white/80">{coach}</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-3 mt-auto">
+                  <div className="flex justify-between items-end">
+                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest leading-none">Attendance:</span>
+                    <span className="text-[10px] font-black text-white/80 uppercase tracking-widest leading-none">({attendance}%)</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full transition-all duration-1000" 
+                      style={{ 
+                        width: `${attendance}%`,
+                        backgroundColor: color
+                      }} 
+                    />
+                  </div>
+                  <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest">
+                    <div className="flex items-center gap-1.5 text-[#4ADE80]">
+                      <IconCheck size={12} strokeWidth={4} />
+                      {stats.present}
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[#FBBF24]">
+                      <IconClockHour4 size={12} strokeWidth={4} />
+                      {stats.late}
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[#E31B23]">
+                      <IconX size={12} strokeWidth={4} />
+                      {stats.absent}
+                    </div>
+                    <div className="ml-auto text-white/20">
+                      Total: {stats.total}
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-wrap sm:flex-nowrap gap-2 md:justify-end mt-2 md:mt-0 w-full md:w-auto">
-                  <button 
-                    onClick={() => handleStatusChange(p.id, 'present')}
-                    className={`flex-1 sm:flex-none justify-center px-3 sm:px-4 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest flex items-center gap-1 sm:gap-2 transition-all ${
-                      p.status === 'present' ? 'bg-[#4ADE80] text-black border-[#4ADE80]' : 'bg-white/5 text-white/40 border-white/10 hover:bg-white/10'
-                    }`}
-                  >
-                    <IconCheck size={14} />
-                    Present
-                  </button>
-                  <button 
-                    onClick={() => handleStatusChange(p.id, 'late')}
-                    className={`flex-1 sm:flex-none justify-center px-3 sm:px-4 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest flex items-center gap-1 sm:gap-2 transition-all ${
-                      p.status === 'late' ? 'bg-[#FBBF24] text-black border-[#FBBF24]' : 'bg-white/5 text-white/40 border-white/10 hover:bg-white/10'
-                    }`}
-                  >
-                    <IconClock size={14} />
-                    Late
-                  </button>
-                  <button 
-                    onClick={() => handleStatusChange(p.id, 'absent')}
-                    className={`flex-1 sm:flex-none justify-center px-3 sm:px-4 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest flex items-center gap-1 sm:gap-2 transition-all ${
-                      p.status === 'absent' ? 'bg-[#E31B23] text-white border-[#E31B23]' : 'bg-white/5 text-white/40 border-white/10 hover:bg-white/10'
-                    }`}
-                  >
-                    <IconX size={14} />
-                    Absent
-                  </button>
-                </div>
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
-      </DashboardModal>
+      )}
+
+      {/* Attendance Modal (API Integrated) */}
+      <SessionAttendanceModal
+        isOpen={Boolean(selectedSessionId)}
+        sessionId={selectedSessionId}
+        onClose={() => setSelectedSessionId(null)}
+      />
+
       {/* Create Session Modal */}
-      <DashboardModal
+      <CreateTrainingSessionModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        title="Create Training Session"
-        subtitle="Schedule a new training session for your team"
-        showBackButton
-        footer={
-          <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
-            <button 
-              onClick={() => setShowCreateModal(false)}
-              className="w-full sm:w-auto px-4 sm:px-8 py-3.5 rounded-xl border border-white/30 text-[11px] font-black uppercase tracking-widest text-white hover:bg-white/5 transition-all flex items-center justify-center shrink-0"
-            >
-              Cancel
-            </button>
-            <button className="w-full sm:w-auto px-4 sm:px-8 py-3.5 rounded-xl bg-[#E31B23] hover:bg-[#C2181F] text-[11px] font-black uppercase tracking-widest text-white flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 shrink-0">
-              <IconPlus size={18} className="shrink-0" />
-              <span className="truncate">Create Session</span>
-            </button>
-          </div>
-        }
-      >
-        <div className="space-y-10">
-          {/* Basic Information */}
-          <div className="space-y-6">
-            <h3 className="text-xl font-black uppercase text-white font-orbitron">Basic Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
-                  Session Name <span className="text-[#E31B23]">*</span>
-                </label>
-                <input type="text" placeholder="e.g., Technical Drills Practice" className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
-                  Team <span className="text-[#E31B23]">*</span>
-                </label>
-                <div className="relative">
-                  <select className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white/60 appearance-none focus:outline-none focus:border-white/25 transition-all cursor-pointer">
-                    <option>Select an option</option>
-                  </select>
-                  <IconChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
-                </div>
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
-                  Head Coach <span className="text-[#E31B23]">*</span>
-                </label>
-                <div className="relative">
-                  <select className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white/60 appearance-none focus:outline-none focus:border-white/25 transition-all cursor-pointer">
-                    <option>Select an option</option>
-                  </select>
-                  <IconChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
-                </div>
-              </div>
-            </div>
-          </div>
-          {/* Schedule Details */}
-          <div className="space-y-6">
-            <h3 className="text-xl font-black uppercase text-white font-orbitron">Schedule Details</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
-                  Date <span className="text-[#E31B23]">*</span>
-                </label>
-                <div className="relative">
-                  <input type="date" className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-white/25 transition-all" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
-                  Start Time <span className="text-[#E31B23]">*</span>
-                </label>
-                <div className="relative">
-                  <input type="time" className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-white/25 transition-all" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
-                  End Time <span className="text-[#E31B23]">*</span>
-                </label>
-                <div className="relative">
-                  <input type="time" className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-white/25 transition-all" />
-                </div>
-              </div>
-            </div>
-          </div>
-          {/* Location & Venue */}
-          <div className="space-y-6">
-            <h3 className="text-xl font-black uppercase text-white font-orbitron">Location & Venue</h3>
-            <div className="space-y-2">
-              <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
-                Training Location <span className="text-[#E31B23]">*</span>
-              </label>
-              <div className="relative">
-                <select className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white/60 appearance-none focus:outline-none focus:border-white/25 transition-all cursor-pointer">
-                  <option>Select an option</option>
-                </select>
-                <IconChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
-              </div>
-            </div>
-          </div>
-          {/* Session Type & Focus */}
-          <div className="space-y-6">
-            <h3 className="text-xl font-black uppercase text-white font-orbitron">Session Type & Focus</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
-                  Session Type <span className="text-[#E31B23]">*</span>
-                </label>
-                <div className="relative">
-                  <select className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white/60 appearance-none focus:outline-none focus:border-white/25 transition-all cursor-pointer">
-                    <option>Select an option</option>
-                  </select>
-                  <IconChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
-                  Focus Area <span className="text-[#E31B23]">*</span>
-                </label>
-                <div className="relative">
-                  <select className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white/60 appearance-none focus:outline-none focus:border-white/25 transition-all cursor-pointer">
-                    <option>Select an option</option>
-                  </select>
-                  <IconChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
-                </div>
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <label className="text-[11px] font-black uppercase tracking-widest text-white/60">Max Participants</label>
-                <input type="text" placeholder="e.g., 25" className="w-full bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all" />
-                <p className="text-[9px] text-white/20 font-bold uppercase tracking-widest">Leave blank for unlimited participants</p>
-              </div>
-            </div>
-          </div>
-          {/* Session Details */}
-          <div className="space-y-6">
-            <h3 className="text-xl font-black uppercase text-white font-orbitron">Session Details</h3>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
-                  Session Description <span className="text-[#E31B23]">*</span>
-                </label>
-                <textarea 
-                  placeholder="Describe the training session objectives, drills, and activities..." 
-                  className="w-full h-32 bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all resize-none"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[11px] font-black uppercase tracking-widest text-white/60">Required Equipment</label>
-                <textarea 
-                  placeholder="List all equipment needed: cones, balls, bibs, etc." 
-                  className="w-full h-32 bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all resize-none"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[11px] font-black uppercase tracking-widest text-white/60">Additional Notes</label>
-                <textarea 
-                  placeholder="Any additional information for coaches or players..." 
-                  className="w-full h-32 bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/25 transition-all resize-none"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </DashboardModal>
+      />
     </div>
   );
 };
+
 export default TrainingSessions;

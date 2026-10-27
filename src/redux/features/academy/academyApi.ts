@@ -27,6 +27,22 @@ import {
   IAcademyMatchesResponse,
   IGetAcademyMatchesParams,
   ICreateAcademyMatchPayload,
+  IExtraEventsMetaResponse,
+  IExtraEventsResponse,
+  IGetExtraEventsParams,
+  ICreateExtraEventPayload,
+  ISponsorsMetaResponse,
+  ISponsorsResponse,
+  IGetSponsorsParams,
+  ICreateSponsorPayload,
+  IUpdateSponsorPayload,
+  ITrainingSessionCoachesResponse,
+  ITrainingSessionTeamsResponse,
+  IGetTrainingSessionsParams,
+  IGetTrainingSessionsResponse,
+  ICreateTrainingSessionPayload,
+  ISessionAttendanceResponse,
+  IUpdateSessionAttendanceArgs,
 } from "@/types/academy.type";
 
 export const academyApi = apiSlice.injectEndpoints({
@@ -659,6 +675,276 @@ export const academyApi = apiSlice.injectEndpoints({
         }
       },
     }),
+
+    getExtraEventsMeta: builder.query<IExtraEventsMetaResponse, void>({
+      query: () => ({
+        url: "/academies/extra-events/meta",
+        method: "GET",
+      }),
+      providesTags: [TagTypes.EXTRA_EVENTS, TagTypes.ACADEMY],
+    }),
+
+    getExtraEvents: builder.query<IExtraEventsResponse, IGetExtraEventsParams | void>({
+      query: (params) => ({
+        url: "/academies/extra-events",
+        method: "GET",
+        params: params || {},
+      }),
+      providesTags: [TagTypes.EXTRA_EVENTS, TagTypes.ACADEMY],
+    }),
+
+    createExtraEvent: builder.mutation<any, FormData | ICreateExtraEventPayload>({
+      query: (arg) => {
+        let body: FormData;
+        if (typeof window !== "undefined" && arg instanceof FormData) {
+          body = arg;
+        } else {
+          const formData = new FormData();
+          const payload = arg as any;
+          if (payload.bannerImage instanceof File) {
+            formData.append("bannerImage", payload.bannerImage);
+          }
+          const cleanData = { ...payload };
+          delete cleanData.bannerImage;
+          formData.append("data", JSON.stringify(cleanData));
+          body = formData;
+        }
+        return {
+          url: "/academies/extra-events",
+          method: "POST",
+          body,
+        };
+      },
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.EXTRA_EVENTS, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Extra event created successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to create extra event";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    getSponsorsMeta: builder.query<ISponsorsMetaResponse, void>({
+      query: () => ({
+        url: "/academies/sponsors/meta",
+        method: "GET",
+      }),
+      providesTags: [TagTypes.SPONSORS, TagTypes.ACADEMY],
+    }),
+
+    getSponsors: builder.query<ISponsorsResponse, IGetSponsorsParams | void>({
+      query: (params) => ({
+        url: "/academies/sponsors",
+        method: "GET",
+        params: params || {},
+      }),
+      providesTags: [TagTypes.SPONSORS, TagTypes.ACADEMY],
+    }),
+
+    createSponsor: builder.mutation<any, ICreateSponsorPayload>({
+      query: (body) => ({
+        url: "/academies/sponsors",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.SPONSORS, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Sponsor created successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to create sponsor";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    updateSponsor: builder.mutation<any, IUpdateSponsorPayload>({
+      query: ({ sponsorId, data }) => ({
+        url: `/academies/sponsors/${sponsorId}`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.SPONSORS, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Sponsor updated successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to update sponsor";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    deleteSponsor: builder.mutation<any, string>({
+      query: (sponsorId) => ({
+        url: `/academies/sponsors/${sponsorId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.SPONSORS, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Sponsor deleted successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to delete sponsor";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    getTrainingSessionCoaches: builder.query<ITrainingSessionCoachesResponse, void>({
+      query: () => ({
+        url: "/academies/training-sessions/coaches",
+        method: "GET",
+      }),
+      providesTags: [TagTypes.TRAINING_SESSIONS, TagTypes.COACHES, TagTypes.ACADEMY],
+    }),
+
+    getTrainingSessionTeams: builder.query<ITrainingSessionTeamsResponse, void>({
+      query: () => ({
+        url: "/academies/training-sessions/teams",
+        method: "GET",
+      }),
+      providesTags: [TagTypes.TRAINING_SESSIONS, TagTypes.TEAMS, TagTypes.ACADEMY],
+    }),
+
+    getTrainingSessions: builder.query<IGetTrainingSessionsResponse, IGetTrainingSessionsParams | void>({
+      query: (params) => {
+        const queryParams: Record<string, any> = {};
+        if (params?.searchTerm) queryParams.searchTerm = params.searchTerm;
+        if (params?.page) queryParams.page = params.page;
+        if (params?.limit) queryParams.limit = params.limit;
+        if (params?.teamId) queryParams.teamId = params.teamId;
+        if (params?.coachId) queryParams.coachId = params.coachId;
+        return {
+          url: "/academies/training-sessions",
+          method: "GET",
+          params: queryParams,
+        };
+      },
+      providesTags: [TagTypes.TRAINING_SESSIONS, TagTypes.ACADEMY],
+    }),
+
+    createTrainingSession: builder.mutation<any, ICreateTrainingSessionPayload>({
+      query: (body) => ({
+        url: "/academies/training-sessions",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.TRAINING_SESSIONS, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Training session created successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to create training session";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    getSessionAttendance: builder.query<ISessionAttendanceResponse, string>({
+      query: (sessionId) => ({
+        url: `/academies/training-sessions/${sessionId}/attendance`,
+        method: "GET",
+      }),
+      providesTags: [TagTypes.TRAINING_SESSIONS, TagTypes.ACADEMY],
+    }),
+
+    updateSessionAttendance: builder.mutation<any, IUpdateSessionAttendanceArgs>({
+      query: ({ sessionId, body }) => ({
+        url: `/academies/training-sessions/${sessionId}/attendance`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.TRAINING_SESSIONS, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Attendance updated successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to update attendance";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
   }),
 });
 
@@ -702,5 +988,29 @@ export const {
   useLazyGetAcademyMatchesQuery,
   useCreateAcademyMatchMutation,
   useDeleteAcademyMatchMutation,
+  useGetExtraEventsMetaQuery,
+  useLazyGetExtraEventsMetaQuery,
+  useGetExtraEventsQuery,
+  useLazyGetExtraEventsQuery,
+  useCreateExtraEventMutation,
+  useGetSponsorsMetaQuery,
+  useLazyGetSponsorsMetaQuery,
+  useGetSponsorsQuery,
+  useLazyGetSponsorsQuery,
+  useCreateSponsorMutation,
+  useUpdateSponsorMutation,
+  useDeleteSponsorMutation,
+  useGetTrainingSessionCoachesQuery,
+  useLazyGetTrainingSessionCoachesQuery,
+  useGetTrainingSessionTeamsQuery,
+  useLazyGetTrainingSessionTeamsQuery,
+  useGetTrainingSessionsQuery,
+  useLazyGetTrainingSessionsQuery,
+  useCreateTrainingSessionMutation,
+  useGetSessionAttendanceQuery,
+  useLazyGetSessionAttendanceQuery,
+  useUpdateSessionAttendanceMutation,
 } = academyApi;
+
+
 

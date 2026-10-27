@@ -688,3 +688,415 @@ export interface ICreateAcademyMatchPayload {
   estimatedTotalCost?: number;
   notes?: string;
 }
+
+// Extra Events Types
+export interface IExtraEventsMetaData {
+  eventTypes: string[];
+  groups: string[];
+  ageGroups: string[];
+  targetAttendees: string[];
+  statusOptions: string[];
+  dateFilters: string[];
+  teams: Array<{
+    _id: string;
+    teamName: string;
+    ageGroup: string;
+  }>;
+}
+
+export interface IExtraEventsMetaResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: IExtraEventsMetaData;
+}
+
+export interface IExtraEventItem {
+  _id: string;
+  id?: number | string;
+  eventName: string;
+  eventType: string;
+  group: string;
+  ageGroup: string;
+  targetAttendees: string;
+  status: string;
+  statusBadge?: {
+    label: string;
+    variant: string;
+  };
+  formattedDate?: string;
+  eventDate: string;
+  eventEndDate?: string;
+  startTime?: string;
+  endTime?: string;
+  registrationDeadline?: string;
+  venueName?: string;
+  venueAddress?: string;
+  registrationFee?: number;
+  currency?: string;
+  feeFormatted?: string;
+  currentAttendees?: number;
+  maxCapacity?: number;
+  capacityRatio?: string;
+  description?: string;
+  requirements?: string;
+  contactPerson?: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  bannerImage?: string;
+  canRegister?: boolean;
+  shareUrl?: string;
+  createdAt?: string;
+  [key: string]: any;
+}
+
+export interface IGetExtraEventsParams {
+  status?: string;
+  date?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface IExtraEventsResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: {
+    events: IExtraEventItem[];
+    meta: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+  };
+}
+
+export interface ICreateExtraEventPayload {
+  eventName: string;
+  eventType: string;
+  group: string;
+  ageGroup: string;
+  targetAttendees: string;
+  eventDate: string;
+  startTime?: string;
+  endTime?: string;
+  registrationDeadline?: string;
+  venueName: string;
+  venueAddress: string;
+  registrationFee?: number;
+  currency?: string;
+  maxCapacity?: number;
+  description: string;
+  requirements?: string;
+  contactPerson: string;
+  contactPhone: string;
+  contactEmail: string;
+  status?: string;
+  bannerImage?: File | null;
+}
+
+// Academy Sponsors Types
+export interface ISponsorsMetaData {
+  sponsorshipTypes: string[];
+  sponsorshipStatuses: string[];
+  paymentStatuses: string[];
+}
+
+export interface ISponsorsMetaResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: ISponsorsMetaData;
+}
+
+export interface ISponsorStats {
+  totalContractValue: number;
+  totalContractValueFormatted: string;
+  activeSponsors: number;
+  expiringSoon: number;
+  pendingPayments: number;
+  pendingPaymentsFormatted: string;
+}
+
+export interface ISponsorBadge {
+  label: string;
+  variant: string;
+}
+
+export interface ISponsorItem {
+  _id: string;
+  companyName: string;
+  contactPerson: string;
+  email: string;
+  phone: string;
+  fullAddress: string;
+  sponsorshipType: string;
+  sponsorshipTypeBadge?: ISponsorBadge;
+  contractValue: number;
+  currency: string;
+  contractValueFormatted?: string;
+  contractPeriod?: string;
+  startDate: string;
+  endDate: string;
+  status: string;
+  statusBadge?: ISponsorBadge;
+  paymentStatus: string;
+  paymentBadge?: ISponsorBadge;
+  sponsorshipDescription: string;
+  benefitsAndDeliverables?: string;
+  logo?: string;
+  createdAt?: string;
+  [key: string]: any;
+}
+
+export interface IGetSponsorsParams {
+  searchTerm?: string;
+  sponsorshipType?: string;
+  status?: string;
+  paymentStatus?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface ISponsorsResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: {
+    stats: ISponsorStats;
+    sponsors: ISponsorItem[];
+    meta: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+  };
+}
+
+export interface ICreateSponsorPayload {
+  companyName: string;
+  contactPerson: string;
+  email: string;
+  phone: string;
+  fullAddress: string;
+  sponsorshipType: string;
+  sponsorshipStatus: string;
+  contractValue: number;
+  currency: string;
+  paymentStatus: string;
+  startDate: string;
+  endDate: string;
+  sponsorshipDescription: string;
+  benefitsAndDeliverables?: string;
+}
+
+export interface IUpdateSponsorPayload {
+  sponsorId: string;
+  data: Partial<ICreateSponsorPayload>;
+}
+
+// Academy Training Sessions Types
+export interface ITrainingSessionCoachItem {
+  _id: string;
+  id?: string;
+  coachId: string;
+  fullName: string;
+  title?: string;
+  label?: string;
+  displayName?: string;
+  profileImage?: string;
+  email?: string;
+  phone?: string;
+}
+
+export interface ITrainingSessionCoachesResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: ITrainingSessionCoachItem[];
+}
+
+export interface ITrainingSessionTeamItem {
+  _id: string;
+  id?: string;
+  teamId: string;
+  teamName: string;
+  ageGroup?: string;
+  label?: string;
+  displayName?: string;
+  playersCount?: number;
+  coachesCount?: number;
+}
+
+export interface ITrainingSessionTeamsResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: ITrainingSessionTeamItem[];
+}
+
+export interface IGetTrainingSessionsParams {
+  searchTerm?: string;
+  page?: number;
+  limit?: number;
+  teamId?: string;
+  coachId?: string;
+  status?: string;
+}
+
+export interface ITrainingSessionCardStats {
+  present: number;
+  late: number;
+  absent: number;
+  total: number;
+}
+
+export interface ITrainingSessionListItem {
+  _id: string;
+  id?: string | number;
+  sessionName?: string;
+  title?: string;
+  teamBadge?: string;
+  teamName?: string;
+  team?: string;
+  date?: string;
+  sessionDate?: string;
+  formattedDate?: string;
+  startTime?: string;
+  endTime?: string;
+  timeRange?: string;
+  time?: string;
+  coachName?: string;
+  coach?: string;
+  trainingLocation?: string;
+  locationVenue?: string;
+  sessionType?: string;
+  focusArea?: string;
+  attendancePercentage?: number;
+  attendanceRate?: number;
+  attendance?:
+    | number
+    | {
+        percentage: number;
+        isCompleted?: boolean;
+        statusLabel?: string;
+        present?: number;
+        late?: number;
+        absent?: number;
+        unmarked?: number;
+        total?: number;
+      };
+  stats?: ITrainingSessionCardStats;
+  overviewChips?: {
+    presentCount: number;
+    lateCount: number;
+    absentCount: number;
+    unmarkedCount: number;
+    totalPlayers: number;
+  };
+  color?: string;
+  [key: string]: any;
+}
+
+export interface IGetTrainingSessionsResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data:
+    | ITrainingSessionListItem[]
+    | {
+        sessions: ITrainingSessionListItem[];
+        meta?: {
+          page: number;
+          limit: number;
+          total: number;
+          totalPages: number;
+        };
+      };
+}
+
+export interface ICreateTrainingSessionPayload {
+  sessionName: string;
+  teamId: string;
+  coachId: string;
+  sessionDate: string;
+  startTime: string;
+  endTime: string;
+  trainingLocation: string;
+  sessionType: string;
+  focusArea: string;
+  maxParticipants?: number;
+  sessionDescription: string;
+  requiredEquipment?: string;
+  additionalNotes?: string;
+}
+
+// Session Attendance Sheet Types
+export interface ISessionAttendanceSession {
+  _id: string;
+  sessionName: string;
+  teamBadge?: string;
+  teamName: string;
+  date: string;
+  startTime?: string;
+  endTime?: string;
+  timeRange?: string;
+  coachName: string;
+  locationVenue: string;
+}
+
+export interface ISessionAttendanceOverviewChips {
+  presentCount: number;
+  lateCount: number;
+  absentCount: number;
+  unmarkedCount: number;
+  totalPlayers: number;
+  hasUnmarked?: boolean;
+  unmarkedAlert?: string;
+}
+
+export interface ISessionAttendancePlayer {
+  serialNumber: number;
+  attendanceId: string;
+  playerId: string;
+  name: string;
+  avatar: string;
+  jerseyNumber: string;
+  position: string;
+  status: "PRESENT" | "LATE" | "ABSENT" | "UNMARKED" | string;
+  notes?: string;
+}
+
+export interface ISessionAttendanceSheetData {
+  session: ISessionAttendanceSession;
+  overviewChips: ISessionAttendanceOverviewChips;
+  players: ISessionAttendancePlayer[];
+}
+
+export interface ISessionAttendanceResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: ISessionAttendanceSheetData;
+}
+
+export interface IAttendanceItemPayload {
+  playerId: string;
+  status: "PRESENT" | "LATE" | "ABSENT" | "UNMARKED" | string;
+  notes?: string;
+}
+
+export interface IUpdateSessionAttendancePayload {
+  attendances?: IAttendanceItemPayload[];
+  markAll?: "PRESENT" | "ABSENT" | "CLEAR" | string;
+}
+
+export interface IUpdateSessionAttendanceArgs {
+  sessionId: string;
+  body: IUpdateSessionAttendancePayload;
+}
+
+
+
