@@ -20,13 +20,20 @@ import { Button } from "@/components/ui/button";
 import { useUploadMediaMutation } from "@/redux/features/media/mediaApi";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { UploadStartPayload } from "@/components/user-wise-dashboard/player-dashboard/images-videos";
+import TagTypes from "@/constants/tagType.constant";
 
 interface UploadVideoModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onStartUpload?: (payload: UploadStartPayload) => void;
 }
 
-export const UploadVideoModal = ({ isOpen, onClose }: UploadVideoModalProps) => {
+export const UploadVideoModal = ({
+  isOpen,
+  onClose,
+  onStartUpload,
+}: UploadVideoModalProps) => {
   const [uploadMedia, { isLoading: isUploading }] = useUploadMediaMutation();
 
   const [title, setTitle] = useState("");
@@ -118,12 +125,27 @@ export const UploadVideoModal = ({ isOpen, onClose }: UploadVideoModalProps) => 
 
     if (hasError) return;
 
-    try {
-      const formData = new FormData();
-      formData.append("data", JSON.stringify({ title: title.trim() }));
-      formData.append("video", videoFile!);
-      formData.append("thumbnail", thumbnailFile!);
+    const formData = new FormData();
+    formData.append("data", JSON.stringify({ title: title.trim() }));
+    formData.append("video", videoFile!);
+    formData.append("thumbnail", thumbnailFile!);
 
+    // If background upload handler provided, delegate and close immediately
+    if (onStartUpload) {
+      onStartUpload({
+        formData,
+        title: title.trim(),
+        fileName: videoFile!.name,
+        type: "video",
+        thumbnailPreview: thumbnailPreviewUrl,
+        endpoint: "/media/upload",
+        tagsToInvalidate: [TagTypes.MEDIA],
+      });
+      handleClose();
+      return;
+    }
+
+    try {
       await uploadMedia(formData).unwrap();
       handleClose();
     } catch {
@@ -343,7 +365,7 @@ export const UploadVideoModal = ({ isOpen, onClose }: UploadVideoModalProps) => 
             <Button
               type="submit"
               disabled={isUploading}
-              className="bg-primary text-primary-foreground font-bold hover:bg-primary/90 min-w-32"
+              className="bg-primary text-primary-foreground font-bold hover:bg-primary/90 min-w-32 cursor-pointer"
             >
               {isUploading ? (
                 <span className="flex items-center gap-2">

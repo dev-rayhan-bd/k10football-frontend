@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
+import { MediaUploadProvider } from "@/providers/MediaUploadProvider";
 
 const DashboardRootLayout = ({ children }: { children: ReactNode }) => {
-return <>{children}</>;
-}
+  return <MediaUploadProvider>{children}</MediaUploadProvider>;
+};
 export default DashboardRootLayout;

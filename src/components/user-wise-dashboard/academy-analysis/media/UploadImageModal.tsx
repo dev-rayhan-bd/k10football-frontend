@@ -13,13 +13,20 @@ import { Button } from "@/components/ui/button";
 import { useUploadMediaMutation } from "@/redux/features/media/mediaApi";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { UploadStartPayload } from "@/components/user-wise-dashboard/player-dashboard/images-videos";
+import TagTypes from "@/constants/tagType.constant";
 
 interface UploadImageModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onStartUpload?: (payload: UploadStartPayload) => void;
 }
 
-export const UploadImageModal = ({ isOpen, onClose }: UploadImageModalProps) => {
+export const UploadImageModal = ({
+  isOpen,
+  onClose,
+  onStartUpload,
+}: UploadImageModalProps) => {
   const [uploadMedia, { isLoading: isUploading }] = useUploadMediaMutation();
 
   const [title, setTitle] = useState("");
@@ -83,11 +90,26 @@ export const UploadImageModal = ({ isOpen, onClose }: UploadImageModalProps) => 
 
     if (hasError) return;
 
-    try {
-      const formData = new FormData();
-      formData.append("data", JSON.stringify({ title: title.trim() }));
-      formData.append("image", file!);
+    const formData = new FormData();
+    formData.append("data", JSON.stringify({ title: title.trim() }));
+    formData.append("image", file!);
 
+    // If background upload handler provided, delegate and close immediately
+    if (onStartUpload) {
+      onStartUpload({
+        formData,
+        title: title.trim(),
+        fileName: file!.name,
+        type: "image",
+        thumbnailPreview: previewUrl,
+        endpoint: "/media/upload",
+        tagsToInvalidate: [TagTypes.MEDIA],
+      });
+      handleClose();
+      return;
+    }
+
+    try {
       await uploadMedia(formData).unwrap();
       handleClose();
     } catch {
@@ -229,7 +251,7 @@ export const UploadImageModal = ({ isOpen, onClose }: UploadImageModalProps) => 
             <Button
               type="submit"
               disabled={isUploading}
-              className="bg-primary text-primary-foreground font-bold hover:bg-primary/90 min-w-32"
+              className="bg-primary text-primary-foreground font-bold hover:bg-primary/90 min-w-32 cursor-pointer"
             >
               {isUploading ? (
                 <span className="flex items-center gap-2">

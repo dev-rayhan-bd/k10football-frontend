@@ -35,3 +35,12 @@ export interface UploadTask {
   errorMessage?: string;
 }
 
+export interface UploadStartPayload {
+  formData: FormData;
+  title: string;
+  fileName: string;
+  type: UploadMediaType;
+  thumbnailPreview?: string | null;
+  endpoint?: string;
+  tagsToInvalidate?: string[];
+}

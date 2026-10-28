@@ -13,6 +13,7 @@ import { getToken } from "@/helpers/SessionHelper";
 import { SuccessToast, ErrorToast, WarningToast } from "@/helpers/ValidationHelper";
 import { useAppDispatch } from "@/hooks/reduxHooks";
 import { playerApi } from "@/redux/features/player/playerApi";
+import { apiSlice } from "@/redux/features/api/apiSlice";
 import TagTypes from "@/constants/tagType.constant";
 import {
   UploadTask,
@@ -71,7 +72,8 @@ export const MediaUploadProvider: React.FC<{ children: ReactNode }> = ({ childre
       xhrRef.current = xhr;
       const token = getToken();
 
-      xhr.open("POST", `${BASE_URL}/players/me/media`);
+      const endpoint = payload.endpoint || "/players/me/media";
+      xhr.open("POST", `${BASE_URL}${endpoint}`);
 
       if (token) {
         xhr.setRequestHeader(
@@ -106,14 +108,26 @@ export const MediaUploadProvider: React.FC<{ children: ReactNode }> = ({ childre
             };
           });
 
-          SuccessToast(
+          let successMsg =
             payload.type === "video"
               ? "Video uploaded successfully"
-              : "Image uploaded successfully"
-          );
+              : "Image uploaded successfully";
+          try {
+            const resJson = JSON.parse(xhr.responseText);
+            if (resJson.message) successMsg = resJson.message;
+          } catch {
+            // Keep default
+          }
 
-          // Invalidate player cache so media list updates anywhere in the app
-          dispatch(playerApi.util.invalidateTags([TagTypes.PLAYERS]));
+          SuccessToast(successMsg);
+
+          // Invalidate cache so media lists update across the dashboard
+          if (payload.tagsToInvalidate && payload.tagsToInvalidate.length > 0) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            dispatch(apiSlice.util.invalidateTags(payload.tagsToInvalidate as any));
+          } else {
+            dispatch(playerApi.util.invalidateTags([TagTypes.PLAYERS]));
+          }
 
           // Auto dismiss completed widget after 3.5 seconds
           setTimeout(() => {
@@ -181,8 +195,12 @@ export const GlobalUploadWidget: React.FC = () => {
   const { activeUploadTask, cancelUpload, dismissUpload } = useMediaUpload();
   const pathname = usePathname();
 
-  // On images-videos page, ImagesVideos component renders it right above header cards
-  if (!activeUploadTask || pathname === "/dashboard/player/images-videos") {
+  // On pages that render MediaUploadProgressWidget directly, avoid duplicate widget
+  if (
+    !activeUploadTask ||
+    pathname === "/dashboard/player/images-videos" ||
+    pathname === "/dashboard/club"
+  ) {
     return null;
   }
 

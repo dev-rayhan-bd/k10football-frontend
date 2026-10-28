@@ -22,15 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useUploadPlayerMediaMutation } from "@/redux/features/player/playerApi";
 import { ErrorToast } from "@/helpers/ValidationHelper";
-import { UploadMediaType } from "./types";
-
-export interface UploadStartPayload {
-  formData: FormData;
-  title: string;
-  fileName: string;
-  type: UploadMediaType;
-  thumbnailPreview?: string | null;
-}
+import { UploadMediaType, UploadStartPayload } from "./types";
 
 interface UploadMediaModalProps {
   isOpen: boolean;

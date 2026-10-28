@@ -11,6 +11,7 @@ import {
   IconMessageCircle
 } from "@tabler/icons-react";
 import { ReactNode } from "react";
+import { GlobalUploadWidget } from "@/providers/MediaUploadProvider";
 
 const clubSidebarItems = [
   { name: "Dashboard", url: "/dashboard/club", icon: IconDashboard },
@@ -24,13 +25,14 @@ const clubSidebarItems = [
 ];
 
 const ClubLayout = ({ children }: { children: ReactNode }) => {
-return (
-<DashboardLayout 
-  sidebarItems={clubSidebarItems}
-  tier={{ name: "ACTIVE CLUB", color: "#00FF62" }}
->
-  {children}
-</DashboardLayout>
-);
-}
+  return (
+    <DashboardLayout 
+      sidebarItems={clubSidebarItems}
+      tier={{ name: "ACTIVE CLUB", color: "#00FF62" }}
+    >
+      <GlobalUploadWidget />
+      {children}
+    </DashboardLayout>
+  );
+};
 export default ClubLayout;

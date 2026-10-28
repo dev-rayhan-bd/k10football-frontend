@@ -48,6 +48,10 @@ const TagTypes = {
     playerEvaluations: "PlayerEvaluations",
     VALIDATE_CV: "ValidateCv",
     validateCv: "ValidateCv",
+    CLUBS: "Clubs",
+    clubs: "Clubs",
+    SCOUTING_BOARD: "ScoutingBoard",
+    scoutingBoard: "ScoutingBoard",
 } as const;
 
 export default TagTypes;
