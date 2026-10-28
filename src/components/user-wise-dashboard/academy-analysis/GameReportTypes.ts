@@ -57,16 +57,20 @@ export type Player = {
   };
 };
 
-export type ReportView = MatchStats & {
+export type ReportView = Omit<Partial<MatchStats>, "id" | "status" | "playerId"> & {
   id?: string | number;
   playerId?: string | number;
   playerName?: string;
   playerPosition?: string;
+  playerAvatar?: string;
   scoutName?: string;
+  matchTitle?: string;
   team1?: string;
   team2?: string;
   date?: string;
   rating?: number;
+  overallPerformance?: string;
+  performanceRatio?: string;
   goals?: number;
   assists?: number;
   passes?: number;
@@ -81,11 +85,14 @@ export type ReportView = MatchStats & {
   height?: string;
   foot?: string;
   characteristics?: string[];
+  scoutAnalysis?: string;
   goalMarkers?: Marker[];
   pitchMarkers?: PitchMarker[];
   tag?: string;
   tier?: string;
+  positionTierBadge?: string;
   dateFormatted?: string;
+  status?: string;
 };
 
 export type SummaryCardProps = {
@@ -107,7 +114,12 @@ export type GameReportCardProps = {
   passes: number;
   pos: string;
   tier: string;
-  team1: string;
-  team2: string;
+  team1?: string;
+  team2?: string;
+  matchTitle?: string;
+  performanceRatio?: string;
+  positionTierBadge?: string;
+  status?: string;
   onClick: () => void;
+  onPdfClick?: () => void;
 };

@@ -49,6 +49,17 @@ import {
   IAcademyNewsMetaResponse,
   IAcademyNewsResponse,
   IGetAcademyNewsParams,
+  IAcademyPlayerEvaluationsResponse,
+  IGetAcademyPlayerEvaluationsParams,
+  IAcademyPlayerEvaluationPdfResponse,
+  IPlayerEvaluationDetailsResponse,
+  IAcademyGameReportsResponse,
+  IGetAcademyGameReportsParams,
+  ISingleGameReportResponse,
+  IAcademyValidateCvResponse,
+  IGetAcademyValidateCvParams,
+  INotifyCoachToValidateCvPayload,
+  INotifyCoachToValidateCvResponse,
 } from "@/types/academy.type";
 
 export const academyApi = apiSlice.injectEndpoints({
@@ -1229,6 +1240,91 @@ export const academyApi = apiSlice.injectEndpoints({
         }
       },
     }),
+
+    getAcademyPlayerEvaluations: builder.query<IAcademyPlayerEvaluationsResponse, IGetAcademyPlayerEvaluationsParams | void>({
+      query: (params) => ({
+        url: "/academies/player-evaluations",
+        method: "GET",
+        params: params || {},
+      }),
+      providesTags: [TagTypes.ACADEMY, TagTypes.PLAYER_EVALUATIONS],
+    }),
+
+    getAcademyPlayerEvaluationPdf: builder.query<IAcademyPlayerEvaluationPdfResponse, string>({
+      query: (evaluationId) => ({
+        url: `/academies/player-evaluations/${evaluationId}/pdf`,
+        method: "GET",
+      }),
+      providesTags: (_result, _error, evaluationId) => [
+        { type: TagTypes.PLAYER_EVALUATIONS, id: evaluationId },
+        TagTypes.ACADEMY,
+      ],
+    }),
+
+    getPlayerEvaluationDetails: builder.query<IPlayerEvaluationDetailsResponse, string>({
+      query: (evaluationId) => ({
+        url: `/coaches/player-evaluations/${evaluationId}`,
+        method: "GET",
+      }),
+      providesTags: (_result, _error, evaluationId) => [
+        { type: TagTypes.PLAYER_EVALUATIONS, id: evaluationId },
+        TagTypes.ACADEMY,
+      ],
+    }),
+
+    getAcademyGameReports: builder.query<IAcademyGameReportsResponse, IGetAcademyGameReportsParams | void>({
+      query: (params) => ({
+        url: "/academies/game-reports",
+        method: "GET",
+        params: params || {},
+      }),
+      providesTags: [TagTypes.GAME_REPORTS, TagTypes.ACADEMY],
+    }),
+
+    getSingleGameReport: builder.query<ISingleGameReportResponse, string>({
+      query: (reportId) => ({
+        url: `/players/game-reports/${reportId}`,
+        method: "GET",
+      }),
+      providesTags: (_result, _error, reportId) => [
+        { type: TagTypes.GAME_REPORTS, id: reportId },
+        TagTypes.ACADEMY,
+      ],
+    }),
+
+    getAcademyValidateCv: builder.query<IAcademyValidateCvResponse, IGetAcademyValidateCvParams | void>({
+      query: (params) => ({
+        url: "/academies/validate-cv",
+        method: "GET",
+        params: params || {},
+      }),
+      providesTags: [TagTypes.VALIDATE_CV, TagTypes.ACADEMY],
+    }),
+
+    notifyCoachToValidateCv: builder.mutation<INotifyCoachToValidateCvResponse, INotifyCoachToValidateCvPayload>({
+      query: (data) => ({
+        url: "/academies/validate-cv/notify-coach",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: [TagTypes.VALIDATE_CV, TagTypes.ACADEMY],
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Coach notified successfully to validate player CV");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to notify coach";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
   }),
 });
 
@@ -1310,6 +1406,19 @@ export const {
   useMoveNewsToBinMutation,
   useRestoreNewsFromBinMutation,
   useDeleteAcademyNewsMutation,
+  useGetAcademyPlayerEvaluationsQuery,
+  useLazyGetAcademyPlayerEvaluationsQuery,
+  useGetAcademyPlayerEvaluationPdfQuery,
+  useLazyGetAcademyPlayerEvaluationPdfQuery,
+  useGetPlayerEvaluationDetailsQuery,
+  useLazyGetPlayerEvaluationDetailsQuery,
+  useGetAcademyGameReportsQuery,
+  useLazyGetAcademyGameReportsQuery,
+  useGetSingleGameReportQuery,
+  useLazyGetSingleGameReportQuery,
+  useGetAcademyValidateCvQuery,
+  useLazyGetAcademyValidateCvQuery,
+  useNotifyCoachToValidateCvMutation,
 } = academyApi;
 
 

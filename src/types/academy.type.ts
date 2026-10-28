@@ -1487,3 +1487,485 @@ export interface IGetAcademyNewsParams {
   search?: string;
   category?: string;
 }
+
+// Academy Player Evaluations Dashboard & PDF Types
+
+export interface IAcademyPlayerEvaluationsMetrics {
+  avgOverallRating: number;
+  improvingPlayers: number;
+  evaluatedThisMonth: number;
+  totalEvaluations: number;
+}
+
+export interface IAcademyMostImprovedPlayer {
+  rank?: number;
+  playerId?: string;
+  playerName?: string;
+  name?: string;
+  ageGroup?: string;
+  team?: string;
+  position?: string;
+  change?: string | number;
+  improvementDelta?: number;
+  rating?: number;
+  down?: boolean;
+}
+
+export interface IAcademyTopPerformer {
+  rank: number;
+  playerId: string;
+  playerName: string;
+  ageGroup: string;
+  position: string;
+  rating: number;
+}
+
+export interface IAcademyEvaluationPlayer {
+  _id: string;
+  name: string;
+  avatar?: string;
+  position: string;
+  tier?: string;
+  tierBadge?: string;
+  currentClub?: string;
+}
+
+export interface IAcademyEvaluationCoach {
+  _id: string;
+  name: string;
+  avatar?: string;
+  title?: string;
+}
+
+export interface IAcademyEvaluationScores {
+  technical: number;
+  physical: number;
+  mental: number;
+  technicalScore?: number;
+  physicalScore?: number;
+  mentalScore?: number;
+}
+
+export interface IAcademyEvaluationItem {
+  _id: string;
+  evaluationId: string;
+  evaluationDate: string;
+  formattedDate: string;
+  ageGroup: string;
+  player: IAcademyEvaluationPlayer;
+  coach: IAcademyEvaluationCoach;
+  overallRating: number;
+  overallRatingFormatted?: string;
+  rawOverallRating?: number;
+  scores: IAcademyEvaluationScores;
+  improvementDelta?: number;
+  status: string;
+  nextEvaluationDue?: string;
+}
+
+export interface IAcademyEvaluationsMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPage?: number;
+  totalPages?: number;
+}
+
+export interface IAcademyPlayerEvaluationsData {
+  metrics: IAcademyPlayerEvaluationsMetrics;
+  mostImproved: IAcademyMostImprovedPlayer[];
+  topPerformers: IAcademyTopPerformer[];
+  evaluations: IAcademyEvaluationItem[];
+  meta: IAcademyEvaluationsMeta;
+}
+
+export interface IAcademyPlayerEvaluationsResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: IAcademyPlayerEvaluationsData;
+}
+
+export interface IGetAcademyPlayerEvaluationsParams {
+  searchTerm?: string;
+  page?: number;
+  limit?: number;
+}
+
+// Player Evaluation PDF Data Types
+
+export interface IAcademyEvaluationPdfTechniques {
+  dribbling?: string;
+  ballMastery?: string;
+  runningWithBall?: string;
+  rangeOfPassing?: string;
+  rangePassing?: string;
+  strikingFinishing?: string;
+  defending?: string;
+  firstTouch?: string;
+  nonDominantFoot?: string;
+  [key: string]: string | undefined;
+}
+
+export interface IAcademyEvaluationPdfCharacteristics {
+  gameAwareness?: string;
+  gamesUnderstanding?: string;
+  decisionMaking?: string;
+  concentration?: string;
+  leadership?: string;
+  desire?: string;
+  maturity?: string;
+  [key: string]: string | undefined;
+}
+
+export interface IAcademyEvaluationPdfPhysical {
+  speedAcceleration?: string;
+  movement?: string;
+  balance?: string;
+  power?: string;
+  strength?: string;
+  agility?: string;
+  coordination?: string;
+  [key: string]: string | undefined;
+}
+
+export interface IAcademyEvaluationPdfBreakdown {
+  techniques: IAcademyEvaluationPdfTechniques;
+  characteristics: IAcademyEvaluationPdfCharacteristics;
+  physical: IAcademyEvaluationPdfPhysical;
+}
+
+export interface IAcademyEvaluationPdfCategoryScores {
+  technical: number;
+  physical: number;
+  mental: number;
+}
+
+export interface IAcademyEvaluationPdfPlayer {
+  id: string;
+  name: string;
+  position: string;
+  age: number;
+  avatar?: string;
+  academy?: string;
+  currentClub?: string;
+  tier?: string;
+}
+
+export interface IAcademyEvaluationPdfCoach {
+  id: string;
+  name: string;
+  club?: string;
+  avatar?: string;
+  license?: string;
+}
+
+export interface IAcademyEvaluationPdfAcademy {
+  name: string;
+  logo?: string;
+}
+
+export interface IAcademyEvaluationPdfData {
+  reportTitle: string;
+  evaluationId: string;
+  evaluationDate: string;
+  formattedDate: string;
+  cycle: string;
+  status: string;
+  nextEvaluationDue?: string;
+  overallRating: number;
+  grade: string;
+  categoryScores: IAcademyEvaluationPdfCategoryScores;
+  player: IAcademyEvaluationPdfPlayer;
+  coach: IAcademyEvaluationPdfCoach;
+  academy: IAcademyEvaluationPdfAcademy;
+  breakdown: IAcademyEvaluationPdfBreakdown;
+  coachFeedback?: string;
+  notes?: string;
+  downloadUrl?: string;
+  isOfficial?: boolean;
+  generatedAt?: string;
+}
+
+export interface IAcademyPlayerEvaluationPdfResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: IAcademyEvaluationPdfData;
+}
+
+// Player Evaluation Single Details Data Types
+
+export interface IPlayerEvaluationDetailsPlayer {
+  _id: string;
+  name: string;
+  age: number;
+  avatar?: string;
+  position: string;
+  centre?: string;
+  rating: number;
+}
+
+export interface IPlayerEvaluationDetailsEvaluation {
+  _id: string;
+  date: string;
+  status: string;
+  overallRating: number;
+  technicalScore: number;
+  physicalScore: number;
+  mentalScore: number;
+  techniques: IAcademyEvaluationPdfTechniques;
+  characteristics: IAcademyEvaluationPdfCharacteristics;
+  physical: IAcademyEvaluationPdfPhysical;
+  notes?: string;
+  nextEvaluationDue?: string;
+}
+
+export interface IPlayerEvaluationDetailsData {
+  player: IPlayerEvaluationDetailsPlayer;
+  evaluation: IPlayerEvaluationDetailsEvaluation;
+}
+
+export interface IPlayerEvaluationDetailsResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: IPlayerEvaluationDetailsData;
+}
+
+// Academy Game Reports Dashboard Types
+
+export interface IAcademyGameReportsMetrics {
+  avgMatchRating: string;
+  totalGoals: number;
+  totalAssists: number;
+  totalReports: number;
+}
+
+export interface IAcademyScoutingReportItem {
+  _id: string;
+  playerId: string;
+  playerName: string;
+  playerAvatar?: string;
+  ageGroup: string;
+  matchTitle: string;
+  date: string;
+  scoutName?: string;
+  overallPerformance: string;
+  performanceRatio: string;
+  goals: number;
+  assists: number;
+  passes: number;
+  position: string;
+  tier: string;
+  positionTierBadge?: string;
+  status: string;
+  team1?: string;
+  team2?: string;
+}
+
+export interface IAcademyTopScorerItem {
+  _id: string;
+  name: string;
+  position: string;
+  ageGroup: string;
+  goals: number;
+  avatar?: string;
+}
+
+export interface IAcademyGameReportTopPerformer {
+  rank: string;
+  name: string;
+  position: string;
+  rating: string;
+}
+
+export interface IAcademyGameReportsData {
+  metrics: IAcademyGameReportsMetrics;
+  scoutingReports: IAcademyScoutingReportItem[];
+  topScorers: IAcademyTopScorerItem[];
+  topPerformers: IAcademyGameReportTopPerformer[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface IAcademyGameReportsResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: IAcademyGameReportsData;
+}
+
+export interface IGetAcademyGameReportsParams {
+  searchTerm?: string;
+  page?: number;
+  limit?: number;
+}
+
+// Single Game Report Details Types (GET /players/game-reports/:reportId)
+
+export interface IAccurateShotItem {
+  x: number;
+  y: number;
+  target?: string;
+  _id?: string;
+}
+
+export interface IAccurateAssistItem {
+  fromX: number;
+  fromY: number;
+  toX: number;
+  toY: number;
+  assistType?: string;
+  _id?: string;
+}
+
+export interface IGameReportStats {
+  shotsOnGoal: number;
+  goalScored: number;
+  assists: number;
+  passAccurate: number;
+  wrongPass: number;
+  penaltiesTaken: number;
+  freeKick: number;
+  cornerKick: number;
+  standTackle: number;
+  slidingTackle: number;
+  interception: number;
+  appearances: number;
+  fault: number;
+  yellowCard: number;
+  redCard: number;
+  savesAccurate: number;
+  goalUnsave: number;
+  penaltiesSaves: number;
+  punching: number;
+  handling: number;
+  reflex: number;
+  aerialAbility: number;
+  throwing: number;
+  reactions: number;
+  [key: string]: number | undefined;
+}
+
+export interface IGameReportCategoryRatings {
+  Attack?: number;
+  Passing?: number;
+  Possession?: number;
+  Defending?: number;
+  Discipline?: number;
+  Goalkeeping?: number;
+  [key: string]: number | undefined;
+}
+
+export interface ISingleGameReportData {
+  _id: string;
+  title: string;
+  subtitle?: string;
+  scoutRating?: number;
+  rating?: number;
+  position?: string;
+  date?: string;
+  league?: string;
+  score?: string;
+  homeScore?: number;
+  awayScore?: number;
+  performanceMetrics?: {
+    goals: number;
+    assists: number;
+    passes: number;
+  };
+  scoutAnalysis?: string;
+  status?: string;
+  paymentStatus?: string;
+  reportPdfUrl?: string | null;
+  stats?: IGameReportStats;
+  accurateShots?: IAccurateShotItem[];
+  accurateAssists?: IAccurateAssistItem[];
+  categoryRatings?: IGameReportCategoryRatings;
+}
+
+export interface ISingleGameReportResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: ISingleGameReportData;
+}
+
+export interface IAcademyValidateCvMetrics {
+  totalPlayers: number;
+  goldCvs: number;
+  silverCvs: number;
+  bronzeCvs: number;
+}
+
+export interface IAcademyValidateCvPlayerInfo {
+  _id: string;
+  name: string;
+  country: string;
+  avatar?: string;
+}
+
+export interface IAcademyValidateCvBadge {
+  label: string;
+  variant: string;
+}
+
+export interface IAcademyValidateCvItem {
+  _id: string;
+  player: IAcademyValidateCvPlayerInfo;
+  rating: number;
+  cvTier: string;
+  cvTierBadge?: IAcademyValidateCvBadge;
+  type: string;
+  position: string;
+  validation: string;
+  validationBadge?: IAcademyValidateCvBadge;
+  coach?: string;
+  assignedCoachId?: string;
+  cvUrl?: string;
+}
+
+export interface IAcademyValidateCvData {
+  metrics: IAcademyValidateCvMetrics;
+  players: IAcademyValidateCvItem[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface IAcademyValidateCvResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: IAcademyValidateCvData;
+}
+
+export interface IGetAcademyValidateCvParams {
+  searchTerm?: string;
+  cvTier?: string;
+  type?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface INotifyCoachToValidateCvPayload {
+  playerId: string;
+  message?: string;
+}
+
+export interface INotifyCoachToValidateCvResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data?: any;
+}
+
+

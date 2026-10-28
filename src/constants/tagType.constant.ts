@@ -44,6 +44,10 @@ const TagTypes = {
     products: "Products",
     ACADEMY_NEWS: "AcademyNews",
     academyNews: "AcademyNews",
+    PLAYER_EVALUATIONS: "PlayerEvaluations",
+    playerEvaluations: "PlayerEvaluations",
+    VALIDATE_CV: "ValidateCv",
+    validateCv: "ValidateCv",
 } as const;
 
 export default TagTypes;

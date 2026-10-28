@@ -22,6 +22,9 @@ import {
 } from "@/components/ui/dialog";
 
 import RadarChart from "@/components/user-wise-dashboard/coach-dashboard/create-game-report/RadarChart";
+import { useGetSingleGameReportQuery } from "@/redux/features/academy/academyApi";
+import { BASE_URL } from "@/constants/global.constant";
+import { getToken } from "@/helpers/SessionHelper";
 
 import {
   ReportView,
@@ -53,6 +56,13 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
   const previewRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Fetch dynamic single game report details from API
+  const reportId = selectedCard ? String(selectedCard.id || (selectedCard as any)._id || "") : "";
+  const { data: detailsResponse, isLoading: isDetailsLoading } = useGetSingleGameReportQuery(reportId, {
+    skip: !reportId,
+  });
+  const reportDetails = detailsResponse?.data;
+
   // ResizeObserver to handle scaling
   useEffect(() => {
     const handleResize = () => {
@@ -77,18 +87,43 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
     });
     observer.observe(previewRef.current);
     return () => observer.disconnect();
-  }, [selectedCard]);
+  }, [selectedCard, reportDetails]);
 
-  // Derived Stats
+  // Derived Stats: prioritize API stats, then fallback
   const activeStats = useMemo<ReportStats | null>(() => {
+    if (reportDetails?.stats) {
+      return reportDetails.stats as unknown as ReportStats;
+    }
     if (!selectedCard) return null;
     return getStatsFromReport(selectedCard);
-  }, [selectedCard]);
+  }, [reportDetails, selectedCard]);
 
-  const isGK =
-    safeString(selectedCard?.playerPosition).toUpperCase() === "GOALKEEPER";
+  const rawPosition = reportDetails?.position || selectedCard?.playerPosition || "FORWARD";
+  const displayPosition = safeString(rawPosition).toUpperCase();
+  const isGK = displayPosition === "GOALKEEPER";
 
+  const shortPos = useMemo(() => {
+    if (displayPosition === "STRIKER") return "ST";
+    if (displayPosition === "GOALKEEPER") return "GK";
+    if (displayPosition === "MIDFIELDER") return "MID";
+    if (displayPosition === "DEFENDER") return "DEF";
+    return displayPosition.substring(0, 3) || "ST";
+  }, [displayPosition]);
+
+  // Radar Stats from categoryRatings or calculation
   const radarStats = useMemo<RadarStat[]>(() => {
+    if (reportDetails?.categoryRatings) {
+      const cr = reportDetails.categoryRatings;
+      return [
+        { label: "ATT", value: cr.Attack ?? 100 },
+        { label: "PAS", value: cr.Passing ?? 73 },
+        { label: "POS", value: cr.Possession ?? 50 },
+        { label: "DEF", value: cr.Defending ?? 65 },
+        { label: "DIS", value: cr.Discipline ?? 45 },
+        { label: "GK", value: cr.Goalkeeping ?? 50 },
+      ];
+    }
+
     if (!selectedCard || !activeStats) {
       return [];
     }
@@ -150,30 +185,195 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
         value: mapStat(activeStats.appearances * 5 + (characteristics.includes("STRONG") ? 10 : 5), 20),
       },
     ];
-  }, [selectedCard, activeStats, isGK]);
+  }, [reportDetails, selectedCard, activeStats, isGK]);
 
-  const overallPercent =
-    radarStats.length > 0
-      ? Math.round(
-        radarStats.reduce((acc, curr) => acc + curr.value, 0) / radarStats.length
-      )
-      : 0;
+  // Overall Score Display
+  const displayOverall = useMemo(() => {
+    const rawRating = reportDetails?.rating ?? reportDetails?.scoutRating;
+    if (rawRating !== undefined && rawRating !== null) {
+      return rawRating <= 10 ? Math.round(rawRating * 10) : Math.round(rawRating);
+    }
+    if (selectedCard?.overallPerformance) {
+      const num = parseFloat(selectedCard.overallPerformance.replace("%", ""));
+      if (!isNaN(num)) return Math.round(num);
+    }
+    if (radarStats.length > 0) {
+      return Math.round(radarStats.reduce((acc, curr) => acc + curr.value, 0) / radarStats.length);
+    }
+    return 74;
+  }, [reportDetails, selectedCard, radarStats]);
 
+  // Dynamic Goal Diagram Markers (from accurateShots)
+  const goalMarkers = useMemo(() => {
+    if (reportDetails?.accurateShots && reportDetails.accurateShots.length > 0) {
+      return reportDetails.accurateShots.map((s) => ({ x: s.x, y: s.y }));
+    }
+    if (selectedCard?.goalMarkers && selectedCard.goalMarkers.length > 0) {
+      return selectedCard.goalMarkers;
+    }
+    return [
+      { x: 20, y: 35 },
+      { x: 50, y: 55 },
+      { x: 80, y: 35 },
+    ];
+  }, [reportDetails, selectedCard]);
+
+  // Dynamic Pitch Diagram Markers (from accurateAssists)
+  const pitchMarkers = useMemo(() => {
+    if (reportDetails?.accurateAssists && reportDetails.accurateAssists.length > 0) {
+      return reportDetails.accurateAssists.map((a) => ({
+        x1: a.fromX,
+        y1: a.fromY,
+        x2: a.toX,
+        y2: a.toY,
+      }));
+    }
+    if (selectedCard?.pitchMarkers && selectedCard.pitchMarkers.length > 0) {
+      return selectedCard.pitchMarkers;
+    }
+    return [
+      {
+        x1: 50,
+        y1: 72,
+        x2: 68,
+        y2: 52,
+      },
+    ];
+  }, [reportDetails, selectedCard]);
+
+  // Scout Name
+  const displayScoutName = useMemo(() => {
+    if (reportDetails?.subtitle) {
+      if (reportDetails.subtitle.includes("by ")) {
+        return reportDetails.subtitle.split("by ")[1]?.trim();
+      }
+      return reportDetails.subtitle;
+    }
+    if (selectedCard?.scoutName && selectedCard.scoutName !== "Pending Analysis") {
+      return selectedCard.scoutName;
+    }
+    return "Alex Ferguson";
+  }, [reportDetails, selectedCard]);
+
+  // Match Result
+  const displayMatchResult = useMemo(() => {
+    if (reportDetails?.title && reportDetails?.score) {
+      return `${reportDetails.title} (${reportDetails.score})`;
+    }
+    if (reportDetails?.title) {
+      return reportDetails.title;
+    }
+    if (selectedCard?.matchTitle && selectedCard?.score) {
+      return `${selectedCard.matchTitle} (${selectedCard.score})`;
+    }
+    if (selectedCard?.matchTitle) {
+      return selectedCard.matchTitle;
+    }
+    if (selectedCard?.team1 && selectedCard?.team2) {
+      return `${selectedCard.team1} VS ${selectedCard.team2}`;
+    }
+    return safeString(selectedCard?.team1 || "N/A");
+  }, [reportDetails, selectedCard]);
+
+  // Club Name
+  const displayClubName = useMemo(() => {
+    if (reportDetails?.title) {
+      const parts = reportDetails.title.split(/\s+(?:VS|vs)\s+/);
+      if (parts[0]) return parts[0].trim();
+    }
+    return safeString(selectedCard?.team1 || "K10 ACADEMY");
+  }, [reportDetails, selectedCard]);
+
+  // Date
+  const displayDate = useMemo(() => {
+    const raw = reportDetails?.date || selectedCard?.date;
+    if (!raw) return "N/A";
+    const d = new Date(raw);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    }
+    return raw;
+  }, [reportDetails, selectedCard]);
+
+  // Game Location & Type
+  const displayGameLocation = reportDetails?.league || selectedCard?.stadium || "LONDON";
+  const displayGameType = reportDetails?.league || selectedCard?.gameType || "CHAMPIONSHIP MATCH";
+
+  // Player image lookup
+  const matchingPlayer = selectedCard
+    ? players.find((player) => player.id === selectedCard.playerId)
+    : null;
+
+  const playerImgSrc = useMemo(() => {
+    if (selectedCard?.playerAvatar) return selectedCard.playerAvatar;
+    if (matchingPlayer?.playerImage) {
+      if (typeof matchingPlayer.playerImage === "string") return matchingPlayer.playerImage;
+      if (matchingPlayer.playerImage.src) return matchingPlayer.playerImage.src;
+    }
+    return isGK ? "/pngegg.png" : "/ronaldo.png";
+  }, [selectedCard, matchingPlayer, isGK]);
+
+  // Handle PDF Download
   const handleDownloadPDF = async () => {
     if (!selectedCard) {
       toast.error("No report selected.");
       return;
     }
 
-    const page = document.getElementById("report-page-1");
-
-    if (!page) {
-      toast.error("Report elements not found in the DOM.");
-      return;
-    }
+    const playerName = safeString(selectedCard.playerName).trim();
+    const safeFileName = (playerName || "Player")
+      .replace(/[^a-zA-Z0-9_-]+/g, "_")
+      .replace(/^_+|_+$/g, "");
 
     const toastId = toast.loading("Generating PDF report... Please wait.");
     setIsGeneratingPdf(true);
+
+    // Try downloading official PDF from backend URL if present
+    if (reportDetails?.reportPdfUrl) {
+      try {
+        const token = getToken();
+        const baseOrigin = BASE_URL.replace(/\/api\/v1\/?$/, "");
+        const targetUrl = reportDetails.reportPdfUrl.startsWith("http")
+          ? reportDetails.reportPdfUrl
+          : `${baseOrigin}${reportDetails.reportPdfUrl.startsWith("/") ? "" : "/"}${reportDetails.reportPdfUrl}`;
+
+        const res = await fetch(targetUrl, {
+          method: "GET",
+          headers: {
+            ...(token ? { Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}` } : {}),
+          },
+        });
+
+        if (res.ok) {
+          const contentType = res.headers.get("content-type") || "";
+          if (contentType.includes("pdf") || contentType.includes("octet-stream")) {
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `Game_Report_${safeFileName}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+            toast.success("PDF report downloaded successfully!", { id: toastId });
+            setIsGeneratingPdf(false);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("Backend PDF download fallback to client generation:", err);
+      }
+    }
+
+    // Client-side html2canvas & jsPDF generation
+    const page = document.getElementById("pdf-report-content") || document.getElementById("report-page-1");
+
+    if (!page) {
+      toast.error("Report elements not found in the DOM.", { id: toastId });
+      setIsGeneratingPdf(false);
+      return;
+    }
 
     try {
       const canvas = await html2canvas(page, {
@@ -190,12 +390,6 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
       const pdf = new jsPDF("p", "mm", [210, Math.max(297, imgHeight)]);
 
       pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-
-      const playerName = safeString(selectedCard.playerName).trim();
-      const safeFileName = (playerName || "Player")
-        .replace(/[^a-zA-Z0-9_-]+/g, "_")
-        .replace(/^_+|_+$/g, "");
-
       pdf.save(`Game_Report_${safeFileName || "Player"}.pdf`);
       toast.success("PDF report downloaded successfully!", { id: toastId });
     } catch (error) {
@@ -205,34 +399,6 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
       setIsGeneratingPdf(false);
     }
   };
-
-  const matchingPlayer = selectedCard
-    ? players.find((player) => player.id === selectedCard.playerId)
-    : null;
-
-  let playerImgSrc = "/dummy-player.png";
-  if (matchingPlayer?.playerImage) {
-    if (typeof matchingPlayer.playerImage === "string") {
-      playerImgSrc = matchingPlayer.playerImage;
-    } else if (matchingPlayer.playerImage.src) {
-      playerImgSrc = matchingPlayer.playerImage.src;
-    }
-  }
-
-  const pitchMarkers = [
-    {
-      x1: 50,
-      y1: 72,
-      x2: 68,
-      y2: 52,
-    },
-  ];
-
-  const goalMarkers = [
-    { x: 20, y: 35 },
-    { x: 50, y: 55 },
-    { x: 80, y: 35 },
-  ];
 
   if (!selectedCard) return null;
 
@@ -263,6 +429,12 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
           </div>
 
           <div className="flex flex-wrap gap-3 items-center w-full md:w-auto">
+            {isDetailsLoading && (
+              <span className="text-[10px] uppercase font-bold text-sky-400 bg-sky-400/10 px-3 py-1 rounded-full flex items-center gap-1.5">
+                <IconLoader2 size={12} className="animate-spin" /> Loading data...
+              </span>
+            )}
+
             <button
               type="button"
               onClick={handleDownloadPDF}
@@ -313,6 +485,7 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
                 <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none z-0">
                   <Image src="/pdf_logo.jpg" alt="Logo Watermark" className="w-24 h-24 object-contain" width={500} height={500} />
                 </div>
+
                 {/* Header */}
                 <div className="relative z-10 flex items-center justify-between border-b-4 border-slate-900 pb-3 mb-4 shrink-0">
                   <div className="flex items-center gap-4">
@@ -327,7 +500,7 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
                       PLAYER ANALYSIS PROFILE
                     </h2>
                     <div className="text-[10px] text-slate-900 font-black uppercase tracking-widest mt-1">
-                      POSITION : {safeString(selectedCard.playerPosition)} ⚽
+                      POSITION : {displayPosition} ⚽
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
@@ -348,7 +521,7 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
                     </div>
                     <div>
                       <span className="font-bold text-slate-900 uppercase font-orbitron">CLUB NAME:</span>
-                      <p className="text-slate-700 text-xs font-bold mt-0.5 uppercase">{safeString(selectedCard.team1)}</p>
+                      <p className="text-slate-700 text-xs font-bold mt-0.5 uppercase">{displayClubName}</p>
                     </div>
                     <div>
                       <span className="font-bold text-slate-900 uppercase font-orbitron">DOB:</span>
@@ -356,7 +529,7 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
                     </div>
                     <div>
                       <span className="font-bold text-slate-900 uppercase font-orbitron">MATCHES PLAYED:</span>
-                      <p className="text-slate-700 text-xs font-bold mt-0.5">{matchingPlayer?.seasonStats?.matches || "1"}</p>
+                      <p className="text-slate-700 text-xs font-bold mt-0.5">{activeStats?.appearances || matchingPlayer?.seasonStats?.matches || "1"}</p>
                     </div>
                     <div>
                       <span className="font-bold text-slate-900 uppercase font-orbitron">WEIGHT:</span>
@@ -385,21 +558,21 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
                     <div className="w-36 h-48 border-2 border-sky-400 bg-sky-50 rounded-2xl p-2 relative shadow-md flex flex-col items-center justify-between">
                       <div className="flex justify-between w-full items-start">
                         <div className="flex flex-col items-center">
-                          <div className="text-2xl font-black text-sky-600 font-orbitron italic leading-none">{overallPercent}</div>
-                          <div className="text-[8px] font-bold text-sky-500 uppercase font-orbitron leading-none mt-0.5">{safeString(selectedCard.playerPosition).substring(0, 3)}</div>
+                          <div className="text-2xl font-black text-sky-600 font-orbitron italic leading-none">{displayOverall}</div>
+                          <div className="text-[8px] font-bold text-sky-500 uppercase font-orbitron leading-none mt-0.5">{shortPos}</div>
                         </div>
                         <Image src="/logo.png" alt="Club Logo" className="w-5 h-5 object-contain" width={50} height={50} />
                       </div>
                       <div className="w-24 h-28 overflow-hidden relative mt-1 flex items-end justify-center">
                         <Image
-                          src={"/sergio-ramos.png"}
+                          src={playerImgSrc}
                           alt="Player Card Image"
                           className="h-full object-contain"
                           onError={(e) => {
                             e.currentTarget.src = isGK ? "/pngegg.png" : "/ronaldo.png";
                           }}
-                          width={50}
-                          height={50}
+                          width={80}
+                          height={100}
                         />
                       </div>
                       <div className="w-full text-center bg-sky-500/10 py-0.5 rounded border border-sky-400/20 mt-1">
@@ -432,27 +605,29 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
                   <div className="grid grid-cols-2 gap-x-12 gap-y-1.5 text-[10px] font-medium text-slate-600 pl-2">
                     <div>
                       <span className="font-bold text-slate-950 font-orbitron">SCOUT NAME:</span>
-                      <span className="ml-2 text-slate-700 font-bold uppercase">{selectedCard.scoutName || "MARIO LOPEZ"}</span>
+                      <span className="ml-2 text-slate-700 font-bold uppercase">{displayScoutName}</span>
                     </div>
                     <div>
                       <span className="font-bold text-slate-950 font-orbitron">GAME DATE:</span>
-                      <span className="ml-2 text-slate-700 font-bold">{selectedCard.date || "N/A"}</span>
+                      <span className="ml-2 text-slate-700 font-bold">{displayDate}</span>
                     </div>
                     <div>
                       <span className="font-bold text-slate-950 font-orbitron">MATCH RESULT:</span>
-                      <span className="ml-2 text-slate-700 font-bold uppercase">{safeString(selectedCard.playerName).split(" ")[0]} {selectedCard.score || "N/A"} {selectedCard.team2 || "N/A"}</span>
+                      <span className="ml-2 text-slate-700 font-bold uppercase">
+                        {displayMatchResult}
+                      </span>
                     </div>
                     <div>
                       <span className="font-bold text-slate-950 font-orbitron">GAME LOCATION:</span>
-                      <span className="ml-2 text-slate-700 font-bold uppercase">{selectedCard.stadium || "LONDON"}</span>
+                      <span className="ml-2 text-slate-700 font-bold uppercase">{displayGameLocation}</span>
                     </div>
                     <div>
                       <span className="font-bold text-slate-950 font-orbitron">WEATHER/TEMPERATURE:</span>
-                      <span className="ml-2 text-slate-700 font-bold uppercase">{selectedCard.weather || "RAINY"} {selectedCard.temperature ?? "19"}C</span>
+                      <span className="ml-2 text-slate-700 font-bold uppercase">{selectedCard.weather || "RAINY"} {selectedCard.temperature ?? "18"}C</span>
                     </div>
                     <div>
                       <span className="font-bold text-slate-950 font-orbitron">GAME TYPE:</span>
-                      <span className="ml-2 text-slate-700 font-bold uppercase">{selectedCard.gameType || "CHAMPIONSHIP MATCH"}</span>
+                      <span className="ml-2 text-slate-700 font-bold uppercase">{displayGameType}</span>
                     </div>
                   </div>
                 </div>
@@ -464,30 +639,30 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
                   </div>
                   <div className="grid grid-cols-3 gap-x-8 gap-y-1 text-[10px] pl-2">
                     {[
-                      { label: "Shots on Goal:", val: activeStats?.shotsOnGoal || 0 },
-                      { label: "Stand Tackle:", val: activeStats?.standTackle || 0 },
-                      { label: "Appearances:", val: activeStats?.appearances || 0 },
-                      { label: "Goals Scored:", val: activeStats?.goalScored || 0 },
-                      { label: "Sliding Tackle:", val: activeStats?.slidingTackle || 0 },
-                      { label: "Fault:", val: activeStats?.fault || 0 },
-                      { label: "Assists:", val: activeStats?.assists || 0 },
-                      { label: "Interception:", val: activeStats?.interception || 0 },
-                      { label: "Punching:", val: activeStats?.punching || 0 },
-                      { label: "Pass Accurate:", val: activeStats?.passAccurate || 0 },
-                      { label: "Saves Accurate:", val: activeStats?.savesAccurate || 0 },
-                      { label: "Handling:", val: activeStats?.handling || 0 },
-                      { label: "Wrong Pass:", val: activeStats?.wrongPass || 0 },
-                      { label: "Goals Unsave:", val: activeStats?.goalUnsave || 0 },
-                      { label: "Reflex:", val: activeStats?.reflex || 0 },
-                      { label: "Free Kick:", val: activeStats?.freeKick || 0 },
-                      { label: "Penalties Save:", val: activeStats?.penaltiesSaves || 0 },
-                      { label: "Aerial Ability:", val: activeStats?.aerialAbility || 0 },
-                      { label: "Corner Kick:", val: activeStats?.cornerKick || 0 },
-                      { label: "Red Card:", val: activeStats?.redCard || 0 },
-                      { label: "Throwing:", val: activeStats?.throwing || 0 },
-                      { label: "Penalties Taken:", val: activeStats?.penaltiesTaken || 0 },
-                      { label: "Yellow Card:", val: activeStats?.yellowCard || 0 },
-                      { label: "Reactions:", val: activeStats?.reactions || 0 }
+                      { label: "Shots on Goal:", val: activeStats?.shotsOnGoal ?? 0 },
+                      { label: "Stand Tackle:", val: activeStats?.standTackle ?? 0 },
+                      { label: "Appearances:", val: activeStats?.appearances ?? 0 },
+                      { label: "Goals Scored:", val: activeStats?.goalScored ?? 0 },
+                      { label: "Sliding Tackle:", val: activeStats?.slidingTackle ?? 0 },
+                      { label: "Fault:", val: activeStats?.fault ?? 0 },
+                      { label: "Assists:", val: activeStats?.assists ?? 0 },
+                      { label: "Interception:", val: activeStats?.interception ?? 0 },
+                      { label: "Punching:", val: activeStats?.punching ?? 0 },
+                      { label: "Pass Accurate:", val: activeStats?.passAccurate ?? 0 },
+                      { label: "Saves Accurate:", val: activeStats?.savesAccurate ?? 0 },
+                      { label: "Handling:", val: activeStats?.handling ?? 0 },
+                      { label: "Wrong Pass:", val: activeStats?.wrongPass ?? 0 },
+                      { label: "Goals Unsave:", val: activeStats?.goalUnsave ?? 0 },
+                      { label: "Reflex:", val: activeStats?.reflex ?? 0 },
+                      { label: "Free Kick:", val: activeStats?.freeKick ?? 0 },
+                      { label: "Penalties Save:", val: activeStats?.penaltiesSaves ?? 0 },
+                      { label: "Aerial Ability:", val: activeStats?.aerialAbility ?? 0 },
+                      { label: "Corner Kick:", val: activeStats?.cornerKick ?? 0 },
+                      { label: "Red Card:", val: activeStats?.redCard ?? 0 },
+                      { label: "Throwing:", val: activeStats?.throwing ?? 0 },
+                      { label: "Penalties Taken:", val: activeStats?.penaltiesTaken ?? 0 },
+                      { label: "Yellow Card:", val: activeStats?.yellowCard ?? 0 },
+                      { label: "Reactions:", val: activeStats?.reactions ?? 0 }
                     ].map((item, idx) => (
                       <div key={idx} className="flex justify-between border-b border-slate-100 py-1 pr-2">
                         <span className="text-slate-500 font-bold uppercase font-orbitron">{item.label}</span>
@@ -496,6 +671,18 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
                     ))}
                   </div>
                 </div>
+
+                {/* Scout Analysis Remarks (if available) */}
+                {(reportDetails?.scoutAnalysis || selectedCard.scoutAnalysis) && (
+                  <div className="relative z-10 mb-4 shrink-0">
+                    <div className="bg-slate-900 text-white font-orbitron px-4 py-1.5 rounded text-[10px] font-black uppercase tracking-wider mb-2 shadow">
+                      SCOUT ANALYSIS & REMARKS
+                    </div>
+                    <div className="text-[10px] text-slate-700 italic bg-slate-50 p-2.5 rounded border border-slate-200 leading-relaxed">
+                      &ldquo;{reportDetails?.scoutAnalysis || selectedCard.scoutAnalysis}&rdquo;
+                    </div>
+                  </div>
+                )}
 
                 {/* Bottom section (Radar, Overall, Logos) */}
                 <div className="relative z-10 flex items-center justify-between border-t-2 border-slate-200 pt-3 mt-auto mb-3 shrink-0">
@@ -513,7 +700,7 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
                   {/* Overall score */}
                   <div className="text-center flex-1 min-w-0">
                     <div className="text-4xl font-black text-emerald-600 font-orbitron tracking-tighter italic">
-                      OVERALL = {overallPercent}%
+                      OVERALL = {displayOverall}%
                     </div>
                   </div>
                   {/* Logo and tag */}
@@ -528,7 +715,7 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
 
                 {/* Diagrams Section */}
                 <div className="relative z-10 grid grid-cols-2 gap-8 shrink-0 items-start">
-                  {/* Goal Diagram */}
+                  {/* Goal Diagram with Dynamic accurateShots */}
                   <div className="bg-slate-200 border border-slate-200 rounded-2xl overflow-hidden flex flex-col items-center w-full shadow-md">
                     <div className="bg-slate-100 py-1.5 px-4 text-center border-b border-slate-200 w-full shrink-0">
                       <span className="text-[9px] font-black text-slate-800 uppercase tracking-widest font-orbitron">
@@ -545,7 +732,7 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Pitch Diagram */}
+                  {/* Pitch Diagram with Dynamic accurateAssists */}
                   <div className="bg-[#121212]/90 border border-slate-200 rounded-2xl overflow-hidden shadow-xl flex flex-col items-center w-full">
                     <div className="bg-slate-100 py-1.5 px-4 text-center border-b border-slate-200 w-full shrink-0">
                       <span className="text-[9px] font-black text-slate-800 uppercase tracking-widest font-orbitron">
@@ -572,7 +759,6 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
                     </div>
                   </div>
                 </div>
-
 
               </div>
             </div>
