@@ -73,7 +73,11 @@ const TableActionButtons = ({
       {onHeart && (
         <button 
           onClick={onHeart}
-          className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl border transition-all hover:scale-105 ${heartColor}`}
+          className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl border transition-all hover:scale-105 ${
+            isHeartFilled && heartColor.includes("text-white/40")
+              ? "text-[#E31B23] border-[#E31B23]/30 bg-[#E31B23]/10 hover:bg-[#E31B23]/20"
+              : heartColor
+          }`}
         >
           <IconHeart size={18} fill={isHeartFilled ? "currentColor" : "none"} />
         </button>

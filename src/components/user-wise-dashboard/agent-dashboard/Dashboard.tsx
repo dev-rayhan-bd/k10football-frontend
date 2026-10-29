@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+
 import Image from "next/image";
-import React from "react";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 import {
   IconUsers,
   IconHeart,
@@ -11,12 +13,17 @@ import {
   IconCertificate,
   IconPhone,
   IconMail,
-  IconChevronDown
+  IconChevronDown,
+  IconUpload,
+  IconPhoto,
+  IconVideo,
+  IconRefresh,
 } from "@tabler/icons-react";
 import DashboardStatCard from "@/components/dashboard/DashboardStatCard";
 import { DashboardSidebarPanel } from "@/components/dashboard/DashboardSidebar";
 import DashboardTable, { Column } from "@/components/dashboard/DashboardTable";
 import TableActionButtons from "@/components/dashboard/TableActionButtons";
+import { DashboardSection } from "@/components/dashboard/DashboardElements";
 import { Button } from "@/components/ui/button";
 import {
   BarChart,
@@ -28,22 +35,37 @@ import {
   ResponsiveContainer,
   AreaChart,
   Area,
-  Legend
+  Legend,
 } from "recharts";
-import MyImagesSection from "@/components/cvs/player-cv-details/MyImageSection";
-import MyVideosSection from "@/components/cvs/player-cv-details/MyVideoSection";
+import { useGetMyMediaQuery } from "@/redux/features/media/mediaApi";
+import { IMediaItem } from "@/types/media.type";
+import {
+  AcademyMediaCard,
+  MediaCardSkeleton,
+  UploadImageModal,
+  UploadVideoModal,
+  MediaPreviewModal,
+  EditMediaModal,
+  DeleteMediaModal,
+} from "@/components/user-wise-dashboard/academy-analysis/media";
+import { useMediaUpload } from "@/providers/MediaUploadProvider";
+import { MediaUploadProgressWidget } from "@/components/user-wise-dashboard/player-dashboard/images-videos";
+import { useGetAgentAnalyticsQuery } from "@/redux/features/agent/agentApi";
+
 const areaData = [
   { week: "Week 1", views: 14 },
   { week: "Week 2", views: 21 },
   { week: "Week 3", views: 12 },
   { week: "Week 4", views: 25 },
 ];
+
 const barData = [
   { week: "Week 1", likes: 8, shares: 5 },
   { week: "Week 2", likes: 6, shares: 9 },
   { week: "Week 3", likes: 11, shares: 4 },
   { week: "Week 4", likes: 3, shares: 5 },
 ];
+
 type Player = {
   avatar: string;
   name: string;
@@ -54,12 +76,14 @@ type Player = {
   age: number;
   status: "Gold" | "Silver" | "Bronze";
 };
+
 const monitoredPlayers: Player[] = [
   { avatar: "https://i.pravatar.cc/150?u=10", name: "Marcus Silva", position: "Forward", rating: 9.2, club: "Manchester Academy", country: "Brazil", age: 19, status: "Silver" },
   { avatar: "https://i.pravatar.cc/150?u=11", name: "David Chen", position: "Midfielder", rating: 8.8, club: "Chelsea Youth", country: "England", age: 18, status: "Gold" },
   { avatar: "https://i.pravatar.cc/150?u=12", name: "Alex Jonson", position: "Defender", rating: 8.5, club: "Barcelona B", country: "Spain", age: 20, status: "Silver" },
   { avatar: "https://i.pravatar.cc/150?u=13", name: "James Brown", position: "Goalkeeper", rating: 7.9, club: "Liverpool Academy", country: "Argentina", age: 17, status: "Bronze" },
 ];
+
 const getStatusColor = (status: "Gold" | "Silver" | "Bronze") => {
   switch (status) {
     case "Gold": return "bg-[#ffc107] text-black";
@@ -68,6 +92,7 @@ const getStatusColor = (status: "Gold" | "Silver" | "Bronze") => {
     default: return "bg-gray-500 text-white";
   }
 };
+
 const columns: Column<Player>[] = [
   {
     header: "Name",
@@ -75,7 +100,7 @@ const columns: Column<Player>[] = [
     align: "left",
     render: (row) => (
       <div className="flex items-center gap-3">
-        <Image src={row.avatar} alt={row.name} className="w-10 h-10 rounded-full border border-white/10" width={40} height={40} />
+        <Image src={row.avatar} alt={row.name} className="size-10 rounded-full border border-white/10" width={40} height={40} />
         <div>
           <p className="text-white font-semibold">{row.name}</p>
           <p className="text-[#E31B23] text-xs">{row.position}</p>
@@ -130,6 +155,7 @@ const columns: Column<Player>[] = [
     ),
   },
 ];
+
 const CustomAreaTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
@@ -143,6 +169,7 @@ const CustomAreaTooltip = ({ active, payload, label }: any) => {
   }
   return null;
 };
+
 const CustomBarTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
@@ -158,9 +185,55 @@ const CustomBarTooltip = ({ active, payload, label }: any) => {
   }
   return null;
 };
+
 const AgentDashboard = () => {
+  const router = useRouter();
+
+  // Agent Analytics query
+  const { data: analyticsResponse } = useGetAgentAnalyticsQuery({ year: 2026 });
+  const analyticsData = analyticsResponse?.data;
+  const overview = analyticsData?.overview;
+
+  const currentAreaData =
+    analyticsData?.cvsViewsOverTime && analyticsData.cvsViewsOverTime.length > 0
+      ? analyticsData.cvsViewsOverTime
+      : areaData;
+
+  const currentBarData =
+    analyticsData?.likesAndSharesActivity && analyticsData.likesAndSharesActivity.length > 0
+      ? analyticsData.likesAndSharesActivity
+      : barData;
+
+  // Media upload background context
+  const { activeUploadTask, startUpload, cancelUpload, dismissUpload } = useMediaUpload();
+
+  // Media queries
+  const {
+    data: imagesData,
+    isLoading: isImagesLoading,
+    isError: isImagesError,
+    refetch: refetchImages,
+  } = useGetMyMediaQuery({ mediaType: "IMAGE", limit: 20 });
+
+  const {
+    data: videosData,
+    isLoading: isVideosLoading,
+    isError: isVideosError,
+    refetch: refetchVideos,
+  } = useGetMyMediaQuery({ mediaType: "VIDEO", limit: 20 });
+
+  const imagesList = imagesData?.data?.media || [];
+  const videosList = videosData?.data?.media || [];
+
+  // Modal states
+  const [isUploadImageOpen, setIsUploadImageOpen] = useState(false);
+  const [isUploadVideoOpen, setIsUploadVideoOpen] = useState(false);
+  const [previewItem, setPreviewItem] = useState<IMediaItem | null>(null);
+  const [editingItem, setEditingItem] = useState<IMediaItem | null>(null);
+  const [deletingItem, setDeletingItem] = useState<IMediaItem | null>(null);
+
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       {/* Hero & Sidebar Row */}
       <div className="flex flex-col xl:flex-row gap-6">
         {/* Custom Agent Hero */}
@@ -176,8 +249,8 @@ const AgentDashboard = () => {
             <div className="relative p-6 sm:p-8 md:p-10 w-full flex flex-col h-full justify-between">
               <div>
                 {/* Progress Circle SVG */}
-                <div className="relative w-32 h-32 flex items-center justify-center mb-6">
-                  <svg className="w-full h-full transform -rotate-90">
+                <div className="relative size-32 flex items-center justify-center mb-6">
+                  <svg className="size-full transform -rotate-90">
                     <circle cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-white/10" />
                     <circle cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-[#E31B23]" strokeDasharray={364.4} strokeDashoffset={364.4 * (1 - 0.74)} />
                   </svg>
@@ -204,36 +277,36 @@ const AgentDashboard = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pt-6 sm:pt-8 mt-6 sm:mt-8 border-t border-white/15">
                 <div className="flex items-center gap-3 sm:gap-4">
                   <div className="p-2.5 sm:p-3 bg-white/5 rounded-xl sm:rounded-2xl border border-white/15 text-white/40 shrink-0">
-                    <IconShieldCheck className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
+                    <IconShieldCheck className="size-5 sm:size-5.5" />
                   </div>
-                  <div className="space-y-0.5 min-w-0">
+                  <div className="flex flex-col gap-0.5 min-w-0">
                     <p className="text-[10px] text-white/40 uppercase font-black tracking-widest truncate">License ID</p>
                     <p className="text-white text-sm sm:text-base font-bold font-heading truncate">UK-AG-2024-001</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 sm:gap-4">
                   <div className="p-2.5 sm:p-3 bg-white/5 rounded-xl sm:rounded-2xl border border-white/15 text-white/40 shrink-0">
-                    <IconCertificate className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
+                    <IconCertificate className="size-5 sm:size-5.5" />
                   </div>
-                  <div className="space-y-0.5 min-w-0">
+                  <div className="flex flex-col gap-0.5 min-w-0">
                     <p className="text-[10px] text-white/40 uppercase font-black tracking-widest truncate">Certifications</p>
                     <p className="text-[#E31B23] text-sm sm:text-base font-bold font-heading truncate">FIFA Licensed Agent</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 sm:gap-4">
                   <div className="p-2.5 sm:p-3 bg-white/5 rounded-xl sm:rounded-2xl border border-white/15 text-white/40 shrink-0">
-                    <IconPhone className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
+                    <IconPhone className="size-5 sm:size-5.5" />
                   </div>
-                  <div className="space-y-0.5 min-w-0">
+                  <div className="flex flex-col gap-0.5 min-w-0">
                     <p className="text-[10px] text-white/40 uppercase font-black tracking-widest truncate">Contact</p>
                     <p className="text-white text-sm sm:text-base font-bold font-heading truncate">+55 11 9999-8888</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 sm:gap-4">
                   <div className="p-2.5 sm:p-3 bg-white/5 rounded-xl sm:rounded-2xl border border-white/15 text-white/40 shrink-0">
-                    <IconMail className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
+                    <IconMail className="size-5 sm:size-5.5" />
                   </div>
-                  <div className="space-y-0.5 min-w-0">
+                  <div className="flex flex-col gap-0.5 min-w-0">
                     <p className="text-[10px] text-white/40 uppercase font-black tracking-widest truncate">Email</p>
                     <p className="text-white text-sm sm:text-base font-bold font-heading truncate">john.doe@example.com</p>
                   </div>
@@ -245,7 +318,7 @@ const AgentDashboard = () => {
         {/* Sidebar */}
         <div className="w-full xl:w-[320px] shrink-0">
           <DashboardSidebarPanel title="Recent Activity" icon={<IconShieldCheck size={20} />} iconColor="text-[#E31B23]">
-            <div className="space-y-4">
+            <div className="flex flex-col gap-4">
               {/* Activity Item 1 */}
               <div className="p-4 bg-white/2 border border-white/5 rounded-2xl hover:bg-white/4 transition-all flex items-start gap-4">
                 <div className="mt-1">
@@ -286,50 +359,61 @@ const AgentDashboard = () => {
           </DashboardSidebarPanel>
         </div>
       </div>
+
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <DashboardStatCard
-          icon={<IconUsers className="w-6 h-6" />}
-          label="Players Viewed"
-          value="24"
+          icon={<IconUsers className="size-6" />}
+          label={overview?.playersProfileViewed?.label || "Players Profile Viewed"}
+          value={String(overview?.playersProfileViewed?.count ?? 0)}
         />
         <DashboardStatCard
-          icon={<IconHeart className="w-6 h-6" />}
-          label="Liked CVs"
-          value="8"
+          icon={<IconHeart className="size-6" />}
+          label={overview?.likedCvs?.label || "Liked CVs"}
+          value={String(overview?.likedCvs?.count ?? 0)}
         />
         <DashboardStatCard
-          icon={<IconShare className="w-6 h-6" />}
-          label="Shared Profiles"
-          value="5"
+          icon={<IconShare className="size-6" />}
+          label={overview?.sharedProfiles?.label || "Shared Profiles"}
+          value={String(overview?.sharedProfiles?.count ?? 0)}
         />
         <DashboardStatCard
-          icon={<IconEye className="w-6 h-6" />}
-          label="Profile Views"
-          value="156"
+          icon={<IconEye className="size-6" />}
+          label={overview?.profileViews?.label || "Profile Views"}
+          value={String(overview?.profileViews?.count ?? 0)}
         />
       </div>
+
       {/* Analytics */}
-      <div className="bg-[#111111] border border-white/15 rounded-3xl p-5 sm:p-8 space-y-8">
+      <div className="bg-[#111111] border border-white/15 rounded-3xl p-5 sm:p-8 flex flex-col gap-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-white font-orbitron tracking-wide mb-1">Analytics For Players Monitored</h2>
-            <p className="text-xs sm:text-sm text-gray-500 font-medium">Insights based on Players interactions, profile activity & performance data.</p>
+            <h2 className="text-xl sm:text-2xl font-bold text-white font-orbitron tracking-wide mb-1">
+              {analyticsData?.title || "Analytics For Players Monitored"}
+            </h2>
+            <p className="text-xs sm:text-sm text-gray-500 font-medium">
+              {analyticsData?.subtitle ||
+                "Insights based on Players interactions, profile activity & performance data."}
+            </p>
           </div>
-          <Button variant="outline" className="w-full sm:w-auto bg-transparent border-white/10 text-gray-300 hover:bg-white/5 hover:text-white rounded-lg px-6">
+          <Button
+            variant="outline"
+            onClick={() => router.push("/dashboard/agent/analytics")}
+            className="w-full sm:w-auto bg-transparent border-white/10 text-gray-300 hover:bg-white/5 hover:text-white rounded-lg px-6 cursor-pointer"
+          >
             Full Analytics
           </Button>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           {/* Area Chart */}
-          <div className="space-y-6">
+          <div className="flex flex-col gap-6">
             <div>
               <h3 className="text-base font-bold text-white tracking-wide">CV Views Over Time</h3>
               <p className="text-xs text-gray-500">Your profile viewing trends</p>
             </div>
             <div className="h-55 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={areaData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <AreaChart data={currentAreaData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#E31B23" stopOpacity={0.2} />
@@ -348,7 +432,7 @@ const AgentDashboard = () => {
                     axisLine={false}
                     tickLine={false}
                     tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11, fontWeight: 500 }}
-                    ticks={[0, 7, 14, 21, 28]}
+                    allowDecimals={false}
                   />
                   <Tooltip content={<CustomAreaTooltip />} />
                   <Area
@@ -367,14 +451,14 @@ const AgentDashboard = () => {
             </div>
           </div>
           {/* Bar Chart */}
-          <div className="space-y-6">
+          <div className="flex flex-col gap-6">
             <div>
               <h3 className="text-base font-bold text-white tracking-wide">Likes & Shares Activity</h3>
               <p className="text-xs text-gray-500">Your interaction patterns</p>
             </div>
             <div className="h-55 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={barData} barSize={12} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <BarChart data={currentBarData} barSize={12} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
                   <XAxis
                     dataKey="week"
@@ -387,36 +471,37 @@ const AgentDashboard = () => {
                     axisLine={false}
                     tickLine={false}
                     tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11, fontWeight: 500 }}
-                    ticks={[0, 3, 6, 9, 12]}
+                    allowDecimals={false}
                   />
                   <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} content={<CustomBarTooltip />} />
                   <Legend
                     iconType="square"
                     wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
                   />
-                  <Bar dataKey="likes" name="Likes" fill="#ffffff" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="shares" name="Shares" fill="rgba(255,255,255,0.2)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="likes" name="Likes" fill="#E31B23" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="shares" name="Shares" fill="#ffffff" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
         </div>
       </div>
+
       {/* Monitored Players */}
-      <div className="bg-[#111111] border border-white/15 rounded-3xl p-5 sm:p-8 space-y-6">
+      <div className="bg-[#111111] border border-white/15 rounded-3xl p-5 sm:p-8 flex flex-col gap-6">
         <h2 className="text-xl sm:text-2xl font-bold text-white font-orbitron tracking-wide mb-4">Monitored Players</h2>
         <div className="grid grid-cols-2 lg:flex lg:flex-wrap gap-2 sm:gap-4 lg:justify-end mb-6">
           <Button variant="outline" className="w-full bg-transparent border-white/10 text-gray-300 hover:bg-white/5 hover:text-white rounded-lg text-xs sm:text-sm px-2 sm:px-4">
-            All Positions <IconChevronDown className="ml-1 sm:ml-2 w-3 h-3 sm:w-4 sm:h-4" />
+            All Positions <IconChevronDown className="ml-1 sm:ml-2 size-3 sm:size-4" />
           </Button>
           <Button variant="outline" className="w-full bg-transparent border-white/10 text-gray-300 hover:bg-white/5 hover:text-white rounded-lg text-xs sm:text-sm px-2 sm:px-4">
-            Country <IconChevronDown className="ml-1 sm:ml-2 w-3 h-3 sm:w-4 sm:h-4" />
+            Country <IconChevronDown className="ml-1 sm:ml-2 size-3 sm:size-4" />
           </Button>
           <Button variant="outline" className="w-full bg-transparent border-white/10 text-gray-300 hover:bg-white/5 hover:text-white rounded-lg text-xs sm:text-sm px-2 sm:px-4">
-            Age Range <IconChevronDown className="ml-1 sm:ml-2 w-3 h-3 sm:w-4 sm:h-4" />
+            Age Range <IconChevronDown className="ml-1 sm:ml-2 size-3 sm:size-4" />
           </Button>
           <Button variant="outline" className="w-full bg-transparent border-white/10 text-gray-300 hover:bg-white/5 hover:text-white rounded-lg text-xs sm:text-sm px-2 sm:px-4">
-            All Status <IconChevronDown className="ml-1 sm:ml-2 w-3 h-3 sm:w-4 sm:h-4" />
+            All Status <IconChevronDown className="ml-1 sm:ml-2 size-3 sm:size-4" />
           </Button>
         </div>
         <div className="overflow-x-auto">
@@ -425,8 +510,188 @@ const AgentDashboard = () => {
           </div>
         </div>
       </div>
-      <MyImagesSection editable={true} />
-      <MyVideosSection editable={true} />
+
+      {/* Background Image Upload Progress Widget */}
+      {activeUploadTask && activeUploadTask.type === "image" && (
+        <MediaUploadProgressWidget
+          task={activeUploadTask}
+          onCancel={cancelUpload}
+          onDismiss={dismissUpload}
+        />
+      )}
+
+      {/* My Images Section */}
+      <DashboardSection
+        title="My Images"
+        action={
+          <button
+            type="button"
+            onClick={() => setIsUploadImageOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all shrink-0 cursor-pointer hover:scale-102"
+          >
+            <IconUpload size={16} /> <span className="hidden sm:inline">Upload Image</span>
+          </button>
+        }
+      >
+        <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-4 md:mb-8 wrap-break-word">
+          Match highlights & training
+        </p>
+
+        {isImagesLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 w-full">
+            {[1, 2, 3, 4].map((i) => (
+              <MediaCardSkeleton key={`img-skel-${i}`} />
+            ))}
+          </div>
+        ) : isImagesError ? (
+          <div className="py-12 text-center flex flex-col items-center justify-center gap-3 border border-white/10 rounded-2xl bg-white/[0.02]">
+            <p className="text-sm font-bold text-destructive">Failed to load images</p>
+            <button
+              type="button"
+              onClick={() => refetchImages()}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-bold hover:bg-white/10 transition-all cursor-pointer"
+            >
+              <IconRefresh size={14} /> Retry
+            </button>
+          </div>
+        ) : imagesList.length === 0 ? (
+          <div className="py-12 text-center flex flex-col items-center justify-center gap-3 border border-dashed border-white/10 rounded-2xl bg-white/[0.01]">
+            <div className="size-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40">
+              <IconPhoto size={24} />
+            </div>
+            <p className="text-sm font-bold text-white uppercase tracking-wider">
+              No images uploaded yet
+            </p>
+            <p className="text-xs text-white/40 max-w-sm">
+              Upload match photos and training highlights to showcase your profile.
+            </p>
+            <button
+              type="button"
+              onClick={() => setIsUploadImageOpen(true)}
+              className="mt-2 text-xs font-bold uppercase tracking-wider text-primary hover:underline cursor-pointer flex items-center gap-1.5"
+            >
+              <IconUpload size={14} />
+              <span>Upload First Image</span>
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 w-full">
+            {imagesList.map((item) => (
+              <AcademyMediaCard
+                key={item._id}
+                item={item}
+                type="IMAGE"
+                onPreview={setPreviewItem}
+                onEdit={setEditingItem}
+                onDelete={setDeletingItem}
+              />
+            ))}
+          </div>
+        )}
+      </DashboardSection>
+
+      {/* Background Video Upload Progress Widget */}
+      {activeUploadTask && activeUploadTask.type === "video" && (
+        <MediaUploadProgressWidget
+          task={activeUploadTask}
+          onCancel={cancelUpload}
+          onDismiss={dismissUpload}
+        />
+      )}
+
+      {/* My Videos Section */}
+      <DashboardSection
+        title="My Videos"
+        action={
+          <button
+            type="button"
+            onClick={() => setIsUploadVideoOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all shrink-0 cursor-pointer hover:scale-102"
+          >
+            <IconUpload size={16} /> <span className="hidden sm:inline">Upload Video</span>
+          </button>
+        }
+      >
+        <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-4 md:mb-8 wrap-break-word">
+          Match highlights & training
+        </p>
+
+        {isVideosLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 w-full">
+            {[1, 2, 3, 4].map((i) => (
+              <MediaCardSkeleton key={`vid-skel-${i}`} isVideo />
+            ))}
+          </div>
+        ) : isVideosError ? (
+          <div className="py-12 text-center flex flex-col items-center justify-center gap-3 border border-white/10 rounded-2xl bg-white/[0.02]">
+            <p className="text-sm font-bold text-destructive">Failed to load videos</p>
+            <button
+              type="button"
+              onClick={() => refetchVideos()}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-bold hover:bg-white/10 transition-all cursor-pointer"
+            >
+              <IconRefresh size={14} /> Retry
+            </button>
+          </div>
+        ) : videosList.length === 0 ? (
+          <div className="py-12 text-center flex flex-col items-center justify-center gap-3 border border-dashed border-white/10 rounded-2xl bg-white/[0.01]">
+            <div className="size-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40">
+              <IconVideo size={24} />
+            </div>
+            <p className="text-sm font-bold text-white uppercase tracking-wider">
+              No videos uploaded yet
+            </p>
+            <p className="text-xs text-white/40 max-w-sm">
+              Upload match recordings and training drill clips with custom thumbnails.
+            </p>
+            <button
+              type="button"
+              onClick={() => setIsUploadVideoOpen(true)}
+              className="mt-2 text-xs font-bold uppercase tracking-wider text-primary hover:underline cursor-pointer flex items-center gap-1.5"
+            >
+              <IconUpload size={14} />
+              <span>Upload First Video</span>
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 w-full">
+            {videosList.map((item) => (
+              <AcademyMediaCard
+                key={item._id}
+                item={item}
+                type="VIDEO"
+                onPreview={setPreviewItem}
+                onEdit={setEditingItem}
+                onDelete={setDeletingItem}
+              />
+            ))}
+          </div>
+        )}
+      </DashboardSection>
+
+      {/* Media Modals */}
+      <UploadImageModal
+        isOpen={isUploadImageOpen}
+        onClose={() => setIsUploadImageOpen(false)}
+        onStartUpload={startUpload}
+      />
+      <UploadVideoModal
+        isOpen={isUploadVideoOpen}
+        onClose={() => setIsUploadVideoOpen(false)}
+        onStartUpload={startUpload}
+      />
+      <MediaPreviewModal
+        item={previewItem}
+        onClose={() => setPreviewItem(null)}
+      />
+      <EditMediaModal
+        item={editingItem}
+        onClose={() => setEditingItem(null)}
+      />
+      <DeleteMediaModal
+        item={deletingItem}
+        onClose={() => setDeletingItem(null)}
+      />
     </div>
   );
 };

@@ -52,6 +52,14 @@ const TagTypes = {
     clubs: "Clubs",
     SCOUTING_BOARD: "ScoutingBoard",
     scoutingBoard: "ScoutingBoard",
+    CVS_LIBRARY: "CvsLibrary",
+    cvsLibrary: "CvsLibrary",
+    ANALYTICS: "Analytics",
+    analytics: "Analytics",
+    AGENTS: "Agents",
+    agents: "Agents",
+    AGENT_SUCCESS_STORIES: "AgentSuccessStories",
+    agentSuccessStories: "AgentSuccessStories",
 } as const;
 
 export default TagTypes;

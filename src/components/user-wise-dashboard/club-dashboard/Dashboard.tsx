@@ -1,5 +1,8 @@
 "use client";
+
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import {
   IconUsers,
@@ -12,6 +15,7 @@ import {
   IconPhoto,
   IconVideo,
   IconRefresh,
+  IconLoader2,
 } from "@tabler/icons-react";
 import {
   LineChart,
@@ -45,58 +49,37 @@ import {
 } from "@/components/user-wise-dashboard/academy-analysis/media";
 import { useMediaUpload } from "@/providers/MediaUploadProvider";
 import { MediaUploadProgressWidget } from "@/components/user-wise-dashboard/player-dashboard/images-videos";
-
-const stats = [
-  { label: "Players", value: "156", icon: IconUsers },
-  { label: "Coaches", value: "12", icon: IconTrophy },
-  { label: "Liked CVs", value: "42", icon: IconHeart },
-  { label: "Profile share", value: "18", icon: IconShare },
-];
-
-const timelineData = [
-  { name: "Jan-Feb", players: 45, coaches: 12 },
-  { name: "Mar-Apr", players: 62, coaches: 15 },
-  { name: "May-Jun", players: 75, coaches: 18 },
-  { name: "Jul-Aug", players: 70, coaches: 16 },
-  { name: "Sept-Oct", players: 85, coaches: 22 },
-  { name: "Nov-Dec", players: 98, coaches: 25 },
-];
-
-const distributionData = [
-  { name: "Midfielder", value: 80 },
-  { name: "Striker", value: 65 },
-  { name: "Defender", value: 92, highlight: true },
-  { name: "Goalkeeper", value: 75 },
-  { name: "Winger", value: 58 },
-];
-
-const staffData = [
-  { id: 1, teamName: "Santos U17", ageGroup: "Under 17", scout: "Carlos Silva", players: 22, status: "Active" },
-  { id: 2, teamName: "Santos U19", ageGroup: "Under 19", scout: "Roberto Lima", players: 18, status: "Active" },
-  { id: 3, teamName: "Santos U16", ageGroup: "Under 16", scout: "Alex Jonson", players: 16, status: "Pending" },
-  { id: 4, teamName: "Santos U18", ageGroup: "Under 18", scout: "James Brown", players: 20, status: "Active" },
-];
-
-const coachData = [
-  { id: 1, name: "Eduardo Ricci", role: "Head Coach", team: "Santos U19", experience: "12 yrs", status: "Active" },
-  { id: 2, name: "Marco Fernandez", role: "Assistant Coach", team: "Santos U17", experience: "8 yrs", status: "Active" },
-  { id: 3, name: "Lucas Oliveira", role: "Fitness Coach", team: "Santos U18", experience: "5 yrs", status: "Active" },
-  { id: 4, name: "Rafael Costa", role: "Goalkeeping Coach", team: "Santos U16", experience: "10 yrs", status: "Pending" },
-];
-
-const favPlayerData = [
-  { id: 1, name: "Marcus Silva", position: "Forward", rating: 9.2, club: "Manchester Academy", country: "Brazil", age: 19, avatar: "https://i.pravatar.cc/150?u=1" },
-  { id: 2, name: "David Chen", position: "Midfielder", rating: 8.8, club: "Chelsea Youth", country: "England", age: 18, avatar: "https://i.pravatar.cc/150?u=2" },
-  { id: 3, name: "Alex Jonson", position: "Defender", rating: 8.5, club: "Barcelona B", country: "Spain", age: 20, avatar: "https://i.pravatar.cc/150?u=3" },
-];
-
-const favCoachData = [
-  { id: 1, name: "Eduardo Ricci", role: "Head Coach", speciality: "Attacking", experience: "12 yrs", club: "Santos FC", country: "Brazil", avatar: "https://i.pravatar.cc/150?u=10" },
-  { id: 2, name: "Marco Fernandez", role: "Assistant Coach", speciality: "Defending", experience: "8 yrs", club: "Real Madrid B", country: "Spain", avatar: "https://i.pravatar.cc/150?u=11" },
-  { id: 3, name: "Lucas Oliveira", role: "Fitness Coach", speciality: "Physical", experience: "5 yrs", club: "PSG Academy", country: "France", avatar: "https://i.pravatar.cc/150?u=12" },
-];
+import {
+  useGetClubDashboardAnalyticsQuery,
+  useToggleScoutingBoardFavouriteMutation,
+} from "@/redux/features/club/clubApi";
+import {
+  IClubDashboardPlayerItem,
+  IClubDashboardCoachItem,
+} from "@/types/club.type";
+import { toast } from "sonner";
 
 const ClubDashboard = () => {
+  const router = useRouter();
+
+  // API Query: GET {{baseUrl}}/clubs/dashboard-analytics
+  const {
+    data: dashboardResponse,
+    isLoading: isDashboardLoading,
+    isFetching: isDashboardFetching,
+    refetch: refetchDashboard,
+  } = useGetClubDashboardAnalyticsQuery();
+
+  const [toggleScoutingBoardFavourite] = useToggleScoutingBoardFavouriteMutation();
+
+  const dashboardData = dashboardResponse?.data;
+  const club = dashboardData?.club;
+  const metrics = dashboardData?.metrics;
+  const analytics = dashboardData?.analytics;
+  const coachesAndPlayers = dashboardData?.coachesAndPlayers;
+  const favourites = dashboardData?.favourites;
+  const recentActivities = dashboardData?.recentActivity || [];
+
   // Global Upload Context (Background uploader with real-time percentage)
   const { activeUploadTask, startUpload, cancelUpload, dismissUpload } = useMediaUpload();
 
@@ -125,85 +108,116 @@ const ClubDashboard = () => {
   const [editingItem, setEditingItem] = useState<IMediaItem | null>(null);
   const [deletingItem, setDeletingItem] = useState<IMediaItem | null>(null);
 
-  const staffColumns: Column<typeof staffData[0]>[] = [
-    { header: "Team Name", key: "teamName", cellClassName: "text-sm text-gray-400" },
-    { header: "Age Group", key: "ageGroup", align: "center", cellClassName: "text-sm text-gray-400" },
-    { header: "Scout", key: "scout", align: "center", cellClassName: "text-sm text-gray-400" },
-    { header: "Players", key: "players", align: "center", cellClassName: "text-sm text-gray-400" },
+  // Share handlers
+  const handleShareUrl = async (url?: string, defaultPath?: string) => {
+    const toCopy = url || (defaultPath ? `${window.location.origin}${defaultPath}` : window.location.href);
+    try {
+      await navigator.clipboard.writeText(toCopy);
+      toast.success("Profile link copied to clipboard!");
+    } catch {
+      toast.error("Failed to copy link");
+    }
+  };
+
+  const handleTogglePlayerFav = async (playerId: string) => {
+    try {
+      await toggleScoutingBoardFavourite({ targetType: "PLAYER", targetId: playerId }).unwrap();
+      refetchDashboard();
+    } catch {
+      // Toast handled by mutation
+    }
+  };
+
+  const handleToggleCoachFav = async (coachId: string) => {
+    try {
+      await toggleScoutingBoardFavourite({ targetType: "COACH", targetId: coachId }).unwrap();
+      refetchDashboard();
+    } catch {
+      // Toast handled by mutation
+    }
+  };
+
+  // Stat metrics cards
+  const stats = [
     {
-      header: "Status",
-      key: "status",
-      align: "center",
-      render: (item) => (
-        <span
-          className={`px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
-            item.status === "Active"
-              ? "bg-emerald-500/10 text-emerald-500"
-              : "bg-amber-500/10 text-amber-500"
-          }`}
-        >
-          {item.status}
-        </span>
-      ),
+      label: metrics?.players?.label || "Players",
+      value: metrics?.players?.count !== undefined ? String(metrics.players.count) : "0",
+      icon: IconUsers,
     },
     {
-      header: "Actions",
-      key: "actions",
-      align: "right",
-      render: () => <TableActionButtons onView={() => {}} />,
+      label: metrics?.coaches?.label || "Coaches",
+      value: metrics?.coaches?.count !== undefined ? String(metrics.coaches.count) : "0",
+      icon: IconTrophy,
+    },
+    {
+      label: metrics?.likedCvs?.label || "Liked CVs",
+      value: metrics?.likedCvs?.count !== undefined ? String(metrics.likedCvs.count) : "0",
+      icon: IconHeart,
+    },
+    {
+      label: metrics?.profileShare?.label || "Profile share",
+      value: metrics?.profileShare?.count !== undefined ? String(metrics.profileShare.count) : "0",
+      icon: IconShare,
     },
   ];
 
-  const coachColumns: Column<typeof coachData[0]>[] = [
-    { header: "Name", key: "name", cellClassName: "text-sm text-white font-semibold" },
-    { header: "Role", key: "role", align: "center", cellClassName: "text-sm text-gray-400" },
-    { header: "Team", key: "team", align: "center", cellClassName: "text-sm text-gray-400" },
-    { header: "Experience", key: "experience", align: "center", cellClassName: "text-sm text-gray-400" },
-    {
-      header: "Status",
-      key: "status",
-      align: "center",
-      render: (item) => (
-        <span
-          className={`px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
-            item.status === "Active"
-              ? "bg-emerald-500/10 text-emerald-500"
-              : "bg-amber-500/10 text-amber-500"
-          }`}
-        >
-          {item.status}
-        </span>
-      ),
-    },
-    {
-      header: "Actions",
-      key: "actions",
-      align: "right",
-      render: () => <TableActionButtons onView={() => {}} />,
-    },
-  ];
+  // Timeline monitored data
+  const timelineData =
+    analytics?.playersAndCoachesMonitored && analytics.playersAndCoachesMonitored.length > 0
+      ? analytics.playersAndCoachesMonitored.map((item) => ({
+          name: item.period,
+          players: item.players,
+          coaches: item.coaches,
+        }))
+      : [
+          { name: "Jan-Feb", players: 0, coaches: 0 },
+          { name: "Mar-Apr", players: 0, coaches: 0 },
+          { name: "May-Jun", players: 0, coaches: 0 },
+          { name: "Jul-Aug", players: 0, coaches: 0 },
+          { name: "Sept-Oct", players: 0, coaches: 0 },
+          { name: "Nov-Dec", players: 0, coaches: 0 },
+        ];
 
-  const favPlayerColumns: Column<typeof favPlayerData[0]>[] = [
+  // Position distribution data
+  const distributionData =
+    analytics?.positionInterestDistribution && analytics.positionInterestDistribution.length > 0
+      ? analytics.positionInterestDistribution.map((item) => ({
+          name: item.position,
+          value: item.percentage ?? item.value,
+          highlight: item.percentage > 0 || item.value > 0,
+        }))
+      : [
+          { name: "Midfielder", value: 0, highlight: false },
+          { name: "Striker", value: 0, highlight: false },
+          { name: "Defender", value: 0, highlight: false },
+          { name: "Goalkeeper", value: 0, highlight: false },
+          { name: "Winger", value: 0, highlight: false },
+        ];
+
+  // Columns: Coaches & Players -> Players Table
+  const playerColumns: Column<IClubDashboardPlayerItem>[] = [
     {
-      header: "Name",
+      header: "Player Name",
       key: "name",
       render: (p) => (
         <div className="flex items-center gap-3">
           <Image
-            width={500}
-            height={500}
-            src={p.avatar}
+            width={40}
+            height={40}
+            src={p.avatar || "/placeholder_img.jpg"}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.srcset = "";
               target.src = "/placeholder_img.jpg";
             }}
-            className="size-10 rounded-full object-cover"
-            alt="avatar"
+            className="size-10 rounded-full object-cover shrink-0 border border-white/10"
+            alt={p.name}
           />
-          <div>
-            <div className="text-sm font-bold text-white">{p.name}</div>
-            <div className="text-[10px] text-destructive font-bold uppercase tracking-widest">{p.position}</div>
+          <div className="min-w-0">
+            <div className="text-sm font-bold text-white truncate">{p.name}</div>
+            <div className="text-[10px] text-destructive font-bold uppercase tracking-widest truncate">
+              {p.position}
+            </div>
           </div>
         </div>
       ),
@@ -212,55 +226,295 @@ const ClubDashboard = () => {
       header: "Rating",
       key: "rating",
       align: "center",
-      render: (p) => <span className="text-sm font-black text-destructive italic">{p.rating}</span>,
+      render: (p) => <span className="text-sm font-black text-destructive italic">{p.rating || "N/A"}</span>,
     },
-    { header: "Club", key: "club", align: "center", cellClassName: "text-sm text-gray-400" },
-    { header: "Country", key: "country", align: "center", cellClassName: "text-sm text-gray-400" },
-    { header: "Age", key: "age", align: "center", cellClassName: "text-sm text-gray-400" },
+    {
+      header: "Club",
+      key: "club",
+      align: "center",
+      cellClassName: "text-sm text-gray-400",
+      render: (p) => p.club || "Free Agent",
+    },
+    {
+      header: "Country",
+      key: "country",
+      align: "center",
+      cellClassName: "text-sm text-gray-400",
+      render: (p) => p.country || "N/A",
+    },
+    {
+      header: "Age",
+      key: "age",
+      align: "center",
+      cellClassName: "text-sm text-gray-400",
+      render: (p) => (p.age ? `${p.age} yrs` : "N/A"),
+    },
+    {
+      header: "Status",
+      key: "status",
+      align: "center",
+      render: (p) => (
+        <span className="px-3.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-green-500/20">
+          {p.status || "ACTIVE"}
+        </span>
+      ),
+    },
     {
       header: "Actions",
       key: "actions",
       align: "right",
-      render: () => <TableActionButtons onView={() => {}} onHeart={() => {}} onShare={() => {}} />,
+      render: (p) => (
+        <TableActionButtons
+          onView={() => router.push(`/dashboard/club/player-cv/${p.playerId || p.id}`)}
+        />
+      ),
     },
   ];
 
-  const favCoachColumns: Column<typeof favCoachData[0]>[] = [
+  // Columns: Coaches & Players -> Coaches Table
+  const coachColumns: Column<IClubDashboardCoachItem>[] = [
     {
-      header: "Name",
+      header: "Coach Name",
       key: "name",
       render: (c) => (
         <div className="flex items-center gap-3">
           <Image
-            src={c.avatar}
-            className="size-10 rounded-full object-cover"
-            alt="avatar"
-            width={500}
-            height={500}
+            src={c.avatar || "/placeholder_img.jpg"}
+            className="size-10 rounded-full object-cover shrink-0 border border-white/10"
+            alt={c.name}
+            width={40}
+            height={40}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.srcset = "";
               target.src = "/placeholder_img.jpg";
             }}
           />
-          <div>
-            <div className="text-sm font-bold text-white">{c.name}</div>
-            <div className="text-[10px] text-destructive font-bold uppercase tracking-widest">{c.role}</div>
+          <div className="min-w-0">
+            <div className="text-sm font-bold text-white truncate">{c.name}</div>
+            <div className="text-[10px] text-destructive font-bold uppercase tracking-widest truncate">
+              {c.role}
+            </div>
           </div>
         </div>
       ),
     },
-    { header: "Speciality", key: "speciality", align: "center", cellClassName: "text-sm text-gray-400" },
-    { header: "Club", key: "club", align: "center", cellClassName: "text-sm text-gray-400" },
-    { header: "Country", key: "country", align: "center", cellClassName: "text-sm text-gray-400" },
-    { header: "Experience", key: "experience", align: "center", cellClassName: "text-sm text-gray-400" },
+    {
+      header: "Speciality",
+      key: "speciality",
+      align: "center",
+      cellClassName: "text-sm text-gray-400",
+      render: (c) => c.speciality || "N/A",
+    },
+    {
+      header: "Club / Team",
+      key: "club",
+      align: "center",
+      cellClassName: "text-sm text-gray-400",
+      render: (c) => c.club || c.team || "N/A",
+    },
+    {
+      header: "Experience",
+      key: "experience",
+      align: "center",
+      cellClassName: "text-sm text-gray-400",
+      render: (c) => c.experience || (c.yearsExperience ? `${c.yearsExperience} yrs` : "N/A"),
+    },
+    {
+      header: "Status",
+      key: "status",
+      align: "center",
+      render: (c) => (
+        <span className="px-3.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-green-500/20">
+          {c.status || "ACTIVE"}
+        </span>
+      ),
+    },
     {
       header: "Actions",
       key: "actions",
       align: "right",
-      render: () => <TableActionButtons onView={() => {}} onHeart={() => {}} onShare={() => {}} />,
+      render: (c) => (
+        <TableActionButtons
+          onView={() => router.push(`/cvs/coach-cv-details?coachId=${c.coachId || c.id}`)}
+        />
+      ),
     },
   ];
+
+  // Columns: Favourites -> Favourite Players Table
+  const favPlayerColumns: Column<IClubDashboardPlayerItem>[] = [
+    {
+      header: "Name",
+      key: "name",
+      render: (p) => (
+        <div className="flex items-center gap-3">
+          <Image
+            width={40}
+            height={40}
+            src={p.avatar || "/placeholder_img.jpg"}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.srcset = "";
+              target.src = "/placeholder_img.jpg";
+            }}
+            className="size-10 rounded-full object-cover shrink-0 border border-white/10"
+            alt={p.name}
+          />
+          <div className="min-w-0">
+            <div className="text-sm font-bold text-white truncate">{p.name}</div>
+            <div className="text-[10px] text-destructive font-bold uppercase tracking-widest truncate">
+              {p.position}
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: "Rating",
+      key: "rating",
+      align: "center",
+      render: (p) => <span className="text-sm font-black text-destructive italic">{p.rating || "N/A"}</span>,
+    },
+    {
+      header: "Club",
+      key: "club",
+      align: "center",
+      cellClassName: "text-sm text-gray-400",
+      render: (p) => p.club || "Free Agent",
+    },
+    {
+      header: "Country",
+      key: "country",
+      align: "center",
+      cellClassName: "text-sm text-gray-400",
+      render: (p) => p.country || "N/A",
+    },
+    {
+      header: "Age",
+      key: "age",
+      align: "center",
+      cellClassName: "text-sm text-gray-400",
+      render: (p) => (p.age ? `${p.age} yrs` : "N/A"),
+    },
+    {
+      header: "Actions",
+      key: "actions",
+      align: "right",
+      render: (p) => (
+        <TableActionButtons
+          onView={() => router.push(`/dashboard/club/player-cv/${p.playerId || p.id}`)}
+          onHeart={() => handleTogglePlayerFav(p.playerId || p.id)}
+          isHeartFilled={true}
+          onShare={() => handleShareUrl(p.shareableUrl, `/players/share/${p.playerId || p.id}`)}
+        />
+      ),
+    },
+  ];
+
+  // Columns: Favourites -> Favourite Coaches Table
+  const favCoachColumns: Column<IClubDashboardCoachItem>[] = [
+    {
+      header: "Name",
+      key: "name",
+      render: (c) => (
+        <div className="flex items-center gap-3">
+          <Image
+            src={c.avatar || "/placeholder_img.jpg"}
+            className="size-10 rounded-full object-cover shrink-0 border border-white/10"
+            alt={c.name}
+            width={40}
+            height={40}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.srcset = "";
+              target.src = "/placeholder_img.jpg";
+            }}
+          />
+          <div className="min-w-0">
+            <div className="text-sm font-bold text-white truncate">{c.name}</div>
+            <div className="text-[10px] text-destructive font-bold uppercase tracking-widest truncate">
+              {c.role}
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: "Speciality",
+      key: "speciality",
+      align: "center",
+      cellClassName: "text-sm text-gray-400",
+      render: (c) => c.speciality || "N/A",
+    },
+    {
+      header: "Club / Team",
+      key: "club",
+      align: "center",
+      cellClassName: "text-sm text-gray-400",
+      render: (c) => c.club || c.team || "N/A",
+    },
+    {
+      header: "Country",
+      key: "country",
+      align: "center",
+      cellClassName: "text-sm text-gray-400",
+      render: (c) => c.country || "N/A",
+    },
+    {
+      header: "Experience",
+      key: "experience",
+      align: "center",
+      cellClassName: "text-sm text-gray-400",
+      render: (c) => c.experience || "N/A",
+    },
+    {
+      header: "Actions",
+      key: "actions",
+      align: "right",
+      render: (c) => (
+        <TableActionButtons
+          onView={() => router.push(`/cvs/coach-cv-details?coachId=${c.coachId || c.id}`)}
+          onHeart={() => handleToggleCoachFav(c.coachId || c.id)}
+          isHeartFilled={true}
+          onShare={() => handleShareUrl(c.shareableUrl, `/coach/share/${c.coachId || c.id}`)}
+        />
+      ),
+    },
+  ];
+
+  // Derived Hero data
+  const heroCover = club?.coverPhoto || "/barcelona-la-liga-champions.avif";
+  const heroTier = club?.tier || "Active Club";
+  const heroTitle = club?.name || "FC Barcelona";
+  const heroSubtitle = club?.category || club?.clubType || "Chief Scout / Director";
+  const heroEst = club?.establishedYear ? `Est. ${club.establishedYear}` : "Est. 1899";
+  const heroCountry = club?.country || "Spain";
+  const heroPhone = club?.contactPhone || "+34 902 1899 00";
+  const heroEmail = club?.contactEmail || "oab@fcbarcelona.cat";
+  const heroLogo = club?.logo || "https://upload.wikimedia.org/wikipedia/en/4/47/FC_Barcelona_(crest).svg";
+
+  // Skeleton Loader for whole dashboard
+  if (isDashboardLoading) {
+    return (
+      <div className="flex flex-col gap-8 pb-12 animate-pulse">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className="lg:col-span-9 flex flex-col gap-8">
+            <div className="h-72 w-full bg-white/5 rounded-3xl" />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-28 bg-white/5 rounded-2xl" />
+              ))}
+            </div>
+            <div className="h-96 w-full bg-white/5 rounded-2xl" />
+          </div>
+          <div className="hidden lg:block lg:col-span-3">
+            <div className="h-96 w-full bg-white/5 rounded-2xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-8 pb-12">
@@ -268,22 +522,28 @@ const ClubDashboard = () => {
         {/* Left Section - Main Content */}
         <div className="lg:col-span-9 flex flex-col gap-8 min-w-0">
           {/* Hero Section */}
-          <div className="rounded-3xl overflow-hidden border border-white/10">
+          <div className="rounded-3xl overflow-hidden border border-white/10 relative">
             <DashboardHero
-              backgroundImage="/barcelona-la-liga-champions.avif"
-              badgeText="Active Club"
-              title="FC Barcelona"
-              subtitle="Premium Club"
+              backgroundImage={heroCover}
+              badgeText={heroTier}
+              title={heroTitle}
+              subtitle={heroSubtitle}
               details={[
-                { text: "Est. 1899" },
-                { text: "Spain" },
+                { text: heroEst },
+                { text: heroCountry },
               ]}
               contacts={[
-                { type: "phone", label: "Contact", value: "+34 902 1899 00" },
-                { type: "email", label: "Email", value: "oab@fcbarcelona.cat" },
+                { type: "phone", label: "Contact", value: heroPhone },
+                { type: "email", label: "Email", value: heroEmail },
               ]}
-              logoImage="https://upload.wikimedia.org/wikipedia/en/4/47/FC_Barcelona_(crest).svg"
+              logoImage={heroLogo}
             />
+            {isDashboardFetching && !isDashboardLoading && (
+              <div className="absolute top-4 right-4 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 border border-white/10 text-[10px] text-white/70 backdrop-blur-md">
+                <IconLoader2 className="animate-spin size-3 text-[#E31B23]" />
+                <span>Syncing dashboard...</span>
+              </div>
+            )}
           </div>
 
           {/* Stat Grid */}
@@ -297,9 +557,12 @@ const ClubDashboard = () => {
           <DashboardSection
             title="Analytics"
             action={
-              <button className="px-5 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">
+              <Link
+                href="/dashboard/club/analytics"
+                className="px-5 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all inline-block"
+              >
                 Full Analytics
-              </button>
+              </Link>
             }
           >
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-4">
@@ -315,7 +578,7 @@ const ClubDashboard = () => {
                       <YAxis axisLine={false} tickLine={false} tick={{ fill: "#888", fontSize: 10 }} />
                       <Tooltip contentStyle={{ backgroundColor: "#000", border: "1px solid #333", borderRadius: "12px" }} />
                       <Line type="monotone" name="Players Monitored" dataKey="players" stroke="#E31B23" strokeWidth={3} dot={{ r: 4, fill: "#E31B23" }} />
-                      <Line type="monotone" name="Coaches Monitored" dataKey="coaches" stroke="#444" strokeWidth={2} dot={{ r: 3, fill: "#444" }} />
+                      <Line type="monotone" name="Coaches Monitored" dataKey="coaches" stroke="#666" strokeWidth={2} dot={{ r: 3, fill: "#666" }} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -332,7 +595,7 @@ const ClubDashboard = () => {
                       <YAxis axisLine={false} tickLine={false} tick={{ fill: "#888", fontSize: 10 }} />
                       <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                         {distributionData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.highlight ? "#fff" : "#333"} />
+                          <Cell key={`cell-${index}`} fill={entry.highlight ? "#E31B23" : "#333"} />
                         ))}
                       </Bar>
                     </BarChart>
@@ -345,17 +608,43 @@ const ClubDashboard = () => {
           {/* Coaches & Players */}
           <DashboardSection title="Coaches & Players">
             <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-6">Players</p>
-            <DashboardTable columns={staffColumns} data={staffData} className="border-white/10" />
+            {coachesAndPlayers?.players && coachesAndPlayers.players.length > 0 ? (
+              <DashboardTable columns={playerColumns} data={coachesAndPlayers.players} className="border-white/10" />
+            ) : (
+              <div className="py-8 text-center text-xs text-white/40 border border-dashed border-white/10 rounded-xl">
+                No players found.
+              </div>
+            )}
+
             <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mt-10 mb-6">Coaches</p>
-            <DashboardTable columns={coachColumns} data={coachData} className="border-white/10" />
+            {coachesAndPlayers?.coaches && coachesAndPlayers.coaches.length > 0 ? (
+              <DashboardTable columns={coachColumns} data={coachesAndPlayers.coaches} className="border-white/10" />
+            ) : (
+              <div className="py-8 text-center text-xs text-white/40 border border-dashed border-white/10 rounded-xl">
+                No coaches found.
+              </div>
+            )}
           </DashboardSection>
 
           {/* Favourites */}
           <DashboardSection title="Favourites">
             <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-6">Favourite Players</p>
-            <DashboardTable columns={favPlayerColumns} data={favPlayerData} className="border-white/10" />
+            {favourites?.players && favourites.players.length > 0 ? (
+              <DashboardTable columns={favPlayerColumns} data={favourites.players} className="border-white/10" />
+            ) : (
+              <div className="py-8 text-center text-xs text-white/40 border border-dashed border-white/10 rounded-xl">
+                No favourite players added yet.
+              </div>
+            )}
+
             <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mt-10 mb-6">Favourite Coaches</p>
-            <DashboardTable columns={favCoachColumns} data={favCoachData} className="border-white/10" />
+            {favourites?.coaches && favourites.coaches.length > 0 ? (
+              <DashboardTable columns={favCoachColumns} data={favourites.coaches} className="border-white/10" />
+            ) : (
+              <div className="py-8 text-center text-xs text-white/40 border border-dashed border-white/10 rounded-xl">
+                No favourite coaches added yet.
+              </div>
+            )}
           </DashboardSection>
 
           {/* Background Image Upload Progress Widget */}
@@ -526,27 +815,37 @@ const ClubDashboard = () => {
               </div>
               <h3 className="text-xl font-black text-white uppercase tracking-tight italic">Recent Activity</h3>
             </div>
-            <div className="flex flex-col gap-6">
-              <ActivityItem
-                icon={<IconHeart size={18} />}
-                text="John Smith viewed CV for Marcus Johnson"
-                time="2 hours ago"
-              />
-              <ActivityItem
-                icon={<IconShare size={18} />}
-                text="Profile shared: David Martinez"
-                time="5 hours ago"
-              />
-              <ActivityItem
-                icon={<IconEye size={18} />}
-                text="New scout view from Manchester United"
-                time="8 hours ago"
-              />
-              <ActivityItem
-                icon={<IconUsers size={18} />}
-                text="Team Santos U17 updated roster"
-                time="1 day ago"
-              />
+            <div className="flex flex-col gap-4">
+              {recentActivities.length > 0 ? (
+                recentActivities.map((act) => {
+                  const getIcon = () => {
+                    const upperType = (act.type || "").toUpperCase();
+                    if (upperType.includes("FAVOURITE") || upperType.includes("LIKE")) {
+                      return <IconHeart className="size-4.5 text-destructive" />;
+                    }
+                    if (upperType.includes("SHARE")) {
+                      return <IconShare className="size-4.5" />;
+                    }
+                    if (upperType.includes("VIEW") || upperType.includes("SCOUT")) {
+                      return <IconEye className="size-4.5" />;
+                    }
+                    return <IconBell className="size-4.5" />;
+                  };
+
+                  return (
+                    <ActivityItem
+                      key={act.id}
+                      icon={getIcon()}
+                      text={act.title || act.description}
+                      time={act.timeAgo || "RECENT"}
+                    />
+                  );
+                })
+              ) : (
+                <div className="py-8 text-center text-xs text-white/40 border border-dashed border-white/10 rounded-xl">
+                  No recent activity recorded yet.
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -588,12 +887,12 @@ const ActivityItem = ({
   text: string;
   time: string;
 }) => (
-  <div className="p-5 rounded-2xl border border-white/5 bg-white/2 flex gap-4 hover:border-destructive/30 transition-all group">
-    <div className="size-10 rounded-xl bg-white/5 flex items-center justify-center text-white/40 group-hover:bg-destructive/10 group-hover:text-destructive transition-colors">
+  <div className="p-4 rounded-2xl border border-white/5 bg-white/2 flex gap-4 hover:border-destructive/30 transition-all group">
+    <div className="size-10 rounded-xl bg-white/5 flex items-center justify-center text-white/40 group-hover:bg-destructive/10 group-hover:text-destructive transition-colors shrink-0">
       {icon}
     </div>
-    <div>
-      <div className="text-xs font-bold text-white leading-tight mb-1">{text}</div>
+    <div className="min-w-0">
+      <div className="text-xs font-bold text-white leading-tight mb-1 truncate">{text}</div>
       <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{time}</div>
     </div>
   </div>
