@@ -15,6 +15,10 @@ import {
   IParentTrainingSessionsResponse,
   IGetParentTrainingSessionsParams,
   ISubmitSessionRsvpPayload,
+  ICreateChildPayload,
+  ICreateChildResponse,
+  ISwitchProfileToChildPayload,
+  ISwitchProfileResponse,
 } from "@/types/parent.type";
 
 export const parentApi = apiSlice.injectEndpoints({
@@ -165,13 +169,86 @@ export const parentApi = apiSlice.injectEndpoints({
         }
       },
     }),
+
+    createChildProfile: builder.mutation<
+      ICreateChildResponse,
+      ICreateChildPayload | FormData
+    >({
+      query: (payload) => {
+        let body: FormData;
+        if (payload instanceof FormData) {
+          body = payload;
+        } else {
+          body = new FormData();
+          if (payload.avatar) {
+            body.append("avatar", payload.avatar);
+          }
+          body.append("data", JSON.stringify(payload.data));
+        }
+        return {
+          url: "/parents/create-child",
+          method: "POST",
+          body,
+        };
+      },
+      invalidatesTags: [TagTypes.PARENTS, TagTypes.PLAYERS, TagTypes.DASHBOARD],
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Child profile created successfully");
+        } catch (err: any) {
+          const message = err?.error?.data?.message || "Failed to create child profile";
+          ErrorToast(message);
+        }
+      },
+    }),
+
+    switchProfileToChild: builder.mutation<
+      ISwitchProfileResponse,
+      ISwitchProfileToChildPayload
+    >({
+      query: (body) => ({
+        url: "/parents/switch-profile",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: [TagTypes.PARENTS, TagTypes.PLAYERS, TagTypes.PROFILE, TagTypes.DASHBOARD],
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Profile switched to child successfully");
+        } catch (err: any) {
+          const message = err?.error?.data?.message || "Failed to switch profile";
+          ErrorToast(message);
+        }
+      },
+    }),
+
+    switchToParent: builder.mutation<ISwitchProfileResponse, void>({
+      query: () => ({
+        url: "/parents/switch-to-parent",
+        method: "POST",
+      }),
+      invalidatesTags: [TagTypes.PARENTS, TagTypes.PLAYERS, TagTypes.PROFILE, TagTypes.DASHBOARD],
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Profile switched back to parent successfully");
+        } catch (err: any) {
+          const message = err?.error?.data?.message || "Failed to switch back to parent";
+          ErrorToast(message);
+        }
+      },
+    }),
   }),
 });
 
 export const {
   useGetParentOverviewQuery,
   useGetMyChildrenQuery,
+  useLazyGetMyChildrenQuery,
   useUpdateChildProfileMutation,
+  useCreateChildProfileMutation,
   useGetParentFeesQuery,
   useLazyGetParentFeesQuery,
   usePayFeeInvoiceMutation,
@@ -180,4 +257,6 @@ export const {
   useGetParentTrainingSessionsQuery,
   useLazyGetParentTrainingSessionsQuery,
   useSubmitSessionRsvpMutation,
+  useSwitchProfileToChildMutation,
+  useSwitchToParentMutation,
 } = parentApi;

@@ -11,6 +11,7 @@ export interface ILinkedChild {
   childPlayerId: string;
   childUserId?: string;
   fullName: string;
+  email?: string;
   position: string;
   profileImage?: string | null;
   cvTier?: string;
@@ -31,6 +32,30 @@ export interface ILinkedChild {
   coachName?: string;
   assignedCoach?: IAssignedCoach;
   assignedCoaches?: IAssignedCoach[];
+}
+
+export interface ICreateChildData {
+  name: string;
+  email: string;
+  dateOfBirth: string;
+  position: string;
+  height?: number;
+  weight?: number;
+  currentClub?: string;
+  relationshipType: string;
+}
+
+export interface ICreateChildPayload {
+  avatar?: File | null;
+  data: ICreateChildData;
+}
+
+export interface ICreateChildResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  data?: any;
 }
 
 export interface ILinkedChildrenResponse {
@@ -315,6 +340,43 @@ export interface ISubmitSessionRsvpPayload {
   rsvpStatus: "CONFIRMED" | "DECLINED";
   notes?: string;
 }
+
+export interface ISwitchProfileToChildPayload {
+  childUserId: string;
+}
+
+export interface ISwitchProfileUserData {
+  _id: string;
+  email: string;
+  name: string;
+  role: string;
+  status?: string;
+  avatar?: string;
+  phone?: string;
+  accountManagedBy?: string;
+  isEmailVerified?: boolean;
+  playerId?: string;
+  position?: string;
+  isVerified?: boolean;
+  verificationStatus?: string;
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  [key: string]: any;
+}
+
+export interface ISwitchProfileData {
+  user: ISwitchProfileUserData;
+  accessToken: string;
+  refreshToken?: string;
+  switchedFromParentId?: string;
+}
+
+export interface ISwitchProfileResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: ISwitchProfileData;
+}
+
 
 
 

@@ -1,10 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   IconBallFootball,
   IconAward,
@@ -15,10 +24,13 @@ import {
   IconAlertTriangle,
   IconLoader2,
   IconUserOff,
+  IconPlus,
+  IconCamera,
 } from "@tabler/icons-react";
 import {
   useGetMyChildrenQuery,
   useUpdateChildProfileMutation,
+  useCreateChildProfileMutation,
 } from "@/redux/features/parent/parentApi";
 import { ILinkedChild } from "@/types/parent.type";
 import { cn } from "@/lib/utils";
@@ -31,6 +43,17 @@ interface ChildProfileForm {
   position: string;
   preferredFoot: string;
   academyLocation: string;
+}
+
+interface CreateChildFormState {
+  name: string;
+  email: string;
+  dateOfBirth: string;
+  position: string;
+  height: string;
+  weight: string;
+  currentClub: string;
+  relationshipType: string;
 }
 
 const standardPositions = [
@@ -46,6 +69,12 @@ const standardPositions = [
   "Attacking Midfielder (CAM)",
   "Defensive Midfielder (CDM)",
   "Full Back (LB/RB)",
+];
+
+const relationshipTypes = [
+  { value: "FATHER", label: "Father" },
+  { value: "MOTHER", label: "Mother" },
+  { value: "GUARDIAN", label: "Guardian" },
 ];
 
 const formatForDateInput = (val?: string | null): string => {
@@ -84,15 +113,32 @@ const ManageChildProfile = () => {
 
   const [updateChildProfile, { isLoading: isUpdating }] =
     useUpdateChildProfileMutation();
+  const [createChildProfile, { isLoading: isCreating }] =
+    useCreateChildProfileMutation();
 
   const children: ILinkedChild[] = childrenResponse?.data || [];
 
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
+
+  // Create Child Form State
+  const [createForm, setCreateForm] = useState<CreateChildFormState>({
+    name: "",
+    email: "",
+    dateOfBirth: "",
+    position: "Forward",
+    height: "",
+    weight: "",
+    currentClub: "",
+    relationshipType: "FATHER",
+  });
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Safely pick currently selected child
-  const activeIndex =
-    selectedIndex < children.length ? selectedIndex : 0;
+  const activeIndex = selectedIndex < children.length ? selectedIndex : 0;
   const selectedChild: ILinkedChild | undefined = children[activeIndex];
 
   const {
@@ -151,8 +197,69 @@ const ManageChildProfile = () => {
       setIsEditing(false);
       refetch();
     } catch {
-      // Optimistic UX or fallback
       setIsEditing(false);
+    }
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleCreateChildSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!createForm.name.trim()) {
+      toast.error("Please enter your child's full name");
+      return;
+    }
+    if (!createForm.email.trim()) {
+      toast.error("Please enter an email address for your child");
+      return;
+    }
+    if (!createForm.dateOfBirth) {
+      toast.error("Please select a date of birth");
+      return;
+    }
+
+    const payloadFormData = new FormData();
+    if (avatarFile) {
+      payloadFormData.append("avatar", avatarFile);
+    }
+    payloadFormData.append(
+      "data",
+      JSON.stringify({
+        name: createForm.name.trim(),
+        email: createForm.email.trim(),
+        dateOfBirth: createForm.dateOfBirth,
+        position: createForm.position,
+        height: createForm.height ? Number(createForm.height) : undefined,
+        weight: createForm.weight ? Number(createForm.weight) : undefined,
+        currentClub: createForm.currentClub.trim() || undefined,
+        relationshipType: createForm.relationshipType,
+      })
+    );
+
+    try {
+      await createChildProfile(payloadFormData).unwrap();
+      setIsCreateModalOpen(false);
+      setCreateForm({
+        name: "",
+        email: "",
+        dateOfBirth: "",
+        position: "Forward",
+        height: "",
+        weight: "",
+        currentClub: "",
+        relationshipType: "FATHER",
+      });
+      setAvatarFile(null);
+      setAvatarPreview(null);
+      refetch();
+    } catch {
+      // Handled via RTK mutation toast
     }
   };
 
@@ -187,14 +294,14 @@ const ManageChildProfile = () => {
 
   return (
     <div className="flex flex-col gap-8 pb-24 md:pb-12 min-w-0">
-      {/* Header with Title and Child Switcher */}
+      {/* Header with Title and Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase text-white font-orbitron tracking-tight leading-none">
-            Child <span className="text-[#00FF62] italic">Profiles</span>
+            Child <span className="text-primary italic">Profiles</span>
           </h1>
-          <p className="text-white/60 font-bold uppercase tracking-widest text-[9px] md:text-[11px] mt-2 leading-relaxed">
-            Manage your children&apos;s details, CV stats, and positions
+          <p className="text-muted-foreground font-bold uppercase tracking-widest text-[9px] md:text-[11px] mt-2 leading-relaxed">
+            Manage your child&apos;s details, CV stats, and positions
           </p>
         </div>
 
@@ -208,7 +315,7 @@ const ManageChildProfile = () => {
                   setSelectedIndex(Number(e.target.value));
                   setIsEditing(false);
                 }}
-                className="appearance-none bg-white/5 border border-white/10 hover:border-white/25 text-white rounded-xl px-4 py-2.5 pr-10 text-xs font-bold font-orbitron cursor-pointer focus:outline-none focus:border-[#00FF62]/50 transition-all"
+                className="appearance-none bg-white/5 border border-white/10 hover:border-white/25 text-white rounded-xl px-4 py-2.5 pr-10 text-xs font-bold font-orbitron cursor-pointer focus:outline-none focus:border-primary/50 transition-all"
               >
                 {children.map((child, idx) => (
                   <option
@@ -220,15 +327,28 @@ const ManageChildProfile = () => {
                   </option>
                 ))}
               </select>
-              <IconChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400 pointer-events-none" />
+              <IconChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
             </div>
           )}
 
+          {/* If children array is 0, show Create Child button */}
+          {!isLoading && children.length === 0 && (
+            <Button
+              type="button"
+              onClick={() => setIsCreateModalOpen(true)}
+              className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-extrabold px-5 py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all text-xs uppercase tracking-widest shadow-lg shadow-primary/20 shrink-0 cursor-pointer"
+            >
+              <IconPlus size={16} />
+              <span>Create Child</span>
+            </Button>
+          )}
+
+          {/* If children array > 0, ONLY show Edit Profile button */}
           {!isEditing && children.length > 0 && (
             <Button
               type="button"
               onClick={() => setIsEditing(true)}
-              className="w-full sm:w-auto bg-[#E31B23] hover:bg-[#C2181F] text-white px-5 py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all font-bold text-xs uppercase tracking-widest shadow-lg shadow-[#E31B23]/20 shrink-0 cursor-pointer"
+              className="w-full sm:w-auto bg-destructive hover:bg-destructive/90 text-destructive-foreground px-5 py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all font-bold text-xs uppercase tracking-widest shadow-lg shadow-destructive/20 shrink-0 cursor-pointer"
             >
               <IconPencil size={16} />
               <span>Edit Profile</span>
@@ -292,16 +412,26 @@ const ManageChildProfile = () => {
           </Button>
         </div>
       ) : children.length === 0 ? (
-        <div className="py-16 text-center flex flex-col items-center justify-center gap-3 border border-dashed border-white/10 rounded-2xl bg-white/1">
-          <div className="size-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40">
-            <IconUserOff size={28} />
+        <div className="py-16 text-center flex flex-col items-center justify-center gap-4 border border-dashed border-white/10 rounded-3xl bg-white/2 p-8">
+          <div className="size-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-muted-foreground">
+            <IconUserOff size={32} />
           </div>
-          <p className="text-base font-bold text-white uppercase tracking-wider font-orbitron">
-            No Linked Children Found
-          </p>
-          <p className="text-xs text-white/40 max-w-sm">
-            There are currently no child athlete profiles linked to your parent account.
-          </p>
+          <div className="flex flex-col gap-1 max-w-md">
+            <p className="text-lg font-bold text-white uppercase tracking-wider font-orbitron">
+              No Linked Child Found
+            </p>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              You haven&apos;t added your child athlete yet. Create your child&apos;s profile to monitor their football journey, match evaluations, and training schedules.
+            </p>
+          </div>
+          <Button
+            type="button"
+            onClick={() => setIsCreateModalOpen(true)}
+            className="mt-2 bg-primary hover:bg-primary/90 text-primary-foreground font-extrabold px-6 py-3 rounded-xl flex items-center justify-center gap-2 transition-all text-xs uppercase tracking-widest shadow-lg shadow-primary/20 cursor-pointer"
+          >
+            <IconPlus size={16} />
+            <span>Create Child Profile</span>
+          </Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -309,7 +439,7 @@ const ManageChildProfile = () => {
           <div className="bg-[#0D0D0D]/60 border border-white/10 p-8 rounded-3xl shadow-xl flex flex-col gap-6 items-center text-center">
             {/* Avatar with Verification / Award Icon */}
             <div className="relative">
-              <div className="relative size-32 rounded-full overflow-hidden border-4 border-[#00FF62]/20 bg-white/5 shrink-0">
+              <div className="relative size-32 rounded-full overflow-hidden border-4 border-primary/20 bg-white/5 shrink-0">
                 <Image
                   src={selectedChild?.profileImage || "/placeholder_img.jpg"}
                   alt={selectedChild?.fullName || "Child Avatar"}
@@ -333,9 +463,14 @@ const ManageChildProfile = () => {
               <h2 className="text-2xl font-black text-white font-orbitron tracking-wide">
                 {selectedChild?.fullName}
               </h2>
-              <p className="text-xs text-[#00FF62] font-bold uppercase tracking-widest">
+              <p className="text-xs text-primary font-bold uppercase tracking-widest">
                 {selectedChild?.position}
               </p>
+              {selectedChild?.email && (
+                <p className="text-[11px] text-muted-foreground">
+                  {selectedChild.email}
+                </p>
+              )}
             </div>
 
             {/* Badges */}
@@ -350,11 +485,11 @@ const ManageChildProfile = () => {
               </Badge>
 
               {isVerified ? (
-                <Badge className="bg-green-500/10 border-green-500/30 text-green-400 font-bold px-3 py-1 rounded-full text-xs uppercase tracking-wider">
+                <Badge className="bg-emerald-500/10 border-emerald-500/30 text-emerald-400 font-bold px-3 py-1 rounded-full text-xs uppercase tracking-wider">
                   VERIFIED CV
                 </Badge>
               ) : (
-                <Badge className="bg-white/5 border-white/10 text-white/50 font-bold px-3 py-1 rounded-full text-xs uppercase tracking-wider">
+                <Badge className="bg-white/5 border-white/10 text-muted-foreground font-bold px-3 py-1 rounded-full text-xs uppercase tracking-wider">
                   PENDING VERIFICATION
                 </Badge>
               )}
@@ -362,15 +497,15 @@ const ManageChildProfile = () => {
 
             {/* Academy & Coach Information */}
             <div className="w-full border-t border-white/5 pt-6 flex flex-col gap-4 text-left">
-              <div className="flex items-center gap-3 text-sm text-gray-400">
-                <IconBallFootball size={18} className="text-[#00FF62] shrink-0" />
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <IconBallFootball size={18} className="text-primary shrink-0" />
                 <span className="truncate">
                   Academy:{" "}
                   <strong className="text-white font-medium">{academyName}</strong>
                 </span>
               </div>
-              <div className="flex items-center gap-3 text-sm text-gray-400">
-                <IconShield size={18} className="text-[#00FF62] shrink-0" />
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <IconShield size={18} className="text-primary shrink-0" />
                 <span className="truncate">
                   Coaches Assigned:{" "}
                   <strong className="text-white font-medium">{coachName}</strong>
@@ -389,26 +524,26 @@ const ManageChildProfile = () => {
               {/* Row 1: Full Name & DOB */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-orbitron">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest font-orbitron">
                     Full Name
                   </label>
                   <input
                     type="text"
                     disabled={!isEditing}
                     {...register("fullName", { required: true })}
-                    className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-gray-500 focus:outline-none focus:border-[#00FF62]/50 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   />
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-orbitron">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest font-orbitron">
                     Date of Birth
                   </label>
                   <input
                     type="date"
                     disabled={!isEditing}
                     {...register("dob")}
-                    className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white focus:outline-none focus:border-[#00FF62]/50 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed scheme-dark font-medium"
+                    className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white focus:outline-none focus:border-primary/50 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed scheme-dark font-medium"
                   />
                 </div>
               </div>
@@ -416,7 +551,7 @@ const ManageChildProfile = () => {
               {/* Row 2: Height, Weight, Preferred Foot */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-orbitron">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest font-orbitron">
                     Height (cm)
                   </label>
                   <input
@@ -424,12 +559,12 @@ const ManageChildProfile = () => {
                     disabled={!isEditing}
                     {...register("height")}
                     placeholder="180"
-                    className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-gray-500 focus:outline-none focus:border-[#00FF62]/50 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   />
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-orbitron">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest font-orbitron">
                     Weight (kg)
                   </label>
                   <input
@@ -437,18 +572,18 @@ const ManageChildProfile = () => {
                     disabled={!isEditing}
                     {...register("weight")}
                     placeholder="75"
-                    className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-gray-500 focus:outline-none focus:border-[#00FF62]/50 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   />
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-orbitron">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest font-orbitron">
                     Preferred Foot
                   </label>
                   <select
                     disabled={!isEditing}
                     {...register("preferredFoot")}
-                    className="w-full px-4 py-3.5 rounded-xl border border-white/10 bg-white/5 text-white focus:outline-none focus:border-[#00FF62]/50 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed font-medium cursor-pointer"
+                    className="w-full px-4 py-3.5 rounded-xl border border-white/10 bg-white/5 text-white focus:outline-none focus:border-primary/50 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed font-medium cursor-pointer"
                   >
                     <option value="RIGHT" className="bg-[#111111] text-white">
                       Right Foot
@@ -466,13 +601,13 @@ const ManageChildProfile = () => {
               {/* Row 3: Position & Academy Location */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-orbitron">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest font-orbitron">
                     Position
                   </label>
                   <select
                     disabled={!isEditing}
                     {...register("position")}
-                    className="w-full px-4 py-3.5 rounded-xl border border-white/10 bg-white/5 text-white focus:outline-none focus:border-[#00FF62]/50 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed font-medium cursor-pointer"
+                    className="w-full px-4 py-3.5 rounded-xl border border-white/10 bg-white/5 text-white focus:outline-none focus:border-primary/50 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed font-medium cursor-pointer"
                   >
                     {positionOptions.map((pos) => (
                       <option
@@ -487,7 +622,7 @@ const ManageChildProfile = () => {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-orbitron">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest font-orbitron">
                     Academy Location
                   </label>
                   <input
@@ -495,7 +630,7 @@ const ManageChildProfile = () => {
                     disabled={!isEditing}
                     {...register("academyLocation")}
                     placeholder="Academy Location"
-                    className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white focus:outline-none focus:border-[#00FF62]/50 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white focus:outline-none focus:border-primary/50 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   />
                 </div>
               </div>
@@ -523,14 +658,14 @@ const ManageChildProfile = () => {
                         });
                       }
                     }}
-                    className="h-11 px-6 rounded-xl border-white/10 text-xs font-bold text-gray-400 hover:bg-white/5 hover:text-white transition-all uppercase tracking-wider cursor-pointer"
+                    className="h-11 px-6 rounded-xl border-white/10 text-xs font-bold text-muted-foreground hover:bg-white/5 hover:text-white transition-all uppercase tracking-wider cursor-pointer"
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
                     disabled={isSubmitting || isUpdating}
-                    className="h-11 bg-[#E31B23] hover:bg-[#C2181F] text-white px-8 rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg shadow-[#E31B23]/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="h-11 bg-destructive hover:bg-destructive/90 text-destructive-foreground px-8 rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg shadow-destructive/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                   >
                     {isSubmitting || isUpdating ? (
                       <>
@@ -547,6 +682,266 @@ const ManageChildProfile = () => {
           </div>
         </div>
       )}
+
+      {/* Create Child Profile Dialog Modal */}
+      <Dialog
+        open={isCreateModalOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setIsCreateModalOpen(false);
+            setAvatarFile(null);
+            setAvatarPreview(null);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-xl bg-[#0D0D0D] border-white/10 text-white max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-orbitron text-xl uppercase tracking-wide">
+              Create Child Athlete Profile
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Link your child athlete to your parent account to track performance, schedule, and fees.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleCreateChildSubmit} className="flex flex-col gap-5 py-2">
+            {/* Avatar Upload */}
+            <div className="flex flex-col items-center gap-2.5">
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="relative size-24 rounded-full border-2 border-dashed border-white/20 hover:border-primary/50 bg-white/5 flex items-center justify-center cursor-pointer group overflow-hidden transition-all"
+              >
+                {avatarPreview ? (
+                  <Image
+                    src={avatarPreview}
+                    alt="Child Avatar Preview"
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center gap-1 text-muted-foreground group-hover:text-primary transition-colors">
+                    <IconCamera size={24} />
+                    <span className="text-[9px] uppercase font-bold tracking-wider">Photo</span>
+                  </div>
+                )}
+                {avatarPreview && (
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                    <IconPencil size={20} className="text-white" />
+                  </div>
+                )}
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="hidden"
+              />
+              <span className="text-[10px] text-muted-foreground">
+                Upload Child Profile Photo (Optional)
+              </span>
+            </div>
+
+            {/* Row 1: Full Name & Email */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest font-orbitron">
+                  Full Name <span className="text-destructive">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={createForm.name}
+                  onChange={(e) =>
+                    setCreateForm((prev) => ({ ...prev, name: e.target.value }))
+                  }
+                  placeholder="e.g. John Player"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 text-xs font-medium"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest font-orbitron">
+                  Email Address <span className="text-destructive">*</span>
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={createForm.email}
+                  onChange={(e) =>
+                    setCreateForm((prev) => ({ ...prev, email: e.target.value }))
+                  }
+                  placeholder="e.g. johnplayer@yopmail.com"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 text-xs font-medium"
+                />
+              </div>
+            </div>
+
+            {/* Row 2: Date of Birth & Relationship Type */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest font-orbitron">
+                  Date of Birth <span className="text-destructive">*</span>
+                </label>
+                <input
+                  type="date"
+                  required
+                  value={createForm.dateOfBirth}
+                  onChange={(e) =>
+                    setCreateForm((prev) => ({
+                      ...prev,
+                      dateOfBirth: e.target.value,
+                    }))
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-white/10 bg-white/5 text-white focus:outline-none focus:border-primary/50 text-xs font-medium scheme-dark"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest font-orbitron">
+                  Relationship <span className="text-destructive">*</span>
+                </label>
+                <select
+                  value={createForm.relationshipType}
+                  onChange={(e) =>
+                    setCreateForm((prev) => ({
+                      ...prev,
+                      relationshipType: e.target.value,
+                    }))
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-white/10 bg-white/5 text-white focus:outline-none focus:border-primary/50 text-xs font-medium cursor-pointer"
+                >
+                  {relationshipTypes.map((rel) => (
+                    <option
+                      key={rel.value}
+                      value={rel.value}
+                      className="bg-[#111111] text-white"
+                    >
+                      {rel.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Row 3: Position & Current Club */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest font-orbitron">
+                  Position
+                </label>
+                <select
+                  value={createForm.position}
+                  onChange={(e) =>
+                    setCreateForm((prev) => ({
+                      ...prev,
+                      position: e.target.value,
+                    }))
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-white/10 bg-white/5 text-white focus:outline-none focus:border-primary/50 text-xs font-medium cursor-pointer"
+                >
+                  {standardPositions.map((pos) => (
+                    <option
+                      key={pos}
+                      value={pos}
+                      className="bg-[#111111] text-white"
+                    >
+                      {pos}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest font-orbitron">
+                  Current Club / Academy
+                </label>
+                <input
+                  type="text"
+                  value={createForm.currentClub}
+                  onChange={(e) =>
+                    setCreateForm((prev) => ({
+                      ...prev,
+                      currentClub: e.target.value,
+                    }))
+                  }
+                  placeholder="e.g. Abahani Youth Academy"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 text-xs font-medium"
+                />
+              </div>
+            </div>
+
+            {/* Row 4: Height & Weight */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest font-orbitron">
+                  Height (cm)
+                </label>
+                <input
+                  type="number"
+                  value={createForm.height}
+                  onChange={(e) =>
+                    setCreateForm((prev) => ({
+                      ...prev,
+                      height: e.target.value,
+                    }))
+                  }
+                  placeholder="178"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 text-xs font-medium"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest font-orbitron">
+                  Weight (kg)
+                </label>
+                <input
+                  type="number"
+                  value={createForm.weight}
+                  onChange={(e) =>
+                    setCreateForm((prev) => ({
+                      ...prev,
+                      weight: e.target.value,
+                    }))
+                  }
+                  placeholder="67"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 text-xs font-medium"
+                />
+              </div>
+            </div>
+
+            <DialogFooter className="flex flex-col sm:flex-row gap-2 pt-3 border-t border-white/5">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsCreateModalOpen(false);
+                  setAvatarFile(null);
+                  setAvatarPreview(null);
+                }}
+                disabled={isCreating}
+                className="border-white/10 text-muted-foreground hover:bg-white/5 hover:text-white"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isCreating}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-orbitron font-bold uppercase tracking-wider text-xs"
+              >
+                {isCreating ? (
+                  <>
+                    <IconLoader2 className="size-4 animate-spin mr-1.5" />
+                    <span>Creating Profile...</span>
+                  </>
+                ) : (
+                  <span>Create Child Account</span>
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
