@@ -5,6 +5,12 @@ import {
   IGetProductsResponse,
   IGetProductCategoriesResponse,
   IGetProductsParams,
+  IGetCartResponse,
+  IAddToCartPayload,
+  ICreateOrderPayload,
+  ICreateOrderResponse,
+  IVerifyOrderResponse,
+  IGetMyOrdersResponse,
 } from "@/types/shop.type";
 
 import { SuccessToast, ErrorToast } from "@/helpers/ValidationHelper";
@@ -141,6 +147,181 @@ export const shopApi = apiSlice.injectEndpoints({
         }
       },
     }),
+
+    getCart: builder.query<IGetCartResponse, void>({
+      query: () => ({
+        url: "/shop/cart",
+        method: "GET",
+      }),
+      providesTags: [TagTypes.CART],
+    }),
+
+    addToCart: builder.mutation<any, IAddToCartPayload>({
+      query: (body) => ({
+        url: "/shop/cart",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success) {
+          return [TagTypes.CART];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Item added to cart");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to add item to cart";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    updateCartItem: builder.mutation<any, { itemId: string; body: { quantity: number; size?: string } }>({
+      query: ({ itemId, body }) => ({
+        url: `/shop/cart/items/${itemId}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success) {
+          return [TagTypes.CART];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Cart updated");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to update cart";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    deleteCartItem: builder.mutation<any, string>({
+      query: (itemId) => ({
+        url: `/shop/cart/items/${itemId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success) {
+          return [TagTypes.CART];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Item removed from cart");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to remove item";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    clearCart: builder.mutation<any, void>({
+      query: () => ({
+        url: "/shop/cart",
+        method: "DELETE",
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success) {
+          return [TagTypes.CART];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Cart cleared successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to clear cart";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    createOrder: builder.mutation<ICreateOrderResponse, ICreateOrderPayload | void>({
+      query: (body) => ({
+        url: "/shop/orders",
+        method: "POST",
+        body: body || { shippingAddress: "Flat 4B, Road 12, London, UK" },
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success) {
+          return [TagTypes.CART];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Order created successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to create order";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    verifyOrder: builder.query<IVerifyOrderResponse, { orderId: string; sessionId: string }>({
+      query: ({ orderId, sessionId }) => ({
+        url: `/shop/orders/${orderId}/verify`,
+        method: "GET",
+        params: {
+          sessionId,
+        },
+      }),
+      providesTags: [TagTypes.CART],
+    }),
+
+    getMyOrders: builder.query<IGetMyOrdersResponse, void>({
+      query: () => ({
+        url: "/shop/orders",
+        method: "GET",
+      }),
+      providesTags: [TagTypes.CART],
+    }),
   }),
 });
 
@@ -152,4 +333,15 @@ export const {
   useCreateProductMutation,
   useUpdateProductMutation,
   useDeleteProductMutation,
+  useGetCartQuery,
+  useLazyGetCartQuery,
+  useAddToCartMutation,
+  useUpdateCartItemMutation,
+  useDeleteCartItemMutation,
+  useClearCartMutation,
+  useCreateOrderMutation,
+  useVerifyOrderQuery,
+  useLazyVerifyOrderQuery,
+  useGetMyOrdersQuery,
+  useLazyGetMyOrdersQuery,
 } = shopApi;

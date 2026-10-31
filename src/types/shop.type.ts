@@ -97,3 +97,111 @@ export interface IProductFormData {
   isFeatured: boolean;
 }
 
+export interface ICartItemProduct {
+  _id: string;
+  productName: string;
+  slug?: string;
+  category?: string;
+  regularPrice?: number;
+  salePrice?: number;
+  price?: number;
+  productImage?: string;
+  images?: string[];
+  stockQuantity?: number;
+  stockStatus?: string;
+  [key: string]: any;
+}
+
+export interface ICartItem {
+  _id: string;
+  productId: string | ICartItemProduct;
+  product?: ICartItemProduct;
+  quantity: number;
+  size: string;
+  price: number;
+  subtotal?: number;
+}
+
+export interface ICartData {
+  _id: string;
+  userId?: string;
+  items: ICartItem[];
+  itemCount: number;
+  subtotal: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface IGetCartResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: ICartData;
+}
+
+export interface IAddToCartPayload {
+  productId: string;
+  quantity: number;
+  size: string;
+}
+
+export interface IUpdateCartItemPayload {
+  itemId: string;
+  quantity: number;
+  size?: string;
+}
+
+export interface IOrderItem {
+  productId: string | IProductItem | any;
+  quantity: number;
+  price: number;
+  size: string;
+  _id?: string;
+}
+
+export interface IOrderData {
+  _id: string;
+  userId: string;
+  orderNumber: string;
+  items: IOrderItem[];
+  totalAmount: number;
+  paymentStatus: "PENDING" | "PAID" | "FAILED" | string;
+  orderStatus: "PROCESSING" | "COMPLETED" | "CANCELLED" | string;
+  stripeSessionId?: string;
+  sessionId?: string;
+  checkoutUrl?: string;
+  shippingAddress?: string;
+  currency?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  [key: string]: any;
+}
+
+export interface ICreateOrderPayload {
+  shippingAddress?: string;
+  [key: string]: any;
+}
+
+export interface ICreateOrderResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: IOrderData;
+}
+
+export interface IVerifyOrderResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: IOrderData;
+}
+
+export interface IGetMyOrdersResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: IOrderData[];
+}
+
+
+

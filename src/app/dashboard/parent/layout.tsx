@@ -7,7 +7,8 @@ import {
   IconReportAnalytics,
   IconCreditCard,
   IconCalendarCheck,
-  IconBuildingStore
+  IconBuildingStore,
+  IconShoppingBag,
 } from "@tabler/icons-react";
 import { ReactNode } from "react";
 
@@ -17,17 +18,19 @@ const parentSidebarItems = [
   { name: "Match Reports", url: "/dashboard/parent/game-reports", icon: IconReportAnalytics },
   { name: "Fees & Payments", url: "/dashboard/parent/fees", icon: IconCreditCard },
   { name: "Attendance", url: "/dashboard/parent/attendance", icon: IconCalendarCheck },
-  { name: "Academy Shop", url: "/dashboard/parent/shop", icon: IconBuildingStore }
+  { name: "Academy Shop", url: "/dashboard/parent/shop", icon: IconBuildingStore },
+  { name: "My Orders", url: "/dashboard/parent/my-orders", icon: IconShoppingBag },
 ];
 
 const ParentLayout = ({ children }: { children: ReactNode }) => {
-return (
-<DashboardLayout
-  sidebarItems={parentSidebarItems}
-  tier={{ name: "PARENT", color: "var(--indigo)" }}
->
-  {children}
-</DashboardLayout>
-);
-}
+  return (
+    <DashboardLayout
+      sidebarItems={parentSidebarItems}
+      tier={{ name: "PARENT", color: "var(--indigo)" }}
+    >
+      {children}
+    </DashboardLayout>
+  );
+};
+
 export default ParentLayout;

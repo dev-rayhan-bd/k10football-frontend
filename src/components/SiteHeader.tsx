@@ -2,6 +2,9 @@
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useState, useEffect } from "react";
+import Link from "next/link";
+import { IconShoppingCart } from "@tabler/icons-react";
+import { useGetCartQuery } from "@/redux/features/shop/shopApi";
 
 const SiteHeader = ({ showToggle = false, customToggle }: { showToggle?: boolean, customToggle?: ReactNode }) => {
 const pathName = usePathname();
@@ -10,6 +13,9 @@ const isPlayerPage = pathName.startsWith("/dashboard/player");
 const isParentPage = pathName.startsWith("/dashboard/parent");
 const isParentOrPlayerSpace = isPlayerPage || isParentPage;
 const router = useRouter();
+
+const { data: cartResponse } = useGetCartQuery(undefined, { skip: !isParentPage });
+const cartCount = cartResponse?.data?.itemCount ?? cartResponse?.data?.items?.reduce((sum, item) => sum + (item.quantity || 1), 0) ?? 0;
 
 const [isVisible, setIsVisible] = useState(true);
 const [lastScrollY, setLastScrollY] = useState(0);
@@ -124,6 +130,21 @@ return (
           Athlete
         </button>
       </div>
+    )}
+
+    {isParentPage && (
+      <Link
+        href="/dashboard/parent/shop"
+        className="relative p-2 rounded-lg bg-white/5 border border-white/10 hover:border-white/20 hover:bg-white/10 text-gray-300 hover:text-white transition-all flex items-center justify-center cursor-pointer group"
+        title="Academy Shop Cart"
+      >
+        <IconShoppingCart size={18} className="text-gray-300 group-hover:text-white transition-colors" />
+        {cartCount > 0 && (
+          <span className="absolute -top-1.5 -right-1.5 min-w-4.5 h-4.5 px-1 bg-[#E31B23] text-white text-[10px] font-black rounded-full flex items-center justify-center border border-[#0A0A0A] font-orbitron leading-none">
+            {cartCount > 99 ? "99+" : cartCount}
+          </span>
+        )}
+      </Link>
     )}
 
     {showToggle && (

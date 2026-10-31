@@ -60,6 +60,8 @@ const TagTypes = {
     agents: "Agents",
     AGENT_SUCCESS_STORIES: "AgentSuccessStories",
     agentSuccessStories: "AgentSuccessStories",
+    CART: "Cart",
+    cart: "Cart",
 } as const;
 
 export default TagTypes;
