@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 import React, { createContext, useContext, useState, useEffect } from "react";
 import AdditionalNotesSection from "@/components/user-wise-dashboard/academy-management/cv/AdditionalNotesSection";
@@ -16,7 +16,7 @@ import SportsAnalytics from "@/components/user-wise-dashboard/academy-management
 import { useAppSelector } from "@/hooks/reduxHooks";
 import { AuthState } from "@/redux/features/auth";
 
-type UserRole = "player" | "parent" | "coach" | "academy" | "club" | "agent" | "admin" | "";
+type UserRole = "player" | "parent" | "coach" | "academy" | "club" | "agent" | "admin" | "super_admin" | "";
 
 interface PlayerStatsContextType {
     bioRating: number;

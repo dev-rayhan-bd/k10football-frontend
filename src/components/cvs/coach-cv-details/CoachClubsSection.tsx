@@ -18,7 +18,7 @@ const CoachClubsSection = ({ editable = true }: { editable?: boolean }) => {
   const { coachData, handleUpdate } = useCoach();
   const { role } = usePlayerStats() || { role: "player" };
 
-  const canEdit = !!(editable && (role === "coach" || role === "admin" || !role));
+  const canEdit = !!(editable && (role === "coach" || role === "admin" || role === "super_admin" || !role));
 
   const [isAdding, setIsAdding] = useState(false);
 

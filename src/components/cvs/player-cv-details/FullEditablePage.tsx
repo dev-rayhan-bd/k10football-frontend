@@ -16,7 +16,7 @@ import SportsAnalytics from "./SportsAnalycies";
 import { useAppSelector } from "@/hooks/reduxHooks";
 import { AuthState } from "@/redux/features/auth";
 
-type UserRole = "player" | "parent" | "coach" | "academy" | "club" | "agent" | "admin" | "";
+type UserRole = "player" | "parent" | "coach" | "academy" | "club" | "agent" | "admin" | "super_admin" | "";
 
 interface PlayerStatsContextType {
     bioRating: number;

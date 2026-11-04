@@ -6,9 +6,11 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   getDecodedToken,
   getUserRoleFromToken,
+  normalizeRole,
+  getDashboardPathForRole,
   isTokenExpired,
   removeToken,
-  removeUserInfo
+  removeUserInfo,
 } from "@/helpers/SessionHelper";
 
 const AuthGuard = ({ children }: { children: React.ReactNode }) => {
@@ -31,16 +33,16 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
 
     // SECURE: Strictly derive role from the cryptographically signed JWT accessToken!
     // LocalStorage tampering cannot bypass this because it is decoded from token directly.
-    const userRole = getUserRoleFromToken(token);
+    const rawRole = getUserRoleFromToken(token);
+    const normalizedRole = normalizeRole(rawRole);
 
     // Keep localStorage in sync with the authentic token role
-    if (userRole && typeof window !== "undefined") {
-      localStorage.setItem("userRole", userRole);
-      localStorage.setItem("role", userRole);
+    if (normalizedRole && typeof window !== "undefined") {
+      localStorage.setItem("userRole", normalizedRole);
+      localStorage.setItem("role", normalizedRole);
     }
 
-    const defaultDashboardPath =
-      userRole === "academy" ? "/dashboard/academy/analysis" : `/dashboard/${userRole || "player"}`;
+    const defaultDashboardPath = getDashboardPathForRole(normalizedRole);
 
     const isAuthPage =
       pathname.startsWith("/login") ||
@@ -68,9 +70,12 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
       const allRoles = ["player", "coach", "academy", "club", "agent", "admin", "parent"];
 
       // Allowed roles for the current user
-      const allowedRoles = [userRole];
-      if (userRole === "parent") allowedRoles.push("player");
-      if (userRole === "player") allowedRoles.push("parent");
+      const allowedRoles = [normalizedRole];
+      if (normalizedRole === "parent") allowedRoles.push("player");
+      if (normalizedRole === "player") allowedRoles.push("parent");
+      if (normalizedRole === "super_admin" || normalizedRole === "admin") {
+        allowedRoles.push("admin", "super_admin", "super-admin");
+      }
 
       const isAccessingOtherRoleDashboard = allRoles.some((role) => {
         if (allowedRoles.includes(role)) return false;

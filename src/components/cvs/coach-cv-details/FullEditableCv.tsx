@@ -21,7 +21,7 @@ const FullEditableCv = ({ editable = true }: { editable?: boolean }) => {
   const { accessToken } = useAppSelector((state) => state.auth as AuthState);
 
   const isActuallyEditable = editable && !!accessToken;
-  const canEdit = isActuallyEditable && role === "coach";
+  const canEdit = isActuallyEditable && (role === "coach" || role === "admin" || role === "super_admin");
 
   return (
     <>

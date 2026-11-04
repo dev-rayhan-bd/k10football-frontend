@@ -19,9 +19,34 @@ export const getDecodedToken = (token?: string | null): DecodedToken | null => {
   }
 };
 
+export const normalizeRole = (role?: string | null): string => {
+  if (!role) return "";
+  const r = role.toLowerCase().trim().replace(/[-_]/g, "_");
+  if (r === "super_admin" || r === "superadmin" || r === "admin") {
+    return "super_admin";
+  }
+  return r;
+};
+
+export const getDashboardPathForRole = (role?: string | null): string => {
+  const r = normalizeRole(role);
+  if (r === "academy") {
+    return "/dashboard/academy/analysis";
+  }
+  if (r === "super_admin" || r === "admin") {
+    return "/dashboard/admin";
+  }
+  if (r === "coach") return "/dashboard/coach";
+  if (r === "club") return "/dashboard/club";
+  if (r === "agent") return "/dashboard/agent";
+  if (r === "parent") return "/dashboard/parent";
+  if (r === "player") return "/dashboard/player";
+  return `/dashboard/${r || "player"}`;
+};
+
 export const getUserRoleFromToken = (token?: string | null): string => {
   const decoded = getDecodedToken(token);
-  return decoded?.role ? decoded.role.toLowerCase() : "";
+  return decoded?.role ? normalizeRole(decoded.role) : "";
 };
 
 export const isTokenExpired = (token?: string | null): boolean => {
@@ -38,7 +63,7 @@ class SessionHelper {
       localStorage.setItem("token", token);
       const decoded = getDecodedToken(token);
       if (decoded?.role) {
-        const normalizedRole = decoded.role.toLowerCase();
+        const normalizedRole = normalizeRole(decoded.role);
         localStorage.setItem("role", normalizedRole);
         localStorage.setItem("userRole", normalizedRole);
       }
@@ -81,7 +106,7 @@ class SessionHelper {
 
   setUserInfo = (userInfo: { fullName: string; email: string; profileImg: string; role: string }) => {
     if (typeof window !== "undefined" && window.localStorage) {
-      const normalizedRole = (userInfo.role || "").toLowerCase();
+      const normalizedRole = normalizeRole(userInfo.role);
       localStorage.setItem("fullName", userInfo.fullName || "");
       localStorage.setItem("email", userInfo.email || "");
       localStorage.setItem("userEmail", userInfo.email || "");
@@ -96,13 +121,13 @@ class SessionHelper {
     if (typeof window !== "undefined" && window.localStorage) {
       const token = this.getToken();
       const decoded = getDecodedToken(token);
-      const roleFromToken = decoded?.role ? decoded.role.toLowerCase() : "";
+      const roleFromToken = decoded?.role ? normalizeRole(decoded.role) : "";
 
       return {
         fullName: localStorage.getItem("fullName") || "",
         email: decoded?.email || localStorage.getItem("email") || localStorage.getItem("userEmail") || "",
         profileImg: localStorage.getItem("profileImg") || "",
-        role: roleFromToken || (localStorage.getItem("role") || localStorage.getItem("userRole") || "").toLowerCase(),
+        role: roleFromToken || normalizeRole(localStorage.getItem("role") || localStorage.getItem("userRole")),
       };
     }
     return { fullName: "", email: "", profileImg: "", role: "" };

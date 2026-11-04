@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { getDecodedToken } from "@/helpers/SessionHelper";
+import { getDecodedToken, normalizeRole } from "@/helpers/SessionHelper";
 
 export interface AuthState {
   user: any;
@@ -12,7 +12,7 @@ const getInitialAuth = () => {
   if (typeof window === "undefined") return { user: null, accessToken: null, refreshToken: null };
   const token = localStorage.getItem("token");
   const decoded = getDecodedToken(token);
-  const userRole = decoded?.role ? decoded.role.toLowerCase() : null;
+  const userRole = decoded?.role ? normalizeRole(decoded.role) : null;
   const userEmail = decoded?.email || localStorage.getItem("userEmail") || localStorage.getItem("email");
   const fullName = localStorage.getItem("fullName") || "";
 

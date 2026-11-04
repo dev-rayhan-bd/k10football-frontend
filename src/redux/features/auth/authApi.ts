@@ -3,7 +3,7 @@
 import { ErrorToast, SuccessToast } from "@/helpers/ValidationHelper";
 import { apiSlice } from "../api/apiSlice";
 import TagTypes from "@/constants/tagType.constant";
-import { removeToken, setToken, setUserInfo, removeUserInfo } from "@/helpers/SessionHelper";
+import { removeToken, setToken, setUserInfo, removeUserInfo, normalizeRole } from "@/helpers/SessionHelper";
 
 export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -79,10 +79,10 @@ export const authApi = apiSlice.injectEndpoints({
           const token = res?.data?.data?.accessToken;
           const user = res?.data?.data?.user || res?.data?.data || {};
           const rawRole = user?.role || "PLAYER";
-          const role = rawRole.toLowerCase();
+          const role = normalizeRole(rawRole);
           const fullName = user?.name || user?.fullName || "";
           const email = user?.email || "";
-          const profileImg = user?.profileImg || "";
+          const profileImg = user?.profileImg || user?.avatar || "";
 
           if (token) {
             removeToken();

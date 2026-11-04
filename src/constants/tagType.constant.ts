@@ -62,6 +62,12 @@ const TagTypes = {
     agentSuccessStories: "AgentSuccessStories",
     CART: "Cart",
     cart: "Cart",
+    MEMBERSHIP_PLANS: "MembershipPlans",
+    membershipPlans: "MembershipPlans",
+    MEMBERSHIP_GRANTS: "MembershipGrants",
+    membershipGrants: "MembershipGrants",
+    APPROVALS: "Approvals",
+    approvals: "Approvals",
 } as const;
 
 export default TagTypes;

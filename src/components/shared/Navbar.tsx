@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -10,7 +11,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAppSelector } from '@/hooks/reduxHooks'
 import { AuthState } from '@/redux/features/auth'
-import { getToken, getUserInfo, isLoggedIn } from '@/helpers/SessionHelper'
+import { getToken, getUserInfo, isLoggedIn, getDashboardPathForRole, normalizeRole } from '@/helpers/SessionHelper'
 import { useGetMyProfileQuery } from '@/redux/features/user/userApi'
 
 export const Navbar = () => {
@@ -37,7 +38,7 @@ export const Navbar = () => {
     if (loggedIn) {
       setIsAuth(true);
       const info = getUserInfo();
-      const role = (info.role || user?.role || "").toLowerCase();
+      const role = normalizeRole(info.role || user?.role || "");
 
       const name =
         myProfileRes?.data?.fullName ||
@@ -48,24 +49,7 @@ export const Navbar = () => {
         "Dashboard";
       setUserName(name);
 
-      let path = "/dashboard";
-      if (role === "coach") {
-        path = "/dashboard/coach";
-      } else if (role === "academy") {
-        path = "/dashboard/academy/analysis";
-      } else if (role === "club") {
-        path = "/dashboard/club";
-      } else if (role === "agent") {
-        path = "/dashboard/agent";
-      } else if (role === "parent") {
-        path = "/dashboard/parent";
-      } else if (role === "admin" || role === "super_admin") {
-        path = "/dashboard/admin";
-      } else if (role === "player") {
-        path = "/dashboard/player";
-      } else if (role) {
-        path = `/dashboard/${role}`;
-      }
+      const path = getDashboardPathForRole(role);
       setDashboardUrl(path);
     } else {
       setIsAuth(false);

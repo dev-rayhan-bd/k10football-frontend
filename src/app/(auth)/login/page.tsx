@@ -9,7 +9,13 @@ import { Button } from "@/components/ui/button";
 import { useAppDispatch } from "@/hooks/reduxHooks";
 import { setAccessToken, setUser } from "@/redux/features/auth";
 import { useLoginMutation } from "@/redux/features/auth/authApi";
-import { setToken, setUserInfo, getUserRoleFromToken } from "@/helpers/SessionHelper";
+import {
+  setToken,
+  setUserInfo,
+  getUserRoleFromToken,
+  normalizeRole,
+  getDashboardPathForRole,
+} from "@/helpers/SessionHelper";
 
 interface LoginForm {
   email: string;
@@ -43,15 +49,17 @@ const LoginPage = () => {
       const user = res?.data?.user || res?.data;
       const token = res?.data?.accessToken;
       const decodedRole = getUserRoleFromToken(token);
-      const normalizedRole = (decodedRole || user?.role || "player").toLowerCase();
+      const rawRole = user?.role || decodedRole || "player";
+      const normalizedRole = normalizeRole(rawRole);
       const email = user?.email || data.email;
       const fullName = user?.name || user?.fullName || "";
-      const profileImg = user?.profileImg || "";
+      const profileImg = user?.profileImg || user?.avatar || "";
 
       // Store credentials and accessToken
       if (token) {
         setToken(token);
         localStorage.setItem("token", token);
+        localStorage.setItem("accessToken", token);
       }
       setUserInfo({ fullName, email, profileImg, role: normalizedRole });
 
@@ -69,11 +77,8 @@ const LoginPage = () => {
         })
       );
 
-      // Role-based destination
-      const dashboardPath =
-        normalizedRole === "academy"
-          ? "/dashboard/academy/analysis"
-          : `/dashboard/${normalizedRole}`;
+      // Role-based destination (handles super_admin -> /dashboard/admin, academy -> /dashboard/academy/analysis, etc.)
+      const dashboardPath = getDashboardPathForRole(normalizedRole);
 
       router.push(dashboardPath);
     } catch {

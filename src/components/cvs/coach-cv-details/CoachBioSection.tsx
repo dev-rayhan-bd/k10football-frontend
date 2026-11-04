@@ -12,7 +12,7 @@ import { CoachKeySkills } from "./bio-components/CoachKeySkills";
 
 const CoachBioSection = ({ editable }: { editable?: boolean }) => {
   const { role } = usePlayerStats();
-  const canEdit = !!(editable && (role === "coach" || role === "admin" || !role));
+  const canEdit = !!(editable && (role === "coach" || role === "admin" || role === "super_admin" || !role));
 
   return (
     <>
