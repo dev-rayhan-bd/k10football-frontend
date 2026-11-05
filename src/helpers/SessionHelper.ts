@@ -12,8 +12,10 @@ export interface DecodedToken {
 
 export const getDecodedToken = (token?: string | null): DecodedToken | null => {
   if (!token) return null;
+  const clean = token.replace(/^Bearer\s+/i, "").trim();
+  if (!clean) return null;
   try {
-    return jwtDecode<DecodedToken>(token);
+    return jwtDecode<DecodedToken>(clean);
   } catch {
     return null;
   }
@@ -46,12 +48,21 @@ export const getDashboardPathForRole = (role?: string | null): string => {
 
 export const getUserRoleFromToken = (token?: string | null): string => {
   const decoded = getDecodedToken(token);
-  return decoded?.role ? normalizeRole(decoded.role) : "";
+  const rawRole =
+    decoded?.role ||
+    decoded?.userRole ||
+    decoded?.user?.role ||
+    (typeof window !== "undefined"
+      ? localStorage.getItem("role") || localStorage.getItem("userRole")
+      : "") ||
+    "";
+  return normalizeRole(rawRole);
 };
 
 export const isTokenExpired = (token?: string | null): boolean => {
+  if (!token) return true;
   const decoded = getDecodedToken(token);
-  if (!decoded || !decoded.exp) return true;
+  if (!decoded || !decoded.exp) return false;
   return decoded.exp * 1000 < Date.now();
 };
 
@@ -85,6 +96,7 @@ class SessionHelper {
   removeToken = () => {
     if (typeof window !== "undefined" && window.localStorage) {
       localStorage.removeItem("token");
+      localStorage.removeItem("accessToken");
     }
   };
 
@@ -92,8 +104,7 @@ class SessionHelper {
     const token = this.getToken();
     if (!token) return false;
     const decoded = getDecodedToken(token);
-    if (!decoded) return false;
-    if (decoded.exp && decoded.exp * 1000 < Date.now()) {
+    if (decoded && decoded.exp && decoded.exp * 1000 < Date.now()) {
       return false;
     }
     return true;

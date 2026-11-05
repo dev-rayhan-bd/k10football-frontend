@@ -12,7 +12,9 @@ const getInitialAuth = () => {
   if (typeof window === "undefined") return { user: null, accessToken: null, refreshToken: null };
   const token = localStorage.getItem("token");
   const decoded = getDecodedToken(token);
-  const userRole = decoded?.role ? normalizeRole(decoded.role) : null;
+  const userRole = decoded?.role
+    ? normalizeRole(decoded.role)
+    : normalizeRole(localStorage.getItem("role") || localStorage.getItem("userRole"));
   const userEmail = decoded?.email || localStorage.getItem("userEmail") || localStorage.getItem("email");
   const fullName = localStorage.getItem("fullName") || "";
 

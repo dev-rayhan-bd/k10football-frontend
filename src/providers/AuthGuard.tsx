@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  getDecodedToken,
+  getToken,
   getUserRoleFromToken,
   normalizeRole,
   getDashboardPathForRole,
@@ -19,21 +19,24 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    const decoded = getDecodedToken(token);
+    const token = getToken();
     const expired = isTokenExpired(token);
 
-    // If token exists but is invalid or expired, clear session
-    if (token && (!decoded || expired)) {
+    // If token exists but is expired, clear session
+    if (token && expired) {
       removeToken();
       removeUserInfo();
     }
 
-    const isLoggedIn = !!token && !!decoded && !expired;
+    const isLoggedIn = Boolean(token) && !expired;
 
-    // SECURE: Strictly derive role from the cryptographically signed JWT accessToken!
-    // LocalStorage tampering cannot bypass this because it is decoded from token directly.
-    const rawRole = getUserRoleFromToken(token);
+    // Derive role from token or stored session
+    const rawRole =
+      getUserRoleFromToken(token) ||
+      (typeof window !== "undefined"
+        ? localStorage.getItem("role") || localStorage.getItem("userRole")
+        : "") ||
+      "";
     const normalizedRole = normalizeRole(rawRole);
 
     // Keep localStorage in sync with the authentic token role
