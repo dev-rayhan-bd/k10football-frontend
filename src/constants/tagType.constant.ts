@@ -68,6 +68,8 @@ const TagTypes = {
     membershipGrants: "MembershipGrants",
     APPROVALS: "Approvals",
     approvals: "Approvals",
+    ADMIN_SUCCESS_STORIES: "AdminSuccessStories",
+    adminSuccessStories: "AdminSuccessStories",
 } as const;
 
 export default TagTypes;

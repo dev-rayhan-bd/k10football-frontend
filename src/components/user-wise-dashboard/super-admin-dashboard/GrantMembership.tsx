@@ -15,6 +15,7 @@ import {
 } from "@tabler/icons-react";
 import { Loader2, RefreshCw } from "lucide-react";
 import DashboardTable, { Column } from "@/components/dashboard/DashboardTable";
+import TableSkeleton from "@/components/dashboard/TableSkeleton";
 import {
   Dialog,
   DialogContent,
@@ -140,6 +141,10 @@ export const SuperAdminGrantMembership = () => {
                 src={avatar}
                 alt={row.name}
                 className="size-8 rounded-full object-cover border border-white/10 shrink-0"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = "/placeholder_img.jpg";
+                }}
               />
             ) : (
               <div className="size-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/60 text-xs font-bold shrink-0">
@@ -405,12 +410,12 @@ export const SuperAdminGrantMembership = () => {
 
           <div className="w-full overflow-x-auto no-scrollbar">
             {isLoading ? (
-              <div className="py-16 flex flex-col items-center justify-center gap-3">
-                <Loader2 className="size-8 text-primary animate-spin" />
-                <p className="text-xs text-white/40 uppercase tracking-wider font-bold">
-                  Loading membership grants...
-                </p>
-              </div>
+              <TableSkeleton
+                rowCount={5}
+                headers={["USER", "CATEGORY", "DURATION", "VALIDITY PERIOD", "STATUS", "ACTIONS"]}
+                hasAvatar={true}
+                actionButtonsCount={1}
+              />
             ) : isError ? (
               <div className="py-12 flex flex-col items-center justify-center gap-3 text-center">
                 <p className="text-destructive text-sm font-semibold">
