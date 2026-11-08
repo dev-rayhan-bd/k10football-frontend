@@ -435,9 +435,20 @@ export const CreateGameReportWizard = ({
     const payload = buildPayload();
 
     try {
-      await createSelfGameReport(payload).unwrap();
+      const res = await createSelfGameReport(payload).unwrap();
+      const checkoutUrl =
+        res?.data?.checkoutUrl ||
+        res?.checkoutUrl ||
+        (res?.data as any)?.url ||
+        (res as any)?.url;
+
+      if (checkoutUrl) {
+        window.location.assign(checkoutUrl);
+        return;
+      }
     } catch (err: any) {
       console.error("Failed to create self game report via API:", err);
+      return;
     }
 
     const finalReport = {
@@ -467,7 +478,7 @@ export const CreateGameReportWizard = ({
       weight: `${formData.weight}kg`,
       height: `${formData.height}m`,
       status: "Paid" as const,
-      amount: "$ 6.99",
+      amount: "$ 3.99",
       playerId: playerId ? Number(playerId) : undefined,
       playerName: formData.playerName,
       pitchMarkers,
@@ -684,7 +695,17 @@ export const CreateGameReportWizard = ({
     };
 
     try {
-      await requestCoachGameReport(payload).unwrap();
+      const res = await requestCoachGameReport(payload).unwrap();
+      const checkoutUrl =
+        res?.data?.checkoutUrl ||
+        (res as any)?.checkoutUrl ||
+        res?.data?.url ||
+        (res as any)?.url;
+
+      if (checkoutUrl) {
+        window.location.assign(checkoutUrl);
+        return;
+      }
     } catch (err: any) {
       console.error("Failed to request coach game report via API:", err);
       return;
@@ -729,13 +750,14 @@ export const CreateGameReportWizard = ({
           setSelectedCoachId={setSelectedCoachId}
           selectedCoachEmail={selectedCoachEmail}
           setSelectedCoachEmail={setSelectedCoachEmail}
+          isSubmitting={isRequestingCoachReport}
           onCancel={onCancel}
-          onContinue={() => {
+          onContinue={async () => {
             if (isCoach) {
               setStep(2);
             } else if (reportCompletedBy === "coach" && userRole !== "coach") {
-              // Skip to payment before sending request to coach
-              setStep(4);
+              // Direct request to coach API and redirect to Stripe checkout
+              await handlePlayerSubmit();
             } else {
               setStep(2);
             }
@@ -775,15 +797,15 @@ export const CreateGameReportWizard = ({
           goalMarkers={goalMarkers}
           pitchMarkers={pitchMarkers}
           coachFeedback={coachFeedback}
-          isSubmitting={isCompletingCoachReport}
+          isSubmitting={isCompletingCoachReport || isCreatingSelfReport}
           viewOnly={viewOnly}
           onSave={async (overallRating) => {
             if (isCoach) {
               await handleCoachComplete(overallRating);
             } else {
               setTempRating(overallRating);
-              // Go to payment step before final save for player
-              setStep(4);
+              // Direct save & redirect to Stripe checkout!
+              await handleSave(overallRating);
             }
           }}
           onBack={() => setStep(2)}
@@ -804,21 +826,13 @@ export const CreateGameReportWizard = ({
           </div>
         ) : (
           <StripePaymentModal 
-            buttonText={reportCompletedBy === "coach" && userRole !== "coach" ? "Pay $6.99 & Submit Request" : "Pay $6.99 & Save Report"}
-            isSubmitting={isCreatingSelfReport || isRequestingCoachReport}
+            buttonText="Pay $6.99 & Save Report"
+            isSubmitting={isCreatingSelfReport}
             onPay={async () => {
-              if (reportCompletedBy === "coach" && userRole !== "coach") {
-                await handlePlayerSubmit();
-              } else {
-                await handleSave(tempRating);
-              }
+              await handleSave(tempRating);
             }}
             onBack={() => {
-              if (reportCompletedBy === "coach" && userRole !== "coach") {
-                setStep(1);
-              } else {
-                setStep(3);
-              }
+              setStep(3);
             }}
           />
         )
@@ -840,8 +854,8 @@ export const CreateGameReportWizard = ({
             {isCoach
               ? "The game report has been successfully finalized and verified. The player's performance analysis and stats have been updated."
               : reportCompletedBy === "coach" && userRole !== "coach"
-              ? "Your payment of **$6.99** was processed successfully. We have notified your coach of your analysis request. Once complete, the verified report will appear on your CV."
-              : "Your payment of **$6.99** was processed successfully. Your game report has been saved successfully and added to your profile."}
+              ? "Your payment of **$3.99** was processed successfully. We have notified your coach of your analysis request. Once complete, the verified report will appear on your CV."
+              : "Your payment of **$3.99** was processed successfully. Your game report has been saved successfully and added to your profile."}
           </p>
 
           <Button 

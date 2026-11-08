@@ -17,7 +17,17 @@ import {
 } from "@/helpers/SessionHelper";
 import { WarningToast } from "@/helpers/ValidationHelper";
 
-const DEFAULT_PLANS = [
+interface DisplayPlanItem {
+  _id?: string;
+  name: string;
+  price: string;
+  billingCycle: string;
+  planCategory: string;
+  targetRole?: string;
+  features: string[];
+}
+
+const DEFAULT_PLANS: DisplayPlanItem[] = [
   {
     name: "Player",
     price: "$19.99",

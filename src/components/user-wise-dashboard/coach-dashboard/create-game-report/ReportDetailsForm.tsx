@@ -7,7 +7,8 @@ import {
   IconX,
   IconCheck,
   IconPlayerPlay,
-  IconPlayerStop
+  IconPlayerStop,
+  IconLoader2
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +29,7 @@ interface ReportDetailsFormProps {
   setSelectedCoachEmail?: (val: string) => void;
   selectedCoachId?: string;
   setSelectedCoachId?: (val: string) => void;
+  isSubmitting?: boolean;
 }
 
 const ReportDetailsForm = ({
@@ -43,6 +45,7 @@ const ReportDetailsForm = ({
   setSelectedCoachEmail,
   selectedCoachId = "",
   setSelectedCoachId,
+  isSubmitting = false,
 }: ReportDetailsFormProps) => {
   const { data: coachesResponse, isLoading: isLoadingCoaches } = useGetAllCoachesQuery({ limit: 100 });
   const coaches = coachesResponse?.data || [];
@@ -105,7 +108,9 @@ const ReportDetailsForm = ({
           <div className="text-gray-400 text-sm font-medium">Report Fee</div>
           <div className="text-gray-500 text-xs italic">Professional analysis delivered within 48 hours</div>
         </div>
-        <div className="text-3xl sm:text-4xl font-black text-[#E31B23] tracking-tighter italic font-orbitron">$6.99</div>
+        <div className="text-3xl sm:text-4xl font-black text-[#E31B23] tracking-tighter italic font-orbitron">
+          $3.99
+        </div>
       </div>
 
       <div className="space-y-8">
@@ -457,11 +462,20 @@ const ReportDetailsForm = ({
           Cancel
         </Button>
         <Button 
-          className="flex-1 h-14 rounded-xl bg-[#00FF62] hover:bg-[#00D150] text-black font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(0,255,98,0.2)] italic font-orbitron disabled:opacity-50 disabled:cursor-not-allowed min-w-0"
+          className="flex-1 h-14 rounded-xl bg-[#00FF62] hover:bg-[#00D150] text-black font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(0,255,98,0.2)] italic font-orbitron disabled:opacity-50 disabled:cursor-not-allowed min-w-0 flex items-center justify-center gap-2"
           onClick={onContinue}
-          disabled={!isFormValid()}
+          disabled={!isFormValid() || isSubmitting}
         >
-          Continue
+          {isSubmitting ? (
+            <>
+              <IconLoader2 className="size-5 animate-spin text-black" />
+              <span>Processing...</span>
+            </>
+          ) : reportCompletedBy === "coach" ? (
+            "Request Coach"
+          ) : (
+            "Continue"
+          )}
         </Button>
       </div>
     </div>

@@ -333,11 +333,34 @@ export interface IRequestCoachGameReportPayload {
   [key: string]: any;
 }
 
+export interface IRequestCoachGameReportResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data?: {
+    reportId?: string;
+    checkoutUrl?: string;
+    sessionId?: string;
+    amount?: number;
+    status?: string;
+    [key: string]: any;
+  };
+  checkoutUrl?: string;
+}
+
 export interface IGameReportResponse {
   success: boolean;
   statusCode: number;
   message: string;
-  data: any;
+  data: {
+    reportId?: string;
+    checkoutUrl?: string;
+    sessionId?: string;
+    amount?: number;
+    status?: string;
+    [key: string]: any;
+  };
+  checkoutUrl?: string;
 }
 
 export interface IGameReportPerformanceMetrics {

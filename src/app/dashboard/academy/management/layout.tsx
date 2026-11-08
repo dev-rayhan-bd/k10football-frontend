@@ -40,6 +40,7 @@ const managementSidebarItems = [
   { name: "Player Evaluation", url: "/dashboard/academy/management/player-evaluation", icon: IconUsers },
   { name: "Analytics Report", url: "/dashboard/academy/management/analytics-report", icon: IconChartBar },
   { name: "Product Store", url: "/dashboard/academy/management/product-store", icon: IconBuildingStore },
+  { name: "My Subscription", url: "/dashboard/academy/management/my-subscription", icon: IconCreditCard },
   { name: "Settings", url: "/dashboard/academy/management/settings", icon: IconSettings },
 ];
 

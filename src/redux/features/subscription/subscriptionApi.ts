@@ -5,6 +5,7 @@ import {
   ISubscriptionPlansResponse,
   ISubscribeToPlanPayload,
   ISubscribeToPlanResponse,
+  IUserSubscriptionResponse,
 } from "@/types/subscription.type";
 import { SuccessToast, ErrorToast } from "@/helpers/ValidationHelper";
 
@@ -18,13 +19,26 @@ export const subscriptionApi = apiSlice.injectEndpoints({
       providesTags: [TagTypes.MEMBERSHIP_PLANS],
     }),
 
+    getMySubscription: builder.query<IUserSubscriptionResponse, void>({
+      query: () => ({
+        url: "/subscriptions/my-subscription",
+        method: "GET",
+      }),
+      providesTags: [TagTypes.SUBSCRIPTION],
+    }),
+
     subscribeToPlan: builder.mutation<ISubscribeToPlanResponse, ISubscribeToPlanPayload>({
       query: (body) => ({
         url: "/subscriptions/subscribe",
         method: "POST",
         body,
       }),
-      invalidatesTags: [TagTypes.MEMBERSHIP_PLANS, TagTypes.PROFILE, TagTypes.DASHBOARD],
+      invalidatesTags: [
+        TagTypes.MEMBERSHIP_PLANS,
+        TagTypes.PROFILE,
+        TagTypes.DASHBOARD,
+        TagTypes.SUBSCRIPTION,
+      ],
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
@@ -38,4 +52,8 @@ export const subscriptionApi = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useGetSubscriptionPlansQuery, useSubscribeToPlanMutation } = subscriptionApi;
+export const {
+  useGetSubscriptionPlansQuery,
+  useGetMySubscriptionQuery,
+  useSubscribeToPlanMutation,
+} = subscriptionApi;

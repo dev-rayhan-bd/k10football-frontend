@@ -9,7 +9,8 @@ import {
   IconUsers,
   IconReport,
   IconUserCheck,
-  IconClipboardCheck
+  IconClipboardCheck,
+  IconCreditCard
 } from "@tabler/icons-react";
 import { ReactNode, useState, useEffect, createContext } from "react";
 import { useCoach } from "@/hooks/useCoach";
@@ -21,6 +22,7 @@ const coachSidebarItemsWithoutAcademy = [
   { name: "My CV", url: "/dashboard/coach/my-cv", icon: IconFileText },
   { name: "My Images & Videos", url: "/dashboard/coach/my-images-videos", icon: IconPhotoVideo },
   { name: "Analytics", url: "/dashboard/coach/analytics", icon: IconChartBar },
+  { name: "My Subscription", url: "/dashboard/coach/my-subscription", icon: IconCreditCard },
   { name: "Settings", url: "/dashboard/coach/settings", icon: IconSettings },
 ];
 
@@ -33,6 +35,7 @@ const coachSidebarItemsWithAcademy = [
   { name: "Player CV Validations", url: "/dashboard/coach/player-cv-validations", icon: IconUserCheck },
   { name: "Player Evaluation", url: "/dashboard/coach/player-evaluation", icon: IconClipboardCheck },
   { name: "Analytics", url: "/dashboard/coach/analytics", icon: IconChartBar },
+  { name: "My Subscription", url: "/dashboard/coach/my-subscription", icon: IconCreditCard },
   { name: "Settings", url: "/dashboard/coach/settings", icon: IconSettings },
 ];
 

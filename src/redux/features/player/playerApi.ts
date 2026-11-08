@@ -8,6 +8,7 @@ import {
     IUpdatePlayerPayload, 
     ICreateSelfGameReportPayload, 
     IRequestCoachGameReportPayload,
+    IRequestCoachGameReportResponse,
     IGameReportResponse,
     IPlayerGameReportsResponse,
     IPlayerAnalyticsResponse 
@@ -399,14 +400,14 @@ export const playerApi = apiSlice.injectEndpoints({
             },
         }),
 
-        requestCoachGameReport: builder.mutation<any, IRequestCoachGameReportPayload>({
+        requestCoachGameReport: builder.mutation<IRequestCoachGameReportResponse, IRequestCoachGameReportPayload>({
             query: (data) => ({
                 url: "/players/me/game-reports/request-coach",
                 method: "POST",
                 body: data,
             }),
             invalidatesTags: (result) => {
-                if (result?.success || !result?.error) {
+                if (result?.success) {
                     return [TagTypes.PLAYERS, TagTypes.GAME_REPORTS, TagTypes.REPORTS];
                 }
                 return [];

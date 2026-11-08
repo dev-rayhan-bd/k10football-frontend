@@ -7,6 +7,7 @@ import RadarChart from "./RadarChart";
 import { IconDownload, IconCheck, IconLoader2 } from "@tabler/icons-react";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
+import { toast } from "sonner";
 interface ReportPdfPreviewProps {
   formData: any;
   characteristics: string[];
@@ -98,22 +99,100 @@ const ReportPdfPreview = ({
   const handleDownloadPdf = async () => {
     if (!previewRef.current) return;
     setDownloading(true);
+    const toastId = toast.loading("Generating PDF report... Please wait.");
+
+    // Save original getComputedStyle and create dummy div to convert modern colors (oklch, lab, etc.)
+    const originalGetComputedStyle = window.getComputedStyle;
+    const dummy = document.createElement("div");
+    dummy.style.display = "none";
+    document.body.appendChild(dummy);
+
+    const convertModernColor = (value: string) => {
+      if (typeof value !== "string") return value;
+      if (
+        !value.includes("oklch") &&
+        !value.includes("lab") &&
+        !value.includes("oklab") &&
+        !value.includes("lch")
+      ) {
+        return value;
+      }
+      return value.replace(/(oklch|oklab|lab|lch)\([^)]+\)/g, (match) => {
+        try {
+          dummy.style.color = match;
+          const resolved = originalGetComputedStyle(dummy).color;
+          if (resolved && (resolved.startsWith("rgb") || resolved.startsWith("#"))) {
+            return resolved;
+          }
+          return "rgb(0, 0, 0)";
+        } catch {
+          return "rgb(0, 0, 0)";
+        }
+      });
+    };
+
+    // Apply computed style proxy shim
+    window.getComputedStyle = function (el, pseudoEl) {
+      const style = originalGetComputedStyle(el, pseudoEl);
+      return new Proxy(style, {
+        get(target, prop) {
+          if (prop === "getPropertyValue") {
+            return (propertyName: string) => {
+              const val = target.getPropertyValue(propertyName);
+              return convertModernColor(val);
+            };
+          }
+          if (typeof prop === "string") {
+            const targetRecord = target as unknown as Record<string, unknown>;
+            const val = targetRecord[prop];
+            if (typeof val === "string") {
+              return convertModernColor(val);
+            }
+            if (typeof val === "function") {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+              return (val as Function).bind(target);
+            }
+            return val;
+          }
+          const targetRecord = target as unknown as Record<string | symbol, unknown>;
+          return targetRecord[prop];
+        },
+      });
+    };
+
     try {
-      const canvas = await html2canvas(previewRef.current, {
+      const element = previewRef.current;
+      const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
+        allowTaint: false,
         backgroundColor: "#ffffff",
-        logging: false
+        logging: false,
+        onclone: (clonedDoc) => {
+          const clonedElement = clonedDoc.getElementById("pdf-report-content");
+          if (clonedElement && clonedElement.parentElement) {
+            clonedElement.parentElement.style.transform = "none";
+          }
+        },
       });
       const imgData = canvas.toDataURL("image/png");
       const imgWidth = 210;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       const pdf = new jsPDF("p", "mm", [210, Math.max(297, imgHeight)]);
       pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-      pdf.save(`Player_Analysis_Profile_${formData.playerName.replace(/\s+/g, "_")}.pdf`);
+      const safeName = (formData?.playerName || "Player").replace(/\s+/g, "_");
+      pdf.save(`Player_Analysis_Profile_${safeName}.pdf`);
+      toast.success("PDF report downloaded successfully!", { id: toastId });
     } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
       console.error("Failed to generate PDF:", err);
+      toast.error(`Failed to generate PDF: ${msg}`, { id: toastId });
     } finally {
+      // Restore original getComputedStyle
+      window.getComputedStyle = originalGetComputedStyle;
+      if (dummy.parentNode) {
+        dummy.parentNode.removeChild(dummy);
+      }
       setDownloading(false);
     }
   };
@@ -453,12 +532,12 @@ const ReportPdfPreview = ({
             {isSubmitting ? (
               <>
                 <IconLoader2 className="animate-spin" size={18} />
-                Completing Report...
+                {isPlayer ? "Processing..." : "Completing Report..."}
               </>
             ) : (
               <>
                 <IconCheck size={18} />
-                {isPlayer ? "Submit Request" : "Save & Complete"}
+                {isPlayer ? "Save Report" : "Save & Complete"}
               </>
             )}
           </Button>

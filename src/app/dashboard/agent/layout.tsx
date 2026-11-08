@@ -10,7 +10,8 @@ import {
   IconStar, 
   IconChartBar, 
   IconSettings,
-  IconMessageCircle
+  IconMessageCircle,
+  IconCreditCard
 } from "@tabler/icons-react";
 import { ReactNode } from "react";
 
@@ -23,6 +24,7 @@ const agentSidebarItems = [
   { name: "Shared Profiles", url: "/dashboard/agent/shared-profiles", icon: IconShare },
   { name: "Success Story", url: "/dashboard/agent/success-story", icon: IconStar },
   { name: "Analytics", url: "/dashboard/agent/analytics", icon: IconChartBar },
+  { name: "My Subscription", url: "/dashboard/agent/my-subscription", icon: IconCreditCard },
   { name: "Chat", url: "/dashboard/agent/chat", icon: IconMessageCircle },
   { name: "Settings", url: "/dashboard/agent/settings", icon: IconSettings },
 ];

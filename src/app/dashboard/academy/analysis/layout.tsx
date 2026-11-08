@@ -7,7 +7,8 @@ import {
   IconBooks, 
   IconFileText, 
   IconChartBar, 
-  IconSettings 
+  IconSettings,
+  IconCreditCard 
 } from "@tabler/icons-react";
 import { ReactNode } from "react";
 
@@ -21,6 +22,7 @@ const analysisSidebarItems = [
   { name: "Game Reports", url: "/dashboard/academy/analysis/game-reports", icon: IconFileText },
   { name: "Player Evaluation", url: "/dashboard/academy/analysis/player-evaluation", icon: IconUsers },
   { name: "Analytics", url: "/dashboard/academy/analysis/analytics", icon: IconChartBar },
+  { name: "My Subscription", url: "/dashboard/academy/analysis/my-subscription", icon: IconCreditCard },
   { name: "Settings", url: "/dashboard/academy/analysis/settings", icon: IconSettings },
 ];
 
