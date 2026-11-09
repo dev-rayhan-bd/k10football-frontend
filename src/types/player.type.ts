@@ -267,34 +267,49 @@ export interface ICreateSelfGameReportPayload {
   ownTeam: string;
   homeScore: number;
   awayScore: number;
-  minutesPlayed: string;
-  stats: {
-    shotsOnGoal: number;
-    goalScored: number;
-    assists: number;
-    passAccurate: number;
-    wrongPass: number;
-    penaltiesTaken: number;
-    standTackle: number;
-    slidingTackle: number;
-    interception: number;
-    appearances: number;
-    fault: number;
-    redCard: number;
-    yellowCard: number;
-    punching: number;
-    handling: number;
-    reflex: number;
-    aerialAbility: number;
-    throwing: number;
-    reactions: number;
-    savesAccurate: number;
-    freeKick: number;
-    cornerKick: number;
-    goalUnsave: number;
-    penaltiesSaves: number;
-    [key: string]: number;
+  minutesPlayed?: string;
+  stats?: {
+    shotsOnGoal?: number;
+    goalScored?: number;
+    assists?: number;
+    passAccurate?: number;
+    wrongPass?: number;
+    penaltiesTaken?: number;
+    standTackle?: number;
+    slidingTackle?: number;
+    interception?: number;
+    appearances?: number;
+    fault?: number;
+    redCard?: number;
+    yellowCard?: number;
+    punching?: number;
+    handling?: number;
+    reflex?: number;
+    aerialAbility?: number;
+    throwing?: number;
+    reactions?: number;
+    savesAccurate?: number;
+    freeKick?: number;
+    cornerKick?: number;
+    goalUnsave?: number;
+    penaltiesSaves?: number;
+    [key: string]: any;
   };
+  accurateShots?: Array<{
+    x: number;
+    y: number;
+  }>;
+  accurateAssists?: Array<{
+    fromX: number;
+    fromY: number;
+    toX: number;
+    toY: number;
+  }>;
+}
+
+export interface ICompleteSelfGameReportPayload {
+  minutesPlayed: string;
+  stats: Record<string, number>;
   accurateShots: Array<{
     x: number;
     y: number;
@@ -305,6 +320,7 @@ export interface ICreateSelfGameReportPayload {
     toX: number;
     toY: number;
   }>;
+  coachFeedback?: string;
 }
 
 export interface IRequestCoachGameReportPayload {

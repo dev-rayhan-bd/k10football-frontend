@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -79,6 +80,162 @@ export interface PitchLine {
   y2: number;
 }
 
+// Default initial stats mapping all 36 keys with legacy fallbacks
+export const DEFAULT_FORM_STATS: Record<string, number> = {
+  goal: 2,
+  assist: 1,
+  shotOnTarget: 4,
+  shotOffTarget: 1,
+  bigChanceCreated: 2,
+  bigChanceMissed: 0,
+  successfulDribble: 3,
+  failedDribble: 1,
+  penaltyWon: 1,
+  penaltyMissed: 0,
+
+  completedPass: 28,
+  incompletePass: 4,
+  keyPass: 3,
+  throughBallCompleted: 2,
+  longPassCompleted: 3,
+  crossCompleted: 2,
+  crossFailed: 1,
+
+  ballRetention: 5,
+  turnover: 2,
+  freeKickWon: 3,
+  successfulCarry: 4,
+
+  tackleWon: 3,
+  tackleLost: 1,
+  interception: 2,
+  clearance: 1,
+  block: 1,
+  aerialDuelWon: 2,
+  aerialDuelLost: 1,
+  groundDuelWon: 4,
+  groundDuelLost: 2,
+  recovery: 3,
+  defensiveError: 0,
+  errorLeadingToGoal: 0,
+
+  foulCommitted: 1,
+  yellowCard: 0,
+  redCard: 0,
+
+  // Goalkeeper Specific stats
+  save: 10,
+  bigSave: 2,
+  goalConceded: 1,
+  cleanSheet: 0,
+  crossClaimed: 5,
+  crossMissed: 1,
+  oneOnOneSave: 3,
+  distributionCompleted: 15,
+  distributionFailed: 3,
+
+  // Legacy aliases
+  shotsOnGoal: 4,
+  goalScored: 2,
+  assists: 1,
+  passAccurate: 28,
+  wrongPass: 4,
+  penaltiesTaken: 1,
+  standTackle: 3,
+  slidingTackle: 3,
+  fault: 1,
+  appearances: 15,
+  savesAccurate: 10,
+  freeKick: 3,
+  cornerKick: 4,
+  goalUnsave: 1,
+  penaltiesSaves: 1,
+  punching: 5,
+  handling: 10,
+  reflex: 1,
+  aerialAbility: 5,
+  throwing: 8,
+  reactions: 1,
+};
+
+// Outfield slides (3 slides, 12 stats each = 36 stats)
+export const OUTFIELD_SLIDES = [
+  // Slide 1 (12 items)
+  [
+    { label: "Shot on Target", key: "shotOnTarget", color: "bg-[#00D1FF]" },
+    { label: "Shot off Target", key: "shotOffTarget", color: "bg-[#C084FC]" },
+    { label: "Big Chance Created", key: "bigChanceCreated", color: "bg-[#2DD4BF]" },
+    { label: "Big Chance Missed", key: "bigChanceMissed", color: "bg-[#EF4444]" },
+    { label: "Successful Dribble", key: "successfulDribble", color: "bg-[#F59E0B]" },
+    { label: "Completed Pass", key: "completedPass", color: "bg-[#00D1FF]" },
+    { label: "Incomplete Pass", key: "incompletePass", color: "bg-[#C084FC]" },
+    { label: "Key Pass", key: "keyPass", color: "bg-[#8B5CF6]" },
+    { label: "Interception", key: "interception", color: "bg-[#F59E0B]" },
+    { label: "Block", key: "block", color: "bg-[#00D1FF]" },
+    { label: "Ground Duel Won", key: "groundDuelWon", color: "bg-[#2DD4BF]" },
+    { label: "Ground Duel Lost", key: "groundDuelLost", color: "bg-[#EF4444]" },
+  ],
+  // Slide 2 (12 items)
+  [
+    { label: "Goal", key: "goal", color: "bg-[#8B5CF6]" },
+    { label: "Assist", key: "assist", color: "bg-[#2DD4BF]" },
+    { label: "Failed Dribble", key: "failedDribble", color: "bg-[#EF4444]" },
+    { label: "Penalty Won", key: "penaltyWon", color: "bg-[#4ADE80]" },
+    { label: "Through Ball Completed", key: "throughBallCompleted", color: "bg-[#00D1FF]" },
+    { label: "Long Pass Completed", key: "longPassCompleted", color: "bg-[#F59E0B]" },
+    { label: "Cross Completed", key: "crossCompleted", color: "bg-[#4ADE80]" },
+    { label: "Cross Failed", key: "crossFailed", color: "bg-[#EF4444]" },
+    { label: "Ball Retention Under Pressure", key: "ballRetention", color: "bg-[#B48A14]" },
+    { label: "Successful Carry", key: "successfulCarry", color: "bg-[#2DD4BF]" },
+    { label: "Tackle Won", key: "tackleWon", color: "bg-[#4ADE80]" },
+    { label: "Tackle Lost", key: "tackleLost", color: "bg-[#EF4444]" },
+  ],
+  // Slide 3 (12 items)
+  [
+    { label: "Penalty Missed", key: "penaltyMissed", color: "bg-[#EF4444]" },
+    { label: "Turnover / Possession Lost", key: "turnover", color: "bg-[#EF4444]" },
+    { label: "Fouled / Free Kick Won", key: "freeKickWon", color: "bg-[#B48A14]" },
+    { label: "Clearance", key: "clearance", color: "bg-[#4ADE80]" },
+    { label: "Aerial Duel Won", key: "aerialDuelWon", color: "bg-[#8B5CF6]" },
+    { label: "Aerial Duel Lost", key: "aerialDuelLost", color: "bg-[#C084FC]" },
+    { label: "Recovery", key: "recovery", color: "bg-[#F59E0B]" },
+    { label: "Defensive Error", key: "defensiveError", color: "bg-[#EF4444]" },
+    { label: "Error Leading to Goal", key: "errorLeadingToGoal", color: "bg-[#EF4444]" },
+    { label: "Foul Committed", key: "foulCommitted", color: "bg-[#EF4444]" },
+    { label: "Yellow Card", key: "yellowCard", color: "bg-[#F59E0B]" },
+    { label: "Red Card", key: "redCard", color: "bg-[#EF4444]" },
+  ],
+];
+
+// Goalkeeper Specific Slide 1 (12 GK items - image 1)
+export const GK_SLIDE_1 = [
+  { label: "Save", key: "save", color: "bg-[#00D1FF]" },
+  { label: "Big Save", key: "bigSave", color: "bg-[#4ADE80]" },
+  { label: "Goal Conceded", key: "goalConceded", color: "bg-[#EF4444]" },
+  { label: "Clean Sheet", key: "cleanSheet", color: "bg-[#2DD4BF]" },
+  { label: "Cross Claimed", key: "crossClaimed", color: "bg-[#8B5CF6]" },
+  { label: "Cross Missed", key: "crossMissed", color: "bg-[#EF4444]" },
+  { label: "1v1 Save", key: "oneOnOneSave", color: "bg-[#4ADE80]" },
+  { label: "Distribution Completed", key: "distributionCompleted", color: "bg-[#00D1FF]" },
+  { label: "Distribution Failed", key: "distributionFailed", color: "bg-[#EF4444]" },
+  { label: "Foul Committed", key: "foulCommitted", color: "bg-[#EF4444]" },
+  { label: "Yellow Card", key: "yellowCard", color: "bg-[#F59E0B]" },
+  { label: "Red Card", key: "redCard", color: "bg-[#EF4444]" },
+];
+
+// Goalkeeper Specific Slide 4 (9 items: Slide 3 items except Foul Committed, Yellow Card, Red Card which are on Slide 1)
+export const GK_SLIDE_4 = [
+  { label: "Penalty Missed", key: "penaltyMissed", color: "bg-[#EF4444]" },
+  { label: "Turnover / Possession Lost", key: "turnover", color: "bg-[#EF4444]" },
+  { label: "Fouled / Free Kick Won", key: "freeKickWon", color: "bg-[#B48A14]" },
+  { label: "Clearance", key: "clearance", color: "bg-[#4ADE80]" },
+  { label: "Aerial Duel Won", key: "aerialDuelWon", color: "bg-[#8B5CF6]" },
+  { label: "Aerial Duel Lost", key: "aerialDuelLost", color: "bg-[#C084FC]" },
+  { label: "Recovery", key: "recovery", color: "bg-[#F59E0B]" },
+  { label: "Defensive Error", key: "defensiveError", color: "bg-[#EF4444]" },
+  { label: "Error Leading to Goal", key: "errorLeadingToGoal", color: "bg-[#EF4444]" },
+];
+
 interface MatchStatisticsFormProps {
   position: string;
   minutesPlayed: string;
@@ -110,23 +267,39 @@ const MatchStatisticsForm = ({
   onCancel,
   onSubmit
 }: MatchStatisticsFormProps) => {
-  const isGK = position === "GOALKEEPER";
+  const searchParams = useSearchParams();
+  const urlPosition = searchParams?.get("position");
+  const effectivePosition = (urlPosition || position || "").trim().toUpperCase();
+  const isGK = effectivePosition === "GOALKEEPER" || effectivePosition === "GK";
+  const activeSlides = React.useMemo(
+    () => (isGK ? [GK_SLIDE_1, OUTFIELD_SLIDES[0], OUTFIELD_SLIDES[1], GK_SLIDE_4] : OUTFIELD_SLIDES),
+    [isGK]
+  );
+  const maxPages = activeSlides.length;
+
   const [mobilePage, setMobilePage] = React.useState(0);
+
+  // If position switches, ensure mobilePage does not exceed maxPages
+  React.useEffect(() => {
+    if (mobilePage >= maxPages) {
+      setMobilePage(Math.max(0, maxPages - 1));
+    }
+  }, [maxPages, mobilePage]);
   const parseTimeToSeconds = (val: string): number => {
-    if (!val) return 42 * 60;
+    if (!val) return 0;
     if (typeof val === "string" && val.includes(":")) {
       const parts = val.split(":");
       const m = parseInt(parts[0], 10) || 0;
       const s = parseInt(parts[1], 10) || 0;
       const total = m * 60 + s;
-      return total > 0 ? total : 42 * 60;
+      return total >= 0 ? total : 0;
     }
     const mins = parseInt(val, 10);
-    return isNaN(mins) || mins <= 0 ? 42 * 60 : mins * 60;
+    return isNaN(mins) || mins < 0 ? 0 : mins * 60;
   };
 
   const formatTime = (totalSeconds: number) => {
-    const safeSecs = isNaN(totalSeconds) || totalSeconds <= 0 ? 42 * 60 : totalSeconds;
+    const safeSecs = isNaN(totalSeconds) || totalSeconds < 0 ? 0 : totalSeconds;
     const m = Math.floor(safeSecs / 60).toString().padStart(2, '0');
     const s = (safeSecs % 60).toString().padStart(2, '0');
     return `${m}:${s}`;
@@ -134,6 +307,9 @@ const MatchStatisticsForm = ({
 
   const [isTimerRunning, setIsTimerRunning] = React.useState(false);
   const [secondsElapsed, setSecondsElapsed] = React.useState(() => parseTimeToSeconds(minutesPlayed));
+  const secondsRef = React.useRef(secondsElapsed);
+  secondsRef.current = secondsElapsed;
+  const [rawInput, setRawInput] = React.useState<string>(() => formatTime(secondsElapsed));
   const [showOnboarding, setShowOnboarding] = React.useState(false);
 
   React.useEffect(() => {
@@ -152,6 +328,8 @@ const MatchStatisticsForm = ({
     if (!isTimerRunning) {
       const secs = parseTimeToSeconds(minutesPlayed);
       setSecondsElapsed(secs);
+      secondsRef.current = secs;
+      setRawInput(formatTime(secs));
     }
   }, [minutesPlayed, isTimerRunning]);
 
@@ -160,74 +338,156 @@ const MatchStatisticsForm = ({
     if (isTimerRunning) {
       interval = setInterval(() => {
         setSecondsElapsed(prev => {
-          const newSecs = prev + 1;
-          setMinutesPlayed(formatTime(newSecs));
-          return newSecs;
+          const nextSecs = prev + 1;
+          secondsRef.current = nextSecs;
+          setRawInput(formatTime(nextSecs));
+          return nextSecs;
         });
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [isTimerRunning, setMinutesPlayed]);
+  }, [isTimerRunning]);
 
-  const toggleTimer = () => setIsTimerRunning(!isTimerRunning);
+  const touchStartX = React.useRef<number | null>(null);
 
-  const statsLeft = [
-    { label: "Shots on Goal", key: "shotsOnGoal", color: "bg-[#00D1FF]" },
-    { label: "Goal Scored", key: "goalScored", color: "bg-[#8B5CF6]" },
-    { label: "Assists", key: "assists", color: "bg-[#2DD4BF]" },
-    { label: "Pass Accurate", key: "passAccurate", color: "bg-[#F59E0B]" },
-    { label: "Wrong Pass", key: "wrongPass", color: "bg-[#C084FC]" },
-    { label: "Penalties Taken", key: "penaltiesTaken", color: "bg-[#EF4444]" },
-    { label: "Stand Tackle", key: "standTackle", color: "bg-[#B48A14]" },
-    { label: "Sliding Tackle", key: "slidingTackle", color: "bg-[#8B5CF6]" },
-    { label: "Interception", key: "interception", color: "bg-[#F59E0B]" },
-    { label: "Saves Accurate", key: "savesAccurate", color: "bg-[#4ADE80]" },
-    { label: "Free Kick", key: "freeKick", color: "bg-[#F59E0B]" },
-    { label: "Corner Kick", key: "cornerKick", color: "bg-[#00D1FF]" },
-  ];
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
 
-  const statsRight = [
-    { label: "Goal Unsave", key: "goalUnsave", color: "bg-[#8B5CF6]" },
-    { label: "Penalties Saves", key: "penaltiesSaves", color: "bg-[#F59E0B]" },
-    { label: "Appearances", key: "appearances", color: "bg-[#00D1FF]" },
-    { label: "Fault", key: "fault", color: "bg-[#4ADE80]" },
-    { label: "Red Card", key: "redCard", color: "bg-[#EF4444]" },
-    { label: "Yellow Card", key: "yellowCard", color: "bg-[#F59E0B]" },
-    { label: "Punching", key: "punching", color: "bg-[#00D1FF]" },
-    { label: "Handling", key: "handling", color: "bg-[#B48A14]" },
-    { label: "Reflex", key: "reflex", color: "bg-[#8B5CF6]" },
-    { label: "Arial Ability", key: "aerialAbility", color: "bg-[#2DD4BF]" },
-    { label: "Throwing", key: "throwing", color: "bg-[#F59E0B]" },
-    { label: "Reactions", key: "reactions", color: "bg-[#00D1FF]" },
-  ];
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (diff > 40) {
+      setMobilePage(prev => Math.min(maxPages - 1, prev + 1));
+    } else if (diff < -40) {
+      setMobilePage(prev => Math.max(0, prev - 1));
+    }
+    touchStartX.current = null;
+  };
+
+  const toggleTimer = () => {
+    if (isTimerRunning) {
+      const formatted = formatTime(secondsRef.current);
+      setRawInput(formatted);
+      setMinutesPlayed(formatted);
+    }
+    setIsTimerRunning(prev => !prev);
+  };
+
+  const sanitizeTimeInput = (val: string): { display: string; totalSeconds: number } => {
+    // Keep only digits and colon
+    let cleaned = val.replace(/[^\d:]/g, "");
+
+    // Only allow at most one colon
+    const colonCount = (cleaned.match(/:/g) || []).length;
+    if (colonCount > 1) {
+      const firstColon = cleaned.indexOf(":");
+      cleaned = cleaned.slice(0, firstColon + 1) + cleaned.slice(firstColon + 1).replace(/:/g, "");
+    }
+
+    if (cleaned.includes(":")) {
+      let [mStr, sStr] = cleaned.split(":");
+      // Minutes: max 3 digits (up to 130 minutes)
+      mStr = mStr.slice(0, 3);
+      let m = parseInt(mStr, 10);
+      if (!isNaN(m) && m > 130) {
+        m = 130;
+        mStr = "130";
+      }
+
+      // Seconds: strictly max 2 digits (up to 59 seconds)
+      sStr = sStr.slice(0, 2);
+      let s = parseInt(sStr, 10);
+      if (!isNaN(s) && s > 59) {
+        s = 59;
+        sStr = "59";
+      }
+
+      const display = `${mStr}:${sStr}`;
+      const totalSeconds = (isNaN(m) ? 0 : m) * 60 + (isNaN(s) ? 0 : s);
+      return { display, totalSeconds };
+    }
+
+    // No colon typed yet
+    // If user types 4 digits e.g. "0900" -> auto format to "09:00"
+    if (cleaned.length >= 4) {
+      let mStr = cleaned.slice(0, cleaned.length - 2).slice(0, 3);
+      let sStr = cleaned.slice(-2);
+      let m = parseInt(mStr, 10) || 0;
+      if (m > 130) {
+        m = 130;
+        mStr = "130";
+      }
+      let s = parseInt(sStr, 10) || 0;
+      if (s > 59) {
+        s = 59;
+        sStr = "59";
+      }
+      const display = `${mStr}:${sStr}`;
+      return { display, totalSeconds: m * 60 + s };
+    }
+
+    // 1 to 3 digits without colon
+    let mStr = cleaned.slice(0, 3);
+    let m = parseInt(mStr, 10);
+    if (!isNaN(m) && m > 130) {
+      m = 130;
+      mStr = "130";
+    }
+    const totalSeconds = isNaN(m) ? 0 : m * 60;
+    return { display: mStr, totalSeconds };
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isTimerRunning) {
+      setIsTimerRunning(false);
+    }
+    const { display, totalSeconds } = sanitizeTimeInput(e.target.value);
+    setRawInput(display);
+    setSecondsElapsed(totalSeconds);
+    secondsRef.current = totalSeconds;
+    setMinutesPlayed(formatTime(totalSeconds));
+  };
+
+  const handleInputBlur = () => {
+    const formatted = formatTime(secondsRef.current);
+    setRawInput(formatted);
+    setMinutesPlayed(formatted);
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleInputBlur();
+      (e.target as HTMLInputElement).blur();
+    }
+  };
+
+  const statsLeft = activeSlides.flatMap(slide => slide.filter((_, idx) => idx % 2 === 0));
+  const statsRight = activeSlides.flatMap(slide => slide.filter((_, idx) => idx % 2 !== 0));
 
   // Load default stats if empty
   useEffect(() => {
     if (Object.keys(stats).length === 0) {
-      if (isGK) {
-        setStats({
-          shotsOnGoal: 0, goalScored: 0, assists: 1, passAccurate: 12, wrongPass: 2, penaltiesTaken: 0,
-          standTackle: 0, slidingTackle: 0, interception: 0, savesAccurate: 10, freeKick: 0, cornerKick: 0,
-          goalUnsave: 1, penaltiesSaves: 1, appearances: 15, fault: 1, redCard: 0, yellowCard: 1,
-          punching: 5, handling: 10, reflex: 1, aerialAbility: 5, throwing: 8, reactions: 1
-        });
-        setGoalMarkers([{ x: 15.2, y: 28.4 }, { x: 84.6, y: 22.1 }]);
-        setPitchMarkers([{ x1: 45.0, y1: 70.0, x2: 50.0, y2: 55.0 }]);
-      } else {
-        setStats({
-          shotsOnGoal: 8, goalScored: 3, assists: 6, passAccurate: 12, wrongPass: 2, penaltiesTaken: 4,
-          standTackle: 12, slidingTackle: 12, interception: 2, savesAccurate: 10, freeKick: 12, cornerKick: 4,
-          goalUnsave: 1, penaltiesSaves: 1, appearances: 15, fault: 1, redCard: 0, yellowCard: 1,
-          punching: 5, handling: 10, reflex: 1, aerialAbility: 5, throwing: 8, reactions: 1
-        });
-        setGoalMarkers([{ x: 15.2, y: 28.4 }, { x: 84.6, y: 22.1 }]);
-        setPitchMarkers([{ x1: 45.0, y1: 70.0, x2: 50.0, y2: 55.0 }]);
-      }
+      setStats(DEFAULT_FORM_STATS);
+      setGoalMarkers([{ x: 15.2, y: 28.4 }, { x: 84.6, y: 22.1 }]);
+      setPitchMarkers([{ x1: 45.0, y1: 70.0, x2: 50.0, y2: 55.0 }]);
     }
-  }, [isGK, stats, setStats, setGoalMarkers, setPitchMarkers]);
+  }, [stats, setStats, setGoalMarkers, setPitchMarkers]);
 
   const handleStatChange = (key: string, val: number) => {
-    setStats({ ...stats, [key]: val });
+    const updated = { ...stats, [key]: val };
+    // Synchronize legacy aliases
+    if (key === "goal") updated.goalScored = val;
+    if (key === "assist") updated.assists = val;
+    if (key === "shotOnTarget") updated.shotsOnGoal = val;
+    if (key === "completedPass") updated.passAccurate = val;
+    if (key === "incompletePass") updated.wrongPass = val;
+    if (key === "foulCommitted") updated.fault = val;
+    if (key === "tackleWon") updated.standTackle = val;
+    if (key === "freeKickWon") updated.freeKick = val;
+    if (key === "save") updated.savesAccurate = val;
+    if (key === "goalConceded") updated.goalUnsave = val;
+    setStats(updated);
   };
 
   const handleGoalClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -503,25 +763,14 @@ const MatchStatisticsForm = ({
               </span>
               <input
                 type="text"
-                value={formatTime(secondsElapsed)}
-                onChange={(e) => {
-                  const val = e.target.value.trim();
-                  if (val.includes(":")) {
-                    const parts = val.split(":");
-                    const m = parseInt(parts[0], 10) || 0;
-                    const s = parseInt(parts[1], 10) || 0;
-                    const secs = m * 60 + Math.min(59, Math.max(0, s));
-                    setSecondsElapsed(secs);
-                    setMinutesPlayed(formatTime(secs));
-                  } else {
-                    const m = parseInt(val.replace(/[^\d]/g, ""), 10) || 0;
-                    const secs = m * 60;
-                    setSecondsElapsed(secs);
-                    setMinutesPlayed(formatTime(secs));
-                  }
-                }}
-                className="text-xl sm:text-3xl font-black text-white font-orbitron w-24 sm:w-28 text-center italic tracking-widest bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-[#00FF62] rounded px-1"
-                title="Enter minutes:seconds (mm:ss)"
+                value={rawInput}
+                onChange={handleInputChange}
+                onBlur={handleInputBlur}
+                onKeyDown={handleInputKeyDown}
+                maxLength={6}
+                className="text-xl sm:text-3xl font-black text-white font-orbitron w-28 sm:w-36 text-center italic tracking-wider bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-[#00FF62] rounded px-1 transition-colors hover:bg-white/5 cursor-text"
+                placeholder="00:00"
+                title="Enter minutes:seconds (mm:ss) or start timer"
               />
             </div>
             <button
@@ -542,18 +791,21 @@ const MatchStatisticsForm = ({
 
         {/* ---------------- MOBILE LAYOUT: STACKED ---------------- */}
         <div className="lg:hidden flex flex-col gap-10 w-full pt-4">
-          <div className="grid grid-cols-2 landscape:grid-cols-3 gap-3 sm:gap-4">
-            {statsLeft.slice(mobilePage * 6, (mobilePage + 1) * 6).map((s, idx) => {
-              const actualIdx = mobilePage * 6 + idx;
-              return (
-                <React.Fragment key={s.key}>
-                  <StatInput label={s.label} value={stats[s.key] || 0} onChange={(val) => handleStatChange(s.key, val)} colorClass={s.color} align="left" />
-                  {statsRight[actualIdx] && (
-                    <StatInput label={statsRight[actualIdx].label} value={stats[statsRight[actualIdx].key] || 0} onChange={(val) => handleStatChange(statsRight[actualIdx].key, val)} colorClass={statsRight[actualIdx].color} align="left" />
-                  )}
-                </React.Fragment>
-              );
-            })}
+          <div
+            className="grid grid-cols-2 landscape:grid-cols-3 gap-3 sm:gap-4 touch-pan-y select-none transition-all duration-300"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            {activeSlides[mobilePage]?.map((s) => (
+              <StatInput
+                key={s.key}
+                label={s.label}
+                value={stats[s.key] || 0}
+                onChange={(val) => handleStatChange(s.key, val)}
+                colorClass={s.color}
+                align="left"
+              />
+            ))}
           </div>
 
           <div className="flex items-center justify-center gap-4 bg-white/5 rounded-full p-2 mx-auto -mt-4">
@@ -561,17 +813,31 @@ const MatchStatisticsForm = ({
               onClick={() => setMobilePage(Math.max(0, mobilePage - 1))}
               disabled={mobilePage === 0}
               className={cn("p-2 rounded-full transition-all text-white", mobilePage === 0 ? "opacity-30 cursor-not-allowed" : "hover:bg-white/10 active:scale-95 cursor-pointer")}
+              title="Previous Page"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
             </button>
-            <div className="flex gap-2">
-              <div className={cn("w-2 h-2 rounded-full transition-all", mobilePage === 0 ? "bg-[#00FF62] scale-125 shadow-[0_0_10px_#00FF62]" : "bg-white/30")} />
-              <div className={cn("w-2 h-2 rounded-full transition-all", mobilePage === 1 ? "bg-[#00FF62] scale-125 shadow-[0_0_10px_#00FF62]" : "bg-white/30")} />
+            <div className="flex items-center gap-2.5">
+              {activeSlides.map((_, pIdx) => (
+                <button
+                  key={pIdx}
+                  type="button"
+                  onClick={() => setMobilePage(pIdx)}
+                  title={`Slide ${pIdx + 1}`}
+                  className={cn(
+                    "size-2 rounded-full transition-all cursor-pointer",
+                    mobilePage === pIdx
+                      ? "bg-[#00FF62] scale-125 shadow-[0_0_10px_#00FF62]"
+                      : "bg-white/30 hover:bg-white/50"
+                  )}
+                />
+              ))}
             </div>
             <button
-              onClick={() => setMobilePage(Math.min(1, mobilePage + 1))}
-              disabled={mobilePage === 1}
-              className={cn("p-2 rounded-full transition-all text-white", mobilePage === 1 ? "opacity-30 cursor-not-allowed" : "hover:bg-white/10 active:scale-95 cursor-pointer")}
+              onClick={() => setMobilePage(Math.min(maxPages - 1, mobilePage + 1))}
+              disabled={mobilePage >= maxPages - 1}
+              className={cn("p-2 rounded-full transition-all text-white", mobilePage >= maxPages - 1 ? "opacity-30 cursor-not-allowed" : "hover:bg-white/10 active:scale-95 cursor-pointer")}
+              title="Next Page"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
             </button>
@@ -591,7 +857,7 @@ const MatchStatisticsForm = ({
               {renderLeftStats()}
             </div>
 
-            <div className="hidden lg:flex lg:col-span-6 justify-center items-end h-full relative min-h-125">
+            <div className="hidden lg:flex lg:col-span-6 justify-center items-center h-full relative min-h-125 sticky top-28 self-start">
               {isGK ? (
                 <Image
                   src="/mini__GP15525.webp"
@@ -661,7 +927,7 @@ const MatchStatisticsForm = ({
         </Button>
         <Button
           onClick={() => {
-            const finalSecs = secondsElapsed > 0 ? secondsElapsed : 42 * 60;
+            const finalSecs = secondsRef.current >= 0 ? secondsRef.current : (secondsElapsed >= 0 ? secondsElapsed : 0);
             setMinutesPlayed(formatTime(finalSecs));
             onSubmit();
           }}

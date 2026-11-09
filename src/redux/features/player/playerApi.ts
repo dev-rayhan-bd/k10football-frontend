@@ -7,6 +7,7 @@ import {
     IPlayerProfileResponse, 
     IUpdatePlayerPayload, 
     ICreateSelfGameReportPayload, 
+    ICompleteSelfGameReportPayload,
     IRequestCoachGameReportPayload,
     IRequestCoachGameReportResponse,
     IGameReportResponse,
@@ -438,6 +439,36 @@ export const playerApi = apiSlice.injectEndpoints({
             providesTags: [TagTypes.GAME_REPORTS],
         }),
 
+        completeSelfGameReport: builder.mutation<any, { reportId: string | number; payload: ICompleteSelfGameReportPayload }>({
+            query: ({ reportId, payload }) => ({
+                url: `/players/me/game-reports/${reportId}/complete-self`,
+                method: "PATCH",
+                body: payload,
+            }),
+            invalidatesTags: (result) => {
+                if (result?.success) {
+                    return [TagTypes.PLAYERS, TagTypes.GAME_REPORTS, TagTypes.REPORTS];
+                }
+                return [];
+            },
+            async onQueryStarted(_arg, { queryFulfilled }) {
+                try {
+                    const { data } = await queryFulfilled;
+                    SuccessToast(data?.message || "Game report completed successfully");
+                } catch (err: any) {
+                    const status = err?.error?.status;
+                    const message = err?.error?.data?.message || "Failed to complete game report";
+                    if (status === 500) {
+                        ErrorToast("Something went wrong on the server");
+                        return;
+                    }
+                    if (status !== 401) {
+                        ErrorToast(message);
+                    }
+                }
+            },
+        }),
+
         uploadPlayerDocument: builder.mutation<any, FormData | { file: File; title: string }>({
             query: (arg) => {
                 let body: FormData;
@@ -565,6 +596,7 @@ export const {
     useGetMyPlayerMediaQuery,
     useUploadPlayerMediaMutation,
     useCreateSelfGameReportMutation,
+    useCompleteSelfGameReportMutation,
     useRequestCoachGameReportMutation,
     useGetMyGameReportsQuery,
     useUploadPlayerDocumentMutation,

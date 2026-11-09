@@ -8,17 +8,26 @@ import { usePlayer } from "@/hooks/usePlayer";
 import { addReport, completeReportRequest, addReportRequest, updateReport } from "@/lib/constants/reports";
 import ReportDetailsForm from "./ReportDetailsForm";
 import StripePaymentModal from "./StripePaymentModal";
-import MatchStatisticsForm, { PitchLine } from "./MatchStatisticsForm";
+import MatchStatisticsForm, { PitchLine, DEFAULT_FORM_STATS } from "./MatchStatisticsForm";
 import ReportPdfPreview from "./ReportPdfPreview";
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHooks";
 import { addGameReport, updateGameReport, completeGameReportRequest, addGameReportRequest } from "@/redux/features/reports/reportsSlice";
-import { useCreateSelfGameReportMutation, useRequestCoachGameReportMutation, useGetMyPlayerProfileQuery } from "@/redux/features/player/playerApi";
+import {
+  useCreateSelfGameReportMutation,
+  useCompleteSelfGameReportMutation,
+  useRequestCoachGameReportMutation,
+  useGetMyPlayerProfileQuery,
+} from "@/redux/features/player/playerApi";
 import {
   useCompleteCoachGameReportMutation,
   useGetCoachGameReportsQuery,
 } from "@/redux/features/coach/coachApi";
-import { ICreateSelfGameReportPayload, IRequestCoachGameReportPayload } from "@/types/player.type";
+import {
+  ICreateSelfGameReportPayload,
+  ICompleteSelfGameReportPayload,
+  IRequestCoachGameReportPayload,
+} from "@/types/player.type";
 import { IconCircleCheck } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 
@@ -39,9 +48,9 @@ const formatDateToYMD = (dateStr: string): string => {
 };
 
 const formatMinutesPlayed = (val: string | number | undefined | null): string => {
-  if (val === undefined || val === null) return "42:00";
+  if (val === undefined || val === null) return "00:00";
   const str = String(val).trim();
-  if (!str) return "42:00";
+  if (!str) return "00:00";
 
   let m = 0;
   let s = 0;
@@ -64,11 +73,7 @@ const formatMinutesPlayed = (val: string | number | undefined | null): string =>
   }
   if (s < 0) s = 0;
   if (m < 0) m = 0;
-
-  // Format must be "mm:ss" with seconds between 00-59 and time > 0
-  if (m === 0 && s === 0) {
-    return "42:00";
-  }
+  if (m > 130) m = 130;
 
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 };
@@ -77,6 +82,30 @@ interface CreateGameReportWizardProps {
   onCancel: () => void;
   onContinue?: (data: any) => void;
 }
+
+const STEP_NAME_TO_NUMBER: Record<string, number> = {
+  details: 1,
+  "match-details": 1,
+  "1": 1,
+  statistics: 2,
+  stats: 2,
+  "2": 2,
+  preview: 3,
+  "pdf-preview": 3,
+  "3": 3,
+  payment: 4,
+  "4": 4,
+  success: 5,
+  "5": 5,
+};
+
+const STEP_NUMBER_TO_NAME: Record<number, string> = {
+  1: "details",
+  2: "statistics",
+  3: "preview",
+  4: "payment",
+  5: "success",
+};
 
 export const CreateGameReportWizard = ({
   onCancel,
@@ -87,23 +116,83 @@ export const CreateGameReportWizard = ({
   const pathname = usePathname();
   const dispatch = useAppDispatch();
   const { players } = usePlayer();
-  const [createSelfGameReport, { isLoading: isCreatingSelfReport }] = useCreateSelfGameReportMutation();
-  const [requestCoachGameReport, { isLoading: isRequestingCoachReport }] = useRequestCoachGameReportMutation();
-  const [completeCoachGameReport, { isLoading: isCompletingCoachReport }] = useCompleteCoachGameReportMutation();
-  const { data: coachGameReportsResponse } = useGetCoachGameReportsQuery();
-  const { data: myProfileResponse } = useGetMyPlayerProfileQuery();
 
+  const authUser = useAppSelector(state => state.auth?.user);
   const reports = useAppSelector(state => state.reports.reports);
   const requests = useAppSelector(state => state.reports.requests);
+
+  const [userRole, setUserRole] = useState<string>("player");
+  const isCoach = !pathname?.includes("/player") && (pathname?.includes("/coach") || authUser?.role === "coach" || userRole === "coach");
+
+  const [createSelfGameReport, { isLoading: isCreatingSelfReport }] = useCreateSelfGameReportMutation();
+  const [completeSelfGameReport, { isLoading: isCompletingSelfReport }] = useCompleteSelfGameReportMutation();
+  const [requestCoachGameReport, { isLoading: isRequestingCoachReport }] = useRequestCoachGameReportMutation();
+  const [completeCoachGameReport, { isLoading: isCompletingCoachReport }] = useCompleteCoachGameReportMutation();
+  const { data: coachGameReportsResponse } = useGetCoachGameReportsQuery(undefined, {
+    skip: !isCoach,
+  });
+  const { data: myProfileResponse } = useGetMyPlayerProfileQuery(undefined, {
+    skip: isCoach,
+  });
 
   const playerId = searchParams.get("playerId");
   const requestId = searchParams.get("requestId");
   const reportId = searchParams.get("reportId") || requestId;
   const viewOnly = searchParams.get("viewOnly") === "true";
+  const urlPosition = searchParams.get("position");
 
-  const [userRole, setUserRole] = useState<string>("player");
-  const isCoach = pathname?.includes("/coach") || userRole === "coach";
-  const [step, setStep] = useState(1);
+  const stepParam = searchParams.get("step");
+  const initialStep =
+    stepParam && STEP_NAME_TO_NUMBER[stepParam.toLowerCase()]
+      ? STEP_NAME_TO_NUMBER[stepParam.toLowerCase()]
+      : viewOnly
+      ? 3
+      : pathname?.includes("/coach")
+      ? 2
+      : 1;
+
+  const [step, setStep] = useState<number>(initialStep);
+
+  // Synchronize step if URL searchParams changes (e.g. Stripe redirect, browser back/forward)
+  useEffect(() => {
+    const sParam = searchParams.get("step");
+    if (sParam && STEP_NAME_TO_NUMBER[sParam.toLowerCase()]) {
+      const targetStep = STEP_NAME_TO_NUMBER[sParam.toLowerCase()];
+      if (targetStep !== step) {
+        setStep(targetStep);
+      }
+    }
+  }, [searchParams, step]);
+
+  const hasShownPaymentSuccessToast = React.useRef(false);
+  useEffect(() => {
+    const sessionId = searchParams.get("session_id");
+    if (sessionId && !hasShownPaymentSuccessToast.current) {
+      hasShownPaymentSuccessToast.current = true;
+      toast.success("Payment successful! Please review and complete match statistics.");
+    }
+  }, [searchParams]);
+
+  const navigateToStep = (newStep: number, replace = false) => {
+    setStep(newStep);
+    const stepName = STEP_NUMBER_TO_NAME[newStep] || "details";
+    const currentParams = new URLSearchParams(searchParams.toString());
+
+    if (currentParams.get("step") !== stepName) {
+      currentParams.set("step", stepName);
+    }
+    const currentPos = searchParams.get("position") || formData.position;
+    if (currentPos && !currentParams.get("position")) {
+      currentParams.set("position", currentPos.trim().toUpperCase());
+    }
+    const newUrl = `${pathname}?${currentParams.toString()}`;
+    if (replace) {
+      router.replace(newUrl, { scroll: false });
+    } else {
+      router.push(newUrl, { scroll: false });
+    }
+  };
+
   const [characteristics, setCharacteristics] = useState<string[]>(["FAST", "SKILLFUL", "FINISHER"]);
   const [coachFeedback, setCoachFeedback] = useState<string>(
     "Impressive tactical positioning, clinical shooting and accurate ball distribution throughout the game."
@@ -112,12 +201,12 @@ export const CreateGameReportWizard = ({
     playerName: "EDEGELSON RICCI",
     dob: "2014-03-27",
     clubName: "INTER MIAMI",
-    position: "STRIKER",
+    position: searchParams.get("position")?.trim().toUpperCase() || "STRIKER",
     foot: "RIGHT",
     weight: "45",
     height: "1.20",
     matchesPlayed: "1",
-    minutesPlayed: "42:00",
+    minutesPlayed: "00:00",
     manOfTheMatch: "1",
     scoutName: "MARIO LOPEZ",
     gameType: "FRIENDLY CHAMPIONSHIP CATARINESE",
@@ -132,13 +221,126 @@ export const CreateGameReportWizard = ({
     awayScore: 1
   });
 
-  const [stats, setStats] = useState<Record<string, number>>({});
+  const [stats, setStats] = useState<Record<string, number>>(DEFAULT_FORM_STATS);
   const [goalMarkers, setGoalMarkers] = useState<{ x: number; y: number }[]>([]);
   const [pitchMarkers, setPitchMarkers] = useState<PitchLine[]>([]);
   const [reportCompletedBy, setReportCompletedBy] = useState<"parent" | "coach">("parent");
   const [selectedCoachId, setSelectedCoachId] = useState("");
   const [selectedCoachEmail, setSelectedCoachEmail] = useState("");
   const [tempRating, setTempRating] = useState<number>(0);
+
+  const handleSetMinutesPlayed = React.useCallback((val: string) => {
+    setFormData((prev) => ({ ...prev, minutesPlayed: val }));
+  }, []);
+
+  const DRAFT_STORAGE_KEY = `k10_game_report_draft_${playerId || "self"}`;
+
+  const clearDraft = () => {
+    try {
+      if (typeof window !== "undefined") {
+        sessionStorage.removeItem(DRAFT_STORAGE_KEY);
+        sessionStorage.removeItem("k10_game_report_draft_self");
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  const isRestoredFromDraft = React.useRef(false);
+
+  // Restore draft on initial load if available
+  useEffect(() => {
+    if (viewOnly || requestId || isRestoredFromDraft.current) return;
+    try {
+      if (typeof window !== "undefined") {
+        const saved =
+          sessionStorage.getItem(DRAFT_STORAGE_KEY) ||
+          sessionStorage.getItem("k10_game_report_draft_self");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.formData) {
+            if (parsed.formData.minutesPlayed === "42:00") {
+              parsed.formData.minutesPlayed = "00:00";
+            }
+            const urlPos = searchParams.get("position");
+            if (urlPos) {
+              parsed.formData.position = urlPos.trim().toUpperCase();
+            }
+            setFormData(parsed.formData);
+          }
+          if (parsed.characteristics && Array.isArray(parsed.characteristics)) {
+            setCharacteristics(parsed.characteristics);
+          }
+          if (parsed.stats && Object.keys(parsed.stats).length > 0) {
+            setStats({ ...DEFAULT_FORM_STATS, ...parsed.stats });
+          }
+          if (parsed.goalMarkers && Array.isArray(parsed.goalMarkers)) {
+            setGoalMarkers(parsed.goalMarkers);
+          }
+          if (parsed.pitchMarkers && Array.isArray(parsed.pitchMarkers)) {
+            setPitchMarkers(parsed.pitchMarkers);
+          }
+          if (parsed.coachFeedback) setCoachFeedback(parsed.coachFeedback);
+          if (parsed.reportCompletedBy) setReportCompletedBy(parsed.reportCompletedBy);
+          if (parsed.selectedCoachId) setSelectedCoachId(parsed.selectedCoachId);
+          if (parsed.selectedCoachEmail) setSelectedCoachEmail(parsed.selectedCoachEmail);
+          isRestoredFromDraft.current = true;
+        }
+      }
+    } catch (e) {
+      console.error("Failed to restore draft from sessionStorage", e);
+    }
+  }, [viewOnly, requestId, DRAFT_STORAGE_KEY]);
+
+  // Auto-save draft changes to sessionStorage
+  useEffect(() => {
+    if (viewOnly || requestId) return;
+    try {
+      if (typeof window !== "undefined") {
+        const draftData = {
+          formData,
+          characteristics,
+          stats,
+          goalMarkers,
+          pitchMarkers,
+          coachFeedback,
+          reportCompletedBy,
+          selectedCoachId,
+          selectedCoachEmail,
+        };
+        sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftData));
+      }
+    } catch {
+      // Ignore quota errors
+    }
+  }, [
+    formData,
+    characteristics,
+    stats,
+    goalMarkers,
+    pitchMarkers,
+    coachFeedback,
+    reportCompletedBy,
+    selectedCoachId,
+    selectedCoachEmail,
+    viewOnly,
+    requestId,
+    DRAFT_STORAGE_KEY,
+  ]);
+
+  // Keep position synced with URL query param if present
+  useEffect(() => {
+    const pos = searchParams.get("position");
+    if (pos) {
+      const normalizedPos = pos.trim().toUpperCase();
+      setFormData(prev => {
+        if (prev.position?.toUpperCase() !== normalizedPos) {
+          return { ...prev, position: normalizedPos };
+        }
+        return prev;
+      });
+    }
+  }, [searchParams]);
 
   // Scroll to top whenever the wizard step changes
   useEffect(() => {
@@ -149,15 +351,44 @@ export const CreateGameReportWizard = ({
     });
   }, [step]);
 
-  // Detect user role & initial step
+  // Sync step state when browser back/forward buttons are clicked
+  useEffect(() => {
+    const currentStepParam = searchParams.get("step");
+    if (currentStepParam && STEP_NAME_TO_NUMBER[currentStepParam.toLowerCase()]) {
+      const targetStep = STEP_NAME_TO_NUMBER[currentStepParam.toLowerCase()];
+      if (targetStep !== step) {
+        setStep(targetStep);
+      }
+    } else if (!currentStepParam) {
+      const defaultStep = viewOnly ? 3 : isCoach ? 2 : 1;
+      if (step !== defaultStep) {
+        setStep(defaultStep);
+      }
+    }
+  }, [searchParams, isCoach, viewOnly]);
+
+  // Ensure step param is populated in URL on first mount
+  useEffect(() => {
+    const currentStepParam = searchParams.get("step");
+    if (!currentStepParam) {
+      const defaultStep = viewOnly ? 3 : isCoach ? 2 : 1;
+      const currentParams = new URLSearchParams(searchParams.toString());
+      currentParams.set("step", STEP_NUMBER_TO_NAME[defaultStep]);
+      router.replace(`${pathname}?${currentParams.toString()}`, { scroll: false });
+    }
+  }, [searchParams, pathname, isCoach, viewOnly, router]);
+
+  // Detect user role & sync initial step if not in URL
   useEffect(() => {
     const role = localStorage.getItem("userRole") || (pathname?.includes("/coach") ? "coach" : "player");
     setUserRole(role);
-    if (role === "coach" || pathname?.includes("/coach")) {
-      if (viewOnly) {
-        setStep(3); // View only directly opens PDF review
+    if (!searchParams.get("step")) {
+      if (role === "coach" || pathname?.includes("/coach")) {
+        navigateToStep(viewOnly ? 3 : 2, true);
+      } else if (viewOnly) {
+        navigateToStep(3, true);
       } else {
-        setStep(2); // Coach skips details to statistics form directly
+        navigateToStep(1, true);
       }
     }
   }, [pathname, viewOnly]);
@@ -172,7 +403,7 @@ export const CreateGameReportWizard = ({
     let pWeight = "45";
     let pHeight = "1.20";
     let pMatches = "1";
-    let pMinutes = "42:00";
+    let pMinutes = "00:00";
     let pScout = "MARIO LOPEZ";
 
     // check if viewOnly
@@ -263,7 +494,7 @@ export const CreateGameReportWizard = ({
           pWeight = player.weight || "45";
           pHeight = player.height || "1.20";
           pMatches = player.seasonStats?.matches ? player.seasonStats.matches.toString() : "1";
-          pMinutes = player.seasonStats?.matches ? `${player.seasonStats.matches * 90}:00` : "42:00";
+          pMinutes = player.seasonStats?.matches ? `${player.seasonStats.matches * 90}:00` : "00:00";
           pScout = player.coachName && player.coachName !== "N/A" ? player.coachName : "MARIO LOPEZ";
 
           const posUpper = player.position.toUpperCase();
@@ -355,56 +586,17 @@ export const CreateGameReportWizard = ({
 
 
   const buildPayload = (): ICreateSelfGameReportPayload => {
-    const statsPayload = {
-      shotsOnGoal: Number(stats.shotsOnGoal ?? 8),
-      goalScored: Number(stats.goalScored ?? 3),
-      assists: Number(stats.assists ?? 6),
-      passAccurate: Number(stats.passAccurate ?? 12),
-      wrongPass: Number(stats.wrongPass ?? 2),
-      penaltiesTaken: Number(stats.penaltiesTaken ?? 4),
-      standTackle: Number(stats.standTackle ?? 12),
-      slidingTackle: Number(stats.slidingTackle ?? 12),
-      interception: Number(stats.interception ?? 2),
-      appearances: Number(stats.appearances ?? 15),
-      fault: Number(stats.fault ?? 1),
-      redCard: Number(stats.redCard ?? 0),
-      yellowCard: Number(stats.yellowCard ?? 1),
-      punching: Number(stats.punching ?? 5),
-      handling: Number(stats.handling ?? 10),
-      reflex: Number(stats.reflex ?? 1),
-      aerialAbility: Number(stats.aerialAbility ?? 5),
-      throwing: Number(stats.throwing ?? 8),
-      reactions: Number(stats.reactions ?? 1),
-      savesAccurate: Number(stats.savesAccurate ?? 10),
-      freeKick: Number(stats.freeKick ?? 12),
-      cornerKick: Number(stats.cornerKick ?? 4),
-      goalUnsave: Number(stats.goalUnsave ?? 1),
-      penaltiesSaves: Number(stats.penaltiesSaves ?? 1),
-    };
-
-    const accurateShots = (goalMarkers && goalMarkers.length > 0 ? goalMarkers : [{ x: 15.2, y: 28.4 }, { x: 84.6, y: 22.1 }]).map((m) => ({
-      x: Number(Number(m.x).toFixed(1)),
-      y: Number(Number(m.y).toFixed(1)),
-    }));
-
-    const accurateAssists = (pitchMarkers && pitchMarkers.length > 0 ? pitchMarkers : [{ x1: 45.0, y1: 70.0, x2: 50.0, y2: 55.0 }]).map((m) => ({
-      fromX: Number(Number(m.x1).toFixed(1)),
-      fromY: Number(Number(m.y1).toFixed(1)),
-      toX: Number(Number(m.x2).toFixed(1)),
-      toY: Number(Number(m.y2).toFixed(1)),
-    }));
-
     let hScore = typeof formData.homeScore === "number" ? formData.homeScore : parseInt(String(formData.homeScore ?? "2"), 10);
     let aScore = typeof formData.awayScore === "number" ? formData.awayScore : parseInt(String(formData.awayScore ?? "1"), 10);
     if (isNaN(hScore)) hScore = 2;
     if (isNaN(aScore)) aScore = 1;
 
-    return {
+    const payload: ICreateSelfGameReportPayload = {
       playerInfo: {
         playerName: formData.playerName?.trim() || "EDEGELSON RICCI",
         dateOfBirth: formatDateToYMD(formData.dob) || "2014-03-27",
         clubName: formData.clubName?.trim() || "INTER MIAMI",
-        position: formData.position?.trim().toUpperCase() || "STRIKER",
+        position: (urlPosition || formData.position)?.trim().toUpperCase() || "STRIKER",
         foot: formData.foot?.trim().toUpperCase() || "RIGHT",
         characteristics: characteristics && characteristics.length > 0 ? characteristics : ["FAST", "SKILLFUL", "FINISHER"],
         weight: Number(String(formData.weight).replace(/[^\d.]/g, "")) || 45,
@@ -421,21 +613,52 @@ export const CreateGameReportWizard = ({
       ownTeam: formData.ownTeam?.trim() || "FC Barcelona",
       homeScore: hScore,
       awayScore: aScore,
-      minutesPlayed: formatMinutesPlayed(formData.minutesPlayed) || "08:08",
-      stats: statsPayload,
-      accurateShots,
-      accurateAssists,
     };
+
+    console.log("🚀 CREATE SELF GAME REPORT PAYLOAD:", payload);
+    console.log("📦 PAYLOAD JSON:\n", JSON.stringify(payload, null, 2));
+
+    return payload;
   };
 
-  const handleSave = async (overallRating: number) => {
-    const viewOnly = searchParams.get("viewOnly") === "true";
-    const existingReport = viewOnly ? reports.find(r => r.playerId === Number(playerId)) : null;
-
+  const handleSelfReportSubmit = async () => {
+    // 1. Build payload from current details and defaults
     const payload = buildPayload();
+
+    // 2. Persist current draft in sessionStorage so after Stripe redirect, all details are restored
+    try {
+      if (typeof window !== "undefined") {
+        const draftData = {
+          formData,
+          characteristics,
+          stats,
+          goalMarkers,
+          pitchMarkers,
+          coachFeedback,
+          reportCompletedBy,
+          selectedCoachId,
+          selectedCoachEmail,
+        };
+        sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftData));
+        sessionStorage.setItem("k10_game_report_draft_self", JSON.stringify(draftData));
+      }
+    } catch {
+      // ignore
+    }
 
     try {
       const res = await createSelfGameReport(payload).unwrap();
+      const newReportId =
+        res?.data?.report?._id ||
+        res?.data?._id ||
+        res?.data?.id ||
+        (res?.data as any)?.reportId ||
+        (res as any)?._id ||
+        (res as any)?.id;
+      if (newReportId && typeof window !== "undefined") {
+        sessionStorage.setItem("k10_last_self_report_id", String(newReportId));
+      }
+
       const checkoutUrl =
         res?.data?.checkoutUrl ||
         res?.checkoutUrl ||
@@ -445,14 +668,161 @@ export const CreateGameReportWizard = ({
       if (checkoutUrl) {
         window.location.assign(checkoutUrl);
         return;
+      } else {
+        toast.error("Checkout URL not received from server");
       }
     } catch (err: any) {
       console.error("Failed to create self game report via API:", err);
-      return;
+    }
+  };
+
+  const handleSave = async (overallRating: number) => {
+    const viewOnly = searchParams.get("viewOnly") === "true";
+    const existingReport = viewOnly ? reports.find(r => r.playerId === Number(playerId)) : null;
+
+    const currentReportId = reportId || (existingReport ? existingReport.id : Math.floor(Math.random() * 10000));
+    const currentSessionId = searchParams.get("session_id") || undefined;
+
+    // Only attempt creating self game report if user has NOT already created and paid via Stripe
+    if (!reportId && !currentSessionId && !existingReport) {
+      const payload = buildPayload();
+      try {
+        const res = await createSelfGameReport(payload).unwrap();
+        const checkoutUrl =
+          res?.data?.checkoutUrl ||
+          res?.checkoutUrl ||
+          (res?.data as any)?.url ||
+          (res as any)?.url;
+
+        if (checkoutUrl) {
+          clearDraft();
+          window.location.assign(checkoutUrl);
+          return;
+        }
+      } catch (err: any) {
+        console.error("Failed to create self game report via API:", err);
+        return;
+      }
+    }
+
+    const numericId =
+      typeof currentReportId === "number"
+        ? currentReportId
+        : parseInt(String(currentReportId).replace(/\D/g, "").slice(0, 8), 10) ||
+          Math.floor(Math.random() * 10000);
+
+    const isGK =
+      (urlPosition || formData.position)?.trim().toUpperCase() === "GOALKEEPER" ||
+      (urlPosition || formData.position)?.trim().toUpperCase() === "GK";
+
+    const commonStats = {
+      goal: Number(stats.goal ?? stats.goalScored ?? 2),
+      assist: Number(stats.assist ?? stats.assists ?? 1),
+      shotOnTarget: Number(stats.shotOnTarget ?? stats.shotsOnGoal ?? 4),
+      shotOffTarget: Number(stats.shotOffTarget ?? 1),
+      bigChanceCreated: Number(stats.bigChanceCreated ?? 2),
+      bigChanceMissed: Number(stats.bigChanceMissed ?? 0),
+      successfulDribble: Number(stats.successfulDribble ?? 3),
+      failedDribble: Number(stats.failedDribble ?? 1),
+      penaltyWon: Number(stats.penaltyWon ?? stats.penaltiesTaken ?? 1),
+      penaltyMissed: Number(stats.penaltyMissed ?? 0),
+
+      completedPass: Number(stats.completedPass ?? stats.passAccurate ?? (isGK ? 43 : 28)),
+      incompletePass: Number(stats.incompletePass ?? stats.wrongPass ?? (isGK ? 7 : 4)),
+      keyPass: Number(stats.keyPass ?? 3),
+      throughBallCompleted: Number(stats.throughBallCompleted ?? 2),
+      longPassCompleted: Number(stats.longPassCompleted ?? (isGK ? 10 : 3)),
+      crossCompleted: Number(stats.crossCompleted ?? 2),
+      crossFailed: Number(stats.crossFailed ?? 1),
+
+      ballRetention: Number(stats.ballRetention ?? 5),
+      turnover: Number(stats.turnover ?? 2),
+      freeKickWon: Number(stats.freeKickWon ?? stats.freeKick ?? 3),
+      successfulCarry: Number(stats.successfulCarry ?? 4),
+
+      tackleWon: Number(stats.tackleWon ?? stats.standTackle ?? 3),
+      tackleLost: Number(stats.tackleLost ?? 1),
+      interception: Number(stats.interception ?? (isGK ? 3 : 2)),
+      clearance: Number(stats.clearance ?? (isGK ? 4 : 1)),
+      block: Number(stats.block ?? 1),
+      aerialDuelWon: Number(stats.aerialDuelWon ?? (isGK ? 4 : 2)),
+      aerialDuelLost: Number(stats.aerialDuelLost ?? (isGK ? 2 : 1)),
+      groundDuelWon: Number(stats.groundDuelWon ?? 4),
+      groundDuelLost: Number(stats.groundDuelLost ?? 2),
+      recovery: Number(stats.recovery ?? (isGK ? 7 : 3)),
+      defensiveError: Number(stats.defensiveError ?? 0),
+      errorLeadingToGoal: Number(stats.errorLeadingToGoal ?? 0),
+
+      foulCommitted: Number(stats.foulCommitted ?? stats.fault ?? 1),
+      yellowCard: Number(stats.yellowCard ?? 0),
+      redCard: Number(stats.redCard ?? 0),
+    };
+
+    const gkStats = {
+      ...commonStats,
+      save: Number(stats.save ?? stats.savesAccurate ?? 6),
+      bigSave: Number(stats.bigSave ?? 2),
+      save1v1: Number(stats.save1v1 ?? stats.oneOnOneSave ?? 1),
+      goalConceded: Number(stats.goalConceded ?? stats.goalUnsave ?? 1),
+      cleanSheet: Number(stats.cleanSheet ?? 0),
+      crossClaimed: Number(stats.crossClaimed ?? 4),
+      crossMissed: Number(stats.crossMissed ?? 0),
+      distributionCompleted: Number(stats.distributionCompleted ?? 18),
+      distributionFailed: Number(stats.distributionFailed ?? 2),
+    };
+
+    const finalStatsPayload = isGK ? gkStats : commonStats;
+
+    const accurateShots = (goalMarkers && goalMarkers.length > 0
+      ? goalMarkers
+      : [{ x: 15.2, y: 28.4 }, { x: 84.6, y: 22.1 }]
+    ).map((m) => ({
+      x: Number(Number(m.x).toFixed(1)),
+      y: Number(Number(m.y).toFixed(1)),
+    }));
+
+    const accurateAssists = (pitchMarkers && pitchMarkers.length > 0
+      ? pitchMarkers
+      : [{ x1: 45.0, y1: 70.0, x2: 50.0, y2: 55.0 }]
+    ).map((m) => ({
+      fromX: Number(Number(m.x1).toFixed(1)),
+      fromY: Number(Number(m.y1).toFixed(1)),
+      toX: Number(Number(m.x2).toFixed(1)),
+      toY: Number(Number(m.y2).toFixed(1)),
+    }));
+
+    const defaultFeedback = isGK
+      ? "Strong attacking presence, good pressing, superb shot-stopping, and dominant in the air."
+      : "Strong attacking presence, good pressing and excellent off-the-ball runs.";
+
+    const completePayload: ICompleteSelfGameReportPayload = {
+      minutesPlayed: formatMinutesPlayed(formData.minutesPlayed) || (isGK ? "98:08" : "08:08"),
+      stats: finalStatsPayload,
+      accurateShots,
+      accurateAssists,
+      coachFeedback: coachFeedback?.trim() || defaultFeedback,
+    };
+
+    console.log("🚀 COMPLETE SELF GAME REPORT PAYLOAD (Dynamic):", completePayload);
+    console.log("📦 COMPLETE SELF PAYLOAD JSON:\n", JSON.stringify(completePayload, null, 2));
+
+    const targetReportId = reportId || (typeof window !== "undefined" ? sessionStorage.getItem("k10_last_self_report_id") : null);
+
+    if (targetReportId) {
+      try {
+        await completeSelfGameReport({
+          reportId: targetReportId,
+          payload: completePayload,
+        }).unwrap();
+      } catch (err: any) {
+        console.error("Failed to complete self game report via API:", err);
+      }
     }
 
     const finalReport = {
-      id: existingReport ? existingReport.id : Math.floor(Math.random() * 10000),
+      id: numericId,
+      reportId: reportId || undefined,
+      sessionId: currentSessionId,
       date: formData.gameDate,
       league: formData.gameType,
       team1: formData.clubName,
@@ -460,13 +830,13 @@ export const CreateGameReportWizard = ({
       score: formData.matchResult.includes(" x ") ? formData.matchResult.split(" ").slice(-3).join(" ") : "2-1",
       result: "W" as const,
       stadium: formData.gameLocation,
-      goals: stats.goalScored || 0,
-      assists: stats.assists || 0,
-      passes: stats.passAccurate || 50,
+      goals: stats.goal ?? stats.goalScored ?? 0,
+      assists: stats.assist ?? stats.assists ?? 0,
+      passes: stats.completedPass ?? stats.passAccurate ?? 50,
       timePlayedMinutes: Number(formData.minutesPlayed.replace(/[^\d]/g, "")) || 90,
-      yellowCards: stats.yellowCard || 0,
-      redCards: stats.redCard || 0,
-      passAccuracy: Math.round(((stats.passAccurate || 1) / ((stats.passAccurate || 1) + (stats.wrongPass || 0))) * 100) || 85,
+      yellowCards: stats.yellowCard ?? 0,
+      redCards: stats.redCard ?? 0,
+      passAccuracy: Math.round(((stats.completedPass || stats.passAccurate || 1) / ((stats.completedPass || stats.passAccurate || 1) + (stats.incompletePass || stats.wrongPass || 0))) * 100) || 85,
       rating: overallRating / 10,
       scoutName: formData.scoutName,
       gameType: formData.gameType,
@@ -482,7 +852,8 @@ export const CreateGameReportWizard = ({
       playerId: playerId ? Number(playerId) : undefined,
       playerName: formData.playerName,
       pitchMarkers,
-      goalMarkers
+      goalMarkers,
+      stats,
     };
 
     if (existingReport) {
@@ -498,12 +869,13 @@ export const CreateGameReportWizard = ({
       completeReportRequest(Number(requestId));
     }
 
+    clearDraft();
     toast.success("Game Report saved successfully!");
 
     if (onContinue) {
       onContinue(finalReport);
     } else {
-      setStep(5);
+      navigateToStep(5);
     }
   };
 
@@ -516,19 +888,21 @@ export const CreateGameReportWizard = ({
     }
 
     const statsPayload = {
-      shotsOnGoal: Number(stats.shotsOnGoal ?? 8),
-      goalScored: Number(stats.goalScored ?? 3),
-      assists: Number(stats.assists ?? 6),
-      passAccurate: Number(stats.passAccurate ?? 12),
-      wrongPass: Number(stats.wrongPass ?? 2),
-      penaltiesTaken: Number(stats.penaltiesTaken ?? 4),
-      standTackle: Number(stats.standTackle ?? 12),
-      slidingTackle: Number(stats.slidingTackle ?? 12),
+      ...DEFAULT_FORM_STATS,
+      ...stats,
+      shotsOnGoal: Number(stats.shotsOnGoal ?? stats.shotOnTarget ?? 4),
+      goalScored: Number(stats.goalScored ?? stats.goal ?? 2),
+      assists: Number(stats.assists ?? stats.assist ?? 1),
+      passAccurate: Number(stats.passAccurate ?? stats.completedPass ?? 28),
+      wrongPass: Number(stats.wrongPass ?? stats.incompletePass ?? 4),
+      penaltiesTaken: Number(stats.penaltiesTaken ?? stats.penaltyWon ?? 1),
+      standTackle: Number(stats.standTackle ?? stats.tackleWon ?? 3),
+      slidingTackle: Number(stats.slidingTackle ?? stats.tackleWon ?? 3),
       interception: Number(stats.interception ?? 2),
       appearances: Number(stats.appearances ?? 15),
-      fault: Number(stats.fault ?? 1),
+      fault: Number(stats.fault ?? stats.foulCommitted ?? 1),
       redCard: Number(stats.redCard ?? 0),
-      yellowCard: Number(stats.yellowCard ?? 1),
+      yellowCard: Number(stats.yellowCard ?? 0),
       punching: Number(stats.punching ?? 5),
       handling: Number(stats.handling ?? 10),
       reflex: Number(stats.reflex ?? 1),
@@ -536,7 +910,7 @@ export const CreateGameReportWizard = ({
       throwing: Number(stats.throwing ?? 8),
       reactions: Number(stats.reactions ?? 1),
       savesAccurate: Number(stats.savesAccurate ?? 10),
-      freeKick: Number(stats.freeKick ?? 12),
+      freeKick: Number(stats.freeKick ?? stats.freeKickWon ?? 3),
       cornerKick: Number(stats.cornerKick ?? 4),
       goalUnsave: Number(stats.goalUnsave ?? 1),
       penaltiesSaves: Number(stats.penaltiesSaves ?? 1),
@@ -562,7 +936,7 @@ export const CreateGameReportWizard = ({
 
     const payload = {
       reportId: targetReportId,
-      minutesPlayed: formatMinutesPlayed(formData.minutesPlayed) || "42:00",
+      minutesPlayed: formatMinutesPlayed(formData.minutesPlayed) || "00:00",
       stats: statsPayload,
       accurateShots,
       accurateAssists,
@@ -626,11 +1000,12 @@ export const CreateGameReportWizard = ({
 
       dispatch(addGameReport(finalReport));
       addReport(finalReport);
+      clearDraft();
 
       if (onContinue) {
         onContinue(finalReport);
       } else {
-        setStep(5);
+        navigateToStep(5);
       }
     } catch (err: any) {
       console.error("Failed to complete coach game report:", err);
@@ -641,12 +1016,13 @@ export const CreateGameReportWizard = ({
   useEffect(() => {
     if (myProfileResponse?.data && !playerId && !requestId) {
       const p = myProfileResponse.data;
+      const urlPos = searchParams.get("position");
       setFormData(prev => ({
         ...prev,
         playerName: p.fullName || prev.playerName,
         dob: p.dateOfBirth ? formatDateToYMD(p.dateOfBirth) : prev.dob,
         clubName: p.currentClub || prev.clubName,
-        position: p.position ? p.position.toUpperCase() : prev.position,
+        position: urlPos ? urlPos.trim().toUpperCase() : (p.position ? p.position.toUpperCase() : prev.position),
         foot: p.preferredFoot ? p.preferredFoot.toUpperCase() : prev.foot,
         weight: p.weight ? String(p.weight) : prev.weight,
         height: p.height ? String(p.height) : prev.height,
@@ -655,12 +1031,12 @@ export const CreateGameReportWizard = ({
         setCharacteristics(p.playerStyles.map(s => String(s).toUpperCase()));
       }
     }
-  }, [myProfileResponse, playerId, requestId]);
+  }, [myProfileResponse, playerId, requestId, searchParams]);
 
   const handlePlayerSubmit = async () => {
     if (!selectedCoachId) {
       toast.error("Please select a coach first");
-      setStep(1);
+      navigateToStep(1);
       return;
     }
 
@@ -675,7 +1051,7 @@ export const CreateGameReportWizard = ({
         playerName: formData.playerName?.trim() || "EDEGELSON RICCI",
         dateOfBirth: formatDateToYMD(formData.dob) || "2014-03-27",
         clubName: formData.clubName?.trim() || "INTER MIAMI",
-        position: formData.position?.trim().toUpperCase() || "STRIKER",
+        position: (urlPosition || formData.position)?.trim().toUpperCase() || "STRIKER",
         foot: formData.foot?.trim().toUpperCase() || "RIGHT",
         characteristics: characteristics && characteristics.length > 0 ? characteristics : ["FAST", "SKILLFUL", "FINISHER"],
         weight: Number(String(formData.weight).replace(/[^\d.]/g, "")) || 45,
@@ -703,6 +1079,7 @@ export const CreateGameReportWizard = ({
         (res as any)?.url;
 
       if (checkoutUrl) {
+        clearDraft();
         window.location.assign(checkoutUrl);
         return;
       }
@@ -732,8 +1109,9 @@ export const CreateGameReportWizard = ({
       formData: formData
     });
 
+    clearDraft();
     dispatch(addGameReportRequest(newReq));
-    setStep(5);
+    navigateToStep(5);
   };
 
   return (
@@ -750,16 +1128,23 @@ export const CreateGameReportWizard = ({
           setSelectedCoachId={setSelectedCoachId}
           selectedCoachEmail={selectedCoachEmail}
           setSelectedCoachEmail={setSelectedCoachEmail}
-          isSubmitting={isRequestingCoachReport}
-          onCancel={onCancel}
+          isSubmitting={isRequestingCoachReport || isCreatingSelfReport}
+          onCancel={() => {
+            clearDraft();
+            onCancel();
+          }}
           onContinue={async () => {
             if (isCoach) {
-              setStep(2);
+              navigateToStep(2);
             } else if (reportCompletedBy === "coach" && userRole !== "coach") {
               // Direct request to coach API and redirect to Stripe checkout
               await handlePlayerSubmit();
+            } else if (reportId || searchParams.get("session_id")) {
+              // Already paid, proceed to statistics
+              navigateToStep(2);
             } else {
-              setStep(2);
+              // Self report: Call POST /players/me/game-reports/self and redirect to Stripe checkout
+              await handleSelfReportSubmit();
             }
           }} 
         />
@@ -767,9 +1152,9 @@ export const CreateGameReportWizard = ({
       
       {step === 2 && (
         <MatchStatisticsForm 
-          position={formData.position}
+          position={urlPosition || formData.position}
           minutesPlayed={formData.minutesPlayed}
-          setMinutesPlayed={(val) => setFormData({ ...formData, minutesPlayed: val })}
+          setMinutesPlayed={handleSetMinutesPlayed}
           stats={stats}
           setStats={setStats}
           goalMarkers={goalMarkers}
@@ -780,24 +1165,25 @@ export const CreateGameReportWizard = ({
           setCoachFeedback={setCoachFeedback}
           onCancel={() => {
             if (isCoach) {
+              clearDraft();
               router.push("/dashboard/coach/game-reports");
             } else {
-              setStep(1);
+              navigateToStep(1);
             }
           }}
-          onSubmit={() => setStep(3)}
+          onSubmit={() => navigateToStep(3)}
         />
       )}
 
       {step === 3 && (
         <ReportPdfPreview 
-          formData={formData}
+          formData={{ ...formData, position: urlPosition || formData.position }}
           characteristics={characteristics}
           stats={stats}
           goalMarkers={goalMarkers}
           pitchMarkers={pitchMarkers}
           coachFeedback={coachFeedback}
-          isSubmitting={isCompletingCoachReport || isCreatingSelfReport}
+          isSubmitting={isCompletingCoachReport || isCreatingSelfReport || isCompletingSelfReport}
           viewOnly={viewOnly}
           onSave={async (overallRating) => {
             if (isCoach) {
@@ -808,7 +1194,7 @@ export const CreateGameReportWizard = ({
               await handleSave(overallRating);
             }
           }}
-          onBack={() => setStep(2)}
+          onBack={() => navigateToStep(2)}
           isPlayer={!isCoach}
         />
       )}
@@ -832,7 +1218,7 @@ export const CreateGameReportWizard = ({
               await handleSave(tempRating);
             }}
             onBack={() => {
-              setStep(3);
+              navigateToStep(3);
             }}
           />
         )
@@ -860,6 +1246,7 @@ export const CreateGameReportWizard = ({
 
           <Button 
             onClick={() => {
+              clearDraft();
               if (isCoach) {
                 router.push("/dashboard/coach/game-reports");
               } else {

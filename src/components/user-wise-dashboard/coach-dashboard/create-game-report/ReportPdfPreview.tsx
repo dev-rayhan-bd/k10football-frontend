@@ -2,12 +2,14 @@
 "use client";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import RadarChart from "./RadarChart";
 import { IconDownload, IconCheck, IconLoader2 } from "@tabler/icons-react";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { toast } from "sonner";
+import { GK_SLIDE_1, OUTFIELD_SLIDES, GK_SLIDE_4 } from "./MatchStatisticsForm";
 interface ReportPdfPreviewProps {
   formData: any;
   characteristics: string[];
@@ -38,7 +40,33 @@ const ReportPdfPreview = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
   const [scale, setScale] = useState(1);
-  const isGK = formData.position === "GOALKEEPER";
+
+  const searchParams = useSearchParams();
+  const urlPosition = searchParams?.get("position");
+  const effectivePosition = (urlPosition || formData?.position || "").trim().toUpperCase();
+  const isGK = effectivePosition === "GOALKEEPER" || effectivePosition === "GK";
+
+  const statItems = isGK
+    ? [...GK_SLIDE_1, ...OUTFIELD_SLIDES[0], ...OUTFIELD_SLIDES[1], ...GK_SLIDE_4]
+    : [...OUTFIELD_SLIDES[0], ...OUTFIELD_SLIDES[1], ...OUTFIELD_SLIDES[2]];
+
+  const getStatValue = (key: string): number => {
+    if (stats[key] !== undefined && stats[key] !== null) return stats[key];
+    switch (key) {
+      case "goal": return stats.goalScored ?? stats.goalsScored ?? 0;
+      case "assist": return stats.assists ?? 0;
+      case "shotOnTarget": return stats.shotsOnGoal ?? 0;
+      case "completedPass": return stats.passAccurate ?? 0;
+      case "incompletePass": return stats.wrongPass ?? 0;
+      case "tackleWon": return stats.standTackle ?? stats.slidingTackle ?? 0;
+      case "freeKickWon": return stats.freeKick ?? 0;
+      case "penaltyWon": return stats.penaltiesTaken ?? 0;
+      case "foulCommitted": return stats.fault ?? 0;
+      case "save": return stats.savesAccurate ?? 0;
+      case "goalConceded": return stats.goalUnsave ?? 0;
+      default: return 0;
+    }
+  };
 
   const [contentHeight, setContentHeight] = useState(1500);
 
@@ -78,20 +106,20 @@ const ReportPdfPreview = ({
   // Compute attributes for the radar chart
   const radarStats = isGK
     ? [
-      { label: "DIV", value: mapStat((stats.reflex || 0) + (stats.savesAccurate || 0), 25) },
-      { label: "HAN", value: mapStat((stats.handling || 0) + (stats.punching || 0), 25) },
-      { label: "KIC", value: mapStat((stats.throwing || 0) + (stats.passAccurate || 0), 25) },
-      { label: "REF", value: mapStat((stats.reflex || 0) + (stats.penaltiesSaves || 0) * 5, 20) },
-      { label: "SPD", value: mapStat((stats.reactions || 0) + (stats.appearances || 0), 25) },
-      { label: "POS", value: mapStat((stats.aerialAbility || 0) + (stats.savesAccurate || 0), 25) }
+      { label: "DIV", value: mapStat((getStatValue("reflex") || 0) + getStatValue("save"), 25) },
+      { label: "HAN", value: mapStat((getStatValue("handling") || 0) + (getStatValue("crossClaimed") || getStatValue("punching")), 25) },
+      { label: "KIC", value: mapStat((getStatValue("distributionCompleted") || getStatValue("throwing") || getStatValue("completedPass")), 25) },
+      { label: "REF", value: mapStat((getStatValue("oneOnOneSave") || getStatValue("reflex") || 0) * 2 + (getStatValue("bigSave") || 0) * 3, 20) },
+      { label: "SPD", value: mapStat((getStatValue("distributionCompleted") || getStatValue("reactions") || 0), 25) },
+      { label: "POS", value: mapStat((getStatValue("cleanSheet") * 5) + getStatValue("save"), 25) }
     ]
     : [
-      { label: "PAC", value: mapStat((stats.reactions || 0) + (characteristics.includes("FAST") ? 8 : 4), 20) },
-      { label: "SHO", value: mapStat((stats.goalScored || 0) * 3 + (stats.shotsOnGoal || 0) + (stats.penaltiesTaken || 0), 25) },
-      { label: "PAS", value: mapStat((stats.assists || 0) * 2 + (stats.passAccurate || 0), 25) },
-      { label: "DRI", value: mapStat((stats.passAccurate || 0) + (characteristics.includes("SKILLFUL") ? 8 : 4), 20) },
-      { label: "DEF", value: mapStat((stats.standTackle || 0) + (stats.slidingTackle || 0) + (stats.interception || 0), 30) },
-      { label: "PHY", value: mapStat((stats.appearances || 0) + (stats.savesAccurate || 0), 30) }
+      { label: "PAC", value: mapStat((getStatValue("reactions") || 0) + (characteristics.includes("FAST") ? 8 : 4), 20) },
+      { label: "SHO", value: mapStat((getStatValue("goal") * 3) + getStatValue("shotOnTarget") + getStatValue("penaltyWon"), 25) },
+      { label: "PAS", value: mapStat((getStatValue("assist") * 2) + getStatValue("completedPass"), 25) },
+      { label: "DRI", value: mapStat(getStatValue("successfulDribble") * 2 + (characteristics.includes("SKILLFUL") ? 8 : 4), 20) },
+      { label: "DEF", value: mapStat(getStatValue("tackleWon") * 2 + getStatValue("interception") + getStatValue("clearance"), 30) },
+      { label: "PHY", value: mapStat(getStatValue("groundDuelWon") + getStatValue("aerialDuelWon") + getStatValue("recovery"), 30) }
     ];
   const overallRating = Math.round(
     radarStats.reduce((sum, s) => sum + s.value, 0) / radarStats.length
@@ -236,7 +264,7 @@ const ReportPdfPreview = ({
                   PLAYER ANALYSIS PROFILE
                 </h2>
                 <div className="text-[10px] text-slate-900 font-black uppercase tracking-widest mt-1">
-                  POSITION : {formData.position} ⚽
+                  POSITION : {effectivePosition || formData.position} ⚽
                 </div>
               </div>
               <div className="flex items-center gap-4">
@@ -295,7 +323,7 @@ const ReportPdfPreview = ({
                   <div className="flex justify-between w-full items-start">
                     <div className="flex flex-col items-center">
                       <div className="text-2xl font-black text-sky-600 font-orbitron italic leading-none">{overallRating}</div>
-                      <div className="text-[8px] font-bold text-sky-500 uppercase font-orbitron leading-none mt-0.5">{formData.position.slice(0, 3)}</div>
+                      <div className="text-[8px] font-bold text-sky-500 uppercase font-orbitron leading-none mt-0.5">{isGK ? "GK" : (effectivePosition || formData.position).slice(0, 3)}</div>
                     </div>
                     <Image src="/logo.png" alt="Club Logo" className="w-5 h-5 object-contain" width={50} height={50} />
                   </div>
@@ -371,35 +399,10 @@ const ReportPdfPreview = ({
                 MATCH STATISTICS
               </div>
               <div className="grid grid-cols-3 gap-x-8 gap-y-2 text-[10px] pl-2">
-                {[
-                  { label: "Shots on Goal:", val: stats.shotsOnGoal || 0 },
-                  { label: "Stand Tackle:", val: stats.standTackle || 0 },
-                  { label: "Appearances:", val: stats.appearances || 0 },
-                  { label: "Goals Scored:", val: stats.goalsScored || 0 },
-                  { label: "Sliding Tackle:", val: stats.slidingTackle || 0 },
-                  { label: "Fault:", val: stats.fault || 0 },
-                  { label: "Assists:", val: stats.assists || 0 },
-                  { label: "Interception:", val: stats.interception || 0 },
-                  { label: "Punching:", val: stats.punching || 0 },
-                  { label: "Pass Accurate:", val: stats.passAccurate || 0 },
-                  { label: "Saves Accurate:", val: stats.savesAccurate || 0 },
-                  { label: "Handling:", val: stats.handling || 0 },
-                  { label: "Wrong Pass:", val: stats.wrongPass || 0 },
-                  { label: "Goals Unsave:", val: stats.goalUnsave || 0 },
-                  { label: "Reflex:", val: stats.reflex || 0 },
-                  { label: "Free Kick:", val: stats.freeKick || 0 },
-                  { label: "Penalties Save:", val: stats.penaltiesSaves || 0 },
-                  { label: "Aerial Ability:", val: stats.aerialAbility || 0 },
-                  { label: "Corner Kick:", val: stats.cornerKick || 0 },
-                  { label: "Red Card:", val: stats.redCard || 0 },
-                  { label: "Throwing:", val: stats.throwing || 0 },
-                  { label: "Penalties Taken:", val: stats.penaltiesTaken || 0 },
-                  { label: "Yellow Card:", val: stats.yellowCard || 0 },
-                  { label: "Reactions:", val: stats.reactions || 0 }
-                ].map((item, idx) => (
+                {statItems.map((item, idx) => (
                   <div key={idx} className="flex justify-between border-b border-slate-100 py-1 pr-2">
-                    <span className="text-slate-500 font-bold uppercase font-orbitron">{item.label}</span>
-                    <span className="text-slate-800 font-black font-orbitron">{item.val}</span>
+                    <span className="text-slate-500 font-bold uppercase font-orbitron">{item.label}:</span>
+                    <span className="text-slate-800 font-black font-orbitron">{getStatValue(item.key)}</span>
                   </div>
                 ))}
               </div>
