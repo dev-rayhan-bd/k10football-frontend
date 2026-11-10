@@ -10,12 +10,24 @@ import {
   IconReport,
   IconUserCheck,
   IconClipboardCheck,
-  IconCreditCard
+  IconCreditCard,
+  IconLock,
 } from "@tabler/icons-react";
-import { ReactNode, useState, useEffect, createContext } from "react";
+import { ReactNode, useState, useEffect, createContext, useRef } from "react";
 import { useCoach } from "@/hooks/useCoach";
+import { useGetMySubscriptionQuery } from "@/redux/features/subscription/subscriptionApi";
+import { usePathname, useRouter } from "next/navigation";
+import { toast } from "sonner";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export const CoachContext = createContext<{ hasAcademy: boolean }>({ hasAcademy: false });
+
+const LOCKED_COACH_PATHS = [
+  "/dashboard/coach/game-reports",
+  "/dashboard/coach/player-cv-validations",
+  "/dashboard/coach/player-evaluation",
+];
 
 const coachSidebarItemsWithoutAcademy = [
   { name: "Dashboard", url: "/dashboard/coach", icon: IconDashboard },
@@ -42,6 +54,12 @@ const coachSidebarItemsWithAcademy = [
 const CoachLayout = ({ children }: { children: ReactNode }) => {
   const { coachData, handleUpdate } = useCoach();
   const [hasAcademy, setHasAcademy] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+  const redirectedPathRef = useRef<string | null>(null);
+
+  const { data: subscriptionResponse, isLoading: isSubLoading } = useGetMySubscriptionQuery();
+  const hasActiveSubscription = Boolean(subscriptionResponse?.data?.hasActiveSubscription);
 
   useEffect(() => {
     if (coachData?.coachType) {
@@ -49,7 +67,33 @@ const CoachLayout = ({ children }: { children: ReactNode }) => {
     }
   }, [coachData?.coachType]);
 
-  const currentSidebarItems = hasAcademy ? coachSidebarItemsWithAcademy : coachSidebarItemsWithoutAcademy;
+  const isCurrentRouteLocked = LOCKED_COACH_PATHS.some(
+    (lockedPath) => pathname === lockedPath || pathname.startsWith(`${lockedPath}/`)
+  );
+
+  // Route protection: If coach navigates directly via browser URL bar or link to a locked route without active subscription
+  useEffect(() => {
+    if (!isSubLoading && !hasActiveSubscription && isCurrentRouteLocked) {
+      if (redirectedPathRef.current !== pathname) {
+        redirectedPathRef.current = pathname;
+        toast.error("Active subscription required to access this feature. Redirecting to subscription...");
+        router.replace("/dashboard/coach/my-subscription");
+      }
+    } else if (!isCurrentRouteLocked) {
+      redirectedPathRef.current = null;
+    }
+  }, [isSubLoading, hasActiveSubscription, isCurrentRouteLocked, pathname, router]);
+
+  const baseSidebarItems = hasAcademy ? coachSidebarItemsWithAcademy : coachSidebarItemsWithoutAcademy;
+
+  const currentSidebarItems = baseSidebarItems.map((item) => {
+    const isLocked = !hasActiveSubscription && LOCKED_COACH_PATHS.some((path) => item.url === path);
+    return {
+      ...item,
+      isLocked,
+      lockedMessage: "Active subscription required to access this feature. Please subscribe.",
+    };
+  });
 
   const toggleCoachType = (isClub: boolean) => {
     setHasAcademy(isClub);
@@ -90,6 +134,47 @@ const CoachLayout = ({ children }: { children: ReactNode }) => {
       ? "#C0C0C0"
       : "#CD7F32";
 
+  // Prevent rendering locked children if unsubscribed or while checking status
+  let content = children;
+  if (isCurrentRouteLocked) {
+    if (isSubLoading) {
+      content = (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-center">
+          <div className="size-8 rounded-full border-2 border-[#E31B23] border-t-transparent animate-spin" />
+          <p className="text-sm text-muted-foreground">Checking subscription access...</p>
+        </div>
+      );
+    } else if (!hasActiveSubscription) {
+      content = (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center px-4 max-w-lg mx-auto">
+          <div className="size-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-muted-foreground">
+            <IconLock className="size-8 text-[#E31B23]" />
+          </div>
+          <div className="flex flex-col gap-2">
+            <h2 className="text-2xl font-bold font-heading uppercase tracking-wide text-white">
+              Subscription Required
+            </h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              This feature is exclusively available for subscribed coaches. You need an active subscription to access Game Reports, Player CV Validations, and Player Evaluations.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 w-full justify-center">
+            <Link href="/dashboard/coach/my-subscription">
+              <Button className="w-full sm:w-auto bg-[#E31B23] hover:bg-[#c9151c] text-white">
+                View Subscription Plans
+              </Button>
+            </Link>
+            <Link href="/dashboard/coach">
+              <Button variant="outline" className="w-full sm:w-auto">
+                Back to Dashboard
+              </Button>
+            </Link>
+          </div>
+        </div>
+      );
+    }
+  }
+
   return (
     <CoachContext.Provider value={{ hasAcademy }}>
       <DashboardLayout
@@ -97,7 +182,7 @@ const CoachLayout = ({ children }: { children: ReactNode }) => {
         tier={{ name: tierName, color: tierColor }}
         customToggle={customToggle}
       >
-        {children}
+        {content}
       </DashboardLayout>
     </CoachContext.Provider>
   );

@@ -3,6 +3,7 @@ import { apiSlice } from "../api/apiSlice";
 import TagTypes from "@/constants/tagType.constant";
 import { ErrorToast, SuccessToast } from "@/helpers/ValidationHelper";
 import { SetCreateUpdateContentError } from "./contentSlice";
+import { IPolicyDocumentResponse } from "@/types/policy.type";
 
 export const contentApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -13,6 +14,17 @@ export const contentApi = apiSlice.injectEndpoints({
       }),
       providesTags: (_result, _error, type) => [
         { type: TagTypes.CONTENT, id: type },
+        TagTypes.CONTENT,
+      ],
+    }),
+
+    getPolicyByType: builder.query<IPolicyDocumentResponse, string>({
+      query: (type: string) => ({
+        url: `/cms/policies/${type}`,
+        method: "GET",
+      }),
+      providesTags: (_result, _error, type) => [
+        { type: TagTypes.CONTENT, id: `policy-${type}` },
         TagTypes.CONTENT,
       ],
     }),
@@ -57,6 +69,7 @@ export const contentApi = apiSlice.injectEndpoints({
 
 export const {
   useGetContentByTypeQuery,
+  useGetPolicyByTypeQuery,
   useCreateUpdateContentMutation,
   // Alias for semantic clarity
   useCreateUpdateContentMutation: useCreateOrUpdateContentMutation,

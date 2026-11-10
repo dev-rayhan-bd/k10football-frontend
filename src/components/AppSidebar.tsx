@@ -13,6 +13,9 @@ export type SidebarItem = {
   name: string;
   url: string;
   icon: Icon;
+  isLocked?: boolean;
+  lockedMessage?: string;
+  lockedRedirectUrl?: string;
 };
 type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
   sidebarItems: SidebarItem[];

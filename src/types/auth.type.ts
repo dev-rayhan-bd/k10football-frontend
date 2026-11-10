@@ -16,6 +16,7 @@ export interface RegisterFormData {
   phone: string;
   password: string;
   confirmPassword: string;
+  termsAccepted?: boolean;
 
   // Coach fields
   experience: string;

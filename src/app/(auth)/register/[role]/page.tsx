@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/incompatible-library */
 "use client";
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useRegisterMutation } from "@/redux/features/auth/authApi";
 import { RoleType, RegisterFormData } from "@/types/auth.type";
 import RegisterFormStep from "@/components/auth/register/RegisterFormStep";
+import TermsAndConditionsModal from "@/components/auth/register/TermsAndConditionsModal";
 
 const VALID_ROLES: RoleType[] = ["PLAYER", "COACH", "ACADEMY", "CLUB", "AGENT", "PARENT"];
 
@@ -26,6 +27,10 @@ const RegisterRoleFormPage = () => {
       router.replace("/register");
     }
   }, [isValidRole, router]);
+
+  // Terms & Conditions acceptance state
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
 
   // RTK Query Mutation
   const [registerUser, { isLoading: isRegistering }] = useRegisterMutation();
@@ -62,6 +67,12 @@ const RegisterRoleFormPage = () => {
 
   // On Submit Registration
   const onSubmit = async (data: RegisterFormData) => {
+    if (!termsAccepted) {
+      toast.error("You must acknowledge and accept the Terms & Conditions before registering.");
+      setIsTermsModalOpen(true);
+      return;
+    }
+
     if (data.password !== data.confirmPassword) {
       toast.error("Passwords do not match!");
       return;
@@ -161,6 +172,9 @@ const RegisterRoleFormPage = () => {
         };
       }
 
+      // Explicit requirement: payload must include termsAccepted: true
+      payload.termsAccepted = true;
+
       // Build FormData with data key as JSON string matching backend Postman spec
       const formData = new FormData();
       formData.append("data", JSON.stringify(payload));
@@ -188,6 +202,16 @@ const RegisterRoleFormPage = () => {
         errors={errors}
         passwordVal={passwordVal}
         isRegistering={isRegistering}
+        termsAccepted={termsAccepted}
+        onTermsAcceptedChange={setTermsAccepted}
+        onOpenTermsModal={() => setIsTermsModalOpen(true)}
+      />
+
+      <TermsAndConditionsModal
+        isOpen={isTermsModalOpen}
+        onClose={() => setIsTermsModalOpen(false)}
+        onAccept={() => setTermsAccepted(true)}
+        isAccepted={termsAccepted}
       />
     </div>
   );
