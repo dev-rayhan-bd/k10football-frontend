@@ -3,6 +3,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
+import { IconLoader2 } from "@tabler/icons-react";
 
 export const EditableImage = ({
   src,
@@ -25,10 +26,11 @@ export const EditableImage = ({
   layout?: "fill" | "responsive" | "intrinsic" | "fixed";
   editable?: boolean;
   canEditEvaluation?: boolean;
-  onUpdate: (field: string, value: any) => void;
+  onUpdate: (field: string, value: any, file?: File) => void;
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [role, setRole] = useState<string>("player");
+  const [isUploading, setIsUploading] = useState<boolean>(false);
 
   useEffect(() => {
     const currentRole = localStorage.getItem("userRole") || role || "player";
@@ -42,29 +44,35 @@ export const EditableImage = ({
       : canEditEvaluation);
 
   const handleImageUpload = async (file: File) => {
+    setIsUploading(true);
     let processedFile = file;
-    if (field === "playerImage") {
-      try {
-        toast.loading("Removing background... Please wait.", { id: "bg-removal" });
-        const { removeBackground } = await import("@imgly/background-removal");
-        const blob = await removeBackground(file);
-        processedFile = new File([blob], file.name, { type: "image/png" });
-        toast.success("Background removed!", { id: "bg-removal" });
-      } catch (error) {
-        console.error("Background removal failed:", error);
-        toast.error("Background removal failed. Using original image.", { id: "bg-removal" });
+    try {
+      if (field === "playerImage") {
+        try {
+          toast.loading("Removing background... Please wait.", { id: "bg-removal" });
+          const { removeBackground } = await import("@imgly/background-removal");
+          const blob = await removeBackground(file);
+          const newFileName = file.name.replace(/\.[^/.]+$/, "") + ".png";
+          processedFile = new File([blob], newFileName, { type: "image/png" });
+          toast.success("Background removed!", { id: "bg-removal" });
+        } catch (error) {
+          console.error("Background removal failed:", error);
+          toast.error("Background removal failed. Using original image.", { id: "bg-removal" });
+        }
       }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        onUpdate(field, reader.result, processedFile);
+      };
+      reader.readAsDataURL(processedFile);
+    } finally {
+      setIsUploading(false);
     }
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      onUpdate(field, reader.result);
-    };
-    reader.readAsDataURL(processedFile);
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    if (!canUpload) return;
+    if (!canUpload || isUploading) return;
     const file = e.dataTransfer.files[0];
     if (file && file.type.startsWith("image/")) {
       handleImageUpload(file);
@@ -73,8 +81,8 @@ export const EditableImage = ({
 
   return (
     <div
-      className={`relative group w-full ${canUpload ? "cursor-pointer" : ""}`}
-      onClick={() => canUpload && fileInputRef.current?.click()}
+      className={`relative group w-full ${canUpload && !isUploading ? "cursor-pointer" : ""}`}
+      onClick={() => canUpload && !isUploading && fileInputRef.current?.click()}
       onDragOver={(e) => e.preventDefault()}
       onDrop={handleDrop}
       onContextMenu={(e) => e.preventDefault()}
@@ -93,16 +101,25 @@ export const EditableImage = ({
           target.src = "/placeholder_img.jpg";
         }}
       />
-      {canUpload && (
+      {isUploading && (
+        <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-2 z-20 rounded">
+          <IconLoader2 className="size-8 animate-spin text-[#00FF62]" />
+          <span className="text-[11px] font-bold text-white uppercase tracking-wider font-orbitron">
+            Processing image...
+          </span>
+        </div>
+      )}
+      {canUpload && !isUploading && (
         <>
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded">
-            <span className="text-[10px] text-white font-black uppercase tracking-widest">Drop or Click</span>
+            <span className="text-[10px] text-white font-black uppercase tracking-widest font-orbitron">Drop or Click to Change Photo</span>
           </div>
           <input
             type="file"
             ref={fileInputRef}
             className="hidden"
             accept="image/*"
+            disabled={isUploading}
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) handleImageUpload(file);

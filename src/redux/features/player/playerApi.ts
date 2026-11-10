@@ -431,11 +431,21 @@ export const playerApi = apiSlice.injectEndpoints({
             },
         }),
 
-        getMyGameReports: builder.query<IPlayerGameReportsResponse, void>({
-            query: () => ({
-                url: "/players/me/game-reports",
-                method: "GET",
-            }),
+        getMyGameReports: builder.query<
+            IPlayerGameReportsResponse,
+            { page?: number; limit?: number; status?: string } | void
+        >({
+            query: (params) => {
+                const queryParams = new URLSearchParams();
+                if (params?.page) queryParams.append("page", params.page.toString());
+                if (params?.limit) queryParams.append("limit", params.limit.toString());
+                if (params?.status && params.status !== "All") queryParams.append("status", params.status);
+                const queryString = queryParams.toString();
+                return {
+                    url: queryString ? `/players/me/game-reports?${queryString}` : "/players/me/game-reports",
+                    method: "GET",
+                };
+            },
             providesTags: [TagTypes.GAME_REPORTS],
         }),
 

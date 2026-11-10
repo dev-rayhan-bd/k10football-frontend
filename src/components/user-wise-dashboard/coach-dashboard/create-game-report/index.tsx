@@ -194,9 +194,7 @@ export const CreateGameReportWizard = ({
   };
 
   const [characteristics, setCharacteristics] = useState<string[]>(["FAST", "SKILLFUL", "FINISHER"]);
-  const [coachFeedback, setCoachFeedback] = useState<string>(
-    "Impressive tactical positioning, clinical shooting and accurate ball distribution throughout the game."
-  );
+  const [coachFeedback, setCoachFeedback] = useState<string>("");
   const [formData, setFormData] = useState({
     playerName: "EDEGELSON RICCI",
     dob: "2014-03-27",
@@ -227,6 +225,9 @@ export const CreateGameReportWizard = ({
   const [reportCompletedBy, setReportCompletedBy] = useState<"parent" | "coach">("parent");
   const [selectedCoachId, setSelectedCoachId] = useState("");
   const [selectedCoachEmail, setSelectedCoachEmail] = useState("");
+  const [coachRequestMode, setCoachRequestMode] = useState<"dropdown" | "custom">("dropdown");
+  const [customCoachName, setCustomCoachName] = useState("");
+  const [customCoachEmail, setCustomCoachEmail] = useState("");
   const [tempRating, setTempRating] = useState<number>(0);
 
   const handleSetMinutesPlayed = React.useCallback((val: string) => {
@@ -240,6 +241,7 @@ export const CreateGameReportWizard = ({
       if (typeof window !== "undefined") {
         sessionStorage.removeItem(DRAFT_STORAGE_KEY);
         sessionStorage.removeItem("k10_game_report_draft_self");
+        sessionStorage.removeItem("k10_last_self_report_id");
       }
     } catch {
       // ignore
@@ -284,6 +286,9 @@ export const CreateGameReportWizard = ({
           if (parsed.reportCompletedBy) setReportCompletedBy(parsed.reportCompletedBy);
           if (parsed.selectedCoachId) setSelectedCoachId(parsed.selectedCoachId);
           if (parsed.selectedCoachEmail) setSelectedCoachEmail(parsed.selectedCoachEmail);
+          if (parsed.coachRequestMode) setCoachRequestMode(parsed.coachRequestMode);
+          if (parsed.customCoachName) setCustomCoachName(parsed.customCoachName);
+          if (parsed.customCoachEmail) setCustomCoachEmail(parsed.customCoachEmail);
           isRestoredFromDraft.current = true;
         }
       }
@@ -307,6 +312,9 @@ export const CreateGameReportWizard = ({
           reportCompletedBy,
           selectedCoachId,
           selectedCoachEmail,
+          coachRequestMode,
+          customCoachName,
+          customCoachEmail,
         };
         sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftData));
       }
@@ -323,6 +331,9 @@ export const CreateGameReportWizard = ({
     reportCompletedBy,
     selectedCoachId,
     selectedCoachEmail,
+    coachRequestMode,
+    customCoachName,
+    customCoachEmail,
     viewOnly,
     requestId,
     DRAFT_STORAGE_KEY,
@@ -638,6 +649,9 @@ export const CreateGameReportWizard = ({
           reportCompletedBy,
           selectedCoachId,
           selectedCoachEmail,
+          coachRequestMode,
+          customCoachName,
+          customCoachEmail,
         };
         sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftData));
         sessionStorage.setItem("k10_game_report_draft_self", JSON.stringify(draftData));
@@ -791,16 +805,18 @@ export const CreateGameReportWizard = ({
       toY: Number(Number(m.y2).toFixed(1)),
     }));
 
-    const defaultFeedback = isGK
-      ? "Strong attacking presence, good pressing, superb shot-stopping, and dominant in the air."
-      : "Strong attacking presence, good pressing and excellent off-the-ball runs.";
+    const rawMins = formData.minutesPlayed;
+    const formattedMins = formatMinutesPlayed(rawMins);
+    const finalMinutes = (formattedMins && formattedMins !== "00:00")
+      ? formattedMins
+      : (isGK ? "98:08" : "08:08");
 
     const completePayload: ICompleteSelfGameReportPayload = {
-      minutesPlayed: formatMinutesPlayed(formData.minutesPlayed) || (isGK ? "98:08" : "08:08"),
+      minutesPlayed: finalMinutes,
       stats: finalStatsPayload,
       accurateShots,
       accurateAssists,
-      coachFeedback: coachFeedback?.trim() || defaultFeedback,
+      coachFeedback: coachFeedback?.trim() || "",
     };
 
     console.log("🚀 COMPLETE SELF GAME REPORT PAYLOAD (Dynamic):", completePayload);
@@ -808,14 +824,16 @@ export const CreateGameReportWizard = ({
 
     const targetReportId = reportId || (typeof window !== "undefined" ? sessionStorage.getItem("k10_last_self_report_id") : null);
 
+    let isCompleteApiSuccess = false;
     if (targetReportId) {
       try {
         await completeSelfGameReport({
           reportId: targetReportId,
           payload: completePayload,
         }).unwrap();
+        isCompleteApiSuccess = true;
       } catch (err: any) {
-        console.error("Failed to complete self game report via API:", err);
+        console.warn("Could not complete self game report via API:", err?.data?.message || err?.message || err);
       }
     }
 
@@ -871,6 +889,11 @@ export const CreateGameReportWizard = ({
 
     clearDraft();
     toast.success("Game Report saved successfully!");
+
+    if (isCompleteApiSuccess) {
+      router.push("/dashboard/player/game-reports");
+      return;
+    }
 
     if (onContinue) {
       onContinue(finalReport);
@@ -1034,10 +1057,29 @@ export const CreateGameReportWizard = ({
   }, [myProfileResponse, playerId, requestId, searchParams]);
 
   const handlePlayerSubmit = async () => {
-    if (!selectedCoachId) {
-      toast.error("Please select a coach first");
-      navigateToStep(1);
-      return;
+    if (coachRequestMode === "custom") {
+      if (!customCoachName?.trim()) {
+        toast.error("Please enter coach name");
+        navigateToStep(1);
+        return;
+      }
+      if (!customCoachEmail?.trim()) {
+        toast.error("Please enter coach email");
+        navigateToStep(1);
+        return;
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(customCoachEmail.trim())) {
+        toast.error("Please enter a valid coach email address");
+        navigateToStep(1);
+        return;
+      }
+    } else {
+      if (!selectedCoachId) {
+        toast.error("Please select a coach first");
+        navigateToStep(1);
+        return;
+      }
     }
 
     let hScore = typeof formData.homeScore === "number" ? formData.homeScore : parseInt(String(formData.homeScore ?? "2"), 10);
@@ -1046,7 +1088,14 @@ export const CreateGameReportWizard = ({
     if (isNaN(aScore)) aScore = 1;
 
     const payload: IRequestCoachGameReportPayload = {
-      coachId: selectedCoachId,
+      ...(coachRequestMode === "custom"
+        ? {
+            coachEmail: customCoachEmail.trim(),
+            coachName: customCoachName.trim(),
+          }
+        : {
+            coachId: selectedCoachId,
+          }),
       playerInfo: {
         playerName: formData.playerName?.trim() || "EDEGELSON RICCI",
         dateOfBirth: formatDateToYMD(formData.dob) || "2014-03-27",
@@ -1128,6 +1177,12 @@ export const CreateGameReportWizard = ({
           setSelectedCoachId={setSelectedCoachId}
           selectedCoachEmail={selectedCoachEmail}
           setSelectedCoachEmail={setSelectedCoachEmail}
+          coachRequestMode={coachRequestMode}
+          setCoachRequestMode={setCoachRequestMode}
+          customCoachName={customCoachName}
+          setCustomCoachName={setCustomCoachName}
+          customCoachEmail={customCoachEmail}
+          setCustomCoachEmail={setCustomCoachEmail}
           isSubmitting={isRequestingCoachReport || isCreatingSelfReport}
           onCancel={() => {
             clearDraft();

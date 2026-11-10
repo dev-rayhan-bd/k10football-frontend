@@ -10,7 +10,7 @@ import { PlayerStylesSection } from "./PlayerStylesSection";
 
 interface PlayerCenterCardProps {
   playerData: any;
-  handleUpdate: (field: string, value: any) => void;
+  handleUpdate: (field: string, value: any, file?: File) => void;
   canEditBio: boolean;
   canEditEvaluation: boolean;
   editable: boolean;

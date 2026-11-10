@@ -51,19 +51,21 @@ const ReportPdfPreview = ({
     : [...OUTFIELD_SLIDES[0], ...OUTFIELD_SLIDES[1], ...OUTFIELD_SLIDES[2]];
 
   const getStatValue = (key: string): number => {
-    if (stats[key] !== undefined && stats[key] !== null) return stats[key];
+    if (stats[key] !== undefined && stats[key] !== null) return Number(stats[key]);
     switch (key) {
-      case "goal": return stats.goalScored ?? stats.goalsScored ?? 0;
-      case "assist": return stats.assists ?? 0;
-      case "shotOnTarget": return stats.shotsOnGoal ?? 0;
-      case "completedPass": return stats.passAccurate ?? 0;
-      case "incompletePass": return stats.wrongPass ?? 0;
-      case "tackleWon": return stats.standTackle ?? stats.slidingTackle ?? 0;
-      case "freeKickWon": return stats.freeKick ?? 0;
-      case "penaltyWon": return stats.penaltiesTaken ?? 0;
-      case "foulCommitted": return stats.fault ?? 0;
-      case "save": return stats.savesAccurate ?? 0;
-      case "goalConceded": return stats.goalUnsave ?? 0;
+      case "goal": return Number(stats.goalScored ?? stats.goalsScored ?? 0);
+      case "assist": return Number(stats.assists ?? 0);
+      case "shotOnTarget": return Number(stats.shotsOnGoal ?? 0);
+      case "completedPass": return Number(stats.passAccurate ?? 0);
+      case "incompletePass": return Number(stats.wrongPass ?? 0);
+      case "tackleWon": return Number(stats.standTackle ?? stats.slidingTackle ?? 0);
+      case "freeKickWon": return Number(stats.freeKick ?? 0);
+      case "penaltyWon": return Number(stats.penaltiesTaken ?? 0);
+      case "foulCommitted": return Number(stats.fault ?? 0);
+      case "save": return Number(stats.savesAccurate ?? 0);
+      case "goalConceded": return Number(stats.goalUnsave ?? 0);
+      case "oneOnOneSave": return Number(stats.save1v1 ?? 0);
+      case "save1v1": return Number(stats.oneOnOneSave ?? 0);
       default: return 0;
     }
   };
@@ -486,7 +488,6 @@ const ReportPdfPreview = ({
                 </div>
               </div>
             </div>
-
 
           </div>
         </div>

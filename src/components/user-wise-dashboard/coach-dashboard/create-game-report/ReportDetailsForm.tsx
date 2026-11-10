@@ -29,6 +29,12 @@ interface ReportDetailsFormProps {
   setSelectedCoachEmail?: (val: string) => void;
   selectedCoachId?: string;
   setSelectedCoachId?: (val: string) => void;
+  coachRequestMode?: "dropdown" | "custom";
+  setCoachRequestMode?: (val: "dropdown" | "custom") => void;
+  customCoachName?: string;
+  setCustomCoachName?: (val: string) => void;
+  customCoachEmail?: string;
+  setCustomCoachEmail?: (val: string) => void;
   isSubmitting?: boolean;
 }
 
@@ -45,6 +51,12 @@ const ReportDetailsForm = ({
   setSelectedCoachEmail,
   selectedCoachId = "",
   setSelectedCoachId,
+  coachRequestMode = "dropdown",
+  setCoachRequestMode,
+  customCoachName = "",
+  setCustomCoachName,
+  customCoachEmail = "",
+  setCustomCoachEmail,
   isSubmitting = false,
 }: ReportDetailsFormProps) => {
   const { data: coachesResponse, isLoading: isLoadingCoaches } = useGetAllCoachesQuery({ limit: 100 });
@@ -75,7 +87,9 @@ const ReportDetailsForm = ({
   };
 
   const isFormValid = () => {
-    const isCoachSelected = Boolean(selectedCoachId?.trim() || selectedCoachEmail?.trim());
+    const isCoachSelected = coachRequestMode === "custom"
+      ? Boolean(customCoachName?.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customCoachEmail?.trim() || ""))
+      : Boolean(selectedCoachId?.trim() || selectedCoachEmail?.trim());
     return (
       Boolean(formData.playerName?.trim()) &&
       Boolean(formData.dob?.trim()) &&
@@ -363,7 +377,7 @@ const ReportDetailsForm = ({
         </div>
         {/* Report Completion Selection */}
         {setReportCompletedBy && (
-          <div className="p-8 rounded-3xl border border-white/10 bg-[#0D0D0D] space-y-6 shadow-xl">
+          <div className="p-8 rounded-3xl border border-white/10 bg-[#0D0D0D] flex flex-col gap-6 shadow-xl">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-8 h-8 rounded-full bg-blue-500/10 border border-blue-500 flex items-center justify-center">
                 <IconCheck size={18} className="text-blue-500" />
@@ -399,52 +413,111 @@ const ReportDetailsForm = ({
             </div>
 
             {reportCompletedBy === "coach" && (
-              <div className="space-y-2 mt-4 animate-in fade-in slide-in-from-top-2">
-                <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest font-orbitron">
-                  Select Coach <span className="text-red-500">*</span>:
-                </Label>
-                <div className="relative">
-                  <select 
-                    className="w-full bg-[#161616] border border-white/10 text-white h-12 rounded-lg px-4 font-bold appearance-none focus:outline-none focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]"
-                    value={selectedCoachId}
-                    onChange={(e) => {
-                      const selId = e.target.value;
-                      setSelectedCoachId?.(selId);
-                      const matchedCoach = coaches.find((c: any) => {
-                        const cUserId = typeof c.userId === "object" ? c.userId?._id : (c.userId || c._id);
-                        return cUserId === selId || c._id === selId;
-                      });
-                      if (matchedCoach) {
-                        const email = typeof matchedCoach.userId === "object" ? matchedCoach.userId?.email : "";
-                        const coachName = matchedCoach.fullName || (typeof matchedCoach.userId === "object" ? matchedCoach.userId?.name : "") || "Coach";
-                        if (email) setSelectedCoachEmail?.(email);
-                        setFormData({
-                          ...formData,
-                          scoutName: coachName,
-                        });
-                      }
-                    }}
+              <div className="flex flex-col gap-4 mt-6 p-5 rounded-2xl bg-[#161616]/70 border border-white/10 animate-in fade-in slide-in-from-top-2">
+                {/* Method selector tabs */}
+                <div className="flex flex-col sm:flex-row gap-2 p-1.5 bg-black/50 rounded-xl border border-white/5">
+                  <button
+                    type="button"
+                    onClick={() => setCoachRequestMode?.("dropdown")}
+                    className={cn(
+                      "flex-1 py-2.5 px-4 rounded-lg text-xs font-bold uppercase tracking-wider font-orbitron transition-all cursor-pointer text-center",
+                      coachRequestMode === "dropdown"
+                        ? "bg-[#00FF62] text-black shadow-md shadow-[#00FF62]/20 font-black"
+                        : "text-gray-400 hover:text-white hover:bg-white/5"
+                    )}
                   >
-                    <option value="">
-                      {isLoadingCoaches ? "-- LOADING COACHES... --" : "-- SELECT A COACH --"}
-                    </option>
-                    {coaches.map((coach: any) => {
-                      const coachUserId = typeof coach.userId === "object" ? coach.userId?._id : (coach.userId || coach._id);
-                      const name = coach.fullName || (typeof coach.userId === "object" ? coach.userId?.name : "") || "Coach";
-                      const roleOrClub = coach.title || coach.currentClub || coach.speciality || (typeof coach.userId === "object" ? coach.userId?.email : "") || "";
-                      return (
-                        <option key={coach._id} value={coachUserId}>
-                          {name} {roleOrClub ? `(${roleOrClub})` : ""}
-                        </option>
-                      );
-                    })}
-                  </select>
-                  <IconChevronDown className="absolute right-4 top-3.5 text-gray-500 pointer-events-none" size={18} />
+                    1. Select From Coaches Dropdown
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCoachRequestMode?.("custom")}
+                    className={cn(
+                      "flex-1 py-2.5 px-4 rounded-lg text-xs font-bold uppercase tracking-wider font-orbitron transition-all cursor-pointer text-center",
+                      coachRequestMode === "custom"
+                        ? "bg-[#00FF62] text-black shadow-md shadow-[#00FF62]/20 font-black"
+                        : "text-gray-400 hover:text-white hover:bg-white/5"
+                    )}
+                  >
+                    2. Custom Coach (Name & Email)
+                  </button>
                 </div>
-                {selectedCoachEmail && (
-                  <p className="text-[11px] text-gray-400 mt-1">
-                    Selected coach email: <span className="text-[#00FF62]">{selectedCoachEmail}</span>
-                  </p>
+
+                {coachRequestMode === "dropdown" ? (
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest font-orbitron flex items-center gap-1">
+                      Select Coach <span className="text-destructive">*</span>:
+                    </Label>
+                    <div className="relative">
+                      <select 
+                        className="w-full bg-[#161616] border border-white/10 text-white h-12 rounded-lg px-4 font-bold appearance-none focus:outline-none focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62] cursor-pointer"
+                        value={selectedCoachId}
+                        onChange={(e) => {
+                          const selId = e.target.value;
+                          setSelectedCoachId?.(selId);
+                          const matchedCoach = coaches.find((c: any) => {
+                            const cUserId = typeof c.userId === "object" ? c.userId?._id : (c.userId || c._id);
+                            return cUserId === selId || c._id === selId;
+                          });
+                          if (matchedCoach) {
+                            const email = typeof matchedCoach.userId === "object" ? matchedCoach.userId?.email : "";
+                            const coachName = matchedCoach.fullName || (typeof matchedCoach.userId === "object" ? matchedCoach.userId?.name : "") || "Coach";
+                            if (email) setSelectedCoachEmail?.(email);
+                            setFormData({
+                              ...formData,
+                              scoutName: coachName,
+                            });
+                          }
+                        }}
+                      >
+                        <option value="">
+                          {isLoadingCoaches ? "-- LOADING COACHES... --" : "-- SELECT A COACH --"}
+                        </option>
+                        {coaches.map((coach: any) => {
+                          const coachUserId = typeof coach.userId === "object" ? coach.userId?._id : (coach.userId || coach._id);
+                          const name = coach.fullName || (typeof coach.userId === "object" ? coach.userId?.name : "") || "Coach";
+                          const roleOrClub = coach.title || coach.currentClub || coach.speciality || (typeof coach.userId === "object" ? coach.userId?.email : "") || "";
+                          return (
+                            <option key={coach._id} value={coachUserId}>
+                              {name} {roleOrClub ? `(${roleOrClub})` : ""}
+                            </option>
+                          );
+                        })}
+                      </select>
+                      <IconChevronDown className="absolute right-4 top-3.5 text-gray-500 pointer-events-none" size={18} />
+                    </div>
+                    {selectedCoachEmail && (
+                      <p className="text-[11px] text-gray-400 mt-1">
+                        Selected coach email: <span className="text-[#00FF62]">{selectedCoachEmail}</span>
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in">
+                    <div className="flex flex-col gap-1.5">
+                      <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest font-orbitron flex items-center gap-1">
+                        Coach Name <span className="text-destructive">*</span>:
+                      </Label>
+                      <Input
+                        type="text"
+                        placeholder="e.g. Pep Guardiola"
+                        value={customCoachName}
+                        onChange={(e) => setCustomCoachName?.(e.target.value)}
+                        className="bg-[#161616] border-white/10 text-white h-12 rounded-lg px-4 font-bold focus:border-[#00FF62]"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest font-orbitron flex items-center gap-1">
+                        Coach Email <span className="text-destructive">*</span>:
+                      </Label>
+                      <Input
+                        type="email"
+                        placeholder="e.g. rayhanshorker98@gmail.com"
+                        value={customCoachEmail}
+                        onChange={(e) => setCustomCoachEmail?.(e.target.value)}
+                        className="bg-[#161616] border-white/10 text-white h-12 rounded-lg px-4 font-bold focus:border-[#00FF62]"
+                      />
+                    </div>
+                  </div>
                 )}
               </div>
             )}

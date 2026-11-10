@@ -285,6 +285,9 @@ const MatchStatisticsForm = ({
       setMobilePage(Math.max(0, maxPages - 1));
     }
   }, [maxPages, mobilePage]);
+
+  const [feedbackTouched, setFeedbackTouched] = React.useState(false);
+  const isFeedbackValid = Boolean(coachFeedback && coachFeedback.trim().length > 0);
   const parseTimeToSeconds = (val: string): number => {
     if (!val) return 0;
     if (typeof val === "string" && val.includes(":")) {
@@ -894,27 +897,42 @@ const MatchStatisticsForm = ({
               {renderPitchDiagram("desktop")}
             </div>
           </div>
-
-          {/* Coach Tactical Feedback Section */}
-          <div className="flex flex-col gap-3 p-6 rounded-2xl bg-white/5 border border-white/10 mt-8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-              <Label className="text-xs font-black text-white uppercase tracking-wider font-orbitron">
-                Coach Tactical Feedback & Analysis Notes
-              </Label>
-              <span className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">
-                Professional evaluation visible in report
-              </span>
-            </div>
-            <textarea
-              rows={4}
-              value={coachFeedback ?? ""}
-              onChange={(e) => setCoachFeedback?.(e.target.value)}
-              placeholder="Enter your tactical evaluation, player positioning feedback, and match assessment..."
-              className="w-full rounded-xl bg-black/50 border border-white/10 p-4 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-[#00FF62]/60 transition-all resize-y"
-            />
-          </div>
         </div>
         {/* -------------------------------------------------------- */}
+
+        {/* Coach Tactical Feedback Section (Visible on both Mobile & Desktop) */}
+        <div className="flex flex-col gap-3 p-5 sm:p-6 rounded-2xl bg-white/5 border border-white/10 mt-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+            <Label className="text-xs font-black text-white uppercase tracking-wider font-orbitron flex items-center gap-1.5">
+              Coach Tactical Feedback & Analysis Notes
+              <span className="text-destructive font-black text-sm">*</span>
+            </Label>
+            <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
+              Professional evaluation visible in report
+            </span>
+          </div>
+          <textarea
+            rows={4}
+            value={coachFeedback ?? ""}
+            onChange={(e) => {
+              setCoachFeedback?.(e.target.value);
+              if (!feedbackTouched) setFeedbackTouched(true);
+            }}
+            onBlur={() => setFeedbackTouched(true)}
+            placeholder="Enter your tactical evaluation, player positioning feedback, and match assessment..."
+            className={cn(
+              "w-full rounded-xl bg-black/50 p-4 text-sm text-white placeholder:text-muted-foreground focus:outline-none transition-all resize-y",
+              feedbackTouched && !isFeedbackValid
+                ? "border border-destructive focus:border-destructive ring-1 ring-destructive/40"
+                : "border border-white/10 focus:border-[#00FF62]/60"
+            )}
+          />
+          {feedbackTouched && !isFeedbackValid && (
+            <p className="text-xs text-destructive font-medium">
+              Coach tactical feedback is required before submitting the report.
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="flex gap-3 sm:gap-6 mt-4">
@@ -926,12 +944,23 @@ const MatchStatisticsForm = ({
           Cancel
         </Button>
         <Button
+          disabled={!isFeedbackValid}
           onClick={() => {
+            if (!isFeedbackValid) {
+              setFeedbackTouched(true);
+              toast.error("Please provide Coach Tactical Feedback before submitting!");
+              return;
+            }
             const finalSecs = secondsRef.current >= 0 ? secondsRef.current : (secondsElapsed >= 0 ? secondsElapsed : 0);
             setMinutesPlayed(formatTime(finalSecs));
             onSubmit();
           }}
-          className="flex-1 bg-[#00FF62] hover:bg-[#00D150] text-black h-14 sm:h-16 rounded-xl text-xs sm:text-sm font-black uppercase tracking-widest sm:tracking-[0.2em] transition-all shadow-[0_0_30px_rgba(0,255,98,0.2)] font-orbitron italic"
+          className={cn(
+            "flex-1 h-14 sm:h-16 rounded-xl text-xs sm:text-sm font-black uppercase tracking-widest sm:tracking-[0.2em] transition-all font-orbitron italic",
+            isFeedbackValid
+              ? "bg-[#00FF62] hover:bg-[#00D150] text-black shadow-[0_0_30px_rgba(0,255,98,0.2)] cursor-pointer"
+              : "bg-white/10 text-white/40 cursor-not-allowed opacity-50 shadow-none hover:bg-white/10"
+          )}
         >
           Submit Report
         </Button>

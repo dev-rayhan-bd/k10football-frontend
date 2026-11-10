@@ -112,7 +112,7 @@ export const usePlayer = () => {
 
   // Field-based update handler with automatic mapping to backend PATCH payload
   const handleUpdate = useCallback(
-    async (field: string, value: any) => {
+    async (field: string, value: any, fileOrMeta?: any) => {
       const isClubField = field === "clubs" || field === "clubHistory";
 
       // Optimistically update local redux state for non-club fields only
@@ -123,9 +123,38 @@ export const usePlayer = () => {
       // 2. Build partial payload for PATCH /players/me (skip if viewing another player's CV)
       if (!hasToken || isViewingSpecificPlayer) return;
 
-      let backendPayload: Partial<IUpdatePlayerPayload> | null = null;
+      let backendPayload: any = null;
 
       switch (field) {
+        case "playerImage":
+        case "profileImage": {
+          let fileToUpload: File | null = null;
+          if (fileOrMeta instanceof File) {
+            fileToUpload = fileOrMeta;
+          } else if (value instanceof File) {
+            fileToUpload = value;
+          } else if (typeof value === "string" && value.startsWith("data:")) {
+            try {
+              const arr = value.split(",");
+              const mimeMatch = arr[0].match(/:(.*?);/);
+              const mime = mimeMatch ? mimeMatch[1] : "image/png";
+              const bstr = atob(arr[1]);
+              let n = bstr.length;
+              const u8arr = new Uint8Array(n);
+              while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+              }
+              fileToUpload = new File([u8arr], "profile.png", { type: mime });
+            } catch (e) {
+              console.error("Failed to convert dataURL to File", e);
+            }
+          }
+
+          if (fileToUpload) {
+            backendPayload = { profileImage: fileToUpload };
+          }
+          break;
+        }
         case "fullName":
           backendPayload = { fullName: String(value) };
           break;
@@ -306,18 +335,33 @@ export const usePlayer = () => {
       }
 
       if (backendPayload) {
+        const isImageUpload = field === "playerImage" || field === "profileImage";
+        if (isImageUpload) {
+          toast.loading("Saving profile photo to server...", { id: "upload-profile-image" });
+        }
         try {
           const res = await updatePlayerMutation(backendPayload).unwrap();
           if (isClubField && res?.data) {
             dispatch(syncFromCvResponse(res.data));
           }
+          if (isImageUpload) {
+            if (res?.data) {
+              dispatch(syncFromCvResponse(res.data));
+            }
+            await Promise.allSettled([refetchProfile(), refetchCv()]);
+            toast.success("Profile photo updated successfully!", { id: "upload-profile-image" });
+          }
         } catch (err: any) {
           console.error(`Failed to patch field ${field}:`, err);
-          toast.error(err?.data?.message || "Failed to save changes. Please try again.");
+          if (isImageUpload) {
+            toast.error(err?.data?.message || "Failed to upload profile photo. Please try again.", { id: "upload-profile-image" });
+          } else {
+            toast.error(err?.data?.message || "Failed to save changes. Please try again.");
+          }
         }
       }
     },
-    [dispatch, hasToken, isViewingSpecificPlayer, updatePlayerMutation]
+    [dispatch, hasToken, isViewingSpecificPlayer, updatePlayerMutation, refetchProfile, refetchCv]
   );
 
   const handleAddClub = useCallback(

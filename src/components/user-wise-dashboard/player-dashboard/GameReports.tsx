@@ -11,6 +11,12 @@ import {
   IconDownload,
   IconReportAnalytics,
   IconLoader2,
+  IconUser,
+  IconUserCheck,
+  IconChevronLeft,
+  IconChevronRight,
+  IconChevronsLeft,
+  IconChevronsRight,
 } from "@tabler/icons-react";
 
 import {
@@ -21,21 +27,33 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useGetMyGameReportsQuery } from "@/redux/features/player/playerApi";
 import { IGameReportItem } from "@/types/player.type";
 import { WarningToast } from "@/helpers/ValidationHelper";
 
 const GameReports = () => {
-  const { data: response, isLoading } = useGetMyGameReportsQuery();
-  const [selectedReport, setSelectedReport] = useState<IGameReportItem | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const [page, setPage] = useState<number>(1);
+  const [limit, setLimit] = useState<number>(10);
   const [statusFilter, setStatusFilter] = useState<"All" | "Paid" | "Pending">("All");
 
+  const { data: response, isLoading, isFetching } = useGetMyGameReportsQuery({
+    page,
+    limit,
+    status: statusFilter !== "All" ? statusFilter : undefined,
+  });
+  const [selectedReport, setSelectedReport] = useState<IGameReportItem | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
   const reports: IGameReportItem[] = response?.data?.reports || [];
+  const meta = response?.data?.meta || response?.data?.pagination;
   const summary = response?.data?.summary;
 
-  const totalReports = summary?.totalReports ?? reports.length;
+  const totalReports = meta?.total ?? summary?.totalReports ?? reports.length;
+  const totalPages = meta?.totalPages ?? Math.max(1, Math.ceil(totalReports / limit));
+  const currentPage = meta?.page ?? page;
+
   const avgRating = summary?.averageRating !== undefined
     ? Number(summary.averageRating).toFixed(1)
     : "0.0";
@@ -53,6 +71,25 @@ const GameReports = () => {
     if (statusFilter === "All") return true;
     return item.status?.toUpperCase() === statusFilter.toUpperCase();
   });
+
+  const startItem = totalReports === 0 ? 0 : (currentPage - 1) * limit + 1;
+  const endItem = Math.min(currentPage * limit, totalReports);
+
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (currentPage > 3) pages.push("...");
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+      for (let i = start; i <= end; i++) pages.push(i);
+      if (currentPage < totalPages - 2) pages.push("...");
+      pages.push(totalPages);
+    }
+    return pages;
+  };
 
   const handleView = (report: IGameReportItem) => {
     setSelectedReport(report);
@@ -93,26 +130,43 @@ const GameReports = () => {
       {/* Stats Grid */}
       <div className="p-4 sm:p-8 rounded-[30px] sm:rounded-[40px] border border-white/5 bg-[#0D0D0D]/40 backdrop-blur-xl">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {stats.map((stat, idx) => (
-            <div
-              key={idx}
-              className="p-4 sm:p-8 rounded-[20px] sm:rounded-3xl border border-white/5 bg-[#0A0A0A]/60 group hover:border-white/10 transition-all duration-500"
-            >
-              <div className="flex flex-col gap-4 sm:gap-6">
-                <div className="size-10 rounded-xl bg-white/5 flex items-center justify-center text-white/40 group-hover:bg-white/10 group-hover:text-white transition-all duration-500">
-                  <stat.icon size={20} stroke={1.5} />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <div className="text-3xl sm:text-4xl font-bold text-white tracking-tighter font-orbitron">
-                    {isLoading ? <span className="shimmer text-xl">...</span> : stat.value}
-                  </div>
-                  <div className="text-[9px] sm:text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">
-                    {stat.label}
+          {isLoading ? (
+            Array.from({ length: 4 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="p-4 sm:p-8 rounded-[20px] sm:rounded-3xl border border-white/5 bg-[#0A0A0A]/60 animate-pulse"
+              >
+                <div className="flex flex-col gap-4 sm:gap-6">
+                  <Skeleton className="size-10 rounded-xl bg-white/10 shrink-0" />
+                  <div className="flex flex-col gap-2">
+                    <Skeleton className="h-8 sm:h-10 w-24 bg-white/15 rounded-md" />
+                    <Skeleton className="h-3 w-28 bg-white/5 rounded" />
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            stats.map((stat, idx) => (
+              <div
+                key={idx}
+                className="p-4 sm:p-8 rounded-[20px] sm:rounded-3xl border border-white/5 bg-[#0A0A0A]/60 group hover:border-white/10 transition-all duration-500"
+              >
+                <div className="flex flex-col gap-4 sm:gap-6">
+                  <div className="size-10 rounded-xl bg-white/5 flex items-center justify-center text-white/40 group-hover:bg-white/10 group-hover:text-white transition-all duration-500">
+                    <stat.icon size={20} stroke={1.5} />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <div className="text-3xl sm:text-4xl font-bold text-white tracking-tighter font-orbitron">
+                      {stat.value}
+                    </div>
+                    <div className="text-[9px] sm:text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">
+                      {stat.label}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -121,7 +175,10 @@ const GameReports = () => {
         {(["All", "Paid", "Pending"] as const).map((status) => (
           <button
             key={status}
-            onClick={() => setStatusFilter(status)}
+            onClick={() => {
+              setStatusFilter(status);
+              setPage(1);
+            }}
             className={cn(
               "px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 border cursor-pointer",
               statusFilter === status
@@ -136,11 +193,106 @@ const GameReports = () => {
 
       {/* Table Section */}
       <div className="p-4 sm:p-10 rounded-[30px] sm:rounded-[40px] border border-white/5 bg-[#0D0D0D]/40 backdrop-blur-xl w-full">
-        {isLoading ? (
-          <div className="py-20 flex flex-col items-center justify-center gap-3 text-muted-foreground">
-            <IconLoader2 className="animate-spin text-red-600 size-8" />
-            <p className="text-sm font-medium tracking-wide">Loading game reports...</p>
-          </div>
+        {isLoading || isFetching ? (
+          <>
+            {/* Desktop Skeleton Table */}
+            <div className="hidden lg:block overflow-x-auto w-full">
+              <table className="w-full text-left border-collapse min-w-[700px]">
+                <thead>
+                  <tr className="border-b border-white/10 text-[11px] font-bold text-gray-500 uppercase tracking-[0.2em]">
+                    <th className="pb-6 pl-4">Report</th>
+                    <th className="pb-6">Rating</th>
+                    <th className="pb-6">Amount</th>
+                    <th className="pb-6">Approval Date</th>
+                    <th className="pb-6">Evaluated By</th>
+                    <th className="pb-6">Status</th>
+                    <th className="pb-6 text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm font-medium">
+                  {Array.from({ length: limit }).map((_, idx) => (
+                    <tr key={idx} className="border-b border-white/5 animate-pulse">
+                      <td className="py-6 pl-4">
+                        <div className="flex items-center gap-4">
+                          <Skeleton className="size-8 rounded-lg bg-white/10 shrink-0" />
+                          <div className="flex flex-col gap-1.5">
+                            <Skeleton className="h-4 w-44 bg-white/15 rounded" />
+                            <Skeleton className="h-2.5 w-24 bg-white/5 rounded" />
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-6">
+                        <Skeleton className="h-4 w-10 bg-red-600/20 rounded" />
+                      </td>
+                      <td className="py-6">
+                        <Skeleton className="h-4 w-16 bg-white/10 rounded" />
+                      </td>
+                      <td className="py-6">
+                        <Skeleton className="h-4 w-24 bg-white/10 rounded" />
+                      </td>
+                      <td className="py-6">
+                        <div className="flex flex-col gap-1">
+                          <Skeleton className="h-5 w-16 rounded-full bg-white/10" />
+                          <Skeleton className="h-2.5 w-20 bg-white/5 rounded" />
+                        </div>
+                      </td>
+                      <td className="py-6">
+                        <div className="flex items-center gap-2">
+                          <Skeleton className="size-4 rounded-full bg-white/10 shrink-0" />
+                          <Skeleton className="h-3 w-14 bg-white/10 rounded" />
+                        </div>
+                      </td>
+                      <td className="py-6">
+                        <div className="flex items-center justify-center gap-4">
+                          <Skeleton className="size-5 rounded bg-white/10" />
+                          <Skeleton className="size-5 rounded bg-white/10" />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Skeleton Cards */}
+            <div className="flex flex-col gap-4 lg:hidden">
+              {Array.from({ length: 4 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col gap-4 animate-pulse"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="size-10 rounded-xl bg-white/10 shrink-0" />
+                      <div className="flex flex-col gap-1.5">
+                        <Skeleton className="h-4 w-36 bg-white/15 rounded" />
+                        <Skeleton className="h-3 w-20 bg-white/5 rounded" />
+                      </div>
+                    </div>
+                    <Skeleton className="h-6 w-16 rounded-full bg-white/10" />
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 pt-3 border-t border-white/5">
+                    <div className="flex flex-col gap-1.5">
+                      <Skeleton className="h-3 w-12 bg-white/5 rounded" />
+                      <Skeleton className="h-4 w-16 bg-white/10 rounded" />
+                    </div>
+                    <div className="flex flex-col gap-1.5 items-center">
+                      <Skeleton className="h-3 w-14 bg-white/5 rounded" />
+                      <Skeleton className="h-4 w-14 rounded-full bg-white/10" />
+                    </div>
+                    <div className="flex flex-col gap-1.5 items-end">
+                      <Skeleton className="h-3 w-12 bg-white/5 rounded" />
+                      <Skeleton className="h-4 w-16 bg-white/10 rounded" />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 pt-2">
+                    <Skeleton className="h-9 flex-1 rounded-lg bg-white/10" />
+                    <Skeleton className="h-9 flex-1 rounded-lg bg-white/10" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         ) : filteredReports.length === 0 ? (
           <div className="py-20 flex flex-col items-center justify-center gap-3 text-center">
             <div className="size-14 rounded-2xl bg-white/5 flex items-center justify-center text-gray-500">
@@ -164,6 +316,7 @@ const GameReports = () => {
                     <th className="pb-6">Rating</th>
                     <th className="pb-6">Amount</th>
                     <th className="pb-6">Approval Date</th>
+                    <th className="pb-6">Evaluated By</th>
                     <th className="pb-6">Status</th>
                     <th className="pb-6 text-center">Action</th>
                   </tr>
@@ -175,6 +328,8 @@ const GameReports = () => {
                     const reportTitle = item.report || (item.awayTeam ? `vs ${item.awayTeam}` : item.title);
                     const amountText = item.amount || (item.amountNumber !== undefined ? `$ ${item.amountNumber.toFixed(2)}` : "$ 6.99");
                     const dateText = item.approvalDate || item.date || "N/A";
+                    const evaluatedBy = (item.evaluatedBy || item.reportCompletionType || item.evaluator?.type || "SELF").toUpperCase();
+                    const isCoachEvaluated = evaluatedBy === "COACH";
 
                     return (
                       <tr
@@ -201,6 +356,28 @@ const GameReports = () => {
                         </td>
                         <td className="py-6 text-gray-400">
                           {dateText}
+                        </td>
+                        <td className="py-6">
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-1.5">
+                              {isCoachEvaluated ? (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#00FF62]/10 text-[#00FF62] border border-[#00FF62]/20 font-orbitron">
+                                  <IconUserCheck size={12} stroke={2} />
+                                  COACH
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/5 text-gray-300 border border-white/10 font-orbitron">
+                                  <IconUser size={12} stroke={1.8} />
+                                  SELF
+                                </span>
+                              )}
+                            </div>
+                            {item.evaluatorName && (
+                              <span className="text-[11px] text-gray-400 font-medium truncate max-w-[130px]">
+                                {item.evaluatorName}
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="py-6">
                           <div
@@ -253,6 +430,8 @@ const GameReports = () => {
                 const reportTitle = item.report || (item.awayTeam ? `vs ${item.awayTeam}` : item.title);
                 const amountText = item.amount || (item.amountNumber !== undefined ? `$ ${item.amountNumber.toFixed(2)}` : "$ 6.99");
                 const dateText = item.approvalDate || item.date || "N/A";
+                const evaluatedBy = (item.evaluatedBy || item.reportCompletionType || item.evaluator?.type || "SELF").toUpperCase();
+                const isCoachEvaluated = evaluatedBy === "COACH";
 
                 return (
                   <div
@@ -280,12 +459,32 @@ const GameReports = () => {
                       </div>
                     </div>
 
-                    <div className="relative z-10 flex justify-between items-center pt-3 border-t border-white/10">
+                    <div className="relative z-10 grid grid-cols-3 gap-2 pt-3 border-t border-white/10">
                       <div className="flex flex-col gap-0.5">
                         <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Amount</span>
                         <span className="text-gray-300 text-sm font-bold">{amountText}</span>
                       </div>
+                      <div className="flex flex-col gap-0.5 items-center text-center">
+                        <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Evaluated By</span>
+                        <span
+                          className={cn(
+                            "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider font-orbitron mt-0.5",
+                            isCoachEvaluated
+                              ? "bg-[#00FF62]/10 text-[#00FF62] border border-[#00FF62]/20 font-black"
+                              : "bg-white/5 text-gray-300 border border-white/10"
+                          )}
+                        >
+                          {isCoachEvaluated ? <IconUserCheck size={11} stroke={2} /> : <IconUser size={11} stroke={1.8} />}
+                          {evaluatedBy}
+                        </span>
+                        {item.evaluatorName && (
+                          <span className="text-[10px] text-gray-400 truncate max-w-[90px] block mt-0.5">
+                            {item.evaluatorName}
+                          </span>
+                        )}
+                      </div>
                       <div className="flex flex-col gap-1 items-end">
+                        <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Status</span>
                         <div
                           className={cn(
                             "flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/5",
@@ -318,6 +517,92 @@ const GameReports = () => {
                 );
               })}
             </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 0 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 mt-6 border-t border-white/10 w-full">
+                <div className="flex items-center gap-4 text-xs text-gray-400">
+                  <span>
+                    Showing <span className="text-white font-bold font-orbitron">{startItem}</span> to{" "}
+                    <span className="text-white font-bold font-orbitron">{endItem}</span> of{" "}
+                    <span className="text-white font-bold font-orbitron">{totalReports}</span> reports
+                  </span>
+                  {isFetching && (
+                    <span className="flex items-center gap-1.5 text-red-500 font-medium">
+                      <IconLoader2 size={14} className="animate-spin" />
+                      <span className="text-[11px]">Updating...</span>
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  {/* First Page Button */}
+                  <button
+                    onClick={() => setPage(1)}
+                    disabled={currentPage <= 1 || isFetching}
+                    title="First Page"
+                    className="size-8 sm:size-9 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center justify-center cursor-pointer"
+                  >
+                    <IconChevronsLeft size={16} />
+                  </button>
+
+                  {/* Previous Page Button */}
+                  <button
+                    onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                    disabled={currentPage <= 1 || isFetching}
+                    title="Previous Page"
+                    className="size-8 sm:size-9 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center justify-center cursor-pointer"
+                  >
+                    <IconChevronLeft size={16} />
+                  </button>
+
+                  {/* Page Numbers */}
+                  <div className="flex items-center gap-1">
+                    {getPageNumbers().map((p, idx) =>
+                      p === "..." ? (
+                        <span key={`ellipsis-${idx}`} className="px-1.5 text-xs text-gray-500 select-none font-orbitron">
+                          ...
+                        </span>
+                      ) : (
+                        <button
+                          key={`page-${p}`}
+                          onClick={() => setPage(Number(p))}
+                          disabled={isFetching}
+                          className={cn(
+                            "size-8 sm:size-9 rounded-xl text-xs font-black font-orbitron transition-all flex items-center justify-center cursor-pointer",
+                            currentPage === p
+                              ? "bg-red-600 text-white shadow-lg shadow-red-600/30"
+                              : "bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10"
+                          )}
+                        >
+                          {p}
+                        </button>
+                      )
+                    )}
+                  </div>
+
+                  {/* Next Page Button */}
+                  <button
+                    onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage >= totalPages || isFetching}
+                    title="Next Page"
+                    className="size-8 sm:size-9 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center justify-center cursor-pointer"
+                  >
+                    <IconChevronRight size={16} />
+                  </button>
+
+                  {/* Last Page Button */}
+                  <button
+                    onClick={() => setPage(totalPages)}
+                    disabled={currentPage >= totalPages || isFetching}
+                    title="Last Page"
+                    className="size-8 sm:size-9 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center justify-center cursor-pointer"
+                  >
+                    <IconChevronsRight size={16} />
+                  </button>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
@@ -368,6 +653,27 @@ const GameReports = () => {
                     <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Score</div>
                     <div className="text-lg font-bold text-red-600 italic">
                       {selectedReport.score || `${selectedReport.homeScore ?? 0} - ${selectedReport.awayScore ?? 0}`}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1 col-span-2">
+                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Evaluated By</div>
+                    <div className="flex items-center gap-2 mt-1">
+                      {(selectedReport.evaluatedBy || selectedReport.reportCompletionType || "SELF").toUpperCase() === "COACH" ? (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-[#00FF62]/10 text-[#00FF62] border border-[#00FF62]/30 font-orbitron">
+                          <IconUserCheck size={14} stroke={2} />
+                          COACH
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white/5 text-gray-300 border border-white/10 font-orbitron">
+                          <IconUser size={14} stroke={1.8} />
+                          SELF
+                        </span>
+                      )}
+                      {selectedReport.evaluatorName && (
+                        <span className="text-sm font-bold text-gray-300">
+                          ({selectedReport.evaluatorName})
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>

@@ -324,7 +324,9 @@ export interface ICompleteSelfGameReportPayload {
 }
 
 export interface IRequestCoachGameReportPayload {
-  coachId: string;
+  coachId?: string;
+  coachEmail?: string;
+  coachName?: string;
   playerInfo: {
     playerName: string;
     dateOfBirth: string;
@@ -408,6 +410,27 @@ export interface IGameReportItem {
   status: "PAID" | "PENDING" | string;
   paymentStatus?: "PAID" | "UNPAID" | "FREE" | string;
   evaluationStatus?: "PENDING" | "UNREQUESTED" | "COMPLETED" | string;
+  reportCompletionType?: "SELF" | "COACH" | string;
+  evaluatedBy?: "SELF" | "COACH" | string;
+  isExternalCoach?: boolean;
+  evaluatedViaAccessLink?: boolean;
+  evaluatorName?: string | null;
+  evaluatorRole?: string | null;
+  evaluatorEmail?: string | null;
+  authorName?: string | null;
+  authorRole?: string | null;
+  isProfessionallyVerified?: boolean;
+  evaluator?: {
+    id?: string | null;
+    name?: string | null;
+    email?: string | null;
+    role?: string | null;
+    type?: string | null;
+    isExternal?: boolean;
+    evaluatedViaAccessLink?: boolean;
+    clubOrOrg?: string | null;
+    isProfessionallyVerified?: boolean;
+  };
   performanceMetrics?: IGameReportPerformanceMetrics;
   scoutAnalysis?: string;
   reportPdfUrl?: string | null;
@@ -424,15 +447,18 @@ export interface IGameReportsSummary {
   pending: number;
 }
 
+export interface IGameReportsMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
 export interface IGameReportsData {
   summary: IGameReportsSummary;
   reports: IGameReportItem[];
-  pagination?: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
+  meta?: IGameReportsMeta;
+  pagination?: IGameReportsMeta;
 }
 
 export interface IPlayerGameReportsResponse {
