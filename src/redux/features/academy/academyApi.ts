@@ -60,10 +60,57 @@ import {
   IGetAcademyValidateCvParams,
   INotifyCoachToValidateCvPayload,
   INotifyCoachToValidateCvResponse,
+  IAcademyProfileResponse,
 } from "@/types/academy.type";
 
 export const academyApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
+    getMyAcademyProfile: builder.query<IAcademyProfileResponse, void>({
+      query: () => ({
+        url: "/academies/my-profile",
+        method: "GET",
+      }),
+      providesTags: [TagTypes.ACADEMY, TagTypes.PROFILE],
+    }),
+
+    updateAcademyProfile: builder.mutation<any, FormData | Record<string, any>>({
+      query: (data) => {
+        let body: any = data;
+        if (!(data instanceof FormData)) {
+          const formData = new FormData();
+          formData.append("data", JSON.stringify(data));
+          body = formData;
+        }
+        return {
+          url: "/academies/my-profile",
+          method: "PATCH",
+          body,
+        };
+      },
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.ACADEMY, TagTypes.PROFILE, TagTypes.DASHBOARD];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Academy profile updated successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to update academy profile";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
     getAcademyParents: builder.query<IAcademyParentsResponse, IGetAcademyParentsParams | void>({
       query: (params) => ({
         url: "/academies/parents",
@@ -1419,7 +1466,11 @@ export const {
   useGetAcademyValidateCvQuery,
   useLazyGetAcademyValidateCvQuery,
   useNotifyCoachToValidateCvMutation,
+  useGetMyAcademyProfileQuery,
+  useLazyGetMyAcademyProfileQuery,
+  useUpdateAcademyProfileMutation,
 } = academyApi;
+
 
 
 

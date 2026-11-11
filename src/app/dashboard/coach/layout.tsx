@@ -91,7 +91,9 @@ const CoachLayout = ({ children }: { children: ReactNode }) => {
     return {
       ...item,
       isLocked,
-      lockedMessage: "Active subscription required to access this feature. Please subscribe.",
+      lockedMessage:
+        "Active subscription required to access this feature. Please subscribe.",
+      lockedRedirectUrl: "/dashboard/coach/my-subscription",
     };
   });
 

@@ -142,13 +142,18 @@ const PlayerSettings = () => {
   };
 
   const onPasswordSubmit = async (data: ChangePasswordFormValues) => {
-    await changePassword({
-      oldPassword: data.oldPassword,
-      newPassword: data.newPassword,
-    }).unwrap();
+    try {
+      await changePassword({
+        oldPassword: data.oldPassword,
+        currentPassword: data.oldPassword,
+        newPassword: data.newPassword,
+        confirmPassword: data.confirmPassword,
+      }).unwrap();
 
-    resetPasswordForm();
-
+      resetPasswordForm();
+    } catch {
+      // Handled by authApi onQueryStarted toast notifications
+    }
   };
 
   return (
@@ -264,12 +269,12 @@ const PlayerSettings = () => {
           icon={<IconLock size={20} />}
           className="rounded-[30px]! sm:rounded-[40px]! p-6! sm:p-10!"
         >
-          <form onSubmit={handlePasswordSubmit(onPasswordSubmit)} className="max-w-2xl flex flex-col gap-6">
+          <form onSubmit={handlePasswordSubmit(onPasswordSubmit)} className="w-full flex flex-col gap-6">
             <div className="grid grid-cols-1 gap-5">
               <SettingsInput
                 label="Current Password"
                 type="password"
-                placeholder="••••••••"
+                placeholder="••••••••••••"
                 required
                 error={passwordErrors.oldPassword?.message}
                 {...registerPassword("oldPassword", {
@@ -288,7 +293,7 @@ const PlayerSettings = () => {
               <SettingsInput
                 label="New Password"
                 type="password"
-                placeholder="••••••••"
+                placeholder="••••••••••••"
                 required
                 error={passwordErrors.newPassword?.message}
                 {...registerPassword("newPassword", {
@@ -310,7 +315,7 @@ const PlayerSettings = () => {
               <SettingsInput
                 label="Confirm New Password"
                 type="password"
-                placeholder="••••••••"
+                placeholder="••••••••••••"
                 required
                 error={passwordErrors.confirmPassword?.message}
                 {...registerPassword("confirmPassword", {

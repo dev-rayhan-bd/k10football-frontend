@@ -1,14 +1,20 @@
 'use client'
 
 import React from "react";
-import { FileText, Heart } from 'lucide-react';
+import { FileText, Heart, Lock, ShieldCheck } from 'lucide-react';
 import Image from 'next/image';
 import clubLogo from "@/assets/cvs/club1.png";
-
+import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/hooks/reduxHooks";
+import { useGetMySubscriptionQuery } from "@/redux/features/subscription/subscriptionApi";
+import { cn } from "@/lib/utils";
 
 const RightSideContent = () => {
+  const router = useRouter();
   const reports = useAppSelector(state => state.reports.reports);
+  const { data: subscriptionResponse } = useGetMySubscriptionQuery();
+  const hasActiveSubscription = Boolean(subscriptionResponse?.data?.hasActiveSubscription);
+
   const gameReports = reports
     .filter(r => r.status === "Paid")
     .slice(0, 3)
@@ -47,11 +53,43 @@ const RightSideContent = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* Scout & Agent Exposure Card */}
+      <div className="border border-white/10 rounded-2xl p-4 sm:p-6 bg-black/40 backdrop-blur-xs shadow-xl">
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <div className="flex items-center gap-2.5">
+            <div className={cn("size-8 rounded-lg flex items-center justify-center shrink-0", hasActiveSubscription ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-500")}>
+              {hasActiveSubscription ? <ShieldCheck className="size-4" /> : <Lock className="size-4" />}
+            </div>
+            <div>
+              <h3 className="text-white text-xs sm:text-sm font-heading uppercase">Scout Exposure</h3>
+              <p className="text-[10px] text-gray-400">Agent & Club Discovery</p>
+            </div>
+          </div>
+          <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold uppercase font-orbitron", hasActiveSubscription ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-red-500/10 text-red-400 border border-red-500/20")}>
+            {hasActiveSubscription ? "Active" : "Locked"}
+          </span>
+        </div>
+        <p className="text-[11px] text-gray-400 leading-relaxed mb-3">
+          {hasActiveSubscription
+            ? "Your profile is active in verified scouting pools, club radars, and agent discovery algorithms."
+            : "Profile hidden from scouting algorithms & featured recommendation lists on Free plan."}
+        </p>
+        {!hasActiveSubscription && (
+          <button
+            onClick={() => router.push("/dashboard/player/my-subscription")}
+            className="w-full py-2 rounded-lg bg-red-600/10 hover:bg-red-600/20 border border-red-600/30 text-red-400 text-[10px] font-bold uppercase tracking-wider font-orbitron transition cursor-pointer flex items-center justify-center gap-1.5"
+          >
+            <Lock className="size-3" />
+            Unlock Scouting Exposure
+          </button>
+        )}
+      </div>
+
       {/* New Game Reports */}
       <div className="border border-white/10 rounded-2xl p-4 sm:p-6 bg-black/40 backdrop-blur-xs shadow-xl">
         <div className="flex items-center gap-3 mb-4 sm:mb-6">
-          <div className="w-9 h-9 sm:w-10 sm:h-10 bg-red-600 rounded-xl flex items-center justify-center shrink-0">
-            <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+          <div className="size-9 sm:size-10 bg-red-600 rounded-xl flex items-center justify-center shrink-0">
+            <FileText className="size-5 sm:size-6 text-white" />
           </div>
           <h2 className="text-white font-heading text-base sm:text-lg uppercase">New Game Reports</h2>
         </div>
@@ -60,7 +98,7 @@ const RightSideContent = () => {
           {gameReports.map((report) => (
             <div key={report.id} className="border border-white/10 rounded-xl p-3.5 flex items-center justify-between hover:bg-white/5 transition-all">
               <div className="flex items-center gap-3 min-w-0">
-                <FileText className="w-4 h-4 text-red-500 shrink-0" />
+                <FileText className="size-4 text-red-500 shrink-0" />
                 <span className="text-gray-300 text-xs sm:text-sm font-medium truncate">{report.opponent}</span>
               </div>
               <span className="text-white font-bold text-sm sm:text-base font-orbitron shrink-0 ml-2">{report.rating}</span>
@@ -75,8 +113,8 @@ const RightSideContent = () => {
       {/* Clubs Interested */}
       <div className="border border-white/10 rounded-2xl p-4 sm:p-6 bg-black/40 backdrop-blur-xs shadow-xl">
         <div className="flex items-center gap-3 mb-4 sm:mb-6">
-          <div className="w-9 h-9 sm:w-10 sm:h-10 bg-red-600 rounded-xl flex items-center justify-center shrink-0">
-            <Heart className="w-5 h-5 sm:w-6 sm:h-6 text-white fill-white" />
+          <div className="size-9 sm:size-10 bg-red-600 rounded-xl flex items-center justify-center shrink-0">
+            <Heart className="size-5 sm:size-6 text-white fill-white" />
           </div>
           <h2 className="text-white font-heading text-base sm:text-lg uppercase">Clubs Interested</h2>
         </div>
@@ -89,7 +127,7 @@ const RightSideContent = () => {
                 alt={club.name}
                 width={80}
                 height={80}
-                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover shrink-0"
+                className="size-10 sm:size-12 rounded-full object-cover shrink-0"
               />
               <div className="flex-1 min-w-0">
                 <p className="text-white font-semibold text-xs sm:text-sm truncate">{club.name}</p>

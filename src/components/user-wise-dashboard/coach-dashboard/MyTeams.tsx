@@ -14,6 +14,7 @@ import {
   IconChevronDown,
   IconLoader2,
   IconCheck,
+  IconLock,
 } from "@tabler/icons-react";
 import DashboardTable, { Column } from "@/components/dashboard/DashboardTable";
 import TableActionButtons from "@/components/dashboard/TableActionButtons";
@@ -21,6 +22,8 @@ import {
   useGetMyTeamsQuery,
   useUpdatePlayerFitnessStatusMutation,
 } from "@/redux/features/coach/coachApi";
+import { useGetMySubscriptionQuery } from "@/redux/features/subscription/subscriptionApi";
+import { toast } from "sonner";
 import { ICoachTeamPlayer } from "@/types/coach.type";
 import {
   DropdownMenu,
@@ -122,6 +125,9 @@ const MyTeams = () => {
   const router = useRouter();
   const { data: teamResponse, isLoading, isError, refetch, isFetching } =
     useGetMyTeamsQuery();
+  const { data: subscriptionResponse } = useGetMySubscriptionQuery();
+  const hasActiveSubscription = Boolean(subscriptionResponse?.data?.hasActiveSubscription);
+
   const [updatePlayerFitnessStatus] = useUpdatePlayerFitnessStatusMutation();
   const [updatingPlayerId, setUpdatingPlayerId] = useState<string | null>(null);
 
@@ -137,6 +143,14 @@ const MyTeams = () => {
     const playerId = player._id || player.id;
     if (!playerId) return;
     if (player.status?.toUpperCase() === newStatus) return;
+
+    if (!hasActiveSubscription) {
+      toast.error(
+        "Active coach subscription required to update squad fitness/injury status."
+      );
+      router.push("/dashboard/coach/my-subscription");
+      return;
+    }
 
     try {
       setUpdatingPlayerId(playerId);
@@ -239,6 +253,25 @@ const MyTeams = () => {
           const playerId = player._id || player.id || "";
           const isActive = player.status?.toUpperCase() === "ACTIVE";
           const isUpdatingThis = updatingPlayerId === playerId;
+
+          if (!hasActiveSubscription) {
+            return (
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toast.error(
+                    "Active coach subscription required to update squad fitness/injury status."
+                  );
+                  router.push("/dashboard/coach/my-subscription");
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-white/10 bg-white/5 text-muted-foreground cursor-pointer hover:border-primary/40 hover:text-white transition-all select-none"
+                title="Subscription required to update squad fitness"
+              >
+                <IconLock size={12} className="text-primary" />
+                <span>{player.status || "ACTIVE"}</span>
+              </div>
+            );
+          }
 
           return (
             <div

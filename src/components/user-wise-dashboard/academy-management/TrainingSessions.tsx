@@ -29,7 +29,7 @@ import { ITrainingSessionListItem } from "@/types/academy.type";
 const defaultSessions: ITrainingSessionListItem[] = [
   {
     id: 1,
-    _id: "6adc217c118a25d702953410",
+    _id: "6adc217c118a25d702953411",
     teamBadge: "U-15",
     teamName: "U-15",
     date: "Jan 25, 2026",
@@ -42,7 +42,7 @@ const defaultSessions: ITrainingSessionListItem[] = [
   },
   {
     id: 2,
-    _id: "6adc217c118a25d702953410",
+    _id: "6adc217c118a25d702953412",
     teamBadge: "U-16",
     teamName: "U-16",
     date: "Jan 25, 2026",
@@ -55,7 +55,7 @@ const defaultSessions: ITrainingSessionListItem[] = [
   },
   {
     id: 3,
-    _id: "6adc217c118a25d702953410",
+    _id: "6adc217c118a25d702953413",
     teamBadge: "U-17",
     teamName: "U-17",
     date: "Jan 25, 2026",
@@ -68,7 +68,7 @@ const defaultSessions: ITrainingSessionListItem[] = [
   },
   {
     id: 4,
-    _id: "6adc217c118a25d702953410",
+    _id: "6adc217c118a25d702953414",
     teamBadge: "U-19",
     teamName: "U-19",
     date: "Jan 25, 2026",
@@ -232,10 +232,15 @@ export const TrainingSessions = () => {
       ) : (
         /* Session Cards Grid */
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          {displaySessions.map((session) => {
+          {displaySessions.map((session, index) => {
             const sessionId =
               session._id ||
-              (session.id ? session.id.toString() : "6adc217c118a25d702953410");
+              (session.id ? session.id.toString() : `session-${index}`);
+            const uniqueKey = session._id
+              ? `${session._id}-${index}`
+              : session.id
+              ? `${session.id}-${index}`
+              : `session-${index}`;
             const team =
               typeof session.teamBadge === "string"
                 ? session.teamBadge
@@ -338,7 +343,7 @@ export const TrainingSessions = () => {
 
             return (
               <div 
-                key={sessionId} 
+                key={uniqueKey} 
                 onClick={() => setSelectedSessionId(sessionId)}
                 className="bg-[#111111] rounded-4xl border border-white/15 p-5 md:p-6 flex flex-col gap-5 md:gap-6 hover:border-white/30 transition-all cursor-pointer group shadow-xl"
               >

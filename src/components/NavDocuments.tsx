@@ -34,6 +34,12 @@ const NavDocuments = ({
       );
       const fallbackRedirect = pathName.startsWith("/dashboard/agent")
         ? "/dashboard/agent/licensed-verification"
+        : pathName.startsWith("/dashboard/club")
+        ? "/dashboard/club/my-subscription"
+        : pathName.startsWith("/dashboard/player")
+        ? "/dashboard/player/my-subscription"
+        : pathName.startsWith("/dashboard/parent")
+        ? "/dashboard/parent/my-subscription"
         : "/dashboard/coach/my-subscription";
       router.push(item.lockedRedirectUrl || fallbackRedirect);
       setOpenMobile?.(false);

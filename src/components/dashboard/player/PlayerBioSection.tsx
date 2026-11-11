@@ -3,15 +3,19 @@ import Image from "next/image";
 
 import React from "react";
 import backgroundImage from "@/assets/player-dashboard/backgroundImage.png";
-import { Clock, Mail, Phone, Shield } from 'lucide-react';
+import { Clock, Mail, Phone, Shield, Lock } from 'lucide-react';
 import { useRouter } from "next/navigation";
 
 import { usePlayer } from "@/hooks/usePlayer";
 import { getFullWithShortForm, formatDate } from "@/lib/utils";
+import { useGetMySubscriptionQuery } from "@/redux/features/subscription/subscriptionApi";
+import { toast } from "sonner";
 
 const PlayerBioSection = () => {
   const { playerData, cvData } = usePlayer();
   const router = useRouter();
+  const { data: subscriptionResponse } = useGetMySubscriptionQuery();
+  const hasActiveSubscription = Boolean(subscriptionResponse?.data?.hasActiveSubscription);
 
   const currentClub =
     playerData.currentClub ||
@@ -75,10 +79,18 @@ const PlayerBioSection = () => {
 
             {/* Request Game Report Button */}
             <button 
-              onClick={() => router.push("/dashboard/player/game-reports/create")}
-              className="w-full mb-6 sm:mb-8 px-2 sm:px-4 py-3 sm:py-3.5 rounded-xl bg-red-600 hover:bg-red-500 font-bold text-white uppercase tracking-widest sm:tracking-widest transition-all shadow-[0_0_20px_rgba(227,27,35,0.2)] text-[10px] sm:text-xs cursor-pointer font-orbitron"
+              onClick={() => {
+                if (!hasActiveSubscription) {
+                  toast.error("Active Athlete Membership required to create game reports or request coach reviews.");
+                  router.push("/dashboard/player/my-subscription");
+                  return;
+                }
+                router.push("/dashboard/player/game-reports/create");
+              }}
+              className="w-full mb-6 sm:mb-8 px-2 sm:px-4 py-3 sm:py-3.5 rounded-xl bg-red-600 hover:bg-red-500 font-bold text-white uppercase tracking-widest sm:tracking-widest transition-all shadow-[0_0_20px_rgba(227,27,35,0.2)] text-[10px] sm:text-xs cursor-pointer font-orbitron flex items-center justify-center gap-2"
             >
-              Create Game Report
+              {!hasActiveSubscription && <Lock className="size-3.5" />}
+              <span>Create Game Report</span>
             </button>
 
             {/* Info Cards */}

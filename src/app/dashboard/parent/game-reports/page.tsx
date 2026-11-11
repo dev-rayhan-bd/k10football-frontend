@@ -8,7 +8,11 @@ import {
   IconCreditCard,
   IconClock,
   IconCircleCheck,
+  IconLock,
 } from "@tabler/icons-react";
+import { useParentSubscriptionAccess } from "@/hooks/useParentSubscriptionAccess";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface Report {
   id: number;
@@ -21,7 +25,9 @@ interface Report {
 }
 
 const ParentGameReports = () => {
-const [reports, setReports] = useState<Report[]>([
+  const router = useRouter();
+  const { isUnlocked, isLoading } = useParentSubscriptionAccess();
+  const [reports, setReports] = useState<Report[]>([
 {
   id: 1,
   opponent: "Palmeiras U17",
@@ -57,7 +63,12 @@ const [selectedReportId, setSelectedReportId] = useState<number | null>(null);
 const pitchRef = useRef<HTMLDivElement>(null);
 
 const handlePitchClick = (e: React.MouseEvent<HTMLDivElement>) => {
-if (!pitchRef.current) return;
+  if (!isUnlocked) {
+    toast.error("Active subscription required to plot match stats and create scouting reports.");
+    router.push("/dashboard/parent/my-subscription");
+    return;
+  }
+  if (!pitchRef.current) return;
 const rect = pitchRef.current.getBoundingClientRect();
 const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
 const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
@@ -72,6 +83,11 @@ toast.info("Cleared marked events.");
 };
 
 const handleCreateReport = () => {
+  if (!isUnlocked) {
+    toast.error("Active subscription required to save scouting match reports.");
+    router.push("/dashboard/parent/my-subscription");
+    return;
+  }
 if (!newOpponent.trim()) {
   toast.error("Please enter opponent team name.");
   return;
@@ -103,6 +119,11 @@ toast.success("Game report saved! You can now request a paid review.");
 };
 
 const handleRequestReview = (reportId: number) => {
+  if (!isUnlocked) {
+    toast.error("Active subscription required to request coach reviews.");
+    router.push("/dashboard/parent/my-subscription");
+    return;
+  }
 setSelectedReportId(reportId);
 setIsPaying(true);
 };
@@ -225,9 +246,10 @@ return (
 
       <Button
         onClick={handleCreateReport}
-        className="w-full bg-[#E31B23] hover:bg-[#C2181F] text-white py-4 sm:py-6 rounded-lg sm:rounded-xl font-bold text-[10px] sm:text-xs uppercase tracking-widest shadow-lg shadow-[#E31B23]/20"
+        className="w-full bg-[#E31B23] hover:bg-[#C2181F] text-white py-4 sm:py-6 rounded-lg sm:rounded-xl font-bold text-[10px] sm:text-xs uppercase tracking-widest shadow-lg shadow-[#E31B23]/20 flex items-center justify-center gap-2"
       >
-        Save Report Details
+        {!isUnlocked && <IconLock size={14} />}
+        <span>Save Report Details</span>
       </Button>
     </div>
 

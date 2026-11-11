@@ -2,10 +2,12 @@
 'use client'
 
 import React, { useState } from 'react';
-import { FileText, Eye, Plus, CheckCircle, Clock } from 'lucide-react';
+import { FileText, Eye, Plus, CheckCircle, Clock, Lock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { usePlayer } from "@/hooks/usePlayer";
 import { useAppSelector } from "@/hooks/reduxHooks";
+import { useGetMySubscriptionQuery } from "@/redux/features/subscription/subscriptionApi";
+import { toast } from "sonner";
 import {
   Sheet,
   SheetContent,
@@ -18,6 +20,8 @@ import { Badge } from "@/components/ui/badge";
 const GameReportSection = () => {
   const router = useRouter();
   const { playerData } = usePlayer();
+  const { data: subscriptionResponse } = useGetMySubscriptionQuery();
+  const hasActiveSubscription = Boolean(subscriptionResponse?.data?.hasActiveSubscription);
   const [selectedReport, setSelectedReport] = useState<any>(null);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -75,10 +79,17 @@ const GameReportSection = () => {
               <p className="text-gray-400 text-xs sm:text-sm">Professional match performance analysis</p>
             </div>
             <button 
-              onClick={() => router.push("/dashboard/player/game-reports/create")}
+              onClick={() => {
+                if (!hasActiveSubscription) {
+                  toast.error("Active Athlete Membership required to submit game reports or request coach reviews.");
+                  router.push("/dashboard/player/my-subscription");
+                  return;
+                }
+                router.push("/dashboard/player/game-reports/create");
+              }}
               className="px-4 py-2 border border-white/10 text-white rounded-xl hover:bg-white/5 transition flex items-center gap-2 text-xs uppercase tracking-widest font-orbitron cursor-pointer"
             >
-              <Plus className="w-4 h-4 text-red-500" />
+              {!hasActiveSubscription ? <Lock className="w-3.5 h-3.5 text-red-500" /> : <Plus className="w-4 h-4 text-red-500" />}
               Request Report
             </button>
           </div>

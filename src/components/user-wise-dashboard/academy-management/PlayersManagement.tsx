@@ -2,12 +2,12 @@
 import Image from "next/image";
 import React from "react";
 import DashboardModal from "@/components/dashboard/DashboardModal";
-import { 
-  IconSearch, 
-  IconPlus, 
-  IconFilter, 
-  IconEye, 
-  IconEdit, 
+import {
+  IconSearch,
+  IconPlus,
+  IconFilter,
+  IconEye,
+  IconEdit,
   IconTrash,
   IconChevronDown,
   IconChevronLeft,
@@ -30,7 +30,7 @@ const PlayersManagement = () => {
           <h1 className="text-4xl font-black uppercase text-white font-orbitron tracking-tight">Players</h1>
           <p className="text-white/60 font-bold uppercase tracking-widest text-[11px] mt-1">Manage your academy players and their information</p>
         </div>
-        <button 
+        <button
           onClick={() => setShowAddModal(true)}
           className="bg-[#E31B23] hover:bg-[#C2181F] text-white px-6 py-3 rounded-xl font-bold uppercase tracking-widest text-[11px] flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20"
         >
@@ -42,8 +42,8 @@ const PlayersManagement = () => {
       <div className="bg-[#111111] rounded-3xl border border-white/15 p-4 flex gap-4">
         <div className="relative flex-1 min-w-0">
           <IconSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={20} />
-          <input 
-            type="text" 
+          <input
+            type="text"
             placeholder="Search players by name, team, or position..."
             className="w-full bg-white/[0.02] border border-white/15 rounded-2xl py-3 pl-12 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/15 transition-all"
           />
@@ -87,7 +87,7 @@ const PlayersManagement = () => {
                   <td className="py-5 px-6 border-r border-white/15">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-full overflow-hidden border border-white/15 shrink-0">
-                        <Image src={p.avatar} alt={p.name} className="w-full h-full object-cover" />
+                        <Image src={p.avatar} alt={p.name} className="w-full h-full object-cover" width={100} height={100} />
                       </div>
                       <span className="text-sm font-bold text-white">{p.name}</span>
                     </div>
@@ -100,16 +100,14 @@ const PlayersManagement = () => {
                   </td>
                   <td className="py-5 px-6 border-r border-white/15 text-sm font-medium text-white/80 text-center">{p.position}</td>
                   <td className="py-5 px-6 border-r border-white/15 text-center">
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-black ${
-                      parseInt(p.attendance) >= 90 ? "bg-[#4ADE80]/10 text-[#4ADE80]" : "bg-[#FBBF24]/10 text-[#FBBF24]"
-                    }`}>
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-black ${parseInt(p.attendance) >= 90 ? "bg-[#4ADE80]/10 text-[#4ADE80]" : "bg-[#FBBF24]/10 text-[#FBBF24]"
+                      }`}>
                       {p.attendance}
                     </span>
                   </td>
                   <td className="py-5 px-6 border-r border-white/15 text-center">
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                      p.feeStatus === "Paid" ? "bg-[#4ADE80]/10 text-[#4ADE80]" : "bg-[#EF4444]/10 text-[#EF4444]"
-                    }`}>
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${p.feeStatus === "Paid" ? "bg-[#4ADE80]/10 text-[#4ADE80]" : "bg-[#EF4444]/10 text-[#EF4444]"
+                      }`}>
                       {p.feeStatus}
                     </span>
                   </td>
@@ -157,7 +155,7 @@ const PlayersManagement = () => {
         showBackButton
         footer={
           <div className="flex justify-end gap-4">
-            <button 
+            <button
               onClick={() => setShowAddModal(false)}
               className="px-8 py-3.5 rounded-xl border border-white/30 text-[11px] font-black uppercase tracking-widest text-white hover:bg-white/5 transition-all"
             >
@@ -309,8 +307,8 @@ const PlayersManagement = () => {
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Medical Information</h3>
             <div className="space-y-2">
               <label className="text-[11px] font-black uppercase tracking-widest text-white/60">Medical Conditions / Allergies</label>
-              <textarea 
-                placeholder="List any medical conditions, allergies, or special requirements..." 
+              <textarea
+                placeholder="List any medical conditions, allergies, or special requirements..."
                 className="w-full h-32 bg-[#111111] border border-white/15 rounded-xl py-3.5 px-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-white/15 transition-all resize-none"
               />
               <p className="text-[9px] text-white/20 font-bold uppercase tracking-widest">This information will be kept confidential and used only in emergencies</p>

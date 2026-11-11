@@ -17,7 +17,11 @@ import {
   IconChevronRight,
   IconChevronsLeft,
   IconChevronsRight,
+  IconLock,
 } from "@tabler/icons-react";
+import { useRouter } from "next/navigation";
+import { useGetMySubscriptionQuery } from "@/redux/features/subscription/subscriptionApi";
+import { toast } from "sonner";
 
 import {
   Sheet,
@@ -34,6 +38,10 @@ import { IGameReportItem } from "@/types/player.type";
 import { WarningToast } from "@/helpers/ValidationHelper";
 
 const GameReports = () => {
+  const router = useRouter();
+  const { data: subscriptionResponse } = useGetMySubscriptionQuery();
+  const hasActiveSubscription = Boolean(subscriptionResponse?.data?.hasActiveSubscription);
+
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
   const [statusFilter, setStatusFilter] = useState<"All" | "Paid" | "Pending">("All");
@@ -118,12 +126,20 @@ const GameReports = () => {
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <Link href={"/dashboard/player/game-reports/create"}>
-            <button className="px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-white hover:bg-white/10 transition-all flex items-center gap-2 uppercase tracking-wider cursor-pointer">
-              <IconReportAnalytics size={18} stroke={1.5} />
-              Create New Report
-            </button>
-          </Link>
+          <button 
+            onClick={() => {
+              if (!hasActiveSubscription) {
+                toast.error("Active Athlete Membership required to create game reports or request coach reviews.");
+                router.push("/dashboard/player/my-subscription");
+                return;
+              }
+              router.push("/dashboard/player/game-reports/create");
+            }}
+            className="px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-white hover:bg-white/10 transition-all flex items-center gap-2 uppercase tracking-wider cursor-pointer"
+          >
+            {!hasActiveSubscription ? <IconLock size={16} className="text-red-500" /> : <IconReportAnalytics size={18} stroke={1.5} />}
+            Create New Report
+          </button>
         </div>
       </div>
 

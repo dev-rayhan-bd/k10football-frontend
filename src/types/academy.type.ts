@@ -1968,4 +1968,68 @@ export interface INotifyCoachToValidateCvResponse {
   data?: any;
 }
 
+export interface IAcademyProfileData {
+  _id?: string;
+  name?: string;
+  academyName?: string;
+  clubName?: string;
+  category?: string;
+  academyCategory?: string;
+  estimatedAcademySize?: string;
+  city?: string;
+  country?: string;
+  clubCountry?: string;
+  nationality?: string;
+  location?: string;
+  locationText?: string;
+  logo?: string;
+  dateOfEstablishment?: string;
+  dateOfEstablishmentFormatted?: string;
+  establishedDate?: string;
+  foundedYear?: number;
+  foundedText?: string;
+  contact?: string;
+  contactPhone?: string;
+  email?: string;
+  contactEmail?: string;
+  registrationId?: string;
+  activeStatus?: string;
+  tier?: string;
+  isActive?: boolean;
+  currentPlan?: string;
+  league?: string;
+  clubLeague?: string;
+  monthlyTrainingFee?: number;
+  monthlyFeeTitle?: string;
+  userId?: {
+    _id?: string;
+    email?: string;
+    name?: string;
+    phone?: string;
+  };
+  aboutAcademy?: {
+    description?: string;
+    visionAndMission?: string;
+    trainingPhilosophy?: string;
+  };
+  description?: string;
+  visionAndMission?: string;
+  trainingPhilosophy?: string;
+  bannerInfo?: any;
+  plan?: any;
+  stripeConnect?: any;
+  achievements?: any[];
+  sharedPlayerProfiles?: any[];
+  likedPlayerIds?: any[];
+  [key: string]: any;
+}
+
+export interface IAcademyProfileResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: IAcademyProfileData;
+}
+
+
 

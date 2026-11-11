@@ -16,11 +16,14 @@ import {
   IconAlertTriangle,
   IconRefresh,
   IconClock,
+  IconLock,
 } from "@tabler/icons-react";
+import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useGetParentOverviewQuery, useSubmitSessionRsvpMutation } from "@/redux/features/parent/parentApi";
+import { useParentSubscriptionAccess } from "@/hooks/useParentSubscriptionAccess";
 import { cn } from "@/lib/utils";
 
 const getTierBadgeStyle = (tier?: string) => {
@@ -37,6 +40,8 @@ const getTierBadgeStyle = (tier?: string) => {
 };
 
 const ParentDashboardOverview = () => {
+  const router = useRouter();
+  const { isUnlocked } = useParentSubscriptionAccess();
   const [selectedChildId, setSelectedChildId] = useState<string | undefined>(
     undefined
   );
@@ -224,9 +229,16 @@ const ParentDashboardOverview = () => {
                 <span className="text-[9px] md:text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] truncate block font-orbitron">
                   Active Reports
                 </span>
-                <p className="text-xl md:text-2xl font-black text-white font-orbitron mt-0.5 truncate">
-                  {stats?.activeReports?.formatted || "0 Pending"}
-                </p>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <p className="text-xl md:text-2xl font-black text-white font-orbitron truncate">
+                    {stats?.activeReports?.formatted || "0 Pending"}
+                  </p>
+                  {!isUnlocked && (
+                    <span className="text-[9px] font-bold text-destructive bg-destructive/10 px-1.5 py-0.5 rounded border border-destructive/20 font-orbitron">
+                      LOCKED
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -246,6 +258,26 @@ const ParentDashboardOverview = () => {
                     </span>
                   </Link>
                 </div>
+
+                {/* Platform Access Status Pill */}
+                {!isUnlocked ? (
+                  <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-2 text-destructive font-medium">
+                      <IconLock size={16} className="shrink-0" />
+                      <span>Scouting Reports & Advanced Analytics: <strong>Locked (Free Plan)</strong></span>
+                    </div>
+                    <Link href="/dashboard/parent/my-subscription">
+                      <span className="text-[10px] font-bold text-white underline uppercase tracking-wider font-orbitron hover:text-primary transition-colors cursor-pointer">
+                        Unlock with Subscription
+                      </span>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20 flex items-center gap-2 text-xs text-primary font-medium">
+                    <IconCheck size={16} className="shrink-0" />
+                    <span>Scouting Reports & Analytics: <strong>Active & Unlocked</strong></span>
+                  </div>
+                )}
 
                 {/* Profile Info Row */}
                 <div className="flex flex-col sm:flex-row items-center gap-6 p-6 rounded-2xl bg-black/40 border border-white/5">
@@ -514,15 +546,26 @@ const ParentDashboardOverview = () => {
                     </button>
                   </Link>
 
-                  <Link href="/dashboard/parent/game-reports">
-                    <button
-                      type="button"
-                      className="w-full py-3.5 px-4 rounded-xl bg-white/5 border border-white/5 text-xs font-bold text-white hover:bg-white/10 hover:border-white/10 transition-all flex items-center justify-between uppercase tracking-wider cursor-pointer"
-                    >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!isUnlocked) {
+                        toast.error(
+                          "Active subscription required to access scouting match reports and coach evaluations."
+                        );
+                        router.push("/dashboard/parent/my-subscription");
+                        return;
+                      }
+                      router.push("/dashboard/parent/game-reports");
+                    }}
+                    className="w-full py-3.5 px-4 rounded-xl bg-white/5 border border-white/5 text-xs font-bold text-white hover:bg-white/10 hover:border-white/10 transition-all flex items-center justify-between uppercase tracking-wider cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      {!isUnlocked && <IconLock size={14} className="text-destructive" />}
                       <span>Submit Match Stats</span>
-                      <IconArrowRight size={14} />
-                    </button>
-                  </Link>
+                    </div>
+                    <IconArrowRight size={14} />
+                  </button>
 
                   <Link href="/dashboard/parent/shop">
                     <button
