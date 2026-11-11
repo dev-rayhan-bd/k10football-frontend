@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useMemo } from "react";
 import { type Icon, IconLock } from "@tabler/icons-react";
 
 import {
@@ -41,20 +42,26 @@ const NavDocuments = ({
     setOpenMobile?.(false);
   };
 
+  // Find the single active item that best matches current pathname (longest/most specific match)
+  const activeItemUrl = useMemo(() => {
+    // 1. Exact match has highest priority
+    const exactMatch = items.find((item) => !item.isLocked && item.url === pathName);
+    if (exactMatch) return exactMatch.url;
+
+    // 2. Otherwise find prefix match with the longest/most specific URL
+    const prefixMatches = items
+      .filter((item) => !item.isLocked && pathName.startsWith(`${item.url}/`))
+      .sort((a, b) => b.url.length - a.url.length);
+
+    return prefixMatches[0]?.url || null;
+  }, [items, pathName]);
+
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarMenu>
         {items.map((item) => {
           const isLocked = Boolean(item.isLocked);
-          const isActive =
-            !isLocked &&
-            (pathName === item.url ||
-              (item.url !== "/dashboard/coach" &&
-                item.url !== "/dashboard/player" &&
-                item.url !== "/dashboard/club" &&
-                item.url !== "/dashboard/academy" &&
-                item.url !== "/dashboard/agent" &&
-                pathName.startsWith(`${item.url}/`)));
+          const isActive = !isLocked && item.url === activeItemUrl;
 
           return (
             <SidebarMenuItem

@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { useAppDispatch } from "@/hooks/reduxHooks";
 import { setAccessToken, setUser } from "@/redux/features/auth";
 import { useLoginMutation } from "@/redux/features/auth/authApi";
+import { apiSlice } from "@/redux/features/api/apiSlice";
+import TagTypes from "@/constants/tagType.constant";
 import {
   setToken,
   setUserInfo,
@@ -47,7 +49,7 @@ const LoginPage = () => {
       }).unwrap();
 
       const user = res?.data?.user || res?.data;
-      const token = res?.data?.accessToken;
+      const token = res?.data?.accessToken || res?.data?.token || res?.accessToken;
       const decodedRole = getUserRoleFromToken(token);
       const rawRole = user?.role || decodedRole || "player";
       const normalizedRole = normalizeRole(rawRole);
@@ -76,6 +78,9 @@ const LoginPage = () => {
           },
         })
       );
+
+      // Invalidate tags to force fresh refetch of user profile on dashboard entry
+      dispatch(apiSlice.util.invalidateTags([TagTypes.PROFILE, TagTypes.USERS, TagTypes.DASHBOARD]));
 
       // Role-based destination (handles super_admin -> /dashboard/admin, academy -> /dashboard/academy/analysis, etc.)
       const dashboardPath = getDashboardPathForRole(normalizedRole);

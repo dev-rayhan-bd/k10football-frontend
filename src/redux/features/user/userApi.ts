@@ -4,6 +4,11 @@ import TagTypes from "@/constants/tagType.constant";
 import { ErrorToast, SuccessToast } from "@/helpers/ValidationHelper";
 import { setUserInfo, getUserInfo } from "@/helpers/SessionHelper";
 import { IParam } from "@/types/global.type";
+import {
+  IUserProfileResponse,
+  IAcceptTermsPayload,
+  IAcceptTermsResponse,
+} from "@/types/user.type";
 
 export const userApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -112,6 +117,32 @@ export const userApi = apiSlice.injectEndpoints({
         }
       },
     }),
+
+    getMe: builder.query<IUserProfileResponse, void>({
+      query: () => ({
+        url: "/users/me",
+        method: "GET",
+      }),
+      providesTags: [TagTypes.PROFILE, TagTypes.USERS],
+    }),
+
+    acceptTerms: builder.mutation<IAcceptTermsResponse, IAcceptTermsPayload>({
+      query: (body) => ({
+        url: "/users/me/accept-terms",
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: [TagTypes.PROFILE, TagTypes.USERS],
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const res = await queryFulfilled;
+          SuccessToast(res?.data?.message || "Terms & conditions accepted successfully");
+        } catch (err: any) {
+          const message = err?.error?.data?.message || "Failed to accept terms and conditions";
+          ErrorToast(message);
+        }
+      },
+    }),
   }),
 });
 
@@ -120,5 +151,7 @@ export const {
   useGetCustomersByShopIdQuery,
   useGetMyProfileQuery,
   useUpdateProfileMutation,
+  useGetMeQuery,
+  useAcceptTermsMutation,
 } = userApi;
 

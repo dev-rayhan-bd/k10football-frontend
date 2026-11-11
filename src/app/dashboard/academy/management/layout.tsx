@@ -17,9 +17,21 @@ import {
   IconBuildingStore,
   IconSettings,
   IconCoins,
-  IconInbox
+  IconInbox,
+  IconLock,
 } from "@tabler/icons-react";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useRef } from "react";
+import { useGetMySubscriptionQuery } from "@/redux/features/subscription/subscriptionApi";
+import { usePathname, useRouter } from "next/navigation";
+import { toast } from "sonner";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+
+const LOCKED_ACADEMY_MANAGEMENT_PATHS = [
+  "/dashboard/academy/management/transfer-requests",
+  "/dashboard/academy/management/extra-events",
+  "/dashboard/academy/management/product-store",
+];
 
 const managementSidebarItems = [
   { name: "Dashboard", url: "/dashboard/academy/management", icon: IconDashboard },
@@ -45,13 +57,93 @@ const managementSidebarItems = [
 ];
 
 const AcademyManagementLayout = ({ children }: { children: ReactNode }) => {
+  const pathname = usePathname();
+  const router = useRouter();
+  const redirectedPathRef = useRef<string | null>(null);
+
+  // Academy subscription check
+  const { data: subscriptionResponse, isLoading: isSubLoading } = useGetMySubscriptionQuery();
+  const hasActiveSubscription = Boolean(subscriptionResponse?.data?.hasActiveSubscription);
+
+  const isCurrentRouteLocked = LOCKED_ACADEMY_MANAGEMENT_PATHS.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`)
+  );
+
+  // Route protection: If unsubscribed academy navigates directly to locked route
+  useEffect(() => {
+    if (isCurrentRouteLocked && !isSubLoading && !hasActiveSubscription) {
+      if (redirectedPathRef.current !== pathname) {
+        redirectedPathRef.current = pathname;
+        toast.error(
+          "Active subscription (Elite Plan) required to access this feature. Redirecting to subscription..."
+        );
+        router.replace("/dashboard/academy/management/my-subscription");
+      }
+    } else if (!isCurrentRouteLocked) {
+      redirectedPathRef.current = null;
+    }
+  }, [isSubLoading, hasActiveSubscription, isCurrentRouteLocked, pathname, router]);
+
+  const currentSidebarItems = managementSidebarItems.map((item) => {
+    const isLocked = !hasActiveSubscription && LOCKED_ACADEMY_MANAGEMENT_PATHS.some((path) => item.url === path);
+    return {
+      ...item,
+      isLocked,
+      lockedMessage:
+        "Active subscription (Elite Plan) required to access this feature. Please subscribe.",
+      lockedRedirectUrl: "/dashboard/academy/management/my-subscription",
+    };
+  });
+
+  // Guard content rendering if unsubscribed academy visits locked route directly
+  let content = children;
+  if (isCurrentRouteLocked) {
+    if (isSubLoading) {
+      content = (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-center">
+          <div className="size-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+          <p className="text-sm text-muted-foreground">Checking subscription status...</p>
+        </div>
+      );
+    } else if (!hasActiveSubscription) {
+      content = (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center px-4 max-w-lg mx-auto">
+          <div className="size-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-muted-foreground">
+            <IconLock className="size-8 text-primary" />
+          </div>
+          <div className="flex flex-col gap-2">
+            <h2 className="text-2xl font-bold font-heading uppercase tracking-wide text-white">
+              Subscription Required
+            </h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              An active subscription (Elite Plan) is required to access Tournaments & Events, Product Store, and Player Transfer Requests. Please upgrade your plan to unlock these features.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 w-full justify-center">
+            <Link href="/dashboard/academy/management/my-subscription">
+              <Button className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-black font-bold">
+                View Subscription Plans
+              </Button>
+            </Link>
+            <Link href="/dashboard/academy/management">
+              <Button variant="outline" className="w-full sm:w-auto">
+                Back to Dashboard
+              </Button>
+            </Link>
+          </div>
+        </div>
+      );
+    }
+  }
+
   return (
     <DashboardLayout
-      sidebarItems={managementSidebarItems}
+      sidebarItems={currentSidebarItems}
       showToggle={true}
     >
-      {children}
+      {content}
     </DashboardLayout>
   );
-}
+};
+
 export default AcademyManagementLayout;

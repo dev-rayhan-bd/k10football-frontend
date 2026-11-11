@@ -10,6 +10,7 @@ import {
   IconCreditCard,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
+import { useGetMySubscriptionQuery } from "@/redux/features/subscription/subscriptionApi";
 import {
   Dialog,
   DialogContent,
@@ -51,6 +52,14 @@ export const CoachAndPlayer = () => {
   const [cvc, setCvc] = useState("");
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
+  const isManagement = pathname.includes("/management");
+  const subscriptionUrl = isManagement
+    ? "/dashboard/academy/management/my-subscription"
+    : "/dashboard/academy/analysis/my-subscription";
+
+  const { data: subscriptionResponse } = useGetMySubscriptionQuery();
+  const hasActiveSubscription = Boolean(subscriptionResponse?.data?.hasActiveSubscription);
+
   // Load from localStorage on mount
   useEffect(() => {
     setTeams(getTeams());
@@ -66,12 +75,15 @@ export const CoachAndPlayer = () => {
 
   // Add Team Action Trigger
   const handleAddTeamClick = () => {
-    if (teams.length >= 1 && plan === "Free") {
-      setIsPaymentOpen(true);
-    } else {
-      setNewTeamName("");
-      setIsAddOpen(true);
+    if (teams.length >= 1 && !hasActiveSubscription) {
+      toast.error(
+        "Free Plan is limited to 1 team. Upgrade to Elite Plan for unlimited teams."
+      );
+      router.push(subscriptionUrl);
+      return;
     }
+    setNewTeamName("");
+    setIsAddOpen(true);
   };
 
   // Submit payment form
@@ -203,26 +215,26 @@ export const CoachAndPlayer = () => {
       <div className="bg-[#111111] rounded-3xl border border-white/20 p-6 md:p-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
         <div className="space-y-1">
           <h2 className="text-xl md:text-2xl font-black text-white font-orbitron uppercase tracking-tight">Team Capacity</h2>
-          {plan === "Free" ? (
+          {!hasActiveSubscription ? (
             <p className="text-white/60 font-medium text-xs md:text-sm">
-              You are using {teams.length} out of 1 available team slot. Upgrade your plan for more.
+              You are using {teams.length} out of 1 available team slot on Free Plan. Upgrade for unlimited teams.
             </p>
           ) : (
             <p className="text-[#00FF85] font-medium text-xs md:text-sm">
-              Premium Plan Active: Unlimited team slots available.
+              Elite Plan Active: Unlimited team slots available.
             </p>
           )}
         </div>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8 w-full sm:w-auto">
           <div className="text-left sm:text-right w-full sm:w-auto">
             <p className="text-2xl font-black text-[#E31B23] font-orbitron">
-              {plan === "Free" ? `${teams.length}/1` : `${teams.length}/∞`}
+              {!hasActiveSubscription ? `${teams.length}/1` : `${teams.length}/∞`}
             </p>
             <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest font-orbitron">Teams Capacity</p>
           </div>
-          {plan === "Free" && (
+          {!hasActiveSubscription && (
             <button
-              onClick={() => setIsPaymentOpen(true)}
+              onClick={() => router.push(subscriptionUrl)}
               className="w-full sm:w-auto flex justify-center items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/20 text-[10px] font-black uppercase tracking-[0.2em] text-white px-8 py-4 rounded-xl transition-all cursor-pointer shrink-0"
             >
               <IconPlus size={16} />

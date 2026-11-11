@@ -17,6 +17,7 @@ import {
   IconSearch,
   IconCheck,
   IconShirt,
+  IconLock,
 } from "@tabler/icons-react";
 import DashboardStatCard from "@/components/dashboard/DashboardStatCard";
 import TableActionButtons from "@/components/dashboard/TableActionButtons";
@@ -39,6 +40,9 @@ import {
 } from "@/redux/features/academy/academyApi";
 import { useGetAllCoachesQuery } from "@/redux/features/coach/coachApi";
 import { useGetPlayersQuery } from "@/redux/features/player/playerApi";
+import { useGetMySubscriptionQuery } from "@/redux/features/subscription/subscriptionApi";
+import { toast } from "sonner";
+import Link from "next/link";
 import {
   IAcademyTeamItem,
   ICreateAcademyTeamPayload,
@@ -73,6 +77,8 @@ const Teams = () => {
   const { data: response, isLoading, isError, refetch } = useGetAcademyCoachAndPlayersQuery();
   const { data: coachesData, isLoading: isLoadingCoaches } = useGetAllCoachesQuery();
   const { data: playersResponse, isLoading: isLoadingPlayers } = useGetPlayersQuery({});
+  const { data: subscriptionResponse } = useGetMySubscriptionQuery();
+  const hasActiveSubscription = Boolean(subscriptionResponse?.data?.hasActiveSubscription);
   
   const [createTeam, { isLoading: isCreating }] = useCreateAcademyTeamMutation();
   const [updateTeam, { isLoading: isUpdating }] = useUpdateAcademyTeamMutation();
@@ -128,7 +134,27 @@ const Teams = () => {
   const coachesList: ICoachListItem[] = coachesData?.data || [];
   const playersList: any[] = playersResponse?.data || [];
 
+  const currentTotalCoaches =
+    summary?.totalCoaches ??
+    teams.reduce(
+      (acc, t) => acc + (t.coachesCount ?? t.coachIds?.length ?? 0),
+      0
+    );
+  const currentTotalPlayers =
+    summary?.totalPlayers ??
+    teams.reduce(
+      (acc, t) => acc + (t.playersCount ?? t.playerIds?.length ?? 0),
+      0
+    );
+
   const handleOpenAdd = () => {
+    if (!hasActiveSubscription && teams.length >= 1) {
+      toast.error(
+        "Free Plan is limited to 1 team. Upgrade to Elite Plan for unlimited teams."
+      );
+      router.push("/dashboard/academy/analysis/my-subscription");
+      return;
+    }
     resetAdd({
       teamName: "",
       ageGroup: "u19",
@@ -147,6 +173,13 @@ const Teams = () => {
   };
 
   const handleOpenAssignCoach = (team: IAcademyTeamItem) => {
+    if (!hasActiveSubscription && currentTotalCoaches >= 1) {
+      toast.error(
+        "Free Plan allows a maximum of 1 coach. Upgrade to Elite Plan for unlimited coaches."
+      );
+      router.push("/dashboard/academy/analysis/my-subscription");
+      return;
+    }
     setAssigningCoachTeam(team);
     setSelectedCoachId("");
     setSelectedRole("ASSISTANT COACH");
@@ -154,12 +187,26 @@ const Teams = () => {
   };
 
   const handleOpenAssignPlayer = (team: IAcademyTeamItem) => {
+    if (!hasActiveSubscription && currentTotalPlayers >= 16) {
+      toast.error(
+        "Free Plan allows a maximum of 16 players. Upgrade to Elite Plan for unlimited players."
+      );
+      router.push("/dashboard/academy/analysis/my-subscription");
+      return;
+    }
     setAssigningPlayerTeam(team);
     setSelectedPlayerId("");
     setPlayerSearch("");
   };
 
   const onAddSubmit = async (data: ICreateAcademyTeamPayload) => {
+    if (!hasActiveSubscription && teams.length >= 1) {
+      toast.error(
+        "Free Plan is limited to 1 team. Upgrade to Elite Plan for unlimited teams."
+      );
+      router.push("/dashboard/academy/analysis/my-subscription");
+      return;
+    }
     try {
       await createTeam({
         teamName: data.teamName.trim(),
@@ -204,6 +251,14 @@ const Teams = () => {
     e.preventDefault();
     if (!assigningCoachTeam || !selectedCoachId) return;
 
+    if (!hasActiveSubscription && currentTotalCoaches >= 1) {
+      toast.error(
+        "Free Plan allows a maximum of 1 coach. Upgrade to Elite Plan for unlimited coaches."
+      );
+      router.push("/dashboard/academy/analysis/my-subscription");
+      return;
+    }
+
     try {
       await assignCoach({
         teamId: assigningCoachTeam._id,
@@ -222,6 +277,14 @@ const Teams = () => {
   const onAssignPlayerSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!assigningPlayerTeam || !selectedPlayerId) return;
+
+    if (!hasActiveSubscription && currentTotalPlayers >= 16) {
+      toast.error(
+        "Free Plan allows a maximum of 16 players. Upgrade to Elite Plan for unlimited players."
+      );
+      router.push("/dashboard/academy/analysis/my-subscription");
+      return;
+    }
 
     try {
       await assignPlayer({
@@ -302,6 +365,32 @@ const Teams = () => {
           Manage your Coach and Players
         </p>
       </div>
+
+      {/* Free Plan Limits Notice */}
+      {!hasActiveSubscription && (
+        <div className="bg-[#111111] rounded-2xl border border-primary/30 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="size-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+              <IconLock className="size-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-white text-sm font-bold font-orbitron uppercase">
+                Free Plan Limits Active
+              </p>
+              <p className="text-muted-foreground text-xs mt-0.5">
+                Teams: <span className="text-white font-semibold">{teams.length}/1</span> • Coaches:{" "}
+                <span className="text-white font-semibold">{currentTotalCoaches}/1</span> • Players:{" "}
+                <span className="text-white font-semibold">{currentTotalPlayers}/16</span>
+              </p>
+            </div>
+          </div>
+          <Link href="/dashboard/academy/analysis/my-subscription">
+            <button className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold px-4 py-2 rounded-xl transition-all uppercase tracking-wider whitespace-nowrap cursor-pointer">
+              Upgrade to Elite Plan
+            </button>
+          </Link>
+        </div>
+      )}
 
       {/* Stats Section */}
       {isLoading ? (

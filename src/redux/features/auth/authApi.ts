@@ -73,6 +73,7 @@ export const authApi = apiSlice.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: [TagTypes.PROFILE, TagTypes.USERS, TagTypes.DASHBOARD],
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           const res = await queryFulfilled;

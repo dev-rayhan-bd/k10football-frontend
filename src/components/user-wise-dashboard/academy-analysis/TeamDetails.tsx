@@ -40,6 +40,8 @@ import {
 } from "@/redux/features/academy/academyApi";
 import { useGetAllCoachesQuery } from "@/redux/features/coach/coachApi";
 import { useGetPlayersQuery } from "@/redux/features/player/playerApi";
+import { useGetMySubscriptionQuery } from "@/redux/features/subscription/subscriptionApi";
+import { toast } from "sonner";
 import {
   ITeamRosterCoachItem,
   ITeamRosterPlayerItem,
@@ -134,6 +136,9 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
   const coaches: ITeamRosterCoachItem[] = rosterData?.coaches || [];
   const players: ITeamRosterPlayerItem[] = rosterData?.players || [];
 
+  const { data: subscriptionResponse } = useGetMySubscriptionQuery();
+  const hasActiveSubscription = Boolean(subscriptionResponse?.data?.hasActiveSubscription);
+
   const coachesList: ICoachListItem[] = coachesData?.data || [];
   const allPlayersList: any[] = playersResponse?.data || [];
 
@@ -188,6 +193,14 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
     e.preventDefault();
     if (!selectedCoachId || !team?._id) return;
 
+    if (!hasActiveSubscription && (summary?.coachesCount ?? coaches.length) >= 1) {
+      toast.error(
+        "Free Plan allows a maximum of 1 coach. Upgrade to Elite Plan for unlimited coaches."
+      );
+      router.push("/dashboard/academy/analysis/my-subscription");
+      return;
+    }
+
     try {
       await assignCoach({
         teamId: team._id,
@@ -209,6 +222,14 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
   const onAssignPlayerSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPlayerId || !team?._id) return;
+
+    if (!hasActiveSubscription && (summary?.playersCount ?? players.length) >= 16) {
+      toast.error(
+        "Free Plan allows a maximum of 16 players. Upgrade to Elite Plan for unlimited players."
+      );
+      router.push("/dashboard/academy/analysis/my-subscription");
+      return;
+    }
 
     try {
       await assignPlayer({
@@ -313,8 +334,11 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
   const isTeamActive = (team.status || "ACTIVE").toUpperCase() === "ACTIVE";
   const coachCapacityPercentage = summary?.maxCoaches ? Math.min(100, Math.round(((summary.coachesCount || 0) / summary.maxCoaches) * 100)) : 0;
   const playerCapacityPercentage = summary?.maxPlayers ? Math.min(100, Math.round(((summary.playersCount || 0) / summary.maxPlayers) * 100)) : 0;
-  const canAssignCoach = (summary?.availableCoachSlots ?? 1) > 0;
-  const canAssignPlayer = (summary?.availablePlayerSlots ?? 1) > 0;
+  
+  const isCoachLimitReached = !hasActiveSubscription && (summary?.coachesCount ?? coaches.length) >= 1;
+  const isPlayerLimitReached = !hasActiveSubscription && (summary?.playersCount ?? players.length) >= 16;
+  const canAssignCoach = !isCoachLimitReached && (summary?.availableCoachSlots ?? 1) > 0;
+  const canAssignPlayer = !isPlayerLimitReached && (summary?.availablePlayerSlots ?? 1) > 0;
 
   return (
     <div className="flex flex-col gap-6 sm:gap-8 pb-16 w-full max-w-full overflow-hidden">

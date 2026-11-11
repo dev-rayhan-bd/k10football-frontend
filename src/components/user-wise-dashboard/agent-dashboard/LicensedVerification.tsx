@@ -32,17 +32,17 @@ const defaultUploadSlots = [
   {
     fileKey: "licenseCertificateDocument",
     title: "License Certificate",
-    description: "PDF, JPG, PNG (Max 10MB)",
+    description: "PDF, JPG, PNG",
   },
   {
     fileKey: "identityDocument",
     title: "National ID / Passport",
-    description: "PDF, JPG, PNG (Max 10MB)",
+    description: "PDF, JPG, PNG",
   },
   {
     fileKey: "associationMembershipDocument",
     title: "Association Membership",
-    description: "PDF, JPG, PNG (Max 10MB)",
+    description: "PDF, JPG, PNG",
   },
 ];
 
@@ -70,10 +70,6 @@ const AgentVerification = () => {
 
   const handleFileSelect = (fileKey: string, file: File | null) => {
     if (!file) return;
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("File is too large. Max size is 10MB.");
-      return;
-    }
     setSelectedFiles((prev) => ({ ...prev, [fileKey]: file }));
   };
 
