@@ -133,25 +133,33 @@ export const CoachProfileImage = ({ canEdit }: { canEdit: boolean }) => {
       {/* Player Name */}
       <div className="text-center mb-8">
         <div className="flex items-center mb-8 justify-center">
-          <div className="relative w-32 h-20">
-            <Image
-              src={getFlagUrl(coachData.birthCountry)}
-              alt="Birth Country"
-              width={100}
-              height={100}
-              className="object-cover rounded shadow-lg border border-border"
-            />
-            {coachData.dualNationality && (
-              <div className="absolute -bottom-2 -right-2 w-12 h-8 border-2 border-white rounded shadow-md overflow-hidden">
-                <Image
-                  src={getFlagUrl(coachData.dualNationality)}
-                  alt="Dual Nationality"
-                  layout="fill"
-                  className="object-cover"
-                />
-              </div>
-            )}
-          </div>
+          {coachData.birthCountry && getFlagUrl(coachData.birthCountry) ? (
+            <div className="relative w-32 h-20">
+              <Image
+                src={getFlagUrl(coachData.birthCountry)}
+                alt="Birth Country"
+                width={100}
+                height={100}
+                className="object-cover rounded shadow-lg border border-border"
+              />
+              {coachData.dualNationality && getFlagUrl(coachData.dualNationality) ? (
+                <div className="absolute -bottom-2 -right-2 w-12 h-8 border-2 border-white rounded shadow-md overflow-hidden">
+                  <Image
+                    src={getFlagUrl(coachData.dualNationality)}
+                    alt="Dual Nationality"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <div className="h-10 flex items-center justify-center">
+              <span className="text-xs text-white/40 uppercase tracking-widest font-bold">
+                {coachData.birthCountry || "No Country Selected"}
+              </span>
+            </div>
+          )}
         </div>
 
         <h1 className="text-2xl font-bold font-heading mb-2 uppercase flex items-center justify-center gap-2">

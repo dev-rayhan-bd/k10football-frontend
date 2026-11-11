@@ -72,6 +72,8 @@ const TagTypes = {
     adminSuccessStories: "AdminSuccessStories",
     SUBSCRIPTION: "Subscription",
     subscription: "Subscription",
+    NOTIFICATIONS: "Notifications",
+    notifications: "Notifications",
 } as const;
 
 export default TagTypes;

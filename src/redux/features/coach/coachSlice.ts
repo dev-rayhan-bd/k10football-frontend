@@ -72,7 +72,7 @@ export interface CoachData {
   majorTrophies: { id?: string; name: string; count: number; year?: number }[];
   cupHistory: string[];
   keySkills: { id: string | number; text: string; icon?: string; isCustom?: boolean }[];
-  clubs: { id: string; name: string; from: string; to: string; logo?: any; color?: string; role?: string; isCurrent?: boolean }[];
+  clubs: { id: string; _id?: string; name: string; from: string; to: string; logo?: any; color?: string; role?: string; isCurrent?: boolean }[];
   qualifications: { id: number; text: string; icon?: string }[];
   accomplishments: { id?: string; text: string }[];
   coachImage: any;
@@ -91,95 +91,63 @@ export interface CoachData {
 }
 
 const initialState: CoachData = {
-  overallRatingScore: 88,
+  overallRatingScore: 0,
   status: "ACTIVE",
   coachType: "INDIVIDUAL_COACH",
-  fullName: "Marcus Silva",
-  title: "Head Coach",
-  yearsExperience: 15,
+  fullName: "",
+  title: "Coach",
+  yearsExperience: 0,
   cvTier: "BRONZE",
-  profileCompletion: 100,
-  completionPercentage: 100,
-  speciality: "Tactical Coaching",
-  licenseStatus: "UEFA Pro Licence",
-  currentClub: "Kings Football Academy",
+  profileCompletion: 0,
+  completionPercentage: 0,
+  speciality: "",
+  licenseStatus: "",
+  currentClub: "",
   clubLogo: "",
   profileImage: "",
   coverImage: "",
-  validationStatus: "15 days until re-validation",
+  validationStatus: "",
   revalidationRequested: false,
   tierStatus: {
     currentTier: "BRONZE",
-    profileCompletion: 100,
-    completionPercentage: 100,
-    label: "COMPLETE ALL SECTIONS TO UNLOCK GOLD TIER STATUS",
+    profileCompletion: 0,
+    completionPercentage: 0,
+    label: "COMPLETE ALL MANDATORY SECTIONS TO UNLOCK TIER STATUS",
     canRequestRevalidation: true,
   },
-  dob: "15/03/1996",
-  age: "24",
-  birthCountry: "France",
-  birthCountryFlag: flagFr,
-  dualNationality: "Italy",
-  dualNationalityFlag: flagIt,
-  email: "marcus.silva@email.com",
-  phone: "+351 912 345 678",
-  location: "France",
-  website: "www.k10football.com",
-  languages: [
-    { name: "English", level: "FLUENT", color: "text-primary" },
-    { name: "Portuguese", level: "NATIVE", color: "text-yellow" },
-    { name: "Spanish", level: "INTERMEDIATE", color: "text-orange" },
-  ],
+  dob: "",
+  age: "",
+  birthCountry: "",
+  birthCountryFlag: null,
+  dualNationality: "",
+  dualNationalityFlag: null,
+  email: "",
+  phone: "",
+  location: "",
+  website: "",
+  languages: [],
   seasonStats: {
-    matches: 32,
-    wins: 21,
-    losses: 7,
-    draws: 4,
-    winRate: 66,
-    cleanSheets: 12,
+    matches: 0,
+    wins: 0,
+    losses: 0,
+    draws: 0,
+    winRate: 0,
+    cleanSheets: 0,
   },
   transferStatus: "Active",
   statusBadge: "Active",
-  contractUntil: "June, 2026",
-  agent: "John Morris...",
-  agency: "Elite Sports Management",
-  salary: "$ 20,000.00",
-  majorTrophies: [
-    { name: "K10 Football Championship", count: 3, year: 2022 },
-  ],
+  contractUntil: "",
+  agent: "",
+  agency: "",
+  salary: "",
+  majorTrophies: [],
   coachImage: coachStyleImage,
   mainFlag: flagImage,
-  cupHistory: [
-    "2021 - K10 FOOTBALL LEAGUE - K10 FOOTBALL FC",
-  ],
-  keySkills: [
-    { id: 1, text: "Goal setting and performance monitoring", icon: "trending-up" },
-    { id: 2, text: "Discipline and accountability management", icon: "award" },
-    { id: 3, text: "Staff coordination and delegation", icon: "users" },
-    { id: 4, text: "Motivational leadership", icon: "bookmark" },
-    { id: 5, text: "Adaptability and resilience", icon: "sparkles" },
-    { id: 6, text: "Patience and professionalism", icon: "star" },
-    { id: 7, text: "Strong work ethic", icon: "activity" },
-    { id: 8, text: "Strategic thinking", icon: "target" },
-    { id: 9, text: "Problem-solving ability", icon: "sparkles" },
-  ],
-  clubs: [
-    { id: "1", name: "Kings Football Academy", from: "2026", to: "Present", role: "Head Coach", isCurrent: true, logo: clubImage },
-    { id: "2", name: "Manchester City", from: "2020", to: "Present", role: "Head Coach", isCurrent: false, logo: clubImage },
-    { id: "3", name: "Chelsea FC", from: "2018", to: "2020", role: "Assistant Coach", isCurrent: false, logo: clubImage },
-  ],
-  qualifications: [
-    {
-      id: 1,
-      text: "Strong communication skills, empathy and high expectations combine to create strong individuals and winning teams.",
-      icon: "users",
-    },
-  ],
-  accomplishments: [
-    {
-      text: "Strong communication skills, empathy and high expectations combine to create strong individuals and winning teams.",
-    },
-  ],
+  cupHistory: [],
+  keySkills: [],
+  clubs: [],
+  qualifications: [],
+  accomplishments: [],
   selectedStyleIds: ["tiki-taka", "motivator", "youth-development"],
   complementaryLogos: [
     { id: 1, name: 'Logo 1', image: courseLogo1 },
@@ -269,71 +237,71 @@ export const coachSlice = createSlice({
       const data = action.payload;
       if (!data) return;
 
-      if (data._id) state._id = data._id;
-      if (data.userId) state.userId = data.userId;
+      if (data._id !== undefined) state._id = data._id;
+      if (data.userId !== undefined) state.userId = data.userId;
       if (data.overallRatingScore !== undefined) state.overallRatingScore = data.overallRatingScore;
-      if (data.status) state.status = data.status;
-      if (data.coachType) state.coachType = data.coachType;
-      if (data.fullName) state.fullName = data.fullName;
-      if (data.title) state.title = data.title;
+      if (data.status !== undefined) state.status = data.status;
+      if (data.coachType !== undefined) state.coachType = data.coachType;
+      if (data.fullName !== undefined) state.fullName = data.fullName;
+      if (data.title !== undefined) state.title = data.title;
       if (data.yearsExperience !== undefined) state.yearsExperience = data.yearsExperience;
-      if (data.cvTier) state.cvTier = data.cvTier;
+      if (data.cvTier !== undefined) state.cvTier = data.cvTier;
       if (data.profileCompletion !== undefined) state.profileCompletion = data.profileCompletion;
       if (data.completionPercentage !== undefined) state.completionPercentage = data.completionPercentage;
-      if (data.speciality) state.speciality = data.speciality;
-      if (data.licenseStatus) state.licenseStatus = data.licenseStatus;
-      if (data.currentClub) state.currentClub = data.currentClub;
-      if (data.clubLogo) state.clubLogo = data.clubLogo;
-      if (data.profileImage) {
+      if (data.speciality !== undefined) state.speciality = data.speciality;
+      if (data.licenseStatus !== undefined) state.licenseStatus = data.licenseStatus;
+      if (data.currentClub !== undefined) state.currentClub = data.currentClub;
+      if (data.clubLogo !== undefined) state.clubLogo = data.clubLogo;
+      if (data.profileImage !== undefined) {
         state.profileImage = data.profileImage;
         state.coachImage = data.profileImage;
       }
-      if (data.coverImage) state.coverImage = data.coverImage;
-      if (data.validationStatus) state.validationStatus = data.validationStatus;
+      if (data.coverImage !== undefined) state.coverImage = data.coverImage;
+      if (data.validationStatus !== undefined) state.validationStatus = data.validationStatus;
       if (data.revalidationRequested !== undefined) state.revalidationRequested = data.revalidationRequested;
-      if (data.tierStatus) state.tierStatus = data.tierStatus;
+      if (data.tierStatus !== undefined) state.tierStatus = data.tierStatus;
 
       // Personal Info
       if (data.personalInformation) {
         const pi = data.personalInformation;
-        if (pi.fullName) state.fullName = pi.fullName;
-        if (pi.dateOfBirth) state.dob = pi.dateOfBirth;
-        if (pi.age !== undefined) state.age = String(pi.age);
-        if (pi.birthCountry) state.birthCountry = pi.birthCountry;
-        if (pi.dualNationality) state.dualNationality = pi.dualNationality;
+        if (pi.fullName !== undefined) state.fullName = pi.fullName;
+        if (pi.dateOfBirth !== undefined) state.dob = pi.dateOfBirth || "";
+        if (pi.age !== undefined) state.age = pi.age !== null && pi.age !== undefined ? String(pi.age) : "";
+        if (pi.birthCountry !== undefined) state.birthCountry = pi.birthCountry || "";
+        if (pi.dualNationality !== undefined) state.dualNationality = pi.dualNationality || "";
       }
 
       // Contact
       if (data.contact) {
         const c = data.contact;
-        if (c.email) state.email = c.email;
-        if (c.phone) state.phone = c.phone;
-        if (c.location) state.location = c.location;
-        if (c.website) state.website = c.website;
+        if (c.email !== undefined) state.email = c.email || "";
+        if (c.phone !== undefined) state.phone = c.phone || "";
+        if (c.location !== undefined) state.location = c.location || "";
+        if (c.website !== undefined) state.website = c.website || "";
       }
 
       // Season Stats
       if (data.seasonStats) {
         const s = data.seasonStats;
         state.seasonStats = {
-          matches: s.matchesCoached ?? s.matches ?? state.seasonStats.matches,
-          wins: s.totalWins ?? s.wins ?? state.seasonStats.wins,
-          losses: s.losses ?? state.seasonStats.losses,
-          draws: s.draws ?? state.seasonStats.draws,
-          winRate: s.winRate ?? state.seasonStats.winRate ?? 0,
-          cleanSheets: s.cleanSheets ?? state.seasonStats.cleanSheets,
+          matches: s.matchesCoached ?? s.matches ?? state.seasonStats?.matches ?? 0,
+          wins: s.totalWins ?? s.wins ?? state.seasonStats?.wins ?? 0,
+          losses: s.losses ?? state.seasonStats?.losses ?? 0,
+          draws: s.draws ?? state.seasonStats?.draws ?? 0,
+          winRate: s.winRate ?? state.seasonStats?.winRate ?? 0,
+          cleanSheets: s.cleanSheets ?? state.seasonStats?.cleanSheets ?? 0,
         };
       }
 
       // Transfer Status
       if (data.transferStatus) {
         const t = data.transferStatus;
-        state.transferStatus = t.statusBadge || t.footballAgentContract || state.transferStatus;
-        if (t.statusBadge) state.statusBadge = t.statusBadge;
-        if (t.contractUntil) state.contractUntil = t.contractUntil;
-        if (t.agent) state.agent = t.agent;
-        if (t.agency) state.agency = t.agency;
-        if (t.salary) state.salary = t.salary;
+        state.transferStatus = t.statusBadge || t.footballAgentContract || state.transferStatus || "";
+        if (t.statusBadge !== undefined) state.statusBadge = t.statusBadge;
+        if (t.contractUntil !== undefined) state.contractUntil = t.contractUntil || "";
+        if (t.agent !== undefined) state.agent = t.agent || "";
+        if (t.agency !== undefined) state.agency = t.agency || "";
+        if (t.salary !== undefined) state.salary = t.salary || "";
       }
 
       // Languages
@@ -389,16 +357,17 @@ export const coachSlice = createSlice({
       }
 
       // Club History
-      if (Array.isArray(data.clubHistory) && data.clubHistory.length > 0) {
+      if (Array.isArray(data.clubHistory)) {
         state.clubs = data.clubHistory.map((c: any, i: number) => {
           const periods = (c.period || "").split("-").map((s: string) => s.trim());
           return {
             id: c._id || String(i + 1),
+            _id: c._id,
             name: c.clubName || c.name || "",
             from: periods[0] || String(c.startYear || "2020"),
             to: periods[1] || (c.isCurrent ? "Present" : String(c.endYear || "2022")),
             logo: c.logoUrl || c.logo || clubImage,
-            color: "border-blue-500",
+            color: "border-primary",
             role: c.role || "Coach",
             isCurrent: c.isCurrent ?? false,
           };

@@ -28,36 +28,38 @@ export const PlayerCenterCard = ({
       {/* Player Name & Flags */}
       <div className="text-center mb-6 sm:mb-8 w-full min-w-0">
         <div className="flex items-center mb-6 sm:mb-8 justify-center w-full min-w-0">
-          <div className="relative w-24 h-16 sm:w-32 sm:h-20 shrink-0">
-            <Image
-              src={getFlagUrl(playerData.birthCountry)}
-              alt="Birth Country"
-              width={200}
-              height={200}
-              className="object-cover rounded shadow-lg border border-border"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.srcset = "";
-                target.src = "/placeholder_img.jpg";
-              }}
-            />
-            {playerData.dualNationality && (
-              <div className="absolute -bottom-2 -right-2 w-10 h-6 sm:w-12 sm:h-8 border-2 border-white rounded shadow-md overflow-hidden">
-                <Image
-                  src={getFlagUrl(playerData.dualNationality)}
-                  alt="Dual Nationality"
-                  width={200}
-                  height={200}
-                  className="object-cover rounded shadow-lg border border-border"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.srcset = "";
-                    target.src = "/placeholder_img.jpg";
-                  }}
-                />
-              </div>
-            )}
-          </div>
+          {playerData.birthCountry && getFlagUrl(playerData.birthCountry) ? (
+            <div className="relative w-24 h-16 sm:w-32 sm:h-20 shrink-0">
+              <Image
+                src={getFlagUrl(playerData.birthCountry)}
+                alt="Birth Country"
+                width={200}
+                height={200}
+                className="object-cover rounded shadow-lg border border-border"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.srcset = "";
+                  target.src = "/placeholder_img.jpg";
+                }}
+              />
+              {playerData.dualNationality && getFlagUrl(playerData.dualNationality) ? (
+                <div className="absolute -bottom-2 -right-2 w-10 h-6 sm:w-12 sm:h-8 border-2 border-white rounded shadow-md overflow-hidden">
+                  <Image
+                    src={getFlagUrl(playerData.dualNationality)}
+                    alt="Dual Nationality"
+                    width={200}
+                    height={200}
+                    className="object-cover rounded shadow-lg border border-border"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.srcset = "";
+                      target.src = "/placeholder_img.jpg";
+                    }}
+                  />
+                </div>
+              ) : null}
+            </div>
+          ) : null}
         </div>
         <h1 className="text-xl sm:text-2xl font-bold font-heading mb-2 flex flex-wrap items-center justify-center gap-2 w-full min-w-0">
           <CMSField

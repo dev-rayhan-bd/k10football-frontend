@@ -21,6 +21,14 @@ import {
 
 export const coachApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
+        getMyCoachProfile: builder.query<any, void>({
+            query: () => ({
+                url: "/coaches/me",
+                method: "GET",
+            }),
+            providesTags: [TagTypes.COACHES, TagTypes.PROFILE],
+        }),
+
         getMyCoachCv: builder.query<ICoachCvResponse, void>({
             query: () => ({
                 url: "/coaches/me/cv",
@@ -88,6 +96,143 @@ export const coachApi = apiSlice.injectEndpoints({
                 } catch (err: any) {
                     const status = err?.error?.status;
                     const message = err?.error?.data?.message || "Failed to update coach profile";
+                    if (status === 500) {
+                        ErrorToast("Something went wrong on the server");
+                        return;
+                    }
+                    if (status !== 401) {
+                        ErrorToast(message);
+                    }
+                }
+            },
+        }),
+
+        addCoachClub: builder.mutation<any, FormData | { data?: any; image?: File | null; [key: string]: any }>({
+            query: (payload) => {
+                let body: any = payload;
+                if (typeof window !== "undefined" && !(payload instanceof FormData)) {
+                    const formData = new FormData();
+                    if ((payload as any)?.image instanceof File) {
+                        formData.append("image", (payload as any).image);
+                    }
+                    if (typeof (payload as any)?.data === "string") {
+                        formData.append("data", (payload as any).data);
+                    } else if (typeof (payload as any)?.data === "object" && (payload as any).data !== null) {
+                        formData.append("data", JSON.stringify((payload as any).data));
+                    } else if (typeof payload === "object" && payload !== null) {
+                        const { image, ...rest } = payload as any;
+                        formData.append("data", JSON.stringify(rest));
+                    }
+                    body = formData;
+                }
+                return {
+                    url: "/coaches/me/clubs",
+                    method: "POST",
+                    body,
+                };
+            },
+            invalidatesTags: (result) => {
+                if (result?.success || !result?.error) {
+                    return [TagTypes.COACHES, TagTypes.PROFILE];
+                }
+                return [];
+            },
+            async onQueryStarted(_arg, { queryFulfilled }) {
+                try {
+                    const { data } = await queryFulfilled;
+                    SuccessToast(data?.message || "Club added successfully");
+                } catch (err: any) {
+                    const status = err?.error?.status;
+                    const message =
+                        err?.error?.data?.message ||
+                        err?.error?.data?.errorSources?.[0]?.message ||
+                        err?.error?.message ||
+                        "Failed to add club";
+                    if (status === 500) {
+                        ErrorToast("Something went wrong on the server");
+                        return;
+                    }
+                    if (status !== 401) {
+                        ErrorToast(message);
+                    }
+                }
+            },
+        }),
+
+        updateCoachClub: builder.mutation<any, { clubId: string; data: FormData | { data?: any; image?: File | null; [key: string]: any } | any }>({
+            query: ({ clubId, data }) => {
+                let body: any = data;
+                if (typeof window !== "undefined" && !(data instanceof FormData)) {
+                    const formData = new FormData();
+                    if ((data as any)?.image instanceof File) {
+                        formData.append("image", (data as any).image);
+                    }
+                    if (typeof (data as any)?.data === "string") {
+                        formData.append("data", (data as any).data);
+                    } else if (typeof (data as any)?.data === "object" && (data as any).data !== null) {
+                        formData.append("data", JSON.stringify((data as any).data));
+                    } else if (typeof data === "object" && data !== null) {
+                        const { image, ...rest } = data as any;
+                        formData.append("data", JSON.stringify(rest));
+                    }
+                    body = formData;
+                }
+                return {
+                    url: `/coaches/me/clubs/${clubId}`,
+                    method: "PATCH",
+                    body,
+                };
+            },
+            invalidatesTags: (result) => {
+                if (result?.success || !result?.error) {
+                    return [TagTypes.COACHES, TagTypes.PROFILE];
+                }
+                return [];
+            },
+            async onQueryStarted(_arg, { queryFulfilled }) {
+                try {
+                    const { data } = await queryFulfilled;
+                    SuccessToast(data?.message || "Club updated successfully");
+                } catch (err: any) {
+                    const status = err?.error?.status;
+                    const message =
+                        err?.error?.data?.message ||
+                        err?.error?.data?.errorSources?.[0]?.message ||
+                        err?.error?.message ||
+                        "Failed to update club";
+                    if (status === 500) {
+                        ErrorToast("Something went wrong on the server");
+                        return;
+                    }
+                    if (status !== 401) {
+                        ErrorToast(message);
+                    }
+                }
+            },
+        }),
+
+        deleteCoachClub: builder.mutation<any, string>({
+            query: (clubId) => ({
+                url: `/coaches/me/clubs/${clubId}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: (result) => {
+                if (result?.success || !result?.error) {
+                    return [TagTypes.COACHES, TagTypes.PROFILE];
+                }
+                return [];
+            },
+            async onQueryStarted(_arg, { queryFulfilled }) {
+                try {
+                    const { data } = await queryFulfilled;
+                    SuccessToast(data?.message || "Club deleted successfully");
+                } catch (err: any) {
+                    const status = err?.error?.status;
+                    const message =
+                        err?.error?.data?.message ||
+                        err?.error?.data?.errorSources?.[0]?.message ||
+                        err?.error?.message ||
+                        "Failed to delete club";
                     if (status === 500) {
                         ErrorToast("Something went wrong on the server");
                         return;
@@ -513,9 +658,14 @@ export const coachApi = apiSlice.injectEndpoints({
 });
 
 export const {
+    useGetMyCoachProfileQuery,
+    useLazyGetMyCoachProfileQuery,
     useGetMyCoachCvQuery,
     useLazyGetMyCoachCvQuery,
     useUpdateMyCoachProfileMutation,
+    useAddCoachClubMutation,
+    useUpdateCoachClubMutation,
+    useDeleteCoachClubMutation,
     useUploadCoachDocumentMutation,
     useDeleteCoachDocumentMutation,
     useUpdateCoachDocumentMutation,

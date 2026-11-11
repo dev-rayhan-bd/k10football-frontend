@@ -51,14 +51,16 @@ export const ViewPlayerBioSection = () => {
                 <span className="text-gray-400 shrink-0">Birth Country</span>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="text-white">{playerData.birthCountry}</span>
-                  <div className="relative size-4 sm:w-5 sm:h-3.5 overflow-hidden rounded-sm border border-border shrink-0">
-                    <Image
-                      src={getFlagUrl(playerData.birthCountry)}
-                      alt={playerData.birthCountry}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
+                  {playerData.birthCountry && getFlagUrl(playerData.birthCountry) ? (
+                    <div className="relative size-4 sm:w-5 sm:h-3.5 overflow-hidden rounded-sm border border-border shrink-0">
+                      <Image
+                        src={getFlagUrl(playerData.birthCountry)}
+                        alt={playerData.birthCountry}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  ) : null}
                 </div>
               </div>
               {playerData.dualNationality && (
@@ -66,14 +68,16 @@ export const ViewPlayerBioSection = () => {
                   <span className="text-gray-400 shrink-0">Dual Nationality</span>
                   <div className="flex items-center gap-2 shrink-0">
                     <span className="text-white">{playerData.dualNationality}</span>
-                    <div className="relative size-4 sm:w-5 sm:h-3.5 overflow-hidden rounded-sm border border-border shrink-0">
-                      <Image
-                        src={getFlagUrl(playerData.dualNationality)}
-                        alt={playerData.dualNationality}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
+                    {getFlagUrl(playerData.dualNationality) ? (
+                      <div className="relative size-4 sm:w-5 sm:h-3.5 overflow-hidden rounded-sm border border-border shrink-0">
+                        <Image
+                          src={getFlagUrl(playerData.dualNationality)}
+                          alt={playerData.dualNationality}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               )}
@@ -184,26 +188,28 @@ export const ViewPlayerBioSection = () => {
           {/* Flags & Player Name */}
           <div className="text-center mb-6 sm:mb-8 w-full min-w-0">
             <div className="flex items-center mb-6 sm:mb-8 justify-center w-full min-w-0">
-              <div className="relative w-24 h-16 sm:w-32 sm:h-20 shrink-0">
-                <Image
-                  src={getFlagUrl(playerData.birthCountry)}
-                  alt="Birth Country"
-                  width={200}
-                  height={200}
-                  className="object-cover rounded shadow-lg border border-border"
-                />
-                {playerData.dualNationality && (
-                  <div className="absolute -bottom-2 -right-2 w-10 h-6 sm:w-12 sm:h-8 border-2 border-white rounded shadow-md overflow-hidden">
-                    <Image
-                      src={getFlagUrl(playerData.dualNationality)}
-                      alt="Dual Nationality"
-                      width={200}
-                      height={200}
-                      className="object-cover rounded shadow-lg border border-border"
-                    />
-                  </div>
-                )}
-              </div>
+              {playerData.birthCountry && getFlagUrl(playerData.birthCountry) ? (
+                <div className="relative w-24 h-16 sm:w-32 sm:h-20 shrink-0">
+                  <Image
+                    src={getFlagUrl(playerData.birthCountry)}
+                    alt="Birth Country"
+                    width={200}
+                    height={200}
+                    className="object-cover rounded shadow-lg border border-border"
+                  />
+                  {playerData.dualNationality && getFlagUrl(playerData.dualNationality) ? (
+                    <div className="absolute -bottom-2 -right-2 w-10 h-6 sm:w-12 sm:h-8 border-2 border-white rounded shadow-md overflow-hidden">
+                      <Image
+                        src={getFlagUrl(playerData.dualNationality)}
+                        alt="Dual Nationality"
+                        width={200}
+                        height={200}
+                        className="object-cover rounded shadow-lg border border-border"
+                      />
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
             <h1 className="text-xl sm:text-2xl font-bold font-heading mb-2 flex flex-wrap items-center justify-center gap-2 w-full min-w-0">
               <span className="text-white uppercase tracking-tight">{playerData.fullName}</span>

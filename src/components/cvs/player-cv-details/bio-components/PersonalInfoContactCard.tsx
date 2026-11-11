@@ -69,19 +69,21 @@ export const PersonalInfoContactCard = ({
                 className="w-20 sm:w-24 justify-end min-w-0"
                 inputClassName="text-right w-full min-w-0 truncate text-[10px] sm:text-sm"
               />
-              <div className="relative w-5 h-3.5 sm:w-6 sm:h-4 overflow-hidden rounded-sm border border-border shrink-0">
-                <Image
-                  src={getFlagUrl(playerData.birthCountry)}
-                  alt="birth country flag"
-                  layout="fill"
-                  className="object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.srcset = "";
-                    target.src = "/placeholder_img.jpg";
-                  }}
-                />
-              </div>
+              {playerData.birthCountry && getFlagUrl(playerData.birthCountry) ? (
+                <div className="relative w-5 h-3.5 sm:w-6 sm:h-4 overflow-hidden rounded-sm border border-border shrink-0">
+                  <Image
+                    src={getFlagUrl(playerData.birthCountry)}
+                    alt="birth country flag"
+                    fill
+                    className="object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.srcset = "";
+                      target.src = "/placeholder_img.jpg";
+                    }}
+                  />
+                </div>
+              ) : null}
             </div>
           </div>
           <div className="flex justify-between items-center gap-2 w-full min-w-0">
@@ -96,19 +98,21 @@ export const PersonalInfoContactCard = ({
                 className="w-20 sm:w-24 justify-end min-w-0"
                 inputClassName="text-right w-full min-w-0 truncate text-[10px] sm:text-sm"
               />
-              <div className="relative w-5 h-3.5 sm:w-6 sm:h-4 overflow-hidden rounded-sm border border-border shrink-0">
-                <Image
-                  src={getFlagUrl(playerData.dualNationality)}
-                  alt="dual nationality flag"
-                  layout="fill"
-                  className="object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.srcset = "";
-                    target.src = "/placeholder_img.jpg";
-                  }}
-                />
-              </div>
+              {playerData.dualNationality && getFlagUrl(playerData.dualNationality) ? (
+                <div className="relative w-5 h-3.5 sm:w-6 sm:h-4 overflow-hidden rounded-sm border border-border shrink-0">
+                  <Image
+                    src={getFlagUrl(playerData.dualNationality)}
+                    alt="dual nationality flag"
+                    fill
+                    className="object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.srcset = "";
+                      target.src = "/placeholder_img.jpg";
+                    }}
+                  />
+                </div>
+              ) : null}
             </div>
           </div>
           <div className="flex justify-between items-center gap-2 w-full min-w-0">

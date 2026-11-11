@@ -60,15 +60,17 @@ export const CoachPersonalInfo = ({ canEdit }: { canEdit: boolean }) => {
                 className="flex-1 justify-end min-w-0 text-right"
                 inputClassName="text-right w-full truncate"
               />
-              <div className="relative w-6 h-4 overflow-hidden rounded-sm border border-border shrink-0">
-                <Image
-                  src={getFlagUrl(coachData.birthCountry)}
-                  alt="birth country flag"
-                  width={24}
-                  height={16}
-                  className="object-cover"
-                />
-              </div>
+              {coachData.birthCountry && getFlagUrl(coachData.birthCountry) ? (
+                <div className="relative w-6 h-4 overflow-hidden rounded-sm border border-border shrink-0">
+                  <Image
+                    src={getFlagUrl(coachData.birthCountry)}
+                    alt="birth country flag"
+                    width={24}
+                    height={16}
+                    className="object-cover"
+                  />
+                </div>
+              ) : null}
             </div>
           </div>
           <div className="flex justify-between items-center gap-2 sm:gap-4">
@@ -83,15 +85,17 @@ export const CoachPersonalInfo = ({ canEdit }: { canEdit: boolean }) => {
                 className="flex-1 justify-end min-w-0 text-right"
                 inputClassName="text-right w-full truncate"
               />
-              <div className="relative w-6 h-4 overflow-hidden rounded-sm border border-border shrink-0">
-                <Image
-                  src={getFlagUrl(coachData.dualNationality)}
-                  alt="dual nationality flag"
-                  width={24}
-                  height={16}
-                  className="object-cover"
-                />
-              </div>
+              {coachData.dualNationality && getFlagUrl(coachData.dualNationality) ? (
+                <div className="relative w-6 h-4 overflow-hidden rounded-sm border border-border shrink-0">
+                  <Image
+                    src={getFlagUrl(coachData.dualNationality)}
+                    alt="dual nationality flag"
+                    width={24}
+                    height={16}
+                    className="object-cover"
+                  />
+                </div>
+              ) : null}
             </div>
           </div>
         </div>

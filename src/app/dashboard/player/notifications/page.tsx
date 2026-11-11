@@ -1,9 +1,9 @@
 "use client";
 import React from "react";
-import PlayerNotifications from "@/components/user-wise-dashboard/player-dashboard/Notifications";
+import NotificationsView from "@/components/notifications/NotificationsView";
 
 const NotificationsPage = () => {
-  return <PlayerNotifications />;
+  return <NotificationsView />;
 };
 
 export default NotificationsPage;
