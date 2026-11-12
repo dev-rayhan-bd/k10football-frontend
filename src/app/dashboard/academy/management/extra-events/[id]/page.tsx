@@ -13,7 +13,16 @@ import {
   TOURNAMENT_PRESET_LOGOS, 
   CLUB_PRESET_LOGOS 
 } from "@/components/user-wise-dashboard/academy-management/ExtraEvents";
-import { useGetExtraEventsQuery } from "@/redux/features/academy/academyApi";
+import { 
+  useGetExtraEventsQuery,
+  useGetSingleExtraEventQuery,
+  useGetRegisteredClubsForExtraEventQuery,
+  useGetClubPlayerRosterQuery,
+  useRegisterClubForExtraEventMutation,
+  useAllocateTournamentGroupsMutation,
+  useStartTournamentMutation,
+  useGetTournamentArenaQuery,
+} from "@/redux/features/academy/academyApi";
 import { 
   IconCurrencyDollar, 
   IconUsers, 
@@ -41,129 +50,159 @@ import {
   IconSearch,
   IconSparkles,
   IconActivity,
+  IconRefresh,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import DashboardModal from "@/components/dashboard/DashboardModal";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const DEFAULT_MOCK_TEAMS = [
-  {
-    id: "team-santos",
-    name: "Santos FC Academy",
-    logoId: "club-badge-2",
-    contactName: "Fabio Santos",
-    contactEmail: "f.santos@santos.com",
-    contactPhone: "+55 13 99823-1122",
-    category: "U-8",
-    players: [
-      { name: "Gabriel Barbosa", dob: "2018-05-12", shirt: "9" },
-      { name: "Rodrygo Goes", dob: "2018-08-24", shirt: "11" },
-      { name: "Marcos Leonardo", dob: "2018-03-03", shirt: "10" }
-    ]
-  },
-  {
-    id: "team-flamengo",
-    name: "Flamengo Youth",
-    logoId: "club-badge-1",
-    contactName: "Carlos Eduardo",
-    contactEmail: "c.eduardo@flamengo.com",
-    contactPhone: "+55 21 99123-4567",
-    category: "U-8",
-    players: [
-      { name: "Vinicius Junior", dob: "2018-07-12", shirt: "7" },
-      { name: "Lucas Paqueta", dob: "2018-04-18", shirt: "10" },
-      { name: "Matheus Franca", dob: "2018-11-20", shirt: "8" }
-    ]
-  },
-  {
-    id: "team-palmeiras",
-    name: "Palmeiras Academy",
-    logoId: "club-badge-4",
-    contactName: "Leandro Silva",
-    contactEmail: "l.silva@palmeiras.com",
-    contactPhone: "+55 11 98822-3344",
-    category: "U-8",
-    players: [
-      { name: "Endrick Felipe", dob: "2018-06-21", shirt: "9" },
-      { name: "Estevao Willian", dob: "2018-04-24", shirt: "11" },
-      { name: "Luis Guilherme", dob: "2018-02-09", shirt: "10" }
-    ]
-  },
-  {
-    id: "team-saopaulo",
-    name: "São Paulo Academy",
-    logoId: "club-badge-3",
-    contactName: "Thiago Carpini",
-    contactEmail: "t.carpini@saopaulo.com",
-    contactPhone: "+55 11 97722-1133",
-    category: "U-8",
-    players: [
-      { name: "Lucas Moura", dob: "2018-08-13", shirt: "7" },
-      { name: "Beraldo Rodrigues", dob: "2018-11-24", shirt: "3" },
-      { name: "Pablo Maia", dob: "2018-01-10", shirt: "8" }
-    ]
-  },
-  {
-    id: "team-corinthians",
-    name: "Corinthians Youth",
-    logoId: "club-badge-2",
-    contactName: "Mano Menezes",
-    contactEmail: "m.menezes@corinthians.com",
-    contactPhone: "+55 11 96633-4455",
-    category: "U-8",
-    players: [
-      { name: "Wesley Gassova", dob: "2018-03-05", shirt: "11" },
-      { name: "Pedro Raul", dob: "2018-11-05", shirt: "9" },
-      { name: "Breno Bidon", dob: "2018-02-20", shirt: "10" }
-    ]
-  },
-  {
-    id: "team-fluminense",
-    name: "Fluminense FC",
-    logoId: "club-badge-1",
-    contactName: "Fernando Diniz",
-    contactEmail: "f.diniz@fluminense.com",
-    contactPhone: "+55 21 95544-3322",
-    category: "U-8",
-    players: [
-      { name: "John Kennedy", dob: "2018-05-18", shirt: "9" },
-      { name: "Alexsander Gomes", dob: "2018-10-08", shirt: "5" },
-      { name: "Arthur Wenderroscky", dob: "2018-02-24", shirt: "10" }
-    ]
-  },
-  {
-    id: "team-vasco",
-    name: "Vasco da Gama",
-    logoId: "club-badge-3",
-    contactName: "Ramon Diaz",
-    contactEmail: "r.diaz@vasco.com",
-    contactPhone: "+55 21 94455-6677",
-    category: "U-8",
-    players: [
-      { name: "Rayan Vitor", dob: "2018-08-03", shirt: "7" },
-      { name: "Marlon Gomes", dob: "2018-12-14", shirt: "8" },
-      { name: "Paulinho Paula", dob: "2018-01-08", shirt: "10" }
-    ]
-  }
-];
+const EventDetailPageSkeleton = () => (
+  <div className="max-w-6xl mx-auto py-8 px-4 flex flex-col gap-6 animate-pulse">
+    {/* DEMO ROLE SWITCHER BAR SKELETON */}
+    <div className="bg-[#161618] border border-white/10 rounded-3xl p-5 flex flex-col lg:flex-row justify-between items-center gap-4">
+      <div className="flex items-center gap-3.5 w-full lg:w-auto">
+        <Skeleton className="size-10 rounded-2xl bg-white/10 shrink-0" />
+        <div className="flex flex-col gap-2 flex-1">
+          <Skeleton className="h-4 w-48 bg-white/10 rounded" />
+          <Skeleton className="h-3 w-64 bg-white/5 rounded" />
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <Skeleton className="h-9 w-32 bg-white/10 rounded-xl" />
+        <Skeleton className="h-9 w-40 bg-white/5 rounded-xl" />
+        <Skeleton className="h-9 w-44 bg-white/5 rounded-xl" />
+      </div>
+      <Skeleton className="h-8 w-32 bg-white/10 rounded-xl shrink-0" />
+    </div>
+
+    {/* Back navigation skeleton */}
+    <Skeleton className="h-4 w-28 bg-white/10 rounded" />
+
+    {/* Main Grid: Flyer + Sidebar */}
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+      {/* Main Flyer Box Skeleton */}
+      <div className="lg:col-span-2 bg-[#111] rounded-4xl border border-white/10 overflow-hidden flex flex-col p-8 md:p-12 gap-8">
+        <div className="flex flex-col md:flex-row gap-8 items-center border-b border-white/5 pb-8">
+          <Skeleton className="size-32 md:size-36 rounded-3xl bg-white/10 shrink-0" />
+          <div className="flex flex-col gap-3 w-full">
+            <Skeleton className="h-6 w-32 rounded-xl bg-white/10" />
+            <Skeleton className="h-10 w-3/4 rounded-xl bg-white/15" />
+            <div className="flex gap-2">
+              <Skeleton className="h-7 w-32 rounded-xl bg-white/10" />
+              <Skeleton className="h-7 w-28 rounded-xl bg-white/10" />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <Skeleton className="h-24 rounded-3xl bg-white/5" />
+          <Skeleton className="h-24 rounded-3xl bg-white/5" />
+          <Skeleton className="h-24 rounded-3xl bg-white/5" />
+        </div>
+
+        <div className="flex flex-col gap-3 bg-white/5 p-6 rounded-3xl">
+          <Skeleton className="h-4 w-48 bg-white/10 rounded" />
+          <div className="flex gap-2">
+            <Skeleton className="h-8 w-16 bg-white/10 rounded-xl" />
+            <Skeleton className="h-8 w-16 bg-white/10 rounded-xl" />
+            <Skeleton className="h-8 w-16 bg-white/10 rounded-xl" />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-6 w-44 bg-white/10 rounded" />
+          <Skeleton className="h-4 w-full bg-white/5 rounded" />
+          <Skeleton className="h-4 w-5/6 bg-white/5 rounded" />
+          <Skeleton className="h-4 w-4/6 bg-white/5 rounded" />
+        </div>
+      </div>
+
+      {/* Sidebar Info Card Skeleton */}
+      <div className="flex flex-col gap-6">
+        <div className="bg-[#1C1C1C] border border-white/10 rounded-4xl p-8 flex flex-col gap-4">
+          <Skeleton className="h-6 w-44 bg-white/10 rounded" />
+          <Skeleton className="h-3 w-full bg-white/5 rounded" />
+          <Skeleton className="h-3 w-4/5 bg-white/5 rounded" />
+          <Skeleton className="h-12 w-full bg-white/10 rounded-2xl mt-2" />
+        </div>
+
+        <div className="bg-[#111] border border-white/10 rounded-4xl p-6 flex flex-col gap-3">
+          <Skeleton className="h-4 w-32 bg-white/10 rounded" />
+          <Skeleton className="h-32 w-full bg-white/5 rounded-2xl" />
+        </div>
+
+        <div className="bg-[#111] border border-white/10 rounded-4xl p-6 flex flex-col gap-3">
+          <Skeleton className="h-4 w-36 bg-white/10 rounded" />
+          <Skeleton className="h-4 w-48 bg-white/5 rounded" />
+          <Skeleton className="h-4 w-40 bg-white/5 rounded" />
+        </div>
+      </div>
+
+      {/* Participating Clubs Section Skeleton */}
+      <div className="lg:col-span-3 w-full bg-[#111] border border-white/10 rounded-4xl p-6 md:p-8 flex flex-col gap-6">
+        <div className="flex justify-between items-center border-b border-white/5 pb-4">
+          <div className="flex items-center gap-3">
+            <Skeleton className="size-6 rounded-full bg-white/10" />
+            <Skeleton className="h-6 w-56 bg-white/10 rounded" />
+            <Skeleton className="h-5 w-24 bg-white/10 rounded-full" />
+          </div>
+          <Skeleton className="h-9 w-36 bg-white/10 rounded-xl" />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="bg-black/40 border border-white/5 p-5 rounded-3xl flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <Skeleton className="size-12 rounded-full bg-white/10 shrink-0" />
+                <div className="flex flex-col gap-2 flex-1">
+                  <Skeleton className="h-4 w-3/4 bg-white/10 rounded" />
+                  <Skeleton className="h-3 w-1/2 bg-white/5 rounded" />
+                </div>
+              </div>
+              <div className="border-t border-white/5 pt-3 flex justify-between items-center">
+                <Skeleton className="h-3 w-20 bg-white/5 rounded" />
+                <Skeleton className="h-5 w-24 bg-white/10 rounded-lg" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 const EventDetailPage = () => {
-const params = useParams();
-const rawId = String(params?.id || "");
-const eventId = rawId;
-const { data: eventsResponse } = useGetExtraEventsQuery();
+  const params = useParams();
+  const rawId = String(params?.id || "");
+  const eventId = rawId;
 
-// States
-const [event, setEvent] = useState<any>(null);
-const [copied, setCopied] = useState(false);
-const [previewRole, setPreviewRole] = useState<"invited_club" | "owner_admin" | "spectator_parent">("invited_club");
+  // RTK Query: Fetch real event from API (single event or events list)
+  const { data: singleEventResponse, isLoading: isSingleLoading } = useGetSingleExtraEventQuery(rawId, {
+    skip: !rawId,
+  });
+  const { data: eventsResponse, isLoading: isEventsLoading } = useGetExtraEventsQuery();
 
-// Tournament State
-const [teams, setTeams] = useState<any[]>([]);
-const [status, setStatus] = useState<"registration" | "live" | "completed">("registration");
-const [groupA, setGroupA] = useState<string[]>([]);
-const [groupB, setGroupB] = useState<string[]>([]);
+  // RTK Query: Fetch registered clubs for this event
+  const { data: registeredClubsResponse, isLoading: isRegisteredClubsLoading } = useGetRegisteredClubsForExtraEventQuery(rawId, {
+    skip: !rawId,
+  });
 
-// Fixtures and Bracket
+  // States
+  const [event, setEvent] = useState<any>(null);
+  const [copied, setCopied] = useState(false);
+  const [previewRole, setPreviewRole] = useState<"invited_club" | "owner_admin" | "spectator_parent">("invited_club");
+
+  // Tournament State (Dynamically loaded from API/storage)
+  const [teams, setTeams] = useState<any[]>([]);
+  const [status, setStatus] = useState<"registration" | "live" | "completed">("registration");
+  const [groupA, setGroupA] = useState<string[]>([]);
+  const [groupB, setGroupB] = useState<string[]>([]);
+
+  const registeredClubsData = registeredClubsResponse?.data;
+  const totalRegisteredClubs = registeredClubsData?.totalRegistered ?? teams.length;
+  const maxClubsCapacity = registeredClubsData?.maxCapacity || event?.maxCapacity || 8;
+
+  // Fixtures and Bracket
 const [groupFixtures, setGroupFixtures] = useState<any[]>([]);
 const [semis, setSemis] = useState<any[]>([]);
 const [final, setFinal] = useState<any>(null);
@@ -184,171 +223,370 @@ const [regPlayers, setRegPlayers] = useState<Array<{ name: string; dob: string; 
 { name: "", dob: "", shirt: "" }
 ]);
 
-// Payment card states
-const [cardNumber, setCardNumber] = useState("");
-const [cardExpiry, setCardExpiry] = useState("");
-const [cardCvv, setCardCvv] = useState("");
-const [cardHolder, setCardHolder] = useState("");
-const [isPaying, setIsPaying] = useState(false);
+// Registration & Payment state
+const [regCustomLogoFile, setRegCustomLogoFile] = useState<File | null>(null);
+const [registerClub, { isLoading: isRegisteringClub }] = useRegisterClubForExtraEventMutation();
+const [allocateTournamentGroups, { isLoading: isAllocatingGroups }] = useAllocateTournamentGroupsMutation();
+const [startTournament, { isLoading: isStartingTournament }] = useStartTournamentMutation();
 const [isSuccess, setIsSuccess] = useState(false);
+
+// Unallocated teams
+const unallocatedTeams = teams.filter((t) => !groupA.includes(t.id) && !groupB.includes(t.id));
 
 // Roster View sub-modal
 const [selectedRosterTeam, setSelectedRosterTeam] = useState<any>(null);
 
-// Load event details & local storage state
-useEffect(() => {
-if (!rawId) return;
-
-const apiEvent = eventsResponse?.data?.events?.find(
-  (e: any) => String(e._id) === rawId || String(e.id) === rawId
+const selectedClubId = String(
+  selectedRosterTeam?.clubId || selectedRosterTeam?.id || selectedRosterTeam?._id || ""
 );
 
-if (apiEvent) {
-  setEvent({
-    ...apiEvent,
-    id: apiEvent._id,
-    title: apiEvent.eventName,
-    date: apiEvent.formattedDate || (apiEvent.eventDate ? new Date(apiEvent.eventDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "TBA"),
-    fee: apiEvent.feeFormatted || (apiEvent.registrationFee !== undefined ? `${apiEvent.currency || "$"} ${apiEvent.registrationFee}` : "Free"),
-    enrolled: apiEvent.capacityRatio || (apiEvent.maxCapacity ? `${apiEvent.currentAttendees || 0}/${apiEvent.maxCapacity}` : "0/0"),
-    status: apiEvent.statusBadge?.label || apiEvent.status || "Open",
-    group: apiEvent.group,
-    ageGroup: apiEvent.ageGroup,
-    targetGroup: apiEvent.targetAttendees,
-    eventType: apiEvent.eventType,
-    venueName: apiEvent.venueName,
-    address: apiEvent.venueAddress,
-    description: apiEvent.description,
-    requirements: apiEvent.requirements,
-    contactName: apiEvent.contactPerson,
-    contactPhone: apiEvent.contactPhone,
-    contactEmail: apiEvent.contactEmail,
-    bannerImage: apiEvent.bannerImage,
-  });
-} else {
-  const list = getStoredEvents();
-  const found = list.find((e: any) => String(e.id) === rawId || String(e._id) === rawId);
-  if (found) {
-    setEvent(found);
-  } else {
-    // Fallback
-    const fallbackEvent = {
-      id: rawId,
-      title: "Academy Tournament Elite",
-      date: "5 March 2026",
-      fee: "£180",
-      enrolled: "7 Teams",
-      status: "Open",
-      group: "Group A",
-      ageGroup: "U-8, U-9",
-      targetGroup: "Academy Players Only",
-      eventType: "tournament",
-      logoId: "preset-cup",
-      venueName: "London Sports Arena",
-      address: "42 Queen's Road, London",
-      description: "Standard elite-level youth tournament invitation.",
-      requirements: "Shin guards, standard credentials required.",
-      contactName: "Coach Roberto",
-      contactPhone: "+44 7123 987654",
-      contactEmail: "r.coach@k10football.com"
-    };
-    setEvent(fallbackEvent);
+// RTK Query: Fetch club player roster for the selected club
+const { 
+  data: clubRosterResponse, 
+  isLoading: isRosterLoading,
+  isFetching: isRosterFetching
+} = useGetClubPlayerRosterQuery(
+  { eventId: rawId, clubId: selectedClubId },
+  { skip: !rawId || !selectedClubId || !selectedRosterTeam }
+);
+
+const clubRosterData = clubRosterResponse?.data;
+const activeClub = clubRosterData?.club || (clubRosterData && !Array.isArray(clubRosterData) ? clubRosterData : null) || selectedRosterTeam;
+const activeRosterList: any[] = 
+  clubRosterData?.roster || 
+  clubRosterData?.players || 
+  (Array.isArray(clubRosterData) ? clubRosterData : null) || 
+  selectedRosterTeam?.players || 
+  selectedRosterTeam?.roster || 
+  [];
+
+// Dynamic API event resolution
+const apiEvent = 
+  singleEventResponse?.data?.event ||
+  singleEventResponse?.data ||
+  eventsResponse?.data?.events?.find(
+    (e: any) => String(e._id) === rawId || String(e.id) === rawId
+  );
+
+// Load dynamic event details & registered teams
+useEffect(() => {
+  if (!rawId) return;
+
+  if (apiEvent) {
+    const rawFee = apiEvent.registrationFee;
+    const currencySymbol = apiEvent.currency || "$";
+    const feeDisplay = apiEvent.feeFormatted || 
+      (rawFee !== undefined && rawFee !== null
+        ? (Number(rawFee) === 0 ? "Free" : `${currencySymbol} ${rawFee}`)
+        : "Free");
+
+    setEvent({
+      ...apiEvent,
+      id: apiEvent._id || rawId,
+      title: apiEvent.eventName || "Extra Event",
+      date: apiEvent.formattedDate || (apiEvent.eventDate ? new Date(apiEvent.eventDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "TBA"),
+      fee: feeDisplay,
+      registrationFee: rawFee ?? 0,
+      currency: currencySymbol,
+      enrolled: apiEvent.capacityRatio || (apiEvent.maxCapacity ? `${apiEvent.currentAttendees || 0}/${apiEvent.maxCapacity}` : `${apiEvent.currentAttendees || 0} Registered`),
+      status: apiEvent.statusBadge?.label || apiEvent.status || "Open",
+      group: apiEvent.group || "",
+      ageGroup: apiEvent.ageGroup || "",
+      targetGroup: apiEvent.targetAttendees || "Academy Players Only",
+      eventType: apiEvent.eventType || "tournament",
+      venueName: apiEvent.venueName || "",
+      address: apiEvent.venueAddress || "",
+      description: apiEvent.description || "",
+      requirements: apiEvent.requirements || "",
+      contactName: apiEvent.contactPerson || "",
+      contactPhone: apiEvent.contactPhone || "",
+      contactEmail: apiEvent.contactEmail || "",
+      bannerImage: apiEvent.bannerImage || "",
+    });
+
+    // Populate registered teams directly from API if present
+    const apiClubs = apiEvent.clubs || apiEvent.registeredClubs || apiEvent.teams;
+    if (Array.isArray(apiClubs) && apiClubs.length > 0) {
+      const dynamicTeams = apiClubs.map((c: any) => ({
+        id: c._id || c.clubId || c.id,
+        name: c.clubName || c.name,
+        logoId: c.badgePreset || c.logoId || "club-badge-1",
+        customLogo: c.logoUrl || c.customLogo || "",
+        coachName: c.coachName || "",
+        contactName: c.contactPerson || c.contactName || "",
+        contactEmail: c.contactEmail || "",
+        contactPhone: c.contactPhone || "",
+        category: c.category || "",
+        players: (c.roster || []).map((p: any) => ({
+          name: p.fullName || p.name,
+          dob: p.dateOfBirth || "",
+          shirt: String(p.shirtNo || p.shirt || "")
+        }))
+      }));
+      setTeams(dynamicTeams);
+    }
   }
-}
 
-// Load registered teams
-const storedTeams = localStorage.getItem(`k10_tournament_teams_${rawId}`);
-if (storedTeams) {
-  setTeams(JSON.parse(storedTeams));
-} else {
-  localStorage.setItem(`k10_tournament_teams_${rawId}`, JSON.stringify(DEFAULT_MOCK_TEAMS));
-  setTeams(DEFAULT_MOCK_TEAMS);
-}
+  // Load registered teams from storage (cleaning out legacy mock teams)
+  const storedTeams = localStorage.getItem(`k10_tournament_teams_${rawId}`);
+  if (storedTeams) {
+    try {
+      const parsed = JSON.parse(storedTeams);
+      const realTeams = parsed.filter((t: any) => 
+        !t.id?.startsWith("team-santos") && 
+        !t.id?.startsWith("team-flamengo") && 
+        !t.id?.startsWith("team-palmeiras") && 
+        !t.id?.startsWith("team-saopaulo") && 
+        !t.id?.startsWith("team-corinthians") && 
+        !t.id?.startsWith("team-fluminense") && 
+        !t.id?.startsWith("team-vasco") && 
+        !t.id?.startsWith("team-chelsea")
+      );
+      if (realTeams.length > 0) {
+        setTeams(realTeams);
+      }
+    } catch {
+      // ignore
+    }
+  }
 
-// Load status
-const storedStatus = localStorage.getItem(`k10_tournament_status_${rawId}`);
-if (storedStatus) {
-  setStatus(storedStatus as any);
-} else {
-  setStatus("registration");
-}
+  // Load status
+  const storedStatus = localStorage.getItem(`k10_tournament_status_${rawId}`);
+  if (storedStatus) {
+    setStatus(storedStatus as any);
+  } else {
+    setStatus("registration");
+  }
 
-// Load groups
-const storedGroupA = localStorage.getItem(`k10_tournament_group_a_${eventId}`);
-const storedGroupB = localStorage.getItem(`k10_tournament_group_b_${eventId}`);
-if (storedGroupA && storedGroupB) {
-  setGroupA(JSON.parse(storedGroupA));
-  setGroupB(JSON.parse(storedGroupB));
-} else {
-  const initialA = ["team-santos", "team-saopaulo", "team-palmeiras", "team-corinthians"];
-  const initialB = ["team-flamengo", "team-fluminense", "team-vasco"];
-  setGroupA(initialA);
-  setGroupB(initialB);
-  localStorage.setItem(`k10_tournament_group_a_${eventId}`, JSON.stringify(initialA));
-  localStorage.setItem(`k10_tournament_group_b_${eventId}`, JSON.stringify(initialB));
-}
+  // Load groups
+  const storedGroupA = localStorage.getItem(`k10_tournament_group_a_${rawId}`);
+  const storedGroupB = localStorage.getItem(`k10_tournament_group_b_${rawId}`);
+  if (storedGroupA && storedGroupB) {
+    try {
+      setGroupA(JSON.parse(storedGroupA));
+      setGroupB(JSON.parse(storedGroupB));
+    } catch {
+      setGroupA([]);
+      setGroupB([]);
+    }
+  }
 
-// Load fixtures/standings
-const storedFixtures = localStorage.getItem(`k10_tournament_fixtures_${eventId}`);
-const storedSemis = localStorage.getItem(`k10_tournament_semis_${eventId}`);
-const storedFinal = localStorage.getItem(`k10_tournament_final_${eventId}`);
-if (storedFixtures) setGroupFixtures(JSON.parse(storedFixtures));
-if (storedSemis) setSemis(JSON.parse(storedSemis));
-if (storedFinal) setFinal(JSON.parse(storedFinal));
-}, [eventId]);
+  // Load fixtures/standings
+  const storedFixtures = localStorage.getItem(`k10_tournament_fixtures_${rawId}`);
+  const storedSemis = localStorage.getItem(`k10_tournament_semis_${rawId}`);
+  const storedFinal = localStorage.getItem(`k10_tournament_final_${rawId}`);
+  if (storedFixtures) {
+    try { setGroupFixtures(JSON.parse(storedFixtures)); } catch {}
+  }
+  if (storedSemis) {
+    try { setSemis(JSON.parse(storedSemis)); } catch {}
+  }
+  if (storedFinal) {
+    try { setFinal(JSON.parse(storedFinal)); } catch {}
+  }
+}, [rawId, apiEvent]);
+
+// Synchronize registered clubs from tournament clubs API
+useEffect(() => {
+  const candidateClubs: any[] = [
+    ...(registeredClubsResponse?.data?.clubs || []),
+    ...(registeredClubsResponse?.data?.groupA || []),
+    ...(registeredClubsResponse?.data?.groupB || []),
+    ...(registeredClubsResponse?.data?.unallocated || []),
+    ...(Array.isArray(registeredClubsResponse?.data) ? registeredClubsResponse.data : [])
+  ];
+
+  if (candidateClubs.length > 0) {
+    const seenIds = new Set<string>();
+    const uniqueClubs: any[] = [];
+
+    candidateClubs.forEach((c: any) => {
+      const cid = String(c._id || c.clubId || c.id || "");
+      if (cid && !seenIds.has(cid)) {
+        seenIds.add(cid);
+        uniqueClubs.push(c);
+      }
+    });
+
+    const mapped = uniqueClubs.map((c: any) => ({
+      id: String(c._id || c.clubId || c.id),
+      clubId: String(c.clubId || c._id || c.id),
+      _id: String(c._id || c.clubId || c.id),
+      name: c.clubName || c.name || "Unnamed Club",
+      category: c.category || "U-16",
+      badgePreset: c.badgePreset,
+      badgeName: c.badgeName,
+      logoUrl: c.logoUrl,
+      customLogo: c.logoUrl,
+      logoId: c.badgePreset || "club-badge-1",
+      coachName: c.coachName || "",
+      contactName: c.contactPerson || c.contactName || c.coachName || "N/A",
+      contactPerson: c.contactPerson || c.contactName || c.coachName || "N/A",
+      contactPhone: c.contactPhone || "",
+      contactEmail: c.contactEmail || "",
+      paymentStatus: c.paymentStatus || "PENDING",
+      paidAmount: c.paidAmount ?? 0,
+      allocatedGroup: c.allocatedGroup || null,
+      registeredAt: c.registeredAt || null,
+      players: (c.roster || []).map((p: any) => ({
+        name: p.fullName || p.name || "",
+        dob: p.dateOfBirth || "",
+        shirt: String(p.shirtNo ?? p.shirt ?? "")
+      })),
+      roster: c.roster || []
+    }));
+
+    setTeams(mapped);
+
+    const apiGroupA = (registeredClubsResponse?.data?.groupA || []).map((c: any) => String(c._id || c.clubId || c.id));
+    const apiGroupB = (registeredClubsResponse?.data?.groupB || []).map((c: any) => String(c._id || c.clubId || c.id));
+
+    uniqueClubs.forEach((c: any) => {
+      const cid = String(c._id || c.clubId || c.id);
+      const grp = String(c.allocatedGroup || "").toUpperCase();
+      if ((grp === "GROUP A" || grp === "A") && !apiGroupA.includes(cid)) {
+        apiGroupA.push(cid);
+      } else if ((grp === "GROUP B" || grp === "B") && !apiGroupB.includes(cid)) {
+        apiGroupB.push(cid);
+      }
+    });
+
+    if (apiGroupA.length > 0) {
+      setGroupA(apiGroupA);
+    }
+    if (apiGroupB.length > 0) {
+      setGroupB(apiGroupB);
+    }
+  }
+}, [registeredClubsResponse]);
 
 const handleCopyLink = () => {
-if (typeof window !== "undefined") {
-  const url = `${window.location.origin}/tournament/live/${eventId}`;
-  navigator.clipboard.writeText(url);
-  setCopied(true);
-  toast.success("Public tournament link copied to clipboard!");
-  setTimeout(() => setCopied(false), 2000);
-}
-};
-
-const handleAutofill8thTeam = () => {
-const default8th = {
-  id: "team-chelsea",
-  name: "Chelsea FC Academy",
-  logoId: "club-badge-4",
-  contactName: "John Terry",
-  contactEmail: "j.terry@chelsea.com",
-  contactPhone: "+44 7911 123456",
-  category: event?.ageGroup?.split(",")[0]?.trim() || "U-8",
-  players: [
-    { name: "Cole Palmer", dob: "2018-05-06", shirt: "20" },
-    { name: "Conor Gallagher", dob: "2018-02-06", shirt: "23" },
-    { name: "Levi Colwill", dob: "2018-02-26", shirt: "26" }
-  ]
-};
-const updated = [...teams, default8th];
-setTeams(updated);
-localStorage.setItem(`k10_tournament_teams_${eventId}`, JSON.stringify(updated));
-
-// Add to group B
-const updatedB = [...groupB, "team-chelsea"];
-setGroupB(updatedB);
-localStorage.setItem(`k10_tournament_group_b_${eventId}`, JSON.stringify(updatedB));
-
-// Update event enrolled count in events list
-const list = getStoredEvents();
-const updatedList = list.map((e: any) => {
-  if (e.id === eventId) {
-    return { ...e, enrolled: `${updated.length} Teams` };
+  if (typeof window !== "undefined") {
+    const url = `${window.location.origin}/tournament/live/${eventId}`;
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    toast.success("Public tournament link copied to clipboard!");
+    setTimeout(() => setCopied(false), 2000);
   }
-  return e;
-});
-saveStoredEvents(updatedList);
-if (event) setEvent({ ...event, enrolled: `${updated.length} Teams` });
-
-toast.success("Autofilled Chelsea FC Academy as 8th team!");
 };
 
-const handleGoLive = () => {
+// Move team to group A
+const handleAssignToGroupA = (teamId: string) => {
+  if (groupA.length >= 4) {
+    toast.error("Group A already has the maximum 4 clubs.");
+    return;
+  }
+  const nextA = [...groupA.filter((id) => id !== teamId), teamId];
+  const nextB = groupB.filter((id) => id !== teamId);
+  setGroupA(nextA);
+  setGroupB(nextB);
+  localStorage.setItem(`k10_tournament_group_a_${rawId}`, JSON.stringify(nextA));
+  localStorage.setItem(`k10_tournament_group_b_${rawId}`, JSON.stringify(nextB));
+};
+
+// Move team to group B
+const handleAssignToGroupB = (teamId: string) => {
+  if (groupB.length >= 4) {
+    toast.error("Group B already has the maximum 4 clubs.");
+    return;
+  }
+  const nextB = [...groupB.filter((id) => id !== teamId), teamId];
+  const nextA = groupA.filter((id) => id !== teamId);
+  setGroupA(nextA);
+  setGroupB(nextB);
+  localStorage.setItem(`k10_tournament_group_a_${rawId}`, JSON.stringify(nextA));
+  localStorage.setItem(`k10_tournament_group_b_${rawId}`, JSON.stringify(nextB));
+};
+
+// Unallocate team
+const handleUnallocateTeam = (teamId: string) => {
+  const nextA = groupA.filter((id) => id !== teamId);
+  const nextB = groupB.filter((id) => id !== teamId);
+  setGroupA(nextA);
+  setGroupB(nextB);
+  localStorage.setItem(`k10_tournament_group_a_${rawId}`, JSON.stringify(nextA));
+  localStorage.setItem(`k10_tournament_group_b_${rawId}`, JSON.stringify(nextB));
+};
+
+// Auto-allocate unallocated teams
+const handleAutoAllocate = () => {
+  const currentA = [...groupA];
+  const currentB = [...groupB];
+  const unallocated = teams.filter((t) => !currentA.includes(t.id) && !currentB.includes(t.id));
+
+  if (unallocated.length === 0) {
+    toast.info("All registered clubs are already allocated.");
+    return;
+  }
+
+  unallocated.forEach((team) => {
+    if (currentA.length < 4) {
+      currentA.push(team.id);
+    } else if (currentB.length < 4) {
+      currentB.push(team.id);
+    }
+  });
+
+  setGroupA(currentA);
+  setGroupB(currentB);
+  localStorage.setItem(`k10_tournament_group_a_${rawId}`, JSON.stringify(currentA));
+  localStorage.setItem(`k10_tournament_group_b_${rawId}`, JSON.stringify(currentB));
+  toast.success("Clubs automatically allocated between Group A and Group B. Remember to save allocations!");
+};
+
+// Save allocations to API
+const handleSaveAllocations = async () => {
+  if (groupA.length === 0 && groupB.length === 0) {
+    toast.error("Please allocate at least one club to Group A or Group B.");
+    return;
+  }
+
+  try {
+    const allocations = [
+      ...groupA.map((id) => ({ _id: id, group: "GROUP A" })),
+      ...groupB.map((id) => ({ _id: id, group: "GROUP B" })),
+    ];
+
+    await allocateTournamentGroups({
+      eventId: rawId,
+      allocations,
+    }).unwrap();
+  } catch {
+    // Error handled in onQueryStarted
+  }
+};
+
+const handleGoLive = async () => {
 if (groupA.length !== 4 || groupB.length !== 4) {
   toast.error("Please allocate exactly 4 teams to Group A and 4 teams to Group B before starting.");
   return;
+}
+
+try {
+  // 1. Persist group allocations to backend
+  const allocations = [
+    ...groupA.map((id) => ({ _id: id, group: "GROUP A" })),
+    ...groupB.map((id) => ({ _id: id, group: "GROUP B" })),
+  ];
+  await allocateTournamentGroups({
+    eventId: rawId,
+    allocations,
+  }).unwrap();
+
+  // 2. Call Start Tournament & Generate Fixtures API
+  const startRes = await startTournament(rawId).unwrap();
+  const serverFixtures = 
+    startRes?.data?.fixtures || 
+    startRes?.data?.tournament?.fixtures || 
+    startRes?.data?.groupFixtures || 
+    startRes?.fixtures;
+
+  if (Array.isArray(serverFixtures) && serverFixtures.length > 0) {
+    setGroupFixtures(serverFixtures);
+    localStorage.setItem(`k10_tournament_fixtures_${eventId}`, JSON.stringify(serverFixtures));
+  }
+} catch {
+  // handled in onQueryStarted
 }
 
 const newFixtures: any[] = [];
@@ -442,7 +680,7 @@ const initialFinal = {
 setStatus("live");
 localStorage.setItem(`k10_tournament_status_${eventId}`, "live");
 
-setGroupFixtures(newFixtures);
+setGroupFixtures((prev) => (prev && prev.length > 0 ? prev : newFixtures));
 localStorage.setItem(`k10_tournament_fixtures_${eventId}`, JSON.stringify(newFixtures));
 
 setSemis(initialSemis);
@@ -677,108 +915,115 @@ localStorage.setItem(`k10_tournament_status_${eventId}`, "completed");
 toast.success(`Grand Final simulated! ${winnerName} is the Champion! 🏆`);
 };
 
-// Club Form 2 autofill roster helper
-const handleAutofillRoster = () => {
-setRegClubName("Arsenal Youth Academy");
-setRegClubLogo(CLUB_PRESET_LOGOS[2].id);
-setRegCoachName("Coach Michael Edwards");
-setRegContactName("Michael Edwards");
-setRegContactPhone("+44 7911 234567");
-setRegContactEmail("m.edwards@arsenalyouth.com");
-setRegCategory(event?.ageGroup?.split(",")[0]?.trim() || "U-8");
-setRegPlayers([
-  { name: "Harry Kane Jr", dob: "2018-07-28", shirt: "9" },
-  { name: "Jude Bellingham Jr", dob: "2018-06-29", shirt: "10" },
-  { name: "Bukayo Saka Jr", dob: "2018-09-05", shirt: "7" },
-  { name: "Phil Foden Jr", dob: "2018-05-28", shirt: "11" },
-  { name: "Declan Rice Jr", dob: "2018-01-14", shirt: "4" }
-]);
-setCardNumber("4242 4242 4242 4242");
-setCardExpiry("12/28");
-setCardCvv("123");
-setCardHolder("Michael Edwards");
-toast.info("Autofilled all club registration data!");
-};
-
-// Club Form 2 Submit
-const handleRegisterSubmit = (e: React.FormEvent) => {
-e.preventDefault();
-if (!regClubName) {
-  toast.error("Please enter your club name");
-  return;
-}
-if (!cardNumber || !cardExpiry || !cardCvv || !cardHolder) {
-  toast.error("Please enter card payment details to complete registration");
-  return;
-}
-
-setIsPaying(true);
-setTimeout(() => {
-  setIsPaying(false);
-  setIsSuccess(true);
-
-  const newClubId = `team-${Date.now()}`;
-  const newClub = {
-    id: newClubId,
-    name: regClubName,
-    logoId: regClubLogo,
-    customLogo: regCustomLogo,
-    coachName: regCoachName,
-    contactName: regContactName,
-    contactEmail: regContactEmail,
-    contactPhone: regContactPhone,
-    category: regCategory || event?.ageGroup?.split(",")[0]?.trim() || "U-8",
-    players: regPlayers.filter(p => p.name)
-  };
-
-  const updatedTeams = [...teams, newClub];
-  setTeams(updatedTeams);
-  localStorage.setItem(`k10_tournament_teams_${eventId}`, JSON.stringify(updatedTeams));
-
-  // Put team in Group B if space, or dynamic
-  if (groupB.length < groupA.length) {
-    const updatedB = [...groupB, newClubId];
-    setGroupB(updatedB);
-    localStorage.setItem(`k10_tournament_group_b_${eventId}`, JSON.stringify(updatedB));
-  } else {
-    const updatedA = [...groupA, newClubId];
-    setGroupA(updatedA);
-    localStorage.setItem(`k10_tournament_group_a_${eventId}`, JSON.stringify(updatedA));
+// Club Form 2 Submit with Stripe Checkout API
+const handleRegisterSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!regClubName.trim()) {
+    toast.error("Please enter your club name");
+    return;
+  }
+  if (!regCoachName.trim()) {
+    toast.error("Please enter coach / manager name");
+    return;
+  }
+  if (!regContactEmail.trim()) {
+    toast.error("Please enter contact email");
+    return;
   }
 
-  // Update event capacity count
-  const list = getStoredEvents();
-  const updatedList = list.map((e: any) => {
-    if (e.id === eventId) {
-      return { ...e, enrolled: `${updatedTeams.length} Teams` };
+  const validPlayers = regPlayers.filter((p) => p.name.trim());
+  if (validPlayers.length === 0) {
+    toast.error("Please add at least 1 player to the roster");
+    return;
+  }
+
+  const formatDobForApi = (dobStr: string) => {
+    if (!dobStr) return "01/01/2010";
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dobStr)) {
+      const [year, month, day] = dobStr.split("-");
+      return `${month}/${day}/${year}`;
     }
-    return e;
-  });
-  saveStoredEvents(updatedList);
-  if (event) setEvent({ ...event, enrolled: `${updatedTeams.length} Teams` });
-}, 1500);
+    return dobStr;
+  };
+
+  const roster = validPlayers.map((p) => ({
+    fullName: p.name.trim(),
+    dateOfBirth: formatDobForApi(p.dob),
+    shirtNo: parseInt(p.shirt, 10) || 1,
+  }));
+
+  let badgeName = regClubName.trim() ? `${regClubName.trim()} Crest` : "Club Crest";
+  if (regClubLogo !== "custom") {
+    const preset = CLUB_PRESET_LOGOS.find((b) => b.id === regClubLogo);
+    if (preset) badgeName = preset.name;
+  }
+
+  const payload = {
+    clubName: regClubName.trim(),
+    category: regCategory || event?.ageGroup?.split(",")?.[0]?.trim() || "U-16",
+    badgeName,
+    coachName: regCoachName.trim(),
+    contactPerson: regContactName.trim() || regCoachName.trim(),
+    contactPhone: regContactPhone.trim(),
+    contactEmail: regContactEmail.trim(),
+    roster,
+    paymentMethod: "STRIPE",
+  };
+
+  try {
+    const formData = new FormData();
+    formData.append("data", JSON.stringify(payload));
+    if (regCustomLogoFile) {
+      formData.append("logo", regCustomLogoFile);
+    }
+
+    const res = await registerClub({
+      eventId: rawId,
+      body: formData,
+    }).unwrap();
+
+    const checkoutUrl = res?.data?.checkoutUrl || res?.checkoutUrl;
+
+    if (checkoutUrl) {
+      toast.success(res?.message || "Club registration initiated! Redirecting to Stripe payment...");
+      setTimeout(() => {
+        window.location.href = checkoutUrl;
+      }, 700);
+      return;
+    }
+
+    setIsSuccess(true);
+    toast.success("Club registered successfully!");
+  } catch (error: any) {
+    toast.error(error?.data?.message || error?.message || "Failed to initiate club registration");
+  }
 };
 
 // Helper render logo
 const renderTeamLogo = (teamId: string, sizeClass = "w-6 h-6") => {
-const team = teams.find((t) => t.id === teamId);
-if (!team) {
-  if (teamId === "winner-a") return <IconShield className={`${sizeClass} text-yellow-400/50`} />;
-  if (teamId === "winner-b") return <IconShield className={`${sizeClass} text-yellow-400/50`} />;
-  if (teamId === "runner-a") return <IconShield className={`${sizeClass} text-white/20`} />;
-  if (teamId === "runner-b") return <IconShield className={`${sizeClass} text-white/20`} />;
-  return <IconShield className={`${sizeClass} text-white/20`} />;
-}
-if (team.customLogo) {
-  return <Image width={20} height={20} src={team.customLogo} alt={team.name} className={`${sizeClass} object-contain rounded-full`} />;
-}
-const preset = CLUB_PRESET_LOGOS.find((l) => l.id === team.logoId);
-if (preset) {
-  return (
-    <div className={sizeClass} dangerouslySetInnerHTML={{ __html: preset.svg }} />
+  const team = teams.find((t) => t.id === teamId || t.clubId === teamId || String(t._id) === teamId);
+  if (!team) {
+    if (teamId === "winner-a") return <IconShield className={`${sizeClass} text-yellow-400/50`} />;
+    if (teamId === "winner-b") return <IconShield className={`${sizeClass} text-yellow-400/50`} />;
+    if (teamId === "runner-a") return <IconShield className={`${sizeClass} text-white/20`} />;
+    if (teamId === "runner-b") return <IconShield className={`${sizeClass} text-white/20`} />;
+    return <IconShield className={`${sizeClass} text-white/20`} />;
+  }
+  const logo = team.logoUrl || team.customLogo;
+  if (logo) {
+    return <Image width={40} height={40} src={logo} alt={team.name} className={`${sizeClass} object-contain rounded-full`} />;
+  }
+  const preset = CLUB_PRESET_LOGOS.find(
+    (l) => l.id === team.logoId || 
+           l.name?.toLowerCase() === team.badgePreset?.toLowerCase() || 
+           l.name?.toLowerCase() === team.badgeName?.toLowerCase()
   );
-}
-return <IconShield className={`${sizeClass} text-white/30`} />;
+  if (preset) {
+    return (
+      <div className={sizeClass} dangerouslySetInnerHTML={{ __html: preset.svg }} />
+    );
+  }
+  return <IconShield className={`${sizeClass} text-white/30`} />;
 };
 
 const getTeamName = (teamId: string, placeholder = "TBD") => {
@@ -786,13 +1031,9 @@ const team = teams.find((t) => t.id === teamId);
 return team ? team.name : placeholder;
 };
 
-if (!event) {
-return (
-  <div className="flex items-center justify-center min-h-[50vh] text-white">
-    <div className="w-8 h-8 border-4 border-t-[#E31B23] border-white/20 rounded-full animate-spin" />
-  </div>
-);
-}
+  if (isSingleLoading || isEventsLoading || !event) {
+    return <EventDetailPageSkeleton />;
+  }
 
 const isTournament = event.eventType === "tournament" || event.title.toLowerCase().includes("tournament");
 
@@ -857,14 +1098,19 @@ return (
     <div className="flex items-center gap-2 z-10 shrink-0">
       <button
         onClick={status === "registration" ? handleGoLive : handleResetTournament}
+        disabled={isStartingTournament}
         className={`px-3.5 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border cursor-pointer font-orbitron flex items-center gap-1.5 ${
           status === "live" || status === "completed"
             ? "bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20"
             : "bg-[#00FF62]/10 border-[#00FF62]/30 text-[#00FF62] hover:bg-[#00FF62]/20"
-        }`}
+        } ${isStartingTournament ? "opacity-60 cursor-not-allowed" : ""}`}
       >
-        <IconActivity size={13} className="animate-pulse" />
-        {status === "live" ? "Live Mode Active" : "Toggle Live Mode"}
+        {isStartingTournament ? (
+          <div className="size-3 border-2 border-t-white border-white/20 rounded-full animate-spin" />
+        ) : (
+          <IconActivity size={13} className="animate-pulse" />
+        )}
+        {isStartingTournament ? "Starting..." : status === "live" ? "Live Mode Active" : "Toggle Live Mode"}
       </button>
     </div>
   </div>
@@ -945,7 +1191,9 @@ return (
               <span className="text-[10px] font-black uppercase tracking-widest text-white/40 flex items-center gap-2 font-orbitron">
                 <IconUsers size={18} className="text-[#E31B23]" /> Registered Clubs
               </span>
-              <span className="text-base font-black text-white uppercase mt-1">{teams.length} / 8 Teams</span>
+              <span className="text-base font-black text-white uppercase mt-1">
+                {totalRegisteredClubs} / {maxClubsCapacity} Teams
+              </span>
             </div>
           </div>
 
@@ -1079,6 +1327,116 @@ return (
         </div>
 
       </div>
+
+      {/* Participating Tournament Clubs Section */}
+      <div className="lg:col-span-3 w-full bg-[#111111] border border-white/10 rounded-4xl p-6 md:p-8 flex flex-col gap-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/5 pb-4">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <IconShield className="text-[#00FF62] shrink-0" size={20} />
+              <h3 className="text-lg sm:text-xl font-black uppercase text-white font-orbitron truncate">
+                Registered Tournament Clubs
+              </h3>
+              <span className="text-[10px] font-black uppercase bg-[#00FF62]/10 border border-[#00FF62]/30 text-[#00FF62] px-2.5 py-0.5 rounded-full font-orbitron shrink-0">
+                {totalRegisteredClubs} Enrolled
+              </span>
+            </div>
+            <p className="text-xs text-white/50 mt-1">
+              Clubs registered and verified for {event?.title}. Click any club to inspect their player roster.
+            </p>
+          </div>
+
+          {status === "registration" && (
+            <button
+              type="button"
+              onClick={() => {
+                setIsSuccess(false);
+                setShowRegModal(true);
+              }}
+              className="flex items-center gap-2 bg-[#E31B23] hover:bg-[#C2181F] text-white text-[10px] font-black uppercase tracking-wider py-2.5 px-4 rounded-xl transition-all font-orbitron cursor-pointer shrink-0 whitespace-nowrap self-start sm:self-auto"
+            >
+              <IconPlus size={14} /> Register Your Club
+            </button>
+          )}
+        </div>
+
+        {isRegisteredClubsLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 animate-pulse">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-black/40 border border-white/5 p-5 rounded-3xl flex flex-col justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <Skeleton className="size-12 rounded-full bg-white/10 shrink-0" />
+                  <div className="min-w-0 flex-1 flex flex-col gap-2">
+                    <Skeleton className="h-4 w-3/4 bg-white/10 rounded" />
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-3.5 w-14 bg-white/5 rounded" />
+                      <Skeleton className="h-3.5 w-16 bg-white/5 rounded" />
+                    </div>
+                  </div>
+                </div>
+                <div className="border-t border-white/5 pt-3 flex items-center justify-between">
+                  <Skeleton className="h-3 w-20 bg-white/5 rounded" />
+                  <Skeleton className="h-5 w-24 bg-white/10 rounded-lg" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : teams.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+            {teams.map((t) => (
+              <div
+                key={t.id}
+                onClick={() => setSelectedRosterTeam(t)}
+                className="bg-black/40 hover:bg-black/70 border border-white/5 hover:border-white/20 p-5 rounded-3xl transition-all cursor-pointer group flex flex-col justify-between gap-4 min-w-0"
+              >
+                <div className="flex items-center gap-3.5 min-w-0">
+                  {renderTeamLogo(t.id, "size-12 shrink-0")}
+                  <div className="min-w-0 flex-1">
+                    <h4 className="text-sm font-black uppercase text-white truncate font-orbitron group-hover:text-[#00FF62] transition-colors">
+                      {t.name}
+                    </h4>
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      <span className="text-[9px] font-black uppercase bg-white/5 border border-white/10 text-white/70 px-2 py-0.5 rounded shrink-0">
+                        {t.category || "General"}
+                      </span>
+                      {t.paymentStatus && (
+                        <span
+                          className={`text-[8px] font-black uppercase px-2 py-0.5 rounded shrink-0 ${
+                            t.paymentStatus === "PAID"
+                              ? "bg-[#00FF62]/10 border border-[#00FF62]/30 text-[#00FF62]"
+                              : "bg-yellow-400/10 border border-yellow-400/30 text-yellow-400"
+                          }`}
+                        >
+                          {t.paymentStatus}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t border-white/5 pt-3 flex items-center justify-between gap-2 text-xs text-white/50">
+                  <div className="truncate text-[10px]">
+                    {t.coachName ? `Coach: ${t.coachName}` : t.contactName ? `Contact: ${t.contactName}` : "Official Club"}
+                  </div>
+                  <span className="text-[9px] font-black uppercase text-[#E31B23] bg-[#E31B23]/10 border border-[#E31B23]/25 px-2.5 py-1 rounded-lg group-hover:scale-105 transition-all shrink-0 whitespace-nowrap">
+                    {t.players?.length || 0} Players Roster
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 border border-dashed border-white/10 rounded-3xl p-6">
+            <p className="text-xs font-black uppercase text-white/40 tracking-wider font-orbitron">
+              No clubs registered yet.
+            </p>
+            <p className="text-[11px] text-white/30 mt-1">
+              Be the first club to register your squad for this tournament!
+            </p>
+          </div>
+        )}
+      </div>
+
     </div>
   )}
 
@@ -1140,7 +1498,7 @@ return (
         <div className="bg-[#111] border border-white/10 rounded-3xl p-6 space-y-2">
           <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Total Registered Teams</span>
           <p className="text-2xl font-black text-[#00FF62] font-orbitron tracking-tight">
-            {teams.length} / 8 Teams
+            {totalRegisteredClubs} / {maxClubsCapacity} Teams
           </p>
         </div>
         <div className="bg-[#111] border border-white/10 rounded-3xl p-6 space-y-2">
@@ -1151,12 +1509,9 @@ return (
         </div>
         <div className="bg-[#111] border border-white/10 rounded-3xl p-6 space-y-2 flex flex-col justify-center">
           {status === "registration" && teams.length < 8 && (
-            <button
-              onClick={handleAutofill8thTeam}
-              className="bg-[#00FF62]/10 hover:bg-[#00FF62]/20 border border-[#00FF62]/30 text-[#00FF62] text-[10px] font-black uppercase tracking-widest py-3 px-4 rounded-xl transition-all cursor-pointer text-center w-full font-orbitron"
-            >
-              Autofill 8th Team
-            </button>
+            <div className="text-[10px] text-white/50 font-black uppercase text-center border border-white/10 bg-white/5 py-3 px-4 rounded-xl font-orbitron">
+              {totalRegisteredClubs} / {maxClubsCapacity} Clubs Enrolled
+            </div>
           )}
           {(status === "live" || status === "completed") && (
             <button
@@ -1166,7 +1521,7 @@ return (
               Reset Tournament Flow
             </button>
           )}
-          {status === "registration" && teams.length === 8 && (
+          {status === "registration" && teams.length >= 8 && (
             <div className="text-[9px] text-[#00FF62] font-black uppercase text-center border border-[#00FF62]/20 bg-[#00FF62]/5 p-2 rounded-xl">
               Squads Cap Reached!
             </div>
@@ -1180,37 +1535,81 @@ return (
 
           {/* Left Column: Registered Teams (Roster Viewer) */}
           <div className="lg:col-span-1 bg-[#111] border border-white/10 rounded-4xl p-6 md:p-8 space-y-6 min-w-0">
-            <h3 className="text-xl font-black uppercase text-white font-orbitron">Registered Teams</h3>
-            <p className="text-[11px] text-white/40 leading-relaxed font-bold uppercase tracking-widest">
-              Roster registrations received. Click any team to view their registered player list.
-            </p>
+            <div className="flex justify-between items-center border-b border-white/5 pb-3">
+              <div>
+                <h3 className="text-xl font-black uppercase text-white font-orbitron">Registered Clubs</h3>
+                <p className="text-[10px] text-white/40 leading-relaxed font-bold uppercase tracking-widest mt-0.5">
+                  {teams.length} clubs enrolled
+                </p>
+              </div>
+              {isRegisteredClubsLoading && (
+                <div className="size-4 border-2 border-t-[#00FF62] border-white/10 rounded-full animate-spin" />
+              )}
+            </div>
 
-            <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
-              {teams.map((t) => (
-                <div 
-                  key={t.id}
-                  onClick={() => setSelectedRosterTeam(t)}
-                  className="bg-black/40 hover:bg-black border border-white/5 hover:border-white/15 p-4 rounded-2xl flex items-center justify-between cursor-pointer transition-all group"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    {renderTeamLogo(t.id, "w-10 h-10")}
-                    <div className="min-w-0">
-                      <p className="text-xs font-black text-white truncate uppercase">{t.name}</p>
-                      <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest mt-1">
-                        {t.players?.length || 0} Players • {t.category}
-                      </p>
+            <div className="flex flex-col gap-3 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+              {isRegisteredClubsLoading ? (
+                <div className="flex flex-col gap-3 animate-pulse">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="bg-black/40 border border-white/5 p-4 rounded-2xl flex items-center justify-between">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Skeleton className="size-10 rounded-full bg-white/10 shrink-0" />
+                        <div className="flex flex-col gap-2 min-w-0 flex-1">
+                          <Skeleton className="h-3.5 w-28 bg-white/10 rounded" />
+                          <Skeleton className="h-2.5 w-36 bg-white/5 rounded" />
+                        </div>
+                      </div>
+                      <Skeleton className="h-6 w-14 bg-white/10 rounded-lg shrink-0" />
                     </div>
-                  </div>
-                  <span className="text-[8px] font-black uppercase text-[#E31B23] bg-[#E31B23]/10 border border-[#E31B23]/25 px-2.5 py-1.5 rounded-lg group-hover:scale-105 transition-all">
-                    Roster
-                  </span>
+                  ))}
                 </div>
-              ))}
+              ) : teams.length > 0 ? (
+                teams.map((t) => (
+                  <div 
+                    key={t.id}
+                    onClick={() => setSelectedRosterTeam(t)}
+                    className="bg-black/40 hover:bg-black border border-white/5 hover:border-white/15 p-4 rounded-2xl flex items-center justify-between cursor-pointer transition-all group"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      {renderTeamLogo(t.id, "size-10 shrink-0")}
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <p className="text-xs font-black text-white truncate uppercase">{t.name}</p>
+                          {t.paymentStatus && (
+                            <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded ${
+                              t.paymentStatus === "PAID" 
+                                ? "bg-[#00FF62]/10 border border-[#00FF62]/30 text-[#00FF62]" 
+                                : "bg-yellow-400/10 border border-yellow-400/30 text-yellow-400"
+                            }`}>
+                              {t.paymentStatus}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest mt-1">
+                          {t.players?.length || 0} Players • {t.category || "General"}
+                        </p>
+                        {t.coachName && (
+                          <p className="text-[9px] text-white/50 truncate mt-0.5">
+                            Coach: {t.coachName}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <span className="text-[8px] font-black uppercase text-[#E31B23] bg-[#E31B23]/10 border border-[#E31B23]/25 px-2.5 py-1.5 rounded-lg group-hover:scale-105 transition-all shrink-0">
+                      Roster
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-12 text-xs text-white/30 uppercase font-black font-orbitron border border-dashed border-white/10 rounded-2xl p-6">
+                  No clubs registered yet
+                </div>
+              )}
             </div>
           </div>
 
           {/* Right Column: Group Allocation Board */}
-          <div className="lg:col-span-2 bg-[#111] border border-white/10 rounded-4xl p-6 md:p-8 space-y-6 min-w-0">
+          <div className="lg:col-span-2 bg-[#111] border border-white/10 rounded-4xl p-6 md:p-8 flex flex-col gap-6 min-w-0">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <h3 className="text-xl font-black uppercase text-white font-orbitron">Group Stage Builder</h3>
@@ -1219,24 +1618,119 @@ return (
                 </p>
               </div>
 
-              <button
-                onClick={handleGoLive}
-                disabled={groupA.length !== 4 || groupB.length !== 4}
-                className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all font-orbitron cursor-pointer ${
-                  groupA.length === 4 && groupB.length === 4
-                    ? "bg-[#00FF62] text-black shadow-lg shadow-[#00FF62]/20 hover:scale-[1.02]"
-                    : "bg-white/5 border border-white/10 text-white/20 cursor-not-allowed"
-                }`}
-              >
-                Start Tournament & Generate Fixtures
-              </button>
+              <div className="flex items-center gap-2 flex-wrap">
+                {unallocatedTeams.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleAutoAllocate}
+                    className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 hover:text-white text-[10px] font-black uppercase tracking-wider py-2.5 px-3.5 rounded-xl transition-all font-orbitron cursor-pointer"
+                  >
+                    <IconSparkles size={14} className="text-[#00FF62]" />
+                    Auto Balance
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleSaveAllocations}
+                  disabled={isAllocatingGroups || (groupA.length === 0 && groupB.length === 0)}
+                  className="flex items-center gap-2 bg-[#E31B23] hover:bg-[#C2181F] text-white text-[10px] font-black uppercase tracking-wider py-2.5 px-4 rounded-xl transition-all font-orbitron cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#E31B23]/20"
+                >
+                  {isAllocatingGroups ? (
+                    <>
+                      <div className="size-3.5 border-2 border-t-white border-white/20 rounded-full animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <IconCheck size={14} />
+                      Save Allocations
+                    </>
+                  )}
+                </button>
+
+                <button
+                  onClick={handleGoLive}
+                  disabled={groupA.length !== 4 || groupB.length !== 4 || isAllocatingGroups || isStartingTournament}
+                  className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all font-orbitron cursor-pointer flex items-center gap-2 ${
+                    groupA.length === 4 && groupB.length === 4 && !isStartingTournament
+                      ? "bg-[#00FF62] text-black shadow-lg shadow-[#00FF62]/20 hover:scale-[1.02]"
+                      : "bg-white/5 border border-white/10 text-white/20 cursor-not-allowed"
+                  }`}
+                >
+                  {isStartingTournament ? (
+                    <>
+                      <div className="size-3.5 border-2 border-t-black border-black/20 rounded-full animate-spin" />
+                      Starting Tournament...
+                    </>
+                  ) : (
+                    <>
+                      <IconActivity size={14} />
+                      Start Tournament & Generate Fixtures
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
+            {/* Unallocated Clubs Pool (if any exist) */}
+            {unallocatedTeams.length > 0 && (
+              <div className="bg-black/60 border border-yellow-500/20 rounded-3xl p-5 flex flex-col gap-3">
+                <div className="flex justify-between items-center flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="size-2 rounded-full bg-yellow-400 animate-ping" />
+                    <span className="text-xs font-black uppercase text-yellow-400 font-orbitron">
+                      Unallocated Clubs ({unallocatedTeams.length})
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-white/40 font-bold uppercase tracking-wider">
+                    Assign each club to Group A or Group B
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {unallocatedTeams.map((t) => (
+                    <div
+                      key={t.id}
+                      className="bg-[#141414] border border-white/5 p-3 rounded-2xl flex items-center justify-between gap-3"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        {renderTeamLogo(t.id, "size-8 shrink-0")}
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-white truncate">{t.name}</p>
+                          <p className="text-[9px] text-white/40 uppercase font-black">{t.category || "General"}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => handleAssignToGroupA(t.id)}
+                          disabled={groupA.length >= 4}
+                          className="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider bg-white/5 hover:bg-[#00FF62]/20 text-white/80 hover:text-[#00FF62] border border-white/10 hover:border-[#00FF62]/40 transition-all font-orbitron cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          + Group A
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleAssignToGroupB(t.id)}
+                          disabled={groupB.length >= 4}
+                          className="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider bg-white/5 hover:bg-[#00FF62]/20 text-white/80 hover:text-[#00FF62] border border-white/10 hover:border-[#00FF62]/40 transition-all font-orbitron cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          + Group B
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Group A & B Columns */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
 
               {/* Group A Column */}
-              <div className="bg-black/40 border border-white/5 rounded-3xl p-5 space-y-4">
+              <div className="bg-black/40 border border-white/5 rounded-3xl p-5 flex flex-col gap-4">
                 <div className="flex justify-between items-center border-b border-white/5 pb-3">
                   <span className="text-xs font-black uppercase text-white font-orbitron">Group A</span>
                   <span className={`text-[10px] font-black font-orbitron ${groupA.length === 4 ? "text-[#00FF62]" : "text-white/40"}`}>
@@ -1244,28 +1738,30 @@ return (
                   </span>
                 </div>
 
-                <div className="space-y-2.5 min-h-[30vh]">
+                <div className="flex flex-col gap-2.5 min-h-[25vh]">
                   {teams.filter(t => groupA.includes(t.id)).map((t) => (
-                    <div key={t.id} className="bg-[#121212] border border-white/10 p-3 rounded-xl flex items-center justify-between">
+                    <div key={t.id} className="bg-[#121212] border border-white/10 p-3 rounded-xl flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2.5 min-w-0">
-                        {renderTeamLogo(t.id, "w-6 h-6")}
+                        {renderTeamLogo(t.id, "size-6 shrink-0")}
                         <span className="text-xs font-bold text-white truncate">{t.name}</span>
                       </div>
-                      <select
-                        value="A"
-                        onChange={(e) => {
-                          if (e.target.value === "B") {
-                            setGroupA(groupA.filter(id => id !== t.id));
-                            setGroupB([...groupB, t.id]);
-                            localStorage.setItem(`k10_tournament_group_a_${eventId}`, JSON.stringify(groupA.filter(id => id !== t.id)));
-                            localStorage.setItem(`k10_tournament_group_b_${eventId}`, JSON.stringify([...groupB, t.id]));
-                          }
-                        }}
-                        className="bg-black text-[9px] border border-white/10 text-white font-black uppercase tracking-wider rounded px-2 py-1 focus:outline-none cursor-pointer"
-                      >
-                        <option value="A">Group A</option>
-                        <option value="B">Group B</option>
-                      </select>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <select
+                          value="A"
+                          onChange={(e) => {
+                            if (e.target.value === "B") {
+                              handleAssignToGroupB(t.id);
+                            } else if (e.target.value === "UNALLOCATED") {
+                              handleUnallocateTeam(t.id);
+                            }
+                          }}
+                          className="bg-black text-[9px] border border-white/10 text-white font-black uppercase tracking-wider rounded px-2 py-1 focus:outline-none cursor-pointer"
+                        >
+                          <option value="A">Group A</option>
+                          <option value="B" disabled={groupB.length >= 4}>Move to Group B</option>
+                          <option value="UNALLOCATED">Unallocate</option>
+                        </select>
+                      </div>
                     </div>
                   ))}
                   {groupA.length === 0 && (
@@ -1277,7 +1773,7 @@ return (
               </div>
 
               {/* Group B Column */}
-              <div className="bg-black/40 border border-white/5 rounded-3xl p-5 space-y-4">
+              <div className="bg-black/40 border border-white/5 rounded-3xl p-5 flex flex-col gap-4">
                 <div className="flex justify-between items-center border-b border-white/5 pb-3">
                   <span className="text-xs font-black uppercase text-white font-orbitron">Group B</span>
                   <span className={`text-[10px] font-black font-orbitron ${groupB.length === 4 ? "text-[#00FF62]" : "text-white/40"}`}>
@@ -1285,28 +1781,30 @@ return (
                   </span>
                 </div>
 
-                <div className="space-y-2.5 min-h-[30vh]">
+                <div className="flex flex-col gap-2.5 min-h-[25vh]">
                   {teams.filter(t => groupB.includes(t.id)).map((t) => (
-                    <div key={t.id} className="bg-[#121212] border border-white/10 p-3 rounded-xl flex items-center justify-between">
+                    <div key={t.id} className="bg-[#121212] border border-white/10 p-3 rounded-xl flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2.5 min-w-0">
-                        {renderTeamLogo(t.id, "w-6 h-6")}
+                        {renderTeamLogo(t.id, "size-6 shrink-0")}
                         <span className="text-xs font-bold text-white truncate">{t.name}</span>
                       </div>
-                      <select
-                        value="B"
-                        onChange={(e) => {
-                          if (e.target.value === "A") {
-                            setGroupB(groupB.filter(id => id !== t.id));
-                            setGroupA([...groupA, t.id]);
-                            localStorage.setItem(`k10_tournament_group_b_${eventId}`, JSON.stringify(groupB.filter(id => id !== t.id)));
-                            localStorage.setItem(`k10_tournament_group_a_${eventId}`, JSON.stringify([...groupA, t.id]));
-                          }
-                        }}
-                        className="bg-black text-[9px] border border-white/10 text-white font-black uppercase tracking-wider rounded px-2 py-1 focus:outline-none cursor-pointer"
-                      >
-                        <option value="A">Group A</option>
-                        <option value="B">Group B</option>
-                      </select>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <select
+                          value="B"
+                          onChange={(e) => {
+                            if (e.target.value === "A") {
+                              handleAssignToGroupA(t.id);
+                            } else if (e.target.value === "UNALLOCATED") {
+                              handleUnallocateTeam(t.id);
+                            }
+                          }}
+                          className="bg-black text-[9px] border border-white/10 text-white font-black uppercase tracking-wider rounded px-2 py-1 focus:outline-none cursor-pointer"
+                        >
+                          <option value="B">Group B</option>
+                          <option value="A" disabled={groupA.length >= 4}>Move to Group A</option>
+                          <option value="UNALLOCATED">Unallocate</option>
+                        </select>
+                      </div>
                     </div>
                   ))}
                   {groupB.length === 0 && (
@@ -1390,6 +1888,7 @@ return (
 
   {/* DYNAMIC TOURNAMENT STANDINGS & BRACKET AREA (Displayed across preview roles) */}
   <TournamentSection 
+    eventId={eventId}
     ageGroup={event.ageGroup} 
     status={status}
     groupFixtures={groupFixtures}
@@ -1434,18 +1933,6 @@ return (
       </div>
     ) : (
       <form onSubmit={handleRegisterSubmit} className="space-y-10">
-
-        {/* Autofill helper */}
-        <div className="flex justify-end">
-          <button
-            type="button"
-            onClick={handleAutofillRoster}
-            className="bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider text-[#00FF62] cursor-pointer"
-          >
-            Autofill Mock Club Data
-          </button>
-        </div>
-
         {/* Club Information */}
         <div className="space-y-6">
           <h3 className="text-xl font-black uppercase text-white font-orbitron border-b border-white/5 pb-2">Club Information</h3>
@@ -1520,6 +2007,7 @@ return (
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
+                        setRegCustomLogoFile(file);
                         const reader = new FileReader();
                         reader.onloadend = () => {
                           setRegCustomLogo(reader.result as string);
@@ -1611,8 +2099,8 @@ return (
                 <tr className="border-b border-white/10 bg-white/2">
                   <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40 w-12 text-center">#</th>
                   <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40">Player Full Name</th>
-                  <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40">Date of Birth</th>
-                  <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40 text-center w-24">Shirt No.</th>
+                  <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40 min-w-[170px]">Date of Birth</th>
+                  <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40 text-center w-28">Shirt No.</th>
                   <th className="p-4 text-[9px] font-black uppercase tracking-wider text-white/40 w-12 text-center">Action</th>
                 </tr>
               </thead>
@@ -1630,10 +2118,10 @@ return (
                           updated[idx].name = e.target.value;
                           setRegPlayers(updated);
                         }}
-                        className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder:text-white/10 focus:outline-none focus:border-white/25"
+                        className="w-full bg-[#111111] border border-white/15 rounded-xl px-4 py-2.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-white/30 transition-all"
                       />
                     </td>
-                    <td className="p-3">
+                    <td className="p-3 min-w-[170px]">
                       <input
                         type="date"
                         value={player.dob}
@@ -1642,20 +2130,30 @@ return (
                           updated[idx].dob = e.target.value;
                           setRegPlayers(updated);
                         }}
-                        className="w-full bg-[#11] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-white/25"
+                        onClick={(e) => {
+                          try {
+                            e.currentTarget.showPicker?.();
+                          } catch {}
+                        }}
+                        style={{ colorScheme: "dark" }}
+                        className="w-full bg-[#111111] border border-white/15 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-white/30 cursor-pointer [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-100 transition-all"
                       />
                     </td>
-                    <td className="p-3">
+                    <td className="p-3 w-28">
                       <input
                         type="text"
-                        placeholder="e.g. 10"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={3}
+                        placeholder="10"
                         value={player.shirt}
                         onChange={(e) => {
+                          const numericVal = e.target.value.replace(/\D/g, "");
                           const updated = [...regPlayers];
-                          updated[idx].shirt = e.target.value;
+                          updated[idx].shirt = numericVal;
                           setRegPlayers(updated);
                         }}
-                        className="w-full bg-[#11] border border-white/10 rounded-xl px-3 py-2.5 text-xs text-center text-white placeholder:text-white/10 focus:outline-none focus:border-white/25"
+                        className="w-full bg-[#111111] border border-white/15 rounded-xl px-3 py-2.5 text-xs text-center text-white placeholder:text-white/40 focus:outline-none focus:border-white/30 font-orbitron font-bold transition-all"
                       />
                     </td>
                     <td className="p-3 text-center">
@@ -1668,7 +2166,7 @@ return (
                             toast.error("Must have at least 1 player");
                           }
                         }}
-                        className="text-white/30 hover:text-red-500 transition-colors p-1"
+                        className="text-white/30 hover:text-red-500 transition-colors p-1 cursor-pointer"
                       >
                         <IconTrash size={16} />
                       </button>
@@ -1680,20 +2178,20 @@ return (
           </div>
         </div>
 
-        {/* Payment checkout */}
-        <div className="space-y-6 bg-[#161616]/40 border border-white/10 rounded-4xl p-6 md:p-8">
+        {/* Payment checkout with Stripe */}
+        <div className="flex flex-col gap-6 bg-[#161616]/40 border border-white/10 rounded-4xl p-6 md:p-8">
           <div className="flex items-center gap-3 border-b border-white/5 pb-3">
             <IconCreditCard size={24} className="text-[#E31B23]" />
             <h3 className="text-xl font-black uppercase text-white font-orbitron">Secure Registration Fee Payment</h3>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-2">
-            <div className="lg:col-span-1 space-y-4 min-w-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-2 items-center">
+            <div className="flex flex-col gap-4 min-w-0">
               <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Total Summary</span>
-              <div className="space-y-2">
+              <div className="flex flex-col gap-2">
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-white/60">Club Registration Fee</span>
-                  <span className="text-white font-bold">{event.fee}</span>
+                  <span className="text-white font-bold">{event?.fee || "Free"}</span>
                 </div>
                 <div className="flex justify-between items-center text-sm border-t border-white/5 pt-2">
                   <span className="text-white/60">Service Taxes & Referee fee</span>
@@ -1701,58 +2199,24 @@ return (
                 </div>
                 <div className="flex justify-between items-center text-base border-t border-white/5 pt-3 font-black font-orbitron">
                   <span className="text-white">Amount Due</span>
-                  <span className="text-[#00FF62]">{event.fee}</span>
+                  <span className="text-[#00FF62]">{event?.fee || "Free"}</span>
                 </div>
               </div>
             </div>
 
-            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
-              <div className="space-y-2 md:col-span-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-white/40">Credit Card Number</label>
-                <input
-                  type="text"
-                  required
-                  value={cardNumber}
-                  onChange={(e) => setCardNumber(e.target.value)}
-                  placeholder="4000 1234 5678 9010"
-                  className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-white/25"
-                />
+            <div className="flex flex-col gap-3 p-5 rounded-2xl bg-black/40 border border-white/10">
+              <div className="flex items-center gap-2 text-white">
+                <IconShield className="size-5 text-[#00FF62]" />
+                <span className="text-xs font-black uppercase tracking-wider font-orbitron">Stripe Secure Checkout</span>
               </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-white/40">Expiration Date</label>
-                <input
-                  type="text"
-                  required
-                  value={cardExpiry}
-                  onChange={(e) => setCardExpiry(e.target.value)}
-                  placeholder="MM / YY"
-                  className="w-full bg-[#11] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-white/25"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-white/40">Security Code (CVV)</label>
-                <input
-                  type="text"
-                  required
-                  value={cardCvv}
-                  onChange={(e) => setCardCvv(e.target.value)}
-                  placeholder="123"
-                  className="w-full bg-[#11] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-white/25"
-                />
-              </div>
-
-              <div className="space-y-2 md:col-span-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-white/40">Cardholder Full Name</label>
-                <input
-                  type="text"
-                  required
-                  value={cardHolder}
-                  onChange={(e) => setCardHolder(e.target.value)}
-                  placeholder="e.g. John Terry"
-                  className="w-full bg-[#11] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-white/25"
-                />
+              <p className="text-xs text-white/60 leading-relaxed">
+                You will be redirected to the official Stripe payment gateway to securely complete your payment. Upon successful transaction, your club registration will be verified automatically.
+              </p>
+              <div className="flex items-center gap-2 pt-1 text-[10px] font-bold text-white/40">
+                <span className="bg-white/10 px-2 py-0.5 rounded text-white/70">Visa</span>
+                <span className="bg-white/10 px-2 py-0.5 rounded text-white/70">Mastercard</span>
+                <span className="bg-white/10 px-2 py-0.5 rounded text-white/70">Apple Pay</span>
+                <span className="bg-white/10 px-2 py-0.5 rounded text-white/70">Google Pay</span>
               </div>
             </div>
           </div>
@@ -1762,20 +2226,20 @@ return (
           <button
             type="button"
             onClick={() => setShowRegModal(false)}
-            className="px-8 py-3.5 border border-white/20 text-white hover:bg-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all font-orbitron"
+            className="px-8 py-3.5 border border-white/20 text-white hover:bg-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all font-orbitron cursor-pointer"
           >
             Cancel
           </button>
 
           <button
             type="submit"
-            disabled={isPaying}
+            disabled={isRegisteringClub}
             className="px-10 py-3.5 bg-[#00FF62] text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-[#00E559] hover:scale-[1.01] transition-all flex items-center gap-2 font-orbitron cursor-pointer disabled:opacity-50"
           >
-            {isPaying ? (
+            {isRegisteringClub ? (
               <>
-                <div className="w-3.5 h-3.5 border-2 border-t-black border-black/20 rounded-full animate-spin" />
-                Authorizing Payment...
+                <div className="size-3.5 border-2 border-t-black border-black/20 rounded-full animate-spin" />
+                Processing Stripe Checkout...
               </>
             ) : (
               <>
@@ -1794,31 +2258,72 @@ return (
   <DashboardModal
     isOpen={selectedRosterTeam !== null}
     onClose={() => setSelectedRosterTeam(null)}
-    title={selectedRosterTeam?.name || "Roster Details"}
-    subtitle={`Squad age group: ${selectedRosterTeam?.category || "U-8"} • Contact Person: ${selectedRosterTeam?.contactName || "N/A"}`}
+    title={activeClub?.clubName || activeClub?.name || selectedRosterTeam?.name || "Roster Details"}
+    subtitle={`Squad age group: ${activeClub?.category || selectedRosterTeam?.category || "U-16"} • Contact Person: ${activeClub?.contactPerson || activeClub?.contactName || selectedRosterTeam?.contactPerson || selectedRosterTeam?.contactName || "N/A"}`}
     showBackButton
     onBack={() => setSelectedRosterTeam(null)}
   >
-    <div className="space-y-6">
-      <div className="flex justify-between items-center bg-[#111] p-6 rounded-3xl border border-white/10">
-        <div className="flex items-center gap-4">
-          {selectedRosterTeam && renderTeamLogo(selectedRosterTeam.id, "w-16 h-16")}
-          <div>
-            <h4 className="text-xl font-black uppercase text-white font-orbitron">{selectedRosterTeam?.name}</h4>
-            <p className="text-xs text-white/50">{selectedRosterTeam?.contactEmail} • {selectedRosterTeam?.contactPhone}</p>
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[#111] p-6 rounded-3xl border border-white/10">
+        <div className="flex items-center gap-4 min-w-0">
+          {(activeClub?.logoUrl || activeClub?.customLogo || selectedRosterTeam?.logoUrl || selectedRosterTeam?.customLogo) ? (
+            <Image
+              width={64}
+              height={64}
+              src={activeClub?.logoUrl || activeClub?.customLogo || selectedRosterTeam?.logoUrl || selectedRosterTeam?.customLogo}
+              alt={activeClub?.clubName || activeClub?.name || selectedRosterTeam?.name || "Club Logo"}
+              className="size-16 shrink-0 object-contain rounded-2xl bg-white/5 p-1 border border-white/10"
+            />
+          ) : (
+            selectedRosterTeam && renderTeamLogo(selectedClubId, "size-16 shrink-0")
+          )}
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h4 className="text-xl font-black uppercase text-white font-orbitron truncate">
+                {activeClub?.clubName || activeClub?.name || selectedRosterTeam?.name}
+              </h4>
+              {(activeClub?.paymentStatus || selectedRosterTeam?.paymentStatus) && (
+                <span className={`text-[9px] font-black uppercase px-2.5 py-0.5 rounded ${
+                  (activeClub?.paymentStatus || selectedRosterTeam?.paymentStatus) === "PAID"
+                    ? "bg-[#00FF62]/10 border border-[#00FF62]/30 text-[#00FF62]"
+                    : "bg-yellow-400/10 border border-yellow-400/30 text-yellow-400"
+                }`}>
+                  Payment: {activeClub?.paymentStatus || selectedRosterTeam?.paymentStatus}
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-white/50 mt-1">
+              {activeClub?.contactEmail || selectedRosterTeam?.contactEmail || "No email"} • {activeClub?.contactPhone || selectedRosterTeam?.contactPhone || "No phone"}
+            </p>
+            {(activeClub?.coachName || selectedRosterTeam?.coachName) && (
+              <p className="text-xs text-white/70 font-bold mt-0.5">
+                Coach: {activeClub?.coachName || selectedRosterTeam?.coachName}
+              </p>
+            )}
           </div>
         </div>
 
-        <div className="text-right">
+        <div className="text-left sm:text-right shrink-0">
           <span className="text-[10px] font-black uppercase tracking-widest text-white/40 block">Assigned Group</span>
           <span className="text-lg font-black text-[#00FF62] font-orbitron uppercase mt-1 block">
-            {groupA.includes(selectedRosterTeam?.id) ? "Group A" : groupB.includes(selectedRosterTeam?.id) ? "Group B" : "Unallocated"}
+            {groupA.includes(selectedClubId) ? "Group A" : groupB.includes(selectedClubId) ? "Group B" : (activeClub?.allocatedGroup || selectedRosterTeam?.allocatedGroup || "Unallocated")}
           </span>
         </div>
       </div>
 
-      <div className="space-y-3">
-        <h4 className="text-xs font-black uppercase text-white/40 tracking-widest font-orbitron">Registered Player Roster ({selectedRosterTeam?.players?.length || 0})</h4>
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h4 className="text-xs font-black uppercase text-white/40 tracking-widest font-orbitron">
+            Registered Player Roster ({activeRosterList.length})
+          </h4>
+          {(isRosterLoading || isRosterFetching) && (
+            <div className="flex items-center gap-2 text-xs text-white/50">
+              <div className="size-3.5 border-2 border-t-[#00FF62] border-white/20 rounded-full animate-spin" />
+              <span className="text-[11px] font-medium">Syncing roster...</span>
+            </div>
+          )}
+        </div>
+
         <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/40">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -1830,15 +2335,41 @@ return (
               </tr>
             </thead>
             <tbody>
-              {selectedRosterTeam?.players?.map((player: any, idx: number) => (
-                <tr key={idx} className="border-b border-white/5 hover:bg-white/1">
-                  <td className="p-4 text-center font-black text-xs text-white/40 font-orbitron">{idx + 1}</td>
-                  <td className="p-4 text-sm font-bold text-white uppercase">{player.name}</td>
-                  <td className="p-4 text-sm text-white/60">{player.dob}</td>
-                  <td className="p-4 text-center font-black text-sm text-[#00FF62] font-orbitron">{player.shirt}</td>
-                </tr>
-              ))}
-              {(!selectedRosterTeam?.players || selectedRosterTeam.players.length === 0) && (
+              {isRosterLoading && activeRosterList.length === 0 ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <tr key={i} className="border-b border-white/5 animate-pulse">
+                    <td className="p-4 text-center">
+                      <Skeleton className="h-4 w-4 bg-white/10 mx-auto rounded" />
+                    </td>
+                    <td className="p-4">
+                      <Skeleton className="h-4 w-32 bg-white/10 rounded" />
+                    </td>
+                    <td className="p-4">
+                      <Skeleton className="h-4 w-24 bg-white/5 rounded" />
+                    </td>
+                    <td className="p-4 text-center">
+                      <Skeleton className="h-4 w-8 bg-white/10 mx-auto rounded" />
+                    </td>
+                  </tr>
+                ))
+              ) : activeRosterList.length > 0 ? (
+                activeRosterList.map((player: any, idx: number) => {
+                  const playerName = player.fullName || player.name || "Unnamed Player";
+                  const playerDob = player.dateOfBirth || player.dob || "—";
+                  const playerShirt = player.shirtNo !== undefined && player.shirtNo !== null 
+                    ? player.shirtNo 
+                    : (player.shirt || "—");
+
+                  return (
+                    <tr key={player._id || player.playerId || idx} className="border-b border-white/5 hover:bg-white/1">
+                      <td className="p-4 text-center font-black text-xs text-white/40 font-orbitron">{idx + 1}</td>
+                      <td className="p-4 text-sm font-bold text-white uppercase">{playerName}</td>
+                      <td className="p-4 text-sm text-white/60">{playerDob}</td>
+                      <td className="p-4 text-center font-black text-sm text-[#00FF62] font-orbitron">{playerShirt}</td>
+                    </tr>
+                  );
+                })
+              ) : (
                 <tr>
                   <td colSpan={4} className="p-12 text-center text-xs text-white/30 uppercase font-black font-orbitron">
                     No players registered on this roster.
@@ -1858,6 +2389,7 @@ return (
 export default EventDetailPage;
 
 interface TournamentSectionProps {
+  eventId?: string;
   ageGroup: string;
   status: "registration" | "live" | "completed";
   groupFixtures: any[];
@@ -1874,6 +2406,7 @@ interface TournamentSectionProps {
 }
 
 const TournamentSection = ({
+  eventId,
   ageGroup,
   status,
   groupFixtures,
@@ -1892,6 +2425,69 @@ const TournamentSection = ({
   const [selectedGroup, setSelectedGroup] = useState<"Group A" | "Group B">("Group A");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+
+  // RTK Query: Fetch arena tab data (standings, fixtures, bracket)
+  const { 
+    data: arenaResponse, 
+    isLoading: isArenaLoading, 
+    isFetching: isArenaFetching 
+  } = useGetTournamentArenaQuery(
+    { eventId: eventId || "", tab: activeTab },
+    { skip: !eventId }
+  );
+
+  const arenaData = arenaResponse?.data;
+
+  // Resolve API Fixtures
+  const apiFixtures = 
+    arenaData?.fixtures || 
+    arenaData?.matches || 
+    arenaData?.groupFixtures || 
+    (activeTab === "fixtures" && Array.isArray(arenaData) ? arenaData : null);
+
+  const resolvedFixtures: any[] = (Array.isArray(apiFixtures) && apiFixtures.length > 0)
+    ? apiFixtures.map((f: any, idx: number) => ({
+        id: f.id || f._id || `fixture-${idx}`,
+        round: f.round || f.stage || "Group Stage",
+        group: f.group || f.groupName || (f.round === "Group Stage" ? "Group A" : "Playoffs"),
+        status: f.status || (f.isCompleted ? "Completed" : "Scheduled"),
+        team1Id: f.team1Id || f.homeTeamId || f.team1?._id || f.team1?.id || f.teamAId || "",
+        team2Id: f.team2Id || f.awayTeamId || f.team2?._id || f.team2?.id || f.teamBId || "",
+        team1Name: f.team1Name || f.homeTeamName || f.team1?.name || f.teamA?.name || "",
+        team2Name: f.team2Name || f.awayTeamName || f.team2?.name || f.teamB?.name || "",
+        score1: f.score1 ?? f.homeScore ?? f.scoreA ?? (typeof f.homeGoals === "number" ? f.homeGoals : null),
+        score2: f.score2 ?? f.awayScore ?? f.scoreB ?? (typeof f.awayGoals === "number" ? f.awayGoals : null),
+        date: f.date || f.matchDate || "Day 1",
+        pitch: f.pitch || f.venue || "Pitch A",
+        time: f.time || f.matchTime || "10:00"
+      }))
+    : groupFixtures;
+
+  // Resolve API Standings based on selected group or full standings
+  const isGroupA = selectedGroup === "Group A";
+  const apiStandings = 
+    (isGroupA ? (arenaData?.groupA || arenaData?.groupAStandings || arenaData?.standings?.groupA) : (arenaData?.groupB || arenaData?.groupBStandings || arenaData?.standings?.groupB)) ||
+    (Array.isArray(arenaData?.standings) 
+      ? arenaData.standings.filter((row: any) => !row.group || row.group === selectedGroup || row.groupName === selectedGroup)
+      : null) ||
+    arenaData?.tables?.[isGroupA ? "groupA" : "groupB"] ||
+    (Array.isArray(arenaData?.tables) ? arenaData.tables : null) ||
+    (activeTab === "standings" && Array.isArray(arenaData) ? arenaData : null);
+
+  const resolvedStandings: any[] = (Array.isArray(apiStandings) && apiStandings.length > 0)
+    ? apiStandings.map((row: any, idx: number) => ({
+        id: row.id || row.clubId || row._id || `team-${idx}`,
+        name: row.name || row.clubName || row.teamName || getTeamName(row.id || row.clubId || row._id),
+        p: row.p ?? row.played ?? row.matchesPlayed ?? 0,
+        w: row.w ?? row.won ?? row.wins ?? 0,
+        d: row.d ?? row.draws ?? 0,
+        l: row.l ?? row.lost ?? row.losses ?? 0,
+        gf: row.gf ?? row.goalsFor ?? 0,
+        ga: row.ga ?? row.goalsAgainst ?? 0,
+        gd: row.gd ?? row.goalDifference ?? ((row.gf || 0) - (row.ga || 0)),
+        pts: row.pts ?? row.points ?? 0
+      }))
+    : calculateStandings(selectedGroup);
 
   const categories = Array.from(
     new Set((ageGroup || "U-8, U-10").split(",").map((c) => c.trim()))
@@ -1923,9 +2519,84 @@ const TournamentSection = ({
     winnerId: null,
   }));
 
-  const filteredFixtures = groupFixtures.filter((f) => {
-    const t1 = getTeamName(f.team1Id).toLowerCase();
-    const t2 = getTeamName(f.team2Id).toLowerCase();
+  const apiBracket = arenaData?.bracket || arenaData;
+  const rawR16 = apiBracket?.roundOf16 || apiBracket?.r16;
+  const resolvedR16 = (Array.isArray(rawR16) && rawR16.length > 0)
+    ? rawR16.map((m: any, idx: number) => ({
+        id: m.id || m._id || `r16-${idx + 1}`,
+        round: m.round || "Round of 16",
+        date: m.date || m.matchDate || "Day 2",
+        team1Id: m.team1Id || m.team1?._id || m.homeTeamId || `r16-t${idx * 2 + 1}`,
+        team2Id: m.team2Id || m.team2?._id || m.awayTeamId || `r16-t${idx * 2 + 2}`,
+        team1Name: m.team1Name || m.homeTeamName || m.team1?.name || "",
+        team2Name: m.team2Name || m.awayTeamName || m.team2?.name || "",
+        team1Placeholder: m.team1Placeholder || `Group ${String.fromCharCode(65 + idx)} Winner`,
+        team2Placeholder: m.team2Placeholder || `Group ${String.fromCharCode(66 + idx)} Runner-up`,
+        score1: m.score1 ?? m.homeScore ?? null,
+        score2: m.score2 ?? m.awayScore ?? null,
+        winnerId: m.winnerId || m.winner || null,
+      }))
+    : mockRoundOf16;
+
+  const rawQuarters = apiBracket?.quarterFinals || apiBracket?.quarters || apiBracket?.qf;
+  const resolvedQuarters = (Array.isArray(rawQuarters) && rawQuarters.length > 0)
+    ? rawQuarters.map((m: any, idx: number) => ({
+        id: m.id || m._id || `qf-${idx + 1}`,
+        round: m.round || "Quarter-Final",
+        date: m.date || m.matchDate || "Day 3",
+        team1Id: m.team1Id || m.team1?._id || m.homeTeamId || `qf-t${idx * 2 + 1}`,
+        team2Id: m.team2Id || m.team2?._id || m.awayTeamId || `qf-t${idx * 2 + 2}`,
+        team1Name: m.team1Name || m.homeTeamName || m.team1?.name || "",
+        team2Name: m.team2Name || m.awayTeamName || m.team2?.name || "",
+        team1Placeholder: m.team1Placeholder || `Winner R16 ${idx * 2 + 1}`,
+        team2Placeholder: m.team2Placeholder || `Winner R16 ${idx * 2 + 2}`,
+        score1: m.score1 ?? m.homeScore ?? null,
+        score2: m.score2 ?? m.awayScore ?? null,
+        winnerId: m.winnerId || m.winner || null,
+      }))
+    : mockQuarters;
+
+  const rawSemis = apiBracket?.semiFinals || apiBracket?.semis || apiBracket?.sf;
+  const resolvedSemis = (Array.isArray(rawSemis) && rawSemis.length > 0)
+    ? rawSemis.map((m: any, idx: number) => ({
+        id: m.id || m._id || `sf-${idx + 1}`,
+        round: m.round || "Semi-Final",
+        date: m.date || m.matchDate || "Day 4",
+        team1Id: m.team1Id || m.team1?._id || m.homeTeamId || "",
+        team2Id: m.team2Id || m.team2?._id || m.awayTeamId || "",
+        team1Name: m.team1Name || m.homeTeamName || m.team1?.name || "",
+        team2Name: m.team2Name || m.awayTeamName || m.team2?.name || "",
+        team1Placeholder: m.team1Placeholder || `Semi-Finalist ${idx * 2 + 1}`,
+        team2Placeholder: m.team2Placeholder || `Semi-Finalist ${idx * 2 + 2}`,
+        score1: m.score1 ?? m.homeScore ?? null,
+        score2: m.score2 ?? m.awayScore ?? null,
+        winnerId: m.winnerId || m.winner || null,
+      }))
+    : semis;
+
+  const rawFinal = apiBracket?.final || apiBracket?.championship;
+  const resolvedFinal = rawFinal
+    ? {
+        id: rawFinal.id || rawFinal._id || "final-1",
+        round: rawFinal.round || "Grand Final",
+        date: rawFinal.date || rawFinal.matchDate || "Final Day",
+        time: rawFinal.time || rawFinal.matchTime || "18:00",
+        team1Id: rawFinal.team1Id || rawFinal.team1?._id || rawFinal.homeTeamId || "",
+        team2Id: rawFinal.team2Id || rawFinal.team2?._id || rawFinal.awayTeamId || "",
+        team1Name: rawFinal.team1Name || rawFinal.homeTeamName || rawFinal.team1?.name || "",
+        team2Name: rawFinal.team2Name || rawFinal.awayTeamName || rawFinal.team2?.name || "",
+        team1Placeholder: rawFinal.team1Placeholder || "Grand Finalist 1",
+        team2Placeholder: rawFinal.team2Placeholder || "Grand Finalist 2",
+        score1: rawFinal.score1 ?? rawFinal.homeScore ?? null,
+        score2: rawFinal.score2 ?? rawFinal.awayScore ?? null,
+        winnerId: rawFinal.winnerId || rawFinal.winner || null,
+        winnerName: rawFinal.winnerName || rawFinal.winner?.name || null,
+      }
+    : final;
+
+  const filteredFixtures = resolvedFixtures.filter((f) => {
+    const t1 = (f.team1Name || getTeamName(f.team1Id)).toLowerCase();
+    const t2 = (f.team2Name || getTeamName(f.team2Id)).toLowerCase();
     const q = searchQuery.toLowerCase();
     return t1.includes(q) || t2.includes(q);
   });
@@ -1938,9 +2609,9 @@ const TournamentSection = ({
 
       {/* Header Bar */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 border-b border-white/10 pb-6 relative z-10">
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#E31B23]/10 border border-[#E31B23]/30 flex items-center justify-center text-[#E31B23] shadow-lg shadow-[#E31B23]/10">
+            <div className="size-10 rounded-2xl bg-[#E31B23]/10 border border-[#E31B23]/30 flex items-center justify-center text-[#E31B23] shadow-lg shadow-[#E31B23]/10">
               <IconTrophy size={22} />
             </div>
             <div>
@@ -1955,9 +2626,16 @@ const TournamentSection = ({
                     ? "bg-[#00FF62]/10 border-[#00FF62]/30 text-[#00FF62]"
                     : "bg-amber-500/10 border-amber-500/30 text-amber-400"
                 }`}>
-                  <span className={`w-2 h-2 rounded-full ${status === "live" ? "bg-red-500 animate-ping" : status === "completed" ? "bg-[#00FF62]" : "bg-amber-400"}`} />
+                  <span className={`size-2 rounded-full ${status === "live" ? "bg-red-500 animate-ping" : status === "completed" ? "bg-[#00FF62]" : "bg-amber-400"}`} />
                   {status === "live" ? "🔴 LIVE MATCHES IN PROGRESS" : status === "completed" ? "🏆 TOURNAMENT FINISHED" : "📅 REGISTRATION & PREVIEW"}
                 </span>
+
+                {(isArenaLoading || isArenaFetching) && (
+                  <span className="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest font-orbitron bg-white/5 border border-white/10 text-white/70 flex items-center gap-1.5 animate-pulse">
+                    <IconRefresh size={11} className="animate-spin text-[#00FF62]" />
+                    Syncing Arena...
+                  </span>
+                )}
               </div>
               <p className="text-white/50 font-bold uppercase tracking-widest text-[9px] mt-1">
                 Official Live Standings, Match Schedules and Knockout Brackets
@@ -2058,7 +2736,7 @@ const TournamentSection = ({
 
       {/* TAB 1: STANDINGS */}
       {activeTab === "standings" && (
-        <div className="space-y-6 relative z-10">
+        <div className="flex flex-col gap-6 relative z-10">
           {/* Group Selector */}
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex bg-black/50 p-1 rounded-xl border border-white/10">
@@ -2078,7 +2756,7 @@ const TournamentSection = ({
             </div>
 
             <div className="flex items-center gap-2 text-[9px] font-bold text-white/40 uppercase tracking-widest">
-              <span className="w-2.5 h-2.5 rounded-sm bg-[#00FF62]" /> Top 2 teams qualify for Championship Semi-Finals
+              <span className="size-2.5 rounded-sm bg-[#00FF62]" /> Top 2 teams qualify for Championship Semi-Finals
             </div>
           </div>
 
@@ -2100,50 +2778,72 @@ const TournamentSection = ({
                 </tr>
               </thead>
               <tbody>
-                {calculateStandings(selectedGroup)
-                  .filter((row: any) => row.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                  .map((row: any, idx: number) => {
-                    const isQualified = idx < 2;
-                    return (
-                      <tr 
-                        key={idx} 
-                        className={`border-b border-white/5 transition-all hover:bg-white/5 ${
-                          isQualified ? "bg-[#00FF62]/5 border-l-4 border-l-[#00FF62]" : ""
-                        }`}
-                      >
-                        <td className="p-4 text-center font-black text-xs font-orbitron">
-                          <div className="flex items-center justify-center gap-1">
-                            <span className={isQualified ? "text-[#00FF62]" : "text-white/60"}>{idx + 1}</span>
-                            {isQualified && (
-                              <span className="bg-[#00FF62]/20 text-[#00FF62] text-[8px] font-black px-1.5 py-0.2 rounded font-orbitron">Q</span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="p-4">
-                          <button 
-                            onClick={() => {
-                              setActiveTab("fixtures");
-                              setSearchQuery(row.name);
-                            }}
-                            className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity w-full text-left"
-                          >
-                            {renderTeamLogo(row.id, "w-7 h-7")}
-                            <span className="text-sm font-bold text-white uppercase tracking-tight">{row.name}</span>
-                          </button>
-                        </td>
-                        <td className="p-4 text-center font-bold text-sm text-white">{row.p}</td>
-                        <td className="p-4 text-center text-sm font-bold text-[#00FF62]">{row.w}</td>
-                        <td className="p-4 text-center text-sm font-bold text-white/40">{row.d}</td>
-                        <td className="p-4 text-center text-sm font-bold text-red-400">{row.l}</td>
-                        <td className="p-4 text-center text-sm text-white/60">{row.gf}</td>
-                        <td className="p-4 text-center text-sm text-white/60">{row.ga}</td>
-                        <td className={`p-4 text-center text-sm font-bold ${row.gd > 0 ? 'text-[#00FF62]' : row.gd < 0 ? 'text-red-400' : 'text-white/60'}`}>
-                          {row.gd > 0 ? `+${row.gd}` : row.gd}
-                        </td>
-                        <td className="p-4 text-center font-black text-base text-[#00FF62] font-orbitron">{row.pts}</td>
-                      </tr>
-                    );
-                  })}
+                {isArenaLoading && resolvedStandings.length === 0 ? (
+                  Array.from({ length: 4 }).map((_, i) => (
+                    <tr key={`standings-skel-${i}`} className="border-b border-white/5">
+                      <td className="p-4 text-center"><Skeleton className="h-4 w-6 mx-auto bg-white/10" /></td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <Skeleton className="size-7 rounded-full bg-white/10" />
+                          <Skeleton className="h-4 w-32 bg-white/10" />
+                        </div>
+                      </td>
+                      <td className="p-4 text-center"><Skeleton className="h-4 w-6 mx-auto bg-white/10" /></td>
+                      <td className="p-4 text-center"><Skeleton className="h-4 w-6 mx-auto bg-white/10" /></td>
+                      <td className="p-4 text-center"><Skeleton className="h-4 w-6 mx-auto bg-white/10" /></td>
+                      <td className="p-4 text-center"><Skeleton className="h-4 w-6 mx-auto bg-white/10" /></td>
+                      <td className="p-4 text-center"><Skeleton className="h-4 w-6 mx-auto bg-white/10" /></td>
+                      <td className="p-4 text-center"><Skeleton className="h-4 w-6 mx-auto bg-white/10" /></td>
+                      <td className="p-4 text-center"><Skeleton className="h-4 w-6 mx-auto bg-white/10" /></td>
+                      <td className="p-4 text-center"><Skeleton className="h-5 w-8 mx-auto bg-[#00FF62]/20" /></td>
+                    </tr>
+                  ))
+                ) : (
+                  resolvedStandings
+                    .filter((row: any) => (row.name || "").toLowerCase().includes(searchQuery.toLowerCase()))
+                    .map((row: any, idx: number) => {
+                      const isQualified = idx < 2;
+                      return (
+                        <tr 
+                          key={row.id || idx} 
+                          className={`border-b border-white/5 transition-all hover:bg-white/5 ${
+                            isQualified ? "bg-[#00FF62]/5 border-l-4 border-l-[#00FF62]" : ""
+                          }`}
+                        >
+                          <td className="p-4 text-center font-black text-xs font-orbitron">
+                            <div className="flex items-center justify-center gap-1">
+                              <span className={isQualified ? "text-[#00FF62]" : "text-white/60"}>{idx + 1}</span>
+                              {isQualified && (
+                                <span className="bg-[#00FF62]/20 text-[#00FF62] text-[8px] font-black px-1.5 py-0.2 rounded font-orbitron">Q</span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <button 
+                              onClick={() => {
+                                setActiveTab("fixtures");
+                                setSearchQuery(row.name);
+                              }}
+                              className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity w-full text-left"
+                            >
+                              {renderTeamLogo(row.id, "size-7")}
+                              <span className="text-sm font-bold text-white uppercase tracking-tight">{row.name}</span>
+                            </button>
+                          </td>
+                          <td className="p-4 text-center font-bold text-sm text-white">{row.p}</td>
+                          <td className="p-4 text-center text-sm font-bold text-[#00FF62]">{row.w}</td>
+                          <td className="p-4 text-center text-sm font-bold text-white/40">{row.d}</td>
+                          <td className="p-4 text-center text-sm font-bold text-red-400">{row.l}</td>
+                          <td className="p-4 text-center text-sm text-white/60">{row.gf}</td>
+                          <td className="p-4 text-center text-sm text-white/60">{row.ga}</td>
+                          <td className={`p-4 text-center text-sm font-bold ${row.gd > 0 ? 'text-[#00FF62]' : row.gd < 0 ? 'text-red-400' : 'text-white/60'}`}>
+                            {row.gd > 0 ? `+${row.gd}` : row.gd}
+                          </td>
+                          <td className="p-4 text-center font-black text-base text-[#00FF62] font-orbitron">{row.pts}</td>
+                        </tr>
+                      );
+                    })
+                )}
               </tbody>
             </table>
           </div>
@@ -2153,44 +2853,75 @@ const TournamentSection = ({
       {/* TAB 2: FIXTURES */}
       {activeTab === "fixtures" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
-          {(filteredFixtures.length > 0 ? filteredFixtures : groupFixtures).map((f) => (
-            <div key={f.id} className="bg-black/60 border border-white/10 rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-xl hover:border-white/20 transition-all">
-              <div className="flex justify-between items-center">
-                <span className="text-[9px] font-black uppercase tracking-wider text-white/40 font-orbitron">
-                  {f.round} ({f.group})
-                </span>
-                <span className={`px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest font-orbitron flex items-center gap-1 ${
-                  f.status === 'Completed' 
-                    ? 'bg-[#00FF62]/10 text-[#00FF62] border border-[#00FF62]/30' 
-                    : 'bg-red-500/10 text-red-400 border border-red-500/30'
-                }`}>
-                  {f.status === 'Completed' ? 'FULL TIME' : '🔴 LIVE MATCH'}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between gap-3 my-2 bg-white/2 p-4 rounded-2xl border border-white/5">
-                <div className="flex-1 text-center flex flex-col items-center gap-2 min-w-0">
-                  {renderTeamLogo(f.team1Id, "w-10 h-10")}
-                  <div className="text-xs font-bold text-white uppercase truncate max-w-28">{getTeamName(f.team1Id)}</div>
+          {isArenaLoading && resolvedFixtures.length === 0 ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={`fixture-skel-${i}`} className="bg-black/60 border border-white/10 rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-xl">
+                <div className="flex justify-between items-center">
+                  <Skeleton className="h-3 w-28 bg-white/10 rounded" />
+                  <Skeleton className="h-4 w-20 bg-white/10 rounded-full" />
                 </div>
-
-                <div className="bg-black border border-white/15 px-5 py-3 rounded-2xl shrink-0 font-black text-lg font-orbitron text-white text-center shadow-inner">
-                  {f.status === 'Completed' ? `${f.score1} - ${f.score2}` : f.score1 !== null ? `${f.score1} - ${f.score2}` : 'VS'}
+                <div className="flex items-center justify-between gap-3 my-2 bg-white/2 p-4 rounded-2xl border border-white/5">
+                  <div className="flex-1 flex flex-col items-center gap-2">
+                    <Skeleton className="size-10 rounded-full bg-white/10" />
+                    <Skeleton className="h-3 w-20 bg-white/10 rounded" />
+                  </div>
+                  <Skeleton className="h-10 w-20 bg-white/10 rounded-2xl shrink-0" />
+                  <div className="flex-1 flex flex-col items-center gap-2">
+                    <Skeleton className="size-10 rounded-full bg-white/10" />
+                    <Skeleton className="h-3 w-20 bg-white/10 rounded" />
+                  </div>
                 </div>
-
-                <div className="flex-1 text-center flex flex-col items-center gap-2 min-w-0">
-                  {renderTeamLogo(f.team2Id, "w-10 h-10")}
-                  <div className="text-xs font-bold text-white uppercase truncate max-w-28">{getTeamName(f.team2Id)}</div>
+                <div className="flex justify-between items-center pt-2 border-t border-white/5">
+                  <Skeleton className="h-3 w-16 bg-white/5 rounded" />
+                  <Skeleton className="h-4 w-16 bg-white/10 rounded-lg" />
+                  <Skeleton className="h-3 w-16 bg-white/5 rounded" />
                 </div>
               </div>
+            ))
+          ) : (
+            (filteredFixtures.length > 0 ? filteredFixtures : resolvedFixtures).map((f) => (
+              <div key={f.id} className="bg-black/60 border border-white/10 rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-xl hover:border-white/20 transition-all">
+                <div className="flex justify-between items-center">
+                  <span className="text-[9px] font-black uppercase tracking-wider text-white/40 font-orbitron">
+                    {f.round} ({f.group})
+                  </span>
+                  <span className={`px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest font-orbitron flex items-center gap-1 ${
+                    f.status === 'Completed' 
+                      ? 'bg-[#00FF62]/10 text-[#00FF62] border border-[#00FF62]/30' 
+                      : 'bg-red-500/10 text-red-400 border border-red-500/30'
+                  }`}>
+                    {f.status === 'Completed' ? 'FULL TIME' : '🔴 LIVE MATCH'}
+                  </span>
+                </div>
 
-              <div className="flex justify-between items-center text-[9px] text-white/40 font-bold uppercase tracking-widest pt-2 border-t border-white/5">
-                <span>{f.date}</span>
-                <span className="bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-lg text-[#00FF62] font-orbitron">{f.pitch || "Pitch A"}</span>
-                <span>KO {f.time}</span>
+                <div className="flex items-center justify-between gap-3 my-2 bg-white/2 p-4 rounded-2xl border border-white/5">
+                  <div className="flex-1 text-center flex flex-col items-center gap-2 min-w-0">
+                    {renderTeamLogo(f.team1Id, "size-10")}
+                    <div className="text-xs font-bold text-white uppercase truncate max-w-28">
+                      {f.team1Name || getTeamName(f.team1Id)}
+                    </div>
+                  </div>
+
+                  <div className="bg-black border border-white/15 px-5 py-3 rounded-2xl shrink-0 font-black text-lg font-orbitron text-white text-center shadow-inner">
+                    {f.status === 'Completed' ? `${f.score1} - ${f.score2}` : f.score1 !== null ? `${f.score1} - ${f.score2}` : 'VS'}
+                  </div>
+
+                  <div className="flex-1 text-center flex flex-col items-center gap-2 min-w-0">
+                    {renderTeamLogo(f.team2Id, "size-10")}
+                    <div className="text-xs font-bold text-white uppercase truncate max-w-28">
+                      {f.team2Name || getTeamName(f.team2Id)}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center text-[9px] text-white/40 font-bold uppercase tracking-widest pt-2 border-t border-white/5">
+                  <span>{f.date}</span>
+                  <span className="bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-lg text-[#00FF62] font-orbitron">{f.pitch || "Pitch A"}</span>
+                  <span>KO {f.time}</span>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       )}
 
@@ -2201,37 +2932,37 @@ const TournamentSection = ({
           {/* Round of 16 */}
           <div className="flex flex-col gap-6 w-full min-w-70 max-w-sm shrink-0">
             <h4 className="text-[10px] font-black uppercase tracking-widest text-white/40 text-center font-orbitron flex items-center justify-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#E31B23]" />
+              <span className="size-2 rounded-full bg-[#E31B23]" />
               Round of 16
             </h4>
-            {mockRoundOf16.map((match) => (
-              <div key={match.id} className="bg-black/60 border border-white/15 rounded-3xl p-5 space-y-4 relative shadow-2xl hover:border-white/25 transition-all">
+            {resolvedR16.map((match: any) => (
+              <div key={match.id} className="bg-black/60 border border-white/15 rounded-3xl p-5 flex flex-col gap-4 relative shadow-2xl hover:border-white/25 transition-all">
                 <div className="flex justify-between items-center text-[9px] font-bold text-white/40 uppercase tracking-widest border-b border-white/5 pb-2">
-                  <span>Match #{match.id.replace('r16-', '')} ({match.round})</span>
+                  <span>Match #{String(match.id).replace('r16-', '')} ({match.round})</span>
                   <span>{match.date}</span>
                 </div>
-                <div className="space-y-3">
-                  <div className={`flex justify-between items-center p-2 rounded-xl transition-all`}>
+                <div className="flex flex-col gap-3">
+                  <div className="flex justify-between items-center p-2 rounded-xl transition-all">
                     <div className="flex items-center gap-2.5">
-                      {renderTeamLogo(match.team1Id, "w-6 h-6")}
+                      {renderTeamLogo(match.team1Id, "size-6")}
                       <span className="text-xs text-white/60">
-                        {getTeamName(match.team1Id, match.team1Placeholder)}
+                        {match.team1Name || getTeamName(match.team1Id, match.team1Placeholder)}
                       </span>
                     </div>
                     <span className="text-xs font-black text-white font-orbitron bg-black/60 px-2.5 py-1 rounded-lg border border-white/10">
-                      -
+                      {match.score1 !== null ? match.score1 : "-"}
                     </span>
                   </div>
 
-                  <div className={`flex justify-between items-center p-2 rounded-xl transition-all`}>
+                  <div className="flex justify-between items-center p-2 rounded-xl transition-all">
                     <div className="flex items-center gap-2.5">
-                      {renderTeamLogo(match.team2Id, "w-6 h-6")}
+                      {renderTeamLogo(match.team2Id, "size-6")}
                       <span className="text-xs text-white/60">
-                        {getTeamName(match.team2Id, match.team2Placeholder)}
+                        {match.team2Name || getTeamName(match.team2Id, match.team2Placeholder)}
                       </span>
                     </div>
                     <span className="text-xs font-black text-white font-orbitron bg-black/60 px-2.5 py-1 rounded-lg border border-white/10">
-                      -
+                      {match.score2 !== null ? match.score2 : "-"}
                     </span>
                   </div>
                 </div>
@@ -2244,37 +2975,37 @@ const TournamentSection = ({
           {/* Quarter-Finals */}
           <div className="flex flex-col gap-6 w-full min-w-70 max-w-sm shrink-0">
             <h4 className="text-[10px] font-black uppercase tracking-widest text-white/40 text-center font-orbitron flex items-center justify-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#E31B23]" />
+              <span className="size-2 rounded-full bg-[#E31B23]" />
               Quarter-Finals
             </h4>
-            {mockQuarters.map((match) => (
-              <div key={match.id} className="bg-black/60 border border-white/15 rounded-3xl p-5 space-y-4 relative shadow-2xl hover:border-white/25 transition-all">
+            {resolvedQuarters.map((match: any) => (
+              <div key={match.id} className="bg-black/60 border border-white/15 rounded-3xl p-5 flex flex-col gap-4 relative shadow-2xl hover:border-white/25 transition-all">
                 <div className="flex justify-between items-center text-[9px] font-bold text-white/40 uppercase tracking-widest border-b border-white/5 pb-2">
-                  <span>Match #{match.id.replace('qf-', '')} ({match.round})</span>
+                  <span>Match #{String(match.id).replace('qf-', '')} ({match.round})</span>
                   <span>{match.date}</span>
                 </div>
-                <div className="space-y-3">
-                  <div className={`flex justify-between items-center p-2 rounded-xl transition-all`}>
+                <div className="flex flex-col gap-3">
+                  <div className="flex justify-between items-center p-2 rounded-xl transition-all">
                     <div className="flex items-center gap-2.5">
-                      {renderTeamLogo(match.team1Id, "w-6 h-6")}
+                      {renderTeamLogo(match.team1Id, "size-6")}
                       <span className="text-xs text-white/60">
-                        {getTeamName(match.team1Id, match.team1Placeholder)}
+                        {match.team1Name || getTeamName(match.team1Id, match.team1Placeholder)}
                       </span>
                     </div>
                     <span className="text-xs font-black text-white font-orbitron bg-black/60 px-2.5 py-1 rounded-lg border border-white/10">
-                      -
+                      {match.score1 !== null ? match.score1 : "-"}
                     </span>
                   </div>
 
-                  <div className={`flex justify-between items-center p-2 rounded-xl transition-all`}>
+                  <div className="flex justify-between items-center p-2 rounded-xl transition-all">
                     <div className="flex items-center gap-2.5">
-                      {renderTeamLogo(match.team2Id, "w-6 h-6")}
+                      {renderTeamLogo(match.team2Id, "size-6")}
                       <span className="text-xs text-white/60">
-                        {getTeamName(match.team2Id, match.team2Placeholder)}
+                        {match.team2Name || getTeamName(match.team2Id, match.team2Placeholder)}
                       </span>
                     </div>
                     <span className="text-xs font-black text-white font-orbitron bg-black/60 px-2.5 py-1 rounded-lg border border-white/10">
-                      -
+                      {match.score2 !== null ? match.score2 : "-"}
                     </span>
                   </div>
                 </div>
@@ -2287,21 +3018,21 @@ const TournamentSection = ({
           {/* Semifinals */}
           <div className="flex flex-col gap-6 w-full min-w-70 max-w-sm shrink-0">
             <h4 className="text-[10px] font-black uppercase tracking-widest text-white/40 text-center font-orbitron flex items-center justify-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#E31B23]" />
+              <span className="size-2 rounded-full bg-[#E31B23]" />
               Semi-Final Knockouts
             </h4>
-            {semis.map((match) => (
-              <div key={match.id} className="bg-black/60 border border-white/15 rounded-3xl p-5 space-y-4 relative shadow-2xl hover:border-white/25 transition-all">
+            {resolvedSemis.map((match: any) => (
+              <div key={match.id} className="bg-black/60 border border-white/15 rounded-3xl p-5 flex flex-col gap-4 relative shadow-2xl hover:border-white/25 transition-all">
                 <div className="flex justify-between items-center text-[9px] font-bold text-white/40 uppercase tracking-widest border-b border-white/5 pb-2">
                   <span>Match #{match.id} ({match.round})</span>
                   <span>{match.date}</span>
                 </div>
-                <div className="space-y-3">
-                  <div className={`flex justify-between items-center p-2 rounded-xl transition-all ${match.winnerId === match.team1Id ? 'bg-[#00FF62]/10 border border-[#00FF62]/30' : ''}`}>
+                <div className="flex flex-col gap-3">
+                  <div className={`flex justify-between items-center p-2 rounded-xl transition-all ${match.winnerId && match.winnerId === match.team1Id ? 'bg-[#00FF62]/10 border border-[#00FF62]/30' : ''}`}>
                     <div className="flex items-center gap-2.5">
-                      {renderTeamLogo(match.team1Id, "w-6 h-6")}
-                      <span className={`text-xs ${match.winnerId === match.team1Id ? 'font-black text-white' : 'text-white/60'}`}>
-                        {getTeamName(match.team1Id, match.team1Placeholder)}
+                      {renderTeamLogo(match.team1Id, "size-6")}
+                      <span className={`text-xs ${match.winnerId && match.winnerId === match.team1Id ? 'font-black text-white' : 'text-white/60'}`}>
+                        {match.team1Name || getTeamName(match.team1Id, match.team1Placeholder)}
                       </span>
                     </div>
                     <span className="text-xs font-black text-white font-orbitron bg-black/60 px-2.5 py-1 rounded-lg border border-white/10">
@@ -2309,11 +3040,11 @@ const TournamentSection = ({
                     </span>
                   </div>
 
-                  <div className={`flex justify-between items-center p-2 rounded-xl transition-all ${match.winnerId === match.team2Id ? 'bg-[#00FF62]/10 border border-[#00FF62]/30' : ''}`}>
+                  <div className={`flex justify-between items-center p-2 rounded-xl transition-all ${match.winnerId && match.winnerId === match.team2Id ? 'bg-[#00FF62]/10 border border-[#00FF62]/30' : ''}`}>
                     <div className="flex items-center gap-2.5">
-                      {renderTeamLogo(match.team2Id, "w-6 h-6")}
-                      <span className={`text-xs ${match.winnerId === match.team2Id ? 'font-black text-white' : 'text-white/60'}`}>
-                        {getTeamName(match.team2Id, match.team2Placeholder)}
+                      {renderTeamLogo(match.team2Id, "size-6")}
+                      <span className={`text-xs ${match.winnerId && match.winnerId === match.team2Id ? 'font-black text-white' : 'text-white/60'}`}>
+                        {match.team2Name || getTeamName(match.team2Id, match.team2Placeholder)}
                       </span>
                     </div>
                     <span className="text-xs font-black text-white font-orbitron bg-black/60 px-2.5 py-1 rounded-lg border border-white/10">
@@ -2328,48 +3059,48 @@ const TournamentSection = ({
           <div className="hidden lg:block w-12 h-0.5 bg-linear-to-r from-white/10 via-[#E31B23] to-amber-500 shrink-0" />
 
           {/* Grand Final */}
-          {final && (
+          {resolvedFinal && (
             <div className="w-full max-w-sm flex flex-col gap-4">
               <h4 className="text-[10px] font-black uppercase tracking-widest text-amber-400 text-center font-orbitron animate-pulse flex items-center justify-center gap-2">
                 <IconCrown size={14} />
                 Championship Grand Final
               </h4>
-              <div className="bg-linear-to-b from-[#E31B23]/10 via-black to-black border-2 border-amber-500/40 rounded-4xl p-6 space-y-4 relative shadow-2xl">
+              <div className="bg-linear-to-b from-[#E31B23]/10 via-black to-black border-2 border-amber-500/40 rounded-4xl p-6 flex flex-col gap-4 relative shadow-2xl">
                 <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-amber-400 border-b border-amber-500/20 pb-2">
                   <span>Grand Final Championship</span>
-                  <span>{final.date} - {final.time}</span>
+                  <span>{resolvedFinal.date} - {resolvedFinal.time}</span>
                 </div>
-                <div className="space-y-3">
+                <div className="flex flex-col gap-3">
                   <div className="flex justify-between items-center p-2 rounded-xl border border-white/5 bg-white/2">
                     <div className="flex items-center gap-2.5">
-                      {renderTeamLogo(final.team1Id, "w-7 h-7")}
-                      <span className={`text-sm ${final.winnerId === final.team1Id ? 'font-black text-white' : 'text-white/80'}`}>
-                        {getTeamName(final.team1Id, final.team1Placeholder)}
+                      {renderTeamLogo(resolvedFinal.team1Id, "size-7")}
+                      <span className={`text-sm ${resolvedFinal.winnerId && resolvedFinal.winnerId === resolvedFinal.team1Id ? 'font-black text-white' : 'text-white/80'}`}>
+                        {resolvedFinal.team1Name || getTeamName(resolvedFinal.team1Id, resolvedFinal.team1Placeholder)}
                       </span>
                     </div>
                     <span className="text-base font-black text-amber-400 font-orbitron">
-                      {final.score1 !== null ? final.score1 : "TBD"}
+                      {resolvedFinal.score1 !== null ? resolvedFinal.score1 : "TBD"}
                     </span>
                   </div>
                   <div className="flex justify-between items-center p-2 rounded-xl border border-white/5 bg-white/2">
                     <div className="flex items-center gap-2.5">
-                      {renderTeamLogo(final.team2Id, "w-7 h-7")}
-                      <span className={`text-sm ${final.winnerId === final.team2Id ? 'font-black text-white' : 'text-white/80'}`}>
-                        {getTeamName(final.team2Id, final.team2Placeholder)}
+                      {renderTeamLogo(resolvedFinal.team2Id, "size-7")}
+                      <span className={`text-sm ${resolvedFinal.winnerId && resolvedFinal.winnerId === resolvedFinal.team2Id ? 'font-black text-white' : 'text-white/80'}`}>
+                        {resolvedFinal.team2Name || getTeamName(resolvedFinal.team2Id, resolvedFinal.team2Placeholder)}
                       </span>
                     </div>
                     <span className="text-base font-black text-amber-400 font-orbitron">
-                      {final.score2 !== null ? final.score2 : "TBD"}
+                      {resolvedFinal.score2 !== null ? resolvedFinal.score2 : "TBD"}
                     </span>
                   </div>
                 </div>
 
-                {final.winnerId && (
+                {resolvedFinal.winnerId && (
                   <div className="mt-4 pt-4 border-t border-amber-500/30 flex flex-col items-center justify-center gap-1.5 bg-amber-500/10 rounded-2xl p-4">
                     <IconTrophy className="text-amber-400 animate-bounce" size={36} />
                     <p className="text-[9px] font-black text-white/60 uppercase tracking-widest">TOURNAMENT CHAMPION</p>
                     <p className="text-lg font-black text-amber-400 uppercase font-orbitron tracking-tight text-center">
-                      {getTeamName(final.winnerId)}
+                      {resolvedFinal.winnerName || getTeamName(resolvedFinal.winnerId)}
                     </p>
                   </div>
                 )}

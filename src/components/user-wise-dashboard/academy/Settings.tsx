@@ -14,16 +14,29 @@ import {
   IconEyeOff, 
   IconLoader2,
   IconDeviceFloppy,
+  IconBuildingBank,
+  IconCheck,
+  IconAlertCircle,
+  IconRefresh,
+  IconArrowUpRight,
+  IconShieldCheck,
+  IconCoins,
+  IconWallet,
 } from "@tabler/icons-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useChangePasswordMutation } from "@/redux/features/auth/authApi";
 import { 
   useGetMyAcademyProfileQuery, 
-  useUpdateAcademyProfileMutation 
+  useUpdateAcademyProfileMutation,
+  useGetAcademyStripeStatusQuery,
+  useConnectAcademyStripeMutation,
 } from "@/redux/features/academy/academyApi";
+import { WarningToast, SuccessToast, ErrorToast } from "@/helpers/ValidationHelper";
 import { cn } from "@/lib/utils";
 
 interface AcademyInfoFormValues {
@@ -64,6 +77,56 @@ const AcademySettings = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Academy Stripe Connect Payout API hooks
+  const { 
+    data: stripeStatusResponse, 
+    isLoading: isStripeLoading,
+    isFetching: isStripeFetching,
+    refetch: refetchStripeStatus 
+  } = useGetAcademyStripeStatusQuery();
+  const [connectAcademyStripe, { isLoading: isConnectingStripe }] = useConnectAcademyStripeMutation();
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
+  const stripeData = stripeStatusResponse?.data;
+  const isStripeConnected = Boolean(stripeData?.isConnected);
+  const isPayoutsEnabled = Boolean(stripeData?.payoutsEnabled);
+  const stripeAccountId = stripeData?.stripeAccountId;
+  const accountStatus = stripeData?.accountStatus || (isStripeConnected ? "CONNECTED" : "NOT_CONNECTED");
+  const payoutSummary = stripeData?.payoutSummary;
+
+  // Handle returnUrl / refreshUrl query params
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const statusParam = params.get("connect_status");
+      if (statusParam === "return") {
+        SuccessToast("Returned from Stripe onboarding! Updating your payout status...");
+        refetchStripeStatus();
+      } else if (statusParam === "refresh") {
+        WarningToast("Stripe session was refreshed. You can continue onboarding anytime.");
+        refetchStripeStatus();
+      }
+    }
+  }, [refetchStripeStatus]);
+
+  const handleConnectStripe = async () => {
+    if (isConnectingStripe || isRedirecting) return;
+    try {
+      setIsRedirecting(true);
+      const res = await connectAcademyStripe().unwrap();
+      const onboardingUrl = res?.data?.onboardingUrl || res?.onboardingUrl;
+      if (onboardingUrl) {
+        SuccessToast("Redirecting to Stripe Connect onboarding...");
+        window.location.href = onboardingUrl;
+      } else {
+        setIsRedirecting(false);
+        ErrorToast("Onboarding link not provided by server");
+      }
+    } catch {
+      setIsRedirecting(false);
+    }
+  };
 
   // Academy Information Form
   const {
@@ -357,6 +420,223 @@ const AcademySettings = () => {
             </Button>
           </div>
         </form>
+      </SettingsSection>
+
+      {/* Payout Account (Stripe Connect) */}
+      <SettingsSection icon={IconBuildingBank} title="Payout Account (Stripe Connect)">
+        {isStripeLoading && !stripeData ? (
+          <div className="flex flex-col gap-4 py-4 animate-pulse">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/10 pb-4">
+              <div className="flex flex-col gap-2">
+                <Skeleton className="h-5 w-40 bg-white/10" />
+                <Skeleton className="h-4 w-72 bg-white/5" />
+              </div>
+              <Skeleton className="h-8 w-28 bg-white/10 rounded-full" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-24 bg-white/5 rounded-xl" />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-6 w-full min-w-0">
+            {/* Account Status Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/10 pb-6">
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm font-bold text-white">Account Status:</span>
+                  {isStripeConnected && isPayoutsEnabled ? (
+                    <Badge variant="default" className="bg-[#00FF62]/10 text-[#00FF62] border border-[#00FF62]/30 flex items-center gap-1.5 font-orbitron text-[10px] tracking-wider uppercase">
+                      <IconCheck className="size-3" />
+                      Connected & Active
+                    </Badge>
+                  ) : accountStatus === "PENDING" || (isStripeConnected && !isPayoutsEnabled) ? (
+                    <Badge variant="secondary" className="bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center gap-1.5 font-orbitron text-[10px] tracking-wider uppercase">
+                      <IconAlertCircle className="size-3" />
+                      Action Required (Pending Verification)
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="bg-white/5 text-white/50 border-white/10 flex items-center gap-1.5 font-orbitron text-[10px] tracking-wider uppercase">
+                      <IconAlertCircle className="size-3" />
+                      Not Connected
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-xs text-white/60">
+                  {stripeData?.message || (isStripeConnected
+                    ? "Your academy Stripe Connect account is verified to receive automatic tournament fees and student payouts."
+                    : "Connect your Stripe account to receive automated registration fees and payouts directly to your academy bank account.")}
+                </p>
+              </div>
+
+              {/* Status action / Refresh */}
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => refetchStripeStatus()}
+                  disabled={isStripeFetching}
+                  className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border border-white/10 transition-all cursor-pointer disabled:opacity-50"
+                  title="Refresh payout status"
+                >
+                  <IconRefresh className={cn("size-4", isStripeFetching && "animate-spin text-[#E31B23]")} />
+                </button>
+
+                <Button
+                  type="button"
+                  onClick={handleConnectStripe}
+                  disabled={isConnectingStripe || isRedirecting}
+                  className="bg-[#E31B23] hover:bg-[#C2181F] text-white rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider px-6 h-11 flex items-center justify-center gap-2 font-orbitron cursor-pointer transition-all shadow-lg shadow-[#E31B23]/20 disabled:opacity-50"
+                >
+                  {isConnectingStripe || isRedirecting ? (
+                    <>
+                      <IconLoader2 className="size-4 animate-spin" />
+                      Redirecting to Stripe...
+                    </>
+                  ) : isStripeConnected ? (
+                    <>
+                      <IconArrowUpRight className="size-4" />
+                      Update Payout Account
+                    </>
+                  ) : (
+                    <>
+                      <IconArrowUpRight className="size-4" />
+                      Connect with Stripe
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            {/* Account Details & Badges */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="bg-white/2 border border-white/5 rounded-2xl p-4 flex flex-col gap-1.5">
+                <span className="text-[10px] font-black uppercase tracking-wider text-white/40 font-orbitron">
+                  Stripe Account ID
+                </span>
+                <div className="flex items-center gap-2">
+                  <IconShieldCheck className={cn("size-4", stripeAccountId ? "text-[#00FF62]" : "text-white/40")} />
+                  <span className="text-xs font-mono font-bold text-white truncate">
+                    {stripeAccountId || "Not Generated Yet"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="bg-white/2 border border-white/5 rounded-2xl p-4 flex flex-col gap-1.5">
+                <span className="text-[10px] font-black uppercase tracking-wider text-white/40 font-orbitron">
+                  Bank Transfers / Payouts
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className={cn("size-2 rounded-full", isPayoutsEnabled ? "bg-[#00FF62]" : "bg-white/40")} />
+                  <span className="text-xs font-bold text-white">
+                    {isPayoutsEnabled ? "Enabled (Direct Bank Transfers Active)" : "Disabled (Pending Setup)"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="bg-white/2 border border-white/5 rounded-2xl p-4 flex flex-col gap-1.5 sm:col-span-2 lg:col-span-1">
+                <span className="text-[10px] font-black uppercase tracking-wider text-white/40 font-orbitron">
+                  Verification & KYC
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className={cn("size-2 rounded-full", stripeData?.detailsSubmitted ? "bg-[#00FF62]" : "bg-amber-400")} />
+                  <span className="text-xs font-bold text-white">
+                    {stripeData?.detailsSubmitted ? "Details Submitted & Verified" : "Onboarding Incomplete"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Financial Overview / Payout Summary Cards */}
+            <div className="flex flex-col gap-3">
+              <span className="text-[10px] font-black uppercase tracking-widest text-white/40 font-orbitron">
+                Commission & Payout Overview
+              </span>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Total Commission */}
+                <div className="bg-linear-to-b from-white/4 to-white/1 border border-white/10 rounded-2xl p-4 flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-white/50 uppercase tracking-wider">
+                      Total Commission
+                    </span>
+                    <div className="size-7 rounded-lg bg-red-500/10 text-red-500 flex items-center justify-center">
+                      <IconCoins className="size-4" />
+                    </div>
+                  </div>
+                  <div className="text-2xl font-black font-orbitron text-white">
+                    £{payoutSummary?.totalEarnedCommission ?? 0}
+                  </div>
+                  <span className="text-[10px] text-white/40">
+                    Lifetime earned academy earnings
+                  </span>
+                </div>
+
+                {/* Total Transferred */}
+                <div className="bg-linear-to-b from-[#00FF62]/5 to-transparent border border-[#00FF62]/20 rounded-2xl p-4 flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-white/50 uppercase tracking-wider">
+                      Transferred to Bank
+                    </span>
+                    <div className="size-7 rounded-lg bg-[#00FF62]/10 text-[#00FF62] flex items-center justify-center">
+                      <IconBuildingBank className="size-4" />
+                    </div>
+                  </div>
+                  <div className="text-2xl font-black font-orbitron text-[#00FF62]">
+                    £{payoutSummary?.totalTransferredAmount ?? 0}
+                  </div>
+                  <span className="text-[10px] text-white/40">
+                    {payoutSummary?.transferredCount ?? 0} payouts successfully processed
+                  </span>
+                </div>
+
+                {/* Pending Transfers */}
+                <div className="bg-linear-to-b from-amber-500/5 to-transparent border border-amber-500/20 rounded-2xl p-4 flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-white/50 uppercase tracking-wider">
+                      Pending Transfers
+                    </span>
+                    <div className="size-7 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                      <IconWallet className="size-4" />
+                    </div>
+                  </div>
+                  <div className="text-2xl font-black font-orbitron text-amber-400">
+                    £{payoutSummary?.pendingTransferAmount ?? 0}
+                  </div>
+                  <span className="text-[10px] text-white/40">
+                    {payoutSummary?.pendingTransferCount ?? 0} transfers in processing queue
+                  </span>
+                </div>
+
+                {/* Charges & Status */}
+                <div className="bg-linear-to-b from-white/4 to-white/1 border border-white/10 rounded-2xl p-4 flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-white/50 uppercase tracking-wider">
+                      Charges & Processing
+                    </span>
+                    <div className="size-7 rounded-lg bg-white/10 text-white flex items-center justify-center">
+                      <IconCreditCard className="size-4" />
+                    </div>
+                  </div>
+                  <div className="text-2xl font-black font-orbitron text-white">
+                    {stripeData?.chargesEnabled ? "Active" : "Standard"}
+                  </div>
+                  <span className="text-[10px] text-white/40">
+                    Direct Stripe charge capability
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Informational Guidance Banner */}
+            <div className="bg-white/2 border border-white/5 rounded-2xl p-4 flex items-start gap-3">
+              <IconShieldCheck className="size-5 text-[#E31B23] shrink-0 mt-0.5" />
+              <p className="text-xs text-white/60 leading-relaxed">
+                Payouts are handled securely by <strong>Stripe Connect</strong>. When you click &quot;Connect with Stripe&quot;, you will be safely redirected to Stripe&apos;s hosted onboarding flow to verify your academy details and specify your bank account. Once verified, tournament fees and payouts are deposited automatically to your academy bank account.
+              </p>
+            </div>
+          </div>
+        )}
       </SettingsSection>
 
       {/* Security */}

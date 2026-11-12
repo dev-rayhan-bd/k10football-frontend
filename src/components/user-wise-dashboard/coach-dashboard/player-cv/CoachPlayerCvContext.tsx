@@ -110,6 +110,7 @@ export interface CoachViewPlayerData {
 interface CoachPlayerCvContextType {
   playerData: CoachViewPlayerData;
   cvData: any;
+  openValidateModal?: () => void;
 }
 
 const CoachPlayerCvContext = createContext<CoachPlayerCvContextType | undefined>(undefined);
@@ -125,9 +126,11 @@ export const useCoachPlayerCv = () => {
 export const CoachPlayerCvProvider = ({
   children,
   apiData,
+  openValidateModal,
 }: {
   children: React.ReactNode;
   apiData: any;
+  openValidateModal?: () => void;
 }) => {
   const playerData = useMemo<CoachViewPlayerData>(() => {
     const data = apiData || {};
@@ -435,7 +438,7 @@ export const CoachPlayerCvProvider = ({
   }, [apiData]);
 
   return (
-    <CoachPlayerCvContext.Provider value={{ playerData, cvData: apiData }}>
+    <CoachPlayerCvContext.Provider value={{ playerData, cvData: apiData, openValidateModal }}>
       {children}
     </CoachPlayerCvContext.Provider>
   );

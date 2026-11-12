@@ -803,6 +803,167 @@ export const academyApi = apiSlice.injectEndpoints({
       },
     }),
 
+    registerClubForExtraEvent: builder.mutation<any, { eventId: string; body: FormData | any }>({
+      query: ({ eventId, body }) => {
+        let reqBody = body;
+        if (typeof window !== "undefined" && !(body instanceof FormData)) {
+          const formData = new FormData();
+          if (body?.logo instanceof File) {
+            formData.append("logo", body.logo);
+          }
+          if (typeof body?.data === "string") {
+            formData.append("data", body.data);
+          } else if (typeof body?.data === "object" && body?.data !== null) {
+            formData.append("data", JSON.stringify(body.data));
+          } else if (typeof body === "object" && body !== null) {
+            const { logo, ...rest } = body;
+            formData.append("data", JSON.stringify(rest));
+          }
+          reqBody = formData;
+        }
+
+        return {
+          url: `/academies/extra-events/${eventId}/register-club`,
+          method: "POST",
+          body: reqBody,
+        };
+      },
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.EXTRA_EVENTS, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Club registration initiated successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message =
+            err?.error?.data?.message ||
+            err?.error?.data?.errorSources?.[0]?.message ||
+            err?.error?.message ||
+            "Failed to initiate club registration";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    allocateTournamentGroups: builder.mutation<
+      any,
+      {
+        eventId: string;
+        allocations: Array<{ _id: string; group: string }>;
+      }
+    >({
+      query: ({ eventId, allocations }) => ({
+        url: `/academies/extra-events/${eventId}/allocate-groups`,
+        method: "PATCH",
+        body: { allocations },
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.EXTRA_EVENTS, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Groups allocated successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message =
+            err?.error?.data?.message ||
+            err?.error?.data?.errorSources?.[0]?.message ||
+            err?.error?.message ||
+            "Failed to allocate tournament groups";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    startTournament: builder.mutation<any, string>({
+      query: (eventId) => ({
+        url: `/academies/extra-events/${eventId}/start-tournament`,
+        method: "POST",
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.EXTRA_EVENTS, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Tournament started & fixtures generated successfully!");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message =
+            err?.error?.data?.message ||
+            err?.error?.data?.errorSources?.[0]?.message ||
+            err?.error?.message ||
+            "Failed to start tournament";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
+
+    getTournamentArena: builder.query<
+      any,
+      { eventId: string; tab?: "standings" | "fixtures" | "bracket" | string }
+    >({
+      query: ({ eventId, tab }) => ({
+        url: `/academies/extra-events/${eventId}/arena${tab ? `?tab=${tab}` : ""}`,
+        method: "GET",
+      }),
+      providesTags: [TagTypes.EXTRA_EVENTS, TagTypes.ACADEMY],
+    }),
+
+    getSingleExtraEvent: builder.query<any, string>({
+      query: (eventId) => ({
+        url: `/academies/extra-events/${eventId}`,
+        method: "GET",
+      }),
+      providesTags: [TagTypes.EXTRA_EVENTS, TagTypes.ACADEMY],
+    }),
+
+    getRegisteredClubsForExtraEvent: builder.query<any, string>({
+      query: (eventId) => ({
+        url: `/academies/extra-events/${eventId}/registered-clubs`,
+        method: "GET",
+      }),
+      providesTags: [TagTypes.EXTRA_EVENTS, TagTypes.ACADEMY],
+    }),
+
+    getClubPlayerRoster: builder.query<any, { eventId: string; clubId: string }>({
+      query: ({ eventId, clubId }) => ({
+        url: `/academies/extra-events/${eventId}/registered-clubs/${clubId}/roster`,
+        method: "GET",
+      }),
+      providesTags: [TagTypes.EXTRA_EVENTS, TagTypes.ACADEMY],
+    }),
+
     getSponsorsMeta: builder.query<ISponsorsMetaResponse, void>({
       query: () => ({
         url: "/academies/sponsors/meta",
@@ -1372,6 +1533,48 @@ export const academyApi = apiSlice.injectEndpoints({
         }
       },
     }),
+
+    getAcademyStripeStatus: builder.query<any, void>({
+      query: () => ({
+        url: "/academies/me/stripe/status",
+        method: "GET",
+      }),
+      providesTags: [TagTypes.ACADEMY, TagTypes.PAYMENTS, TagTypes.FINANCE],
+    }),
+
+    connectAcademyStripe: builder.mutation<any, void | Record<string, any>>({
+      query: (body) => ({
+        url: "/academies/me/stripe/connect",
+        method: "POST",
+        body: body || {},
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.ACADEMY, TagTypes.PAYMENTS, TagTypes.FINANCE];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Stripe onboarding URL generated successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message =
+            err?.error?.data?.message ||
+            err?.error?.data?.errorSources?.[0]?.message ||
+            err?.error?.message ||
+            "Failed to generate Stripe onboarding link";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
   }),
 });
 
@@ -1422,6 +1625,17 @@ export const {
   useGetExtraEventsQuery,
   useLazyGetExtraEventsQuery,
   useCreateExtraEventMutation,
+  useRegisterClubForExtraEventMutation,
+  useAllocateTournamentGroupsMutation,
+  useStartTournamentMutation,
+  useGetTournamentArenaQuery,
+  useLazyGetTournamentArenaQuery,
+  useGetSingleExtraEventQuery,
+  useLazyGetSingleExtraEventQuery,
+  useGetRegisteredClubsForExtraEventQuery,
+  useLazyGetRegisteredClubsForExtraEventQuery,
+  useGetClubPlayerRosterQuery,
+  useLazyGetClubPlayerRosterQuery,
   useGetSponsorsMetaQuery,
   useLazyGetSponsorsMetaQuery,
   useGetSponsorsQuery,
@@ -1469,6 +1683,9 @@ export const {
   useGetMyAcademyProfileQuery,
   useLazyGetMyAcademyProfileQuery,
   useUpdateAcademyProfileMutation,
+  useGetAcademyStripeStatusQuery,
+  useLazyGetAcademyStripeStatusQuery,
+  useConnectAcademyStripeMutation,
 } = academyApi;
 
 

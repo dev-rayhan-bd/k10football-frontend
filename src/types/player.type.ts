@@ -70,6 +70,16 @@ export interface IPlayerProfileData {
   transferStatus: {
     status: string;
   };
+  fifaCardStats?: {
+    overallRating?: number;
+    position?: string;
+    pac?: number;
+    sho?: number;
+    pas?: number;
+    dri?: number;
+    def?: number;
+    phy?: number;
+  };
   visionMetrics: Record<string, any>;
   highlightVideo: string;
   phone: string;

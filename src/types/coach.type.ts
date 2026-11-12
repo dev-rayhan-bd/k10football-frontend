@@ -631,3 +631,54 @@ export interface ICoachCompleteGameReportResponse {
   message: string;
   data?: any;
 }
+
+export interface ICoachValidatePlayerCvTechnical {
+  ballControl: number;
+  dribbling: number;
+  shortPassing: number;
+  longPassing: number;
+  crossing: number;
+  shooting: number;
+  finishing: number;
+  longShots: number;
+}
+
+export interface ICoachValidatePlayerCvPhysical {
+  acceleration: number;
+  sprintSpeed: number;
+  stamina: number;
+  strength: number;
+  balance: number;
+  agility: number;
+  reactions: number;
+  jumping: number;
+}
+
+export interface ICoachValidatePlayerCvBehavioral {
+  creativity: number;
+  leadership: number;
+  confidence: number;
+  composure: number;
+  motivation: number;
+  focus: number;
+  determination: number;
+  workRate: number;
+  teamwork: number;
+  consistency: number;
+  decisionMaking: number;
+}
+
+export interface ICoachValidatePlayerCvPayload {
+  playerId: string;
+  technical: ICoachValidatePlayerCvTechnical;
+  physical: ICoachValidatePlayerCvPhysical;
+  behavioral: ICoachValidatePlayerCvBehavioral;
+  coachFeedback: string;
+}
+
+export interface ICoachValidatePlayerCvResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data?: any;
+}

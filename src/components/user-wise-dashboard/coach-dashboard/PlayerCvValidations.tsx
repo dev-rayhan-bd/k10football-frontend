@@ -242,7 +242,9 @@ const PlayerCVValidations = () => {
               onVerify={
                 !isVerified
                   ? () => {
-                      toast.success(`Validation request initiated for ${player.name}`);
+                      router.push(
+                        `/dashboard/coach/player-cv-validations/${player._id || player.id}?validate=true`
+                      );
                     }
                   : undefined
               }

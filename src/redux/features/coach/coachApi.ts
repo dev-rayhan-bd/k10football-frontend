@@ -17,6 +17,8 @@ import {
     IUpdatePlayerFitnessStatusPayload,
     ICoachCompleteGameReportResponse,
     ICoachCompleteGameReportPayload,
+    ICoachValidatePlayerCvPayload,
+    ICoachValidatePlayerCvResponse,
 } from "@/types/coach.type";
 
 export const coachApi = apiSlice.injectEndpoints({
@@ -654,6 +656,90 @@ export const coachApi = apiSlice.injectEndpoints({
                 }
             },
         }),
+
+        getCoachStripeStatus: builder.query<any, void>({
+            query: () => ({
+                url: "/coaches/me/stripe/status",
+                method: "GET",
+            }),
+            providesTags: [TagTypes.COACHES, TagTypes.PAYMENTS, TagTypes.FINANCE],
+        }),
+
+        connectCoachStripe: builder.mutation<any, void | Record<string, any>>({
+            query: (body) => ({
+                url: "/coaches/me/stripe/connect",
+                method: "POST",
+                body: body || {},
+            }),
+            invalidatesTags: (result) => {
+                if (result?.success || !result?.error) {
+                    return [TagTypes.COACHES, TagTypes.PAYMENTS, TagTypes.FINANCE];
+                }
+                return [];
+            },
+            async onQueryStarted(_arg, { queryFulfilled }) {
+                try {
+                    const { data } = await queryFulfilled;
+                    SuccessToast(data?.message || "Stripe Connect onboarding link generated successfully");
+                } catch (err: any) {
+                    const status = err?.error?.status;
+                    const message =
+                        err?.error?.data?.message ||
+                        err?.error?.data?.errorSources?.[0]?.message ||
+                        err?.error?.message ||
+                        "Failed to generate Stripe onboarding link";
+                    if (status === 500) {
+                        ErrorToast("Something went wrong on the server");
+                        return;
+                    }
+                    if (status !== 401) {
+                        ErrorToast(message);
+                    }
+                }
+            },
+        }),
+
+        validatePlayerCv: builder.mutation<
+            ICoachValidatePlayerCvResponse,
+            ICoachValidatePlayerCvPayload
+        >({
+            query: ({ playerId, ...body }) => ({
+                url: `/coaches/players/${playerId}/validate-cv`,
+                method: "POST",
+                body,
+            }),
+            invalidatesTags: (result) => {
+                if (result?.success) {
+                    return [
+                        TagTypes.PLAYERS,
+                        TagTypes.VALIDATE_CV,
+                        TagTypes.COACHES,
+                        TagTypes.PLAYER_EVALUATIONS,
+                    ];
+                }
+                return [];
+            },
+            async onQueryStarted({ playerId }, { queryFulfilled }) {
+                try {
+                    const { data } = await queryFulfilled;
+                    SuccessToast(data?.message || "Player CV validated successfully");
+                } catch (err: any) {
+                    const status = err?.error?.status;
+                    const message =
+                        err?.error?.data?.message ||
+                        err?.error?.data?.errorSources?.[0]?.message ||
+                        err?.error?.message ||
+                        "Failed to validate player CV";
+                    if (status === 500) {
+                        ErrorToast("Something went wrong on the server");
+                        return;
+                    }
+                    if (status !== 401) {
+                        ErrorToast(message);
+                    }
+                }
+            },
+        }),
     }),
 });
 
@@ -688,5 +774,9 @@ export const {
     useLazyGetCoachPlayerEvaluationsQuery,
     useUpdatePlayerFitnessStatusMutation,
     useCompleteCoachGameReportMutation,
+    useGetCoachStripeStatusQuery,
+    useLazyGetCoachStripeStatusQuery,
+    useConnectCoachStripeMutation,
+    useValidatePlayerCvMutation,
 } = coachApi;
 
