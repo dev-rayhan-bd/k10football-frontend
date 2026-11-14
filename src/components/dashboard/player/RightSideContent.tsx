@@ -7,12 +7,15 @@ import clubLogo from "@/assets/cvs/club1.png";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/hooks/reduxHooks";
 import { useGetMySubscriptionQuery } from "@/redux/features/subscription/subscriptionApi";
+import { useGetMyAcademyHomepageQuery } from "@/redux/features/academy/academyApi";
 import { cn } from "@/lib/utils";
 
 const RightSideContent = () => {
   const router = useRouter();
   const reports = useAppSelector(state => state.reports.reports);
   const { data: subscriptionResponse } = useGetMySubscriptionQuery();
+  const { data: academyHomepageResponse } = useGetMyAcademyHomepageQuery();
+  const affiliatedAcademy = academyHomepageResponse?.data?.academyInfo;
   const hasActiveSubscription = Boolean(subscriptionResponse?.data?.hasActiveSubscription);
 
   const gameReports = reports
@@ -53,6 +56,36 @@ const RightSideContent = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* Affiliated Academy Card (if connected) */}
+      {affiliatedAcademy && (
+        <div className="border border-primary/20 rounded-2xl p-4 sm:p-5 bg-black/40 backdrop-blur-xs shadow-xl flex items-center gap-3.5">
+          <div className="size-12 rounded-xl bg-black/60 border border-white/10 p-1.5 flex items-center justify-center shrink-0 overflow-hidden">
+            <Image
+              src={affiliatedAcademy.logo || clubLogo}
+              alt={affiliatedAcademy.name || "Academy"}
+              width={48}
+              height={48}
+              className="size-full object-contain"
+              onError={(e) => {
+                const target = e.currentTarget as HTMLImageElement;
+                target.src = "/placeholder_img.jpg";
+              }}
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <span className="text-[10px] font-bold text-primary uppercase tracking-widest font-orbitron">
+              Affiliated Academy
+            </span>
+            <p className="text-white font-bold text-sm truncate">
+              {affiliatedAcademy.name}
+            </p>
+            <p className="text-gray-400 text-[11px] truncate">
+              {affiliatedAcademy.category || affiliatedAcademy.location}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Scout & Agent Exposure Card */}
       <div className="border border-white/10 rounded-2xl p-4 sm:p-6 bg-black/40 backdrop-blur-xs shadow-xl">
         <div className="flex items-center justify-between gap-3 mb-3">

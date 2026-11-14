@@ -8,6 +8,7 @@ import pinkCard from "@/assets/cvs/pink-card.png";
 import whiteCard from "@/assets/cvs/white-card.png";
 import { useRouter } from "next/navigation";
 import { useGetAllCoachesQuery } from "@/redux/features/coach/coachApi";
+import { cn } from "@/lib/utils";
 
 const COUNTRY_CODES: Record<string, string> = {
   france: "fr",
@@ -301,7 +302,13 @@ const Coaches = () => {
               coach.avatar ||
               coach.userId?.avatar ||
               coach.image ||
-              playerImage;
+              "/profile_placeholder.jpg";
+
+            const isPlaceholder =
+              !coachImgSrc ||
+              coachImgSrc === "/profile_placeholder.jpg" ||
+              coachImgSrc === "/profile_placeholder.png" ||
+              (typeof coachImgSrc === "string" && coachImgSrc.includes("placeholder"));
 
             const cardType: "gold" | "white" | "pink" =
               coach.cardType ||
@@ -366,6 +373,11 @@ const Coaches = () => {
                         src={flagSrc}
                         className="w-7 sm:w-8 h-4.5 sm:h-5.5 object-cover rounded-[2px] shadow-xs"
                         alt={country}
+                        onError={(e) => {
+                          const target = e.currentTarget as HTMLImageElement;
+                          target.srcset = "";
+                          target.src = flag1.src;
+                        }}
                       />
                     ) : (
                       <Image
@@ -381,6 +393,11 @@ const Coaches = () => {
                         src={clubLogoSrc}
                         className="size-7 sm:size-8 object-contain"
                         alt="club logo"
+                        onError={(e) => {
+                          const target = e.currentTarget as HTMLImageElement;
+                          target.srcset = "";
+                          target.src = club1.src;
+                        }}
                       />
                     ) : (
                       <Image
@@ -392,9 +409,12 @@ const Coaches = () => {
                   </div>
 
                   {/* Coach image */}
-                  <div className="absolute top-[3%] right-[6%] w-[64%] h-[47%] flex items-end justify-center z-10 overflow-hidden">
+                  <div className="absolute top-[11%] right-[10%] w-[58%] h-[40%] flex items-end justify-center z-10 overflow-hidden">
                     <Image
-                      className="h-full w-auto object-contain select-none pointer-events-none"
+                      className={cn(
+                        "h-full w-auto object-contain select-none pointer-events-none transition-all duration-300",
+                        isPlaceholder && "max-h-[85%] max-w-[85%] pb-1 opacity-85"
+                      )}
                       src={coachImgSrc}
                       width={285}
                       height={370}
@@ -403,6 +423,12 @@ const Coaches = () => {
                         typeof coachImgSrc === "string" &&
                         (coachImgSrc.startsWith("http") || coachImgSrc.startsWith("/"))
                       }
+                      onError={(e) => {
+                        const target = e.currentTarget as HTMLImageElement;
+                        target.srcset = "";
+                        target.src = "/profile_placeholder.jpg";
+                        target.classList.add("max-h-[85%]", "max-w-[85%]", "pb-1", "opacity-85");
+                      }}
                     />
                   </div>
 

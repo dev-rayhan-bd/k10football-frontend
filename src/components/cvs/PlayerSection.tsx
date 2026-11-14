@@ -9,7 +9,7 @@ import whiteCard from "@/assets/cvs/white-card.png";
 import { useRouter } from "next/navigation";
 import { usePlayer } from "@/hooks/usePlayer";
 import { useGetPlayersQuery } from "@/redux/features/player/playerApi";
-import { getShortForm } from "@/lib/utils";
+import { getShortForm, cn } from "@/lib/utils";
 
 const COUNTRY_CODES: Record<string, string> = {
   france: "fr",
@@ -128,6 +128,11 @@ const Players = () => {
               player.userId?.avatar || 
               playerImage;
 
+            const isPlaceholder =
+              playerImgSrc === "/profile_placeholder.jpg" ||
+              playerImgSrc === "/profile_placeholder.png" ||
+              (typeof playerImgSrc === "string" && playerImgSrc.includes("placeholder"));
+
             // FIFA Card stats: pac, sho, pas, dri, def, phy from fifaCardStats!
             const stats = {
               pac: player.fifaCardStats?.pac ?? player.strengths?.pace ?? 50,
@@ -206,12 +211,24 @@ const Players = () => {
                   {/* Player image */}
                   <div className="absolute top-[12%] right-[11%] w-[58%] h-[40%] flex items-end justify-center z-10 overflow-hidden">
                     <Image
-                      className="h-full w-auto object-contain select-none pointer-events-none"
+                      className={cn(
+                        "h-full w-auto object-contain select-none pointer-events-none transition-all duration-300",
+                        isPlaceholder && "max-h-[85%] max-w-[85%] pb-1 opacity-85"
+                      )}
                       src={playerImgSrc}
                       width={285}
                       height={370}
                       alt="player Image"
-                      unoptimized={typeof playerImgSrc === "string" && playerImgSrc.startsWith("http")}
+                      unoptimized={
+                        typeof playerImgSrc === "string" &&
+                        (playerImgSrc.startsWith("http") || playerImgSrc.startsWith("/"))
+                      }
+                      onError={(e) => {
+                        const target = e.currentTarget as HTMLImageElement;
+                        target.srcset = "";
+                        target.src = "/profile_placeholder.jpg";
+                        target.classList.add("max-h-[85%]", "max-w-[85%]", "pb-1", "opacity-85");
+                      }}
                     />
                   </div>
                   {/* Name */}

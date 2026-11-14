@@ -12,7 +12,9 @@ import {
     IRequestCoachGameReportResponse,
     IGameReportResponse,
     IPlayerGameReportsResponse,
-    IPlayerAnalyticsResponse 
+    IPlayerAnalyticsResponse,
+    IPublicStatsResponse,
+    ICvAnalyticsResponse
 } from "@/types/player.type";
 
 export const playerApi = apiSlice.injectEndpoints({
@@ -589,6 +591,21 @@ export const playerApi = apiSlice.injectEndpoints({
             }),
             providesTags: [TagTypes.PLAYERS],
         }),
+
+        getPublicStats: builder.query<IPublicStatsResponse, void>({
+            query: () => ({
+                url: "/players/public-stats",
+                method: "GET",
+            }),
+        }),
+
+        getCvAnalytics: builder.query<ICvAnalyticsResponse, void>({
+            query: () => ({
+                url: "/players/cv-analytics",
+                method: "GET",
+            }),
+            providesTags: [TagTypes.PLAYERS],
+        }),
     }),
 });
 
@@ -617,6 +634,8 @@ export const {
     useAddPlayerClubMutation,
     useDeletePlayerClubMutation,
     useUpdatePlayerClubMutation,
+    useGetPublicStatsQuery,
+    useGetCvAnalyticsQuery,
 } = playerApi;
 
 // Export aliases for convenience

@@ -61,6 +61,7 @@ import {
   INotifyCoachToValidateCvPayload,
   INotifyCoachToValidateCvResponse,
   IAcademyProfileResponse,
+  IAcademyHomepageResponse,
 } from "@/types/academy.type";
 
 export const academyApi = apiSlice.injectEndpoints({
@@ -1575,6 +1576,14 @@ export const academyApi = apiSlice.injectEndpoints({
         }
       },
     }),
+
+    getMyAcademyHomepage: builder.query<IAcademyHomepageResponse, void>({
+      query: () => ({
+        url: "/academies/me/homepage",
+        method: "GET",
+      }),
+      providesTags: [TagTypes.ACADEMY],
+    }),
   }),
 });
 
@@ -1686,6 +1695,8 @@ export const {
   useGetAcademyStripeStatusQuery,
   useLazyGetAcademyStripeStatusQuery,
   useConnectAcademyStripeMutation,
+  useGetMyAcademyHomepageQuery,
+  useLazyGetMyAcademyHomepageQuery,
 } = academyApi;
 
 

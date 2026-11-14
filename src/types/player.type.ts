@@ -583,4 +583,60 @@ export interface IPlayerAnalyticsResponse {
   data: IPlayerAnalyticsData;
 }
 
+export interface IPublicStatItem {
+  count: number;
+  display?: string;
+  label?: string;
+}
+
+export interface IPublicStatsData {
+  homeStats?: {
+    players?: IPublicStatItem;
+    coaches?: IPublicStatItem;
+    clubs?: IPublicStatItem;
+    scouts?: IPublicStatItem;
+  };
+  servicesStats?: {
+    activePlayers?: IPublicStatItem;
+    professionalScouts?: IPublicStatItem;
+    countries?: IPublicStatItem;
+    matchReports?: IPublicStatItem;
+  };
+}
+
+export interface IPublicStatsResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: IPublicStatsData;
+}
+
+export interface IByNationalityItem {
+  country: string;
+  count: number;
+}
+
+export interface IByAgeItem {
+  label: string;
+  min: number;
+  max: number;
+  count: number;
+  percentage: number;
+}
+
+export interface ICvAnalyticsData {
+  totalPlayers: number;
+  byPosition: Record<string, number>;
+  byNationality: IByNationalityItem[];
+  byAge: IByAgeItem[];
+}
+
+export interface ICvAnalyticsResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: ICvAnalyticsData;
+}
+
+
 

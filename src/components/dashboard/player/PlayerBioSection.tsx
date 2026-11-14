@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { usePlayer } from "@/hooks/usePlayer";
 import { getFullWithShortForm, formatDate } from "@/lib/utils";
 import { useGetMySubscriptionQuery } from "@/redux/features/subscription/subscriptionApi";
+import { useGetMyAcademyHomepageQuery } from "@/redux/features/academy/academyApi";
 import { toast } from "sonner";
 import { useAppDispatch } from "@/hooks/reduxHooks";
 import { updatePlayerField } from "@/redux/features/player/playerSlice";
@@ -16,6 +17,7 @@ const PlayerBioSection = () => {
   const { playerData, cvData, updatePlayerProfile, isLoading } = usePlayer();
   const router = useRouter();
   const { data: subscriptionResponse } = useGetMySubscriptionQuery();
+  const { data: academyHomepageResponse } = useGetMyAcademyHomepageQuery();
   const hasActiveSubscription = Boolean(subscriptionResponse?.data?.hasActiveSubscription);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const coverFileInputRef = useRef<HTMLInputElement>(null);
@@ -69,6 +71,7 @@ const PlayerBioSection = () => {
     playerData.currentClub ||
     cvData?.currentClub ||
     cvData?.playerEvaluation?.currentClub ||
+    academyHomepageResponse?.data?.academyInfo?.name ||
     playerData.clubs?.[0]?.name ||
     "Unattached";
 

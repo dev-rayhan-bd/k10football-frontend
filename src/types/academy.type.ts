@@ -2038,5 +2038,199 @@ export interface IAcademyProfileResponse {
   data: IAcademyProfileData;
 }
 
+// ---------------- ACADEMY HOMEPAGE PRESENTATION ---------------- //
+
+export interface IAcademyHomepageInfo {
+  _id?: string;
+  name?: string;
+  logo?: string;
+  coverPhoto?: string;
+  location?: string;
+  country?: string;
+  city?: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  description?: string;
+  establishedDate?: string;
+  category?: string;
+  registrationId?: string;
+  estimatedAcademySize?: string;
+  league?: string;
+  achievements?: any[];
+}
+
+export interface IAcademyHomepageIntroduction {
+  mission?: string;
+  philosophy?: string;
+  objectives?: string;
+  playerDevelopmentApproach?: string;
+}
+
+export interface IAcademyHomepageTeam {
+  _id: string;
+  teamName: string;
+  ageGroup: string;
+  playersCount: number;
+  coachesCount: number;
+  totalMembers: number;
+  status: string;
+}
+
+export interface IAcademyHomepageCoach {
+  _id: string;
+  coachId?: string;
+  name: string;
+  title?: string;
+  role?: string;
+  status?: string;
+  profileImage?: string;
+  licenseStatus?: string;
+  yearsExperience?: number;
+}
+
+export interface IAcademyHomepageTrainingSession {
+  _id: string;
+  sessionName?: string;
+  sessionTitle?: string;
+  sessionDate?: string;
+  startTime?: string;
+  endTime?: string;
+  trainingLocation?: string;
+  locationField?: string;
+  sessionType?: string;
+  focusArea?: string;
+  teamName?: string;
+  ageGroup?: string;
+  coachName?: string;
+}
+
+export interface IAcademyHomepageMatch {
+  _id: string;
+  matchTitle?: string;
+  ourTeamName?: string;
+  ageGroup?: string;
+  opponentTeam?: string;
+  matchType?: string;
+  competitionName?: string;
+  homeOrAway?: string;
+  venueName?: string;
+  venueAddress?: string;
+  matchDate?: string;
+  kickOffTime?: string;
+  status?: string;
+}
+
+export interface IAcademyHomepageEvent {
+  _id: string;
+  title?: string;
+  eventName?: string;
+  type?: string;
+  eventType?: string;
+  group?: string;
+  ageGroup?: string;
+  targetAttendees?: string;
+  date?: string;
+  eventDate?: string;
+  formattedDateRange?: string;
+  startTime?: string;
+  endTime?: string;
+  registrationDeadline?: string;
+  location?: string;
+  venueName?: string;
+  venueAddress?: string;
+  registrationFee?: number;
+  currency?: string;
+  maxCapacity?: number;
+  currentAttendees?: number;
+  status?: string;
+  tournamentStatus?: string;
+  bannerImage?: string;
+  description?: string;
+}
+
+export interface IAcademyHomepageNews {
+  _id: string;
+  title?: string;
+  articleTitle?: string;
+  type?: string;
+  category?: string;
+  author?: string;
+  date?: string;
+  publishDate?: string;
+  formattedPublishDate?: string;
+  featuredImage?: string;
+  excerpt?: string;
+  content?: string;
+  fullArticle?: string;
+  priority?: string;
+  status?: string;
+}
+
+export interface IAcademyHomepageSponsor {
+  _id: string;
+  companyName: string;
+  contactPerson?: string;
+  sponsorshipType?: string;
+  sponsorshipStatus?: string;
+  formattedContractPeriod?: string;
+  description?: string;
+  logo?: string;
+}
+
+export interface IAcademyHomepageSuccessStory {
+  _id: string;
+  storyTitle: string;
+  playerName: string;
+  position?: string;
+  currentAcademy?: string;
+  category?: string;
+  date?: string;
+  formattedDate?: string;
+  photo?: string;
+  storyContent?: string;
+  status?: string;
+}
+
+export interface IAcademyHomepageData {
+  academyId?: string;
+  academyInfo?: IAcademyHomepageInfo;
+  academyIntroduction?: IAcademyHomepageIntroduction;
+  teams?: IAcademyHomepageTeam[];
+  coaches?: IAcademyHomepageCoach[];
+  coachingStaff?: IAcademyHomepageCoach[];
+  trainingSessions?: IAcademyHomepageTrainingSession[];
+  matches?: IAcademyHomepageMatch[];
+  trainingInformation?: {
+    totalTeams?: number;
+    trainingFacilities?: string;
+    ageGroups?: IAcademyHomepageTeam[];
+    trainingSchedule?: IAcademyHomepageTrainingSession[];
+    matchSchedule?: IAcademyHomepageMatch[];
+  };
+  extraEvents?: IAcademyHomepageEvent[];
+  news?: IAcademyHomepageNews[];
+  sponsors?: IAcademyHomepageSponsor[];
+  successStories?: IAcademyHomepageSuccessStory[];
+  eventsAndAnnouncements?: any[];
+  meta?: {
+    teamsCount?: number;
+    coachesCount?: number;
+    trainingSessionsCount?: number;
+    matchesCount?: number;
+    eventsCount?: number;
+    newsCount?: number;
+    sponsorsCount?: number;
+    successStoriesCount?: number;
+  };
+}
+
+export interface IAcademyHomepageResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: IAcademyHomepageData;
+}
+
+
 
 
