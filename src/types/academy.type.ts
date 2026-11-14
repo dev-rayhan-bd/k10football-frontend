@@ -86,6 +86,7 @@ export interface ITeamRosterAcademy {
   city?: string;
   country?: string;
   logo?: string;
+  coverPhoto?: string;
   currentPlan?: string;
 }
 
@@ -278,6 +279,7 @@ export interface IAcademyParentsResponse {
       _id: string;
       name: string;
       logo?: string;
+  coverPhoto?: string;
     };
     stats?: IAcademyParentStats;
     meta?: {
@@ -339,6 +341,7 @@ export interface ITransferRequestAcademy {
   _id: string;
   name: string;
   logo?: string;
+  coverPhoto?: string;
   city?: string;
   country?: string;
 }
@@ -400,6 +403,7 @@ export interface ITargetAcademyItem {
   _id: string;
   name: string;
   logo?: string;
+  coverPhoto?: string;
   city?: string;
   country?: string;
   teams?: any[];
@@ -846,6 +850,7 @@ export interface ISponsorItem {
   sponsorshipDescription: string;
   benefitsAndDeliverables?: string;
   logo?: string;
+  coverPhoto?: string;
   createdAt?: string;
   [key: string]: any;
 }
@@ -1663,6 +1668,7 @@ export interface IAcademyEvaluationPdfCoach {
 export interface IAcademyEvaluationPdfAcademy {
   name: string;
   logo?: string;
+  coverPhoto?: string;
 }
 
 export interface IAcademyEvaluationPdfData {
@@ -1983,6 +1989,7 @@ export interface IAcademyProfileData {
   location?: string;
   locationText?: string;
   logo?: string;
+  coverPhoto?: string;
   dateOfEstablishment?: string;
   dateOfEstablishmentFormatted?: string;
   establishedDate?: string;

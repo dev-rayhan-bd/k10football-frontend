@@ -65,7 +65,7 @@ const DashboardHero = ({
       ) : (
         <div
           className="absolute inset-0 bg-cover bg-no-repeat bg-center opacity-70 sm:opacity-80 transition-opacity duration-500"
-          style={{ backgroundImage: `url(${backgroundImage})` }}
+          style={{ backgroundImage: `url(${backgroundImage || "/placeholder_img.jpg"})` }}
         />
       )}
 

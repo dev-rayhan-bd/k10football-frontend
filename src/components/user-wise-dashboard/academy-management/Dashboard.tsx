@@ -144,7 +144,7 @@ const AcademyManagementDashboard = () => {
         <div className="flex-1 min-w-0 flex flex-col gap-6">
           {/* Hero Section */}
           <DashboardHero
-            backgroundImage={academy?.coverPhoto || "/banner.png"}
+            backgroundImage={academy?.coverPhoto || "/placeholder_img.jpg"}
             logoImage={academy?.badge || "/image 47.png"}
             badgeText={academy?.status || "Active Academy"}
             title={academy?.name || "Santos FC Academy"}

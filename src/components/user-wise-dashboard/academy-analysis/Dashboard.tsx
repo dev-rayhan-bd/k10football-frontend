@@ -34,6 +34,7 @@ import DashboardStatCard from "@/components/dashboard/DashboardStatCard";
 import DashboardCharts from "@/components/dashboard/DashboardCharts";
 import { DashboardSidebarPanel, DashboardSidebarItem } from "@/components/dashboard/DashboardSidebar";
 import { AcademyImagesSection, AcademyVideosSection } from "./media";
+import { useGetMyAcademyProfileQuery } from "@/redux/features/academy/academyApi";
 // const transactions = [
 //   { id: "1", athlete: { name: "Marcus Silva", role: "Forward", avatar: "https://i.pravatar.cc/100?u=marcus" }, report: "Under 19 vs Chelsea U19", amount: "$ 6.99", myAmount: "$ 2.796", date: "2024-01-15", status: "Completed" as const },
 //   { id: "2", athlete: { name: "David Chen", role: "Midfielder", avatar: "https://i.pravatar.cc/100?u=david" }, report: "Under 18 vs Chelsea U18", amount: "$ 6.99", myAmount: "$ 2.796", date: "2024-02-01", status: "Pending" as const },
@@ -89,6 +90,8 @@ const PlayerEvalSidebarItem = ({ player, status }: { player: any, status: any })
   );
 };
 const AcademyAnalysisDashboard = () => {
+  const { data: profileResponse, isLoading: isLoadingProfile } = useGetMyAcademyProfileQuery();
+  const profileData = profileResponse?.data;
   const players = useAppSelector((state) => state.player.players);
   const evaluationRecords = useAppSelector((state) => state.evaluation.records);
   const [selectedMedia, setSelectedMedia] = React.useState<{ mediaType: "image" | "video"; mediaFile: string } | null>(null);
@@ -247,19 +250,50 @@ const AcademyAnalysisDashboard = () => {
         <div className="flex-1 min-w-0 flex flex-col gap-6">
           {/* Hero Section */}
           <DashboardHero
-            backgroundImage="/banner.png"
-            logoImage="/image 47.png"
-            badgeText="Active Academy"
-            title="Santos FC Academy"
-            subtitle="Premier League Academy"
+            backgroundImage={
+              profileData?.coverPhoto ||
+              profileData?.bannerInfo?.coverPhoto ||
+              "/placeholder_img.jpg"
+            }
+            logoImage={
+              profileData?.logo ||
+              profileData?.bannerInfo?.logo ||
+              "/image 47.png"
+            }
+            badgeText={
+              profileData?.activeStatus ||
+              profileData?.tier ||
+              "Active Academy"
+            }
+            title={profileData?.name || profileData?.academyName || "Santos FC Academy"}
+            subtitle={profileData?.category || profileData?.academyCategory || "Premier League Academy"}
             details={[
-              { icon: <IconCalendarEvent size={16} />, text: "Founded 2018" },
-              { icon: <IconMapPin size={16} className="text-green-500" />, text: "São Paulo, Brazil" },
+              {
+                icon: <IconCalendarEvent size={16} />,
+                text:
+                  profileData?.foundedText ||
+                  (profileData?.foundedYear
+                    ? `Founded ${profileData.foundedYear}`
+                    : "Founded 2018"),
+              },
+              {
+                icon: <IconMapPin size={16} className="text-green-500" />,
+                text: profileData?.location || profileData?.nationality || "São Paulo, Brazil",
+              },
             ]}
             contacts={[
-              { type: "phone", label: "Contact", value: "+55 11 9999-8888" },
-              { type: "email", label: "Email", value: "contact@santosfc.academy" },
+              {
+                type: "phone",
+                label: "Contact",
+                value: profileData?.contactPhone || profileData?.contact || "+55 11 9999-8888",
+              },
+              {
+                type: "email",
+                label: "Email",
+                value: profileData?.contactEmail || profileData?.email || "contact@santosfc.academy",
+              },
             ]}
+            isLoading={isLoadingProfile}
           />
           {/* Stats Section */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
