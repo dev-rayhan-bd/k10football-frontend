@@ -78,7 +78,7 @@ export const usePlayer = () => {
 
   // Update whole section or partial payload via PATCH /players/me
   const updatePlayerProfile = useCallback(
-    async (payload: Partial<IUpdatePlayerPayload>) => {
+    async (payload: FormData | Partial<IUpdatePlayerPayload> | any) => {
       try {
         const response = await updatePlayerMutation(payload).unwrap();
         if (response?.data) {
@@ -152,6 +152,34 @@ export const usePlayer = () => {
 
           if (fileToUpload) {
             backendPayload = { profileImage: fileToUpload };
+          }
+          break;
+        }
+        case "coverImage": {
+          let fileToUpload: File | null = null;
+          if (fileOrMeta instanceof File) {
+            fileToUpload = fileOrMeta;
+          } else if (value instanceof File) {
+            fileToUpload = value;
+          } else if (typeof value === "string" && value.startsWith("data:")) {
+            try {
+              const arr = value.split(",");
+              const mimeMatch = arr[0].match(/:(.*?);/);
+              const mime = mimeMatch ? mimeMatch[1] : "image/png";
+              const bstr = atob(arr[1]);
+              let n = bstr.length;
+              const u8arr = new Uint8Array(n);
+              while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+              }
+              fileToUpload = new File([u8arr], "cover.png", { type: mime });
+            } catch (e) {
+              console.error("Failed to convert dataURL to File", e);
+            }
+          }
+
+          if (fileToUpload) {
+            backendPayload = { coverImage: fileToUpload };
           }
           break;
         }
@@ -335,9 +363,10 @@ export const usePlayer = () => {
       }
 
       if (backendPayload) {
-        const isImageUpload = field === "playerImage" || field === "profileImage";
+        const isImageUpload = field === "playerImage" || field === "profileImage" || field === "coverImage";
         if (isImageUpload) {
-          toast.loading("Saving profile photo to server...", { id: "upload-profile-image" });
+          const loadingMsg = field === "coverImage" ? "Saving cover photo to server..." : "Saving profile photo to server...";
+          toast.loading(loadingMsg, { id: `upload-${field}` });
         }
         try {
           const res = await updatePlayerMutation(backendPayload).unwrap();
@@ -349,12 +378,14 @@ export const usePlayer = () => {
               dispatch(syncFromCvResponse(res.data));
             }
             await Promise.allSettled([refetchProfile(), refetchCv()]);
-            toast.success("Profile photo updated successfully!", { id: "upload-profile-image" });
+            const successMsg = field === "coverImage" ? "Cover photo updated successfully!" : "Profile photo updated successfully!";
+            toast.success(successMsg, { id: `upload-${field}` });
           }
         } catch (err: any) {
           console.error(`Failed to patch field ${field}:`, err);
           if (isImageUpload) {
-            toast.error(err?.data?.message || "Failed to upload profile photo. Please try again.", { id: "upload-profile-image" });
+            const errorMsg = field === "coverImage" ? "Failed to upload cover photo. Please try again." : "Failed to upload profile photo. Please try again.";
+            toast.error(err?.data?.message || errorMsg, { id: `upload-${field}` });
           } else {
             toast.error(err?.data?.message || "Failed to save changes. Please try again.");
           }
@@ -517,7 +548,16 @@ export const usePlayer = () => {
 
   return {
     dispatch,
-    playerData,
+    playerData: {
+      ...playerData,
+      coverImage: (cvResponse?.data as any)?.coverImage || (profileResponse?.data as any)?.coverImage || (playerData as any).coverImage || "",
+      ...(cvResponse?.data?.isVerifiedByCoach !== undefined
+        ? {
+            isVerifiedByCoach: Boolean(cvResponse.data.isVerifiedByCoach),
+            validationStatus: cvResponse.data.isVerifiedByCoach ? "verified" : "pending",
+          }
+        : {}),
+    },
     players,
     selectedPlayerId,
     cvData: cvResponse?.data || profileResponse?.data || (playerData as any).cvData,

@@ -46,6 +46,7 @@ export interface IPlayerProfileData {
   cvTier: string;
   profileCompletion: number;
   profileImage: string;
+  coverImage?: string;
   preferredFoot: string;
   isVerifiedByCoach: boolean;
   profileViews: number;

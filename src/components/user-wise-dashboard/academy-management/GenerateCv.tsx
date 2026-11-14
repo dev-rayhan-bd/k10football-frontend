@@ -3,7 +3,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   IconDownload,
   IconClock,
@@ -11,18 +11,71 @@ import {
   IconMail,
   IconShield,
   IconShare,
+  IconCamera,
+  IconLoader2,
 } from "@tabler/icons-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import FullEditablePage from "@/components/cvs/player-cv-details/FullEditablePage";
 import { usePlayer } from "@/hooks/usePlayer";
 import { usePlayerStats } from "@/components/cvs/player-cv-details/FullEditablePage";
 import { getFullWithShortForm, formatDate } from "@/lib/utils";
 import { FileText } from 'lucide-react';
-import { useAppSelector } from "@/hooks/reduxHooks";
+import { useAppDispatch, useAppSelector } from "@/hooks/reduxHooks";
+import { updatePlayerField } from "@/redux/features/player/playerSlice";
+
 const GenerateCv = () => {
-  const { playerData, cvData } = usePlayer();
+  const dispatch = useAppDispatch();
+  const { playerData, cvData, updatePlayerProfile, isLoading } = usePlayer();
   const { role: contextRole } = usePlayerStats();
   const [role, setRole] = useState<string>("player");
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const coverFileInputRef = useRef<HTMLInputElement>(null);
+
+  const coverImgSrc =
+    playerData.coverImage ||
+    cvData?.coverImage ||
+    "/placeholder_img.jpg";
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image size should be less than 10MB");
+      return;
+    }
+
+    setIsUploadingCover(true);
+
+    // Optimistic preview
+    const reader = new FileReader();
+    reader.onload = () => {
+      dispatch(updatePlayerField({ field: "coverImage", value: reader.result as string }));
+    };
+    reader.readAsDataURL(file);
+
+    try {
+      const formData = new FormData();
+      formData.append("coverImage", file);
+      formData.append("data", JSON.stringify({}));
+      await updatePlayerProfile(formData);
+      toast.success("Cover image updated successfully!");
+    } catch (err: any) {
+      console.error("Cover image upload failed:", err);
+      toast.error(err?.data?.message || "Failed to update cover image");
+    } finally {
+      setIsUploadingCover(false);
+      if (coverFileInputRef.current) {
+        coverFileInputRef.current.value = "";
+      }
+    }
+  };
   const reports = useAppSelector(state => state.reports.reports);
   interface IDisplayReport {
     id: string | number;
@@ -264,20 +317,62 @@ const GenerateCv = () => {
         {/* Personal Information Hero - Restoring Original Design */}
         <section className="bg-[#111111] rounded-3xl border border-white/10 p-4 md:p-8 flex flex-col gap-8 w-full min-w-0 overflow-hidden">
           <div className="relative rounded-3xl overflow-hidden min-h-100 md:min-h-140 border border-white/10 group flex flex-col justify-end w-full min-w-0">
-            <div
-              className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-              style={{ backgroundImage: `url('/stadium-night.jpg')` }}
-            />
+            {isLoading ? (
+              <div className="absolute inset-0 bg-neutral-900 animate-pulse flex items-center justify-center">
+                <div className="text-white/20 text-xs font-semibold tracking-wider uppercase">
+                  Loading Cover...
+                </div>
+              </div>
+            ) : (
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                style={{ backgroundImage: `url('${coverImgSrc}')` }}
+              />
+            )}
             <div className="absolute inset-0 bg-linear-to-r from-black/95 via-black/40 via-45% to-transparent" />
             <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
-            <div className="absolute right-0 bottom-0 h-full w-[80%] md:w-[55%] flex items-end justify-end pointer-events-none opacity-50 md:opacity-100 z-0">
-              <Image
-                src={typeof playerData.playerImage === 'string' ? playerData.playerImage : (playerData.playerImage?.src || "/ronaldo.png")}
-                alt="Player"
-                className="h-[90%] md:h-[105%] object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.9)]"
-                height={500}
-                width={500}
+
+            {/* Change Cover Button */}
+            <div className="absolute top-4 right-4 md:top-6 md:right-6 z-20 print:hidden">
+              <button
+                type="button"
+                onClick={() => coverFileInputRef.current?.click()}
+                disabled={isUploadingCover || isLoading}
+                className="flex items-center gap-2 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white text-[11px] md:text-xs font-bold px-3 py-2 md:px-4 md:py-2.5 rounded-xl border border-white/20 hover:border-white/40 transition-all shadow-xl cursor-pointer disabled:opacity-50"
+              >
+                {isUploadingCover ? (
+                  <>
+                    <IconLoader2 className="size-4 animate-spin text-[#E31B23]" />
+                    <span>Uploading...</span>
+                  </>
+                ) : (
+                  <>
+                    <IconCamera className="size-4 text-white" />
+                    <span>Change Cover</span>
+                  </>
+                )}
+              </button>
+              <input
+                ref={coverFileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleCoverUpload}
               />
+            </div>
+
+            <div className="absolute right-0 bottom-0 h-full w-[80%] md:w-[55%] flex items-end justify-end pointer-events-none opacity-50 md:opacity-100 z-0">
+              {isLoading ? (
+                <div className="w-48 h-72 md:w-64 md:h-96 bg-white/5 rounded-2xl animate-pulse" />
+              ) : (
+                <Image
+                  src={typeof playerData.playerImage === 'string' ? playerData.playerImage : (playerData.playerImage?.src || "/ronaldo.png")}
+                  alt="Player"
+                  className="h-[90%] md:h-[105%] object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.9)]"
+                  height={500}
+                  width={500}
+                />
+              )}
             </div>
             <div className="relative p-4 sm:p-6 md:p-10 w-full space-y-8 min-w-0 z-10">
               <div className="flex flex-col gap-4 sm:gap-6 w-full min-w-0">

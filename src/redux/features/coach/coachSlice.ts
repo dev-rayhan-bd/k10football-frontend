@@ -328,7 +328,7 @@ export const coachSlice = createSlice({
 
       // Coach Styles
       if (Array.isArray(data.coachStyles) && data.coachStyles.length > 0) {
-        state.selectedStyleIds = data.coachStyles.map((s: string) => s.toLowerCase().replace(/_/g, "-"));
+        state.selectedStyleIds = data.coachStyles.map((s: string) => s.toLowerCase().replace(/[_\s]/g, "-"));
       }
 
       // Major Trophies

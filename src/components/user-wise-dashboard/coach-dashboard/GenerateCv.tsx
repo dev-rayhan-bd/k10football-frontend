@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import Image from "next/image";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   IconDownload,
   IconClock,
@@ -13,7 +13,9 @@ import {
   IconShare,
   IconUserCheck,
   IconLoader2,
+  IconCamera,
 } from "@tabler/icons-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import FullEditableCv from "@/components/cvs/coach-cv-details/FullEditableCv";
 import { useCoach } from "@/hooks/useCoach";
@@ -22,7 +24,8 @@ import { usePlayer } from "@/hooks/usePlayer";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/hooks/reduxHooks";
 import { useGetMyCoachCvQuery } from "@/redux/features/coach/coachApi";
-import { syncFromCoachCvResponse } from "@/redux/features/coach/coachSlice";
+import { syncFromCoachCvResponse, updateCoachField } from "@/redux/features/coach/coachSlice";
+import { cn } from "@/lib/utils";
 
 const COUNTRY_CODES: Record<string, string> = {
   "afghanistan": "af", "albania": "al", "algeria": "dz", "andorra": "ad", "angola": "ao",
@@ -90,9 +93,48 @@ const GenerateCvCoach = () => {
   const cv = cvResponse?.data;
 
   // 2. Redux Coach State
-  const { coachData, assignedPlayerReviews } = useCoach();
+  const { coachData, assignedPlayerReviews, isUpdating, updateCoachProfile } = useCoach();
   const { players, selectPlayer } = usePlayer();
   const [role, setRole] = useState<string>("coach");
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [isProfileImgLoaded, setIsProfileImgLoaded] = useState(false);
+  const coverFileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setIsProfileImgLoaded(false);
+  }, [coachData.profileImage, coachData.coachImage]);
+
+  const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Cover image size must be less than 10MB");
+      return;
+    }
+
+    setIsUploadingCover(true);
+    // Instant local preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      dispatch(updateCoachField({ field: "coverImage", value: reader.result as string }));
+    };
+    reader.readAsDataURL(file);
+
+    try {
+      const formData = new FormData();
+      formData.append("coverImage", file);
+      formData.append("data", JSON.stringify({}));
+      await updateCoachProfile(formData);
+    } catch (err: any) {
+      console.error("Cover image upload failed:", err);
+    } finally {
+      setIsUploadingCover(false);
+      if (coverFileInputRef.current) {
+        coverFileInputRef.current.value = "";
+      }
+    }
+  };
 
   // Sync API response to Redux so all child sub-sections inherit live data
   useEffect(() => {
@@ -384,27 +426,89 @@ const GenerateCvCoach = () => {
         {/* Personal Information Hero */}
         <section className="bg-[#111111] rounded-3xl border border-white/10 p-4 md:p-8 flex flex-col gap-8">
           <div className="relative rounded-3xl overflow-hidden min-h-100 md:min-h-140 border border-white/10 group flex flex-col justify-end">
-            <div
-              className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-              style={{
-                backgroundImage: `url('${coachData.coverImage || "/stadium-night.jpg"}')`,
-              }}
-            />
+            {/* Cover Image or Skeleton */}
+            {isCvLoading || isUploadingCover ? (
+              <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center">
+                <div className="flex items-center gap-2 bg-black/60 border border-white/10 px-4 py-2 rounded-xl backdrop-blur-md">
+                  <IconLoader2 className="size-4 animate-spin text-[#E31B23]" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-white/70">
+                    {isUploadingCover ? "Uploading Cover..." : "Loading Cover..."}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                style={{
+                  backgroundImage: `url('${coachData.coverImage || "/stadium-night.jpg"}')`,
+                }}
+              />
+            )}
             <div className="absolute inset-0 bg-linear-to-r from-black/95 via-black/40 via-45% to-transparent" />
             <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
-            <div className="absolute right-0 bottom-0 h-full w-[70%] p-8 md:w-[40%] flex items-center justify-center pointer-events-none opacity-60 md:opacity-100">
-              <Image
-                src={
-                  coachData.profileImage ||
-                  coachData.coachImage?.src ||
-                  coachData.coachImage ||
-                  "/coach-image.png"
-                }
-                alt={fullName}
-                width={400}
-                height={500}
-                className="h-[90%] md:h-[105%] object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.9)]"
+
+            {/* Cover Image Upload Button */}
+            <div className="absolute top-4 right-4 md:top-6 md:right-6 z-20 print:hidden">
+              <button
+                type="button"
+                onClick={() => coverFileInputRef.current?.click()}
+                disabled={isUploadingCover || isCvLoading}
+                className="flex items-center gap-2 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white text-[11px] md:text-xs font-bold px-3 py-2 md:px-4 md:py-2.5 rounded-xl border border-white/20 hover:border-white/40 transition-all shadow-xl cursor-pointer"
+              >
+                {isUploadingCover ? (
+                  <>
+                    <IconLoader2 className="size-4 animate-spin text-[#E31B23]" />
+                    <span>Uploading...</span>
+                  </>
+                ) : (
+                  <>
+                    <IconCamera className="size-4 text-white" />
+                    <span>Change Cover</span>
+                  </>
+                )}
+              </button>
+              <input
+                ref={coverFileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleCoverChange}
               />
+            </div>
+            {/* Profile Image Standing Cutout or Skeleton */}
+            <div className="absolute right-0 bottom-0 h-full w-[70%] p-8 md:w-[40%] flex items-end justify-center pointer-events-none opacity-60 md:opacity-100">
+              {isCvLoading || isUpdating ? (
+                <div className="h-[80%] md:h-[95%] w-36 sm:w-48 md:w-56 bg-white/5 animate-pulse rounded-2xl flex flex-col items-center justify-center gap-3 border border-white/10 mb-2">
+                  <IconLoader2 className="size-6 animate-spin text-[#E31B23]" />
+                  <span className="text-[10px] text-white/60 font-black uppercase tracking-widest text-center px-2">
+                    {isUpdating ? "Updating Photo..." : "Loading Coach..."}
+                  </span>
+                </div>
+              ) : (
+                <div className="relative h-[90%] md:h-[105%] w-full flex items-end justify-center">
+                  {!isProfileImgLoaded && (
+                    <div className="absolute inset-0 m-auto h-[90%] w-36 sm:w-48 md:w-56 bg-white/5 animate-pulse rounded-2xl flex items-center justify-center border border-white/10">
+                      <IconLoader2 className="size-6 animate-spin text-[#E31B23]" />
+                    </div>
+                  )}
+                  <Image
+                    src={
+                      coachData.profileImage ||
+                      coachData.coachImage?.src ||
+                      coachData.coachImage ||
+                      "/coach-image.png"
+                    }
+                    alt={fullName}
+                    width={400}
+                    height={500}
+                    onLoad={() => setIsProfileImgLoaded(true)}
+                    className={cn(
+                      "h-full object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.9)] transition-opacity duration-300",
+                      isProfileImgLoaded ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                </div>
+              )}
             </div>
             <div className="relative p-6 md:p-10 w-full flex flex-col gap-8">
               <div className="flex flex-col gap-6">

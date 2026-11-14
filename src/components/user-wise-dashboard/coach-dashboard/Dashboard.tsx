@@ -122,7 +122,7 @@ const MediaCardSkeleton = ({ isVideo }: { isVideo?: boolean }) => (
 
 const CoachDashboard = () => {
   const { hasAcademy } = useContext(CoachContext);
-  const { coachData } = useCoach();
+  const { coachData, isLoading: isCoachLoading, handleUpdate, isUpdating: isUpdatingCoach } = useCoach();
   const router = useRouter();
   const requests = useAppSelector(state => state.reports.requests);
 
@@ -574,22 +574,31 @@ const CoachDashboard = () => {
         <div className="lg:col-span-9 space-y-6 min-w-0">
           {/* Hero Section */}
           <DashboardHero
-            backgroundImage="/stadium-night.jpg"
-            rating={profileAnalysis?.overall ?? 58}
-            badgeText={`${coachData.transferStatus} Coach`}
-            title={coachData.fullName}
-            subtitle={coachData.coachType}
+            backgroundImage={coachData.coverImage || "/stadium-night.jpg"}
+            rating={profileAnalysis?.overall ?? coachData.overallRatingScore ?? 58}
+            badgeText={`${coachData.transferStatus || "Active"} Coach`}
+            title={coachData.fullName || "Coach"}
+            subtitle={coachData.coachType || coachData.title || "Coach"}
             details={[
               { text: coachData.age ? coachData.age.replace(/\D/g, "") : "" },
               { text: coachData.birthCountry }
             ]}
             contacts={[
-              { type: "club", label: "Current Club", value: coachData.agency },
-              { type: "phone", label: "Contact", value: coachData.phone },
-              { type: "license", label: "Validation Status", value: "UEFA A License" },
-              { type: "email", label: "Email", value: coachData.email },
+              { type: "club", label: "Current Club", value: coachData.agency || coachData.currentClub || "Not specified" },
+              { type: "phone", label: "Contact", value: coachData.phone || "N/A" },
+              { type: "license", label: "Validation Status", value: coachData.licenseStatus || "UEFA A License" },
+              { type: "email", label: "Email", value: coachData.email || "N/A" },
             ]}
-            characterImage={coachData.coachImage}
+            characterImage={coachData.profileImage || coachData.coachImage || "/coach-image.png"}
+            isLoading={isCoachLoading}
+            onCoverUpload={(file) => {
+              const reader = new FileReader();
+              reader.onload = () => {
+                handleUpdate("coverImage", reader.result as string, file);
+              };
+              reader.readAsDataURL(file);
+            }}
+            isUploadingCover={isUpdatingCoach}
           />
           {/* Analytics Section */}
           <div className="p-6 rounded-2xl border border-white/20 bg-[#0D0D0D]">

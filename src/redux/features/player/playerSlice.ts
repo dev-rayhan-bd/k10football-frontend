@@ -50,6 +50,7 @@ export interface PlayerData {
   rating: number;
   playerImage: any;
   cardImage?: string;
+  coverImage?: string;
   strengths: {
     pace: number;
     shooting: number;
@@ -102,6 +103,8 @@ export interface PlayerData {
   currentClub?: string;
   certificates?: IPlayerDocument[];
   documents?: IPlayerDocument[];
+  isVerifiedByCoach?: boolean;
+  validationStatus?: "pending" | "verified" | "expired" | "not_needed";
 }
 
 export interface Marker {
@@ -344,6 +347,8 @@ const basePlayerData: PlayerData = {
   academyName: "Manchester City Academy",
   coachLicenseNumber: "CBF-2026-4587",
   clubManaged: "Manchester City Academy",
+  isVerifiedByCoach: false,
+  validationStatus: "pending",
 };
 
 export interface PlayerStateItem extends PlayerData {
@@ -490,6 +495,7 @@ export const playerSlice = createSlice({
         if (data.preferredFoot) (activePlayer as any).preferredFoot = data.preferredFoot;
         if (data.overallRating !== undefined) activePlayer.rating = data.overallRating;
         if (data.profileImage) activePlayer.playerImage = data.profileImage;
+        if (data.coverImage) activePlayer.coverImage = data.coverImage;
         if (data.marketValue !== undefined) activePlayer.marketValue = String(data.marketValue);
         if (data.contractUntil !== undefined) activePlayer.contractUntil = formatDate(data.contractUntil);
         if (data.agentName !== undefined) activePlayer.agent = data.agentName;
@@ -599,11 +605,21 @@ export const playerSlice = createSlice({
             icon: trofeeIcon
           }));
         }
+        if (data.isVerifiedByCoach !== undefined) {
+          activePlayer.isVerifiedByCoach = Boolean(data.isVerifiedByCoach);
+          activePlayer.validationStatus = data.isVerifiedByCoach ? "verified" : "pending";
+        }
         if (data.coachVerification) {
           if (data.coachVerification.coachName) activePlayer.coachName = data.coachVerification.coachName;
           if (data.coachVerification.licenseNumber) activePlayer.coachLicenseNumber = data.coachVerification.licenseNumber;
           if (data.coachVerification.clubManaged) activePlayer.clubManaged = data.coachVerification.clubManaged;
-          if (data.coachVerification.isVerified) activePlayer.validationStatus = "verified";
+          if (data.isVerifiedByCoach === undefined && data.coachVerification.isVerified !== undefined) {
+            activePlayer.isVerifiedByCoach = Boolean(data.coachVerification.isVerified);
+            activePlayer.validationStatus = data.coachVerification.isVerified ? "verified" : "pending";
+          }
+        } else if (data.isVerified !== undefined && data.isVerifiedByCoach === undefined) {
+          activePlayer.isVerifiedByCoach = Boolean(data.isVerified);
+          activePlayer.validationStatus = data.isVerified ? "verified" : "pending";
         }
         if (data.academy || data.academyDoc?.name || data.academyDetails?.name) {
           activePlayer.academyName = data.academy || data.academyDoc?.name || data.academyDetails?.name;

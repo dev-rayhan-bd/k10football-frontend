@@ -8,6 +8,13 @@ import {
 } from "@/redux/features/coach/coachApi";
 import { IUpdateCoachPayload } from "@/types/coach.type";
 import { toast } from "sonner";
+import { ALL_COACH_STYLES, COUNTRY_CODES } from "@/components/cvs/coach-cv-details/bio-components/constants";
+
+const getCountryCode = (countryName?: string) => {
+  if (!countryName) return undefined;
+  const code = COUNTRY_CODES[countryName.toLowerCase()];
+  return code ? code.toUpperCase() : countryName.toUpperCase().slice(0, 2);
+};
 
 export const useCoach = () => {
   const dispatch = useAppDispatch();
@@ -57,104 +64,103 @@ export const useCoach = () => {
 
   // Field-based update handler with automatic mapping to backend PATCH payload
   const handleUpdate = useCallback(
-    async (field: string, value: any) => {
+    async (field: string, value: any, file?: File) => {
       // 1. Optimistically update local redux state
       dispatch(updateCoachField({ field, value }));
+      if (field === "coachImage") {
+        dispatch(updateCoachField({ field: "profileImage", value }));
+      }
+      if (field === "profileImage") {
+        dispatch(updateCoachField({ field: "coachImage", value }));
+      }
 
       if (!hasToken) return;
+
+      const imageFile = file instanceof File ? file : (value instanceof File ? value : null);
+      if (imageFile && (field === "coachImage" || field === "profileImage")) {
+        try {
+          const formData = new FormData();
+          formData.append("profileImage", imageFile);
+          formData.append("data", JSON.stringify({}));
+          await updateCoachMutation(formData).unwrap();
+          toast.success("Profile image updated successfully");
+        } catch (err: any) {
+          console.error(`Failed to patch coach profileImage:`, err);
+          toast.error("Failed to update profile image");
+        }
+        return;
+      }
+
+      if (imageFile && field === "coverImage") {
+        try {
+          const formData = new FormData();
+          formData.append("coverImage", imageFile);
+          formData.append("data", JSON.stringify({}));
+          await updateCoachMutation(formData).unwrap();
+          toast.success("Cover image updated successfully");
+        } catch (err: any) {
+          console.error(`Failed to patch coach coverImage:`, err);
+          toast.error("Failed to update cover image");
+        }
+        return;
+      }
 
       let backendPayload: Partial<IUpdateCoachPayload> | null = null;
 
       switch (field) {
-        case "fullName":
-          backendPayload = {
-            fullName: String(value),
-            personalInformation: {
-              fullName: String(value),
-              dateOfBirth: coachData.dob,
-              age: Number(coachData.age) || undefined,
-              birthCountry: coachData.birthCountry,
-              dualNationality: coachData.dualNationality,
-            },
-          };
+        case "overallRatingScore":
+          backendPayload = { overallRatingScore: Number(value) };
           break;
+        case "fullName":
         case "dob":
         case "dateOfBirth":
-          backendPayload = {
-            personalInformation: {
-              fullName: coachData.fullName,
-              dateOfBirth: String(value),
-              age: Number(coachData.age) || undefined,
-              birthCountry: coachData.birthCountry,
-              dualNationality: coachData.dualNationality,
-            },
-          };
-          break;
+        case "age":
         case "birthCountry":
+        case "dualNationality": {
+          const currentFullName = field === "fullName" ? String(value) : (coachData.fullName || "");
+          const currentDob = (field === "dob" || field === "dateOfBirth") ? String(value) : (coachData.dob || "");
+          const currentAge = field === "age" ? Number(value) : (Number(coachData.age) || undefined);
+          const currentBirthCountry = field === "birthCountry" ? String(value) : (coachData.birthCountry || "");
+          const currentDual = field === "dualNationality" ? String(value) : (coachData.dualNationality || "");
+
           backendPayload = {
+            fullName: currentFullName,
             personalInformation: {
-              fullName: coachData.fullName,
-              dateOfBirth: coachData.dob,
-              age: Number(coachData.age) || undefined,
-              birthCountry: String(value),
-              dualNationality: coachData.dualNationality,
+              fullName: currentFullName,
+              dateOfBirth: currentDob,
+              age: currentAge,
+              birthCountry: currentBirthCountry,
+              birthCountryFlag: getCountryCode(currentBirthCountry),
+              dualNationality: currentDual,
+              dualNationalityFlag: getCountryCode(currentDual),
             },
           };
           break;
-        case "dualNationality":
-          backendPayload = {
-            personalInformation: {
-              fullName: coachData.fullName,
-              dateOfBirth: coachData.dob,
-              age: Number(coachData.age) || undefined,
-              birthCountry: coachData.birthCountry,
-              dualNationality: String(value),
-            },
-          };
-          break;
+        }
         case "email":
-          backendPayload = {
-            contact: {
-              email: String(value),
-              phone: coachData.phone,
-              location: coachData.location,
-              website: coachData.website,
-            },
-          };
-          break;
         case "phone":
-          backendPayload = {
-            contact: {
-              email: coachData.email,
-              phone: String(value),
-              location: coachData.location,
-              website: coachData.website,
-            },
-          };
-          break;
         case "location":
-          backendPayload = {
-            contact: {
-              email: coachData.email,
-              phone: coachData.phone,
-              location: String(value),
-              website: coachData.website,
-            },
-          };
-          break;
         case "website":
           backendPayload = {
             contact: {
-              email: coachData.email,
-              phone: coachData.phone,
-              location: coachData.location,
-              website: String(value),
+              email: field === "email" ? String(value) : (coachData.email || ""),
+              phone: field === "phone" ? String(value) : (coachData.phone || ""),
+              location: field === "location" ? String(value) : (coachData.location || ""),
+              website: field === "website" ? String(value) : (coachData.website || ""),
             },
           };
           break;
-        case "coachType":
-          backendPayload = { coachType: String(value) };
+        case "coachType": {
+          const strVal = String(value);
+          if (strVal === "INDIVIDUAL_COACH" || strVal === "CLUB_COACH") {
+            // Local client-side toggle between Individual Coach and Club Coach
+            backendPayload = null;
+          } else {
+            // If selecting a coaching role (e.g. "Head Coach"), save to backend as title
+            backendPayload = { title: strVal };
+          }
           break;
+        }
         case "title":
           backendPayload = { title: String(value) };
           break;
@@ -173,12 +179,50 @@ export const useCoach = () => {
         case "status":
           backendPayload = { status: String(value) };
           break;
+        case "seasonStats":
+        case "seasonStats.matches":
+        case "seasonStats.wins":
+        case "seasonStats.losses":
+        case "seasonStats.draws":
+        case "matchesCoached":
+        case "totalWins":
+        case "losses":
+        case "draws":
+        case "cleanSheets":
+          backendPayload = {
+            seasonStats: {
+              matchesCoached: field === "seasonStats.matches" || field === "matchesCoached" ? Number(value) : (coachData.seasonStats?.matches ?? 0),
+              totalWins: field === "seasonStats.wins" || field === "totalWins" ? Number(value) : (coachData.seasonStats?.wins ?? 0),
+              losses: field === "seasonStats.losses" || field === "losses" ? Number(value) : (coachData.seasonStats?.losses ?? 0),
+              draws: field === "seasonStats.draws" || field === "draws" ? Number(value) : (coachData.seasonStats?.draws ?? 0),
+              cleanSheets: field === "cleanSheets" ? Number(value) : (coachData.seasonStats?.cleanSheets ?? 0),
+            },
+          };
+          break;
+        case "transferStatus":
+        case "contractUntil":
+        case "agent":
+        case "agency":
+        case "salary":
+        case "statusBadge":
+        case "footballAgentContract":
+          backendPayload = {
+            transferStatus: {
+              footballAgentContract: field === "footballAgentContract" ? String(value) : "No",
+              contractUntil: field === "contractUntil" ? String(value) : (coachData.contractUntil || "June, 2026"),
+              agent: field === "agent" ? String(value) : (coachData.agent || ""),
+              agency: field === "agency" ? String(value) : (coachData.agency || ""),
+              salary: field === "salary" ? String(value) : (coachData.salary || ""),
+              statusBadge: field === "statusBadge" ? String(value) : (coachData.statusBadge || "Active"),
+            },
+          };
+          break;
         case "languages":
           backendPayload = {
             languages: Array.isArray(value)
               ? value.map((l: any) => ({
                   language: l.name || l.language || "",
-                  proficiency: l.level || l.proficiency || "FLUENT",
+                  proficiency: (l.level || l.proficiency || "FLUENT").toUpperCase(),
                 }))
               : value,
           };
@@ -187,7 +231,10 @@ export const useCoach = () => {
         case "coachStyles":
           backendPayload = {
             coachStyles: Array.isArray(value)
-              ? value.map((s: string) => s.toUpperCase().replace(/-/g, "_"))
+              ? value.map((s: string) => {
+                  const found = ALL_COACH_STYLES.find((item) => item.id === s.toLowerCase());
+                  return found ? found.label.toUpperCase() : s.toUpperCase();
+                })
               : value,
           };
           break;
@@ -259,12 +306,16 @@ export const useCoach = () => {
         case "complementaryCourses":
           backendPayload = {
             courses: Array.isArray(value)
-              ? value.map((c: any) => ({
-                  name: c.title || c.name || "",
-                  category: c.category || "Certificate",
-                  isCompleted: c.isCompleted ?? true,
-                  isSelected: c.isSelected ?? true,
-                }))
+              ? value.map((c: any) => {
+                  const title = c.title || c.name || "";
+                  const category = c.category || (title.includes("Licence") ? "Licence" : title.includes("Analysis") ? "Analysis" : "Certificate");
+                  return {
+                    name: title,
+                    category,
+                    isCompleted: c.isCompleted ?? true,
+                    isSelected: c.isSelected ?? true,
+                  };
+                })
               : value,
           };
           break;
@@ -280,12 +331,11 @@ export const useCoach = () => {
           };
           break;
         case "formationMarkers":
-          // Map formationMarkers [[pins1], [pins2], [pins3]] into formations payload
+        case "formations":
           if (Array.isArray(value)) {
             backendPayload = {
               formations: value.map((slotPins: any[], idx: number) => ({
                 formationSlot: idx + 1,
-                formationName: `FORMATION ${idx + 1}`,
                 positions: (slotPins || []).map((p: any, pIdx: number) => ({
                   id: p.id ? String(p.id) : `pin-${pIdx + 1}`,
                   x: Math.round(p.x),
@@ -304,8 +354,9 @@ export const useCoach = () => {
         try {
           await updateCoachMutation(backendPayload).unwrap();
         } catch (err: any) {
-          console.error(`Failed to patch coach field ${field}:`, err);
-          toast.error(err?.data?.message || "Failed to save changes. Please try again.");
+          const message = err?.data?.message || err?.message || "Failed to save changes. Please try again.";
+          console.warn(`Failed to patch coach field ${field}:`, message);
+          toast.error(message);
         }
       }
     },

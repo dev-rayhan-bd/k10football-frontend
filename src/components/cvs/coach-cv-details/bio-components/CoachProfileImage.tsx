@@ -13,9 +13,10 @@ import iconSetPieceSpecialist from "@/assets/cvs/id/coach-styles-icons/set-piece
 import iconTikiTaka from "@/assets/cvs/id/coach-styles-icons/tiki-taka.png";
 import iconYouthDevelopment from "@/assets/cvs/id/coach-styles-icons/youth development.png";
 import Image from "next/image";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { IconLoader2 } from "@tabler/icons-react";
 import CMSField from "@/components/shared/CMSField";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -66,41 +67,69 @@ const EditableImage = ({
   height?: number;
   fill?: boolean;
   canEdit: boolean;
-  handleUpdate: (field: string, value: any) => void;
+  handleUpdate: (field: string, value: any, file?: File) => void;
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isImgLoaded, setIsImgLoaded] = useState(false);
+
+  const onFileChange = async (file: File) => {
+    setIsUploading(true);
+    try {
+      await handleImageUpload(file, field, handleUpdate);
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   return (
     <div
       className={cn(
-        "relative group w-full h-full",
-        canEdit ? "cursor-pointer" : ""
+        "relative group w-full h-full flex items-center justify-center min-h-[280px]",
+        canEdit && !isUploading ? "cursor-pointer" : ""
       )}
-      onClick={() => canEdit && fileInputRef.current?.click()}
+      onClick={() => canEdit && !isUploading && fileInputRef.current?.click()}
     >
-      <Image
-        src={src}
-        alt={alt}
-        className={className}
-        {...(!fill ? { width: width || 500, height: height || 500 } : { fill: true })}
-      />
-      {canEdit && (
+      {isUploading ? (
+        <div className="w-full h-70 sm:h-95 md:h-125 bg-white/5 animate-pulse rounded-2xl flex flex-col items-center justify-center gap-3 border border-white/10">
+          <IconLoader2 className="size-8 animate-spin text-[#E31B23]" />
+          <span className="text-xs text-white/70 font-bold uppercase tracking-wider text-center px-4">
+            Removing Background & Saving...
+          </span>
+        </div>
+      ) : (
         <>
-          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded">
-            <span className="text-[10px] text-white font-black uppercase tracking-widest">
-              Click to Change
-            </span>
-          </div>
-          <input
-            type="file"
-            ref={fileInputRef}
-            className="hidden"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) handleImageUpload(file, field, handleUpdate);
-            }}
+          {!isImgLoaded && (
+            <div className="absolute inset-0 bg-white/5 animate-pulse rounded-2xl flex items-center justify-center">
+              <IconLoader2 className="size-6 animate-spin text-white/30" />
+            </div>
+          )}
+          <Image
+            src={src}
+            alt={alt}
+            onLoad={() => setIsImgLoaded(true)}
+            className={cn(className, !isImgLoaded && "opacity-0", "transition-opacity duration-300")}
+            {...(!fill ? { width: width || 500, height: height || 500 } : { fill: true })}
           />
+          {canEdit && (
+            <>
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded">
+                <span className="text-[10px] text-white font-black uppercase tracking-widest">
+                  Click to Change
+                </span>
+              </div>
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) onFileChange(file);
+                }}
+              />
+            </>
+          )}
         </>
       )}
     </div>
@@ -176,8 +205,11 @@ export const CoachProfileImage = ({ canEdit }: { canEdit: boolean }) => {
       {/* Position Selector */}
       <div className="mb-8">
         <CMSField
-          value={coachData.coachType}
-          onUpdate={(val) => handleUpdate("coachType", String(val))}
+          value={coachData.title || coachData.coachType || "Head Coach"}
+          onUpdate={(val) => {
+            handleUpdate("title", String(val));
+            handleUpdate("coachType", String(val));
+          }}
           canEdit={canEdit}
           type="combobox"
           options={COACH_TYPES}

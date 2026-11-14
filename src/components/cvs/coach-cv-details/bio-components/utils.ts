@@ -29,16 +29,21 @@ export const getFlagUrl = (countryName: string) => {
   return `https://flagcdn.com/w160/${code}.png`;
 };
 
-export const handleImageUpload = async (file: File, field: string, handleUpdate: (field: string, value: any) => void) => {
+export const handleImageUpload = async (
+  file: File,
+  field: string,
+  handleUpdate: (field: string, value: any, file?: File) => void
+) => {
   let processedFile = file;
 
-  if (field === "coachImage" || field === "playerImage") {
+  if (field === "coachImage" || field === "playerImage" || field === "profileImage") {
     try {
       const { toast } = await import("sonner");
       toast.loading("Removing background... Please wait.", { id: "bg-removal" });
       const { removeBackground } = await import("@imgly/background-removal");
       const blob = await removeBackground(file);
-      processedFile = new File([blob], file.name, { type: "image/png" });
+      const newFileName = file.name.replace(/\.[^/.]+$/, "") + ".png";
+      processedFile = new File([blob], newFileName, { type: "image/png" });
       toast.success("Background removed!", { id: "bg-removal" });
     } catch (error) {
       console.error("Background removal failed:", error);
@@ -49,7 +54,7 @@ export const handleImageUpload = async (file: File, field: string, handleUpdate:
 
   const reader = new FileReader();
   reader.onloadend = () => {
-    handleUpdate(field, reader.result);
+    handleUpdate(field, reader.result, processedFile);
   };
   reader.readAsDataURL(processedFile);
 };

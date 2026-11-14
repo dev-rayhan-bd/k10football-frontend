@@ -1,8 +1,9 @@
 "use client";
 import Image from "next/image";
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from "react";
-import { IconPhone, IconMail, IconShieldCheck, IconCertificate } from "@tabler/icons-react";
+import React, { useRef } from "react";
+import { IconPhone, IconMail, IconShieldCheck, IconCertificate, IconCamera, IconLoader2 } from "@tabler/icons-react";
+
 interface DashboardHeroProps {
   backgroundImage: string;
   rating?: number;
@@ -20,7 +21,11 @@ interface DashboardHeroProps {
   }[];
   characterImage?: any;
   logoImage?: string;
+  isLoading?: boolean;
+  onCoverUpload?: (file: File) => void | Promise<void>;
+  isUploadingCover?: boolean;
 }
+
 const DashboardHero = ({
   backgroundImage,
   rating,
@@ -31,7 +36,11 @@ const DashboardHero = ({
   contacts,
   characterImage,
   logoImage,
+  isLoading,
+  onCoverUpload,
+  isUploadingCover,
 }: DashboardHeroProps) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const characterImgSrc = characterImage
     ? (typeof characterImage === "string" ? characterImage : (characterImage.src || ""))
     : "";
@@ -46,29 +55,79 @@ const DashboardHero = ({
   };
   return (
     <div className="relative rounded-3xl overflow-hidden min-h-125 border border-white/20 bg-[#0D0D0D] group flex flex-col justify-center">
-      {/* Background Image */}
-      <div
-        className="absolute inset-0 bg-cover bg-no-repeat bg-center opacity-70 sm:opacity-80"
-        style={{ backgroundImage: `url(${backgroundImage})` }}
-      />
+      {/* Background Image / Skeleton */}
+      {isLoading ? (
+        <div className="absolute inset-0 bg-neutral-900 animate-pulse flex items-center justify-center">
+          <div className="text-white/20 text-sm font-semibold tracking-wider uppercase animate-pulse">
+            Loading...
+          </div>
+        </div>
+      ) : (
+        <div
+          className="absolute inset-0 bg-cover bg-no-repeat bg-center opacity-70 sm:opacity-80 transition-opacity duration-500"
+          style={{ backgroundImage: `url(${backgroundImage})` }}
+        />
+      )}
+
       {/* Dark gradients for text readability */}
       <div className="absolute inset-0 bg-linear-to-r from-black/80 via-black/40 to-transparent w-full sm:w-2/3" />
       <div className="absolute inset-0 bg-linear-to-t from-[#0D0D0D] via-black/50 to-transparent sm:hidden" />
-      {/* Standing Character */}
-      {characterImgSrc && (
+
+      {/* Change Cover Button */}
+      {onCoverUpload && (
+        <div className="absolute top-4 right-4 md:top-6 md:right-6 z-20 print:hidden">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploadingCover || isLoading}
+            className="flex items-center gap-2 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white text-[11px] md:text-xs font-bold px-3 py-2 md:px-4 md:py-2.5 rounded-xl border border-white/20 hover:border-white/40 transition-all shadow-xl cursor-pointer disabled:opacity-50"
+          >
+            {isUploadingCover ? (
+              <>
+                <IconLoader2 className="size-4 animate-spin text-[#E31B23]" />
+                <span>Uploading...</span>
+              </>
+            ) : (
+              <>
+                <IconCamera className="size-4 text-white" />
+                <span>Change Cover</span>
+              </>
+            )}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                onCoverUpload(file);
+                e.target.value = "";
+              }
+            }}
+          />
+        </div>
+      )}
+
+      {/* Standing Character / Skeleton */}
+      {isLoading ? (
+        <div className="absolute right-6 lg:right-16 bottom-0 h-[75%] sm:h-[80%] lg:h-[88%] w-48 sm:w-64 rounded-2xl bg-white/5 animate-pulse z-10 hidden sm:block" />
+      ) : characterImgSrc ? (
         <Image
           src={characterImgSrc}
           alt="Character"
           className="absolute right-0 lg:right-16 bottom-0 lg:bottom-6 h-[75%] sm:h-[80%] lg:h-[88%] w-[60%] sm:w-[50%] lg:w-auto object-contain object-right-bottom z-10 opacity-50 lg:opacity-100 pointer-events-none"
-          width={200}
-          height={200}
+          width={400}
+          height={600}
+          priority
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.srcset = "";
             target.src = "/placeholder_img.jpg";
           }}
         />
-      )}
+      ) : null}
       <div className="relative p-6 sm:p-8 md:p-12 w-full flex flex-col gap-6 sm:gap-8 z-20 min-w-0">
         <div className="space-y-6">
           {/* Logo Image */}

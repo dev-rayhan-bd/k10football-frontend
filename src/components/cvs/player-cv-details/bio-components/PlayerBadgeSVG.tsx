@@ -456,7 +456,7 @@ export const PlayerBadgeSVG = ({ playerData, className }: { playerData: any, cla
                     {/* Sub text: VERIFIED BY FOOTBALL COACH */}
                     <text fontSize="18" fontWeight="800" className="badge-heading" letterSpacing="3.5">
                       <textPath href="#ribbon-subtext-path-mobile" startOffset="50%" textAnchor="middle" fill="url(#gold-bright-mobile)">
-                        VERIFIED BY FOOTBALL COACH
+                        {playerData?.isVerifiedByCoach ? "VERIFIED BY FOOTBALL COACH" : "PENDING COACH VALIDATION"}
                       </textPath>
                     </text>
                   </g>
@@ -482,14 +482,14 @@ export const PlayerBadgeSVG = ({ playerData, className }: { playerData: any, cla
                   {/* 12. Stamp year (2026) */}
                   <text x="400" y="768" fontSize="19" fontWeight="800" className="badge-heading gold-text" textAnchor="middle" letterSpacing="4.5">2026</text>
                 </svg>
-                {/* Not Verified Overlay */}
-                {playerData.validationStatus !== "verified" && (
+                {/* Pending Validation Badge */}
+                {(!playerData?.isVerifiedByCoach || playerData?.validationStatus !== "verified") && (
                   <div className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center p-3 z-20 backdrop-blur-xs rounded-xl">
-                    <div className="text-[#E31B23] font-black uppercase text-[10px] tracking-widest mb-1.5 flex items-center gap-1">
+                    <div className="text-yellow-500 font-black uppercase text-xs tracking-widest mb-1.5 flex items-center gap-1">
                       <span>⚠️</span> Pending Validation
                     </div>
-                    <p className="text-[8px] text-gray-400 max-w-45 text-center">
-                      A coach must validate your CV details from the academy dashboard to unlock your certificate.
+                    <p className="text-[10px] text-gray-400 max-w-48 text-center">
+                      Validate this player to confirm eligibility and award official verification status.
                     </p>
                   </div>
                 )}
