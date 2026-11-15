@@ -121,12 +121,33 @@ const Players = () => {
             const flagSrc = getFlagUrl(country) || flag1.src;
 
             // Player image:
-            const playerImgSrc = 
-              player.profileImage || 
-              player.cardImage || 
-              player.avatar || 
-              player.userId?.avatar || 
-              playerImage;
+            const cardImg =
+              (typeof player.cardImage === "string" && player.cardImage.trim()) ||
+              (typeof player.cardPhoto === "string" && player.cardPhoto.trim()) ||
+              (typeof player.fifaCardStats?.cardImage === "string" && player.fifaCardStats.cardImage.trim()) ||
+              (typeof player.fifaCardStats?.cardPhoto === "string" && player.fifaCardStats.cardPhoto.trim()) ||
+              "";
+
+            const profileImg =
+              (typeof player.profileImage === "string" &&
+                player.profileImage.trim() &&
+                !player.profileImage.includes("player-short-image") &&
+                !player.profileImage.includes("player-image")) ||
+              (typeof player.avatar === "string" &&
+                player.avatar.trim() &&
+                !player.avatar.includes("player-short-image") &&
+                !player.avatar.includes("player-image")) ||
+              (typeof player.userId?.avatar === "string" &&
+                player.userId.avatar.trim() &&
+                !player.userId.avatar.includes("player-short-image") &&
+                !player.userId.avatar.includes("player-image")) ||
+              (typeof player.playerImage === "string" &&
+                player.playerImage.trim() &&
+                !player.playerImage.includes("player-short-image") &&
+                !player.playerImage.includes("player-image")) ||
+              "";
+
+            const playerImgSrc = cardImg || profileImg || "/profile_placeholder.jpg";
 
             const isPlaceholder =
               playerImgSrc === "/profile_placeholder.jpg" ||

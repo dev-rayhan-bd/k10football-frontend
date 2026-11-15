@@ -91,7 +91,7 @@ export const useCoach = () => {
         return;
       }
 
-      if (imageFile && field === "coverImage") {
+      if (imageFile && (field === "coverImage")) {
         try {
           const formData = new FormData();
           formData.append("coverImage", imageFile);
@@ -101,6 +101,21 @@ export const useCoach = () => {
         } catch (err: any) {
           console.error(`Failed to patch coach coverImage:`, err);
           toast.error("Failed to update cover image");
+        }
+        return;
+      }
+
+      if (imageFile && (field === "cardImage" || field === "cardPhoto")) {
+        try {
+          const formData = new FormData();
+          formData.append("cardImage", imageFile);
+          formData.append("cardPhoto", imageFile);
+          formData.append("data", JSON.stringify({}));
+          await updateCoachMutation(formData).unwrap();
+          toast.success("Card image updated successfully");
+        } catch (err: any) {
+          console.error(`Failed to patch coach cardImage:`, err);
+          toast.error("Failed to update card image");
         }
         return;
       }

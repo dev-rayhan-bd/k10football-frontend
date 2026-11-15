@@ -49,7 +49,9 @@ export interface PlayerData {
   languages: { name: string; level: string; color: string }[];
   rating: number;
   playerImage: any;
+  profileImage?: string;
   cardImage?: string;
+  cardPhoto?: string;
   coverImage?: string;
   strengths: {
     pace: number;
@@ -154,6 +156,9 @@ const basePlayerData: PlayerData = {
   rating: 94,
   jerseyNumber: 10,
   playerImage: playerImage,
+  profileImage: "",
+  cardImage: "",
+  cardPhoto: "",
   strengths: {
     pace: 82,
     shooting: 84,
@@ -494,8 +499,26 @@ export const playerSlice = createSlice({
         if (data.leftFootDominance !== undefined) activePlayer.leftLegUsage = data.leftFootDominance;
         if (data.preferredFoot) (activePlayer as any).preferredFoot = data.preferredFoot;
         if (data.overallRating !== undefined) activePlayer.rating = data.overallRating;
-        if (data.profileImage) activePlayer.playerImage = data.profileImage;
+        if (data.profileImage !== undefined) {
+          activePlayer.playerImage = data.profileImage;
+          (activePlayer as any).profileImage = data.profileImage;
+        }
         if (data.coverImage) activePlayer.coverImage = data.coverImage;
+        const apiCardImg =
+          data.cardImage ||
+          data.cardPhoto ||
+          data.fifaCardStats?.cardImage ||
+          data.fifaCardStats?.cardPhoto ||
+          "";
+        if (
+          data.cardImage !== undefined ||
+          data.cardPhoto !== undefined ||
+          data.fifaCardStats?.cardImage !== undefined ||
+          data.fifaCardStats?.cardPhoto !== undefined
+        ) {
+          activePlayer.cardImage = apiCardImg;
+          activePlayer.cardPhoto = apiCardImg;
+        }
         if (data.marketValue !== undefined) activePlayer.marketValue = String(data.marketValue);
         if (data.contractUntil !== undefined) activePlayer.contractUntil = formatDate(data.contractUntil);
         if (data.agentName !== undefined) activePlayer.agent = data.agentName;
@@ -740,7 +763,10 @@ export const playerSlice = createSlice({
         }
 
         // Two-way synchronization for Heading
-        if (field === "strengths.heading") {
+        if (field === "cardImage" || field === "cardPhoto") {
+          activePlayer.cardImage = value;
+          activePlayer.cardPhoto = value;
+        } else if (field === "strengths.heading") {
           if (activePlayer.skillsCategories) {
             for (const cat of activePlayer.skillsCategories) {
               const headingSkill = cat.skills?.find((s) => s.name.toLowerCase() === "heading");

@@ -47,6 +47,8 @@ export interface IPlayerProfileData {
   profileCompletion: number;
   profileImage: string;
   coverImage?: string;
+  cardImage?: string;
+  cardPhoto?: string;
   preferredFoot: string;
   isVerifiedByCoach: boolean;
   profileViews: number;
@@ -252,6 +254,9 @@ export interface IUpdatePlayerPayload {
     heading?: number;
     [key: string]: any;
   };
+
+  cardImage?: File | string;
+  cardPhoto?: File | string;
 
   [key: string]: any;
 }

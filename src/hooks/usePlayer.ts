@@ -183,6 +183,35 @@ export const usePlayer = () => {
           }
           break;
         }
+        case "cardImage":
+        case "cardPhoto": {
+          let fileToUpload: File | null = null;
+          if (fileOrMeta instanceof File) {
+            fileToUpload = fileOrMeta;
+          } else if (value instanceof File) {
+            fileToUpload = value;
+          } else if (typeof value === "string" && value.startsWith("data:")) {
+            try {
+              const arr = value.split(",");
+              const mimeMatch = arr[0].match(/:(.*?);/);
+              const mime = mimeMatch ? mimeMatch[1] : "image/png";
+              const bstr = atob(arr[1]);
+              let n = bstr.length;
+              const u8arr = new Uint8Array(n);
+              while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+              }
+              fileToUpload = new File([u8arr], "cardImage.png", { type: mime });
+            } catch (e) {
+              console.error("Failed to convert dataURL to File", e);
+            }
+          }
+
+          if (fileToUpload) {
+            backendPayload = { cardImage: fileToUpload, cardPhoto: fileToUpload };
+          }
+          break;
+        }
         case "fullName":
           backendPayload = { fullName: String(value) };
           break;
@@ -363,9 +392,19 @@ export const usePlayer = () => {
       }
 
       if (backendPayload) {
-        const isImageUpload = field === "playerImage" || field === "profileImage" || field === "coverImage";
+        const isImageUpload =
+          field === "playerImage" ||
+          field === "profileImage" ||
+          field === "coverImage" ||
+          field === "cardImage" ||
+          field === "cardPhoto";
         if (isImageUpload) {
-          const loadingMsg = field === "coverImage" ? "Saving cover photo to server..." : "Saving profile photo to server...";
+          const loadingMsg =
+            field === "coverImage"
+              ? "Saving cover photo to server..."
+              : field === "cardImage" || field === "cardPhoto"
+                ? "Saving card photo to server..."
+                : "Saving profile photo to server...";
           toast.loading(loadingMsg, { id: `upload-${field}` });
         }
         try {
@@ -378,13 +417,23 @@ export const usePlayer = () => {
               dispatch(syncFromCvResponse(res.data));
             }
             await Promise.allSettled([refetchProfile(), refetchCv()]);
-            const successMsg = field === "coverImage" ? "Cover photo updated successfully!" : "Profile photo updated successfully!";
+            const successMsg =
+              field === "coverImage"
+                ? "Cover photo updated successfully!"
+                : field === "cardImage" || field === "cardPhoto"
+                  ? "Card photo updated successfully!"
+                  : "Profile photo updated successfully!";
             toast.success(successMsg, { id: `upload-${field}` });
           }
         } catch (err: any) {
           console.error(`Failed to patch field ${field}:`, err);
           if (isImageUpload) {
-            const errorMsg = field === "coverImage" ? "Failed to upload cover photo. Please try again." : "Failed to upload profile photo. Please try again.";
+            const errorMsg =
+              field === "coverImage"
+                ? "Failed to upload cover photo. Please try again."
+                : field === "cardImage" || field === "cardPhoto"
+                  ? "Failed to upload card photo. Please try again."
+                  : "Failed to upload profile photo. Please try again.";
             toast.error(err?.data?.message || errorMsg, { id: `upload-${field}` });
           } else {
             toast.error(err?.data?.message || "Failed to save changes. Please try again.");

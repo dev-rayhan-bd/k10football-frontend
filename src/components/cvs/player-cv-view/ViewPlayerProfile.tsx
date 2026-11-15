@@ -12,7 +12,7 @@ import whiteCard from "@/assets/cvs/white-card.png";
 import clubFallback from "@/assets/cvs/club1.png";
 import playerFallback from "@/assets/cvs/id/player-short-image.png";
 import { getFlagUrl } from "../player-cv-details/bio-components/bioConstants";
-import { getShortForm } from "@/lib/utils";
+import { getShortForm, cn } from "@/lib/utils";
 import { IconCircleCheck } from "@tabler/icons-react";
 
 interface Attribute {
@@ -86,6 +86,34 @@ export const ViewPlayerProfile = () => {
   const lastName = playerData.fullName?.split(" ").pop()?.toUpperCase() || "PLAYER";
   const positionShort = getShortForm(playerData.position) || "ST";
 
+  const cardImg =
+    (typeof playerData.cardImage === "string" && playerData.cardImage.trim()) ||
+    (typeof (playerData as any).cardPhoto === "string" && (playerData as any).cardPhoto.trim()) ||
+    (typeof (playerData as any).fifaCardStats?.cardImage === "string" && (playerData as any).fifaCardStats.cardImage.trim()) ||
+    (typeof (playerData as any).fifaCardStats?.cardPhoto === "string" && (playerData as any).fifaCardStats.cardPhoto.trim()) ||
+    "";
+
+  const profileImg =
+    (typeof (playerData as any).profileImage === "string" &&
+      (playerData as any).profileImage.trim() &&
+      !(playerData as any).profileImage.includes("player-short-image") &&
+      !(playerData as any).profileImage.includes("player-image")) ||
+    (typeof (playerData as any).avatar === "string" &&
+      (playerData as any).avatar.trim() &&
+      !(playerData as any).avatar.includes("player-short-image") &&
+      !(playerData as any).avatar.includes("player-image")) ||
+    (typeof playerData.playerImage === "string" &&
+      playerData.playerImage.trim() &&
+      !playerData.playerImage.includes("player-short-image") &&
+      !playerData.playerImage.includes("player-image")) ||
+    "";
+
+  const cardDisplayImg = cardImg || profileImg || "/profile_placeholder.jpg";
+  const isPlaceholderCard =
+    cardDisplayImg === "/profile_placeholder.jpg" ||
+    cardDisplayImg === "/profile_placeholder.png" ||
+    (typeof cardDisplayImg === "string" && cardDisplayImg.includes("placeholder"));
+
   const firstClub = playerData.clubs?.[0];
   const clubLogo = firstClub?.logo && !firstClub.logo.startsWith("bg-") ? firstClub.logo : clubFallback;
 
@@ -147,10 +175,23 @@ export const ViewPlayerProfile = () => {
                   {/* Player Image */}
                   <div className="absolute top-[12%] right-[11%] w-[58%] h-[40%] flex items-end justify-center z-10 overflow-hidden rounded-t-3xl">
                     <Image
-                      src={playerData.cardImage || playerData.playerImage || playerFallback}
-                      alt={playerData.fullName}
+                      src={cardDisplayImg}
+                      alt={playerData.fullName || "Player"}
                       fill
-                      className="object-contain"
+                      unoptimized={
+                        typeof cardDisplayImg === "string" &&
+                        (cardDisplayImg.startsWith("http") || cardDisplayImg.startsWith("/") || cardDisplayImg.startsWith("data:"))
+                      }
+                      className={cn(
+                        "object-contain select-none pointer-events-none transition-all duration-300",
+                        isPlaceholderCard && "scale-85 pb-1 opacity-85"
+                      )}
+                      onError={(e) => {
+                        const target = e.currentTarget as HTMLImageElement;
+                        target.srcset = "";
+                        target.src = "/profile_placeholder.jpg";
+                        target.classList.add("scale-85", "pb-1", "opacity-85");
+                      }}
                     />
                   </div>
 

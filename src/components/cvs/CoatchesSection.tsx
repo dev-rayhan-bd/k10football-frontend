@@ -297,12 +297,26 @@ const Coaches = () => {
               coach.clubHistory?.[0]?.logoUrl ||
               "";
 
-            const coachImgSrc =
-              coach.profileImage ||
-              coach.avatar ||
-              coach.userId?.avatar ||
-              coach.image ||
-              "/profile_placeholder.jpg";
+            const cardImg =
+              (typeof coach.cardImage === "string" && coach.cardImage.trim()) ||
+              (typeof coach.cardPhoto === "string" && coach.cardPhoto.trim()) ||
+              (typeof coach.coachCardStats?.cardImage === "string" && coach.coachCardStats.cardImage.trim()) ||
+              (typeof coach.coachCardStats?.cardPhoto === "string" && coach.coachCardStats.cardPhoto.trim()) ||
+              "";
+
+            const profileImg =
+              (typeof coach.profileImage === "string" &&
+                coach.profileImage.trim() &&
+                !coach.profileImage.includes("coach-image")) ||
+              (typeof coach.avatar === "string" &&
+                coach.avatar.trim() &&
+                !coach.avatar.includes("coach-image")) ||
+              (typeof coach.userId?.avatar === "string" &&
+                coach.userId.avatar.trim() &&
+                !coach.userId.avatar.includes("coach-image")) ||
+              "";
+
+            const coachImgSrc = cardImg || profileImg || "/profile_placeholder.jpg";
 
             const isPlaceholder =
               !coachImgSrc ||

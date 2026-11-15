@@ -69,12 +69,19 @@ export const playerApi = apiSlice.injectEndpoints({
                         payload?.profileImage instanceof File ||
                         payload?.highlightVideo instanceof File ||
                         payload?.coverImage instanceof File ||
+                        payload?.cardImage instanceof File ||
+                        payload?.cardPhoto instanceof File ||
                         payload?.data
                     ) {
                         const formData = new FormData();
                         if (payload.profileImage instanceof File) formData.append("profileImage", payload.profileImage);
                         if (payload.highlightVideo instanceof File) formData.append("highlightVideo", payload.highlightVideo);
                         if (payload.coverImage instanceof File) formData.append("coverImage", payload.coverImage);
+                        if (payload.cardImage instanceof File) formData.append("cardImage", payload.cardImage);
+                        if (payload.cardPhoto instanceof File) formData.append("cardPhoto", payload.cardPhoto);
+                        // Provide both field names for maximum backend compatibility
+                        if (payload.cardImage instanceof File && !payload.cardPhoto) formData.append("cardPhoto", payload.cardImage);
+                        if (payload.cardPhoto instanceof File && !payload.cardImage) formData.append("cardImage", payload.cardPhoto);
                         if (payload.clubLogo_0 instanceof File) formData.append("clubLogo_0", payload.clubLogo_0);
                         if (payload.clubLogo_1 instanceof File) formData.append("clubLogo_1", payload.clubLogo_1);
 
@@ -87,6 +94,8 @@ export const playerApi = apiSlice.injectEndpoints({
                             delete cleanPayload.profileImage;
                             delete cleanPayload.highlightVideo;
                             delete cleanPayload.coverImage;
+                            delete cleanPayload.cardImage;
+                            delete cleanPayload.cardPhoto;
                             delete cleanPayload.clubLogo_0;
                             delete cleanPayload.clubLogo_1;
                             formData.append("data", JSON.stringify(cleanPayload));

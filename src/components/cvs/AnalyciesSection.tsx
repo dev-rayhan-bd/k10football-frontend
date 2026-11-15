@@ -17,6 +17,7 @@ import {
   YAxis,
 } from "recharts";
 import image_bar from "@/assets/cvs/bar.png";
+import cleanPitch from "@/assets/cvs/clean_pitch.png";
 import { useGetCvAnalyticsQuery } from "@/redux/features/player/playerApi";
 import { cn } from "@/lib/utils";
 
@@ -195,7 +196,7 @@ const AnalyciesSection = () => {
         >
           {/* Background Football Pitch */}
           <Image
-            src="/FootballPitch.png"
+            src={cleanPitch}
             alt="Football Pitch"
             fill
             className="object-cover select-none pointer-events-none"
@@ -205,39 +206,21 @@ const AnalyciesSection = () => {
           {/* Dynamic Position Badges */}
           {POSITIONS.map((pos) => {
             const count = byPosition[pos.code] ?? 0;
-            const hasPlayers = count > 0;
 
             return (
               <div
                 key={pos.code}
                 style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
-                className={cn(
-                  "absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center cursor-pointer group z-10 transition-all duration-200",
-                  hasPlayers
-                    ? "hover:scale-125 hover:z-20"
-                    : "opacity-35 hover:opacity-100 hover:scale-110"
-                )}
+                className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center cursor-pointer group z-10 transition-all duration-200 hover:scale-125 hover:z-20"
                 title={`${pos.name} (${pos.code}): ${count} players`}
               >
                 <div
-                  className={cn(
-                    "rounded-full flex items-center justify-center font-bold text-white shadow-lg font-heading transition-all duration-200",
-                    hasPlayers
-                      ? "size-7 sm:size-9 md:size-10 text-xs sm:text-sm border-2 border-white/60 ring-2 ring-black/30 shadow-[0_0_12px_rgba(0,0,0,0.5)]"
-                      : "size-5 sm:size-7 md:size-8 text-[10px] sm:text-xs border border-white/30"
-                  )}
+                  className="size-7 sm:size-9 md:size-10 text-xs sm:text-sm rounded-full flex items-center justify-center font-bold text-white shadow-lg font-heading border-2 border-white/60 ring-2 ring-black/30 shadow-[0_0_12px_rgba(0,0,0,0.5)] transition-all duration-200"
                   style={{ backgroundColor: pos.color }}
                 >
                   {count}
                 </div>
-                <span
-                  className={cn(
-                    "uppercase tracking-wider drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mt-0.5 transition-all duration-200",
-                    hasPlayers
-                      ? "text-[10px] sm:text-xs font-black text-white"
-                      : "text-[9px] sm:text-[10px] font-bold text-white/80"
-                  )}
-                >
+                <span className="text-[10px] sm:text-xs font-black text-white uppercase tracking-wider drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mt-0.5 transition-all duration-200">
                   {pos.label}
                 </span>
               </div>

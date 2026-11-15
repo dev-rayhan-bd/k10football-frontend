@@ -5,6 +5,7 @@ import Image from "next/image";
 import React, { useState } from "react";
 import playerImage from "@/assets/cvs/id/player-short-image.png";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { usePlayerStats } from "./FullEditablePage";
 import CMSField from "@/components/shared/CMSField";
@@ -17,8 +18,67 @@ import whiteCard from "@/assets/cvs/white-card.png";
 import flag1 from "@/assets/cvs/flag1.png";
 import club1 from "@/assets/cvs/club1.png";
 import { useRouter } from "next/navigation";
-import { IconCircleCheck } from "@tabler/icons-react";
+import { IconCircleCheck, IconDeviceFloppy, IconLoader2 } from "@tabler/icons-react";
 import { calculateWeightedRating } from "@/lib/utils/rating";
+import {
+  useGetMyPlayerAttributesQuery,
+  useUpdateMyPlayerAttributesMutation,
+} from "@/redux/features/player/playerApi";
+import { INITIAL_SKILL_CATEGORIES } from "./SkillAttributeSection";
+
+const SKILL_NAME_TO_KEY: Record<string, string> = {
+  "ball control": "ballControl",
+  "dribbling": "dribbling",
+  "short passing": "shortPassing",
+  "long passing": "longPassing",
+  "crossing": "crossing",
+  "shooting": "shooting",
+  "finishing": "finishing",
+  "long shots": "longShots",
+  "positioning": "positioning",
+  "vision": "vision",
+  "anticipation": "anticipation",
+  "composition": "composure",
+  "composure": "composure",
+  "teamwork": "teamwork",
+  "work rate": "workRate",
+  "decisions": "decisions",
+  "att. position": "attPosition",
+  "att position": "attPosition",
+  "acceleration": "acceleration",
+  "sprint speed": "sprintSpeed",
+  "stamina": "stamina",
+  "strength": "strength",
+  "balance": "balance",
+  "agility": "agility",
+  "reactions": "reactions",
+  "jumping": "jumping",
+  "aggression": "aggression",
+  "concentration": "concentration",
+  "consistency": "consistency",
+  "leadership": "leadership",
+  "bravery": "bravery",
+  "determination": "determination",
+  "heading": "heading",
+  "influence": "influence",
+  "first touch": "firstTouch",
+  "shot power": "shotPower",
+  "curve": "curve",
+  "free kick": "freeKick",
+  "penalties": "penalties",
+  "volleys": "volleys",
+  "heading accuracy": "headingAccuracy",
+  "weak foot": "weakFoot",
+  "standing tackle": "standingTackle",
+  "sliding tackle": "slidingTackle",
+  "interception": "interception",
+  "interceptions": "interception",
+  "marking": "marking",
+  "aerial duels": "aerialDuels",
+  "clearance": "clearance",
+  "pressing": "pressing",
+  "defensive awareness": "defensiveAwareness",
+};
 const COUNTRY_CODES: Record<string, string> = {
   "afghanistan": "af", "albania": "al", "algeria": "dz", "andorra": "ad", "angola": "ao",
   "antigua and barbuda": "ag", "argentina": "ar", "armenia": "am", "australia": "au",
@@ -111,6 +171,57 @@ const { bioRating, skillsAvg, metricsAvg, attributesAvg, role } =
 usePlayerStats();
 const { playerData, handleUpdate: updatePlayerData, validatePlayer } = usePlayer();
 
+const isViewingSpecificPlayer =
+  typeof window !== "undefined" &&
+  Boolean(new URLSearchParams(window.location.search).get("playerId"));
+
+const { data: attributesResponse } = useGetMyPlayerAttributesQuery(undefined, {
+  skip: !editable || isViewingSpecificPlayer,
+});
+const [updateMyPlayerAttributes, { isLoading: isUpdatingAttributes }] = useUpdateMyPlayerAttributesMutation();
+const [isDirty, setIsDirty] = useState(false);
+
+// Sync API attributes data into Redux on load if available
+React.useEffect(() => {
+  const apiCats = attributesResponse?.data?.categories;
+  if (apiCats && typeof apiCats === "object" && editable && !isViewingSpecificPlayer) {
+    const currentCats =
+      playerData.skillsCategories && playerData.skillsCategories.length > 0
+        ? playerData.skillsCategories
+        : INITIAL_SKILL_CATEGORIES;
+
+    const synced = currentCats.map((cat) => {
+      const catKey = cat.categoryKey || cat.category.toLowerCase();
+      const catData = apiCats[catKey] || {};
+      return {
+        ...cat,
+        categoryKey: catKey,
+        skills: cat.skills.map((skill) => {
+          const skillKey =
+            skill.key ||
+            SKILL_NAME_TO_KEY[skill.name.toLowerCase().trim()] ||
+            skill.name.toLowerCase();
+          let val = catData[skillKey];
+          if (val === undefined) {
+            if (skillKey === "composition" && catData.composure !== undefined) {
+              val = catData.composure;
+            } else if (skillKey === "composure" && catData.composition !== undefined) {
+              val = catData.composition;
+            }
+          }
+          return {
+            ...skill,
+            key: skillKey,
+            value: typeof val === "number" ? val : skill.value,
+          };
+        }),
+      };
+    });
+
+    updatePlayerData("skillsCategories", synced);
+  }
+}, [attributesResponse, editable, isViewingSpecificPlayer]);
+
 const getFlagUrlWithFallback = () => {
 const url = getFlagUrl(playerData.birthCountry);
 return url || flag1.src;
@@ -127,7 +238,9 @@ if (firstClub && firstClub.logo) {
 return club1.src;
 };
 
-const attrData: Attribute[] = (playerData.skillsCategories || [])
+const attrData: Attribute[] = ((playerData.skillsCategories && playerData.skillsCategories.length > 0)
+  ? playerData.skillsCategories
+  : INITIAL_SKILL_CATEGORIES)
 .flatMap(c => c.skills)
 .slice(0, 12) // Keep it to 12 as before
 .map(s => ({
@@ -162,16 +275,91 @@ stats: currentStats,
 cardType: (overallRating >= 80 ? "gold" : overallRating >= 60 ? "white" : "pink") as "gold" | "white" | "pink"
 };
 
+const cardImg =
+  (typeof playerData.cardImage === "string" && playerData.cardImage.trim()) ||
+  (typeof playerData.cardPhoto === "string" && playerData.cardPhoto.trim()) ||
+  (typeof (playerData as any).fifaCardStats?.cardImage === "string" && (playerData as any).fifaCardStats.cardImage.trim()) ||
+  (typeof (playerData as any).fifaCardStats?.cardPhoto === "string" && (playerData as any).fifaCardStats.cardPhoto.trim()) ||
+  "";
+
+const profileImg =
+  (typeof (playerData as any).profileImage === "string" && (playerData as any).profileImage.trim()) ||
+  (typeof (playerData as any).avatar === "string" && (playerData as any).avatar.trim()) ||
+  (typeof (playerData as any).userId?.avatar === "string" && (playerData as any).userId.avatar.trim()) ||
+  (typeof playerData.playerImage === "string" &&
+    playerData.playerImage.trim() &&
+    !playerData.playerImage.includes("player-short-image") &&
+    !playerData.playerImage.includes("player-image")) ||
+  "";
+
+const cardDisplayImg = cardImg || profileImg || "/profile_placeholder.jpg";
+const isPlaceholderCard =
+  cardDisplayImg === "/profile_placeholder.jpg" ||
+  cardDisplayImg === "/profile_placeholder.png" ||
+  (typeof cardDisplayImg === "string" && cardDisplayImg.includes("placeholder"));
+
 const [editingField, setEditingField] = useState<string | null>(null);
 
-const handleUpdate = async (attrName: string, value: number) => {
-// Find which category this skill belongs to
-playerData.skillsCategories.forEach((cat, catIdx) => {
-  const skillIdx = cat.skills.findIndex(s => s.name === attrName);
-  if (skillIdx !== -1) {
-    updatePlayerData(`skillsCategories.${catIdx}.skills.${skillIdx}.value`, value);
+const handleUpdate = (attrName: string, rawVal: number) => {
+  const value = Math.max(0, Math.min(100, isNaN(rawVal) ? 0 : rawVal));
+
+  // Immediately update Redux state for 60fps UI responsiveness
+  playerData.skillsCategories?.forEach((cat, catIdx) => {
+    const skillIdx = cat.skills?.findIndex((s) => s.name.toLowerCase() === attrName.toLowerCase());
+    if (skillIdx !== -1) {
+      updatePlayerData(`skillsCategories.${catIdx}.skills.${skillIdx}.value`, value);
+    }
+  });
+
+  setIsDirty(true);
+};
+
+const handleSaveAttributes = async () => {
+  if (!editable || isViewingSpecificPlayer || isUpdatingAttributes) return;
+
+  try {
+    const apiCategories = attributesResponse?.data?.categories || {};
+    const payload: Record<string, number> = {};
+
+    // 1. Initialize with all 48 default skills to ensure every expected key has a valid value
+    INITIAL_SKILL_CATEGORIES.forEach((cat) => {
+      const catData = (apiCategories as any)[cat.categoryKey] || {};
+      cat.skills.forEach((skill) => {
+        const existingVal = typeof catData[skill.key] === "number" ? catData[skill.key] : skill.value;
+        payload[skill.key] = existingVal;
+      });
+    });
+
+    // 2. Overlay values from current Redux skillsCategories
+    (playerData.skillsCategories || []).forEach((cat) => {
+      cat.skills?.forEach((skill) => {
+        const key =
+          skill.key ||
+          SKILL_NAME_TO_KEY[skill.name.toLowerCase().trim()] ||
+          skill.name
+            .replace(/(?:^\w|[A-Z]|\b\w)/g, (word, index) =>
+              index === 0 ? word.toLowerCase() : word.toUpperCase()
+            )
+            .replace(/[\s\.\-]+/g, "");
+        if (key && typeof skill.value === "number") {
+          payload[key] = skill.value;
+        }
+      });
+    });
+
+    // 3. Keep composition / composure compatibility
+    if (payload.composition !== undefined) {
+      payload.composure = payload.composition;
+    }
+    if (payload.composure !== undefined) {
+      payload.composition = payload.composure;
+    }
+
+    await updateMyPlayerAttributes(payload).unwrap();
+    setIsDirty(false);
+  } catch (err: any) {
+    // Handled by playerApi onQueryStarted with user-facing toasts
   }
-});
 };
 
 const handleInfoChange = async (field: string, value: any) => {
@@ -185,12 +373,13 @@ try {
   toast.loading("Removing background... Please wait.", { id: "card-bg-removal" });
   const { removeBackground } = await import("@imgly/background-removal");
   const blob = await removeBackground(file);
-  const processedFile = new File([blob], file.name, { type: "image/png" });
+  const processedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".png", { type: "image/png" });
 
   const reader = new FileReader();
   reader.onloadend = () => {
-    updatePlayerData("cardImage", reader.result as string);
-    toast.success("Card image updated with background removed!", { id: "card-bg-removal" });
+    updatePlayerData("cardImage", reader.result as string, processedFile);
+    updatePlayerData("cardPhoto", reader.result as string, processedFile);
+    toast.success("Card image background removed & uploading...", { id: "card-bg-removal" });
   };
   reader.readAsDataURL(processedFile);
 } catch (error) {
@@ -199,7 +388,8 @@ try {
 
   const reader = new FileReader();
   reader.onloadend = () => {
-    updatePlayerData("cardImage", reader.result as string);
+    updatePlayerData("cardImage", reader.result as string, file);
+    updatePlayerData("cardPhoto", reader.result as string, file);
   };
   reader.readAsDataURL(file);
 }
@@ -284,11 +474,24 @@ return (
                 }}
               >
                 <Image
-                  className="h-full w-auto object-contain select-none pointer-events-none"
+                  className={cn(
+                    "h-full w-auto object-contain select-none pointer-events-none transition-all duration-300",
+                    isPlaceholderCard && "max-h-[85%] max-w-[85%] pb-1 opacity-85"
+                  )}
                   width={300}
                   height={400}
-                  src={playerData.cardImage || playerImage.src}
+                  src={cardDisplayImg}
                   alt="player Image"
+                  unoptimized={
+                    typeof cardDisplayImg === "string" &&
+                    (cardDisplayImg.startsWith("http") || cardDisplayImg.startsWith("/") || cardDisplayImg.startsWith("data:"))
+                  }
+                  onError={(e) => {
+                    const target = e.currentTarget as HTMLImageElement;
+                    target.srcset = "";
+                    target.src = "/profile_placeholder.jpg";
+                    target.classList.add("max-h-[85%]", "max-w-[85%]", "pb-1", "opacity-85");
+                  }}
                 />
                 {editable && (
                   <>
@@ -449,8 +652,37 @@ return (
 
     {/* Right Section - Positional Co-Efficients */}
     <div className="lg:col-span-2">
-      <div className="space-y-6">
-        <div className="space-y-4">
+      <div className="flex flex-col gap-6">
+        {/* Top Save Changes Bar */}
+        {editable && (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 bg-[#1a1a1a] border border-border rounded-lg">
+            <p className="text-xs text-muted-foreground">
+              {isDirty ? (
+                <span className="text-yellow-400 font-semibold">• You have unsaved positional co-efficient changes</span>
+              ) : (
+                "Positional co-efficients are synced with your profile."
+              )}
+            </p>
+            <Button
+              type="button"
+              onClick={handleSaveAttributes}
+              disabled={isUpdatingAttributes || !isDirty}
+              className="w-full sm:w-auto bg-[#E31B23] hover:bg-[#C2181F] text-white rounded-xl text-xs font-bold uppercase tracking-wider px-5 h-9 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 transition-all shadow-md shrink-0"
+            >
+              {isUpdatingAttributes ? (
+                <>
+                  <IconLoader2 className="size-4 animate-spin" /> Saving...
+                </>
+              ) : (
+                <>
+                  <IconDeviceFloppy className="size-4" /> Save Changes
+                </>
+              )}
+            </Button>
+          </div>
+        )}
+
+        <div className="flex flex-col gap-4">
           {attrData.map((attr, idx) => (
             <div
               key={idx}
@@ -531,6 +763,35 @@ return (
             </div>
           ))}
         </div>
+
+        {/* Bottom Save Changes Bar */}
+        {editable && (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 bg-[#1a1a1a] border border-border rounded-lg">
+            <p className="text-xs text-muted-foreground">
+              {isDirty ? (
+                <span className="text-yellow-400 font-semibold">• You have unsaved positional co-efficient changes</span>
+              ) : (
+                "Positional co-efficients are synced with your profile."
+              )}
+            </p>
+            <Button
+              type="button"
+              onClick={handleSaveAttributes}
+              disabled={isUpdatingAttributes || !isDirty}
+              className="w-full sm:w-auto bg-[#E31B23] hover:bg-[#C2181F] text-white rounded-xl text-xs font-bold uppercase tracking-wider px-5 h-9 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 transition-all shadow-md shrink-0"
+            >
+              {isUpdatingAttributes ? (
+                <>
+                  <IconLoader2 className="size-4 animate-spin" /> Saving...
+                </>
+              ) : (
+                <>
+                  <IconDeviceFloppy className="size-4" /> Save Changes
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   </div>

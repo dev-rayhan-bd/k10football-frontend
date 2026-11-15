@@ -35,6 +35,8 @@ export interface CoachData {
   clubLogo: string;
   profileImage: string;
   coverImage: string;
+  cardImage?: string;
+  cardPhoto?: string;
   validationStatus: string;
   revalidationRequested: boolean;
   tierStatus: {
@@ -106,6 +108,8 @@ const initialState: CoachData = {
   clubLogo: "",
   profileImage: "",
   coverImage: "",
+  cardImage: "",
+  cardPhoto: "",
   validationStatus: "",
   revalidationRequested: false,
   tierStatus: {
@@ -221,6 +225,10 @@ export const coachSlice = createSlice({
     },
     updateCoachField: (state, action: PayloadAction<{ field: string; value: any }>) => {
       const { field, value } = action.payload;
+      if (field === "cardImage" || field === "cardPhoto") {
+        state.cardImage = value;
+        state.cardPhoto = value;
+      }
       const keys = field.split(".");
       if (keys.length === 1) {
         (state as any)[field] = value;
@@ -257,6 +265,21 @@ export const coachSlice = createSlice({
         state.coachImage = data.profileImage;
       }
       if (data.coverImage !== undefined) state.coverImage = data.coverImage;
+      const apiCoachCardImg =
+        data.cardImage ||
+        data.cardPhoto ||
+        data.coachCardStats?.cardImage ||
+        data.coachCardStats?.cardPhoto ||
+        "";
+      if (
+        data.cardImage !== undefined ||
+        data.cardPhoto !== undefined ||
+        data.coachCardStats?.cardImage !== undefined ||
+        data.coachCardStats?.cardPhoto !== undefined
+      ) {
+        state.cardImage = apiCoachCardImg;
+        state.cardPhoto = apiCoachCardImg;
+      }
       if (data.validationStatus !== undefined) state.validationStatus = data.validationStatus;
       if (data.revalidationRequested !== undefined) state.revalidationRequested = data.revalidationRequested;
       if (data.tierStatus !== undefined) state.tierStatus = data.tierStatus;

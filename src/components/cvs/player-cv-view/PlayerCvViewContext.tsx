@@ -252,8 +252,15 @@ export const PlayerCvViewProvider = ({
             { name: "Spanish", level: "Intermediate", color: "text-yellow" },
           ],
       rating: data.overallRating ?? 85,
-      playerImage: data.profileImage || playerDefaultImage,
-      cardImage: data.profileImage || "",
+      profileImage: data.profileImage || "",
+      cardImage: data.cardImage || data.cardPhoto || data.fifaCardStats?.cardImage || data.fifaCardStats?.cardPhoto || "",
+      playerImage:
+        data.cardImage ||
+        data.cardPhoto ||
+        data.fifaCardStats?.cardImage ||
+        data.fifaCardStats?.cardPhoto ||
+        data.profileImage ||
+        "",
       strengths: {
         pace: data.strength?.pace ?? 50,
         shooting: data.strength?.shooting ?? 50,
@@ -305,7 +312,6 @@ export const PlayerCvViewProvider = ({
       isVerifiedByCoach: Boolean(data.coachVerification?.isVerified ?? data.isVerifiedByCoach),
       additionalNotes: data.additionalNotes || `${data.fullName || "Player"} demonstrates outstanding spatial awareness and decision-making on the pitch. Tactical discipline is exceptional with strong work ethic and positional flexibility.`,
       highlightVideo: data.highlightVideo,
-      profileImage: data.profileImage,
       documents: data.documents || [],
       certificates: data.certificates || data.documents || [],
       recentMatches: data.recentMatches || [],

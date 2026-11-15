@@ -152,6 +152,8 @@ export interface ICoachProfileData {
   clubLogo?: string;
   profileImage?: string;
   coverImage?: string;
+  cardImage?: string;
+  cardPhoto?: string;
   validationStatus?: string;
   revalidationRequested?: boolean;
   tierStatus?: ICoachTierStatus;
@@ -208,6 +210,8 @@ export interface IUpdateCoachPayload {
   cupsPlayed?: { year: number; tournament: string }[];
   profileImage?: File | string;
   coverImage?: File | string;
+  cardImage?: File | string;
+  cardPhoto?: File | string;
   data?: string;
 }
 

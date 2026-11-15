@@ -51,6 +51,18 @@ export const coachApi = apiSlice.injectEndpoints({
                     if (payload.coverImage instanceof File) {
                         formData.append("coverImage", payload.coverImage);
                     }
+                    if (payload.cardImage instanceof File) {
+                        formData.append("cardImage", payload.cardImage);
+                    }
+                    if (payload.cardPhoto instanceof File) {
+                        formData.append("cardPhoto", payload.cardPhoto);
+                    }
+                    if (payload.cardImage instanceof File && !payload.cardPhoto) {
+                        formData.append("cardPhoto", payload.cardImage);
+                    }
+                    if (payload.cardPhoto instanceof File && !payload.cardImage) {
+                        formData.append("cardImage", payload.cardPhoto);
+                    }
                     if (payload.clubLogo_0 instanceof File) {
                         formData.append("clubLogo_0", payload.clubLogo_0);
                     }
@@ -64,6 +76,8 @@ export const coachApi = apiSlice.injectEndpoints({
                         const cleanPayload = { ...payload };
                         delete cleanPayload.profileImage;
                         delete cleanPayload.coverImage;
+                        delete cleanPayload.cardImage;
+                        delete cleanPayload.cardPhoto;
                         delete cleanPayload.clubLogo_0;
                         delete cleanPayload.clubLogo_1;
                         delete (cleanPayload as any).suppressToast;
