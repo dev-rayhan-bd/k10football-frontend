@@ -63,7 +63,9 @@ interface Coach {
   avatar?: string;
   clubLogo?: string;
   cvTier?: string;
+  cardStats?: any;
   coachCardStats?: any;
+  stats?: any;
   userId?: any;
   cardType?: "gold" | "white" | "pink";
   [key: string]: any;
@@ -277,14 +279,32 @@ const Coaches = () => {
               "COACH"
             ).toUpperCase();
 
+            const statsSource =
+              coach.cardStats || coach.coachCardStats || coach.stats || {};
+
+            const att = statsSource.ATT ?? statsSource.att ?? 85;
+            const tac = statsSource.TAC ?? statsSource.tac ?? 85;
+            const def = statsSource.DEF ?? statsSource.def ?? 85;
+            const imp = statsSource.IMP ?? statsSource.imp ?? 85;
+            const exp = statsSource.EXP ?? statsSource.exp ?? 76;
+            const lea = statsSource.LEA ?? statsSource.lea ?? 85;
+
             const rating =
               coach.rating ??
+              coach.cardStats?.rating ??
+              coach.cardStats?.overallRating ??
               coach.coachCardStats?.rating ??
+              coach.coachCardStats?.overallRating ??
               coach.overallRatingScore ??
               74;
 
             const position =
-              coach.coachCardStats?.position || coach.position || "MAN";
+              coach.cardStats?.position ||
+              coach.cardStats?.role ||
+              coach.coachCardStats?.position ||
+              coach.coachCardStats?.role ||
+              coach.position ||
+              "MAN";
 
             const country =
               coach.birthCountry || coach.country || "France";
@@ -297,26 +317,40 @@ const Coaches = () => {
               coach.clubHistory?.[0]?.logoUrl ||
               "";
 
+            const getValidImg = (img: any): string => {
+              if (typeof img === "string") {
+                const trimmed = img.trim();
+                if (
+                  trimmed &&
+                  !trimmed.includes("coach-image") &&
+                  !trimmed.includes("player-short-image") &&
+                  !trimmed.includes("player-image")
+                ) {
+                  return trimmed;
+                }
+              }
+              return "";
+            };
+
             const cardImg =
               (typeof coach.cardImage === "string" && coach.cardImage.trim()) ||
               (typeof coach.cardPhoto === "string" && coach.cardPhoto.trim()) ||
+              (typeof coach.cardStats?.cardImage === "string" && coach.cardStats.cardImage.trim()) ||
+              (typeof coach.cardStats?.cardPhoto === "string" && coach.cardStats.cardPhoto.trim()) ||
               (typeof coach.coachCardStats?.cardImage === "string" && coach.coachCardStats.cardImage.trim()) ||
               (typeof coach.coachCardStats?.cardPhoto === "string" && coach.coachCardStats.cardPhoto.trim()) ||
               "";
 
             const profileImg =
-              (typeof coach.profileImage === "string" &&
-                coach.profileImage.trim() &&
-                !coach.profileImage.includes("coach-image")) ||
-              (typeof coach.avatar === "string" &&
-                coach.avatar.trim() &&
-                !coach.avatar.includes("coach-image")) ||
-              (typeof coach.userId?.avatar === "string" &&
-                coach.userId.avatar.trim() &&
-                !coach.userId.avatar.includes("coach-image")) ||
+              getValidImg(coach.profileImage) ||
+              getValidImg(coach.avatar) ||
+              getValidImg(coach.userId?.avatar) ||
               "";
 
-            const coachImgSrc = cardImg || profileImg || "/profile_placeholder.jpg";
+            const coachImgSrc =
+              (typeof cardImg === "string" && cardImg.trim()) ||
+              (typeof profileImg === "string" && profileImg.trim()) ||
+              "/profile_placeholder.jpg";
 
             const isPlaceholder =
               !coachImgSrc ||
@@ -453,33 +487,33 @@ const Coaches = () => {
                     </h3>
                   </div>
 
-                  {/* Stats - Static stats section as requested */}
+                  {/* Stats - Coach cardStats */}
                   <div className="absolute top-[59%] left-1/2 -translate-x-1/2 w-[86%] bg-black/3 border border-black/10 backdrop-blur-3xs rounded-xl p-2.5 text-black z-20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
                     <div className="flex items-center justify-between gap-3">
                       {/* left */}
                       <div className="flex-1 flex flex-col gap-1.5">
                         <div className="flex justify-between items-center px-1">
                           <span className="font-extrabold text-lg sm:text-xl text-gray-950 leading-none">
-                            93
+                            {att}
                           </span>
                           <span className="font-bold text-sm sm:text-[15px] text-gray-700 leading-none">
-                            PAC
+                            ATT
                           </span>
                         </div>
                         <div className="flex justify-between items-center px-1">
                           <span className="font-extrabold text-lg sm:text-xl text-gray-950 leading-none">
-                            85
+                            {tac}
                           </span>
                           <span className="font-bold text-sm sm:text-[15px] text-gray-700 leading-none">
-                            SHO
+                            TAC
                           </span>
                         </div>
                         <div className="flex justify-between items-center px-1">
                           <span className="font-extrabold text-lg sm:text-xl text-gray-950 leading-none">
-                            75
+                            {def}
                           </span>
                           <span className="font-bold text-sm sm:text-[15px] text-gray-700 leading-none">
-                            PAS
+                            DEF
                           </span>
                         </div>
                       </div>
@@ -488,26 +522,26 @@ const Coaches = () => {
                       <div className="flex-1 flex flex-col gap-1.5">
                         <div className="flex justify-between items-center px-1">
                           <span className="font-extrabold text-lg sm:text-xl text-gray-950 leading-none">
-                            78
+                            {imp}
                           </span>
                           <span className="font-bold text-sm sm:text-[15px] text-gray-700 leading-none">
-                            DRI
+                            IMP
                           </span>
                         </div>
                         <div className="flex justify-between items-center px-1">
                           <span className="font-extrabold text-lg sm:text-xl text-gray-950 leading-none">
-                            78
+                            {exp}
                           </span>
                           <span className="font-bold text-sm sm:text-[15px] text-gray-700 leading-none">
-                            DEF
+                            EXP
                           </span>
                         </div>
                         <div className="flex justify-between items-center px-1">
                           <span className="font-extrabold text-lg sm:text-xl text-gray-950 leading-none">
-                            82
+                            {lea}
                           </span>
                           <span className="font-bold text-sm sm:text-[15px] text-gray-700 leading-none">
-                            PHY
+                            LEA
                           </span>
                         </div>
                       </div>

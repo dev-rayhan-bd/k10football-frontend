@@ -128,26 +128,31 @@ const Players = () => {
               (typeof player.fifaCardStats?.cardPhoto === "string" && player.fifaCardStats.cardPhoto.trim()) ||
               "";
 
+            const getValidImg = (img: any): string => {
+              if (typeof img === "string") {
+                const trimmed = img.trim();
+                if (
+                  trimmed &&
+                  !trimmed.includes("player-short-image") &&
+                  !trimmed.includes("player-image")
+                ) {
+                  return trimmed;
+                }
+              }
+              return "";
+            };
+
             const profileImg =
-              (typeof player.profileImage === "string" &&
-                player.profileImage.trim() &&
-                !player.profileImage.includes("player-short-image") &&
-                !player.profileImage.includes("player-image")) ||
-              (typeof player.avatar === "string" &&
-                player.avatar.trim() &&
-                !player.avatar.includes("player-short-image") &&
-                !player.avatar.includes("player-image")) ||
-              (typeof player.userId?.avatar === "string" &&
-                player.userId.avatar.trim() &&
-                !player.userId.avatar.includes("player-short-image") &&
-                !player.userId.avatar.includes("player-image")) ||
-              (typeof player.playerImage === "string" &&
-                player.playerImage.trim() &&
-                !player.playerImage.includes("player-short-image") &&
-                !player.playerImage.includes("player-image")) ||
+              getValidImg(player.profileImage) ||
+              getValidImg(player.avatar) ||
+              getValidImg(player.userId?.avatar) ||
+              getValidImg(player.playerImage) ||
               "";
 
-            const playerImgSrc = cardImg || profileImg || "/profile_placeholder.jpg";
+            const playerImgSrc =
+              (typeof cardImg === "string" && cardImg.trim()) ||
+              (typeof profileImg === "string" && profileImg.trim()) ||
+              "/profile_placeholder.jpg";
 
             const isPlaceholder =
               playerImgSrc === "/profile_placeholder.jpg" ||
@@ -208,10 +213,6 @@ const Players = () => {
                     {/* Position Badge */}
                     <span className="bg-black text-white/95 px-2 py-0.5 rounded-[3px] text-[10px] sm:text-xs font-black tracking-wider uppercase leading-none min-w-8 text-center shadow-xs whitespace-nowrap">
                       {shortPos}
-                    </span>
-                    {/* Jersey Number Badge */}
-                    <span className="bg-[#E31B23] text-white px-2 py-0.5 rounded-[3px] text-[10px] sm:text-xs font-black font-mono leading-none tracking-tight shadow-xs min-w-8 text-center">
-                      #{jerseyNumber}
                     </span>
                     <Image 
                       src={flagSrc} 

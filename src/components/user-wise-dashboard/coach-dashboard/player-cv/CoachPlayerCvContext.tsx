@@ -359,12 +359,12 @@ export const CoachPlayerCvProvider = ({
       profileImage: data.profileImage || "",
       cardImage: data.cardImage || data.cardPhoto || data.fifaCardStats?.cardImage || data.fifaCardStats?.cardPhoto || "",
       playerImage:
+        data.profileImage ||
         data.cardImage ||
         data.cardPhoto ||
         data.fifaCardStats?.cardImage ||
         data.fifaCardStats?.cardPhoto ||
-        data.profileImage ||
-        "",
+        "/profile_placeholder.jpg",
       strengths: {
         pace: data.strength?.pace ?? 50,
         shooting: data.strength?.shooting ?? 50,

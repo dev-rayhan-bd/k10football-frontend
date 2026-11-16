@@ -277,6 +277,20 @@ stats: currentStats,
 cardType: (overallRating >= 80 ? "gold" : overallRating >= 60 ? "white" : "pink") as "gold" | "white" | "pink"
 };
 
+const getValidImg = (img: any): string => {
+  if (typeof img === "string") {
+    const trimmed = img.trim();
+    if (
+      trimmed &&
+      !trimmed.includes("player-short-image") &&
+      !trimmed.includes("player-image")
+    ) {
+      return trimmed;
+    }
+  }
+  return "";
+};
+
 const cardImg =
   (typeof playerData.cardImage === "string" && playerData.cardImage.trim()) ||
   (typeof playerData.cardPhoto === "string" && playerData.cardPhoto.trim()) ||
@@ -285,16 +299,16 @@ const cardImg =
   "";
 
 const profileImg =
-  (typeof (playerData as any).profileImage === "string" && (playerData as any).profileImage.trim()) ||
-  (typeof (playerData as any).avatar === "string" && (playerData as any).avatar.trim()) ||
-  (typeof (playerData as any).userId?.avatar === "string" && (playerData as any).userId.avatar.trim()) ||
-  (typeof playerData.playerImage === "string" &&
-    playerData.playerImage.trim() &&
-    !playerData.playerImage.includes("player-short-image") &&
-    !playerData.playerImage.includes("player-image")) ||
+  getValidImg((playerData as any).profileImage) ||
+  getValidImg((playerData as any).avatar) ||
+  getValidImg((playerData as any).userId?.avatar) ||
+  getValidImg(playerData.playerImage) ||
   "";
 
-const cardDisplayImg = cardImg || profileImg || "/profile_placeholder.jpg";
+const cardDisplayImg =
+  (typeof cardImg === "string" && cardImg.trim()) ||
+  (typeof profileImg === "string" && profileImg.trim()) ||
+  "/profile_placeholder.jpg";
 const isPlaceholderCard =
   cardDisplayImg === "/profile_placeholder.jpg" ||
   cardDisplayImg === "/profile_placeholder.png" ||
@@ -445,11 +459,6 @@ return (
                 {/* Position Badge */}
                 <span className="bg-black text-white/95 px-1.5 py-0.5 rounded-[3px] text-[8px] sm:text-[9px] font-black tracking-wider uppercase leading-none min-w-7 text-center shadow-xs whitespace-nowrap">
                   {currentPlayer.position}
-                </span>
-
-                {/* Jersey Number Badge */}
-                <span className="bg-[#E31B23] text-white px-1.5 py-0.5 rounded-[3px] text-[8px] sm:text-[9px] font-black font-mono leading-none tracking-tight shadow-xs min-w-7 text-center">
-                  #{playerData.jerseyNumber || 10}
                 </span>
 
                 <Image width={300} height={400} src={getFlagUrlWithFallback()} className="w-5.5 sm:w-6.5 h-3.5 sm:h-4.5 object-cover rounded-[2px] shadow-xs" alt="flag" />

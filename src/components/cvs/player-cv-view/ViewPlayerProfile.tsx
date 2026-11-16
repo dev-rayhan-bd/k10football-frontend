@@ -10,6 +10,7 @@ import goldCard from "@/assets/cvs/gold-card.png";
 import pinkCard from "@/assets/cvs/pink-card.png";
 import whiteCard from "@/assets/cvs/white-card.png";
 import clubFallback from "@/assets/cvs/club1.png";
+import flagFallback from "@/assets/cvs/flag1.png";
 import playerFallback from "@/assets/cvs/id/player-short-image.png";
 import { getFlagUrl } from "../player-cv-details/bio-components/bioConstants";
 import { getShortForm, cn } from "@/lib/utils";
@@ -86,6 +87,20 @@ export const ViewPlayerProfile = () => {
   const lastName = playerData.fullName?.split(" ").pop()?.toUpperCase() || "PLAYER";
   const positionShort = getShortForm(playerData.position) || "ST";
 
+  const getValidImg = (img: any): string => {
+    if (typeof img === "string") {
+      const trimmed = img.trim();
+      if (
+        trimmed &&
+        !trimmed.includes("player-short-image") &&
+        !trimmed.includes("player-image")
+      ) {
+        return trimmed;
+      }
+    }
+    return "";
+  };
+
   const cardImg =
     (typeof playerData.cardImage === "string" && playerData.cardImage.trim()) ||
     (typeof (playerData as any).cardPhoto === "string" && (playerData as any).cardPhoto.trim()) ||
@@ -94,28 +109,29 @@ export const ViewPlayerProfile = () => {
     "";
 
   const profileImg =
-    (typeof (playerData as any).profileImage === "string" &&
-      (playerData as any).profileImage.trim() &&
-      !(playerData as any).profileImage.includes("player-short-image") &&
-      !(playerData as any).profileImage.includes("player-image")) ||
-    (typeof (playerData as any).avatar === "string" &&
-      (playerData as any).avatar.trim() &&
-      !(playerData as any).avatar.includes("player-short-image") &&
-      !(playerData as any).avatar.includes("player-image")) ||
-    (typeof playerData.playerImage === "string" &&
-      playerData.playerImage.trim() &&
-      !playerData.playerImage.includes("player-short-image") &&
-      !playerData.playerImage.includes("player-image")) ||
+    getValidImg((playerData as any).profileImage) ||
+    getValidImg((playerData as any).avatar) ||
+    getValidImg((playerData as any).userId?.avatar) ||
+    getValidImg(playerData.playerImage) ||
     "";
 
-  const cardDisplayImg = cardImg || profileImg || "/profile_placeholder.jpg";
+  const cardDisplayImg =
+    (typeof cardImg === "string" && cardImg.trim()) ||
+    (typeof profileImg === "string" && profileImg.trim()) ||
+    "/profile_placeholder.jpg";
   const isPlaceholderCard =
     cardDisplayImg === "/profile_placeholder.jpg" ||
     cardDisplayImg === "/profile_placeholder.png" ||
     (typeof cardDisplayImg === "string" && cardDisplayImg.includes("placeholder"));
 
   const firstClub = playerData.clubs?.[0];
-  const clubLogo = firstClub?.logo && !firstClub.logo.startsWith("bg-") ? firstClub.logo : clubFallback;
+  const clubLogo =
+    firstClub?.logo && typeof firstClub.logo === "string" && !firstClub.logo.startsWith("bg-") && firstClub.logo.trim()
+      ? firstClub.logo.trim()
+      : clubFallback;
+  const flagSrc =
+    (playerData.birthCountry && typeof playerData.birthCountry === "string" && getFlagUrl(playerData.birthCountry)) ||
+    flagFallback;
 
   return (
     <div className="text-white p-4 lg:p-8 w-full overflow-hidden min-w-0">
@@ -149,14 +165,10 @@ export const ViewPlayerProfile = () => {
                       {positionShort}
                     </span>
 
-                    <span className="bg-[#E31B23] text-white px-1.5 py-0.5 rounded-[3px] text-[8px] sm:text-[9px] font-black font-mono leading-none tracking-tight min-w-7 text-center">
-                      #{playerData.jerseyNumber || 10}
-                    </span>
-
                     <div className="relative w-5.5 sm:w-6.5 h-3.5 sm:h-4.5 rounded-[2px] overflow-hidden border border-black/20 mt-0.5">
                       <Image
-                        src={getFlagUrl(playerData.birthCountry)}
-                        alt="flag"
+                        src={flagSrc}
+                        alt={playerData.birthCountry || "flag"}
                         fill
                         className="object-cover"
                       />
@@ -175,7 +187,7 @@ export const ViewPlayerProfile = () => {
                   {/* Player Image */}
                   <div className="absolute top-[12%] right-[11%] w-[58%] h-[40%] flex items-end justify-center z-10 overflow-hidden rounded-t-3xl">
                     <Image
-                      src={cardDisplayImg}
+                      src={cardDisplayImg || "/profile_placeholder.jpg"}
                       alt={playerData.fullName || "Player"}
                       fill
                       unoptimized={
@@ -261,8 +273,8 @@ export const ViewPlayerProfile = () => {
                   </span>
                   <div className="relative w-6 h-4 overflow-hidden rounded-sm border border-border">
                     <Image
-                      src={getFlagUrl(playerData.birthCountry)}
-                      alt="flag"
+                      src={flagSrc}
+                      alt={playerData.birthCountry || "flag"}
                       fill
                       className="object-cover"
                     />

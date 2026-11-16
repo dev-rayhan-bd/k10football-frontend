@@ -9,6 +9,7 @@ import goldCard from "@/assets/cvs/gold-card.png";
 import pinkCard from "@/assets/cvs/pink-card.png";
 import whiteCard from "@/assets/cvs/white-card.png";
 import clubFallback from "@/assets/cvs/club1.png";
+import flagFallback from "@/assets/cvs/flag1.png";
 import playerFallback from "@/assets/cvs/id/player-short-image.png";
 import { getFlagUrl } from "@/components/cvs/player-cv-details/bio-components/bioConstants";
 import { getShortForm, cn } from "@/lib/utils";
@@ -30,6 +31,20 @@ const getBadgeStatus = (val: number): "Average" | "Good" | "Excellent" | "Outsta
 export const ClubPlayerProfile = () => {
   const { playerData } = useClubPlayerCv();
 
+  const getValidImg = (img: any): string => {
+    if (typeof img === "string") {
+      const trimmed = img.trim();
+      if (
+        trimmed &&
+        !trimmed.includes("player-short-image") &&
+        !trimmed.includes("player-image")
+      ) {
+        return trimmed;
+      }
+    }
+    return "";
+  };
+
   const cardImg =
     (typeof playerData.cardImage === "string" && playerData.cardImage.trim()) ||
     (typeof (playerData as any).cardPhoto === "string" && (playerData as any).cardPhoto.trim()) ||
@@ -38,25 +53,22 @@ export const ClubPlayerProfile = () => {
     "";
 
   const profileImg =
-    (typeof (playerData as any).profileImage === "string" &&
-      (playerData as any).profileImage.trim() &&
-      !(playerData as any).profileImage.includes("player-short-image") &&
-      !(playerData as any).profileImage.includes("player-image")) ||
-    (typeof (playerData as any).avatar === "string" &&
-      (playerData as any).avatar.trim() &&
-      !(playerData as any).avatar.includes("player-short-image") &&
-      !(playerData as any).avatar.includes("player-image")) ||
-    (typeof playerData.playerImage === "string" &&
-      playerData.playerImage.trim() &&
-      !playerData.playerImage.includes("player-short-image") &&
-      !playerData.playerImage.includes("player-image")) ||
+    getValidImg((playerData as any).profileImage) ||
+    getValidImg((playerData as any).avatar) ||
+    getValidImg((playerData as any).userId?.avatar) ||
+    getValidImg(playerData.playerImage) ||
     "";
 
-  const cardDisplayImg = cardImg || profileImg || "/profile_placeholder.jpg";
+  const cardDisplayImg =
+    (typeof cardImg === "string" && cardImg.trim()) ||
+    (typeof profileImg === "string" && profileImg.trim()) ||
+    "/profile_placeholder.jpg";
   const isPlaceholderCard =
     cardDisplayImg === "/profile_placeholder.jpg" ||
     cardDisplayImg === "/profile_placeholder.png" ||
     (typeof cardDisplayImg === "string" && cardDisplayImg.includes("placeholder"));
+
+  const flagSrc = (playerData.birthCountry && getFlagUrl(playerData.birthCountry)) || flagFallback;
 
   const getCardBg = () => {
     if (playerData.rating >= 80) return goldCard;
@@ -113,8 +125,8 @@ export const ClubPlayerProfile = () => {
                 </span>
                 <div className="relative size-5 rounded-full overflow-hidden border border-black/20 my-1">
                   <Image
-                    src={getFlagUrl(playerData.birthCountry)}
-                    alt={playerData.birthCountry}
+                    src={flagSrc}
+                    alt={playerData.birthCountry || "flag"}
                     fill
                     className="object-cover"
                   />

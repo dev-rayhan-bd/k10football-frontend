@@ -7,7 +7,7 @@ import { usePlayerCvView } from "./PlayerCvViewContext";
 import { PlayerBadgeSVG } from "../player-cv-details/bio-components/PlayerBadgeSVG";
 import { DesktopCertificateCard } from "../player-cv-details/bio-components/DesktopCertificateCard";
 import { getFlagUrl } from "../player-cv-details/bio-components/bioConstants";
-import { getFullWithShortForm } from "@/lib/utils";
+import { getFullWithShortForm, cn } from "@/lib/utils";
 import leftLeg from "@/assets/cvs/id/left_foot.png";
 import rightLeg from "@/assets/cvs/id/right_foot.png";
 import futsalMap from "@/assets/cvs/id/Futsal Pitch.jpg";
@@ -16,6 +16,20 @@ import { Progress } from "@/components/ui/progress";
 
 export const ViewPlayerBioSection = () => {
   const { playerData } = usePlayerCvView();
+
+  const mainImgSrc =
+    (typeof playerData.profileImage === "string" && playerData.profileImage.trim()) ||
+    (typeof playerData.playerImage === "string" && playerData.playerImage.trim()) ||
+    (typeof playerData.cardImage === "string" && playerData.cardImage.trim()) ||
+    "/profile_placeholder.jpg";
+
+  const isPlaceholder =
+    mainImgSrc === "/profile_placeholder.jpg" ||
+    mainImgSrc === "/profile_placeholder.png" ||
+    (typeof mainImgSrc === "string" && mainImgSrc.includes("placeholder"));
+
+  const birthFlag = playerData.birthCountry ? getFlagUrl(playerData.birthCountry) : "";
+  const dualFlag = playerData.dualNationality ? getFlagUrl(playerData.dualNationality) : "";
 
   return (
     <div className="w-full min-w-0 overflow-hidden px-2 sm:px-4 md:px-0">
@@ -51,11 +65,11 @@ export const ViewPlayerBioSection = () => {
                 <span className="text-gray-400 shrink-0">Birth Country</span>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="text-white">{playerData.birthCountry}</span>
-                  {playerData.birthCountry && getFlagUrl(playerData.birthCountry) ? (
+                  {birthFlag ? (
                     <div className="relative size-4 sm:w-5 sm:h-3.5 overflow-hidden rounded-sm border border-border shrink-0">
                       <Image
-                        src={getFlagUrl(playerData.birthCountry)}
-                        alt={playerData.birthCountry}
+                        src={birthFlag}
+                        alt={playerData.birthCountry || "Birth Country"}
                         fill
                         className="object-cover"
                       />
@@ -68,11 +82,11 @@ export const ViewPlayerBioSection = () => {
                   <span className="text-gray-400 shrink-0">Dual Nationality</span>
                   <div className="flex items-center gap-2 shrink-0">
                     <span className="text-white">{playerData.dualNationality}</span>
-                    {getFlagUrl(playerData.dualNationality) ? (
+                    {dualFlag ? (
                       <div className="relative size-4 sm:w-5 sm:h-3.5 overflow-hidden rounded-sm border border-border shrink-0">
                         <Image
-                          src={getFlagUrl(playerData.dualNationality)}
-                          alt={playerData.dualNationality}
+                          src={dualFlag}
+                          alt={playerData.dualNationality || "Dual Nationality"}
                           fill
                           className="object-cover"
                         />
@@ -188,19 +202,19 @@ export const ViewPlayerBioSection = () => {
           {/* Flags & Player Name */}
           <div className="text-center mb-6 sm:mb-8 w-full min-w-0">
             <div className="flex items-center mb-6 sm:mb-8 justify-center w-full min-w-0">
-              {playerData.birthCountry && getFlagUrl(playerData.birthCountry) ? (
+              {birthFlag ? (
                 <div className="relative w-24 h-16 sm:w-32 sm:h-20 shrink-0">
                   <Image
-                    src={getFlagUrl(playerData.birthCountry)}
+                    src={birthFlag}
                     alt="Birth Country"
                     width={200}
                     height={200}
                     className="object-cover rounded shadow-lg border border-border"
                   />
-                  {playerData.dualNationality && getFlagUrl(playerData.dualNationality) ? (
+                  {dualFlag ? (
                     <div className="absolute -bottom-2 -right-2 w-10 h-6 sm:w-12 sm:h-8 border-2 border-white rounded shadow-md overflow-hidden">
                       <Image
-                        src={getFlagUrl(playerData.dualNationality)}
+                        src={dualFlag}
                         alt="Dual Nationality"
                         width={200}
                         height={200}
@@ -227,12 +241,26 @@ export const ViewPlayerBioSection = () => {
           </div>
 
           {/* Player Main Image */}
-          <div className="relative w-full max-w-[280px] sm:max-w-[340px] aspect-3/4 mb-6 sm:mb-8 rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-black/40">
+          <div className="relative w-full max-w-[280px] sm:max-w-[340px] aspect-3/4 mb-6 sm:mb-8 rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-black/40 flex items-center justify-center">
             <Image
-              src={playerData.playerImage}
-              alt={playerData.fullName}
+              src={mainImgSrc}
+              alt={playerData.fullName || "Player"}
               fill
-              className="object-cover"
+              unoptimized={
+                typeof mainImgSrc === "string" &&
+                (mainImgSrc.startsWith("http") || mainImgSrc.startsWith("/") || mainImgSrc.startsWith("data:"))
+              }
+              className={cn(
+                "object-cover transition-all duration-300",
+                isPlaceholder && "object-contain p-4 opacity-80"
+              )}
+              onError={(e) => {
+                const target = e.currentTarget as HTMLImageElement;
+                target.srcset = "";
+                target.src = "/profile_placeholder.jpg";
+                target.classList.remove("object-cover");
+                target.classList.add("object-contain", "p-4", "opacity-80");
+              }}
             />
           </div>
 

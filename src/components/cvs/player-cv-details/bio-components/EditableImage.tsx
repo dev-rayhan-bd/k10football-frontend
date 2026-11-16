@@ -79,6 +79,8 @@ export const EditableImage = ({
     }
   };
 
+  const validSrc = (typeof src === "string" && src.trim()) ? src : src || "/profile_placeholder.jpg";
+
   return (
     <div
       className={`relative group w-full ${canUpload && !isUploading ? "cursor-pointer" : ""}`}
@@ -88,17 +90,18 @@ export const EditableImage = ({
       onContextMenu={(e) => e.preventDefault()}
     >
       <Image
-        src={src}
+        src={validSrc}
         alt={alt}
         className={className}
         width={width || 500}
         height={height || 500}
         layout={layout}
         draggable={false}
+        unoptimized={typeof validSrc === "string" && (validSrc.startsWith("http") || validSrc.startsWith("/") || validSrc.startsWith("data:"))}
         onError={(e) => {
           const target = e.target as HTMLImageElement;
           target.srcset = "";
-          target.src = "/placeholder_img.jpg";
+          target.src = "/profile_placeholder.jpg";
         }}
       />
       {isUploading && (
