@@ -12,7 +12,8 @@ import {
   IconSettings,
   IconUserSearch,
   IconBuildingCommunity,
-  IconAward
+  IconAward,
+  IconMessageCircle,
 } from "@tabler/icons-react";
 import { ReactNode } from "react";
  
@@ -27,6 +28,7 @@ const adminSidebarItems = [
   { name: "Grant Membership", url: "/dashboard/admin/grant-membership", icon: IconAward },
   { name: "Approvals", url: "/dashboard/admin/approvals", icon: IconCheckupList },
   { name: "Payments", url: "/dashboard/admin/payments", icon: IconCreditCard },
+  { name: "Messages", url: "/dashboard/admin/chat", icon: IconMessageCircle },
   { name: "Analytics", url: "/dashboard/admin/analytics", icon: IconChartBar },
   { name: "Settings", url: "/dashboard/admin/settings", icon: IconSettings },
 ];

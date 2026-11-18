@@ -12,6 +12,7 @@ import {
   IconClipboardCheck,
   IconCreditCard,
   IconLock,
+  IconMessageCircle,
 } from "@tabler/icons-react";
 import { ReactNode, useState, useEffect, createContext, useRef } from "react";
 import { useCoach } from "@/hooks/useCoach";
@@ -33,6 +34,7 @@ const coachSidebarItemsWithoutAcademy = [
   { name: "Dashboard", url: "/dashboard/coach", icon: IconDashboard },
   { name: "My CV", url: "/dashboard/coach/my-cv", icon: IconFileText },
   { name: "My Images & Videos", url: "/dashboard/coach/my-images-videos", icon: IconPhotoVideo },
+  { name: "Chat", url: "/dashboard/coach/chat", icon: IconMessageCircle },
   { name: "Analytics", url: "/dashboard/coach/analytics", icon: IconChartBar },
   { name: "My Subscription", url: "/dashboard/coach/my-subscription", icon: IconCreditCard },
   { name: "Settings", url: "/dashboard/coach/settings", icon: IconSettings },
@@ -46,6 +48,7 @@ const coachSidebarItemsWithAcademy = [
   { name: "Game Reports", url: "/dashboard/coach/game-reports", icon: IconReport },
   { name: "Player CV Validations", url: "/dashboard/coach/player-cv-validations", icon: IconUserCheck },
   { name: "Player Evaluation", url: "/dashboard/coach/player-evaluation", icon: IconClipboardCheck },
+  { name: "Chat", url: "/dashboard/coach/chat", icon: IconMessageCircle },
   { name: "Analytics", url: "/dashboard/coach/analytics", icon: IconChartBar },
   { name: "My Subscription", url: "/dashboard/coach/my-subscription", icon: IconCreditCard },
   { name: "Settings", url: "/dashboard/coach/settings", icon: IconSettings },

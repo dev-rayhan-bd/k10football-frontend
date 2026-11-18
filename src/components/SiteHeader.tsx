@@ -19,6 +19,7 @@ import { apiSlice } from "@/redux/features/api/apiSlice";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import NotificationBellDropdown from "@/components/notifications/NotificationBellDropdown";
+import ChatHeaderIcon from "@/components/chat/ChatHeaderIcon";
 
 const SiteHeader = ({
   showToggle = false,
@@ -380,6 +381,7 @@ const SiteHeader = ({
           </svg>
         </div>
 
+        <ChatHeaderIcon />
         <NotificationBellDropdown />
       </div>
     </header>

@@ -9,6 +9,7 @@ import reportsReducer from "@/redux/features/reports/reportsSlice";
 import { parentSlice } from "@/redux/features/parent/parentSlice";
 import faqSliceReducer from "../features/faq/faqSlice";
 import contentSliceReducer from "../features/content/contentSlice";
+import chatReducer from "../features/chat/chatSlice";
 import {
   persistReducer,
   persistStore,
@@ -78,6 +79,7 @@ const rootReducer = combineReducers({
   parent: persistedParentReducer,
   faq: faqSliceReducer,
   content: contentSliceReducer,
+  chat: chatReducer,
 });
 
 // Single store instance — main store in redux folder

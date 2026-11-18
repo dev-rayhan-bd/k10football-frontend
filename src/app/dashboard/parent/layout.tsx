@@ -11,6 +11,7 @@ import {
   IconShoppingBag,
   IconAward,
   IconLock,
+  IconMessageCircle,
 } from "@tabler/icons-react";
 import { ReactNode, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -29,6 +30,7 @@ const parentSidebarItems = [
   { name: "Match Reports", url: "/dashboard/parent/game-reports", icon: IconReportAnalytics },
   { name: "Fees & Payments", url: "/dashboard/parent/fees", icon: IconCreditCard },
   { name: "Attendance", url: "/dashboard/parent/attendance", icon: IconCalendarCheck },
+  { name: "Chat", url: "/dashboard/parent/chat", icon: IconMessageCircle },
   { name: "Academy Shop", url: "/dashboard/parent/shop", icon: IconBuildingStore },
   { name: "My Orders", url: "/dashboard/parent/my-orders", icon: IconShoppingBag },
   { name: "My Subscription", url: "/dashboard/parent/my-subscription", icon: IconAward },

@@ -74,6 +74,10 @@ const TagTypes = {
     subscription: "Subscription",
     NOTIFICATIONS: "Notifications",
     notifications: "Notifications",
+    CHATS: "Chats",
+    chats: "Chats",
+    CONVERSATIONS: "Conversations",
+    conversations: "Conversations",
 } as const;
 
 export default TagTypes;
