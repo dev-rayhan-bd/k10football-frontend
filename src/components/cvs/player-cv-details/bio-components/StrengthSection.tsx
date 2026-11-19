@@ -63,18 +63,70 @@ export const StrengthSection = ({
   const handleSaveStrength = async () => {
     try {
       setIsSavingStrength(true);
+      const pace = Number(strengthDraft.pace ?? 50);
+      const shooting = Number(strengthDraft.shooting ?? 50);
+      const passing = Number(strengthDraft.passing ?? 50);
+      const dribbling = Number(strengthDraft.dribbling ?? 50);
+      const defending = Number(strengthDraft.defending ?? 50);
+      const physical = Number(strengthDraft.physical ?? 50);
+      const heading = Number(strengthDraft.heading ?? 50);
+
       const payload = {
         attributes: {
-          pace: strengthDraft.pace ?? 50,
-          shooting: strengthDraft.shooting ?? 50,
-          passing: strengthDraft.passing ?? 50,
-          dribbling: strengthDraft.dribbling ?? 50,
-          defending: strengthDraft.defending ?? 50,
-          physical: strengthDraft.physical ?? 50,
-          strength: strengthDraft.physical ?? 50,
-          heading: strengthDraft.heading ?? 50,
+          pace,
+          acceleration: pace,
+          sprintSpeed: pace,
+          shotStopping: pace,
+
+          shooting,
+          finishing: shooting,
+          longShots: shooting,
+          shotPower: shooting,
+          handling: shooting,
+          crossClaiming: shooting,
+
+          passing,
+          shortPassing: passing,
+          vision: passing,
+          longPassing: passing,
+          crossing: passing,
+          distribution: passing,
+
+          dribbling,
+          ballControl: dribbling,
+          agility: dribbling,
+          reflexes: dribbling,
+          oneOnOne: dribbling,
+
+          defending,
+          marking: defending,
+          standingTackle: defending,
+          tackling: defending,
+          interceptions: defending,
+          interception: defending,
+          footwork: defending,
+          defensiveAwareness: defending,
+
+          physical,
+          strength: physical,
+          stamina: physical,
+          jumping: physical,
+          positioning: physical,
+          decisions: physical,
+
+          heading,
+          headingAccuracy: heading,
+          aerialDuels: heading,
         },
-        strengths: strengthDraft,
+        strengths: {
+          pace,
+          shooting,
+          passing,
+          dribbling,
+          defending,
+          physical,
+          heading,
+        },
       };
       await updatePlayerProfile(payload);
       dispatch(updatePlayerField({ field: "strengths", value: strengthDraft }));

@@ -385,12 +385,76 @@ export const usePlayer = () => {
           backendPayload = { transferStatus: String(value || "") };
           break;
         case "strengths":
-        case "strength":
+        case "strength": {
+          const s = (typeof value === "object" && value !== null) ? value : {};
+          const pace = Number(s.pace ?? 50);
+          const shooting = Number(s.shooting ?? 50);
+          const passing = Number(s.passing ?? 50);
+          const dribbling = Number(s.dribbling ?? 50);
+          const defending = Number(s.defending ?? 50);
+          const physical = Number(s.physical ?? 50);
+          const heading = Number(s.heading ?? 50);
+
           backendPayload = {
-            attributes: value,
-            strength: typeof value === "object" ? value.physical ?? 50 : Number(value) || 50,
+            attributes: {
+              pace,
+              acceleration: pace,
+              sprintSpeed: pace,
+              shotStopping: pace,
+
+              shooting,
+              finishing: shooting,
+              longShots: shooting,
+              shotPower: shooting,
+              handling: shooting,
+              crossClaiming: shooting,
+
+              passing,
+              shortPassing: passing,
+              vision: passing,
+              longPassing: passing,
+              crossing: passing,
+              distribution: passing,
+
+              dribbling,
+              ballControl: dribbling,
+              agility: dribbling,
+              reflexes: dribbling,
+              oneOnOne: dribbling,
+
+              defending,
+              marking: defending,
+              standingTackle: defending,
+              tackling: defending,
+              interceptions: defending,
+              interception: defending,
+              footwork: defending,
+              defensiveAwareness: defending,
+
+              physical,
+              strength: physical,
+              stamina: physical,
+              jumping: physical,
+              positioning: physical,
+              decisions: physical,
+
+              heading,
+              headingAccuracy: heading,
+              aerialDuels: heading,
+            },
+            strengths: {
+              pace,
+              shooting,
+              passing,
+              dribbling,
+              defending,
+              physical,
+              heading,
+            },
+            strength: physical,
           };
           break;
+        }
         case "additionalNotes":
           backendPayload = { additionalNotes: String(value) };
           break;
