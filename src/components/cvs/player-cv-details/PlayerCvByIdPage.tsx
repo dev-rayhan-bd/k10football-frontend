@@ -151,8 +151,8 @@ export const PlayerCvByIdPage = ({ playerId }: PlayerCvByIdPageProps) => {
       <SportsAnalytics editable={false} />
       <PlayerProfile editable={false} />
       <DocSection editable={false} />
-      <MyImagesSection editable={false} />
-      <MyVideosSection editable={false} />
+      <MyImagesSection editable={false} playerId={playerId} />
+      <MyVideosSection editable={false} playerId={playerId} />
       <AdditionalNotesSection editable={false} />
     </PlayerStatsProvider>
   );

@@ -102,24 +102,46 @@ const CMSField = ({
     if (type === "combobox") {
       return (
         <div className={cn("relative flex flex-col gap-1 w-full z-50", className)} style={style}>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 w-full">
             <Input
-              value={searchTerm || String(tempValue)}
+              value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search..."
-              className={cn("h-8 text-xs bg-gray-800 border-primary/30 min-w-20", inputClassName)}
+              placeholder="Search or type..."
+              className={cn("h-8 text-xs bg-gray-800 border-primary/30 flex-1 min-w-24", inputClassName)}
               autoFocus
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSave(searchTerm.trim());
+                if (e.key === "Escape") handleCancel();
+              }}
             />
             <Button
               size="icon"
               variant="ghost"
-              className="h-7 w-7 text-red-500 hover:text-red-400 hover:bg-red-500/10"
-              onClick={handleCancel}
+              type="button"
+              className="h-7 w-7 text-green-500 hover:text-green-400 hover:bg-green-500/10 shrink-0"
+              onClick={() => handleSave(searchTerm.trim())}
+              title="Save value"
             >
-              <X className="h-4 w-4" />
+              <Check className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+              type="button"
+              className="h-7 w-7 text-red-500 hover:text-red-400 hover:bg-red-500/10 shrink-0"
+              onClick={handleCancel}
+              title="Cancel"
+            >
+              <X className="h-3.5 w-3.5" />
             </Button>
           </div>
-          <div className="absolute top-9 left-0 w-full max-h-40 overflow-y-auto bg-gray-900 border border-gray-800 rounded shadow-xl z-100">
+          <div className="absolute top-9 left-0 w-full min-w-44 max-h-48 overflow-y-auto bg-gray-900 border border-gray-800 rounded-lg shadow-2xl z-100">
+            <div
+              className="px-3 py-1.5 text-xs text-gray-400 hover:bg-white/10 hover:text-white cursor-pointer italic border-b border-white/5"
+              onClick={() => handleSave("")}
+            >
+              (None / Clear)
+            </div>
             {filteredOptions.length > 0 ? (
               filteredOptions.map((opt, idx) => {
                 const isHeading = opt.startsWith("--") && opt.endsWith("--");
@@ -144,7 +166,7 @@ const CMSField = ({
                 );
               })
             ) : (
-              <div className="px-3 py-2 text-xs text-gray-500">No results</div>
+              <div className="px-3 py-2 text-xs text-gray-500">No matching results</div>
             )}
           </div>
         </div>
@@ -284,8 +306,20 @@ const CMSField = ({
         className
       )}
       style={style}
-      onClick={() => canEdit && editTrigger === "click" && setIsEditing(true)}
-      onDoubleClick={() => canEdit && editTrigger === "doubleClick" && setIsEditing(true)}
+      onClick={() => {
+        if (canEdit && editTrigger === "click") {
+          setSearchTerm(String(value ?? ""));
+          setTempValue(value);
+          setIsEditing(true);
+        }
+      }}
+      onDoubleClick={() => {
+        if (canEdit && editTrigger === "doubleClick") {
+          setSearchTerm(String(value ?? ""));
+          setTempValue(value);
+          setIsEditing(true);
+        }
+      }}
     >
       <span className={cn(
         type !== "textarea" && !noTruncate && "truncate",

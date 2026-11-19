@@ -165,7 +165,7 @@ export const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="bg-[#161616] border-2 border-white/30 text-white rounded-3xl p-6 sm:p-8 max-w-lg max-h-[90vh] overflow-y-auto shadow-[0_0_0_1px_rgba(255,255,255,0.15),0_25px_60px_rgba(0,0,0,0.95),0_0_40px_rgba(255,255,255,0.06)] backdrop-blur-2xl">
+      <DialogContent className="bg-[#161616] border-2 border-white/30 text-white rounded-3xl p-6 sm:p-8 max-w-lg max-h-[90vh] overflow-y-auto overflow-x-hidden shadow-[0_0_0_1px_rgba(255,255,255,0.15),0_25px_60px_rgba(0,0,0,0.95),0_0_40px_rgba(255,255,255,0.06)] backdrop-blur-2xl">
         <DialogHeader className="text-left flex flex-col gap-1 pb-3 border-b border-white/15">
           <DialogTitle className="text-xl sm:text-2xl font-black uppercase italic tracking-tight font-orbitron text-white">
             Upload <span className="text-[#E31B23]">{isCoach ? "Document" : "Certificate"}</span>
@@ -211,20 +211,20 @@ export const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({
             />
 
             {selectedFile ? (
-              <div className="border border-white/15 bg-white/5 rounded-2xl p-4 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
+              <div className="border border-white/15 bg-white/5 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
                   <div className="size-12 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center shrink-0">
                     {getFileIcon(selectedFile)}
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-white truncate">{selectedFile.name}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold text-white truncate max-w-[200px] sm:max-w-[260px]">{selectedFile.name}</p>
                     <p className="text-[10px] text-gray-400 font-orbitron uppercase tracking-wider mt-0.5">
                       {formatFileSize(selectedFile.size)}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
                   <Button
                     type="button"
                     variant="outline"
@@ -287,7 +287,7 @@ export const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({
             )}
           </div>
 
-          <DialogFooter className="flex flex-row justify-end gap-3 pt-2">
+          <DialogFooter className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-white/10 mt-2">
             <Button
               type="button"
               variant="outline"
@@ -300,7 +300,7 @@ export const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({
             <Button
               type="submit"
               disabled={isUploading || !title.trim() || !selectedFile}
-              className="bg-[#E31B23] hover:bg-[#C2181F] text-white rounded-xl font-bold uppercase tracking-wider text-xs px-6 h-10 flex items-center gap-2 cursor-pointer font-orbitron disabled:opacity-50"
+              className="bg-[#E31B23] hover:bg-[#C2181F] text-white rounded-xl font-bold uppercase tracking-wider text-xs px-6 h-10 flex items-center justify-center gap-2 cursor-pointer font-orbitron disabled:opacity-50"
             >
               {isUploading ? (
                 <>

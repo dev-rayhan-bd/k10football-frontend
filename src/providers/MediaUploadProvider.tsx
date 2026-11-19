@@ -72,7 +72,7 @@ export const MediaUploadProvider: React.FC<{ children: ReactNode }> = ({ childre
       xhrRef.current = xhr;
       const token = getToken();
 
-      const endpoint = payload.endpoint || "/players/me/media";
+      const endpoint = payload.endpoint || "/media/upload";
       xhr.open("POST", `${BASE_URL}${endpoint}`);
 
       if (token) {
@@ -126,7 +126,8 @@ export const MediaUploadProvider: React.FC<{ children: ReactNode }> = ({ childre
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             dispatch(apiSlice.util.invalidateTags(payload.tagsToInvalidate as any));
           } else {
-            dispatch(playerApi.util.invalidateTags([TagTypes.PLAYERS]));
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            dispatch(apiSlice.util.invalidateTags([TagTypes.MEDIA, TagTypes.PLAYERS] as any));
           }
 
           // Auto dismiss completed widget after 3.5 seconds

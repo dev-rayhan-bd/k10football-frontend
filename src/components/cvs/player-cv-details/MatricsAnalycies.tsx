@@ -24,6 +24,8 @@ import { Progress } from '@/components/ui/progress'
 import { usePlayer } from '@/hooks/usePlayer'
 import CMSField from '@/components/shared/CMSField'
 import { cn } from '@/lib/utils'
+import { IconDeviceFloppy, IconLoader2 } from "@tabler/icons-react"
+import { toast } from "sonner"
 
 interface MetricRow {
   category: string
@@ -50,8 +52,10 @@ const getGradeColor = (grade: string) => {
 const METRIC_CATEGORIES = ['Perception', 'Vision']
 
 const MetricsAnalysis = ({ editable = false }: { editable?: boolean }) => {
-  const { cvData, updateSection } = usePlayer();
+  const { cvData, updatePlayerProfile } = usePlayer();
   const [activeTab, setActiveTab] = useState('Perception')
+  const [isDirty, setIsDirty] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [metricsData, setMetricsData] = useState<Record<string, MetricRow[]>>({
     Perception: [
       { category: 'Space Awareness', score: 92, trend: 3, grade: 'Excellent' },
@@ -68,8 +72,110 @@ const MetricsAnalysis = ({ editable = false }: { editable?: boolean }) => {
     ],
   })
 
-  // Synchronize metrics from cvData if present
+  // Synchronize metrics from cvData if present (only when not dirty)
   useEffect(() => {
+    if (!isDirty && (cvData?.perceptionMetrics || cvData?.visionMetrics)) {
+      setMetricsData(prev => {
+        const next = { ...prev };
+        if (cvData.perceptionMetrics) {
+          next.Perception = [
+            { category: 'Space Awareness', score: cvData.perceptionMetrics.spaceAwareness?.score ?? 92, trend: cvData.perceptionMetrics.spaceAwareness?.trend ?? 3, grade: getGrade(cvData.perceptionMetrics.spaceAwareness?.score ?? 92) },
+            { category: 'Opponent Reading', score: cvData.perceptionMetrics.opponentReading?.score ?? 88, trend: cvData.perceptionMetrics.opponentReading?.trend ?? 5, grade: getGrade(cvData.perceptionMetrics.opponentReading?.score ?? 88) },
+            { category: 'Game Flow Understanding', score: cvData.perceptionMetrics.gameFlowUnderstanding?.score ?? 85, trend: cvData.perceptionMetrics.gameFlowUnderstanding?.trend ?? 2, grade: getGrade(cvData.perceptionMetrics.gameFlowUnderstanding?.score ?? 85) },
+            { category: 'Pressure Handling', score: cvData.perceptionMetrics.pressureHandling?.score ?? 90, trend: cvData.perceptionMetrics.pressureHandling?.trend ?? 4, grade: getGrade(cvData.perceptionMetrics.pressureHandling?.score ?? 90) },
+          ];
+        }
+        if (cvData.visionMetrics) {
+          next.Vision = [
+            { category: 'Peripheral Vision', score: cvData.visionMetrics.peripheralVision?.score ?? 87, trend: cvData.visionMetrics.peripheralVision?.trend ?? 3, grade: getGrade(cvData.visionMetrics.peripheralVision?.score ?? 87) },
+            { category: 'Focus Control', score: cvData.visionMetrics.focusControl?.score ?? 92, trend: cvData.visionMetrics.focusControl?.trend ?? 2, grade: getGrade(cvData.visionMetrics.focusControl?.score ?? 92) },
+            { category: 'Pattern Recognition', score: cvData.visionMetrics.patternRecognition?.score ?? 89, trend: cvData.visionMetrics.patternRecognition?.trend ?? 4, grade: getGrade(cvData.visionMetrics.patternRecognition?.score ?? 89) },
+            { category: 'Decision Speed', score: cvData.visionMetrics.decisionSpeed?.score ?? 91, trend: cvData.visionMetrics.decisionSpeed?.trend ?? 5, grade: getGrade(cvData.visionMetrics.decisionSpeed?.score ?? 91) },
+            { category: 'Visual Acuity', score: cvData.visionMetrics.visualAcuity?.score ?? 86, trend: cvData.visionMetrics.visualAcuity?.trend ?? 1, grade: getGrade(cvData.visionMetrics.visualAcuity?.score ?? 86) },
+          ];
+        }
+        return next;
+      });
+    }
+  }, [cvData, isDirty]);
+
+  const { setMetricsAvg } = usePlayerStats();
+
+  useEffect(() => {
+    const allRows = Object.values(metricsData).flat();
+    const avg = allRows.reduce((sum, r) => sum + r.score, 0) / allRows.length;
+    setMetricsAvg(Math.round(avg));
+  }, [metricsData, setMetricsAvg]);
+
+  const handleUpdate = (tab: string, idx: number, field: keyof MetricRow, value: any) => {
+    setMetricsData(prev => {
+      const newData = { ...prev };
+      const row = { ...newData[tab][idx] };
+
+      if (field === 'score') {
+        const score = Math.max(0, Math.min(100, parseInt(value) || 0));
+        row.score = score;
+        row.grade = getGrade(score);
+      } else if (field === 'trend') {
+        row.trend = Math.max(0, parseInt(value) || 0);
+      } else {
+        (row as any)[field] = value;
+      }
+
+      newData[tab][idx] = row;
+      setIsDirty(true);
+      return newData;
+    });
+  };
+
+  const handleSaveChanges = async () => {
+    try {
+      setIsSaving(true);
+      const perceptionRows = metricsData.Perception || [];
+      const visionRows = metricsData.Vision || [];
+
+      const mapPerceptionKey: Record<string, string> = {
+        'Space Awareness': 'spaceAwareness',
+        'Opponent Reading': 'opponentReading',
+        'Game Flow Understanding': 'gameFlowUnderstanding',
+        'Pressure Handling': 'pressureHandling',
+      };
+      const perceptionMetrics: Record<string, any> = {};
+      perceptionRows.forEach(r => {
+        const key = mapPerceptionKey[r.category] || r.category.toLowerCase().replace(/ /g, '');
+        perceptionMetrics[key] = { score: r.score, trend: r.trend };
+      });
+
+      const mapVisionKey: Record<string, string> = {
+        'Peripheral Vision': 'peripheralVision',
+        'Focus Control': 'focusControl',
+        'Pattern Recognition': 'patternRecognition',
+        'Decision Speed': 'decisionSpeed',
+        'Visual Acuity': 'visualAcuity',
+      };
+      const visionMetrics: Record<string, any> = {};
+      visionRows.forEach(r => {
+        const key = mapVisionKey[r.category] || r.category.toLowerCase().replace(/ /g, '');
+        visionMetrics[key] = { score: r.score, trend: r.trend };
+      });
+
+      await updatePlayerProfile({
+        perceptionMetrics,
+        visionMetrics,
+      });
+
+      setIsDirty(false);
+      toast.success("Detailed Analysis Metrics updated successfully!");
+    } catch (err: any) {
+      console.error("Failed to update metrics:", err);
+      toast.error(err?.data?.message || "Failed to update metrics. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancelChanges = () => {
+    setIsDirty(false);
     if (cvData?.perceptionMetrics || cvData?.visionMetrics) {
       setMetricsData(prev => {
         const next = { ...prev };
@@ -93,66 +199,6 @@ const MetricsAnalysis = ({ editable = false }: { editable?: boolean }) => {
         return next;
       });
     }
-  }, [cvData]);
-
-  const { setMetricsAvg } = usePlayerStats();
-
-  useEffect(() => {
-    const allRows = Object.values(metricsData).flat();
-    const avg = allRows.reduce((sum, r) => sum + r.score, 0) / allRows.length;
-    setMetricsAvg(Math.round(avg));
-  }, [metricsData, setMetricsAvg]);
-
-  const handleUpdate = async (tab: string, idx: number, field: keyof MetricRow, value: any) => {
-    setMetricsData(prev => {
-      const newData = { ...prev };
-      const row = { ...newData[tab][idx] };
-
-      if (field === 'score') {
-        const score = Math.max(0, Math.min(100, parseInt(value) || 0));
-        row.score = score;
-        row.grade = getGrade(score);
-      } else if (field === 'trend') {
-        row.trend = Math.max(0, parseInt(value) || 0);
-      } else {
-        (row as any)[field] = value;
-      }
-
-      newData[tab][idx] = row;
-
-      // Update backend via PATCH /players/me
-      const updatedRows = newData[tab];
-      if (tab === 'Perception') {
-        const mapKey: Record<string, string> = {
-          'Space Awareness': 'spaceAwareness',
-          'Opponent Reading': 'opponentReading',
-          'Game Flow Understanding': 'gameFlowUnderstanding',
-          'Pressure Handling': 'pressureHandling',
-        };
-        const perceptionMetrics: Record<string, any> = {};
-        updatedRows.forEach(r => {
-          const key = mapKey[r.category] || r.category.toLowerCase().replace(/ /g, '');
-          perceptionMetrics[key] = { score: r.score, trend: r.trend };
-        });
-        updateSection('perceptionMetrics', perceptionMetrics);
-      } else if (tab === 'Vision') {
-        const mapKey: Record<string, string> = {
-          'Peripheral Vision': 'peripheralVision',
-          'Focus Control': 'focusControl',
-          'Pattern Recognition': 'patternRecognition',
-          'Decision Speed': 'decisionSpeed',
-          'Visual Acuity': 'visualAcuity',
-        };
-        const visionMetrics: Record<string, any> = {};
-        updatedRows.forEach(r => {
-          const key = mapKey[r.category] || r.category.toLowerCase().replace(/ /g, '');
-          visionMetrics[key] = { score: r.score, trend: r.trend };
-        });
-        updateSection('visionMetrics', visionMetrics);
-      }
-
-      return newData;
-    });
   };
 
 
@@ -228,7 +274,7 @@ return (
                                 style={{ width: `${metric.score}%` }}
                               />
                             </div>
-                            {/* Visible Slider on Hover */}
+                            {/* Single Clean Range Input */}
                             <input
                               type="range"
                               min="0"
@@ -241,20 +287,9 @@ return (
                                 background: `linear-gradient(to right, ${metric.score >= 80 ? '#22c55e' : metric.score >= 60 ? '#eab308' : '#ef4444'} ${metric.score}%, #333 ${metric.score}%)`,
                               }}
                               className={cn(
-                                "w-full h-1.5 rounded-full appearance-none cursor-pointer transition-all absolute inset-0 z-10 opacity-0 group-hover:opacity-100",
+                                "w-full h-4 rounded-full appearance-none cursor-pointer transition-all absolute inset-0 z-10 opacity-0 group-hover:opacity-100",
                                 metric.score >= 80 ? "accent-[#22c55e]" : metric.score >= 60 ? "accent-[#eab308]" : "accent-[#ef4444]"
                               )}
-                            />
-                            {/* Always Active Invisible Slider for Dragging */}
-                            <input
-                              type="range"
-                              min="0"
-                              max="100"
-                              value={metric.score}
-                              onChange={(e) =>
-                                handleUpdate(activeTab, idx, 'score', parseInt(e.target.value))
-                              }
-                              className="w-full h-6 opacity-0 cursor-pointer absolute inset-0 z-20"
                             />
                           </>
                         ) : (
@@ -308,6 +343,38 @@ return (
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Save Changes bar when dirty */}
+      {isDirty && (
+        <div className="mt-6 pt-4 border-t border-border flex items-center justify-end gap-3 animate-in fade-in duration-200">
+          <button
+            type="button"
+            onClick={handleCancelChanges}
+            disabled={isSaving}
+            className="px-4 py-2 rounded-xl border border-white/10 hover:bg-white/10 text-xs text-gray-300 font-bold uppercase tracking-wider transition-colors disabled:opacity-50 cursor-pointer"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleSaveChanges}
+            disabled={isSaving}
+            className="px-5 py-2 rounded-xl bg-[#E31B23] hover:bg-[#C2181F] text-white text-xs font-bold uppercase tracking-wider transition-colors disabled:opacity-50 flex items-center gap-2 cursor-pointer shadow-lg shadow-red-900/30"
+          >
+            {isSaving ? (
+              <>
+                <IconLoader2 className="size-4 animate-spin" />
+                <span>Saving Changes...</span>
+              </>
+            ) : (
+              <>
+                <IconDeviceFloppy className="size-4" />
+                <span>Save Changes</span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
     </div>
   </div>
 </div>

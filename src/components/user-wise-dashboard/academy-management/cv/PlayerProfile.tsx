@@ -385,30 +385,13 @@ updatePlayerData(field, value);
 const fileInputRef = React.useRef<HTMLInputElement>(null);
 
 const handleCardImageUpload = async (file: File) => {
-try {
-  toast.loading("Removing background... Please wait.", { id: "card-bg-removal" });
-  const { removeBackground } = await import("@imgly/background-removal");
-  const blob = await removeBackground(file);
-  const processedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".png", { type: "image/png" });
-
-  const reader = new FileReader();
-  reader.onloadend = () => {
-    updatePlayerData("cardImage", reader.result as string, processedFile);
-    updatePlayerData("cardPhoto", reader.result as string, processedFile);
-    toast.success("Card image background removed & uploading...", { id: "card-bg-removal" });
-  };
-  reader.readAsDataURL(processedFile);
-} catch (error) {
-  console.error("Background removal failed:", error);
-  toast.error("Background removal failed. Using original image.", { id: "card-bg-removal" });
-
   const reader = new FileReader();
   reader.onloadend = () => {
     updatePlayerData("cardImage", reader.result as string, file);
     updatePlayerData("cardPhoto", reader.result as string, file);
+    toast.success("Card image updated!");
   };
   reader.readAsDataURL(file);
-}
 };
 
 const handleDrop = (e: React.DragEvent) => {

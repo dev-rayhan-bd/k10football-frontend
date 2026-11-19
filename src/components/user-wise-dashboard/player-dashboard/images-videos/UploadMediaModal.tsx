@@ -20,7 +20,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useUploadPlayerMediaMutation } from "@/redux/features/player/playerApi";
+import { useUploadMediaMutation } from "@/redux/features/media/mediaApi";
+import TagTypes from "@/constants/tagType.constant";
 import { ErrorToast } from "@/helpers/ValidationHelper";
 import { UploadMediaType, UploadStartPayload } from "./types";
 
@@ -37,7 +38,7 @@ export const UploadMediaModal: React.FC<UploadMediaModalProps> = ({
   type,
   onStartUpload,
 }) => {
-  const [uploadPlayerMedia, { isLoading: isUploading }] = useUploadPlayerMediaMutation();
+  const [uploadMedia, { isLoading: isUploading }] = useUploadMediaMutation();
 
   // Form States
   const [title, setTitle] = useState("");
@@ -152,6 +153,8 @@ export const UploadMediaModal: React.FC<UploadMediaModalProps> = ({
         fileName: selectedFile.name,
         type,
         thumbnailPreview: type === "video" ? thumbnailPreviewUrl : previewUrl,
+        endpoint: "/media/upload",
+        tagsToInvalidate: [TagTypes.MEDIA, TagTypes.PLAYERS],
       });
       resetForm();
       onClose();
@@ -159,7 +162,7 @@ export const UploadMediaModal: React.FC<UploadMediaModalProps> = ({
     }
 
     try {
-      await uploadPlayerMedia(formData).unwrap();
+      await uploadMedia(formData).unwrap();
       resetForm();
       onClose();
     } catch (err: any) {

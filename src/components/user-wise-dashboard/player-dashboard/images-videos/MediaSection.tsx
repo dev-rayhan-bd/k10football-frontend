@@ -11,6 +11,8 @@ interface MediaSectionProps {
   isLoading?: boolean;
   onUploadClick?: () => void;
   onItemClick?: (item: MediaItem) => void;
+  onEdit?: (item: MediaItem) => void;
+  onDelete?: (item: MediaItem) => void;
 }
 
 export const MediaSection: React.FC<MediaSectionProps> = ({
@@ -20,6 +22,8 @@ export const MediaSection: React.FC<MediaSectionProps> = ({
   isLoading,
   onUploadClick,
   onItemClick,
+  onEdit,
+  onDelete,
 }) => {
   return (
     <div className="p-6 md:p-10 rounded-[30px] md:rounded-[40px] border border-white/5 bg-[#0D0D0D]/40 backdrop-blur-xl">
@@ -83,6 +87,8 @@ export const MediaSection: React.FC<MediaSectionProps> = ({
               item={item}
               type={type}
               onClick={() => onItemClick?.(item)}
+              onEdit={onEdit}
+              onDelete={onDelete}
             />
           ))}
         </div>

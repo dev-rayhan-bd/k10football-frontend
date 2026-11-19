@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import CMSField from "@/components/shared/CMSField";
 import { Progress } from "@/components/ui/progress";
@@ -19,6 +19,33 @@ export const PhysicalStatsLanguagesCard = ({
   handleUpdate,
   canEditBio,
 }: PhysicalStatsLanguagesCardProps) => {
+  const [leftLegDraft, setLeftLegDraft] = useState<number>(() => playerData.leftLegUsage ?? 50);
+  const [rightLegDraft, setRightLegDraft] = useState<number>(() => playerData.rightLegUsage ?? 85);
+
+  useEffect(() => {
+    if (typeof playerData.leftLegUsage === "number") {
+      setLeftLegDraft(playerData.leftLegUsage);
+    }
+  }, [playerData.leftLegUsage]);
+
+  useEffect(() => {
+    if (typeof playerData.rightLegUsage === "number") {
+      setRightLegDraft(playerData.rightLegUsage);
+    }
+  }, [playerData.rightLegUsage]);
+
+  const commitLeftLeg = (val: number) => {
+    if (val !== playerData.leftLegUsage) {
+      handleUpdate("leftLegUsage", val);
+    }
+  };
+
+  const commitRightLeg = (val: number) => {
+    if (val !== playerData.rightLegUsage) {
+      handleUpdate("rightLegUsage", val);
+    }
+  };
+
   return (
     <div className="order-4 xl:order-0 xl:col-start-1 xl:col-span-4 xl:row-start-2 bg-cardBg rounded-2xl xl:rounded-b-3xl xl:rounded-t-none border border-white/10 xl:border-t-0 overflow-hidden w-full min-w-0 flex flex-col space-y-4 sm:space-y-6 h-fit">
       <div className="p-4 sm:p-6 border-t-0 xl:border-t xl:border-white/5 w-full min-w-0">
@@ -68,10 +95,12 @@ export const PhysicalStatsLanguagesCard = ({
             <div className="flex justify-between items-center text-xs sm:text-sm mb-2 w-full min-w-0">
               <span className="shrink-0 text-white">Left</span>
               <CMSField
-                value={playerData.leftLegUsage}
-                onUpdate={(val) =>
-                  handleUpdate("leftLegUsage", parseInt(String(val)))
-                }
+                value={leftLegDraft}
+                onUpdate={(val) => {
+                  const num = parseInt(String(val)) || 0;
+                  setLeftLegDraft(num);
+                  commitLeftLeg(num);
+                }}
                 canEdit={canEditBio}
                 type="number"
                 editTrigger="doubleClick"
@@ -84,45 +113,34 @@ export const PhysicalStatsLanguagesCard = ({
                 <div className="w-full h-1.5 bg-[#333] rounded-full overflow-hidden relative">
                   <div
                     className={cn(
-                      "h-full transition-all duration-300 ease-out",
-                      getIndicatorColor(playerData.leftLegUsage)
+                      "h-full transition-all duration-150 ease-out",
+                      getIndicatorColor(leftLegDraft)
                     )}
-                    style={{ width: `${playerData.leftLegUsage}%` }}
+                    style={{ width: `${leftLegDraft}%` }}
                   />
                 </div>
-                {/* Visible Slider on Hover */}
                 <input
                   type="range"
                   min="0"
                   max="100"
-                  value={playerData.leftLegUsage}
-                  onChange={(e) =>
-                    handleUpdate("leftLegUsage", parseInt(e.target.value))
-                  }
+                  value={leftLegDraft}
+                  onChange={(e) => setLeftLegDraft(parseInt(e.target.value))}
+                  onPointerUp={(e) => commitLeftLeg(parseInt((e.target as HTMLInputElement).value))}
+                  onTouchEnd={(e) => commitLeftLeg(parseInt((e.target as HTMLInputElement).value))}
+                  onKeyUp={(e) => commitLeftLeg(parseInt((e.target as HTMLInputElement).value))}
                   style={{
                     background: `linear-gradient(to right, ${getHexColor(
-                      playerData.leftLegUsage
-                    )} ${playerData.leftLegUsage}%, #333 ${
-                      playerData.leftLegUsage
+                      leftLegDraft
+                    )} ${leftLegDraft}% , #333 ${
+                      leftLegDraft
                     }%)`,
                   }}
-                  className="w-full h-1.5 rounded-full appearance-none cursor-pointer transition-all absolute inset-0 z-10 opacity-0 group-hover:opacity-100 accent-primary"
-                />
-                {/* Always Active Invisible Slider for Dragging */}
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={playerData.leftLegUsage}
-                  onChange={(e) =>
-                    handleUpdate("leftLegUsage", parseInt(e.target.value))
-                  }
-                  className="w-full h-6 opacity-0 cursor-pointer absolute inset-0 z-20"
+                  className="w-full h-4 rounded-full appearance-none cursor-pointer transition-all absolute inset-0 opacity-0 group-hover:opacity-100 accent-primary"
                 />
               </div>
             ) : (
               <Progress
-                value={playerData.leftLegUsage}
+                value={leftLegDraft}
                 style={{ backgroundColor: "#333" }}
                 indicatorClassName="bg-green-500"
               />
@@ -146,10 +164,12 @@ export const PhysicalStatsLanguagesCard = ({
             <div className="flex justify-between items-center text-xs sm:text-sm mb-1 w-full min-w-0">
               <span className="shrink-0 text-white">Right</span>
               <CMSField
-                value={playerData.rightLegUsage}
-                onUpdate={(val) =>
-                  handleUpdate("rightLegUsage", parseInt(String(val)))
-                }
+                value={rightLegDraft}
+                onUpdate={(val) => {
+                  const num = parseInt(String(val)) || 0;
+                  setRightLegDraft(num);
+                  commitRightLeg(num);
+                }}
                 canEdit={canEditBio}
                 type="number"
                 editTrigger="doubleClick"
@@ -162,45 +182,34 @@ export const PhysicalStatsLanguagesCard = ({
                 <div className="w-full h-1.5 bg-[#333] rounded-full overflow-hidden relative">
                   <div
                     className={cn(
-                      "h-full transition-all duration-300 ease-out",
-                      getIndicatorColor(playerData.rightLegUsage)
+                      "h-full transition-all duration-150 ease-out",
+                      getIndicatorColor(rightLegDraft)
                     )}
-                    style={{ width: `${playerData.rightLegUsage}%` }}
+                    style={{ width: `${rightLegDraft}%` }}
                   />
                 </div>
-                {/* Visible Slider on Hover */}
                 <input
                   type="range"
                   min="0"
                   max="100"
-                  value={playerData.rightLegUsage}
-                  onChange={(e) =>
-                    handleUpdate("rightLegUsage", parseInt(e.target.value))
-                  }
+                  value={rightLegDraft}
+                  onChange={(e) => setRightLegDraft(parseInt(e.target.value))}
+                  onPointerUp={(e) => commitRightLeg(parseInt((e.target as HTMLInputElement).value))}
+                  onTouchEnd={(e) => commitRightLeg(parseInt((e.target as HTMLInputElement).value))}
+                  onKeyUp={(e) => commitRightLeg(parseInt((e.target as HTMLInputElement).value))}
                   style={{
                     background: `linear-gradient(to right, ${getHexColor(
-                      playerData.rightLegUsage
-                    )} ${playerData.rightLegUsage}%, #333 ${
-                      playerData.rightLegUsage
+                      rightLegDraft
+                    )} ${rightLegDraft}%, #333 ${
+                      rightLegDraft
                     }%)`,
                   }}
-                  className="w-full h-1.5 rounded-full appearance-none cursor-pointer transition-all absolute inset-0 z-10 opacity-0 group-hover:opacity-100 accent-primary"
-                />
-                {/* Always Active Invisible Slider for Dragging */}
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={playerData.rightLegUsage}
-                  onChange={(e) =>
-                    handleUpdate("rightLegUsage", parseInt(e.target.value))
-                  }
-                  className="w-full h-6 opacity-0 cursor-pointer absolute inset-0 z-20"
+                  className="w-full h-4 rounded-full appearance-none cursor-pointer transition-all absolute inset-0 opacity-0 group-hover:opacity-100 accent-primary"
                 />
               </div>
             ) : (
               <Progress
-                value={playerData.rightLegUsage}
+                value={rightLegDraft}
                 style={{ backgroundColor: "#333" }}
                 indicatorClassName="bg-green-500"
               />

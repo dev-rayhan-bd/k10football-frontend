@@ -63,11 +63,20 @@ export const StrengthSection = ({
   const handleSaveStrength = async () => {
     try {
       setIsSavingStrength(true);
-      // NO optimistic update! Call backend PATCH first:
-      await updatePlayerProfile({
-        strength: strengthDraft,
-      });
-      // After backend PATCH succeeds, update Redux:
+      const payload = {
+        attributes: {
+          pace: strengthDraft.pace ?? 50,
+          shooting: strengthDraft.shooting ?? 50,
+          passing: strengthDraft.passing ?? 50,
+          dribbling: strengthDraft.dribbling ?? 50,
+          defending: strengthDraft.defending ?? 50,
+          physical: strengthDraft.physical ?? 50,
+          strength: strengthDraft.physical ?? 50,
+          heading: strengthDraft.heading ?? 50,
+        },
+        strengths: strengthDraft,
+      };
+      await updatePlayerProfile(payload);
       dispatch(updatePlayerField({ field: "strengths", value: strengthDraft }));
       setIsStrengthDirty(false);
       toast.success("Strengths updated successfully!");

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState } from "react";
-import { useGetMyPlayerMediaQuery } from "@/redux/features/player/playerApi";
+import { useGetMyMediaQuery } from "@/redux/features/media/mediaApi";
 import { useMediaUpload } from "@/providers/MediaUploadProvider";
 import {
   MediaItem,
@@ -14,12 +14,12 @@ import {
 const MyImagesSection = ({ editable = true }: { editable?: boolean }) => {
   const { startUpload } = useMediaUpload();
 
-  // Fetch Images from API: GET /players/me/media?mediaType=IMAGE
-  const { data: imagesResponse, isLoading } = useGetMyPlayerMediaQuery([
-    { name: "mediaType", value: "IMAGE" },
-    { name: "page", value: "1" },
-    { name: "limit", value: "50" },
-  ]);
+  // Fetch Images from API: GET /media/me?mediaType=IMAGE
+  const { data: imagesResponse, isLoading } = useGetMyMediaQuery({
+    mediaType: "IMAGE",
+    page: 1,
+    limit: 50,
+  });
 
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [previewMedia, setPreviewMedia] = useState<PreviewMedia | null>(null);

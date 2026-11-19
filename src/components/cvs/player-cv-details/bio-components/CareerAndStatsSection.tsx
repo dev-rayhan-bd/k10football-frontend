@@ -53,9 +53,21 @@ export const CareerAndStatsSection = ({
           <h2 className="text-base sm:text-lg text-center font-heading font-normal text-white">
             Transfer Status
           </h2>
-          <span className="text-[10px] sm:text-xs bg-primary text-black px-2 py-1 rounded shrink-0">
-            {playerData.transferStatus}
-          </span>
+          <CMSField
+            value={playerData.transferStatus || "Available for Loan / Transfer"}
+            type="select"
+            options={[
+              "Available for Loan / Transfer",
+              "Available for Loan",
+              "Available for Transfer",
+              "Under Contract",
+              "Free Agent",
+            ]}
+            onUpdate={(val) => handleUpdate("transferStatus", String(val))}
+            canEdit={canEditBio}
+            className="text-[10px] sm:text-xs bg-primary text-black px-2.5 py-1 rounded font-bold shrink-0 cursor-pointer"
+            inputClassName="text-[10px] sm:text-xs text-white"
+          />
         </div>
         <div className="space-y-3 text-xs sm:text-sm w-full min-w-0">
           <div className="flex justify-between items-center w-full min-w-0 gap-2">

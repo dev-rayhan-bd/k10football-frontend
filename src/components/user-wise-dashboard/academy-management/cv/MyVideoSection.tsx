@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState } from "react";
-import { useGetMyPlayerMediaQuery } from "@/redux/features/player/playerApi";
+import { useGetMyMediaQuery } from "@/redux/features/media/mediaApi";
 import { useMediaUpload } from "@/providers/MediaUploadProvider";
 import {
   MediaItem,
@@ -14,12 +14,12 @@ import {
 const MyVideosSection = ({ editable = true }: { editable?: boolean }) => {
   const { startUpload } = useMediaUpload();
 
-  // Fetch Videos from API: GET /players/me/media?mediaType=VIDEO
-  const { data: videosResponse, isLoading } = useGetMyPlayerMediaQuery([
-    { name: "mediaType", value: "VIDEO" },
-    { name: "page", value: "1" },
-    { name: "limit", value: "50" },
-  ]);
+  // Fetch Videos from API: GET /media/me?mediaType=VIDEO
+  const { data: videosResponse, isLoading } = useGetMyMediaQuery({
+    mediaType: "VIDEO",
+    page: 1,
+    limit: 50,
+  });
 
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [previewMedia, setPreviewMedia] = useState<PreviewMedia | null>(null);
@@ -44,6 +44,7 @@ const MyVideosSection = ({ editable = true }: { editable?: boolean }) => {
       img: hasThumbnail ? item.thumbnailUrl.trim() : (item.url || "/placeholder_img.jpg"),
       videoUrl: item.url,
       mediaType: "VIDEO",
+      hasThumbnail: Boolean(hasThumbnail),
     };
   });
 

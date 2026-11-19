@@ -28,6 +28,24 @@ export const mediaApi = apiSlice.injectEndpoints({
       providesTags: [TagTypes.MEDIA],
     }),
 
+    getUserMedia: builder.query<
+      IMediaGalleryResponse,
+      { userId: string; mediaType?: "IMAGE" | "VIDEO"; page?: number; limit?: number }
+    >({
+      query: ({ userId, ...params }) => {
+        const queryParams = new URLSearchParams();
+        if (params?.mediaType) queryParams.append("mediaType", params.mediaType);
+        if (params?.page) queryParams.append("page", params.page.toString());
+        if (params?.limit) queryParams.append("limit", params.limit.toString());
+        const qs = queryParams.toString();
+        return {
+          url: qs ? `/media/user/${userId}?${qs}` : `/media/user/${userId}`,
+          method: "GET",
+        };
+      },
+      providesTags: [TagTypes.MEDIA],
+    }),
+
     uploadMedia: builder.mutation<IUploadMediaResponse, FormData>({
       query: (formData) => ({
         url: "/media/upload",
@@ -126,6 +144,8 @@ export const mediaApi = apiSlice.injectEndpoints({
 export const {
   useGetMyMediaQuery,
   useLazyGetMyMediaQuery,
+  useGetUserMediaQuery,
+  useLazyGetUserMediaQuery,
   useUploadMediaMutation,
   useUpdateMediaMutation,
   useDeleteMediaMutation,

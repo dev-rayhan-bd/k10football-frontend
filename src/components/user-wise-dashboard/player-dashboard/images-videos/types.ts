@@ -11,6 +11,7 @@ export interface MediaItem {
   img: string;
   videoUrl?: string;
   mediaType: "IMAGE" | "VIDEO";
+  hasThumbnail?: boolean;
 }
 
 export interface MediaStat {

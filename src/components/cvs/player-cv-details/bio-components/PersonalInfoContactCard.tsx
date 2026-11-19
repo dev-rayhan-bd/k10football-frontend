@@ -59,14 +59,14 @@ export const PersonalInfoContactCard = ({
           </div>
           <div className="flex justify-between items-center gap-2 w-full min-w-0">
             <span className="text-gray-400 shrink-0">Birth Country</span>
-            <div className="flex items-center gap-2 min-w-0 shrink-0">
+            <div className="flex items-center gap-2 min-w-0">
               <CMSField
-                value={playerData.birthCountry}
-                onUpdate={(val) => handleUpdate("birthCountry", val)}
+                value={playerData.birthCountry || (canEditBio ? "Select Country" : "-")}
+                onUpdate={(val) => handleUpdate("birthCountry", val === "Select Country" ? "" : val)}
                 canEdit={canEditBio}
                 type="combobox"
                 options={ALL_COUNTRIES}
-                className="w-20 sm:w-24 justify-end min-w-0"
+                className="w-auto min-w-24 sm:min-w-32 justify-end"
                 inputClassName="text-right w-full min-w-0 truncate text-[10px] sm:text-sm"
               />
               {playerData.birthCountry && getFlagUrl(playerData.birthCountry) ? (
@@ -88,14 +88,14 @@ export const PersonalInfoContactCard = ({
           </div>
           <div className="flex justify-between items-center gap-2 w-full min-w-0">
             <span className="text-gray-400 shrink-0">Dual Nationality</span>
-            <div className="flex items-center gap-2 min-w-0 shrink-0">
+            <div className="flex items-center gap-2 min-w-0">
               <CMSField
-                value={playerData.dualNationality}
-                onUpdate={(val) => handleUpdate("dualNationality", val)}
+                value={playerData.dualNationality || (canEditBio ? "None" : "-")}
+                onUpdate={(val) => handleUpdate("dualNationality", val === "None" ? "" : val)}
                 canEdit={canEditBio}
                 type="combobox"
                 options={ALL_COUNTRIES}
-                className="w-20 sm:w-24 justify-end min-w-0"
+                className="w-auto min-w-24 sm:min-w-32 justify-end"
                 inputClassName="text-right w-full min-w-0 truncate text-[10px] sm:text-sm"
               />
               {playerData.dualNationality && getFlagUrl(playerData.dualNationality) ? (

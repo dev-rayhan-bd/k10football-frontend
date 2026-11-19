@@ -6,9 +6,26 @@ import {
   IconEye,
   IconHeart,
   IconUpload,
+  IconLoader2,
+  IconPencil,
+  IconTrash,
 } from "@tabler/icons-react";
-import { useGetMyPlayerMediaQuery } from "@/redux/features/player/playerApi";
+import {
+  useGetMyMediaQuery,
+  useUpdateMediaMutation,
+  useDeleteMediaMutation,
+} from "@/redux/features/media/mediaApi";
 import { useMediaUpload } from "@/providers/MediaUploadProvider";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   MediaItem,
   MediaStat,
@@ -20,35 +37,37 @@ import {
   MediaViewerModal,
   MediaUploadProgressWidget,
 } from "./images-videos";
+import { toast } from "sonner";
 
 const PlayerImagesAndVideos = () => {
   // Global Upload Context
   const { activeUploadTask, startUpload, cancelUpload, dismissUpload } = useMediaUpload();
 
-  // Fetch Images from API
+  // Fetch Images from API: GET /media/me?mediaType=IMAGE
   const {
     data: imagesResponse,
     isLoading: isImagesLoading,
-  } = useGetMyPlayerMediaQuery([
-    { name: "mediaType", value: "IMAGE" },
-    { name: "page", value: "1" },
-    { name: "limit", value: "50" },
-  ]);
+  } = useGetMyMediaQuery({ mediaType: "IMAGE", limit: 50 });
 
-  // Fetch Videos from API
+  // Fetch Videos from API: GET /media/me?mediaType=VIDEO
   const {
     data: videosResponse,
     isLoading: isVideosLoading,
-  } = useGetMyPlayerMediaQuery([
-    { name: "mediaType", value: "VIDEO" },
-    { name: "page", value: "1" },
-    { name: "limit", value: "50" },
-  ]);
+  } = useGetMyMediaQuery({ mediaType: "VIDEO", limit: 50 });
+
+  // CRUD Mutations
+  const [updateMedia, { isLoading: isUpdating }] = useUpdateMediaMutation();
+  const [deleteMedia, { isLoading: isDeleting }] = useDeleteMediaMutation();
 
   // Modal States
   const [uploadModalType, setUploadModalType] = useState<UploadMediaType>("image");
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [previewMedia, setPreviewMedia] = useState<PreviewMedia | null>(null);
+
+  // Edit / Delete states
+  const [editingItem, setEditingItem] = useState<MediaItem | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [deletingItem, setDeletingItem] = useState<MediaItem | null>(null);
 
   // Format data from API responses
   const apiImages = imagesResponse?.data?.media ?? [];
@@ -87,9 +106,10 @@ const PlayerImagesAndVideos = () => {
         : "Recent",
       views: item.views ?? 0,
       likes: item.likes ?? 0,
-      img: hasThumbnail ? item.thumbnailUrl.trim() : "/placeholder_img.jpg",
+      img: hasThumbnail ? item.thumbnailUrl.trim() : (item.url || "/placeholder_img.jpg"),
       videoUrl: item.url,
       mediaType: "VIDEO",
+      hasThumbnail,
     };
   });
 
@@ -119,6 +139,35 @@ const PlayerImagesAndVideos = () => {
     setIsUploadModalOpen(true);
   };
 
+  const handleOpenEdit = (item: MediaItem) => {
+    setEditingItem(item);
+    setEditTitle(item.title);
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingItem || !editTitle.trim()) return;
+
+    try {
+      await updateMedia({ mediaId: editingItem.id, title: editTitle.trim() }).unwrap();
+      setEditingItem(null);
+      setEditTitle("");
+    } catch {
+      // Error handled by mediaApi toast
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingItem) return;
+
+    try {
+      await deleteMedia(deletingItem.id).unwrap();
+      setDeletingItem(null);
+    } catch {
+      // Error handled by mediaApi toast
+    }
+  };
+
   return (
     <div className="flex flex-col gap-10 pb-16">
       {/* Live Upload Percentage Widget (Above Header Cards) */}
@@ -145,6 +194,8 @@ const PlayerImagesAndVideos = () => {
           onItemClick={(item) =>
             setPreviewMedia({ type: "image", url: item.img, title: item.title })
           }
+          onEdit={handleOpenEdit}
+          onDelete={(item) => setDeletingItem(item)}
         />
 
         {/* Videos Section */}
@@ -161,6 +212,8 @@ const PlayerImagesAndVideos = () => {
               title: item.title,
             })
           }
+          onEdit={handleOpenEdit}
+          onDelete={(item) => setDeletingItem(item)}
         />
       </div>
 
@@ -177,6 +230,84 @@ const PlayerImagesAndVideos = () => {
         previewMedia={previewMedia}
         onClose={() => setPreviewMedia(null)}
       />
+
+      {/* Edit Title Dialog */}
+      <Dialog open={Boolean(editingItem)} onOpenChange={(open) => !open && setEditingItem(null)}>
+        <DialogContent className="bg-[#161616] border border-white/20 text-white rounded-2xl p-6 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
+              <IconPencil size={18} className="text-[#E31B23]" />
+              Edit Media Title
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSaveEdit} className="flex flex-col gap-4 mt-2">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="edit-title" className="text-xs text-white/60 font-semibold uppercase">
+                Title
+              </Label>
+              <Input
+                id="edit-title"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Enter new title..."
+                className="bg-white/5 border-white/10 text-white rounded-xl focus-visible:border-[#E31B23]"
+                autoFocus
+                required
+              />
+            </div>
+            <DialogFooter className="flex items-center justify-end gap-2 pt-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setEditingItem(null)}
+                className="text-white/60 hover:text-white"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isUpdating || !editTitle.trim()}
+                className="bg-[#E31B23] hover:bg-[#C2181F] text-white rounded-xl font-bold text-xs uppercase tracking-wider"
+              >
+                {isUpdating ? <IconLoader2 size={16} className="animate-spin" /> : "Save Changes"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={Boolean(deletingItem)} onOpenChange={(open) => !open && setDeletingItem(null)}>
+        <DialogContent className="bg-[#161616] border border-white/20 text-white rounded-2xl p-6 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
+              <IconTrash size={18} className="text-red-500" />
+              Delete Media
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-white/70 mt-1">
+            Are you sure you want to delete &quot;{deletingItem?.title}&quot;? This action cannot be undone.
+          </p>
+          <DialogFooter className="flex items-center justify-end gap-2 pt-4">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setDeletingItem(null)}
+              className="text-white/60 hover:text-white"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleConfirmDelete}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs uppercase tracking-wider"
+            >
+              {isDeleting ? <IconLoader2 size={16} className="animate-spin" /> : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

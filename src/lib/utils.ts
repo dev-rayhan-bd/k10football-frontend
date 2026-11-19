@@ -8,46 +8,52 @@ export function cn(...inputs: ClassValue[]) {
 export const getShortForm = (position: string): string => {
   if (!position) return "";
   const pos = position.trim();
-  switch (pos) {
-    case "Goalkeeper": return "GK";
-    case "Center Back": return "CB";
-    case "Right Back": return "RB";
-    case "Left Back": return "LB";
-    case "Midfielder": return "MID";
-    case "Defender": return "DEF";
-    case "Forward": return "FWD";
-    case "Wing Back": return "LWB/RWB";
-    case "Left Wing Back": return "LWB";
-    case "Right Wing Back": return "RWB";
-    case "Defensive Midfielder": return "CDM";
-    case "Central Midfielder": return "CM";
-    case "Attacking Midfielder": return "CAM";
-    case "Left Midfielder": return "LM";
-    case "Right Midfielder": return "RM";
-    case "Striker": return "ST";
-    case "Center Forward": return "CF";
-    case "Second Striker": return "SS";
-    case "Left Forward": return "LF";
-    case "Right Forward": return "RF";
-    case "Left Winger": return "LW";
-    case "Right Winger": return "RW";
-    // Futsal positions
-    case "Fixo (Defender)": return "Fixo";
-    case "Alas (Right Wing)": return "Alas (R)";
-    case "Alas (Left Wing)": return "Alas (L)";
-    case "Pivot (Forward)": return "Pivot";
-    default:
-      // Check if it already has a parenthesis with a short form
-      if (pos.includes("(") && pos.includes(")")) {
-        // Extract content inside last parentheses (e.g. "Fixo (Defender / CB)" -> "Defender / CB")
-        const matches = pos.match(/\(([^)]+)\)[^()]*$/);
-        if (matches && matches[1]) {
-          const parts = matches[1].split("/");
-          return parts[parts.length - 1].trim(); // Returns last part (e.g. "CB")
-        }
-      }
-      return pos;
+  const clean = pos.toUpperCase();
+
+  // 1. Direct standard acronyms
+  const standardAcronyms = [
+    "ST", "CF", "SS", "RW", "LW", "CAM", "CM", "CDM", "CB", "LB", "RB",
+    "LWB", "RWB", "LM", "RM", "GK", "FWD", "MID", "DEF"
+  ];
+  if (standardAcronyms.includes(clean)) {
+    return clean;
   }
+
+  // 2. Extract content from parentheses if present, e.g. "Goalkeeper (GK)" or "Fixo (Defender / CB)"
+  const parenMatch = pos.match(/\(([^)]+)\)[^()]*$/);
+  if (parenMatch && parenMatch[1]) {
+    const parts = parenMatch[1].split(/[\/,]/);
+    const lastPart = parts[parts.length - 1].trim().toUpperCase();
+    if (standardAcronyms.includes(lastPart)) {
+      return lastPart;
+    }
+  }
+
+  // 3. Normalized keyword checks
+  if (clean.includes("ATTACKING MID") || clean.includes("CAM")) return "CAM";
+  if (clean.includes("DEFENSIVE MID") || clean.includes("CDM")) return "CDM";
+  if (clean.includes("CENTRAL MID") || clean.includes("CM")) return "CM";
+  if (clean.includes("CENTER BACK") || clean.includes("CENTRE BACK") || clean.includes("CB")) return "CB";
+  if (clean.includes("LEFT WING BACK") || clean.includes("LWB")) return "LWB";
+  if (clean.includes("RIGHT WING BACK") || clean.includes("RWB")) return "RWB";
+  if (clean.includes("LEFT BACK") || clean.includes("LB")) return "LB";
+  if (clean.includes("RIGHT BACK") || clean.includes("RB")) return "RB";
+  if (clean.includes("LEFT WINGER") || clean.includes("LW")) return "LW";
+  if (clean.includes("RIGHT WINGER") || clean.includes("RW")) return "RW";
+  if (clean.includes("LEFT MID") || clean.includes("LM")) return "LM";
+  if (clean.includes("RIGHT MID") || clean.includes("RM")) return "RM";
+  if (clean.includes("SECOND STRIKER") || clean.includes("SS")) return "SS";
+  if (clean.includes("CENTER FORWARD") || clean.includes("CENTRE FORWARD") || clean.includes("CF")) return "CF";
+  if (clean.includes("STRIKER") || clean.includes("ST")) return "ST";
+  if (clean.includes("GOALKEEPER") || clean.includes("GK") || clean.includes("GOAL")) return "GK";
+  if (clean.includes("FORWARD") || clean.includes("FWD")) return "FWD";
+  if (clean.includes("DEFENDER") || clean.includes("DEF")) return "DEF";
+  if (clean.includes("MIDFIELDER") || clean.includes("MID")) return "MID";
+  if (clean.includes("PIVOT")) return "Pivot";
+  if (clean.includes("FIXO")) return "Fixo";
+  if (clean.includes("ALA")) return "Alas";
+
+  return pos.slice(0, 4).toUpperCase();
 };
 
 export const getFullWithShortForm = (position: string): string => {

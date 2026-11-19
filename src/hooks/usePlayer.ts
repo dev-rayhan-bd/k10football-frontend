@@ -225,7 +225,7 @@ export const usePlayer = () => {
           backendPayload = { country: String(value) };
           break;
         case "dualNationality":
-          backendPayload = { dualNationality: String(value) };
+          backendPayload = { dualNationality: String(value || "") };
           break;
         case "academyName":
         case "academy":
@@ -380,6 +380,16 @@ export const usePlayer = () => {
           break;
         case "visionMetrics":
           backendPayload = { visionMetrics: value };
+          break;
+        case "transferStatus":
+          backendPayload = { transferStatus: String(value || "") };
+          break;
+        case "strengths":
+        case "strength":
+          backendPayload = {
+            attributes: value,
+            strength: typeof value === "object" ? value.physical ?? 50 : Number(value) || 50,
+          };
           break;
         case "additionalNotes":
           backendPayload = { additionalNotes: String(value) };

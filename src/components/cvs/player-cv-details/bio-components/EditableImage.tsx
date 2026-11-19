@@ -45,26 +45,12 @@ export const EditableImage = ({
 
   const handleImageUpload = async (file: File) => {
     setIsUploading(true);
-    let processedFile = file;
     try {
-      if (field === "playerImage") {
-        try {
-          toast.loading("Removing background... Please wait.", { id: "bg-removal" });
-          const { removeBackground } = await import("@imgly/background-removal");
-          const blob = await removeBackground(file);
-          const newFileName = file.name.replace(/\.[^/.]+$/, "") + ".png";
-          processedFile = new File([blob], newFileName, { type: "image/png" });
-          toast.success("Background removed!", { id: "bg-removal" });
-        } catch (error) {
-          console.error("Background removal failed:", error);
-          toast.error("Background removal failed. Using original image.", { id: "bg-removal" });
-        }
-      }
       const reader = new FileReader();
       reader.onloadend = () => {
-        onUpdate(field, reader.result, processedFile);
+        onUpdate(field, reader.result, file);
       };
-      reader.readAsDataURL(processedFile);
+      reader.readAsDataURL(file);
     } finally {
       setIsUploading(false);
     }

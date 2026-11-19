@@ -33,6 +33,7 @@ export const MediaViewerModal: React.FC<MediaViewerModalProps> = ({
               src={previewMedia.url}
               alt={previewMedia.title}
               fill
+              unoptimized
               className="object-contain p-1"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
