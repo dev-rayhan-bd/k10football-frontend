@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { usePlayerStats } from "./FullEditablePage";
 import CMSField from "@/components/shared/CMSField";
 import { toast } from "sonner";
-import { cn, getShortForm, getVeryShortPosition } from "@/lib/utils";
+import { cn, getShortForm, getVeryShortPosition, getFullWithShortForm } from "@/lib/utils";
 import { usePlayer } from "@/hooks/usePlayer";
 import goldCard from "@/assets/cvs/gold-card.png";
 import pinkCard from "@/assets/cvs/pink-card.png";
@@ -25,6 +25,13 @@ import {
   useUpdateMyPlayerAttributesMutation,
 } from "@/redux/features/player/playerApi";
 import { INITIAL_SKILL_CATEGORIES } from "./SkillAttributeSection";
+import {
+  POSITION_COEFFICIENTS_CONFIG,
+  POSITION_DROPDOWN_OPTIONS,
+  normalizePositionKey,
+  calculatePositionOverall,
+} from "@/constants/positionAttributes";
+import { smartRemoveBackground } from "@/lib/utils/backgroundRemoval";
 
 const SKILL_NAME_TO_KEY: Record<string, string> = {
   "ball control": "ballControl",
@@ -78,6 +85,22 @@ const SKILL_NAME_TO_KEY: Record<string, string> = {
   "clearance": "clearance",
   "pressing": "pressing",
   "defensive awareness": "defensiveAwareness",
+  "off-the-ball movement": "offTheBall",
+  "off the ball": "offTheBall",
+  "link-up play": "linkUpPlay",
+  "link up play": "linkUpPlay",
+  "shot accuracy": "shotAccuracy",
+  "one-on-one finishing": "oneOnOneFinishing",
+  "reflexes": "reflexes",
+  "handling": "handling",
+  "one-on-one": "oneOnOne",
+  "one-on-one defending": "oneOnOne",
+  "aerial ability": "aerialAbility",
+  "cross claiming": "crossClaiming",
+  "shot stopping": "shotStopping",
+  "footwork": "footwork",
+  "distribution": "distribution",
+  "communication": "communication",
 };
 const COUNTRY_CODES: Record<string, string> = {
   "afghanistan": "af", "albania": "al", "algeria": "dz", "andorra": "ad", "angola": "ao",
@@ -125,7 +148,9 @@ const COUNTRY_CODES: Record<string, string> = {
   "zambia": "zm", "zimbabwe": "zw"
 };
 interface Attribute {
+  key: string;
   name: string;
+  weight: number;
   score: number;
   status: "Excellent" | "Good" | "Average";
 }
@@ -161,6 +186,15 @@ const getFlagUrl = (countryName: string) => {
   const code = COUNTRY_CODES[countryName.toLowerCase()];
   return code ? `https://flagcdn.com/${code}.svg` : "";
 };
+const KEY_ALIASES: Record<string, string[]> = {
+  composure: ["composure", "composition"],
+  composition: ["composition", "composure"],
+  tackling: ["tackling", "standingTackle"],
+  standingTackle: ["standingTackle", "tackling"],
+  interceptions: ["interceptions", "interception"],
+  interception: ["interception", "interceptions"],
+};
+
 const PlayerProfile = ({
   editable = false,
 }: {
@@ -169,7 +203,7 @@ const PlayerProfile = ({
 const router = useRouter();
 const { bioRating, skillsAvg, metricsAvg, attributesAvg, role } =
 usePlayerStats();
-const { playerData, handleUpdate: updatePlayerData, validatePlayer } = usePlayer();
+const { playerData, cvData, handleUpdate: updatePlayerData, validatePlayer } = usePlayer();
 
 const isViewingSpecificPlayer =
   typeof window !== "undefined" &&
@@ -180,6 +214,7 @@ const { data: attributesResponse } = useGetMyPlayerAttributesQuery(undefined, {
 });
 const [updateMyPlayerAttributes, { isLoading: isUpdatingAttributes }] = useUpdateMyPlayerAttributesMutation();
 const [isDirty, setIsDirty] = useState(false);
+const [positionalOverrides, setPositionalOverrides] = useState<Record<string, number>>({});
 
 // Sync API attributes data into Redux on load if available
 React.useEffect(() => {
@@ -238,41 +273,179 @@ if (firstClub && firstClub.logo) {
 return club1.src;
 };
 
-const attrData: Attribute[] = ((playerData.skillsCategories && playerData.skillsCategories.length > 0)
-  ? playerData.skillsCategories
-  : INITIAL_SKILL_CATEGORIES)
-.flatMap(c => c.skills)
-.slice(0, 12) // Keep it to 12 as before
-.map(s => ({
-  name: s.name,
-  score: s.value,
-  status: getBadgeStatus(s.value)
-}));
+const canonicalPosition = normalizePositionKey(playerData.position);
+const positionConfig =
+  POSITION_COEFFICIENTS_CONFIG[canonicalPosition] || POSITION_COEFFICIENTS_CONFIG.CM;
 
-const currentStats = {
-pac: playerData.strengths?.pace ?? 75,
-sho: playerData.strengths?.shooting ?? 75,
-pas: playerData.strengths?.passing ?? 75,
-dri: playerData.strengths?.dribbling ?? 75,
-def: playerData.strengths?.defending ?? 75,
-phy: playerData.strengths?.physical ?? 75
+// Reset local overrides when switching player position
+React.useEffect(() => {
+  setPositionalOverrides({});
+  setIsDirty(false);
+}, [canonicalPosition]);
+
+// Map values from GET /players/me/cv -> data.positionalCoefficients
+const cvCoeffMap: Record<string, number> = {};
+if (Array.isArray((cvData as any)?.positionalCoefficients)) {
+  (cvData as any).positionalCoefficients.forEach((item: any) => {
+    const k = item?.key;
+    const v =
+      typeof item?.score === "number"
+        ? item.score
+        : typeof item?.value === "number"
+          ? item.value
+          : undefined;
+    if (k && typeof v === "number") {
+      cvCoeffMap[k] = v;
+    }
+  });
+}
+
+// Map values from GET /players/me/attributes -> data.positionAttributes
+const posAttrsMap: Record<string, number> = {};
+const rawPosAttrs = (attributesResponse?.data as any)?.positionAttributes;
+if (Array.isArray(rawPosAttrs)) {
+  rawPosAttrs.forEach((item: any) => {
+    const k = item?.key;
+    const v =
+      typeof item?.score === "number"
+        ? item.score
+        : typeof item?.value === "number"
+          ? item.value
+          : undefined;
+    if (k && typeof v === "number") {
+      posAttrsMap[k] = v;
+    }
+  });
+} else if (rawPosAttrs && typeof rawPosAttrs === "object") {
+  Object.entries(rawPosAttrs).forEach(([k, v]) => {
+    if (typeof v === "number") {
+      posAttrsMap[k] = v;
+    }
+  });
+}
+
+const getAttrValueByKey = (key: string): number => {
+  const aliases = KEY_ALIASES[key] || [key];
+
+  // 1. Immediate unsaved local edits (works for ALL 12 positional attributes, including GK/CAM/CF/ST-only keys)
+  for (const alias of aliases) {
+    if (typeof positionalOverrides[alias] === "number") {
+      return positionalOverrides[alias];
+    }
+  }
+
+  // 2. Backend positionAttributes from GET /players/me/attributes
+  for (const alias of aliases) {
+    if (typeof posAttrsMap[alias] === "number") {
+      return posAttrsMap[alias];
+    }
+  }
+
+  // 3. Backend positionalCoefficients from GET /players/me/cv
+  for (const alias of aliases) {
+    if (typeof cvCoeffMap[alias] === "number") {
+      return cvCoeffMap[alias];
+    }
+  }
+
+  // 4. Redux skillsCategories (48 general attributes synced from API/Skills Radar)
+  if (playerData.skillsCategories && playerData.skillsCategories.length > 0) {
+    for (const cat of playerData.skillsCategories) {
+      const match = cat.skills?.find((s) => {
+        const mappedKey = s.key || SKILL_NAME_TO_KEY[s.name?.toLowerCase()?.trim()];
+        return Boolean(mappedKey && aliases.includes(mappedKey));
+      });
+      if (match && typeof match.value === "number") {
+        return match.value;
+      }
+    }
+  }
+
+  // 5. Raw categorized attributes from GET /players/me/attributes
+  const apiCats = attributesResponse?.data?.categories as any;
+  if (apiCats) {
+    for (const c of Object.values(apiCats)) {
+      if (c && typeof c === "object") {
+        for (const alias of aliases) {
+          if (typeof (c as any)[alias] === "number") {
+            return (c as any)[alias];
+          }
+        }
+      }
+    }
+  }
+
+  // 6. Default baseline (matches POSITION_ATTRIBUTES_AND_COEFFICIENTS.md)
+  return 50;
 };
 
-const overallRating = calculateWeightedRating(playerData.position, {
-pace: currentStats.pac,
-shooting: currentStats.sho,
-passing: currentStats.pas,
-dribbling: currentStats.dri,
-defending: currentStats.def,
-physical: currentStats.phy
+const dynamicAttributes: Attribute[] = positionConfig.map((item) => {
+  const score = getAttrValueByKey(item.key);
+  return {
+    key: item.key,
+    name: item.label,
+    weight: item.weight,
+    score,
+    status: getBadgeStatus(score),
+  };
 });
 
+const attrScoreMap: Record<string, number> = {};
+dynamicAttributes.forEach((a) => {
+  attrScoreMap[a.key] = a.score;
+});
+
+const calculatedOverall = calculatePositionOverall(playerData.position, attrScoreMap);
+const apiPositionMatches =
+  normalizePositionKey(
+    (cvData as any)?.position ||
+      (attributesResponse?.data as any)?.position ||
+      playerData.position
+  ) === canonicalPosition;
+
+const apiPositionOverall =
+  typeof (attributesResponse?.data as any)?.calculatedPositionRating === "number"
+    ? (attributesResponse?.data as any).calculatedPositionRating
+    : typeof (cvData as any)?.positionOverall === "number"
+      ? (cvData as any).positionOverall
+      : undefined;
+
+const displayedOverall =
+  isDirty || !apiPositionMatches || apiPositionOverall === undefined
+    ? calculatedOverall
+    : apiPositionOverall;
+
+const isGoalkeeper = canonicalPosition === "GK";
+const fifaCardApiStats = (cvData as any)?.fifaCardStats || (playerData as any)?.fifaCardStats;
+
+const currentStats = isGoalkeeper
+  ? {
+      pac: fifaCardApiStats?.pac ?? fifaCardApiStats?.diving ?? getAttrValueByKey("shotStopping"),
+      sho: fifaCardApiStats?.sho ?? fifaCardApiStats?.handling ?? getAttrValueByKey("handling"),
+      pas: fifaCardApiStats?.pas ?? fifaCardApiStats?.kicking ?? getAttrValueByKey("distribution"),
+      dri: fifaCardApiStats?.dri ?? fifaCardApiStats?.reflexes ?? getAttrValueByKey("reflexes"),
+      def: fifaCardApiStats?.def ?? fifaCardApiStats?.speed ?? getAttrValueByKey("footwork"),
+      phy: fifaCardApiStats?.phy ?? fifaCardApiStats?.positioning ?? getAttrValueByKey("positioning"),
+    }
+  : {
+      pac: playerData.strengths?.pace ?? fifaCardApiStats?.pac ?? 75,
+      sho: playerData.strengths?.shooting ?? fifaCardApiStats?.sho ?? 75,
+      pas: playerData.strengths?.passing ?? fifaCardApiStats?.pas ?? 75,
+      dri: playerData.strengths?.dribbling ?? fifaCardApiStats?.dri ?? 75,
+      def: playerData.strengths?.defending ?? fifaCardApiStats?.def ?? 75,
+      phy: playerData.strengths?.physical ?? fifaCardApiStats?.phy ?? 75,
+    };
+
+const statLabels = isGoalkeeper
+  ? { pac: "DIV", sho: "HAN", pas: "KIC", dri: "REF", def: "SPD", phy: "POS" }
+  : { pac: "PAC", sho: "SHO", pas: "PAS", dri: "DRI", def: "DEF", phy: "PHY" };
+
 const currentPlayer = {
-name: playerData.fullName?.split(' ').pop()?.toUpperCase() || "PLAYER",
-rating: overallRating,
-position: getShortForm(playerData.position) || "ST",
-stats: currentStats,
-cardType: (overallRating >= 80 ? "gold" : overallRating >= 60 ? "white" : "pink") as "gold" | "white" | "pink"
+  name: playerData.fullName?.split(" ").pop()?.toUpperCase() || "PLAYER",
+  rating: displayedOverall,
+  position: getShortForm(playerData.position) || canonicalPosition,
+  stats: currentStats,
+  cardType: (displayedOverall >= 80 ? "gold" : displayedOverall >= 60 ? "white" : "pink") as "gold" | "white" | "pink",
 };
 
 const getValidImg = (img: any): string => {
@@ -309,13 +482,28 @@ const isPlaceholderCard =
   (typeof cardDisplayImg === "string" && cardDisplayImg.includes("placeholder"));
 
 const [editingField, setEditingField] = useState<string | null>(null);
+const [isUploadingCardImg, setIsUploadingCardImg] = useState(false);
+const [cardBgProgress, setCardBgProgress] = useState<string>("Removing Background...");
 
-const handleUpdate = (attrName: string, rawVal: number) => {
+const handleUpdate = (attrKey: string, rawVal: number) => {
   const value = Math.max(0, Math.min(100, isNaN(rawVal) ? 0 : rawVal));
+  const aliases = KEY_ALIASES[attrKey] || [attrKey];
 
-  // Immediately update Redux state for 60fps UI responsiveness
+  // 1. Always update local positional override so ALL 12 positional attributes respond immediately at 60fps
+  setPositionalOverrides((prev) => {
+    const next = { ...prev, [attrKey]: value };
+    aliases.forEach((alias) => {
+      next[alias] = value;
+    });
+    return next;
+  });
+
+  // 2. Also keep Redux skillsCategories in sync when the key exists in the 48 general attributes
   playerData.skillsCategories?.forEach((cat, catIdx) => {
-    const skillIdx = cat.skills?.findIndex((s) => s.name.toLowerCase() === attrName.toLowerCase());
+    const skillIdx = cat.skills?.findIndex((s) => {
+      const mappedKey = s.key || SKILL_NAME_TO_KEY[s.name?.toLowerCase()?.trim()];
+      return Boolean(mappedKey && aliases.includes(mappedKey));
+    });
     if (skillIdx !== -1) {
       updatePlayerData(`skillsCategories.${catIdx}.skills.${skillIdx}.value`, value);
     }
@@ -357,15 +545,26 @@ const handleSaveAttributes = async () => {
       });
     });
 
-    // 3. Keep composition / composure compatibility
-    if (payload.composition !== undefined) {
-      payload.composure = payload.composition;
-    }
-    if (payload.composure !== undefined) {
+    // 3. Overlay all 12 current positional attributes (exact API keys from POSITION_ATTRIBUTES_AND_COEFFICIENTS.md)
+    dynamicAttributes.forEach((attr) => {
+      payload[attr.key] = attr.score;
+      const aliases = KEY_ALIASES[attr.key];
+      if (aliases) {
+        aliases.forEach((alias) => {
+          payload[alias] = attr.score;
+        });
+      }
+    });
+
+    // 4. Keep alias pairs consistent (composure/composition, tackling/standingTackle, interceptions/interception)
+    if (payload.composure !== undefined && payload.composition === undefined) {
       payload.composition = payload.composure;
+    } else if (payload.composition !== undefined && payload.composure === undefined) {
+      payload.composure = payload.composition;
     }
 
     await updateMyPlayerAttributes(payload).unwrap();
+    setPositionalOverrides({});
     setIsDirty(false);
   } catch (err: any) {
     // Handled by playerApi onQueryStarted with user-facing toasts
@@ -373,20 +572,36 @@ const handleSaveAttributes = async () => {
 };
 
 const handleInfoChange = async (field: string, value: any) => {
-updatePlayerData(field, value);
+  updatePlayerData(field, value);
 };
 
 const fileInputRef = React.useRef<HTMLInputElement>(null);
 
 const handleCardImageUpload = async (file: File) => {
-  const reader = new FileReader();
-  reader.onloadend = () => {
-    const dataUrl = reader.result as string;
-    updatePlayerData("cardImage", dataUrl, file);
-    updatePlayerData("cardPhoto", dataUrl, file);
-    toast.success("Card image updated!");
-  };
-  reader.readAsDataURL(file);
+  if (isUploadingCardImg) return;
+  setIsUploadingCardImg(true);
+  setCardBgProgress("Removing Background...");
+  toast.loading("Removing background from FIFA card image...", { id: "card-bg-removal" });
+  try {
+    const cleanFile = await smartRemoveBackground(file, false, (percent, stage) => {
+      const msg = `${stage} ${percent}%`;
+      setCardBgProgress(msg);
+      toast.loading(msg, { id: "card-bg-removal" });
+    });
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error("Failed to read processed image"));
+      reader.readAsDataURL(cleanFile);
+    });
+    updatePlayerData("cardImage", dataUrl, cleanFile);
+    toast.success("FIFA card background removed & updated!", { id: "card-bg-removal" });
+  } catch (err) {
+    console.error("Card image background removal error:", err);
+    toast.error("Background removal failed. Please try again.", { id: "card-bg-removal" });
+  } finally {
+    setIsUploadingCardImg(false);
+  }
 };
 
 const handleDrop = (e: React.DragEvent) => {
@@ -399,7 +614,7 @@ if (file && file.type.startsWith("image/")) {
 };
 
 return (
-<div className="text-white p-4 lg:p-8 w-full overflow-hidden min-w-0">
+<div className="text-white p-4 lg:p-8 w-full overflow-x-clip min-w-0">
   <div className="container mt-10">
     <h1 className="text-3xl font-bold flex items-center justify-center font-heading text-white text-center lg:text-left">
       POSITIONAL CO-EFFICIENTS
@@ -407,9 +622,9 @@ return (
   </div>
   <div className="container grid grid-cols-1 lg:grid-cols-3 gap-8 mt-10">
     {/* Left Section - Player Card */}
-    <div className="lg:col-span-1  bg-cardBg h-fit rounded-xl overflow-hidden">
-      <div className=" overflow-hidden">
-        <div className="aspect-square bg-linear-to-b from-[#2df168] to-[#39493b] flex items-center justify-center">
+    <div className="lg:col-span-1 bg-cardBg h-fit rounded-xl overflow-visible">
+      <div className="overflow-visible">
+        <div className="aspect-square rounded-t-xl overflow-hidden bg-linear-to-b from-[#2df168] to-[#39493b] flex items-center justify-center">
           <div onClick={() => router.push("/cvs/player-cv-details")} className="flex justify-center cursor-pointer w-full max-w-67.5 mx-auto">
             <div className={`relative w-full aspect-270/385 hover:scale-105 transition-all duration-300 z-0 ${
               currentPlayer.cardType === "gold"
@@ -484,7 +699,7 @@ return (
                 />
                 {editable && (
                   <>
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity z-20">
                       <span className="text-[10px] text-white font-black uppercase tracking-widest text-center">
                         Drop or Click
                       </span>
@@ -496,10 +711,19 @@ return (
                       accept="image/*"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
+                        e.target.value = "";
                         if (file) handleCardImageUpload(file);
                       }}
                     />
                   </>
+                )}
+                {isUploadingCardImg && (
+                  <div className="absolute inset-0 bg-black/75 flex flex-col items-center justify-center gap-1.5 px-2 text-center z-30">
+                    <IconLoader2 className="size-6 animate-spin text-[#00FF62]" />
+                    <span className="text-[9px] font-bold text-white uppercase tracking-wider leading-tight">
+                      {cardBgProgress}
+                    </span>
+                  </div>
                 )}
               </div>
 
@@ -517,15 +741,15 @@ return (
                   <div className="flex-1 flex flex-col gap-1.5">
                     <div className="flex justify-between items-center px-1">
                       <span className="font-extrabold text-base sm:text-lg text-gray-900 leading-none">{currentPlayer.stats.pac}</span>
-                      <span className="font-bold text-xs sm:text-sm text-gray-700 leading-none">PAC</span>
+                      <span className="font-bold text-xs sm:text-sm text-gray-700 leading-none">{statLabels.pac}</span>
                     </div>
                     <div className="flex justify-between items-center px-1">
                       <span className="font-extrabold text-base sm:text-lg text-gray-900 leading-none">{currentPlayer.stats.sho}</span>
-                      <span className="font-bold text-xs sm:text-sm text-gray-700 leading-none">SHO</span>
+                      <span className="font-bold text-xs sm:text-sm text-gray-700 leading-none">{statLabels.sho}</span>
                     </div>
                     <div className="flex justify-between items-center px-1">
                       <span className="font-extrabold text-base sm:text-lg text-gray-900 leading-none">{currentPlayer.stats.pas}</span>
-                      <span className="font-bold text-xs sm:text-sm text-gray-700 leading-none">PAS</span>
+                      <span className="font-bold text-xs sm:text-sm text-gray-700 leading-none">{statLabels.pas}</span>
                     </div>
                   </div>
 
@@ -535,15 +759,15 @@ return (
                   <div className="flex-1 flex flex-col gap-1.5">
                     <div className="flex justify-between items-center px-1">
                       <span className="font-extrabold text-base sm:text-lg text-gray-900 leading-none">{currentPlayer.stats.dri}</span>
-                      <span className="font-bold text-xs sm:text-sm text-gray-700 leading-none">DRI</span>
+                      <span className="font-bold text-xs sm:text-sm text-gray-700 leading-none">{statLabels.dri}</span>
                     </div>
                     <div className="flex justify-between items-center px-1">
                       <span className="font-extrabold text-base sm:text-lg text-gray-900 leading-none">{currentPlayer.stats.def}</span>
-                      <span className="font-bold text-xs sm:text-sm text-gray-700 leading-none">DEF</span>
+                      <span className="font-bold text-xs sm:text-sm text-gray-700 leading-none">{statLabels.def}</span>
                     </div>
                     <div className="flex justify-between items-center px-1">
                       <span className="font-extrabold text-base sm:text-lg text-gray-900 leading-none">{currentPlayer.stats.phy}</span>
-                      <span className="font-bold text-xs sm:text-sm text-gray-700 leading-none">PHY</span>
+                      <span className="font-bold text-xs sm:text-sm text-gray-700 leading-none">{statLabels.phy}</span>
                     </div>
                   </div>
                 </div>
@@ -562,7 +786,7 @@ return (
           <div className="w-32 h-32 rounded-full bg-[#2a2a2a] border-4 border-primary flex items-center justify-center">
             <div className="text-center">
               <div className="text-4xl font-bold text-white font-heading">
-                {overallRating}
+                {displayedOverall}
               </div>
             </div>
           </div>
@@ -607,9 +831,11 @@ return (
             </div>
           </div>
           <CMSField
-            value={getShortForm(playerData.position)}
+            value={getFullWithShortForm(playerData.position) || playerData.position || "Central Midfielder (CM)"}
             onUpdate={(val) => handleInfoChange("position", val)}
-            canEdit={false}
+            canEdit={editable}
+            type="combobox"
+            options={POSITION_DROPDOWN_OPTIONS}
             className="text-xl sm:text-2xl text-primary/80 font-black justify-center uppercase tracking-[0.2em]"
             inputClassName="text-center"
           />
@@ -672,14 +898,16 @@ return (
         )}
 
         <div className="flex flex-col gap-4">
-          {attrData.map((attr, idx) => (
+          {dynamicAttributes.map((attr, idx) => (
             <div
-              key={idx}
+              key={`${attr.key}-${idx}`}
               className="flex items-center gap-2 sm:gap-6 p-3 sm:p-5 bg-[#1a1a1a] border border-border rounded-lg hover:bg-[#222] transition-colors"
             >
               {/* Attribute Name */}
               <div className="flex-1 sm:flex-[1.5] min-w-0">
-                <p className="text-[10px] sm:text-base font-bold text-gray-200 uppercase tracking-wide truncate">{attr.name}</p>
+                <p className="text-[10px] sm:text-base font-bold text-gray-200 uppercase tracking-wide truncate">
+                  {attr.name}
+                </p>
               </div>
 
               {/* Progress Bar / Slider */}
@@ -692,7 +920,7 @@ return (
                       max="100"
                       value={attr.score}
                       onChange={(e) =>
-                        handleUpdate(attr.name, parseInt(e.target.value))
+                        handleUpdate(attr.key, parseInt(e.target.value))
                       }
                       style={{
                         background: `linear-gradient(to right, ${getHexColor(attr.score)} ${attr.score}%, #333 ${attr.score}%)`,
@@ -712,7 +940,7 @@ return (
                       max="100"
                       value={attr.score}
                       onChange={(e) =>
-                        handleUpdate(attr.name, parseInt(e.target.value))
+                        handleUpdate(attr.key, parseInt(e.target.value))
                       }
                       className="w-full h-8 opacity-0 cursor-pointer absolute inset-0 z-20"
                     />
@@ -731,7 +959,7 @@ return (
               <div className="shrink-0 text-right min-w-8 sm:min-w-20 transition-all duration-300">
                 <CMSField
                   value={attr.score}
-                  onUpdate={(val) => handleUpdate(attr.name, parseInt(String(val)))}
+                  onUpdate={(val) => handleUpdate(attr.key, parseInt(String(val)))}
                   canEdit={editable}
                   type="number"
                   editTrigger="doubleClick"

@@ -4,12 +4,13 @@ import React, { useState, useRef } from 'react';
 import { usePlayer } from '@/hooks/usePlayer';
 import CMSField from '@/components/shared/CMSField';
 import { cn } from '@/lib/utils';
-import { Plus, Trash2, X, Check, Info, Upload, Pencil } from 'lucide-react';
+import { Plus, Trash2, X, Check, Info, Upload, Pencil, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 import club1 from '@/assets/cvs/club1.png';
 import Image from 'next/image';
+import { smartRemoveBackground } from '@/lib/utils/backgroundRemoval';
 
 const YEARS = Array.from({ length: 30 }, (_, i) => String(new Date().getFullYear() - i));
 const TO_YEARS = ["Present", ...YEARS];
@@ -18,14 +19,17 @@ const getValidLogoSrc = (logo: any): string | null => {
   if (!logo) return null;
   if (typeof logo === 'string') {
     const trimmed = logo.trim();
-    if (
-      trimmed.startsWith('http://') ||
-      trimmed.startsWith('https://') ||
-      trimmed.startsWith('/') ||
-      trimmed.startsWith('data:') ||
-      trimmed.startsWith('blob:')
-    ) {
-      return trimmed;
+    if (trimmed.length > 0 && !trimmed.startsWith('bg-')) {
+      if (
+        trimmed.startsWith('http://') ||
+        trimmed.startsWith('https://') ||
+        trimmed.startsWith('/') ||
+        trimmed.startsWith('data:') ||
+        trimmed.startsWith('blob:')
+      ) {
+        return trimmed;
+      }
+      return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
     }
   }
   return null;
@@ -54,6 +58,7 @@ const ClubSection = ({ editable = true }: { editable?: boolean }) => {
   const [editingFromDate, setEditingFromDate] = useState(YEARS[0]);
   const [editingToDate, setEditingToDate] = useState("Present");
   const [isUpdatingLoading, setIsUpdatingLoading] = useState(false);
+  const [isProcessingLogo, setIsProcessingLogo] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editFileInputRef = useRef<HTMLInputElement>(null);
@@ -61,40 +66,70 @@ const ClubSection = ({ editable = true }: { editable?: boolean }) => {
   const clubCount = playerData?.clubs?.length || 0;
   const isLimitReached = clubCount >= 6;
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (!file.type.startsWith("image/")) {
-        toast.error("Please upload a valid image file.");
-        return;
-      }
-      if (file.size > 2 * 1024 * 1024) {
-        toast.error("File size too large. Max 2MB.");
-        return;
-      }
-      setNewClubLogoFile(file);
-      setLogoError(false);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewClubLogo(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload a valid image file.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size too large. Max 5MB.");
+      return;
+    }
+    setLogoError(false);
+    setIsProcessingLogo(true);
+    toast.loading("Removing background from club logo...", { id: "club-logo-bg" });
+    try {
+      const cleanFile = await smartRemoveBackground(file, true, (percent, stage) => {
+        toast.loading(`${stage} ${percent}%`, { id: "club-logo-bg" });
+      });
+      setNewClubLogoFile(cleanFile);
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error("Failed to read processed logo"));
+        reader.readAsDataURL(cleanFile);
+      });
+      setNewClubLogo(dataUrl);
+      toast.success("Logo background removed!", { id: "club-logo-bg" });
+    } catch (err) {
+      console.error("Club logo background removal failed:", err);
+      toast.error("Background removal failed. Please try again.", { id: "club-logo-bg" });
+    } finally {
+      setIsProcessingLogo(false);
     }
   };
 
-  const handleEditLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEditLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        toast.error("File size too large. Max 2MB.");
-        return;
-      }
-      setEditingClubLogoFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setEditingClubLogo(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    e.target.value = "";
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size too large. Max 5MB.");
+      return;
+    }
+    setIsProcessingLogo(true);
+    toast.loading("Removing background from club logo...", { id: "club-logo-bg" });
+    try {
+      const cleanFile = await smartRemoveBackground(file, true, (percent, stage) => {
+        toast.loading(`${stage} ${percent}%`, { id: "club-logo-bg" });
+      });
+      setEditingClubLogoFile(cleanFile);
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error("Failed to read processed logo"));
+        reader.readAsDataURL(cleanFile);
+      });
+      setEditingClubLogo(dataUrl);
+      toast.success("Logo background removed!", { id: "club-logo-bg" });
+    } catch (err) {
+      console.error("Club logo background removal failed:", err);
+      toast.error("Background removal failed. Please try again.", { id: "club-logo-bg" });
+    } finally {
+      setIsProcessingLogo(false);
     }
   };
 
@@ -328,6 +363,11 @@ const ClubSection = ({ editable = true }: { editable?: boolean }) => {
                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/editlogo:opacity-100 flex items-center justify-center transition-opacity">
                           <Upload size={16} className="text-white" />
                         </div>
+                        {isProcessingLogo && (
+                          <div className="absolute inset-0 bg-black/75 flex items-center justify-center">
+                            <Loader2 className="size-5 animate-spin text-primary" />
+                          </div>
+                        )}
                       </div>
                       <span className="text-[10px] text-muted-foreground uppercase">Change Club Logo</span>
                       <input
@@ -394,11 +434,15 @@ const ClubSection = ({ editable = true }: { editable?: boolean }) => {
                       <Button
                         type="button"
                         onClick={saveEditClub}
-                        disabled={!editingClubName.trim() || isUpdatingLoading}
+                        disabled={!editingClubName.trim() || isUpdatingLoading || isProcessingLogo}
                         className="w-1/2 bg-primary text-primary-foreground font-bold hover:bg-primary/90"
                         size="sm"
                       >
-                        {isUpdatingLoading ? (
+                        {isProcessingLogo ? (
+                          <span className="flex items-center gap-1.5">
+                            <Loader2 className="size-3.5 animate-spin" /> Processing...
+                          </span>
+                        ) : isUpdatingLoading ? (
                           <span className="flex items-center gap-2">Updating...</span>
                         ) : (
                           <>
@@ -463,7 +507,10 @@ const ClubSection = ({ editable = true }: { editable?: boolean }) => {
                       alt={club.name}
                       width={80}
                       height={80}
-                      unoptimized={Boolean(typeof club.logo === "string" && (club.logo.startsWith("data:") || club.logo.startsWith("blob:")))}
+                      unoptimized={Boolean(
+                        typeof club.logo === "string" &&
+                          (club.logo.startsWith("http") || club.logo.startsWith("data:") || club.logo.startsWith("blob:"))
+                      )}
                       className="object-contain p-2"
                     />
                     {editable && (
@@ -478,14 +525,27 @@ const ClubSection = ({ editable = true }: { editable?: boolean }) => {
                       type="file"
                       accept="image/*"
                       className="hidden"
-                      onChange={(e) => {
+                      onChange={async (e) => {
                         const file = e.target.files?.[0];
-                        if (file) {
-                          if (file.size > 2 * 1024 * 1024) {
-                            toast.error("File size too large. Max 2MB.");
-                            return;
-                          }
-                          updateClub(club.id, "logoFile", file);
+                        e.target.value = "";
+                        if (!file) return;
+                        if (file.size > 5 * 1024 * 1024) {
+                          toast.error("File size too large. Max 5MB.");
+                          return;
+                        }
+                        setIsProcessingLogo(true);
+                        toast.loading("Removing background from club logo...", { id: "club-logo-bg" });
+                        try {
+                          const cleanFile = await smartRemoveBackground(file, true, (percent, stage) => {
+                            toast.loading(`${stage} ${percent}%`, { id: "club-logo-bg" });
+                          });
+                          await updateClub(club.id, "logoFile", cleanFile);
+                          toast.success("Logo background removed & saved!", { id: "club-logo-bg" });
+                        } catch (err) {
+                          console.error("Club logo background removal failed:", err);
+                          toast.error("Background removal failed. Please try again.", { id: "club-logo-bg" });
+                        } finally {
+                          setIsProcessingLogo(false);
                         }
                       }}
                     />
@@ -575,6 +635,11 @@ const ClubSection = ({ editable = true }: { editable?: boolean }) => {
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/newlogo:opacity-100 flex items-center justify-center transition-opacity">
                       <Upload size={16} className="text-white" />
                     </div>
+                    {isProcessingLogo && (
+                      <div className="absolute inset-0 bg-black/75 flex items-center justify-center">
+                        <Loader2 className="size-5 animate-spin text-primary" />
+                      </div>
+                    )}
                   </div>
                   <div className="flex flex-col items-center gap-0.5">
                     <span
@@ -661,11 +726,15 @@ const ClubSection = ({ editable = true }: { editable?: boolean }) => {
 
                 <Button
                   onClick={addClub}
-                  disabled={isAddingLoading}
+                  disabled={isAddingLoading || isProcessingLogo}
                   className="w-full bg-primary text-primary-foreground font-bold hover:bg-primary/90 mt-2"
                   size="sm"
                 >
-                  {isAddingLoading ? (
+                  {isProcessingLogo ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="size-4 animate-spin" /> Removing Background...
+                    </span>
+                  ) : isAddingLoading ? (
                     <span className="flex items-center gap-2">Adding...</span>
                   ) : (
                     <>

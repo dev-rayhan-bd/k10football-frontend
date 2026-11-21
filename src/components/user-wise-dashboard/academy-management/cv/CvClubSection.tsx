@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 
 import club1 from '@/assets/cvs/club1.png';
 import Image from 'next/image';
+import { smartRemoveBackground } from '@/lib/utils/backgroundRemoval';
 
 const YEARS = Array.from({ length: 30 }, (_, i) => String(new Date().getFullYear() - i));
 const TO_YEARS = ["Present", ...YEARS];
@@ -18,14 +19,17 @@ const getValidLogoSrc = (logo: any): string | null => {
     if (!logo) return null;
     if (typeof logo === 'string') {
         const trimmed = logo.trim();
-        if (
-            trimmed.startsWith('http://') ||
-            trimmed.startsWith('https://') ||
-            trimmed.startsWith('/') ||
-            trimmed.startsWith('data:') ||
-            trimmed.startsWith('blob:')
-        ) {
-            return trimmed;
+        if (trimmed.length > 0 && !trimmed.startsWith('bg-')) {
+            if (
+                trimmed.startsWith('http://') ||
+                trimmed.startsWith('https://') ||
+                trimmed.startsWith('/') ||
+                trimmed.startsWith('data:') ||
+                trimmed.startsWith('blob:')
+            ) {
+                return trimmed;
+            }
+            return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
         }
     }
     return null;
@@ -61,40 +65,64 @@ const CvClubSection = ({ editable = false }: { editable?: boolean }) => {
     const clubCount = playerData?.clubs?.length || 0;
     const isLimitReached = clubCount >= 6;
 
-    const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             if (!file.type.startsWith("image/")) {
                 toast.error("Please upload a valid image file.");
                 return;
             }
-            if (file.size > 2 * 1024 * 1024) {
-                toast.error("File size too large. Max 2MB.");
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error("File size too large. Max 5MB.");
                 return;
             }
-            setNewClubLogoFile(file);
             setLogoError(false);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setNewClubLogo(reader.result as string);
-            };
-            reader.readAsDataURL(file);
+            try {
+                toast.info("Removing background from club logo...");
+                const cleanFile = await smartRemoveBackground(file, true);
+                setNewClubLogoFile(cleanFile);
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setNewClubLogo(reader.result as string);
+                    toast.success("Logo background removed!");
+                };
+                reader.readAsDataURL(cleanFile);
+            } catch {
+                setNewClubLogoFile(file);
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setNewClubLogo(reader.result as string);
+                };
+                reader.readAsDataURL(file);
+            }
         }
     };
 
-    const handleEditLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleEditLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            if (file.size > 2 * 1024 * 1024) {
-                toast.error("File size too large. Max 2MB.");
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error("File size too large. Max 5MB.");
                 return;
             }
-            setEditingClubLogoFile(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setEditingClubLogo(reader.result as string);
-            };
-            reader.readAsDataURL(file);
+            try {
+                toast.info("Removing background from club logo...");
+                const cleanFile = await smartRemoveBackground(file, true);
+                setEditingClubLogoFile(cleanFile);
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setEditingClubLogo(reader.result as string);
+                    toast.success("Logo background removed!");
+                };
+                reader.readAsDataURL(cleanFile);
+            } catch {
+                setEditingClubLogoFile(file);
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setEditingClubLogo(reader.result as string);
+                };
+                reader.readAsDataURL(file);
+            }
         }
     };
 

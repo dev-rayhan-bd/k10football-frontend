@@ -145,16 +145,6 @@ export const PersonalInfoContactCard = ({
               inputClassName="text-right w-full min-w-0 truncate"
             />
           </div>
-          <div className="flex justify-between items-center gap-2 w-full min-w-0">
-            <span className="text-gray-400 shrink-0">Coach License</span>
-            <CMSField
-              value={playerData.coachLicenseNumber || "N/A"}
-              onUpdate={(val) => handleUpdate("coachLicenseNumber", val)}
-              canEdit={canEditBio}
-              className="flex-1 min-w-0 justify-end"
-              inputClassName="text-right w-full min-w-0 truncate"
-            />
-          </div>
         </div>
       </div>
       <div className="p-4 sm:p-6 border-t border-white/5 w-full min-w-0">

@@ -4,6 +4,7 @@ import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
 import { IconLoader2 } from "@tabler/icons-react";
+import { smartRemoveBackground } from "@/lib/utils/backgroundRemoval";
 
 export const EditableImage = ({
   src,
@@ -31,6 +32,7 @@ export const EditableImage = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [role, setRole] = useState<string>("player");
   const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [uploadStatus, setUploadStatus] = useState<string>("Processing image...");
 
   useEffect(() => {
     const currentRole = localStorage.getItem("userRole") || role || "player";
@@ -44,13 +46,32 @@ export const EditableImage = ({
       : canEditEvaluation);
 
   const handleImageUpload = async (file: File) => {
+    if (isUploading) return;
     setIsUploading(true);
+    setUploadStatus("Processing image...");
+    const toastId = `img-upload-${field}`;
     try {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        onUpdate(field, reader.result, file);
-      };
-      reader.readAsDataURL(file);
+      let processedFile = file;
+      if (field === "playerImage") {
+        setUploadStatus("Removing background...");
+        toast.loading("Removing background from player photo...", { id: toastId });
+        processedFile = await smartRemoveBackground(file, false, (percent, stage) => {
+          const msg = `${stage} ${percent}%`;
+          setUploadStatus(msg);
+          toast.loading(msg, { id: toastId });
+        });
+      }
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error("Failed to read processed image"));
+        reader.readAsDataURL(processedFile);
+      });
+      onUpdate(field, dataUrl, processedFile);
+      toast.success("Image updated successfully!", { id: toastId });
+    } catch (err) {
+      console.error("Image upload error:", err);
+      toast.error("Failed to remove background. Please try again.", { id: toastId });
     } finally {
       setIsUploading(false);
     }
@@ -91,10 +112,10 @@ export const EditableImage = ({
         }}
       />
       {isUploading && (
-        <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-2 z-20 rounded">
+        <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-2 px-3 text-center z-20 rounded">
           <IconLoader2 className="size-8 animate-spin text-[#00FF62]" />
           <span className="text-[11px] font-bold text-white uppercase tracking-wider font-orbitron">
-            Processing image...
+            {uploadStatus}
           </span>
         </div>
       )}
@@ -111,6 +132,7 @@ export const EditableImage = ({
             disabled={isUploading}
             onChange={(e) => {
               const file = e.target.files?.[0];
+              e.target.value = "";
               if (file) handleImageUpload(file);
             }}
           />

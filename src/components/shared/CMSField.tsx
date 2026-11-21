@@ -51,8 +51,11 @@ const CMSField = ({
   const [isEditing, setIsEditing] = useState(false);
   const [tempValue, setTempValue] = useState(value);
   const [searchTerm, setSearchTerm] = useState("");
+  const [hasTyped, setHasTyped] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const comboboxRef = useRef<HTMLDivElement>(null);
+  const comboboxInputRef = useRef<HTMLInputElement>(null);
 
   const insertEmoji = (emoji: string) => {
     const el = textareaRef.current;
@@ -77,67 +80,136 @@ const CMSField = ({
     setTempValue(value);
   }, [value]);
 
+  useEffect(() => {
+    if (!isEditing || type !== "combobox") return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (comboboxRef.current && !comboboxRef.current.contains(event.target as Node)) {
+        setTempValue(value);
+        setIsEditing(false);
+        setSearchTerm("");
+        setHasTyped(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isEditing, type, value]);
+
   const handleSave = (val?: string | number) => {
     const finalVal = val !== undefined ? val : tempValue;
     onUpdate(isNumeric ? Number(finalVal) : finalVal);
     setIsEditing(false);
     setSearchTerm("");
+    setHasTyped(false);
   };
 
   const handleCancel = () => {
     setTempValue(value);
     setIsEditing(false);
     setSearchTerm("");
+    setHasTyped(false);
   };
 
-  const filteredOptions = options.filter((opt) => {
-    const isHeading = opt.startsWith("--") && opt.endsWith("--");
-    if (isHeading) {
-      return !searchTerm; // Only show headings if search is empty
+  const activeQuery = hasTyped ? searchTerm.trim().toLowerCase() : "";
+
+  const filteredOptions = (() => {
+    if (!activeQuery) return options;
+    const result: string[] = [];
+    let pendingHeading: string | null = null;
+    for (const opt of options) {
+      const isHeading = opt.startsWith("--") && opt.endsWith("--");
+      if (isHeading) {
+        pendingHeading = opt;
+        continue;
+      }
+      if (opt.toLowerCase().includes(activeQuery)) {
+        if (pendingHeading) {
+          result.push(pendingHeading);
+          pendingHeading = null;
+        }
+        result.push(opt);
+      }
     }
-    return opt.toLowerCase().includes(searchTerm.toLowerCase());
-  });
+    return result;
+  })();
+
+  const hasExactMatch =
+    Boolean(searchTerm.trim()) &&
+    options.some(
+      (opt) =>
+        !(opt.startsWith("--") && opt.endsWith("--")) &&
+        opt.trim().toLowerCase() === searchTerm.trim().toLowerCase()
+    );
 
   if (isEditing && canEdit) {
     if (type === "combobox") {
       return (
-        <div className={cn("relative flex flex-col gap-1 w-full z-50", className)} style={style}>
+        <div
+          ref={comboboxRef}
+          className={cn("relative flex flex-col gap-1 w-full z-50", className)}
+          style={style}
+        >
           <div className="flex items-center gap-1.5 w-full">
-            <Input
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search or type..."
-              className={cn("h-8 text-xs bg-gray-800 border-primary/30 flex-1 min-w-24", inputClassName)}
-              autoFocus
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleSave(searchTerm.trim());
-                if (e.key === "Escape") handleCancel();
-              }}
-            />
+            <div className="relative flex-1 min-w-28">
+              <Input
+                ref={comboboxInputRef}
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setHasTyped(true);
+                }}
+                onFocus={(e) => e.currentTarget.select()}
+                placeholder="Search or select..."
+                className={cn(
+                  "h-8 text-xs bg-background border-primary/40 pr-7 w-full",
+                  inputClassName
+                )}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSave(searchTerm.trim());
+                  if (e.key === "Escape") handleCancel();
+                }}
+              />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    setSearchTerm("");
+                    setHasTyped(true);
+                    comboboxInputRef.current?.focus();
+                  }}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 text-muted-foreground hover:text-foreground rounded cursor-pointer"
+                  title="Clear search"
+                >
+                  <X className="size-3.5" />
+                </button>
+              )}
+            </div>
             <Button
               size="icon"
               variant="ghost"
               type="button"
-              className="h-7 w-7 text-green-500 hover:text-green-400 hover:bg-green-500/10 shrink-0"
+              className="size-7 text-primary hover:bg-primary/10 shrink-0"
               onClick={() => handleSave(searchTerm.trim())}
               title="Save value"
             >
-              <Check className="h-3.5 w-3.5" />
+              <Check className="size-3.5" />
             </Button>
             <Button
               size="icon"
               variant="ghost"
               type="button"
-              className="h-7 w-7 text-red-500 hover:text-red-400 hover:bg-red-500/10 shrink-0"
+              className="size-7 text-destructive hover:bg-destructive/10 shrink-0"
               onClick={handleCancel}
               title="Cancel"
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="size-3.5" />
             </Button>
           </div>
-          <div className="absolute top-9 left-0 w-full min-w-44 max-h-48 overflow-y-auto bg-gray-900 border border-gray-800 rounded-lg shadow-2xl z-100">
+          <div className="absolute top-10 left-0 w-full min-w-60 max-h-64 overflow-y-auto bg-popover text-popover-foreground border border-border rounded-lg shadow-2xl z-100">
             <div
-              className="px-3 py-1.5 text-xs text-gray-400 hover:bg-white/10 hover:text-white cursor-pointer italic border-b border-white/5"
+              className="px-3 py-1.5 text-xs text-muted-foreground hover:bg-accent hover:text-accent-foreground cursor-pointer italic border-b border-border/60"
+              onMouseDown={(e) => e.preventDefault()}
               onClick={() => handleSave("")}
             >
               (None / Clear)
@@ -149,24 +221,42 @@ const CMSField = ({
                   return (
                     <div
                       key={`${opt}-${idx}`}
-                      className="px-3 py-1.5 text-[10px] font-bold text-primary bg-black/45 tracking-wider uppercase select-none pointer-events-none border-b border-white/5"
+                      className="sticky top-0 px-3 py-1.5 text-[10px] font-bold text-primary bg-background/95 backdrop-blur-xs tracking-wider uppercase select-none pointer-events-none border-y border-border/50"
                     >
                       {opt.replace(/--/g, "").trim()}
                     </div>
                   );
                 }
+                const isSelected =
+                  String(value ?? "").trim().toLowerCase() === opt.trim().toLowerCase();
                 return (
                   <div
                     key={`${opt}-${idx}`}
-                    className="px-3 py-2 text-xs hover:bg-primary/20 cursor-pointer text-white"
+                    className={cn(
+                      "px-3 py-2 text-xs cursor-pointer flex items-center justify-between gap-2 transition-colors text-left",
+                      isSelected
+                        ? "bg-primary/15 text-primary font-semibold"
+                        : "text-foreground hover:bg-primary/15"
+                    )}
+                    onMouseDown={(e) => e.preventDefault()}
                     onClick={() => handleSave(opt)}
                   >
-                    {opt}
+                    <span className="truncate">{opt}</span>
+                    {isSelected && <Check className="size-3.5 shrink-0 text-primary" />}
                   </div>
                 );
               })
             ) : (
-              <div className="px-3 py-2 text-xs text-gray-500">No matching results</div>
+              <div className="px-3 py-2 text-xs text-muted-foreground">No matching results</div>
+            )}
+            {hasTyped && searchTerm.trim() && !hasExactMatch && (
+              <div
+                className="px-3 py-2 text-xs text-primary hover:bg-primary/15 cursor-pointer border-t border-border/60 font-medium text-left truncate"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => handleSave(searchTerm.trim())}
+              >
+                Use &ldquo;{searchTerm.trim()}&rdquo;
+              </div>
             )}
           </div>
         </div>
@@ -309,6 +399,7 @@ const CMSField = ({
       onClick={() => {
         if (canEdit && editTrigger === "click") {
           setSearchTerm(String(value ?? ""));
+          setHasTyped(false);
           setTempValue(value);
           setIsEditing(true);
         }
@@ -316,6 +407,7 @@ const CMSField = ({
       onDoubleClick={() => {
         if (canEdit && editTrigger === "doubleClick") {
           setSearchTerm(String(value ?? ""));
+          setHasTyped(false);
           setTempValue(value);
           setIsEditing(true);
         }

@@ -7,6 +7,7 @@ import { getFullWithShortForm } from "@/lib/utils";
 import { getFlagUrl } from "./bioConstants";
 import { EditableImage } from "./EditableImage";
 import { PlayerStylesSection } from "./PlayerStylesSection";
+import { POSITION_DROPDOWN_OPTIONS } from "@/constants/positionAttributes";
 
 interface PlayerCenterCardProps {
   playerData: any;
@@ -80,32 +81,7 @@ export const PlayerCenterCard = ({
           onUpdate={(val) => handleUpdate("position", val)}
           canEdit={canEditBio}
           type="combobox"
-          options={[
-            "--Futsal Positions--",
-            "Goalkeeper (GK)",
-            "Fixo (Defender / CB)",
-            "Alas (Right Wing / RW)",
-            "Alas (Left Wing / LW)",
-            "Pivot (Forward / CF)",
-            "--Football Positions--",
-            "Goalkeeper (GK)",
-            "Center Back (CB)",
-            "Right Back (RB)",
-            "Left Back (LB)",
-            "Left Wing Back (LWB)",
-            "Right Wing Back (RWB)",
-            "Defensive Midfielder (CDM)",
-            "Central Midfielder (CM)",
-            "Attacking Midfielder (CAM)",
-            "Left Midfielder (LM)",
-            "Right Midfielder (RM)",
-            "Striker (ST)",
-            "Center Forward (CF)",
-            "Left Forward (LF)",
-            "Right Forward (RF)",
-            "Left Winger (LW)",
-            "Right Winger (RW)",
-          ]}
+          options={POSITION_DROPDOWN_OPTIONS}
           className="flex items-center justify-center gap-2 border border-border px-3 sm:px-4 py-2 rounded hover:bg-gray-900 bg-transparent text-foreground h-auto w-full sm:w-fit max-w-full mx-auto min-w-0"
           inputClassName="w-full text-center sm:text-left text-xs sm:text-sm truncate min-w-0"
         />

@@ -26,6 +26,7 @@ import {
   useUpdateMyPlayerAttributesMutation,
 } from "@/redux/features/player/playerApi";
 import { INITIAL_SKILL_CATEGORIES } from "./SkillAttributeSection";
+import { smartRemoveBackground } from "@/lib/utils/backgroundRemoval";
 
 const SKILL_NAME_TO_KEY: Record<string, string> = {
   "ball control": "ballControl",
@@ -385,13 +386,23 @@ updatePlayerData(field, value);
 const fileInputRef = React.useRef<HTMLInputElement>(null);
 
 const handleCardImageUpload = async (file: File) => {
-  const reader = new FileReader();
-  reader.onloadend = () => {
-    updatePlayerData("cardImage", reader.result as string, file);
-    updatePlayerData("cardPhoto", reader.result as string, file);
-    toast.success("Card image updated!");
-  };
-  reader.readAsDataURL(file);
+  toast.loading("Removing background from FIFA card image...", { id: "academy-card-bg-removal" });
+  try {
+    const cleanFile = await smartRemoveBackground(file, false, (percent, stage) => {
+      toast.loading(`${stage} ${percent}%`, { id: "academy-card-bg-removal" });
+    });
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error("Failed to read processed image"));
+      reader.readAsDataURL(cleanFile);
+    });
+    updatePlayerData("cardImage", dataUrl, cleanFile);
+    toast.success("Card image background removed & updated!", { id: "academy-card-bg-removal" });
+  } catch (err) {
+    console.error("Card image background removal error:", err);
+    toast.error("Background removal failed. Please try again.", { id: "academy-card-bg-removal" });
+  }
 };
 
 const handleDrop = (e: React.DragEvent) => {

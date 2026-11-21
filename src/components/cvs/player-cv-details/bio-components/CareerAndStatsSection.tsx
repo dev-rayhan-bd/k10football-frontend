@@ -155,60 +155,40 @@ export const CareerAndStatsSection = ({
         </div>
       </div>
 
-      {/* Current Season Stats */}
+      {/* Current Season Stats (Read-Only) */}
       <div className="p-4 sm:p-6 border-t border-white/5 w-full min-w-0">
         <h2 className="text-base sm:text-lg text-center font-heading font-normal mb-4 sm:mb-6 text-white">
           Current Season Stats
         </h2>
         <div className="grid grid-cols-2 gap-3 sm:gap-4 w-full min-w-0">
           <div className="text-center w-full min-w-0 border border-white/10 bg-white/5 rounded-xl p-2 sm:p-4">
-            <CMSField
-              value={playerData.seasonStats.matches}
-              onUpdate={(val) => handleUpdate("seasonStats.matches", val)}
-              canEdit={canEditEvaluation}
-              isNumeric
-              className="text-xl sm:text-3xl font-bold text-primary justify-center min-w-0"
-              inputClassName="text-center w-16 sm:w-24 h-8 sm:h-10 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-lg"
-            />
+            <div className="text-xl sm:text-3xl font-bold text-primary flex items-center justify-center min-w-0 font-heading">
+              {playerData.seasonStats.matches ?? 0}
+            </div>
             <div className="text-[10px] sm:text-xs text-gray-400 mt-1 truncate">
               MATCHES
             </div>
           </div>
           <div className="text-center w-full min-w-0 border border-white/10 bg-white/5 rounded-xl p-2 sm:p-4">
-            <CMSField
-              value={playerData.seasonStats.goals}
-              onUpdate={(val) => handleUpdate("seasonStats.goals", val)}
-              canEdit={canEditEvaluation}
-              isNumeric
-              className="text-xl sm:text-3xl font-bold text-primary justify-center min-w-0"
-              inputClassName="text-center w-16 sm:w-24 h-8 sm:h-10 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-lg"
-            />
+            <div className="text-xl sm:text-3xl font-bold text-primary flex items-center justify-center min-w-0 font-heading">
+              {playerData.seasonStats.goals ?? 0}
+            </div>
             <div className="text-[10px] sm:text-xs text-gray-400 mt-1 truncate">
               GOALS
             </div>
           </div>
           <div className="text-center w-full min-w-0 border border-white/10 bg-white/5 rounded-xl p-2 sm:p-4">
-            <CMSField
-              value={playerData.seasonStats.assists}
-              onUpdate={(val) => handleUpdate("seasonStats.assists", val)}
-              canEdit={canEditEvaluation}
-              isNumeric
-              className="text-xl sm:text-3xl font-bold text-primary justify-center min-w-0"
-              inputClassName="text-center w-16 sm:w-24 h-8 sm:h-10 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-lg"
-            />
+            <div className="text-xl sm:text-3xl font-bold text-primary flex items-center justify-center min-w-0 font-heading">
+              {playerData.seasonStats.assists ?? 0}
+            </div>
             <div className="text-[10px] sm:text-xs text-gray-400 mt-1 truncate">
               ASSISTS
             </div>
           </div>
           <div className="text-center w-full min-w-0 border border-white/10 bg-white/5 rounded-xl p-2 sm:p-4">
-            <CMSField
-              value={playerData.seasonStats.avgRating}
-              onUpdate={(val) => handleUpdate("seasonStats.avgRating", val)}
-              canEdit={canEditEvaluation}
-              isNumeric
-              className="text-xl sm:text-3xl font-bold text-primary justify-center min-w-0"
-              inputClassName="text-center w-16 sm:w-24 h-8 sm:h-10 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-lg"
-            />
+            <div className="text-xl sm:text-3xl font-bold text-primary flex items-center justify-center min-w-0 font-heading">
+              {playerData.seasonStats.avgRating ?? 0}
+            </div>
             <div className="text-[10px] sm:text-xs text-gray-400 mt-1 truncate">
               AVG RATING
             </div>

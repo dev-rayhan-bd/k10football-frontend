@@ -60,7 +60,14 @@ export const getFullWithShortForm = (position: string): string => {
   if (!position) return "";
   const pos = position.trim();
   const short = getShortForm(pos);
-  if (!short || short === pos || pos.includes(`(${short})`)) return pos;
+  if (
+    !short ||
+    short === pos ||
+    pos.includes(`(${short})`) ||
+    new RegExp(`\\([^)]*\\b${short}\\b[^)]*\\)`, "i").test(pos)
+  ) {
+    return pos;
+  }
   return `${pos} (${short})`;
 };
 
