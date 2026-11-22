@@ -22,10 +22,9 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-const LOCKED_PLAYER_PATHS = [
-  "/dashboard/player/game-reports",
-  "/dashboard/player/analytics",
-];
+// Game Reports and Analytics are unlocked so athletes can freely enter and view;
+// Actions (creating reports, requesting coach reviews) trigger 402 error handling if unsubscribed.
+const LOCKED_PLAYER_PATHS: string[] = [];
 
 const playerSidebarItems = [
   { name: "Dashboard", url: "/dashboard/player", icon: IconDashboard },

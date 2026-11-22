@@ -39,6 +39,14 @@ export const coachApi = apiSlice.injectEndpoints({
             providesTags: [TagTypes.COACHES],
         }),
 
+        getCoachCvById: builder.query<ICoachCvResponse, string>({
+            query: (coachId) => ({
+                url: `/coaches/${coachId}/cv`,
+                method: "GET",
+            }),
+            providesTags: [TagTypes.COACHES],
+        }),
+
         updateMyCoachProfile: builder.mutation<ICoachCvResponse, FormData | Partial<IUpdateCoachPayload> | any>({
             query: (payload) => {
                 let body = payload;
@@ -486,12 +494,16 @@ export const coachApi = apiSlice.injectEndpoints({
             },
         }),
 
-        getAllCoaches: builder.query<ICoachListResponse, { page?: number; limit?: number; searchTerm?: string } | void>({
+        getAllCoaches: builder.query<ICoachListResponse, Record<string, any> | void>({
             query: (params) => {
                 const queryParams = new URLSearchParams();
-                if (params?.page) queryParams.append("page", params.page.toString());
-                if (params?.limit) queryParams.append("limit", params.limit.toString());
-                if (params?.searchTerm) queryParams.append("searchTerm", params.searchTerm);
+                if (params && typeof params === "object") {
+                    Object.entries(params).forEach(([key, value]) => {
+                        if (value !== undefined && value !== null && value !== "") {
+                            queryParams.append(key, String(value));
+                        }
+                    });
+                }
                 const queryString = queryParams.toString();
                 return {
                     url: queryString ? `/coaches?${queryString}` : "/coaches",
@@ -762,6 +774,8 @@ export const {
     useLazyGetMyCoachProfileQuery,
     useGetMyCoachCvQuery,
     useLazyGetMyCoachCvQuery,
+    useGetCoachCvByIdQuery,
+    useLazyGetCoachCvByIdQuery,
     useUpdateMyCoachProfileMutation,
     useAddCoachClubMutation,
     useUpdateCoachClubMutation,

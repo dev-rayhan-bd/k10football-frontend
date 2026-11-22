@@ -32,6 +32,7 @@ import {
   useUpdateChildProfileMutation,
   useCreateChildProfileMutation,
 } from "@/redux/features/parent/parentApi";
+import { useParentDashboard } from "@/providers/ParentDashboardProvider";
 import { ILinkedChild } from "@/types/parent.type";
 import { cn } from "@/lib/utils";
 
@@ -116,9 +117,13 @@ const ManageChildProfile = () => {
   const [createChildProfile, { isLoading: isCreating }] =
     useCreateChildProfileMutation();
 
+  const {
+    selectedChildPlayerId,
+    setSelectedChildPlayerId,
+  } = useParentDashboard();
+
   const children: ILinkedChild[] = childrenResponse?.data || [];
 
-  const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
 
@@ -137,8 +142,11 @@ const ManageChildProfile = () => {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Safely pick currently selected child
-  const activeIndex = selectedIndex < children.length ? selectedIndex : 0;
+  // Safely pick currently selected child synced with shared ParentDashboardProvider
+  const matchedIndex = children.findIndex(
+    (c) => c.childPlayerId === selectedChildPlayerId
+  );
+  const activeIndex = matchedIndex >= 0 ? matchedIndex : 0;
   const selectedChild: ILinkedChild | undefined = children[activeIndex];
 
   const {
@@ -312,7 +320,11 @@ const ManageChildProfile = () => {
               <select
                 value={activeIndex}
                 onChange={(e) => {
-                  setSelectedIndex(Number(e.target.value));
+                  const idx = Number(e.target.value);
+                  const picked = children[idx];
+                  if (picked?.childPlayerId) {
+                    setSelectedChildPlayerId(picked.childPlayerId);
+                  }
                   setIsEditing(false);
                 }}
                 className="appearance-none bg-white/5 border border-white/10 hover:border-white/25 text-white rounded-xl px-4 py-2.5 pr-10 text-xs font-bold font-orbitron cursor-pointer focus:outline-none focus:border-primary/50 transition-all"
@@ -439,14 +451,14 @@ const ManageChildProfile = () => {
           <div className="bg-[#0D0D0D]/60 border border-white/10 p-8 rounded-3xl shadow-xl flex flex-col gap-6 items-center text-center">
             {/* Avatar with Verification / Award Icon */}
             <div className="relative">
-              <div className="relative size-32 rounded-full overflow-hidden border-4 border-primary/20 bg-white/5 shrink-0">
+              <div className="relative size-32 rounded-full overflow-hidden border-4 border-primary/20 bg-black/60 shrink-0 flex items-center justify-center">
                 <Image
                   src={selectedChild?.profileImage || "/placeholder_img.jpg"}
                   alt={selectedChild?.fullName || "Child Avatar"}
                   fill
                   sizes="128px"
                   unoptimized
-                  className="object-cover"
+                  className="object-contain p-2"
                   onError={(e) => {
                     (e.currentTarget as HTMLImageElement).src =
                       "/placeholder_img.jpg";

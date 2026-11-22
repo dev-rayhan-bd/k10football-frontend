@@ -14,7 +14,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { usePlayerStats } from "@/components/cvs/player-cv-details/FullEditablePage";
 import {
   useAddCoachClubMutation,
   useUpdateCoachClubMutation,
@@ -37,9 +36,7 @@ interface EditingClubState {
 
 const CoachClubsSection = ({ editable = true }: { editable?: boolean }) => {
   const { coachData } = useCoach();
-  const { role } = usePlayerStats() || { role: "player" };
-
-  const canEdit = !!(editable && (role === "coach" || role === "admin" || role === "super_admin" || !role));
+  const canEdit = Boolean(editable);
 
   const [addCoachClub, { isLoading: isAddingClub }] = useAddCoachClubMutation();
   const [updateCoachClub, { isLoading: isUpdatingClub }] = useUpdateCoachClubMutation();

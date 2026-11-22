@@ -7,8 +7,11 @@ import goldCard from "@/assets/cvs/gold-card.png";
 import pinkCard from "@/assets/cvs/pink-card.png";
 import whiteCard from "@/assets/cvs/white-card.png";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { useGetAllCoachesQuery } from "@/redux/features/coach/coachApi";
 import { cn } from "@/lib/utils";
+import { CvsFilterState } from "./SearchBar";
+import { ChevronLeft, ChevronRight, UserX } from "lucide-react";
 
 const COUNTRY_CODES: Record<string, string> = {
   france: "fr",
@@ -224,9 +227,37 @@ const mockCoaches: Coach[] = [
   },
 ];
 
-const Coaches = () => {
+interface CoachesProps {
+  filters?: CvsFilterState;
+  onResetFilters?: () => void;
+}
+
+const Coaches = ({ filters, onResetFilters }: CoachesProps) => {
   const router = useRouter();
-  const { data: coachesResponse, isLoading, isFetching } = useGetAllCoachesQuery({ limit: 50 });
+  const [page, setPage] = useState<number>(1);
+  const limit = 10;
+
+  useEffect(() => {
+    setPage(1);
+  }, [filters?.searchTarget, filters?.search, filters?.category]);
+
+  // ONLY execute search on coaches if user explicitly targeted "coach", or when tier is selected with no specific target
+  // If user searched for "player", coaches search MUST NOT execute!
+  const isTargetingCoaches = filters?.searchTarget === "coach" || (!filters?.searchTarget && Boolean(filters?.category && !filters?.ageGroup && !filters?.position));
+
+  const coachQueryParams: Record<string, any> = {
+    page,
+    limit,
+  };
+  if (filters?.searchTarget === "coach" && filters?.search?.trim()) {
+    coachQueryParams.search = filters.search.trim();
+    coachQueryParams.searchTerm = filters.search.trim();
+  }
+  if (isTargetingCoaches && filters?.category) {
+    coachQueryParams.cvTier = filters.category;
+  }
+
+  const { data: coachesResponse, isLoading, isFetching } = useGetAllCoachesQuery(coachQueryParams);
 
   const apiCoaches: any[] = Array.isArray(coachesResponse?.data)
     ? coachesResponse.data
@@ -234,28 +265,45 @@ const Coaches = () => {
     ? coachesResponse
     : [];
 
-  const displayCoaches: Coach[] = apiCoaches.length > 0 ? apiCoaches : mockCoaches;
+  const meta = coachesResponse?.meta || (coachesResponse as any)?.pagination;
+  const hasActiveFilters = isTargetingCoaches && Boolean(filters?.search?.trim() || filters?.category);
+
+  const displayCoaches: Coach[] = apiCoaches.length > 0
+    ? apiCoaches
+    : hasActiveFilters || (coachesResponse && !isLoading)
+    ? []
+    : mockCoaches;
+
+  const totalCoaches = meta?.total ?? (apiCoaches.length > 0 ? apiCoaches.length : (hasActiveFilters ? 0 : mockCoaches.length));
+  const totalPages = meta?.totalPage ?? meta?.totalPages ?? Math.max(1, Math.ceil(totalCoaches / limit));
 
   return (
-    <div className="container mx-auto px-4 mt-20 bg-black py-8 rounded-3xl">
-      <div className="flex items-center justify-center gap-3 mb-12">
-        <h1
-          className="text-4xl text-center font-heading"
-          style={{ color: "#00FF62" }}
-        >
-          Coaches
-        </h1>
-        {isFetching && !isLoading && (
-          <span
-            className="size-2 rounded-full bg-[#00FF62] animate-ping"
-            title="Syncing live coaches..."
-          />
+    <div id="coaches-section" className="container mx-auto px-4 mt-20 bg-black py-8 rounded-3xl scroll-mt-20">
+      <div className="flex flex-col items-center justify-center gap-2 mb-12">
+        <div className="flex items-center justify-center gap-3">
+          <h1
+            className="text-4xl text-center font-heading"
+            style={{ color: "#00FF62" }}
+          >
+            COACHES {totalCoaches > 0 && <span className="text-xl text-white/60">({totalCoaches})</span>}
+          </h1>
+          {isFetching && !isLoading && (
+            <span
+              className="size-2 rounded-full bg-[#00FF62] animate-ping"
+              title="Syncing live coaches..."
+            />
+          )}
+        </div>
+        {hasActiveFilters && (
+          <p className="text-xs text-muted-foreground">
+            Filtered by: {[filters?.search && `"${filters.search}"`, filters?.category].filter(Boolean).join(" • ")}
+          </p>
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-        {isLoading && apiCoaches.length === 0 ? (
-          Array.from({ length: 10 }).map((_, i) => (
+      {isLoading && apiCoaches.length === 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          {Array.from({ length: 10 }).map((_, i) => (
             <div key={`coach-skel-${i}`} className="w-full max-w-67.5 mx-auto">
               <div className="relative w-full aspect-270/385 rounded-2xl bg-white/5 border border-white/10 animate-pulse flex flex-col justify-between p-6">
                 <div className="flex justify-between items-start">
@@ -268,9 +316,32 @@ const Coaches = () => {
                 </div>
               </div>
             </div>
-          ))
-        ) : (
-          displayCoaches.map((coach, index) => {
+          ))}
+        </div>
+      ) : displayCoaches.length === 0 ? (
+        <div className="py-16 text-center flex flex-col items-center justify-center gap-4 border border-dashed border-white/10 rounded-3xl p-8 bg-white/[0.02]">
+          <div className="size-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-primary">
+            <UserX className="size-7" />
+          </div>
+          <div className="flex flex-col gap-1 max-w-md">
+            <h3 className="text-lg font-bold text-white uppercase font-orbitron">No Coaches Found</h3>
+            <p className="text-xs text-muted-foreground">
+              No coaches match your active search or filter criteria. Try adjusting your filters.
+            </p>
+          </div>
+          {onResetFilters && (
+            <button
+              type="button"
+              onClick={onResetFilters}
+              className="mt-2 px-5 py-2.5 rounded-xl bg-primary text-black font-bold text-xs uppercase tracking-wider hover:bg-primary/90 transition cursor-pointer"
+            >
+              Reset Filters
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          {displayCoaches.map((coach, index) => {
             const coachId = coach._id || coach.id;
             const coachName = (
               coach.fullName ||
@@ -555,9 +626,36 @@ const Coaches = () => {
                 </div>
               </div>
             );
-          })
-        )}
-      </div>
+          })}
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-3 mt-10">
+          <button
+            type="button"
+            disabled={page <= 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            className="p-2 rounded-xl bg-white/5 border border-white/10 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition cursor-pointer"
+            title="Previous Page"
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <span className="text-xs text-muted-foreground font-orbitron">
+            Page <strong className="text-white">{page}</strong> of <strong className="text-white">{totalPages}</strong>
+          </span>
+          <button
+            type="button"
+            disabled={page >= totalPages}
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            className="p-2 rounded-xl bg-white/5 border border-white/10 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition cursor-pointer"
+            title="Next Page"
+          >
+            <ChevronRight size={18} />
+          </button>
+        </div>
+      )}
     </div>
   );
 };

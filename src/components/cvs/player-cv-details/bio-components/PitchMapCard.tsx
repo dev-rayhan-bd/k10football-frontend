@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { getMarkersForPosition } from "./bioConstants";
 import { useAppDispatch } from "@/hooks/reduxHooks";
 import { updatePlayerField } from "@/redux/features/player/playerSlice";
-import { usePlayer } from "@/hooks/usePlayer";
+import { useUpdateMyPlayerProfileMutation } from "@/redux/features/player/playerApi";
 import { IconDeviceFloppy, IconLoader2 } from "@tabler/icons-react";
 import { toast } from "sonner";
 
@@ -26,7 +26,7 @@ export const PitchMapCard = ({
   canEditBio = true,
 }: PitchMapCardProps) => {
   const dispatch = useAppDispatch();
-  const { updatePlayerProfile } = usePlayer();
+  const [updateMyPlayerProfile] = useUpdateMyPlayerProfileMutation();
 
   const [isPositionMap, setIsPositionMap] = useState(true);
   const [activeMarker, setActiveMarker] = useState<{
@@ -40,14 +40,14 @@ export const PitchMapCard = ({
 
   // Initial markers for both maps
   const [positionMarkers, setPositionMarkers] = useState<any[]>(() => {
-    if (playerData?.positionMarkers && playerData.positionMarkers.length === 3) {
+    if (Array.isArray(playerData?.positionMarkers) && playerData.positionMarkers.length > 0) {
       return playerData.positionMarkers;
     }
     return getMarkersForPosition(playerData?.position || "Striker", false);
   });
 
   const [futsalMarkers, setFutsalMarkers] = useState<any[]>(() => {
-    if (playerData?.futsalMarkers && playerData.futsalMarkers.length === 3) {
+    if (Array.isArray(playerData?.futsalMarkers) && playerData.futsalMarkers.length > 0) {
       return playerData.futsalMarkers;
     }
     return getMarkersForPosition(playerData?.position || "Striker", true);
@@ -75,13 +75,13 @@ export const PitchMapCard = ({
 
   // Sync with playerData from API if user hasn't made unsaved changes
   useEffect(() => {
-    if (!isPositionDirty && playerData?.positionMarkers && playerData.positionMarkers.length === 3) {
+    if (!isPositionDirty && Array.isArray(playerData?.positionMarkers) && playerData.positionMarkers.length > 0) {
       setPositionMarkers(playerData.positionMarkers);
     }
   }, [playerData?.positionMarkers, isPositionDirty]);
 
   useEffect(() => {
-    if (!isFutsalDirty && playerData?.futsalMarkers && playerData.futsalMarkers.length === 3) {
+    if (!isFutsalDirty && Array.isArray(playerData?.futsalMarkers) && playerData.futsalMarkers.length > 0) {
       setFutsalMarkers(playerData.futsalMarkers);
     }
   }, [playerData?.futsalMarkers, isFutsalDirty]);
@@ -166,7 +166,7 @@ export const PitchMapCard = ({
             y: Math.round(m.y),
           })),
         };
-        await updatePlayerProfile(payload);
+        await updateMyPlayerProfile(payload).unwrap();
         dispatch(updatePlayerField({ field: "positionMarkers", value: positionMarkers }));
         setIsPositionDirty(false);
         toast.success("Position map saved successfully!");
@@ -180,7 +180,7 @@ export const PitchMapCard = ({
             y: Math.round(m.y),
           })),
         };
-        await updatePlayerProfile(payload);
+        await updateMyPlayerProfile(payload).unwrap();
         dispatch(updatePlayerField({ field: "futsalMarkers", value: futsalMarkers }));
         setIsFutsalDirty(false);
         toast.success("Futsal map saved successfully!");
@@ -195,14 +195,14 @@ export const PitchMapCard = ({
 
   const handleCancel = () => {
     if (isPositionMap) {
-      if (playerData?.positionMarkers && playerData.positionMarkers.length === 3) {
+      if (Array.isArray(playerData?.positionMarkers) && playerData.positionMarkers.length > 0) {
         setPositionMarkers(playerData.positionMarkers);
       } else {
         setPositionMarkers(getMarkersForPosition(playerData?.position || "Striker", false));
       }
       setIsPositionDirty(false);
     } else {
-      if (playerData?.futsalMarkers && playerData.futsalMarkers.length === 3) {
+      if (Array.isArray(playerData?.futsalMarkers) && playerData.futsalMarkers.length > 0) {
         setFutsalMarkers(playerData.futsalMarkers);
       } else {
         setFutsalMarkers(getMarkersForPosition(playerData?.position || "Striker", true));

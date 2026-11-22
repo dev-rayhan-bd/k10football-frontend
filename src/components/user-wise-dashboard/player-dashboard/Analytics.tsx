@@ -41,57 +41,19 @@ const PlayerAnalytics = () => {
   const { data: subscriptionResponse, isLoading: isSubLoading } = useGetMySubscriptionQuery();
   const hasActiveSubscription = Boolean(subscriptionResponse?.data?.hasActiveSubscription);
 
-  const { data: response, isLoading, isError, refetch } = useGetMyPlayerAnalyticsQuery(undefined, {
-    skip: !hasActiveSubscription,
-  });
+  const { data: response, isLoading, isError, error, refetch } = useGetMyPlayerAnalyticsQuery();
   const analytics = response?.data;
 
-  if (isSubLoading || (hasActiveSubscription && isLoading)) {
+  if (isSubLoading || isLoading) {
     return <AnalyticsSkeleton />;
   }
 
-  if (!hasActiveSubscription) {
-    return (
-      <div className="flex flex-col gap-10 pb-16">
-        <div className="flex flex-col gap-2 px-2 sm:px-0">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-normal text-white uppercase tracking-tighter font-heading">
-            Analytics
-          </h1>
-          <p className="text-gray-400 text-sm sm:text-base md:text-lg font-light tracking-tight">
-            Track Your Performance and Improvement
-          </p>
-        </div>
-
-        <div className="p-8 sm:p-12 rounded-[30px] border border-white/10 bg-[#0D0D0D]/60 backdrop-blur-xl flex flex-col items-center justify-center text-center gap-6 max-w-lg mx-auto">
-          <div className="size-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-primary">
-            <IconLock className="size-8" />
-          </div>
-          <div className="flex flex-col gap-2">
-            <h3 className="text-xl sm:text-2xl font-bold text-white uppercase font-heading">
-              Advanced Analytics Locked
-            </h3>
-            <p className="text-sm text-gray-400 leading-relaxed">
-              Detailed performance radar charts, attribute progression graphs, and psychological metrics are available with an active Athlete Membership plan.
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3 w-full justify-center">
-            <Link href="/dashboard/player/my-subscription">
-              <Button className="w-full sm:w-auto bg-primary hover:bg-[#00dd00] text-black font-bold">
-                View Membership Plans
-              </Button>
-            </Link>
-            <Link href="/dashboard/player">
-              <Button variant="outline" className="w-full sm:w-auto">
-                Back to Dashboard
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   if (isError) {
+    const errorMsg =
+      (error as any)?.data?.message ||
+      (error as any)?.message ||
+      "An error occurred while fetching your analytics data.";
+
     return (
       <div className="flex flex-col gap-10 pb-16">
         <div className="flex flex-col gap-2 px-2 sm:px-0">
@@ -108,7 +70,7 @@ const PlayerAnalytics = () => {
           <div className="flex flex-col gap-1">
             <h3 className="text-lg font-bold text-white">Failed to load analytics</h3>
             <p className="text-sm text-gray-400">
-              An error occurred while fetching your analytics data. Please try again.
+              {errorMsg}
             </p>
           </div>
           <button

@@ -7,6 +7,8 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { getIndicatorColor, getHexColor } from "./bioConstants";
 import { PitchMapCard } from "./PitchMapCard";
+import leftLegDefault from "@/assets/cvs/id/left_foot.png";
+import rightLegDefault from "@/assets/cvs/id/right_foot.png";
 
 interface PhysicalStatsLanguagesCardProps {
   playerData: any;
@@ -46,6 +48,9 @@ export const PhysicalStatsLanguagesCard = ({
     }
   };
 
+  const leftLegSrc = playerData.leftLegImage || leftLegDefault;
+  const rightLegSrc = playerData.rightLegImage || rightLegDefault;
+
   return (
     <div className="order-4 xl:order-0 xl:col-start-1 xl:col-span-4 xl:row-start-2 bg-cardBg rounded-2xl xl:rounded-b-3xl xl:rounded-t-none border border-white/10 xl:border-t-0 overflow-hidden w-full min-w-0 flex flex-col space-y-4 sm:space-y-6 h-fit">
       <div className="p-4 sm:p-6 border-t-0 xl:border-t xl:border-white/5 w-full min-w-0">
@@ -62,7 +67,7 @@ export const PhysicalStatsLanguagesCard = ({
               className="text-xl sm:text-2xl font-bold text-primary justify-center min-w-0"
               inputClassName="text-center w-20 sm:w-24 h-8 sm:h-10 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 rounded-lg"
             />
-            <div className="text-[10px] sm:text-xs text-gray-400">HEIGHT (m)</div>
+            <div className="text-[10px] sm:text-xs text-gray-400">HEIGHT (cm)</div>
           </div>
           <div className="min-w-0">
             <CMSField
@@ -80,15 +85,15 @@ export const PhysicalStatsLanguagesCard = ({
           <div className="border border-white/10 bg-white/5 p-4 rounded-xl flex flex-col w-full min-w-0">
             <div className="flex justify-center items-center w-full mb-3 h-12 sm:h-16">
               <Image
-                src={playerData.leftLegImage}
+                src={leftLegSrc}
                 alt="left leg"
-                className="object-contain w-12 h-12 sm:w-16 sm:h-16 drop-shadow-md"
+                className="object-contain size-12 sm:size-16 drop-shadow-md"
                 width={80}
                 height={80}
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.srcset = "";
-                  target.src = "/placeholder_img.jpg";
+                  target.src = typeof leftLegDefault === "string" ? leftLegDefault : leftLegDefault.src;
                 }}
               />
             </div>
@@ -149,15 +154,15 @@ export const PhysicalStatsLanguagesCard = ({
           <div className="border border-white/10 bg-white/5 p-4 rounded-xl flex flex-col w-full min-w-0">
             <div className="flex justify-center items-center w-full mb-3 h-12 sm:h-16">
               <Image
-                src={playerData.rightLegImage}
+                src={rightLegSrc}
                 alt="right leg"
-                className="object-contain w-12 h-12 sm:w-16 sm:h-16 drop-shadow-md"
+                className="object-contain size-12 sm:size-16 drop-shadow-md"
                 width={80}
                 height={80}
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.srcset = "";
-                  target.src = "/placeholder_img.jpg";
+                  target.src = typeof rightLegDefault === "string" ? rightLegDefault : rightLegDefault.src;
                 }}
               />
             </div>

@@ -277,7 +277,7 @@ export const calculatePositionOverall = (
     const score = Number(values[item.key] ?? 50);
     return sum + score * (item.weight / 100);
   }, 0);
-  return Math.min(100, Math.max(0, Math.round(total)));
+  return Math.min(99, Math.max(1, Math.round(total)));
 };
 
 /**

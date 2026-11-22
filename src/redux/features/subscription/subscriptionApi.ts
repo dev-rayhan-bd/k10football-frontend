@@ -6,6 +6,7 @@ import {
   ISubscribeToPlanPayload,
   ISubscribeToPlanResponse,
   IUserSubscriptionResponse,
+  IGetMySubscriptionParams,
 } from "@/types/subscription.type";
 import { SuccessToast, ErrorToast } from "@/helpers/ValidationHelper";
 
@@ -19,12 +20,24 @@ export const subscriptionApi = apiSlice.injectEndpoints({
       providesTags: [TagTypes.MEMBERSHIP_PLANS],
     }),
 
-    getMySubscription: builder.query<IUserSubscriptionResponse, void>({
-      query: () => ({
-        url: "/subscriptions/my-subscription",
-        method: "GET",
-      }),
-      providesTags: [TagTypes.SUBSCRIPTION],
+    getMySubscription: builder.query<
+      IUserSubscriptionResponse,
+      IGetMySubscriptionParams | void
+    >({
+      query: (params) => {
+        const queryParams = new URLSearchParams();
+        if (params?.childPlayerId) {
+          queryParams.append("childPlayerId", params.childPlayerId);
+        }
+        const qs = queryParams.toString();
+        return {
+          url: qs
+            ? `/subscriptions/my-subscription?${qs}`
+            : "/subscriptions/my-subscription",
+          method: "GET",
+        };
+      },
+      providesTags: [TagTypes.SUBSCRIPTION, TagTypes.PARENTS],
     }),
 
     subscribeToPlan: builder.mutation<ISubscribeToPlanResponse, ISubscribeToPlanPayload>({

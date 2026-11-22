@@ -27,6 +27,7 @@ import {
   useDeleteCoachTestimonialMutation,
 } from "@/redux/features/coach/coachApi";
 import { ICoachTestimonial } from "@/types/coach.type";
+import { useCoach } from "@/hooks/useCoach";
 
 const DEFAULT_TESTIMONIALS = [
   {
@@ -118,14 +119,17 @@ const initialFormState: FormState = {
 };
 
 const TestimonialSection = ({ editable = false }: { editable?: boolean }) => {
+  const { isViewingSpecificCoach } = useCoach();
   const hasToken =
     typeof window !== "undefined" &&
     Boolean(localStorage.getItem("token") || localStorage.getItem("accessToken"));
 
   const { data: testimonialsResponse, isLoading } = useGetMyCoachTestimonialsQuery(
     undefined,
-    { skip: !hasToken }
+    { skip: !hasToken || isViewingSpecificCoach }
   );
+
+  const canEdit = editable && !isViewingSpecificCoach;
 
   const [createTestimonial, { isLoading: isCreating }] = useCreateCoachTestimonialMutation();
   const [updateTestimonial, { isLoading: isUpdating }] = useUpdateCoachTestimonialMutation();
@@ -326,7 +330,7 @@ const TestimonialSection = ({ editable = false }: { editable?: boolean }) => {
 
     return (
       <div className="bg-[#121212] border border-white/10 hover:border-white/25 rounded-2xl p-6 min-w-[320px] max-w-[380px] shrink-0 group relative overflow-hidden transition-all duration-300">
-        {editable && isRealItem && (
+        {canEdit && isRealItem && (
           <div className="flex items-center gap-1.5 absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity z-10">
             <button
               type="button"
@@ -385,7 +389,7 @@ const TestimonialSection = ({ editable = false }: { editable?: boolean }) => {
 
   return (
     <div className="bg-black py-20 w-full min-w-0 overflow-hidden">
-      <div className={editable ? "container mx-auto" : "w-full"}>
+      <div className={canEdit ? "container mx-auto" : "w-full"}>
         {/* Title Area */}
         <div className="flex flex-col items-center mb-14 gap-3 text-center">
           <h2 className="text-3xl sm:text-5xl font-black font-heading text-white tracking-wide uppercase italic">
@@ -395,7 +399,7 @@ const TestimonialSection = ({ editable = false }: { editable?: boolean }) => {
             Reviews and recommendations from players, club directors, and colleagues
           </p>
 
-          {editable && (
+          {canEdit && (
             <Button
               type="button"
               onClick={handleOpenAdd}

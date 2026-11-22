@@ -17,8 +17,10 @@ import {
   Sparkles,
   Inbox,
   Filter,
+  SlidersHorizontal,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import NotificationSettingsCard from "./NotificationSettingsCard";
 import {
   useGetNotificationsQuery,
   useGetUnreadNotificationCountQuery,
@@ -29,7 +31,7 @@ import {
 import { INotificationItem } from "@/types/notification.type";
 import { cn } from "@/lib/utils";
 
-type FilterTab = "all" | "unread" | "read";
+type FilterTab = "all" | "unread" | "read" | "settings";
 
 const formatFullDate = (dateString?: string) => {
   if (!dateString) return "";
@@ -223,6 +225,22 @@ export const NotificationsView = () => {
               Mark all as read
             </Button>
           )}
+
+          <Button
+            type="button"
+            onClick={() => setFilterTab((prev) => (prev === "settings" ? "all" : "settings"))}
+            variant={filterTab === "settings" ? "default" : "outline"}
+            size="sm"
+            className={cn(
+              "cursor-pointer border-white/10 transition-all flex items-center gap-2",
+              filterTab === "settings"
+                ? "bg-primary text-black hover:bg-primary/90"
+                : "hover:bg-white/10 text-white"
+            )}
+          >
+            <SlidersHorizontal className="size-4" />
+            <span>Preferences</span>
+          </Button>
         </div>
       </div>
 
@@ -336,6 +354,19 @@ export const NotificationsView = () => {
               >
                 Read ({readCount})
               </button>
+              <button
+                type="button"
+                onClick={() => setFilterTab("settings")}
+                className={cn(
+                  "px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5",
+                  filterTab === "settings"
+                    ? "bg-primary text-black shadow-sm"
+                    : "text-muted-foreground hover:text-white"
+                )}
+              >
+                <SlidersHorizontal className="size-3" />
+                <span>Controls</span>
+              </button>
             </div>
           </div>
 
@@ -346,8 +377,10 @@ export const NotificationsView = () => {
           )}
         </div>
 
-        {/* Notifications List */}
-        {isNotificationsLoading && notifications.length === 0 ? (
+        {/* Content View: Settings or Notifications List */}
+        {filterTab === "settings" ? (
+          <NotificationSettingsCard showHeader={false} />
+        ) : isNotificationsLoading && notifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3 text-muted-foreground">
             <Loader2 className="size-8 animate-spin text-primary" />
             <p className="text-sm">Loading all notifications...</p>

@@ -126,8 +126,8 @@ const PREDEFINED_COURSES_BY_CATEGORY = {
   ]
 };
 
-const ComplementaryCoursesSection = ({ editable }: { editable?: boolean }) => {
-const { coachData, handleUpdate } = useCoach()
+const ComplementaryCoursesSection = ({ editable, coachId }: { editable?: boolean; coachId?: string }) => {
+const { coachData, handleUpdate } = useCoach(coachId)
 
 const [isAddCourseOpen, setIsAddCourseOpen] = useState(false)
 const [activeIconIndex, setActiveIconIndex] = useState<number | null>(null)

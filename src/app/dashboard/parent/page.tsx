@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   IconUsers,
@@ -12,18 +12,21 @@ import {
   IconMessage2,
   IconCheck,
   IconX,
-  IconChevronDown,
   IconAlertTriangle,
   IconRefresh,
   IconClock,
   IconLock,
+  IconLoader2,
 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useGetParentOverviewQuery, useSubmitSessionRsvpMutation } from "@/redux/features/parent/parentApi";
-import { useParentSubscriptionAccess } from "@/hooks/useParentSubscriptionAccess";
+import {
+  useGetParentOverviewQuery,
+  useSubmitSessionRsvpMutation,
+} from "@/redux/features/parent/parentApi";
+import { useParentDashboard } from "@/providers/ParentDashboardProvider";
 import { cn } from "@/lib/utils";
 
 const getTierBadgeStyle = (tier?: string) => {
@@ -39,41 +42,93 @@ const getTierBadgeStyle = (tier?: string) => {
   }
 };
 
+const normalizeRsvpUiStatus = (
+  status?: string
+): "Pending" | "Attending" | "Declined" => {
+  const s = (status || "").toUpperCase();
+  if (s === "CONFIRMED" || s === "ATTENDING") return "Attending";
+  if (s === "DECLINED") return "Declined";
+  return "Pending";
+};
+
 const ParentDashboardOverview = () => {
   const router = useRouter();
-  const { isUnlocked } = useParentSubscriptionAccess();
-  const [selectedChildId, setSelectedChildId] = useState<string | undefined>(
-    undefined
-  );
+  const {
+    selectedChildPlayerId,
+    selectedChild,
+    switchToChildAccount,
+    isSwitchingProfile,
+  } = useParentDashboard();
 
-  // Query: GET {{baseUrl}}/parents/overview
+  // Query: GET {{baseUrl}}/parents/overview?childPlayerId=<selectedChildPlayerId>
   const {
     data: overviewResponse,
+    currentData: currentOverviewResponse,
     isLoading,
+    isFetching,
     isError,
     refetch,
   } = useGetParentOverviewQuery(
-    selectedChildId ? { childId: selectedChildId } : undefined
+    selectedChildPlayerId
+      ? { childPlayerId: selectedChildPlayerId }
+      : undefined
   );
+
+  const overviewData = currentOverviewResponse?.data ?? overviewResponse?.data;
+  const scopedOverviewData = currentOverviewResponse?.data;
+  const stats = overviewData?.stats;
+  const youthProfile = overviewData?.youthProfile;
+  const trainingRsvp = overviewData?.trainingRsvp || [];
+  const recentActivity = overviewData?.recentActivity || [];
+  const overviewChildren = overviewData?.children || [];
+
+  // Per-selected-child gating rule (strictly scoped to the currently selected child;
+  // uses currentData so switching from Child A -> Child B never flashes Child A's unlock state)
+  const isSelectedChildUnlocked = Boolean(
+    scopedOverviewData?.youthProfile?.hasActiveSubscription ??
+      scopedOverviewData?.subscriptionSummary?.activeChildHasSubscription ??
+      selectedChild?.hasActiveSubscription
+  );
+
+  const activeChildName =
+    youthProfile?.fullName || selectedChild?.fullName || "Selected Athlete";
+  const activeChildUserId =
+    youthProfile?.childUserId || selectedChild?.childUserId || "";
+  const activePlanTitle =
+    youthProfile?.currentSubscription?.planTitle ||
+    selectedChild?.currentSubscription?.planTitle;
 
   const [rsvpStatus, setRsvpStatus] = useState<
     "Pending" | "Attending" | "Declined"
   >("Pending");
 
-  const overviewData = overviewResponse?.data;
-  const stats = overviewData?.stats;
-  const youthProfile = overviewData?.youthProfile;
-  const trainingRsvp = overviewData?.trainingRsvp || [];
-  const recentActivity = overviewData?.recentActivity || [];
-  const children = overviewData?.children || [];
+  useEffect(() => {
+    const first = trainingRsvp[0];
+    setRsvpStatus(normalizeRsvpUiStatus(first?.rsvpStatus || first?.status));
+  }, [selectedChildPlayerId, trainingRsvp]);
 
-  const [submitRsvp, { isLoading: isSubmittingRsvp }] = useSubmitSessionRsvpMutation();
+  const [submitRsvp, { isLoading: isSubmittingRsvp }] =
+    useSubmitSessionRsvpMutation();
+
+  const handleUnlockSelectedChild = async () => {
+    await switchToChildAccount(
+      activeChildUserId || undefined,
+      "/dashboard/player/my-subscription"
+    );
+  };
 
   const handleRsvp = async (status: "Attending" | "Declined") => {
     setRsvpStatus(status);
     const targetSession = trainingRsvp[0];
-    const sessionId = (targetSession?._id || targetSession?.id) as string | undefined;
-    const childPlayerId = (youthProfile?._id || youthProfile?.id || selectedChildId || children[0]?.id) as string | undefined;
+    const sessionId = (targetSession?._id || targetSession?.id) as
+      | string
+      | undefined;
+    const childPlayerId = (selectedChildPlayerId ||
+      youthProfile?.childPlayerId ||
+      youthProfile?._id ||
+      youthProfile?.id ||
+      overviewChildren[0]?.childPlayerId ||
+      overviewChildren[0]?.id) as string | undefined;
 
     if (sessionId && childPlayerId) {
       try {
@@ -81,45 +136,38 @@ const ParentDashboardOverview = () => {
           sessionId,
           childPlayerId,
           rsvpStatus: status === "Attending" ? "CONFIRMED" : "DECLINED",
-          notes: status === "Attending" ? "Will attend session on time" : "Cannot attend session",
+          notes:
+            status === "Attending"
+              ? "Will attend session on time"
+              : "Cannot attend session",
         }).unwrap();
       } catch {
         // Error toast handled by RTK mutation onQueryStarted
       }
     } else {
-      const childName = youthProfile?.fullName || "Child";
-      toast.success(`RSVP updated: ${childName} is marked as ${status.toLowerCase()}`);
+      toast.success(
+        `RSVP updated: ${activeChildName} is marked as ${status.toLowerCase()}`
+      );
     }
   };
 
   return (
     <div className="flex flex-col gap-8 pb-24 md:pb-12 min-w-0">
-      {/* Header with Title and Child Selector */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase text-white font-orbitron tracking-tight leading-none">
             Guardian <span className="text-[#00FF62] italic">Overview</span>
           </h1>
           <p className="text-white/60 font-bold uppercase tracking-widest text-[9px] md:text-[11px] mt-2 leading-relaxed">
-            Monitor your child&apos;s football development and manage academy services
+            Monitor {activeChildName}&apos;s football development and manage academy services
           </p>
         </div>
 
-        {/* Child Selector Dropdown if multiple children */}
-        {children.length > 1 && (
-          <div className="relative self-start sm:self-auto">
-            <select
-              value={selectedChildId || children.find((c) => c.isCurrent)?.id || children[0]?.id}
-              onChange={(e) => setSelectedChildId(e.target.value)}
-              className="appearance-none bg-white/5 border border-white/10 hover:border-white/25 text-white rounded-xl px-4 py-2.5 pr-10 text-xs font-bold font-orbitron cursor-pointer focus:outline-none focus:border-[#00FF62]/50 transition-all"
-            >
-              {children.map((c) => (
-                <option key={c.id || c._id} value={c.id || c._id} className="bg-[#111111] text-white">
-                  {c.fullName} ({c.position || "Athlete"})
-                </option>
-              ))}
-            </select>
-            <IconChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400 pointer-events-none" />
+        {isFetching && !isLoading && (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <IconLoader2 className="size-4 animate-spin text-primary" />
+            <span>Updating child data...</span>
           </div>
         )}
       </div>
@@ -127,7 +175,6 @@ const ParentDashboardOverview = () => {
       {/* Loading Skeleton */}
       {isLoading ? (
         <div className="flex flex-col gap-8 animate-pulse">
-          {/* Stats Cards Skeleton */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
               <div
@@ -143,7 +190,6 @@ const ParentDashboardOverview = () => {
             ))}
           </div>
 
-          {/* Main Grid Skeleton */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 flex flex-col gap-6">
               <div className="h-56 rounded-3xl bg-[#0D0D0D]/60 border border-white/10" />
@@ -233,7 +279,7 @@ const ParentDashboardOverview = () => {
                   <p className="text-xl md:text-2xl font-black text-white font-orbitron truncate">
                     {stats?.activeReports?.formatted || "0 Pending"}
                   </p>
-                  {!isUnlocked && (
+                  {!isSelectedChildUnlocked && (
                     <span className="text-[9px] font-bold text-destructive bg-destructive/10 px-1.5 py-0.5 rounded border border-destructive/20 font-orbitron">
                       LOCKED
                     </span>
@@ -259,36 +305,44 @@ const ParentDashboardOverview = () => {
                   </Link>
                 </div>
 
-                {/* Platform Access Status Pill */}
-                {!isUnlocked ? (
-                  <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                    <div className="flex items-center gap-2 text-destructive font-medium">
+                {/* Per-Selected-Child Subscription Access Banner (only shown when NOT subscribed) */}
+                {!isSelectedChildUnlocked && (
+                  <div className="p-3.5 rounded-xl bg-destructive/10 border border-destructive/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-2 text-destructive font-medium min-w-0">
                       <IconLock size={16} className="shrink-0" />
-                      <span>Scouting Reports & Advanced Analytics: <strong>Locked (Free Plan)</strong></span>
-                    </div>
-                    <Link href="/dashboard/parent/my-subscription">
-                      <span className="text-[10px] font-bold text-white underline uppercase tracking-wider font-orbitron hover:text-primary transition-colors cursor-pointer">
-                        Unlock with Subscription
+                      <span>
+                        Scouting Reports &amp; Match Reports Locked for{" "}
+                        <strong>{activeChildName}</strong>
                       </span>
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20 flex items-center gap-2 text-xs text-primary font-medium">
-                    <IconCheck size={16} className="shrink-0" />
-                    <span>Scouting Reports & Analytics: <strong>Active & Unlocked</strong></span>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={isSwitchingProfile}
+                      onClick={handleUnlockSelectedChild}
+                      className="text-[10px] font-bold text-white underline uppercase tracking-wider font-orbitron hover:text-primary transition-colors cursor-pointer shrink-0 flex items-center gap-1.5 disabled:opacity-60"
+                    >
+                      {isSwitchingProfile && (
+                        <IconLoader2 className="size-3.5 animate-spin" />
+                      )}
+                      Unlock with Subscription
+                    </button>
                   </div>
                 )}
 
                 {/* Profile Info Row */}
                 <div className="flex flex-col sm:flex-row items-center gap-6 p-6 rounded-2xl bg-black/40 border border-white/5">
-                  <div className="relative size-20 rounded-full overflow-hidden border-2 border-[#00FF62]/20 bg-white/5 shrink-0">
+                  <div className="relative size-20 sm:size-24 rounded-full overflow-hidden border-2 border-[#00FF62]/30 bg-black/60 shrink-0 flex items-center justify-center">
                     <Image
-                      src={youthProfile?.profileImage || "/placeholder_img.jpg"}
-                      alt={youthProfile?.fullName || "Child Avatar"}
+                      src={
+                        youthProfile?.profileImage ||
+                        selectedChild?.profileImage ||
+                        "/placeholder_img.jpg"
+                      }
+                      alt={activeChildName}
                       fill
-                      sizes="80px"
+                      sizes="96px"
                       unoptimized
-                      className="object-cover"
+                      className="object-contain p-1"
                       onError={(e) => {
                         (e.currentTarget as HTMLImageElement).src =
                           "/placeholder_img.jpg";
@@ -299,15 +353,18 @@ const ParentDashboardOverview = () => {
                   <div className="flex-1 text-center sm:text-left flex flex-col gap-1.5 min-w-0">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                       <h3 className="text-lg font-bold text-white font-orbitron truncate">
-                        {youthProfile?.fullName || "John Player"}
+                        {activeChildName}
                       </h3>
                       <Badge
                         className={cn(
                           "w-fit mx-auto sm:mx-0 font-bold border px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider",
-                          getTierBadgeStyle(youthProfile?.tier)
+                          getTierBadgeStyle(
+                            youthProfile?.tier || selectedChild?.cvTier
+                          )
                         )}
                       >
-                        {youthProfile?.tierBadge || `${youthProfile?.tier || "BRONZE"} Profile`}
+                        {youthProfile?.tierBadge ||
+                          `${youthProfile?.tier || selectedChild?.cvTier || "BRONZE"} Profile`}
                       </Badge>
                     </div>
 
@@ -316,11 +373,15 @@ const ParentDashboardOverview = () => {
                         <>
                           Position:{" "}
                           <span className="text-white font-medium">
-                            {youthProfile?.position || "Forward"}
+                            {youthProfile?.position ||
+                              selectedChild?.position ||
+                              "Forward"}
                           </span>{" "}
                           | Academy:{" "}
                           <span className="text-white font-medium">
-                            {youthProfile?.academyName || "Academy"}
+                            {youthProfile?.academyName ||
+                              selectedChild?.academy ||
+                              "Academy"}
                           </span>
                         </>
                       )}
@@ -331,7 +392,9 @@ const ParentDashboardOverview = () => {
                         <>
                           Head Coach:{" "}
                           <span className="text-white font-medium">
-                            {youthProfile?.headCoachName || "Didier Deschamps"}
+                            {youthProfile?.headCoachName ||
+                              selectedChild?.coachName ||
+                              "Unassigned"}
                           </span>
                         </>
                       )}
@@ -341,7 +404,7 @@ const ParentDashboardOverview = () => {
                   {/* Rating Circle */}
                   <div className="size-20 rounded-full border-4 border-[#00FF62]/30 flex flex-col items-center justify-center bg-black/50 shrink-0">
                     <span className="text-2xl font-black text-white font-orbitron leading-none">
-                      {youthProfile?.rating ?? 50}
+                      {youthProfile?.rating ?? selectedChild?.overallRating ?? 50}
                     </span>
                     <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mt-1">
                       Rating
@@ -378,7 +441,10 @@ const ParentDashboardOverview = () => {
                                 {act.title}
                               </h4>
                               <span className="text-[10px] text-gray-500 font-bold shrink-0">
-                                {act.time || (act.createdAt ? new Date(act.createdAt).toLocaleDateString() : "")}
+                                {act.time ||
+                                  (act.createdAt
+                                    ? new Date(act.createdAt).toLocaleDateString()
+                                    : "")}
                               </span>
                             </div>
                             <p className="text-xs text-gray-400 font-light leading-relaxed">
@@ -415,7 +481,7 @@ const ParentDashboardOverview = () => {
                       Training RSVP
                     </h2>
                     <p className="text-xs text-gray-400 mt-1 font-light">
-                      Confirm your child&apos;s attendance for the upcoming session.
+                      Confirm {activeChildName}&apos;s attendance for the upcoming session.
                     </p>
                   </div>
                   <Link href="/dashboard/parent/attendance" className="shrink-0">
@@ -433,13 +499,21 @@ const ParentDashboardOverview = () => {
                         className="p-4 rounded-xl bg-black/40 border border-white/5 flex flex-col gap-3"
                       >
                         <div className="flex items-center gap-3">
-                          <IconCalendar size={18} className="text-[#00FF62] shrink-0" />
+                          <IconCalendar
+                            size={18}
+                            className="text-[#00FF62] shrink-0"
+                          />
                           <div className="min-w-0">
                             <h4 className="text-xs font-bold text-white truncate">
-                              {session.title || session.sessionName || "Training Session"}
+                              {session.title ||
+                                session.sessionName ||
+                                "Training Session"}
                             </h4>
                             <p className="text-[10px] text-gray-400 font-light mt-0.5 truncate">
-                              {session.date || session.time || session.location || "Upcoming Session"}
+                              {session.date ||
+                                session.time ||
+                                session.location ||
+                                "Upcoming Session"}
                             </p>
                           </div>
                         </div>
@@ -451,11 +525,15 @@ const ParentDashboardOverview = () => {
                           <Badge
                             className={cn(
                               "text-[9px] font-bold border",
-                              (session.rsvpStatus || session.status) === "Attending"
+                              normalizeRsvpUiStatus(
+                                session.rsvpStatus || session.status
+                              ) === "Attending"
                                 ? "bg-green-500/10 border-green-500/30 text-green-400"
-                                : (session.rsvpStatus || session.status) === "Declined"
-                                ? "bg-red-500/10 border-red-500/30 text-red-400"
-                                : "bg-yellow-500/10 border-yellow-500/30 text-yellow-400"
+                                : normalizeRsvpUiStatus(
+                                      session.rsvpStatus || session.status
+                                    ) === "Declined"
+                                  ? "bg-red-500/10 border-red-500/30 text-red-400"
+                                  : "bg-yellow-500/10 border-yellow-500/30 text-yellow-400"
                             )}
                           >
                             {session.rsvpStatus || session.status || "Pending"}
@@ -467,7 +545,10 @@ const ParentDashboardOverview = () => {
                 ) : (
                   <div className="p-4 rounded-xl bg-black/40 border border-white/5 flex flex-col gap-3">
                     <div className="flex items-center gap-3">
-                      <IconCalendar size={18} className="text-[#00FF62] shrink-0" />
+                      <IconCalendar
+                        size={18}
+                        className="text-[#00FF62] shrink-0"
+                      />
                       <div className="min-w-0">
                         <h4 className="text-xs font-bold text-white">
                           Upcoming Training Session
@@ -490,8 +571,8 @@ const ParentDashboardOverview = () => {
                           rsvpStatus === "Attending"
                             ? "bg-green-500/10 border-green-500/30 text-green-400"
                             : rsvpStatus === "Declined"
-                            ? "bg-red-500/10 border-red-500/30 text-red-400"
-                            : "bg-yellow-500/10 border-yellow-500/30 text-yellow-400"
+                              ? "bg-red-500/10 border-red-500/30 text-red-400"
+                              : "bg-yellow-500/10 border-yellow-500/30 text-yellow-400"
                         )}
                       >
                         {rsvpStatus}
@@ -548,23 +629,35 @@ const ParentDashboardOverview = () => {
 
                   <button
                     type="button"
+                    disabled={isSwitchingProfile}
                     onClick={() => {
-                      if (!isUnlocked) {
+                      if (!isSelectedChildUnlocked) {
                         toast.error(
-                          "Active subscription required to access scouting match reports and coach evaluations."
+                          `Match Reports are locked for ${activeChildName}. Switch to ${activeChildName}'s Athlete account to subscribe.`
                         );
-                        router.push("/dashboard/parent/my-subscription");
+                        handleUnlockSelectedChild();
                         return;
                       }
                       router.push("/dashboard/parent/game-reports");
                     }}
-                    className="w-full py-3.5 px-4 rounded-xl bg-white/5 border border-white/5 text-xs font-bold text-white hover:bg-white/10 hover:border-white/10 transition-all flex items-center justify-between uppercase tracking-wider cursor-pointer"
+                    className={cn(
+                      "w-full py-3.5 px-4 rounded-xl border text-xs font-bold transition-all flex items-center justify-between uppercase tracking-wider cursor-pointer disabled:opacity-50",
+                      isSelectedChildUnlocked
+                        ? "bg-white/5 border-white/5 text-white hover:bg-white/10 hover:border-white/10"
+                        : "bg-destructive/5 border-destructive/20 text-white/70 hover:bg-destructive/10"
+                    )}
                   >
                     <div className="flex items-center gap-2">
-                      {!isUnlocked && <IconLock size={14} className="text-destructive" />}
+                      {!isSelectedChildUnlocked && (
+                        <IconLock size={14} className="text-destructive" />
+                      )}
                       <span>Submit Match Stats</span>
                     </div>
-                    <IconArrowRight size={14} />
+                    {isSwitchingProfile ? (
+                      <IconLoader2 size={14} className="animate-spin" />
+                    ) : (
+                      <IconArrowRight size={14} />
+                    )}
                   </button>
 
                   <Link href="/dashboard/parent/shop">

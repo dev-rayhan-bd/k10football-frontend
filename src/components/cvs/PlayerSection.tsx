@@ -7,9 +7,12 @@ import playerImage from "@/assets/cvs/id/player-short-image.png";
 import pinkCard from "@/assets/cvs/pink-card.png";
 import whiteCard from "@/assets/cvs/white-card.png";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { usePlayer } from "@/hooks/usePlayer";
 import { useGetPlayersQuery } from "@/redux/features/player/playerApi";
 import { getShortForm, cn } from "@/lib/utils";
+import { CvsFilterState } from "./SearchBar";
+import { ChevronLeft, ChevronRight, UserX } from "lucide-react";
 
 const COUNTRY_CODES: Record<string, string> = {
   france: "fr",
@@ -47,9 +50,38 @@ const getFlagUrl = (countryName: string) => {
   return code ? `https://flagcdn.com/w40/${code}.png` : "";
 };
 
-const Players = () => {
+interface PlayersProps {
+  filters?: CvsFilterState;
+  onResetFilters?: () => void;
+}
+
+const Players = ({ filters, onResetFilters }: PlayersProps) => {
   const router = useRouter();
-  const { data: playersResponse, isLoading, isFetching } = useGetPlayersQuery({ limit: 50 });
+  const [page, setPage] = useState<number>(1);
+  const limit = 10;
+
+  useEffect(() => {
+    setPage(1);
+  }, [filters?.searchTarget, filters?.search, filters?.category, filters?.ageGroup, filters?.position]);
+
+  // Only execute search on players if user chose "player" (or if no specific target is set yet)
+  // If user explicitly chose "coach", DO NOT execute search on players!
+  const isTargetingPlayers = filters?.searchTarget !== "coach";
+
+  const queryParams: Record<string, any> = {
+    page,
+    limit,
+  };
+  if (isTargetingPlayers && filters?.search?.trim()) {
+    queryParams.search = filters.search.trim();
+  }
+  if (isTargetingPlayers && filters?.category) {
+    queryParams.category = filters.category;
+  }
+  if (isTargetingPlayers && filters?.ageGroup) queryParams.ageGroup = filters.ageGroup;
+  if (isTargetingPlayers && filters?.position) queryParams.position = filters.position;
+
+  const { data: playersResponse, isLoading, isFetching } = useGetPlayersQuery(queryParams);
   const { players: mockPlayers, selectPlayer } = usePlayer();
 
   const apiPlayers: any[] = Array.isArray(playersResponse?.data)
@@ -58,25 +90,44 @@ const Players = () => {
     ? playersResponse
     : [];
 
-  const displayPlayers = apiPlayers.length > 0 ? apiPlayers : mockPlayers;
+  const meta = playersResponse?.meta || playersResponse?.pagination;
+  const hasActiveFilters = isTargetingPlayers && Boolean(
+    filters?.search?.trim() || filters?.category || filters?.ageGroup || filters?.position
+  );
+
+  const displayPlayers = apiPlayers.length > 0
+    ? apiPlayers
+    : hasActiveFilters || (playersResponse && !isLoading)
+    ? []
+    : mockPlayers;
+
+  const totalPlayers = meta?.total ?? (apiPlayers.length > 0 ? apiPlayers.length : (hasActiveFilters ? 0 : mockPlayers.length));
+  const totalPages = meta?.totalPage ?? meta?.totalPages ?? Math.max(1, Math.ceil(totalPlayers / limit));
 
   return (
-    <div className="container mx-auto px-4 mt-20 bg-black py-8 rounded-3xl">
-      <div className="flex items-center justify-center gap-3 mb-12">
-        <h1
-          className="text-4xl text-center font-heading animate-pulse"
-          style={{ color: "#00FF62" }}
-        >
-          PLAYERS
-        </h1>
-        {isFetching && !isLoading && (
-          <span className="size-2 rounded-full bg-[#00FF62] animate-ping" title="Syncing live players..." />
+    <div id="players-section" className="container mx-auto px-4 mt-20 bg-black py-8 rounded-3xl scroll-mt-20">
+      <div className="flex flex-col items-center justify-center gap-2 mb-12">
+        <div className="flex items-center justify-center gap-3">
+          <h1
+            className="text-4xl text-center font-heading animate-pulse"
+            style={{ color: "#00FF62" }}
+          >
+            PLAYERS {totalPlayers > 0 && <span className="text-xl text-white/60">({totalPlayers})</span>}
+          </h1>
+          {isFetching && !isLoading && (
+            <span className="size-2 rounded-full bg-[#00FF62] animate-ping" title="Syncing live players..." />
+          )}
+        </div>
+        {hasActiveFilters && (
+          <p className="text-xs text-muted-foreground">
+            Filtered by: {[filters?.search && `"${filters.search}"`, filters?.category, filters?.ageGroup, filters?.position].filter(Boolean).join(" • ")}
+          </p>
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-        {isLoading && apiPlayers.length === 0 ? (
-          Array.from({ length: 10 }).map((_, i) => (
+      {isLoading && apiPlayers.length === 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          {Array.from({ length: 10 }).map((_, i) => (
             <div key={`player-skel-${i}`} className="w-full max-w-67.5 mx-auto">
               <div className="relative w-full aspect-270/385 bg-white/5 border border-white/10 rounded-3xl animate-pulse flex flex-col justify-between p-6">
                 <div className="flex justify-between items-start">
@@ -90,9 +141,32 @@ const Players = () => {
                 <div className="h-20 w-full rounded-xl bg-white/5 border border-white/10" />
               </div>
             </div>
-          ))
-        ) : (
-          displayPlayers.map((player: any, index: number) => {
+          ))}
+        </div>
+      ) : displayPlayers.length === 0 ? (
+        <div className="py-16 text-center flex flex-col items-center justify-center gap-4 border border-dashed border-white/10 rounded-3xl p-8 bg-white/[0.02]">
+          <div className="size-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-primary">
+            <UserX className="size-7" />
+          </div>
+          <div className="flex flex-col gap-1 max-w-md">
+            <h3 className="text-lg font-bold text-white uppercase font-orbitron">No Players Found</h3>
+            <p className="text-xs text-muted-foreground">
+              No players match your active search or filter criteria. Try adjusting your filters.
+            </p>
+          </div>
+          {onResetFilters && (
+            <button
+              type="button"
+              onClick={onResetFilters}
+              className="mt-2 px-5 py-2.5 rounded-xl bg-primary text-black font-bold text-xs uppercase tracking-wider hover:bg-primary/90 transition cursor-pointer"
+            >
+              Reset Filters
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          {displayPlayers.map((player: any, index: number) => {
             const playerId = player._id || player.id;
             const fullName = player.fullName || player.name || player.userId?.name || "Player";
             const names = fullName.trim().split(" ");
@@ -169,6 +243,20 @@ const Players = () => {
               phy: player.fifaCardStats?.phy ?? player.strengths?.physical ?? 50,
             };
 
+            const currentClubObj = Array.isArray(player.clubHistory)
+              ? player.clubHistory.find((c: any) => c?.isCurrent) || player.clubHistory[0]
+              : null;
+
+            const clubLogoSrc =
+              (typeof player.clubLogo === "string" && player.clubLogo.trim()) ||
+              (typeof player.currentClubLogo === "string" && player.currentClubLogo.trim()) ||
+              (typeof player.fifaCardStats?.clubLogo === "string" && player.fifaCardStats.clubLogo.trim()) ||
+              (typeof currentClubObj?.logoUrl === "string" && currentClubObj.logoUrl.trim()) ||
+              (typeof currentClubObj?.clubLogo === "string" && currentClubObj.clubLogo.trim()) ||
+              (typeof currentClubObj?.logo === "string" && currentClubObj.logo.trim()) ||
+              (typeof player.currentClub === "object" ? player.currentClub?.logoUrl || player.currentClub?.logo : "") ||
+              "";
+
             const glowClass = 
               cardType === "gold"
                 ? "drop-shadow-[0_0_10px_rgba(253,224,71,0.5)] hover:drop-shadow-[0_0_25px_rgba(253,224,71,0.95)]"
@@ -222,13 +310,26 @@ const Players = () => {
                       alt="flag" 
                       unoptimized
                     />
-                    <Image 
-                      src={club1} 
-                      className="size-7 sm:size-8 object-contain" 
-                      width={32} 
-                      height={32} 
-                      alt="club image" 
-                    />
+                    {clubLogoSrc ? (
+                      <img 
+                        src={clubLogoSrc} 
+                        className="size-7 sm:size-8 object-contain rounded-full" 
+                        alt="club logo" 
+                        onError={(e) => {
+                          const target = e.currentTarget as HTMLImageElement;
+                          target.srcset = "";
+                          target.src = club1.src;
+                        }}
+                      />
+                    ) : (
+                      <Image 
+                        src={club1} 
+                        className="size-7 sm:size-8 object-contain opacity-75" 
+                        width={32} 
+                        height={32} 
+                        alt="club image" 
+                      />
+                    )}
                   </div>
                   {/* Player image */}
                   <div className="absolute top-[12%] right-[11%] w-[58%] h-[40%] flex items-end justify-center z-10 overflow-hidden">
@@ -298,9 +399,36 @@ const Players = () => {
                 </div>
               </div>
             );
-          })
-        )}
-      </div>
+          })}
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-3 mt-10">
+          <button
+            type="button"
+            disabled={page <= 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            className="p-2 rounded-xl bg-white/5 border border-white/10 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition cursor-pointer"
+            title="Previous Page"
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <span className="text-xs text-muted-foreground font-orbitron">
+            Page <strong className="text-white">{page}</strong> of <strong className="text-white">{totalPages}</strong>
+          </span>
+          <button
+            type="button"
+            disabled={page >= totalPages}
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            className="p-2 rounded-xl bg-white/5 border border-white/10 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition cursor-pointer"
+            title="Next Page"
+          >
+            <ChevronRight size={18} />
+          </button>
+        </div>
+      )}
     </div>
   );
 };

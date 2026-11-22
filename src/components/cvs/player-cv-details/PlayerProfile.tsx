@@ -263,14 +263,27 @@ return url || flag1.src;
 };
 
 const getClubLogoUrl = () => {
-const firstClub = playerData.clubs?.[0];
-if (firstClub && firstClub.logo) {
-  if (firstClub.logo.startsWith('bg-')) {
-    return club1.src;
+  const pAny = playerData as any;
+  if (pAny?.clubLogo && typeof pAny.clubLogo === "string" && pAny.clubLogo.trim()) {
+    return pAny.clubLogo.trim();
   }
-  return firstClub.logo;
-}
-return club1.src;
+  if (pAny?.currentClubLogo && typeof pAny.currentClubLogo === "string" && pAny.currentClubLogo.trim()) {
+    return pAny.currentClubLogo.trim();
+  }
+  const currentClubFromHistory = Array.isArray(pAny?.clubHistory)
+    ? pAny.clubHistory.find((c: any) => c?.isCurrent) || pAny.clubHistory[0]
+    : null;
+  if (currentClubFromHistory?.logoUrl && typeof currentClubFromHistory.logoUrl === "string") {
+    return currentClubFromHistory.logoUrl.trim();
+  }
+  const firstClub = playerData.clubs?.[0];
+  if (firstClub && firstClub.logo) {
+    if (firstClub.logo.startsWith('bg-')) {
+      return club1.src;
+    }
+    return firstClub.logo;
+  }
+  return club1.src;
 };
 
 const canonicalPosition = normalizePositionKey(playerData.position);
@@ -486,7 +499,7 @@ const [isUploadingCardImg, setIsUploadingCardImg] = useState(false);
 const [cardBgProgress, setCardBgProgress] = useState<string>("Removing Background...");
 
 const handleUpdate = (attrKey: string, rawVal: number) => {
-  const value = Math.max(0, Math.min(100, isNaN(rawVal) ? 0 : rawVal));
+  const value = Math.max(1, Math.min(99, isNaN(rawVal) ? 1 : rawVal));
   const aliases = KEY_ALIASES[attrKey] || [attrKey];
 
   // 1. Always update local positional override so ALL 12 positional attributes respond immediately at 60fps
@@ -562,6 +575,12 @@ const handleSaveAttributes = async () => {
     } else if (payload.composition !== undefined && payload.composure === undefined) {
       payload.composure = payload.composition;
     }
+
+    // 5. Enforce strict 1..99 bounds so 0 or 100 is never sent to the API
+    Object.keys(payload).forEach((k) => {
+      const n = Number(payload[k]);
+      payload[k] = Math.max(1, Math.min(99, isNaN(n) ? 50 : Math.round(n)));
+    });
 
     await updateMyPlayerAttributes(payload).unwrap();
     setPositionalOverrides({});
@@ -916,9 +935,9 @@ return (
                   <div className="relative flex items-center h-2 group">
                     <input
                       type="range"
-                      min="0"
-                      max="100"
-                      value={attr.score}
+                      min="1"
+                      max="99"
+                      value={Math.max(1, Math.min(99, attr.score))}
                       onChange={(e) =>
                         handleUpdate(attr.key, parseInt(e.target.value))
                       }
@@ -936,9 +955,9 @@ return (
                     {/* Always show range input but overlay it */}
                     <input
                       type="range"
-                      min="0"
-                      max="100"
-                      value={attr.score}
+                      min="1"
+                      max="99"
+                      value={Math.max(1, Math.min(99, attr.score))}
                       onChange={(e) =>
                         handleUpdate(attr.key, parseInt(e.target.value))
                       }
@@ -962,6 +981,8 @@ return (
                   onUpdate={(val) => handleUpdate(attr.key, parseInt(String(val)))}
                   canEdit={editable}
                   type="number"
+                  min={1}
+                  max={99}
                   editTrigger="doubleClick"
                   className="text-base sm:text-xl font-black justify-end uppercase"
                   style={{ color: getHexColor(attr.score) }}

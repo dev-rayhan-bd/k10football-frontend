@@ -17,6 +17,7 @@ import {
   SettingsInput, 
   SettingsToggle 
 } from "@/components/dashboard/DashboardSettingsElements";
+import NotificationSettingsCard from "@/components/notifications/NotificationSettingsCard";
 import { Button } from "@/components/ui/button";
 import { 
   useGetClubProfileQuery, 
@@ -369,20 +370,7 @@ const ClubSettings = () => {
         </SettingsSection>
 
         {/* Section 4: Notifications */}
-        <SettingsSection title="Notifications" icon={<IconBell size={20} />}>
-          <div className="flex flex-col gap-4">
-            <SettingsToggle 
-              title="New CV Alerts" 
-              description="Get notified of new athlete CVs" 
-              defaultChecked 
-            />
-            <SettingsToggle 
-              title="Profile Share Alerts" 
-              description="Notification when profiles are viewed" 
-              defaultChecked 
-            />
-          </div>
-        </SettingsSection>
+        <NotificationSettingsCard className="rounded-[30px]! sm:rounded-[40px]! p-6! sm:p-10!" />
       </div>
     </div>
   );

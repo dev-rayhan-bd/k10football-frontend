@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useChangePasswordMutation } from "@/redux/features/auth/authApi";
 import { cn } from "@/lib/utils";
+import NotificationSettingsCard from "@/components/notifications/NotificationSettingsCard";
 
 interface ChangePasswordFormValues {
   oldPassword: string;
@@ -235,24 +236,7 @@ const SuperAdminSettings = () => {
       </SettingsSection>
 
       {/* Notifications */}
-      <SettingsSection icon={IconBell} title="Notifications">
-        <div className="flex flex-col gap-3 sm:gap-4 w-full min-w-0">
-          {[
-            { title: "New User Registration", desc: "Allow new users to register" },
-            { title: "Game Report Submissions", desc: "Enable game report creation" },
-            { title: "Pending Approvals", desc: "Alert when action needed" },
-            { title: "Payment Notifications", desc: "Notify on transactions" }
-          ].map((notif, i) => (
-            <div key={i} className="bg-black/40 border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 flex justify-between items-center gap-4 w-full min-w-0">
-              <div className="flex flex-col gap-0.5 sm:gap-1 min-w-0">
-                <h4 className="text-white font-bold text-xs sm:text-sm truncate">{notif.title}</h4>
-                <p className="text-white/40 text-[9px] sm:text-xs truncate">{notif.desc}</p>
-              </div>
-              <Switch defaultChecked className="data-[state=checked]:bg-red-600 shrink-0" />
-            </div>
-          ))}
-        </div>
-      </SettingsSection>
+      <NotificationSettingsCard className="rounded-3xl sm:rounded-[40px] p-4 sm:p-6 md:p-10" />
     </div>
   );
 };

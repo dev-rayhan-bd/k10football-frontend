@@ -687,6 +687,8 @@ export const CreateGameReportWizard = ({
       }
     } catch (err: any) {
       console.error("Failed to create self game report via API:", err);
+      const msg = err?.data?.message || err?.message || "Failed to create game report. Active subscription may be required.";
+      toast.error(msg);
     }
   };
 
@@ -715,6 +717,8 @@ export const CreateGameReportWizard = ({
         }
       } catch (err: any) {
         console.error("Failed to create self game report via API:", err);
+        const msg = err?.data?.message || err?.message || "Failed to create game report. Active subscription may be required.";
+        toast.error(msg);
         return;
       }
     }
@@ -1134,6 +1138,8 @@ export const CreateGameReportWizard = ({
       }
     } catch (err: any) {
       console.error("Failed to request coach game report via API:", err);
+      const msg = err?.data?.message || err?.message || "Failed to request coach game report. Active subscription may be required.";
+      toast.error(msg);
       return;
     }
 

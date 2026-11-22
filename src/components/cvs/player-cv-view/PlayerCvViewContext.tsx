@@ -8,10 +8,13 @@ import playerDefaultImage from "@/assets/cvs/id/player-image.png";
 import trofeeIcon from "@/assets/cvs/id/trofeeIcon.png";
 import futsalMap from "@/assets/cvs/id/Futsal Pitch.jpg";
 import positionMap from "@/assets/cvs/id/position-map.png";
+import leftLeg from "@/assets/cvs/id/left_foot.png";
+import rightLeg from "@/assets/cvs/id/right_foot.png";
 import { formatDate } from "@/lib/utils";
 
 export interface ViewPlayerData {
   id: string;
+  userId: string;
   fullName: string;
   dob: string;
   age: string;
@@ -27,6 +30,8 @@ export interface ViewPlayerData {
   weight: string;
   leftLegUsage: number;
   rightLegUsage: number;
+  leftLegImage?: any;
+  rightLegImage?: any;
   languages: { name: string; level: string; color: string }[];
   rating: number;
   playerImage: any;
@@ -91,6 +96,10 @@ export interface ViewPlayerData {
   coachLicenseNumber: string;
   clubManaged: string;
   isVerifiedByCoach: boolean;
+  validationStatus: "pending" | "verified" | "expired" | "not_needed";
+  positionMarkers: Array<{ id: string; name?: string; position?: string; slot?: string; role?: string; x: number; y: number }>;
+  futsalMarkers: Array<{ id: string; name?: string; position?: string; slot?: string; role?: string; x: number; y: number }>;
+  positionOverall?: number;
   additionalNotes: string;
   highlightVideo?: string;
   profileImage?: string;
@@ -192,66 +201,84 @@ export const PlayerCvViewProvider = ({
       { category: "Defending", categoryKey: "defending", color: "#00FFFF", borderColor: "border-l-cyan-500", skills: defendingSkills },
     ];
 
-    let clubsList = [];
+    let clubsList: ViewPlayerData["clubs"] = [];
     if (Array.isArray(data.clubHistory) && data.clubHistory.length > 0) {
       clubsList = data.clubHistory.map((c: any, i: number) => {
         const periods = (c.period || "").split("-").map((s: string) => s.trim());
         return {
           id: c._id || String(i + 1),
           name: c.clubName || c.name || "Club",
-          from: periods[0] || "2020",
-          to: periods[1] || (c.isCurrent ? "Present" : "2024"),
-          logo: c.logoUrl || c.logo || "bg-blue-600",
-          color: "border-blue-500",
-          shortName: (c.clubName || "CLB").slice(0, 3).toUpperCase(),
+          from: c.from || periods[0] || "2020",
+          to: c.to || periods[1] || (c.isCurrent ? "Present" : "2024"),
+          logo: c.logoUrl || c.logo || c.image || "",
+          color: "border-primary",
+          shortName: (c.clubName || c.name || "CLB").slice(0, 3).toUpperCase(),
           isCurrent: c.isCurrent,
         };
       });
-    } else if (Array.isArray(data.clubsInterested) && data.clubsInterested.length > 0) {
-      clubsList = data.clubsInterested.map((c: any, i: number) => ({
-        id: String(i + 1),
-        name: c.clubName || "Club",
-        from: "2024",
-        to: "Present",
-        logo: c.logoUrl || "bg-blue-600",
-        color: "border-blue-500",
-        shortName: (c.clubName || "CLB").slice(0, 3).toUpperCase(),
-        isCurrent: true,
-      }));
-    } else {
-      clubsList = [
-        { id: "1", name: data.currentClub || "Real Madrid Youth", from: "2024", to: "Present", logo: "bg-blue-600", color: "border-blue-400", shortName: "RMY" }
-      ];
     }
+
+    const positionMarkers = Array.isArray(data.positionMap) && data.positionMap.length > 0
+      ? data.positionMap.map((m: any, idx: number) => ({
+          id: m._id || `pos-${idx + 1}`,
+          name: m.position || m.slot || `Position-${idx + 1}`,
+          position: m.position || "",
+          slot: m.slot || "",
+          role: m.role || "",
+          x: Number(m.x ?? 50),
+          y: Number(m.y ?? 50),
+        }))
+      : [];
+
+    const futsalMarkers = Array.isArray(data.futsalMap) && data.futsalMap.length > 0
+      ? data.futsalMap.map((m: any, idx: number) => ({
+          id: m._id || `futsal-${idx + 1}`,
+          name: m.position || m.slot || `Futsal-${idx + 1}`,
+          position: m.position || "",
+          slot: m.slot || "",
+          role: m.role || "",
+          x: Number(m.x ?? 50),
+          y: Number(m.y ?? 50),
+        }))
+      : [];
+
+    const isVerified = Boolean(data.coachVerification?.isVerified ?? data.isVerifiedByCoach);
+    const resolvedUserId =
+      typeof data.userId === "object" && data.userId !== null
+        ? data.userId._id || data.userId.id || ""
+        : typeof data.userId === "string"
+          ? data.userId
+          : "";
 
     return {
       id: data._id || data.playerId || "",
+      userId: resolvedUserId,
       fullName: data.fullName || "Player",
-      dob: data.dateOfBirth ? (data.dateOfBirth.includes("T") ? data.dateOfBirth.split("T")[0] : data.dateOfBirth) : "2008-05-15",
-      age: String(data.age || 18),
-      birthCountry: data.country || "Bangladesh",
+      dob: data.dateOfBirth ? (data.dateOfBirth.includes("T") ? data.dateOfBirth.split("T")[0] : data.dateOfBirth) : "",
+      age: String(data.age ?? ""),
+      birthCountry: data.country || "",
       birthCountryFlag: flagFr,
-      dualNationality: data.dualNationality || "Spain",
+      dualNationality: data.dualNationality || "",
       dualNationalityFlag: flagIt,
       email: data.email || "",
       phone: data.phone || data.contact || "",
-      location: data.country || "Bangladesh",
+      location: data.country || "",
       website: data.website || "",
-      height: String(data.height || 180),
-      weight: String(data.weight || 75),
-      leftLegUsage: data.leftFootDominance ?? 50,
-      rightLegUsage: data.rightFootDominance ?? 50,
-      languages: Array.isArray(data.languages) && data.languages.length > 0
+      height: String(data.height ?? 0),
+      weight: String(data.weight ?? 0),
+      leftLegUsage: data.leftFootDominance ?? data.footDonut?.left ?? 50,
+      rightLegUsage: data.rightFootDominance ?? data.footDonut?.right ?? 50,
+      leftLegImage: leftLeg,
+      rightLegImage: rightLeg,
+      languages: Array.isArray(data.languages)
         ? data.languages.map((l: any, i: number) => ({
             name: l.language || l.name || "",
             level: l.proficiency || l.level || "Fluent",
             color: i === 0 ? "text-primary" : i === 1 ? "text-yellow" : "text-orange",
           }))
-        : [
-            { name: "English", level: "Fluent", color: "text-primary" },
-            { name: "Spanish", level: "Intermediate", color: "text-yellow" },
-          ],
-      rating: data.overallRating ?? 85,
+        : [],
+      rating: data.positionOverall ?? data.overallRating ?? 0,
+      positionOverall: typeof data.positionOverall === "number" ? data.positionOverall : undefined,
       profileImage: data.profileImage || "",
       cardImage: data.cardImage || data.cardPhoto || data.fifaCardStats?.cardImage || data.fifaCardStats?.cardPhoto || "",
       playerImage:
@@ -262,55 +289,59 @@ export const PlayerCvViewProvider = ({
         data.fifaCardStats?.cardPhoto ||
         "/profile_placeholder.jpg",
       strengths: {
-        pace: data.strength?.pace ?? 50,
-        shooting: data.strength?.shooting ?? 50,
-        passing: data.strength?.passing ?? 50,
-        dribbling: data.strength?.dribbling ?? 50,
-        defending: data.strength?.defending ?? 50,
-        physical: data.strength?.physical ?? 50,
-        heading: data.strength?.heading ?? 50,
+        pace: data.strength?.pace ?? data.strengths?.pace ?? 50,
+        shooting: data.strength?.shooting ?? data.strengths?.shooting ?? 50,
+        passing: data.strength?.passing ?? data.strengths?.passing ?? 50,
+        dribbling: data.strength?.dribbling ?? data.strengths?.dribbling ?? 50,
+        defending: data.strength?.defending ?? data.strengths?.defending ?? 50,
+        physical: data.strength?.physical ?? data.strengths?.physical ?? 50,
+        heading: data.strength?.heading ?? data.strengths?.heading ?? 50,
       },
       performanceMetrics: {
-        passAccuracy: 88,
-        shootAccuracy: 75,
-        dribbleSuccess: 80,
-        tackleSuccess: 70,
+        passAccuracy: data.matchSummary?.avgPassAccuracy ?? 0,
+        shootAccuracy: data.strength?.shooting ?? 0,
+        dribbleSuccess: data.strength?.dribbling ?? 0,
+        tackleSuccess: data.strength?.defending ?? 0,
       },
       marketValue: String(data.marketValue ?? 0),
-      marketTrend: "Stable",
-      transferStatus: typeof data.transferStatus === "string" ? data.transferStatus : (data.transferStatus?.status || "Active"),
-      contractUntil: data.contractUntil ? formatDate(data.contractUntil) : "June, 2028",
-      agent: data.agentName || "Unrepresented",
-      agency: data.agencyName || "",
-      currentClub: data.currentClub || "Real Madrid Youth",
-      position: data.position || "ST",
-      secondaryPositions: data.secondaryPositions || ["Winger", "CF"],
-      jerseyNumber: 10,
-      selectedStyleIds: data.playerStyles || ["technical", "finesse-shot"],
-      careerHighlights: Array.isArray(data.accomplishments) && data.accomplishments.length > 0
+      marketTrend: data.marketTrend || "",
+      transferStatus:
+        typeof data.transferStatus === "string"
+          ? data.transferStatus
+          : data.transferStatus?.status || data.clubStatus || "Available for Loan / Transfer",
+      contractUntil: data.contractUntil ? formatDate(data.contractUntil) : "N/A",
+      agent: data.agentName || data.transferStatus?.agentName || "N/A",
+      agency: data.agencyName || data.transferStatus?.agencyName || "N/A",
+      currentClub: data.currentClub || clubsList[0]?.name || "Unattached",
+      position: data.position || "CM",
+      secondaryPositions: Array.isArray(data.secondaryPositions) ? data.secondaryPositions : [],
+      jerseyNumber: data.jerseyNumber ?? 10,
+      selectedStyleIds: Array.isArray(data.playerStyles) ? data.playerStyles : [],
+      careerHighlights: Array.isArray(data.accomplishments)
         ? data.accomplishments.map((a: any) => ({
-            year: String(a.year || "2024"),
-            title: a.title || "Championship",
-            club: a.club || data.currentClub || "K10 Academy",
+            year: String(a.year || ""),
+            title: a.title || "",
+            club: a.club || data.currentClub || "",
             icon: trofeeIcon,
           }))
-        : [
-            { year: "2026", title: "Youth Premier League", club: "Real Madrid Youth", icon: trofeeIcon }
-          ],
+        : [],
       seasonStats: {
-        matches: data.performanceStats?.matches ?? (data.matchSummary?.totalMatches ?? 1),
-        goals: data.performanceStats?.goals ?? (data.matchSummary?.totalGoals ?? 0),
-        assists: data.performanceStats?.assists ?? (data.matchSummary?.totalAssists ?? 0),
-        avgRating: data.matchSummary?.avgMatchRating ?? 10,
+        matches: data.performanceStats?.matches ?? data.matchSummary?.totalMatches ?? 0,
+        goals: data.performanceStats?.goals ?? data.matchSummary?.totalGoals ?? 0,
+        assists: data.performanceStats?.assists ?? data.matchSummary?.totalAssists ?? 0,
+        avgRating: data.matchSummary?.avgMatchRating ?? 0,
       },
       clubs: clubsList,
       skillsCategories,
-      coachName: data.coachVerification?.coachName || "Marcus Silva",
-      academyName: data.academy || data.academyDetails?.name || "Santos FC Academy",
-      coachLicenseNumber: data.coachVerification?.licenseNumber || "UEFA Pro Licence",
-      clubManaged: data.coachVerification?.clubManaged || "Kings Football Academy",
-      isVerifiedByCoach: Boolean(data.coachVerification?.isVerified ?? data.isVerifiedByCoach),
-      additionalNotes: data.additionalNotes || `${data.fullName || "Player"} demonstrates outstanding spatial awareness and decision-making on the pitch. Tactical discipline is exceptional with strong work ethic and positional flexibility.`,
+      positionMarkers,
+      futsalMarkers,
+      coachName: data.coachVerification?.coachName || data.coachName || "N/A",
+      academyName: data.academy || data.academyDetails?.name || "N/A",
+      coachLicenseNumber: data.coachVerification?.licenseNumber || data.licenseNumber || "",
+      clubManaged: data.coachVerification?.clubManaged || data.clubManaged || "N/A",
+      isVerifiedByCoach: isVerified,
+      validationStatus: isVerified ? "verified" : "pending",
+      additionalNotes: data.additionalNotes || "",
       highlightVideo: data.highlightVideo,
       documents: data.documents || [],
       certificates: data.certificates || data.documents || [],
@@ -319,11 +350,11 @@ export const PlayerCvViewProvider = ({
       perceptionMetrics: data.perceptionMetrics,
       visionMetrics: data.visionMetrics,
       footDonut: data.footDonut,
-      skillsDonutScore: data.skillsDonutScore ?? 61,
+      skillsDonutScore: data.skillsDonutScore ?? 0,
       positionalCoefficients: data.positionalCoefficients,
       keyAttributes: data.keyAttributes,
-      profileViews: data.profileViews ?? 127,
-      totalLikes: data.totalLikes ?? 8,
+      profileViews: data.overviewStats?.profileViews ?? data.profileViews ?? 0,
+      totalLikes: data.overviewStats?.totalLikes ?? data.totalLikes ?? 0,
       rawCvData: data,
     };
   }, [apiData]);

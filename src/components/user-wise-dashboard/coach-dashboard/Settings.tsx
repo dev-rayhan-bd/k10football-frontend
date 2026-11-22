@@ -26,6 +26,7 @@ import {
   SettingsInput, 
   SettingsToggle 
 } from "@/components/dashboard/DashboardSettingsElements";
+import NotificationSettingsCard from "@/components/notifications/NotificationSettingsCard";
 import { useChangePasswordMutation } from "@/redux/features/auth/authApi";
 import { 
   useGetMyCoachProfileQuery, 
@@ -589,20 +590,7 @@ const Settings = () => {
         </SettingsSection>
 
         {/* Notifications */}
-        <SettingsSection title="Notifications" icon={<IconBell size={20} />}>
-          <div className="flex flex-col gap-4">
-            <SettingsToggle 
-              title="New video likes" 
-              description="Get notified when someone likes your video" 
-              defaultChecked 
-            />
-            <SettingsToggle 
-              title="Profile views" 
-              description="Get notified when a club views your profile" 
-              defaultChecked 
-            />
-          </div>
-        </SettingsSection>
+        <NotificationSettingsCard className="rounded-[30px]! sm:rounded-[40px]! p-6! sm:p-10!" />
       </div>
     </div>
   );

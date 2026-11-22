@@ -1,51 +1,131 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import React from "react";
-import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from 'recharts';
+import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from "recharts";
 import { usePlayer } from "@/hooks/usePlayer";
-import { useAppSelector } from "@/hooks/reduxHooks";
 import { useGetMySubscriptionQuery } from "@/redux/features/subscription/subscriptionApi";
+import { useGetMyGameReportsQuery } from "@/redux/features/player/playerApi";
 import { useRouter } from "next/navigation";
 import { Lock } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 const PerformanceChart = () => {
-  const { playerData } = usePlayer();
+  const { playerData, cvData } = usePlayer();
   const router = useRouter();
-  const reports = useAppSelector(state => state.reports.reports);
   const { data: subscriptionResponse } = useGetMySubscriptionQuery();
+  const { data: gameReportsResponse } = useGetMyGameReportsQuery({ page: 1, limit: 20 });
   const hasActiveSubscription = Boolean(subscriptionResponse?.data?.hasActiveSubscription);
 
-  const paidReports = reports.filter(r => r.status === "Paid");
-  
-  const totalGoals = paidReports.reduce((sum, r) => sum + r.goals, 0);
-  const totalAssists = paidReports.reduce((sum, r) => sum + r.assists, 0);
-  const totalMatches = paidReports.length;
+  const toSafeNumber = (...candidates: unknown[]): number => {
+    for (const val of candidates) {
+      if (val === null || val === undefined || val === "") continue;
+      const parsed =
+        typeof val === "number"
+          ? val
+          : parseFloat(String(val).replace(/[^0-9.-]/g, ""));
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
+    }
+    return 0;
+  };
 
-  const avgPassAccuracy = totalMatches > 0 
-    ? Math.round(paidReports.reduce((sum, r) => sum + r.passAccuracy, 0) / totalMatches)
-    : 0;
+  const toSafePercent = (...candidates: unknown[]): number => {
+    const n = toSafeNumber(...candidates);
+    return Math.max(0, Math.min(100, Math.round(n)));
+  };
+
+  const apiReports = gameReportsResponse?.data?.reports || [];
+  const recentMatches = Array.isArray(cvData?.recentMatches) ? cvData.recentMatches : [];
+
+  const totalGoals = Math.round(
+    toSafeNumber(
+      cvData?.matchSummary?.totalGoals,
+      cvData?.performanceStats?.goals,
+      playerData?.seasonStats?.goals,
+      apiReports.reduce((sum, r) => sum + toSafeNumber(r.performanceMetrics?.goals), 0)
+    )
+  );
+  const totalAssists = Math.round(
+    toSafeNumber(
+      cvData?.matchSummary?.totalAssists,
+      cvData?.performanceStats?.assists,
+      playerData?.seasonStats?.assists,
+      apiReports.reduce((sum, r) => sum + toSafeNumber(r.performanceMetrics?.assists), 0)
+    )
+  );
+  const totalMatches = Math.round(
+    toSafeNumber(
+      cvData?.matchSummary?.totalMatches,
+      cvData?.performanceStats?.matches,
+      playerData?.seasonStats?.matches,
+      gameReportsResponse?.data?.summary?.totalReports,
+      apiReports.length
+    )
+  );
+
+  const validPassAccValues = recentMatches
+    .map((m: any) => toSafeNumber(m?.passAccuracy))
+    .filter((v: number) => v > 0);
+  const computedMatchPassAcc =
+    validPassAccValues.length > 0
+      ? Math.round(
+          validPassAccValues.reduce((sum: number, v: number) => sum + v, 0) /
+            validPassAccValues.length
+        )
+      : undefined;
+
+  const avgPassAccuracy = toSafePercent(
+    cvData?.matchSummary?.avgPassAccuracy,
+    computedMatchPassAcc,
+    (cvData as any)?.attributes?.categories?.technical?.shortPassing,
+    playerData?.strengths?.passing
+  );
+
+  const shotAccuracy = toSafePercent(
+    (cvData as any)?.matchSummary?.avgShotAccuracy,
+    (cvData as any)?.attributes?.categories?.technical?.finishing,
+    playerData?.strengths?.shooting,
+    playerData?.performanceMetrics?.shootAccuracy
+  );
+
+  const dribbleSuccess = toSafePercent(
+    (cvData as any)?.matchSummary?.avgDribbleSuccess,
+    (cvData as any)?.attributes?.categories?.technical?.dribbling,
+    playerData?.strengths?.dribbling,
+    playerData?.performanceMetrics?.dribbleSuccess
+  );
+
+  const visionScore = toSafePercent(
+    (cvData as any)?.attributes?.categories?.tactical?.vision,
+    playerData?.strengths?.passing
+  );
+  const strengthScore = toSafePercent(
+    (cvData as any)?.attributes?.categories?.physical?.strength,
+    playerData?.strengths?.physical
+  );
 
   const radarData = [
-    { subject: 'Vision', value: playerData.strengths.passing },
-    { subject: 'Strength', value: playerData.strengths.physical },
-    { subject: 'Pace', value: playerData.strengths.pace },
-    { subject: 'Passing', value: playerData.strengths.passing },
-    { subject: 'Shooting', value: playerData.strengths.shooting },
-    { subject: 'Dribbling', value: playerData.strengths.dribbling }
+    { subject: "Vision", value: visionScore },
+    { subject: "Strength", value: strengthScore },
+    { subject: "Pace", value: toSafePercent(playerData?.strengths?.pace) },
+    { subject: "Passing", value: toSafePercent(playerData?.strengths?.passing) },
+    { subject: "Shooting", value: toSafePercent(playerData?.strengths?.shooting) },
+    { subject: "Dribbling", value: toSafePercent(playerData?.strengths?.dribbling) },
   ];
 
   const stats = [
-    { label: 'Goals', value: totalGoals.toString() },
-    { label: 'Assists', value: totalAssists.toString() },
-    { label: 'Matches', value: totalMatches.toString() }
+    { label: "Goals", value: String(totalGoals) },
+    { label: "Assists", value: String(totalAssists) },
+    { label: "Matches", value: String(totalMatches) },
   ];
 
   const accuracyMetrics = [
-    { label: 'Pass Accuracy', value: avgPassAccuracy },
-    { label: 'Shot Accuracy', value: playerData.performanceMetrics.shootAccuracy },
-    { label: 'Dribble Success', value: playerData.performanceMetrics.dribbleSuccess }
+    { label: "Pass Accuracy", value: avgPassAccuracy },
+    { label: "Shot Accuracy", value: shotAccuracy },
+    { label: "Dribble Success", value: dribbleSuccess },
   ];
 
   const handleFullAnalyticsClick = () => {
@@ -68,7 +148,7 @@ const PerformanceChart = () => {
             </h1>
             <p className="text-gray-400 text-xs sm:text-sm">Season 2024/25</p>
           </div>
-          <button 
+          <button
             onClick={handleFullAnalyticsClick}
             className="self-start sm:self-auto px-5 py-2 border border-gray-600 text-gray-300 rounded-xl hover:border-gray-400 transition text-xs font-orbitron uppercase tracking-wider flex items-center gap-2 cursor-pointer"
           >
@@ -99,14 +179,19 @@ const PerformanceChart = () => {
             </div>
           )}
 
-          <div className={cn("flex flex-col lg:flex-row gap-8 lg:gap-12", !hasActiveSubscription && "opacity-35 pointer-events-none select-none")}>
+          <div
+            className={cn(
+              "flex flex-col lg:flex-row gap-8 lg:gap-12",
+              !hasActiveSubscription && "opacity-35 pointer-events-none select-none"
+            )}
+          >
             {/* Left - Radar Chart */}
             <div className="flex-1 w-full min-h-75 min-w-0">
               <ResponsiveContainer width="100%" height={320}>
                 <RadarChart data={radarData} margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
                   <PolarGrid stroke="#333333" />
-                  <PolarAngleAxis dataKey="subject" stroke="#666666" tick={{ fill: '#999999', fontSize: 11 }} />
-                  <PolarRadiusAxis angle={90} domain={[0, 100]} stroke="#333333" tick={{ fill: '#666666', fontSize: 10 }} />
+                  <PolarAngleAxis dataKey="subject" stroke="#666666" tick={{ fill: "#999999", fontSize: 11 }} />
+                  <PolarRadiusAxis angle={90} domain={[0, 100]} stroke="#333333" tick={{ fill: "#666666", fontSize: 10 }} />
                   <Radar
                     name="Performance"
                     dataKey="value"
@@ -131,7 +216,7 @@ const PerformanceChart = () => {
               </div>
 
               {/* Accuracy Metrics */}
-              <div className="space-y-4 sm:space-y-6">
+              <div className="flex flex-col gap-4 sm:gap-6">
                 {accuracyMetrics.map((metric) => (
                   <div key={metric.label}>
                     <div className="flex items-center justify-between mb-2">

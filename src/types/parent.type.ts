@@ -5,6 +5,13 @@ export interface IAssignedCoach {
   profileImage?: string;
 }
 
+export interface IChildCurrentSubscription {
+  planTitle: string;
+  status: string;
+  endDate: string | null;
+  daysRemaining: number;
+}
+
 export interface ILinkedChild {
   linkId: string;
   relationshipType: string;
@@ -14,11 +21,14 @@ export interface ILinkedChild {
   email?: string;
   position: string;
   profileImage?: string | null;
-  cvTier?: string;
+  cvTier?: "BRONZE" | "SILVER" | "GOLD" | string;
   isCvVerified?: boolean;
   isVerifiedByCoach?: boolean;
   isVerified?: boolean;
   overallRating?: number;
+  hasActiveSubscription?: boolean;
+  subscriptionStatus?: "ACTIVE" | "EXPIRED" | "FREE" | string;
+  currentSubscription?: IChildCurrentSubscription | null;
   age?: number;
   dateOfBirth?: string | null;
   height?: number;
@@ -93,6 +103,8 @@ export interface IParentOverviewStats {
 export interface IParentYouthProfile {
   _id?: string;
   id?: string;
+  childPlayerId?: string;
+  childUserId?: string;
   fullName: string;
   profileImage?: string | null;
   tier?: string;
@@ -104,6 +116,9 @@ export interface IParentYouthProfile {
   ratingFormatted?: string;
   formattedSubtitle?: string;
   headCoachFormatted?: string;
+  hasActiveSubscription?: boolean;
+  subscriptionStatus?: "ACTIVE" | "EXPIRED" | "FREE" | string;
+  currentSubscription?: IChildCurrentSubscription | null;
 }
 
 export interface IParentTrainingRsvpItem {
@@ -133,12 +148,24 @@ export interface IParentRecentActivityItem {
 export interface IParentOverviewChildItem {
   _id?: string;
   id?: string;
+  childPlayerId?: string;
+  childUserId?: string;
   fullName: string;
   position?: string;
   profileImage?: string | null;
   overallRating?: number;
   tier?: string;
   isCurrent?: boolean;
+  hasActiveSubscription?: boolean;
+  subscriptionStatus?: "ACTIVE" | "EXPIRED" | "FREE" | string;
+  currentSubscription?: IChildCurrentSubscription | null;
+}
+
+export interface IParentSubscriptionSummary {
+  activeChildHasSubscription: boolean;
+  hasAnySubscribedChild: boolean;
+  subscribedChildrenCount: number;
+  totalChildrenCount: number;
 }
 
 export interface IParentOverviewData {
@@ -147,6 +174,8 @@ export interface IParentOverviewData {
   trainingRsvp: IParentTrainingRsvpItem[];
   recentActivity: IParentRecentActivityItem[];
   children?: IParentOverviewChildItem[];
+  hasActiveSubscription?: boolean;
+  subscriptionSummary?: IParentSubscriptionSummary;
 }
 
 export interface IParentOverviewResponse {
@@ -157,6 +186,7 @@ export interface IParentOverviewResponse {
 }
 
 export interface IGetParentOverviewParams {
+  childPlayerId?: string;
   childId?: string;
 }
 
@@ -206,6 +236,7 @@ export interface IParentFeeInvoice {
 
 export interface IGetParentFeesParams {
   status?: "ALL" | "UNPAID" | "PAID" | string;
+  childPlayerId?: string;
 }
 
 export interface IGetParentFeesResponse {
@@ -375,6 +406,78 @@ export interface ISwitchProfileResponse {
   success: boolean;
   message: string;
   data: ISwitchProfileData;
+}
+
+export interface IParentReportEvent {
+  type: "Goal" | "Assist" | string;
+  x: number;
+  y: number;
+}
+
+export interface IParentMatchReport {
+  _id: string;
+  id?: string;
+  reportId?: string;
+  childPlayerId?: string;
+  playerId?: string;
+  opponent?: string;
+  opponentTeam?: string;
+  awayTeam?: string;
+  homeTeam?: string;
+  title?: string;
+  matchDate?: string;
+  date?: string;
+  rating?: number;
+  scoutRating?: number;
+  status?: string;
+  paymentStatus?: string;
+  evaluationStatus?: string;
+  amount?: string | number;
+  amountNumber?: number;
+  events?: IParentReportEvent[];
+  plottedEvents?: IParentReportEvent[];
+  goals?: number;
+  assists?: number;
+  createdAt?: string;
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  [key: string]: any;
+}
+
+export interface IGetParentReportsParams {
+  childPlayerId?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface IGetParentReportsResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data:
+    | IParentMatchReport[]
+    | {
+        reports?: IParentMatchReport[];
+        items?: IParentMatchReport[];
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+        meta?: any;
+      };
+}
+
+export interface ICreateParentReportPayload {
+  childPlayerId: string;
+  opponent: string;
+  opponentTeam?: string;
+  matchDate: string;
+  date?: string;
+  events: IParentReportEvent[];
+  goals?: number;
+  assists?: number;
+  notes?: string;
+}
+
+export interface IRequestParentReportReviewPayload {
+  reportId: string;
+  childPlayerId?: string;
 }
 
 

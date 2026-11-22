@@ -135,8 +135,8 @@ const TacticalMap = ({
   );
 };
 
-const Top3Formation = ({ editable }: { editable?: boolean }) => {
-  const { coachData, handleUpdate } = useCoach();
+const Top3Formation = ({ editable, coachId }: { editable?: boolean; coachId?: string }) => {
+  const { coachData, handleUpdate } = useCoach(coachId);
 
   const handleMarkersUpdate = (index: number, newMarkers: any[]) => {
     const updatedMarkers = [...(coachData.formationMarkers || [[], [], []])];

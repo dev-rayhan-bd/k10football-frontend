@@ -41,6 +41,7 @@ const ClubLogoImage = ({ logo, name, className }: ClubLogoImageProps) => {
       alt={name}
       width={80}
       height={80}
+      unoptimized={typeof src === "string" && (src.startsWith("http") || src.startsWith("data:") || src.startsWith("blob:"))}
       className={className}
       onError={() => {
         setHasError(true);

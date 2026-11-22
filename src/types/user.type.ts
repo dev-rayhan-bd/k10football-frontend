@@ -22,6 +22,16 @@ export interface IUserData {
   isVerified?: boolean;
   hasActiveSubscription?: boolean;
   currentSubscription?: unknown;
+  subscribedChildrenCount?: number;
+  totalChildrenCount?: number;
+  childSubscriptions?: Array<{
+    childPlayerId: string;
+    childUserId?: string;
+    fullName?: string;
+    hasActiveSubscription: boolean;
+    subscriptionStatus?: string;
+    currentSubscription?: unknown;
+  }>;
   [key: string]: unknown;
 }
 

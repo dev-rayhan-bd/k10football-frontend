@@ -47,8 +47,13 @@ export const StrengthSection = ({
     }
   }, [playerData?.strengths, isStrengthDirty]);
 
+  const clampStrength = (v: unknown) => {
+    const n = Number(v);
+    return isNaN(n) ? 50 : Math.max(1, Math.min(99, Math.round(n)));
+  };
+
   const handleStrengthChange = (key: string, val: number) => {
-    const numVal = isNaN(val) ? 0 : Math.max(0, Math.min(100, val));
+    const numVal = isNaN(val) ? 1 : Math.max(1, Math.min(99, val));
     setStrengthDraft((prev) => {
       const next = { ...prev, [key]: numVal };
       const hasDifference = STRENGTH_KEYS.some(
@@ -63,13 +68,13 @@ export const StrengthSection = ({
   const handleSaveStrength = async () => {
     try {
       setIsSavingStrength(true);
-      const pace = Number(strengthDraft.pace ?? 50);
-      const shooting = Number(strengthDraft.shooting ?? 50);
-      const passing = Number(strengthDraft.passing ?? 50);
-      const dribbling = Number(strengthDraft.dribbling ?? 50);
-      const defending = Number(strengthDraft.defending ?? 50);
-      const physical = Number(strengthDraft.physical ?? 50);
-      const heading = Number(strengthDraft.heading ?? 50);
+      const pace = clampStrength(strengthDraft.pace ?? 50);
+      const shooting = clampStrength(strengthDraft.shooting ?? 50);
+      const passing = clampStrength(strengthDraft.passing ?? 50);
+      const dribbling = clampStrength(strengthDraft.dribbling ?? 50);
+      const defending = clampStrength(strengthDraft.defending ?? 50);
+      const physical = clampStrength(strengthDraft.physical ?? 50);
+      const heading = clampStrength(strengthDraft.heading ?? 50);
 
       const payload = {
         attributes: {
@@ -186,9 +191,9 @@ export const StrengthSection = ({
                     </div>
                     <input
                       type="range"
-                      min="0"
-                      max="100"
-                      value={value}
+                      min="1"
+                      max="99"
+                      value={Math.max(1, Math.min(99, value))}
                       onChange={(e) =>
                         handleStrengthChange(key, parseInt(e.target.value))
                       }
@@ -201,9 +206,9 @@ export const StrengthSection = ({
                     />
                     <input
                       type="range"
-                      min="0"
-                      max="100"
-                      value={value}
+                      min="1"
+                      max="99"
+                      value={Math.max(1, Math.min(99, value))}
                       onChange={(e) =>
                         handleStrengthChange(key, parseInt(e.target.value))
                       }
@@ -227,6 +232,8 @@ export const StrengthSection = ({
                   }
                   canEdit={canEditEvaluation}
                   type="number"
+                  min={1}
+                  max={99}
                   editTrigger="doubleClick"
                   className="font-bold text-xs justify-end"
                   style={{ color: getHexColor(value) }}

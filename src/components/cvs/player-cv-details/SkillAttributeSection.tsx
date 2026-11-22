@@ -200,7 +200,7 @@ const SkillsAttributes = ({ editable = false }: { editable?: boolean }) => {
   }, [categories, setSkillsAvg, dispatch, editable, isDirty]);
 
   const handleSkillChange = (catIdx: number, skillIdx: number, rawVal: number) => {
-    const clamped = Math.max(0, Math.min(100, isNaN(rawVal) ? 0 : rawVal));
+    const clamped = Math.max(1, Math.min(99, isNaN(rawVal) ? 1 : rawVal));
     setCategories((prev) => {
       const newCats = [...prev];
       newCats[catIdx] = {
@@ -221,7 +221,8 @@ const SkillsAttributes = ({ editable = false }: { editable?: boolean }) => {
       const payload: Record<string, number> = {};
       categories.forEach((cat) => {
         cat.skills.forEach((skill) => {
-          payload[skill.key] = Number(skill.value);
+          const n = Number(skill.value);
+          payload[skill.key] = Math.max(1, Math.min(99, isNaN(n) ? 50 : Math.round(n)));
         });
       });
 
@@ -348,9 +349,9 @@ const SkillsAttributes = ({ editable = false }: { editable?: boolean }) => {
 
                             <input
                               type="range"
-                              min="0"
-                              max="100"
-                              value={skill.value}
+                              min="1"
+                              max="99"
+                              value={Math.max(1, Math.min(99, skill.value))}
                               onChange={(e) =>
                                 handleSkillChange(catIdx, skillIdx, parseInt(e.target.value))
                               }
@@ -362,9 +363,9 @@ const SkillsAttributes = ({ editable = false }: { editable?: boolean }) => {
 
                             <input
                               type="range"
-                              min="0"
-                              max="100"
-                              value={skill.value}
+                              min="1"
+                              max="99"
+                              value={Math.max(1, Math.min(99, skill.value))}
                               onChange={(e) =>
                                 handleSkillChange(catIdx, skillIdx, parseInt(e.target.value))
                               }
@@ -389,6 +390,8 @@ const SkillsAttributes = ({ editable = false }: { editable?: boolean }) => {
                           }
                           canEdit={editable}
                           type="number"
+                          min={1}
+                          max={99}
                           editTrigger="doubleClick"
                           className="font-bold text-base justify-end uppercase"
                           style={{ color: getHexColor(skill.value) }}

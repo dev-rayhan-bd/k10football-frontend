@@ -32,8 +32,8 @@ import {
 import {
   useGetParentTrainingSessionsQuery,
   useSubmitSessionRsvpMutation,
-  useGetMyChildrenQuery,
 } from "@/redux/features/parent/parentApi";
+import { useParentDashboard } from "@/providers/ParentDashboardProvider";
 import { IParentTrainingSessionItem } from "@/types/parent.type";
 import { cn } from "@/lib/utils";
 
@@ -54,7 +54,11 @@ const formatDate = (dateStr?: string) => {
 };
 
 const ParentAttendance = () => {
-  const [selectedChildId, setSelectedChildId] = useState<string | undefined>(undefined);
+  const {
+    selectedChildPlayerId,
+    selectedChild,
+    children: linkedChildren,
+  } = useParentDashboard();
 
   // Modal State for RSVP
   const [rsvpModal, setRsvpModal] = useState<{
@@ -69,18 +73,16 @@ const ParentAttendance = () => {
     notes: "",
   });
 
-  // Query linked children
-  const { data: childrenResponse } = useGetMyChildrenQuery();
-  const linkedChildren = childrenResponse?.data || [];
-
-  // Query training sessions from API
+  // Query training sessions from API scoped to selected child: GET /api/v1/parents/training-sessions?childPlayerId=<selectedChildPlayerId>
   const {
     data: sessionsResponse,
     isLoading,
     isError,
     refetch,
   } = useGetParentTrainingSessionsQuery(
-    selectedChildId ? { childPlayerId: selectedChildId } : undefined
+    selectedChildPlayerId
+      ? { childPlayerId: selectedChildPlayerId }
+      : undefined
   );
 
   const [submitRsvp, { isLoading: isSubmittingRsvp }] = useSubmitSessionRsvpMutation();
@@ -129,7 +131,7 @@ const ParentAttendance = () => {
     const sessionId = session.sessionId || session._id;
     const childPlayerId =
       session.child?.playerId ||
-      selectedChildId ||
+      selectedChildPlayerId ||
       linkedChildren[0]?.childPlayerId;
 
     if (!sessionId) {
@@ -208,28 +210,9 @@ const ParentAttendance = () => {
             Training <span className="text-primary italic">Attendance</span>
           </h1>
           <p className="text-muted-foreground font-bold uppercase tracking-widest text-[9px] md:text-[11px] mt-2 leading-relaxed">
-            Monitor your child&apos;s training schedule and confirm RSVPs
+            Monitor {selectedChild?.fullName ? `${selectedChild.fullName}'s` : "your child's"} training schedule and confirm RSVPs
           </p>
         </div>
-
-        {/* Child Selector if multiple children */}
-        {linkedChildren.length > 1 && (
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground font-orbitron uppercase">Athlete:</span>
-            <select
-              value={selectedChildId || ""}
-              onChange={(e) => setSelectedChildId(e.target.value || undefined)}
-              className="bg-card border border-white/10 hover:border-white/20 text-white rounded-xl px-4 py-2 text-xs font-bold font-orbitron cursor-pointer focus:outline-none focus:border-primary/50 transition-all"
-            >
-              <option value="">All Athletes</option>
-              {linkedChildren.map((child) => (
-                <option key={child.childPlayerId} value={child.childPlayerId}>
-                  {child.fullName} ({child.position || "Player"})
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
       </div>
 
       {/* Stats Board */}

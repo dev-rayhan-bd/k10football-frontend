@@ -29,6 +29,8 @@ interface CMSFieldProps {
   style?: React.CSSProperties;
   showEmojis?: boolean;
   noTruncate?: boolean;
+  min?: number;
+  max?: number;
 }
 
 const EMOJIS = ["⚽", "👀", "🎯", "🧠", "💪", "🌍", "🏆", "🔥", "⚡", "📈", "👏", "🙌", "❤️", "👍"];
@@ -47,6 +49,8 @@ const CMSField = ({
   style,
   showEmojis = false,
   noTruncate = false,
+  min,
+  max,
 }: CMSFieldProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [tempValue, setTempValue] = useState(value);
@@ -95,8 +99,15 @@ const CMSField = ({
   }, [isEditing, type, value]);
 
   const handleSave = (val?: string | number) => {
-    const finalVal = val !== undefined ? val : tempValue;
-    onUpdate(isNumeric ? Number(finalVal) : finalVal);
+    let finalVal = val !== undefined ? val : tempValue;
+    if (isNumeric || type === "number") {
+      let num = Number(finalVal);
+      if (isNaN(num)) num = min ?? 0;
+      if (min !== undefined) num = Math.max(min, num);
+      if (max !== undefined) num = Math.min(max, num);
+      finalVal = num;
+    }
+    onUpdate(finalVal);
     setIsEditing(false);
     setSearchTerm("");
     setHasTyped(false);
@@ -343,6 +354,8 @@ const CMSField = ({
             ) : (
               <Input
                 type={type}
+                min={min}
+                max={max}
                 value={
                   type === "date" && String(tempValue).includes("/")
                     ? String(tempValue).split("/").reverse().join("-")

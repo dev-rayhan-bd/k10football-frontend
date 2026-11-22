@@ -6,6 +6,9 @@ import {
   IGetUnreadCountResponse,
   IGetNotificationsParams,
   IBaseNotificationResponse,
+  IGetNotificationSettingsResponse,
+  IUpdateNotificationSettingsPayload,
+  IUpdateNotificationSettingsResponse,
 } from "@/types/notification.type";
 import { SuccessToast, ErrorToast } from "@/helpers/ValidationHelper";
 
@@ -115,6 +118,69 @@ export const notificationApi = apiSlice.injectEndpoints({
         }
       },
     }),
+
+    // 6. GET /notifications/settings
+    getNotificationSettings: builder.query<IGetNotificationSettingsResponse, void>({
+      query: () => ({
+        url: "/notifications/settings",
+        method: "GET",
+      }),
+      providesTags: [TagTypes.NOTIFICATIONS],
+    }),
+
+    // 7. PATCH /notifications/settings
+    updateNotificationSettings: builder.mutation<
+      IUpdateNotificationSettingsResponse,
+      IUpdateNotificationSettingsPayload
+    >({
+      query: (body) => ({
+        url: "/notifications/settings",
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: [TagTypes.NOTIFICATIONS],
+      async onQueryStarted(patch, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          notificationApi.util.updateQueryData("getNotificationSettings", undefined, (draft) => {
+            if (draft?.data) {
+              if (draft.data.settings) {
+                Object.entries(patch).forEach(([key, val]) => {
+                  if (typeof val === "boolean") {
+                    draft.data.settings[key] = val;
+                  }
+                });
+              }
+              if (Array.isArray(draft.data.controls)) {
+                draft.data.controls = draft.data.controls.map((ctrl) => {
+                  if (ctrl.key in patch) {
+                    return { ...ctrl, value: Boolean(patch[ctrl.key]) };
+                  }
+                  return ctrl;
+                });
+              }
+            }
+          })
+        );
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Notification preferences updated");
+        } catch (err: any) {
+          patchResult.undo();
+          const status = err?.error?.status;
+          const message =
+            err?.error?.data?.message ||
+            err?.error?.message ||
+            "Failed to update notification settings";
+          if (status === 500) {
+            ErrorToast("Something went wrong on the server");
+            return;
+          }
+          if (status !== 401) {
+            ErrorToast(message);
+          }
+        }
+      },
+    }),
   }),
 });
 
@@ -126,4 +192,7 @@ export const {
   useMarkAllNotificationsAsReadMutation,
   useMarkNotificationAsReadMutation,
   useDeleteNotificationMutation,
+  useGetNotificationSettingsQuery,
+  useLazyGetNotificationSettingsQuery,
+  useUpdateNotificationSettingsMutation,
 } = notificationApi;

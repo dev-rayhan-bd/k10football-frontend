@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from "./reduxHooks";
 import { updateCoachField, syncFromCoachCvResponse } from "@/redux/features/coach/coachSlice";
 import {
   useGetMyCoachCvQuery,
+  useGetCoachCvByIdQuery,
   useUpdateMyCoachProfileMutation,
 } from "@/redux/features/coach/coachApi";
 import { IUpdateCoachPayload } from "@/types/coach.type";
@@ -16,24 +17,48 @@ const getCountryCode = (countryName?: string) => {
   return code ? code.toUpperCase() : countryName.toUpperCase().slice(0, 2);
 };
 
-export const useCoach = () => {
+export const useCoach = (explicitCoachId?: string) => {
   const dispatch = useAppDispatch();
   const coachData = useAppSelector((state) => state.coach);
+
+  const queryCoachId =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("coachId")
+      : null;
+  const targetCoachId = explicitCoachId || queryCoachId || "";
+  const isViewingSpecificCoach = Boolean(targetCoachId);
 
   const hasToken =
     typeof window !== "undefined" &&
     Boolean(localStorage.getItem("token") || localStorage.getItem("accessToken"));
 
-  // 1. GET CV API: Fetch complete Coach CV from {{baseUrl}}/coaches/me/cv
+  // 1A. When viewing specific coach, fetch from {{baseUrl}}/coaches/:id/cv
   const {
-    data: cvResponse,
-    isLoading: isCvLoading,
-    isFetching: isCvFetching,
-    error: cvError,
-    refetch: refetchCv,
-  } = useGetMyCoachCvQuery(undefined, {
-    skip: !hasToken,
+    data: specificCvResponse,
+    isLoading: isSpecificCvLoading,
+    isFetching: isSpecificCvFetching,
+    error: specificCvError,
+    refetch: refetchSpecificCv,
+  } = useGetCoachCvByIdQuery(targetCoachId, {
+    skip: !isViewingSpecificCoach,
   });
+
+  // 1B. When viewing own coach CV, fetch from {{baseUrl}}/coaches/me/cv
+  const {
+    data: myCvResponse,
+    isLoading: isMyCvLoading,
+    isFetching: isMyCvFetching,
+    error: myCvError,
+    refetch: refetchMyCv,
+  } = useGetMyCoachCvQuery(undefined, {
+    skip: isViewingSpecificCoach || !hasToken,
+  });
+
+  const cvResponse = isViewingSpecificCoach ? specificCvResponse : myCvResponse;
+  const isCvLoading = isViewingSpecificCoach ? isSpecificCvLoading : isMyCvLoading;
+  const isCvFetching = isViewingSpecificCoach ? isSpecificCvFetching : isMyCvFetching;
+  const cvError = isViewingSpecificCoach ? specificCvError : myCvError;
+  const refetchCv = isViewingSpecificCoach ? refetchSpecificCv : refetchMyCv;
 
   // 2. PATCH Coach API: Update coach profile / CV from {{baseUrl}}/coaches/me
   const [updateCoachMutation, { isLoading: isUpdating }] = useUpdateMyCoachProfileMutation();
@@ -389,5 +414,8 @@ export const useCoach = () => {
     refetchCv,
     handleUpdate,
     updateCoachProfile,
+    isViewingSpecificCoach,
+    targetCoachId,
+    coachUserId: cvResponse?.data?.userId || (coachData as any)?.userId || targetCoachId,
   };
 };

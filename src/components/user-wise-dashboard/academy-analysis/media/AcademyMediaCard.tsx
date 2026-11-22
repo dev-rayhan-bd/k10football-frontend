@@ -64,14 +64,24 @@ export const AcademyMediaCard = ({
       className="bg-[#111111] rounded-3xl border border-white/5 p-4 flex flex-col gap-4 group cursor-pointer hover:border-white/15 transition-all relative overflow-hidden"
     >
       {/* Thumbnail Area */}
-      <div className="relative aspect-video rounded-2xl overflow-hidden bg-white/5">
+      <div className="relative aspect-video rounded-2xl overflow-hidden bg-black/60 flex items-center justify-center">
+        {/* Ambient blurred backdrop so letterbox bars match image colors */}
+        <Image
+          src={thumbnailSrc}
+          alt=""
+          fill
+          unoptimized
+          aria-hidden="true"
+          className="object-cover blur-xl opacity-35 scale-110 pointer-events-none"
+        />
+        {/* Main image: never cropped */}
         <Image
           src={thumbnailSrc}
           alt={item.title || "Media"}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
           unoptimized
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          className="relative z-1 object-contain p-0.5 transition-transform duration-500 group-hover:scale-105"
           onError={(e) => {
             const target = e.currentTarget as HTMLImageElement;
             target.srcset = "";

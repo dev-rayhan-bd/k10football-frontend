@@ -460,6 +460,14 @@ export const playerApi = apiSlice.injectEndpoints({
             providesTags: [TagTypes.GAME_REPORTS],
         }),
 
+        getMyGameReportById: builder.query<any, string>({
+            query: (reportId: string) => ({
+                url: `/players/me/game-reports/${reportId}`,
+                method: "GET",
+            }),
+            providesTags: [TagTypes.GAME_REPORTS],
+        }),
+
         completeSelfGameReport: builder.mutation<any, { reportId: string | number; payload: ICompleteSelfGameReportPayload }>({
             query: ({ reportId, payload }) => ({
                 url: `/players/me/game-reports/${reportId}/complete-self`,
@@ -635,6 +643,8 @@ export const {
     useCompleteSelfGameReportMutation,
     useRequestCoachGameReportMutation,
     useGetMyGameReportsQuery,
+    useGetMyGameReportByIdQuery,
+    useLazyGetMyGameReportByIdQuery,
     useUploadPlayerDocumentMutation,
     useDeletePlayerDocumentMutation,
     useUpdatePlayerDocumentMutation,

@@ -21,8 +21,9 @@ import { usePlayer } from "@/hooks/usePlayer";
 import { usePlayerStats } from "@/components/cvs/player-cv-details/FullEditablePage";
 import { getFullWithShortForm, formatDate } from "@/lib/utils";
 import { FileText } from 'lucide-react';
-import { useAppDispatch, useAppSelector } from "@/hooks/reduxHooks";
+import { useAppDispatch } from "@/hooks/reduxHooks";
 import { updatePlayerField } from "@/redux/features/player/playerSlice";
+import { useGetMyGameReportsQuery } from "@/redux/features/player/playerApi";
 
 const GenerateCv = () => {
   const dispatch = useAppDispatch();
@@ -76,24 +77,36 @@ const GenerateCv = () => {
       }
     }
   };
-  const reports = useAppSelector(state => state.reports.reports);
+  const { data: gameReportsResponse } = useGetMyGameReportsQuery({ page: 1, limit: 5 });
   interface IDisplayReport {
     id: string | number;
     opponent: string;
-    rating: number;
+    rating: string | number;
   }
-  const paidReports = reports.filter(r => r.status === "Paid");
-  const gameReports: IDisplayReport[] = paidReports.length > 0
-    ? paidReports.slice(0, 3).map(r => ({
-        id: r.id,
-        opponent: `vs ${r.team2}`,
-        rating: r.rating
-      }))
-    : (cvData?.recentMatches || []).slice(0, 3).map((m: any) => ({
-        id: m._id,
-        opponent: m.title || `vs ${m.awayTeam || "Opponent"}`,
-        rating: m.playerRating || m.rating || 6
-      }));
+  const apiReports = gameReportsResponse?.data?.reports || [];
+  const rawReports =
+    apiReports.length > 0
+      ? apiReports
+      : Array.isArray(cvData?.recentMatches)
+        ? cvData.recentMatches
+        : [];
+  const gameReports: IDisplayReport[] = rawReports.slice(0, 3).map((m: any, idx: number) => {
+    const rawRating = m.rating ?? m.scoutRating ?? m.playerRating ?? m.rating10;
+    const formattedRating =
+      typeof rawRating === "number" && !isNaN(rawRating)
+        ? Number.isInteger(rawRating)
+          ? rawRating
+          : Number(rawRating.toFixed(1))
+        : rawRating || "-";
+    return {
+      id: m._id || m.reportId || m.id || idx,
+      opponent:
+        m.title ||
+        m.report ||
+        (m.awayTeam ? `vs ${m.awayTeam}` : m.homeTeam ? `vs ${m.homeTeam}` : "Match Report"),
+      rating: formattedRating,
+    };
+  });
   useEffect(() => {
     const userRole = localStorage.getItem("userRole") || "player";
     setRole(userRole);

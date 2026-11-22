@@ -20,28 +20,41 @@ export const MediaCard: React.FC<MediaCardProps> = ({
 }) => {
   return (
     <div onClick={onClick} className="group cursor-pointer relative">
-      <div className="relative aspect-video rounded-2xl overflow-hidden mb-5 border border-white/5 bg-black/40">
+      <div className="relative aspect-video rounded-2xl overflow-hidden mb-5 border border-white/5 bg-black/60 flex items-center justify-center">
         {type === "video" && !item.hasThumbnail && item.videoUrl ? (
           <video
             src={item.videoUrl}
             preload="metadata"
-            className="size-full object-cover pointer-events-none"
+            className="size-full object-contain pointer-events-none"
           />
         ) : (
-          <Image
-            src={item.img}
-            className="size-full object-cover transition-transform duration-700 group-hover:scale-110"
-            alt={item.title}
-            width={1000}
-            height={1000}
-            unoptimized
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.onerror = null;
-              target.srcset = "";
-              target.src = "/placeholder_img.jpg";
-            }}
-          />
+          <>
+            {/* Ambient blurred backdrop so letterbox bars match image colors */}
+            <Image
+              src={item.img}
+              className="absolute inset-0 size-full object-cover blur-xl opacity-35 scale-110 pointer-events-none"
+              alt=""
+              width={100}
+              height={100}
+              unoptimized
+              aria-hidden="true"
+            />
+            {/* Full foreground image: never cropped, heads and bodies fully visible */}
+            <Image
+              src={item.img}
+              className="relative z-1 size-full object-contain p-0.5 transition-transform duration-500 group-hover:scale-105"
+              alt={item.title}
+              width={1000}
+              height={1000}
+              unoptimized
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.onerror = null;
+                target.srcset = "";
+                target.src = "/placeholder_img.jpg";
+              }}
+            />
+          </>
         )}
 
         {type === "video" && (

@@ -65,10 +65,29 @@ export interface ICurrentSubscription {
   paymentReference?: string | null;
 }
 
+export interface IChildSubscriptionItem {
+  childPlayerId: string;
+  childUserId?: string;
+  fullName?: string;
+  position?: string;
+  profileImage?: string | null;
+  hasActiveSubscription: boolean;
+  subscriptionStatus?: "ACTIVE" | "EXPIRED" | "FREE" | string;
+  currentSubscription?: ICurrentSubscription | null;
+}
+
+export interface IGetMySubscriptionParams {
+  childPlayerId?: string;
+}
+
 export interface IUserSubscriptionData {
   hasActiveSubscription: boolean;
+  subscriptionStatus?: "ACTIVE" | "EXPIRED" | "FREE" | string;
   userRole?: string;
   currentSubscription?: ICurrentSubscription | null;
+  childSubscriptions?: IChildSubscriptionItem[];
+  subscribedChildrenCount?: number;
+  totalChildrenCount?: number;
 }
 
 export interface IUserSubscriptionResponse {

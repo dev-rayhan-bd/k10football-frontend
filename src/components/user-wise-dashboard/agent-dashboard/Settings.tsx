@@ -25,6 +25,7 @@ import {
 } from "@/redux/features/agent/agentApi";
 import { useChangePasswordMutation } from "@/redux/features/auth/authApi";
 import { toast } from "sonner";
+import NotificationSettingsCard from "@/components/notifications/NotificationSettingsCard";
 
 interface ChangePasswordFormValues {
   oldPassword: string;
@@ -404,67 +405,7 @@ const AgentSettings = () => {
           </SettingsSection>
 
           {/* Section 4: Notifications */}
-          <SettingsSection
-            title="Notifications"
-            icon={<IconBell size={20} stroke={1.5} />}
-          >
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between p-4 rounded-xl border border-white/10 bg-white/[0.01]">
-                <div>
-                  <h4 className="text-white font-medium text-sm">New Players</h4>
-                  <p className="text-gray-500 text-xs mt-0.5">
-                    Get notified when new Players join
-                  </p>
-                </div>
-                <Switch
-                  checked={notifyNewPlayers}
-                  onCheckedChange={(val) => {
-                    setNotifyNewPlayers(val);
-                    toast.success("Preferences updated");
-                  }}
-                  className="data-[state=checked]:bg-[#E31B23]"
-                />
-              </div>
-
-              <div className="flex items-center justify-between p-4 rounded-xl border border-white/10 bg-white/[0.01]">
-                <div>
-                  <h4 className="text-white font-medium text-sm">
-                    Profile Updates
-                  </h4>
-                  <p className="text-gray-500 text-xs mt-0.5">
-                    Notifications when liked Players update profiles
-                  </p>
-                </div>
-                <Switch
-                  checked={notifyProfileUpdates}
-                  onCheckedChange={(val) => {
-                    setNotifyProfileUpdates(val);
-                    toast.success("Preferences updated");
-                  }}
-                  className="data-[state=checked]:bg-[#E31B23]"
-                />
-              </div>
-
-              <div className="flex items-center justify-between p-4 rounded-xl border border-white/10 bg-white/[0.01]">
-                <div>
-                  <h4 className="text-white font-medium text-sm">
-                    Shared with You
-                  </h4>
-                  <p className="text-gray-500 text-xs mt-0.5">
-                    When another agent shares a profile with you
-                  </p>
-                </div>
-                <Switch
-                  checked={notifyShared}
-                  onCheckedChange={(val) => {
-                    setNotifyShared(val);
-                    toast.success("Preferences updated");
-                  }}
-                  className="data-[state=checked]:bg-[#E31B23]"
-                />
-              </div>
-            </div>
-          </SettingsSection>
+          <NotificationSettingsCard className="rounded-[30px]! sm:rounded-[40px]! p-6! sm:p-10!" />
         </>
       )}
     </div>

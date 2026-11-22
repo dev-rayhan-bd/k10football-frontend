@@ -16,6 +16,7 @@ import {
   useSwitchToParentMutation,
 } from "@/redux/features/parent/parentApi";
 import { apiSlice } from "@/redux/features/api/apiSlice";
+import { useOptionalParentDashboard } from "@/providers/ParentDashboardProvider";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import NotificationBellDropdown from "@/components/notifications/NotificationBellDropdown";
@@ -45,6 +46,9 @@ const SiteHeader = ({
     cartResponse?.data?.items?.reduce((sum, item) => sum + (item.quantity || 1), 0) ??
     0;
 
+  // Shared parent multi-child context (available on /dashboard/parent/*)
+  const parentDashboard = useOptionalParentDashboard();
+
   // Profile switching mutations & linked children query
   const [switchProfileToChild, { isLoading: isSwitchingToChild }] =
     useSwitchProfileToChildMutation();
@@ -53,21 +57,42 @@ const SiteHeader = ({
   const [triggerGetMyChildren] = useLazyGetMyChildrenQuery();
 
   const { data: myChildrenResponse } = useGetMyChildrenQuery(undefined, {
-    skip: !isParentPage,
+    skip: !isParentPage || Boolean(parentDashboard),
   });
 
-  // Keep childUserId persisted in localStorage when loaded
+  // Keep selected child's childUserId persisted in localStorage when loaded
   useEffect(() => {
-    const childId = myChildrenResponse?.data?.[0]?.childUserId;
+    const childId =
+      parentDashboard?.selectedChild?.childUserId ||
+      (parentDashboard?.selectedChild as any)?.userId ||
+      myChildrenResponse?.data?.[0]?.childUserId ||
+      (myChildrenResponse?.data?.[0] as any)?.userId;
     if (childId && typeof window !== "undefined") {
       localStorage.setItem("childUserId", childId);
     }
-  }, [myChildrenResponse]);
+  }, [parentDashboard?.selectedChild, myChildrenResponse]);
 
-  const isSwitching = isSwitchingToChild || isSwitchingToParent;
+  const isSwitching =
+    isSwitchingToChild ||
+    isSwitchingToParent ||
+    Boolean(parentDashboard?.isSwitchingProfile);
+
+  const activeChildName =
+    parentDashboard?.selectedChild?.fullName ||
+    myChildrenResponse?.data?.[0]?.fullName ||
+    "Athlete";
 
   const handleSwitchToAthlete = async () => {
     if (isPlayerPage || isSwitching) return;
+
+    // Prefer switching via shared ParentDashboardProvider using the currently selected child
+    if (parentDashboard) {
+      await parentDashboard.switchToChildAccount(
+        parentDashboard.selectedChild?.childUserId,
+        "/dashboard/player"
+      );
+      return;
+    }
 
     let targetChildUserId =
       myChildrenResponse?.data?.[0]?.childUserId ||
@@ -291,7 +316,11 @@ const SiteHeader = ({
                 "w-10 sm:w-10 h-5 sm:h-5 bg-white/10 rounded-full relative cursor-pointer group border border-white/5 transition-opacity",
                 isSwitching && "opacity-60 cursor-not-allowed"
               )}
-              title={isParentPage ? "Switch to Athlete Profile" : "Switch to Parent Profile"}
+              title={
+                isParentPage
+                  ? `Switch to ${activeChildName}'s Athlete Profile`
+                  : "Switch to Parent Profile"
+              }
             >
               <div
                 className={cn(

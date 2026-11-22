@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { usePlayer } from "@/hooks/usePlayer";
 import { getFullWithShortForm, formatDate } from "@/lib/utils";
+import { getFlagUrl } from "@/components/cvs/player-cv-details/bio-components/bioConstants";
 import { useGetMySubscriptionQuery } from "@/redux/features/subscription/subscriptionApi";
 import { useGetMyAcademyHomepageQuery } from "@/redux/features/academy/academyApi";
 import { toast } from "sonner";
@@ -161,8 +162,18 @@ const PlayerBioSection = () => {
               <span className="text-gray-400">•</span>
               <span className="text-gray-300">{playerData.age} Years Old</span>
               <span className="text-gray-400">•</span>
-              <span className="text-gray-300 flex items-center gap-1.5">
-                <span>{playerData.birthCountry === 'France' ? '🇫🇷' : '🇧🇷'}</span> {playerData.birthCountry}
+              <span className="text-gray-300 flex items-center gap-2">
+                {getFlagUrl(playerData.birthCountry) && (
+                  <Image
+                    src={getFlagUrl(playerData.birthCountry)}
+                    alt={`${playerData.birthCountry} flag`}
+                    width={24}
+                    height={16}
+                    unoptimized
+                    className="w-5 h-3.5 object-cover rounded-[2px] shrink-0"
+                  />
+                )}
+                <span>{playerData.birthCountry || "N/A"}</span>
               </span>
             </div>
 

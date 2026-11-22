@@ -66,7 +66,9 @@ export const MediaSection: React.FC<MediaSectionProps> = ({
               No {type === "image" ? "Images" : "Videos"} Found
             </h3>
             <p className="text-xs text-gray-400">
-              You haven&apos;t uploaded any {type === "image" ? "match photos" : "video clips"} yet.
+              {onUploadClick
+                ? `You haven't uploaded any ${type === "image" ? "match photos" : "video clips"} yet.`
+                : `No ${type === "image" ? "match photos" : "video clips"} have been uploaded yet.`}
             </p>
           </div>
           {onUploadClick && (

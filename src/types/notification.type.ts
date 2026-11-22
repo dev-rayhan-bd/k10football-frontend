@@ -65,3 +65,34 @@ export interface IBaseNotificationResponse {
   data?: any;
 }
 
+export interface INotificationControl {
+  key: string;
+  title: string;
+  description: string;
+  value: boolean;
+}
+
+export type INotificationSettingsDict = Record<string, boolean | undefined>;
+
+export interface INotificationSettingsData {
+  role: string;
+  settings: INotificationSettingsDict;
+  controls: INotificationControl[];
+}
+
+export interface IGetNotificationSettingsResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: INotificationSettingsData;
+}
+
+export type IUpdateNotificationSettingsPayload = Partial<INotificationSettingsDict>;
+
+export interface IUpdateNotificationSettingsResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: INotificationSettingsData;
+}
+

@@ -20,16 +20,19 @@ import {
   IconLoader2,
 } from "@tabler/icons-react";
 import { useGetParentFeesQuery, usePayFeeInvoiceMutation } from "@/redux/features/parent/parentApi";
+import { useParentDashboard } from "@/providers/ParentDashboardProvider";
 import { IParentFeeInvoice } from "@/types/parent.type";
 
 const ParentFeesAndPayments = () => {
+  const { selectedChildPlayerId, selectedChild } = useParentDashboard();
   const [activeTab, setActiveTab] = useState<"ALL" | "UNPAID" | "PAID">("ALL");
   const [receiptInvoice, setReceiptInvoice] = useState<IParentFeeInvoice | null>(null);
   const [payingInvoiceId, setPayingInvoiceId] = useState<string | null>(null);
 
-  // Query fees from API
+  // Query fees from API scoped to selected child: GET /api/v1/parents/fees?childPlayerId=<selectedChildPlayerId>
   const { data: feesResponse, isLoading, isError, refetch } = useGetParentFeesQuery({
     status: activeTab === "ALL" ? undefined : activeTab,
+    childPlayerId: selectedChildPlayerId || undefined,
   });
 
   const [payFeeInvoice] = usePayFeeInvoiceMutation();
@@ -81,7 +84,7 @@ const ParentFeesAndPayments = () => {
           Fees & <span className="text-primary italic">Payments</span>
         </h1>
         <p className="text-muted-foreground font-bold uppercase tracking-widest text-[9px] sm:text-[11px] mt-2 leading-relaxed line-clamp-2 sm:line-clamp-none">
-          View academy invoices, download billing receipts, and pay membership fees
+          View academy invoices for {selectedChild?.fullName || "your child"}, download billing receipts, and pay academy fees
         </p>
       </div>
 

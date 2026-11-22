@@ -15,6 +15,7 @@ import {
   SettingsToggle
 } from "@/components/dashboard/DashboardSettingsElements";
 import { Button } from "@/components/ui/button";
+import NotificationSettingsCard from "@/components/notifications/NotificationSettingsCard";
 import {
   useGetMyPlayerProfileQuery,
   useUpdateMyPlayerProfileMutation
@@ -347,33 +348,7 @@ const PlayerSettings = () => {
         </SettingsSection>
 
         {/* Notifications */}
-        <SettingsSection
-          title="Notifications"
-          icon={<IconBell size={20} />}
-          className="rounded-[30px]! sm:rounded-[40px]! p-6! sm:p-10!"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <SettingsToggle
-              title="New video likes"
-              description="Get notified when someone likes your video"
-              defaultChecked
-            />
-            <SettingsToggle
-              title="Profile views"
-              description="Get notified when a club views your profile"
-              defaultChecked
-            />
-            <SettingsToggle
-              title="Interest alerts"
-              description="Get notified when a club shows interest in you"
-              defaultChecked
-            />
-            <SettingsToggle
-              title="Marketing emails"
-              description="Receive news and updates from K10 Football"
-            />
-          </div>
-        </SettingsSection>
+        <NotificationSettingsCard className="rounded-[30px]! sm:rounded-[40px]! p-6! sm:p-10!" />
       </div>
     </div>
   );

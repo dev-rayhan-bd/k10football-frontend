@@ -1,6 +1,5 @@
 "use client";
 
-import { usePlayerStats } from "@/components/cvs/player-cv-details/FullEditablePage";
 import { CoachPersonalInfo } from "./bio-components/CoachPersonalInfo";
 import { CoachSeasonStats } from "./bio-components/CoachSeasonStats";
 import { CoachTransferStatus } from "./bio-components/CoachTransferStatus";
@@ -11,8 +10,7 @@ import { CoachProfileImage } from "./bio-components/CoachProfileImage";
 import { CoachKeySkills } from "./bio-components/CoachKeySkills";
 
 const CoachBioSection = ({ editable }: { editable?: boolean }) => {
-  const { role } = usePlayerStats();
-  const canEdit = !!(editable && (role === "coach" || role === "admin" || role === "super_admin" || !role));
+  const canEdit = Boolean(editable);
 
   return (
     <>
