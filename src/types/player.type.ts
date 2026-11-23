@@ -275,10 +275,10 @@ export interface ICreateSelfGameReportPayload {
   scoutName: string;
   gameType: string;
   gameDate: string;
-  gameLocation: string;
-  matchResult: string;
-  weather: string;
-  temperature: number;
+  gameLocation?: string;
+  matchResult?: string;
+  weather?: string;
+  temperature?: number;
   opponentTeam: string;
   ownTeam: string;
   homeScore: number;

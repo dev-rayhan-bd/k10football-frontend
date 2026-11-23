@@ -171,7 +171,18 @@ const MembershipPlanSection = () => {
     // 3. Call Subscribe to Plan API
     try {
       setSubscribingPlanId(plan._id);
-      const res = await subscribeToPlan({ planId: plan._id }).unwrap();
+      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      const res = await subscribeToPlan({
+        planId: plan._id,
+        ...(origin
+          ? {
+              origin,
+              successUrl: `${origin}/subscription/success`,
+              cancelUrl: `${origin}/plans`,
+              redirectUrl: `${origin}/subscription/success`,
+            }
+          : {}),
+      } as any).unwrap();
 
       const sessionUrl =
         res?.data?.checkoutSessionUrl ||

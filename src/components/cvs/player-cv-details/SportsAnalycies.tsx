@@ -8,7 +8,6 @@ import { Card } from "@/components/ui/card";
 import { CalendarIcon, MapPinIcon } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { useAppSelector } from "@/hooks/reduxHooks";
 import {
   Dialog,
   DialogContent,
@@ -28,95 +27,169 @@ const getResultColor = (result: "W" | "D" | "L") => {
       return "bg-gray-500 text-white";
     case "L":
       return "bg-red-600 text-white";
+    default:
+      return "bg-gray-500 text-white";
   }
 };
+
 const getResultText = (result: "W" | "D" | "L") => result;
+
 const SportsAnalycies = ({ editable = false }: { editable?: boolean }) => {
-  const { cvData } = usePlayer();
-  const reports = useAppSelector(state => state.reports.reports);
-  const paidMatches = reports.filter(m => m.status === "Paid");
+  const { cvData, playerData } = usePlayer();
 
-  const cvMatches = (cvData?.recentMatches || []).map((m: any, idx: number) => ({
-    id: m._id || idx + 1,
-    date: m.date ? new Date(m.date).toLocaleDateString() : "2026-09-15",
-    team1: m.homeTeam || "K10 Academy",
-    team2: m.awayTeam || m.opponent || m.team2 || "Opponent",
-    team1Logo: "/teams/default.png",
-    team2Logo: "/teams/default.png",
-    score: m.score || `${m.homeScore ?? 0} - ${m.awayScore ?? 0}`,
-    result: (m.result || "W") as "W" | "D" | "L",
-    rating: m.rating || 10,
-    goals: m.goals || 0,
-    assists: m.assists || 0,
-    passAccuracy: m.accuracy ? parseInt(m.accuracy) || 80 : 80,
-    minutesPlayed: m.minutes ? parseInt(m.minutes) || 76 : 90,
-    yellowCards: m.yellowCards || 0,
-    redCards: m.redCards || 0,
-    league: m.gameType || m.league || "Youth Premier League",
-    stadium: m.location || m.stadium || "London",
-    scoutName: m.coachReview?.coachName || m.scoutName || "Scout Analyst",
-    status: "Paid",
-  }));
+  // Canonical DB data: recentMatches from player CV. Strictly NO fallback to hardcoded mock/fake matches.
+  const rawMatches: any[] =
+    Array.isArray(cvData?.recentMatches) && cvData.recentMatches.length > 0
+      ? cvData.recentMatches
+      : Array.isArray((playerData as any)?.recentMatches) && (playerData as any).recentMatches.length > 0
+        ? (playerData as any).recentMatches
+        : [];
 
-  const effectiveMatches: any[] = cvMatches.length > 0 ? cvMatches : paidMatches;
+  const cvMatches = rawMatches.map((m: any, idx: number) => {
+    const rawRating = m.rating ?? m.playerRating ?? m.rating10 ?? 0;
+    const ratingNum = typeof rawRating === "number" ? rawRating : parseFloat(String(rawRating)) || 0;
 
-  const matches: any[] = effectiveMatches.slice(0, 4);
+    const accuracyNum =
+      typeof m.accuracy === "string"
+        ? parseInt(m.accuracy.replace(/[^0-9]/g, ""), 10) || 0
+        : typeof m.passAccuracy === "number"
+          ? m.passAccuracy
+          : typeof m.accuracy === "number"
+            ? m.accuracy
+            : 0;
+
+    const minutesNum =
+      typeof m.minutes === "string"
+        ? parseInt(m.minutes.split(":")[0], 10) || 0
+        : typeof m.timePlayedMinutes === "number"
+          ? m.timePlayedMinutes
+          : typeof m.minutes === "number"
+            ? m.minutes
+            : 0;
+
+    const formattedDate = m.date
+      ? m.date.includes("T")
+        ? m.date.split("T")[0]
+        : m.date
+      : m.matchDate || "Recent";
+
+    return {
+      id: m._id || idx + 1,
+      date: formattedDate,
+      team1: m.homeTeam || "Home Team",
+      team2: m.awayTeam || m.opponent || "Away Team",
+      team1Logo: "/teams/default.png",
+      team2Logo: "/teams/default.png",
+      score: m.score || `${m.homeScore ?? 0} - ${m.awayScore ?? 0}`,
+      result: ((m.result || "W").toUpperCase()) as "W" | "D" | "L",
+      rating: ratingNum,
+      goals: Number(m.goals ?? 0),
+      assists: Number(m.assists ?? 0),
+      passes: Number(m.passes ?? 0),
+      passAccuracy: accuracyNum,
+      minutesPlayed: minutesNum,
+      yellowCards: Number(m.yellowCards ?? 0),
+      redCards: Number(m.redCards ?? 0),
+      league: m.gameType || m.leagueType || m.league || "Competitive Match",
+      stadium: m.location || m.stadium || "Pitch",
+      scoutName: m.coachReview?.coachName || m.authorName || "Scout Analyst",
+      isVerified: Boolean(m.isVerified || m.isProfessionallyVerified),
+      reportPdfUrl: m.reportPdfUrl || null,
+      characteristics: m.playerInfo?.characteristics || m.characteristics || ["Agile", "Fast", "Playmaker"],
+    };
+  });
+
+  const matches = cvMatches.slice(0, 4);
 
   const [showArchive, setShowArchive] = useState(false);
-  const [downloadingReportId, setDownloadingReportId] = useState<number | null>(null);
+  const [downloadingReportId, setDownloadingReportId] = useState<number | string | null>(null);
 
-  const summary = cvData?.matchSummary;
-  const wins = summary?.wins ?? matches.filter((m: any) => m.result === "W").length;
-  const draws = summary?.draws ?? matches.filter((m: any) => m.result === "D").length;
-  const losses = summary?.losses ?? matches.filter((m: any) => m.result === "L").length;
-  const totalGoals = summary?.totalGoals ?? matches.reduce((sum: number, m: any) => sum + (m.goals || 0), 0);
-  const totalAssists = summary?.totalAssists ?? matches.reduce((sum: number, m: any) => sum + (m.assists || 0), 0);
+  const summary = cvData?.matchSummary || (playerData as any)?.matchSummary;
 
-  const rawRating = summary?.avgRating ?? summary?.avgMatchRating;
+  const wins =
+    summary?.wins !== undefined
+      ? Number(summary.wins)
+      : cvMatches.filter((m) => m.result === "W").length;
+  const draws =
+    summary?.draws !== undefined
+      ? Number(summary.draws)
+      : cvMatches.filter((m) => m.result === "D").length;
+  const losses =
+    summary?.losses !== undefined
+      ? Number(summary.losses)
+      : cvMatches.filter((m) => m.result === "L").length;
+  const totalGoals =
+    summary?.totalGoals !== undefined
+      ? Number(summary.totalGoals)
+      : cvMatches.reduce((sum, m) => sum + m.goals, 0);
+  const totalAssists =
+    summary?.totalAssists !== undefined
+      ? Number(summary.totalAssists)
+      : cvMatches.reduce((sum, m) => sum + m.assists, 0);
+
+  const rawRating = summary?.avgMatchRating ?? summary?.averageRating ?? summary?.avgRating;
   const parsedRating =
     rawRating !== undefined && rawRating !== null
       ? parseFloat(String(rawRating).replace(/[^0-9.]/g, ""))
       : NaN;
   const avgRating = !isNaN(parsedRating)
     ? parsedRating.toFixed(1)
-    : matches.length > 0 
-      ? (matches.reduce((sum: number, m: any) => sum + (m.rating || 0), 0) / matches.length).toFixed(1)
-      : "6.5";
+    : cvMatches.length > 0
+      ? (cvMatches.reduce((sum, m) => sum + m.rating, 0) / cvMatches.length).toFixed(1)
+      : "0.0";
 
-  const rawPass = summary?.avgPassAccuracy ?? summary?.passAccuracy ?? (summary as any)?.avgPassAccuracyNum;
+  const rawPass =
+    summary?.avgPassAccuracyNum ??
+    summary?.avgPassAccuracy ??
+    summary?.averagePassAccuracy ??
+    summary?.passAccuracy;
   const parsedPass =
     rawPass !== undefined && rawPass !== null
       ? parseFloat(String(rawPass).replace(/[^0-9.]/g, ""))
       : NaN;
   const avgPassAccuracy = !isNaN(parsedPass)
     ? Math.round(parsedPass)
-    : matches.length > 0
-      ? Math.round(matches.reduce((sum: number, m: any) => sum + (m.passAccuracy || 0), 0) / matches.length)
-      : 80;
+    : cvMatches.length > 0
+      ? Math.round(cvMatches.reduce((sum, m) => sum + m.passAccuracy, 0) / cvMatches.length)
+      : 0;
 
-  const avgTackles = (2.4).toFixed(1);
-  const avgInterceptions = (2.4).toFixed(1);
+  const rawTackles = summary?.avgTackles ?? summary?.averageTackles;
+  const parsedTackles =
+    rawTackles !== undefined && rawTackles !== null
+      ? parseFloat(String(rawTackles).replace(/[^0-9.]/g, ""))
+      : NaN;
+  const avgTackles = !isNaN(parsedTackles)
+    ? parsedTackles.toFixed(1)
+    : cvMatches.length > 0
+      ? (cvMatches.reduce((sum: number, m: any) => sum + (m.tackles || 0), 0) / cvMatches.length).toFixed(1)
+      : "0.0";
 
-const handleDownloadPDF = async (match: any) => {
-setDownloadingReportId(match.id);
-const toastId = toast.loading(`Generating Scouting Report vs ${match.team2}...`);
-try {
-  const printElement = document.createElement("div");
-  printElement.style.position = "fixed";
-  printElement.style.left = "-9999px";
-  printElement.style.top = "-9999px";
-  printElement.style.width = "794px";
-  printElement.style.height = "1123px";
-  printElement.style.backgroundColor = "#ffffff";
-  printElement.style.color = "#1e293b";
-  printElement.style.padding = "40px";
-  printElement.style.fontFamily = "sans-serif";
-  printElement.style.boxSizing = "border-box";
+  // Form Guide: Read directly from DB formGuide array, or derive from real DB matches
+  const formGuideBadges: ("W" | "D" | "L")[] =
+    Array.isArray(summary?.formGuide) && summary.formGuide.length > 0
+      ? summary.formGuide.map((f: string) => f.toUpperCase() as "W" | "D" | "L")
+      : cvMatches.map((m) => m.result);
 
-  printElement.innerHTML = `
+  const handleDownloadPDF = async (match: any) => {
+    setDownloadingReportId(match.id);
+    const toastId = toast.loading(`Generating Scouting Report vs ${match.team2}...`);
+    try {
+      const printElement = document.createElement("div");
+      printElement.style.position = "fixed";
+      printElement.style.left = "-9999px";
+      printElement.style.top = "-9999px";
+      printElement.style.width = "794px";
+      printElement.style.height = "1123px";
+      printElement.style.backgroundColor = "#ffffff";
+      printElement.style.color = "#1e293b";
+      printElement.style.padding = "40px";
+      printElement.style.fontFamily = "sans-serif";
+      printElement.style.boxSizing = "border-box";
+
+      printElement.innerHTML = `
         <div style="border: 2px solid #E31B23; padding: 25px; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
           <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.03; pointer-events: none;">
-            <Image src="/logo.png" style="width: 400px; object-fit: contain;" />
+            <img src="/logo.png" style="width: 400px; object-fit: contain;" />
           </div>
 
           <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; z-index: 10;">
@@ -126,7 +199,7 @@ try {
               <div style="font-size: 12px; font-weight: 600; color: #64748b; margin-top: 5px; text-transform: uppercase;">Match Performance Evaluation</div>
             </div>
             <div style="text-align: right;">
-              <div style="font-size: 11px; font-weight: 800; color: #e2e8f0; background-color: #1e1b4b; padding: 4px 10px; border-radius: 4px; display: inline-block; text-transform: uppercase; margin-bottom: 5px;">VERIFIED</div>
+              <div style="font-size: 11px; font-weight: 800; color: #e2e8f0; background-color: #1e1b4b; padding: 4px 10px; border-radius: 4px; display: inline-block; text-transform: uppercase; margin-bottom: 5px;">${match.isVerified ? "VERIFIED" : "REPORT"}</div>
               <div style="font-size: 32px; font-weight: 900; color: #16a34a; margin: 0; line-height: 1;">${Number(match.rating).toFixed(1)}</div>
               <div style="font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">OVERALL RATING</div>
             </div>
@@ -139,7 +212,7 @@ try {
                 <tr><td style="color: #64748b; font-weight: 500; width: 40%;">Date:</td><td style="color: #0f172a; font-weight: 700;">${match.date}</td></tr>
                 <tr><td style="color: #64748b; font-weight: 500;">League:</td><td style="color: #0f172a; font-weight: 700;">${match.league}</td></tr>
                 <tr><td style="color: #64748b; font-weight: 500;">Stadium:</td><td style="color: #0f172a; font-weight: 700;">${match.stadium}</td></tr>
-                <tr><td style="color: #64748b; font-weight: 500;">Scout:</td><td style="color: #0f172a; font-weight: 700;">${match.scoutName || "Mario Lopez"}</td></tr>
+                <tr><td style="color: #64748b; font-weight: 500;">Scout:</td><td style="color: #0f172a; font-weight: 700;">${match.scoutName || "Scout Analyst"}</td></tr>
               </table>
             </div>
 
@@ -149,50 +222,43 @@ try {
                 <div style="font-size: 20px; font-weight: 900; color: #1e1b4b; text-transform: uppercase; margin-bottom: 4px;">
                   ${match.team1} vs ${match.team2}
                 </div>
-                <div style="font-size: 16px; font-weight: 800; color: #1e1b4b; background-color: #e2e8f0; padding: 3px 12px; border-radius: 6px; display: inline-block;">
-                  Score: ${match.score} (${match.result === 'W' ? 'WON' : match.result === 'D' ? 'DRAW' : 'LOST'})
+                <div style="font-size: 24px; font-weight: 900; color: #E31B23; letter-spacing: 2px;">
+                  ${match.score} (${match.result})
                 </div>
               </div>
             </div>
           </div>
 
-          <div style="background-color: #f8fafc; border: 1px solid #f1f5f9; padding: 15px; border-radius: 8px; margin-top: 20px; z-index: 10;">
-            <h3 style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-top: 0; margin-bottom: 10px; letter-spacing: 1px;">Player Overview</h3>
-            <table style="width: 100%; border-collapse: collapse; font-size: 12px; line-height: 1.6;">
-              <tr style="display: flex; justify-content: space-between; width: 100%;">
-                <td><span style="color: #64748b; font-weight: 500;">Position:</span> <strong style="color: #0f172a;">${match.playerPosition || "Forward"}</strong></td>
-                <td><span style="color: #64748b; font-weight: 500;">Preferred Foot:</span> <strong style="color: #0f172a;">${match.foot || "Right"}</strong></td>
-                <td><span style="color: #64748b; font-weight: 500;">Played:</span> <strong style="color: #0f172a;">${match.timePlayedMinutes} Min</strong></td>
-              </tr>
-            </table>
-          </div>
-
-          <div style="margin-top: 25px; z-index: 10;">
-            <h3 style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-top: 0; margin-bottom: 12px; letter-spacing: 1px;">Performance Statistics</h3>
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
-              <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; text-align: center;">
-                <div style="font-size: 24px; font-weight: 900; color: #1e1b4b;">${match.goals}</div>
-                <div style="font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-top: 3px;">Goals</div>
+          <div style="margin-top: 25px; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; z-index: 10;">
+            <div style="background-color: #1e1b4b; color: white; padding: 8px 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Player Performance Metrics</div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 15px; background-color: #ffffff; text-align: center;">
+              <div>
+                <div style="font-size: 22px; font-weight: 900; color: #0f172a;">${match.goals}</div>
+                <div style="font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase;">Goals</div>
               </div>
-              <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; text-align: center;">
-                <div style="font-size: 24px; font-weight: 900; color: #1e1b4b;">${match.assists}</div>
-                <div style="font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-top: 3px;">Assists</div>
+              <div>
+                <div style="font-size: 22px; font-weight: 900; color: #0f172a;">${match.assists}</div>
+                <div style="font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase;">Assists</div>
               </div>
-              <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; text-align: center;">
-                <div style="font-size: 24px; font-weight: 900; color: #1e1b4b;">${match.passes}</div>
-                <div style="font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-top: 3px;">Total Passes</div>
+              <div>
+                <div style="font-size: 22px; font-weight: 900; color: #0f172a;">${match.passes}</div>
+                <div style="font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase;">Passes</div>
               </div>
-              <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; text-align: center;">
-                <div style="font-size: 24px; font-weight: 900; color: #1e1b4b;">${match.passAccuracy}%</div>
-                <div style="font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-top: 3px;">Pass Accuracy</div>
+              <div>
+                <div style="font-size: 22px; font-weight: 900; color: #0f172a;">${match.minutesPlayed}</div>
+                <div style="font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase;">Minutes</div>
               </div>
             </div>
           </div>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 25px; z-index: 10;">
             <div style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px;">
-              <h4 style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-top: 0; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">Disciplinary Summary</h4>
-              <div style="display: flex; gap: 20px;">
+              <h4 style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-top: 0; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">Discipline & Accuracy</h4>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 12px; color: #64748b;">Pass Accuracy:</span>
+                <span style="font-size: 14px; font-weight: 800; color: #16a34a;">${match.passAccuracy}%</span>
+              </div>
+              <div style="display: flex; gap: 15px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                   <div style="width: 12px; height: 18px; background-color: #FFCC00; border-radius: 2px; border: 1px solid #e2e8f0;"></div>
                   <span style="font-size: 13px; font-weight: 800;">${match.yellowCards} Yellow Cards</span>
@@ -214,7 +280,7 @@ try {
             </div>
           </div>
 
-          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: auto; font-size: 9px; color: #64748b; font-weight: 700; text-transform: uppercase; tracking-spacing: 1px; z-index: 10;">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: auto; font-size: 9px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; z-index: 10;">
             <span>Report ID: ${match.id}</span>
             <span>Generated: ${new Date().toISOString().split("T")[0]}</span>
             <span>System: K10 Football Platform</span>
@@ -222,272 +288,345 @@ try {
         </div>
       `;
 
-  document.body.appendChild(printElement);
-  const canvas = await html2canvas(printElement, {
-    scale: 2,
-    useCORS: true,
-    backgroundColor: "#ffffff",
-    logging: false
-  });
-  const imgData = canvas.toDataURL("image/png");
-  const pdf = new jsPDF("p", "mm", "a4");
-  const imgWidth = 210;
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      document.body.appendChild(printElement);
+      const canvas = await html2canvas(printElement, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+      });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgWidth = 210;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-  pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-  pdf.save(`Scouting_Report_vs_${match.team2.replace(/\s+/g, "_")}.pdf`);
-  document.body.removeChild(printElement);
-  toast.success("PDF Report downloaded successfully!", { id: toastId });
-} catch (err) {
-  console.error(err);
-  toast.error("Failed to generate PDF.", { id: toastId });
-} finally {
-  setDownloadingReportId(null);
-}
-};
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      pdf.save(`Scouting_Report_vs_${match.team2.replace(/\s+/g, "_")}.pdf`);
+      document.body.removeChild(printElement);
+      toast.success("PDF Report downloaded successfully!", { id: toastId });
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to generate PDF.", { id: toastId });
+    } finally {
+      setDownloadingReportId(null);
+    }
+  };
 
-return (
-<div className="container w-full min-w-0 overflow-hidden">
-  <h1 className="mb-6 sm:mb-8 text-center text-2xl sm:text-3xl font-bold text-white font-heading">
-    GAME SUMMARY (LAST 4 MATCHES)
-  </h1>
+  return (
+    <div className="container w-full min-w-0 overflow-hidden">
+      <h1 className="mb-6 sm:mb-8 text-center text-2xl sm:text-3xl font-bold text-white font-heading">
+        GAME SUMMARY (LAST 4 MATCHES)
+      </h1>
 
-  <div className="space-y-4 sm:space-y-6 w-full min-w-0">
-    {/* Overall stats cards */}
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 w-full min-w-0">
-      <Card className="border-0 bg-linear-to-br from-[#1B4D2E] to-[#0F3B1F] p-4 sm:p-8 text-white rounded-lg w-full min-w-0">
-        <div className="mb-4 sm:mb-6 text-lg sm:text-xl font-bold text-[#00FF62] uppercase tracking-wide truncate">Overall Performance</div>
-        <div className="mb-4 sm:mb-6 w-full min-w-0">
-          <div className="text-sm sm:text-base text-gray-300 font-medium truncate">Average Rating</div>
-          <div className="text-4xl sm:text-6xl font-black text-[#00FF62]">{avgRating}</div>
-        </div>
-        <div className="grid grid-cols-2 gap-4 sm:gap-6 w-full min-w-0">
-          <div className="w-full min-w-0">
-            <div className="text-sm sm:text-base text-gray-300 font-medium truncate">Total Goals</div>
-            <div className="text-3xl sm:text-4xl font-black text-white">{totalGoals}</div>
-          </div>
-          <div className="w-full min-w-0">
-            <div className="text-sm sm:text-base text-gray-300 font-medium truncate">Total Assists</div>
-            <div className="text-3xl sm:text-4xl font-black text-white">{totalAssists}</div>
-          </div>
-        </div>
-      </Card>
-
-      <Card className="border border-border bg-black p-4 sm:p-8 text-white rounded-lg w-full min-w-0">
-        <div className="mb-4 sm:mb-6 text-lg sm:text-xl font-bold text-gray-300 uppercase tracking-wide truncate">Form Guide</div>
-        <div className="mb-4 sm:mb-6 flex flex-wrap gap-2 sm:gap-3 w-full min-w-0">
-          {matches.map((match: any, idx: number) => (
-            <Badge key={idx} className={`h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center p-0 rounded-full font-black text-base sm:text-lg ${getResultColor(match.result)} shadow-lg`}>
-              {getResultText(match.result)}
-            </Badge>
-          ))}
-        </div>
-        <div className="space-y-2 sm:space-y-3 text-base sm:text-lg w-full min-w-0">
-          <div className="flex justify-between w-full min-w-0"><span className="text-gray-300">Wins</span><span className="font-bold text-white">{wins}</span></div>
-          <div className="flex justify-between w-full min-w-0"><span className="text-gray-300">Draws</span><span className="font-bold text-white">{draws}</span></div>
-          <div className="flex justify-between w-full min-w-0"><span className="text-gray-300">Losses</span><span className="font-bold text-white">{losses}</span></div>
-        </div>
-      </Card>
-
-      <Card className="border border-border bg-black p-4 sm:p-8 text-white rounded-lg w-full min-w-0">
-        <div className="mb-4 sm:mb-6 text-lg sm:text-xl font-bold text-gray-300 uppercase tracking-wide truncate">Key Stats</div>
-        <div className="space-y-4 sm:space-y-5 w-full min-w-0">
-          <div className="w-full min-w-0">
-            <div className="mb-1 sm:mb-2 flex justify-between text-xs sm:text-base w-full min-w-0 gap-2">
-              <span className="text-gray-300 font-medium truncate">Average Pass Accuracy</span>
-              <span className="text-[#00FF62] font-bold shrink-0">{avgPassAccuracy}%</span>
+      <div className="space-y-4 sm:space-y-6 w-full min-w-0">
+        {/* Overall stats cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 w-full min-w-0">
+          <Card className="border-0 bg-gradient-to-br from-[#1B4D2E] to-[#0F3B1F] p-4 sm:p-8 text-white rounded-lg w-full min-w-0">
+            <div className="mb-4 sm:mb-6 text-lg sm:text-xl font-bold text-[#00FF62] uppercase tracking-wide truncate">
+              Overall Performance
             </div>
-            <div className="h-2 sm:h-3 bg-gray-700 rounded-full overflow-hidden">
-              <div className="h-full bg-[#00FF62]" style={{ width: `${avgPassAccuracy}%` }} />
+            <div className="mb-4 sm:mb-6 w-full min-w-0">
+              <div className="text-sm sm:text-base text-gray-300 font-medium truncate">Average Rating</div>
+              <div className="text-4xl sm:text-6xl font-black text-[#00FF62]">{avgRating}</div>
             </div>
-          </div>
-          <div className="w-full min-w-0">
-            <div className="mb-1 sm:mb-2 flex justify-between text-xs sm:text-base w-full min-w-0 gap-2">
-              <span className="text-gray-300 font-medium truncate">Average Tackles</span>
-              <span className="text-[#00FF62] font-bold shrink-0">{avgTackles}</span>
+            <div className="grid grid-cols-2 gap-4 sm:gap-6 w-full min-w-0">
+              <div className="w-full min-w-0">
+                <div className="text-sm sm:text-base text-gray-300 font-medium truncate">Total Goals</div>
+                <div className="text-3xl sm:text-4xl font-black text-white">{totalGoals}</div>
+              </div>
+              <div className="w-full min-w-0">
+                <div className="text-sm sm:text-base text-gray-300 font-medium truncate">Total Assists</div>
+                <div className="text-3xl sm:text-4xl font-black text-white">{totalAssists}</div>
+              </div>
             </div>
-            <div className="h-2 sm:h-3 bg-gray-700 rounded-full overflow-hidden">
-              <div className="h-full bg-[#00FF62]" style={{ width: "60%" }} />
-            </div>
-          </div>
-        </div>
-      </Card>
-    </div>
+          </Card>
 
-    {/* Detailed Game Reports */}
-    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-8 w-full min-w-0">
-      {matches.map((match: any, idx: number) => (
-        <Card
-          key={idx}
-          className="border border-border bg-black p-4 sm:p-8 text-white rounded-xl hover:border-primary/30 transition-all shadow-xl flex flex-col justify-between w-full min-w-0"
-        >
-          <div className="w-full min-w-0">
-            {/* Header Row */}
-            <div className="mb-6 flex flex-wrap items-start sm:items-center justify-between gap-4">
-              <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-                <div className="flex items-center gap-1 sm:gap-2 text-sm sm:text-lg text-gray-400">
-                  <CalendarIcon className="h-4 w-4 sm:h-6 sm:w-6 text-primary" />
-                  <span className="font-medium whitespace-nowrap">{match.date}</span>
+          <Card className="border border-border bg-black p-4 sm:p-8 text-white rounded-lg w-full min-w-0">
+            <div className="mb-4 sm:mb-6 text-lg sm:text-xl font-bold text-gray-300 uppercase tracking-wide truncate">
+              Form Guide
+            </div>
+            {formGuideBadges.length > 0 ? (
+              <div className="mb-4 sm:mb-6 flex flex-wrap gap-2 sm:gap-3 w-full min-w-0">
+                {formGuideBadges.map((res, idx) => (
+                  <Badge
+                    key={idx}
+                    className={`h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center p-0 rounded-full font-black text-base sm:text-lg ${getResultColor(
+                      res
+                    )} shadow-lg`}
+                  >
+                    {getResultText(res)}
+                  </Badge>
+                ))}
+              </div>
+            ) : (
+              <div className="mb-4 sm:mb-6 py-2 text-sm text-gray-500 italic">
+                No matches recorded yet
+              </div>
+            )}
+            <div className="space-y-2 sm:space-y-3 text-base sm:text-lg w-full min-w-0">
+              <div className="flex justify-between w-full min-w-0">
+                <span className="text-gray-300">Wins</span>
+                <span className="font-bold text-white">{wins}</span>
+              </div>
+              <div className="flex justify-between w-full min-w-0">
+                <span className="text-gray-300">Draws</span>
+                <span className="font-bold text-white">{draws}</span>
+              </div>
+              <div className="flex justify-between w-full min-w-0">
+                <span className="text-gray-300">Losses</span>
+                <span className="font-bold text-white">{losses}</span>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="border border-border bg-black p-4 sm:p-8 text-white rounded-lg w-full min-w-0">
+            <div className="mb-4 sm:mb-6 text-lg sm:text-xl font-bold text-gray-300 uppercase tracking-wide truncate">
+              Key Stats
+            </div>
+            <div className="space-y-4 sm:space-y-5 w-full min-w-0">
+              <div className="w-full min-w-0">
+                <div className="mb-1 sm:mb-2 flex justify-between text-xs sm:text-base w-full min-w-0 gap-2">
+                  <span className="text-gray-300 font-medium truncate">Average Pass Accuracy</span>
+                  <span className="text-[#00FF62] font-bold shrink-0">{avgPassAccuracy}%</span>
                 </div>
-                <Badge className="bg-gray-800 text-white hover:bg-gray-700 text-xs sm:text-base py-1 px-2 sm:py-1.5 sm:px-4 rounded-md font-bold uppercase tracking-wider text-center max-w-[120px] sm:max-w-none truncate block">
-                  {match.league}
-                </Badge>
-              </div>
-              <div className="text-right flex flex-col items-end gap-1 shrink-0">
-                <Badge className="bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[8px] sm:text-[10px] uppercase font-black tracking-widest py-0.5 px-1 sm:px-2">VERIFIED</Badge>
-                <div className="text-2xl sm:text-3xl font-black text-[#00FF62]">{Number(match.rating).toFixed(1)}</div>
-                <div className="text-[10px] sm:text-xs uppercase tracking-widest text-gray-500 font-black">Rating</div>
-              </div>
-            </div>
-
-            {/* Teams and Score */}
-            <div className="mb-6 sm:mb-8 flex items-center justify-between gap-2 sm:gap-4">
-              <div className="flex-1 text-center min-w-0">
-                <div className="text-sm sm:text-xl font-black uppercase tracking-tight text-white mb-1 truncate">{match.team1}</div>
-                <div className="h-1 w-8 sm:w-12 bg-primary/30 mx-auto rounded-full"></div>
-              </div>
-              <div className="shrink-0 bg-[#111111] border border-white/5 p-2 sm:p-4 px-4 sm:px-8 rounded-xl shadow-inner">
-                <div className="text-2xl sm:text-4xl font-black text-white tracking-tighter">{match.score}</div>
-              </div>
-              <div className="flex-1 text-center min-w-0">
-                <div className="text-sm sm:text-xl font-black uppercase tracking-tight text-white mb-1 truncate">{match.team2}</div>
-                <Badge className={cn(getResultColor(match.result), "font-black text-[10px] sm:text-sm uppercase px-2 sm:px-3")}>
-                  {getResultText(match.result)}
-                </Badge>
-              </div>
-            </div>
-
-            {/* Stadium */}
-            <div className="flex items-center gap-2 sm:gap-3 text-sm sm:text-lg text-gray-400 mb-4 sm:mb-6 bg-white/5 p-2 sm:p-3 rounded-lg truncate">
-              <MapPinIcon className="h-4 w-4 sm:h-6 sm:w-6 text-primary shrink-0" />
-              <span className="font-medium truncate">{match.stadium}</span>
-            </div>
-
-            {/* Stats Grid */}
-            <div className="mb-4 sm:mb-6 grid grid-cols-4 gap-2 sm:gap-4 border-t border-b border-border/50 py-4 sm:py-6 mt-4">
-              <div className="text-center">
-                <div className="text-xl sm:text-3xl font-black text-white mb-1">{match.goals}</div>
-                <div className="text-[8px] sm:text-[10px] text-gray-500 uppercase font-black tracking-widest truncate">Goals</div>
-              </div>
-              <div className="text-center">
-                <div className="text-xl sm:text-3xl font-black text-white mb-1">{match.assists}</div>
-                <div className="text-[8px] sm:text-[10px] text-gray-500 uppercase font-black tracking-widest truncate">Assists</div>
-              </div>
-              <div className="text-center">
-                <div className="text-xl sm:text-3xl font-black text-white mb-1">{match.passes}</div>
-                <div className="text-[8px] sm:text-[10px] text-gray-500 uppercase font-black tracking-widest truncate">Passes</div>
-              </div>
-              <div className="text-center">
-                <div className="text-xl sm:text-3xl font-black text-white mb-1">{match.timePlayedMinutes}</div>
-                <div className="text-[8px] sm:text-[10px] text-gray-500 uppercase font-black tracking-widest truncate">Minutes</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Cards and Accuracy + Download Button */}
-          <div className="space-y-4 border-t border-white/5 pt-4">
-            <div className="flex items-center justify-between px-2 gap-4">
-              <div className="flex items-center gap-3 sm:gap-6">
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <div className="h-6 w-4 sm:h-8 sm:w-5 bg-[#FFCC00] rounded-sm shadow-md" />
-                  <span className="text-base sm:text-xl font-black text-white">{match.yellowCards}</span>
-                </div>
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <div className="h-6 w-4 sm:h-8 sm:w-5 bg-[#DC143C] rounded-sm shadow-md" />
-                  <span className="text-base sm:text-xl font-black text-white">{match.redCards}</span>
+                <div className="h-2 sm:h-3 bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-[#00FF62] transition-all duration-300"
+                    style={{ width: `${Math.min(100, Math.max(0, avgPassAccuracy))}%` }}
+                  />
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-xl sm:text-2xl font-black text-white">
-                  {match.passAccuracy}%
+              <div className="w-full min-w-0">
+                <div className="mb-1 sm:mb-2 flex justify-between text-xs sm:text-base w-full min-w-0 gap-2">
+                  <span className="text-gray-300 font-medium truncate">Average Tackles</span>
+                  <span className="text-[#00FF62] font-bold shrink-0">{avgTackles}</span>
                 </div>
-                <div className="text-[8px] sm:text-[10px] uppercase tracking-widest text-gray-500 font-black">Accuracy</div>
+                <div className="h-2 sm:h-3 bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-[#00FF62] transition-all duration-300"
+                    style={{
+                      width: `${Math.min(100, Math.max(0, (Number(avgTackles) / 10) * 100))}%`,
+                    }}
+                  />
+                </div>
               </div>
             </div>
+          </Card>
+        </div>
 
+        {/* Detailed Game Reports */}
+        {matches.length > 0 ? (
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-8 w-full min-w-0">
+            {matches.map((match: any, idx: number) => (
+              <Card
+                key={match.id || idx}
+                className="border border-border bg-black p-4 sm:p-8 text-white rounded-xl hover:border-primary/30 transition-all shadow-xl flex flex-col justify-between w-full min-w-0"
+              >
+                <div className="w-full min-w-0">
+                  {/* Header Row */}
+                  <div className="mb-6 flex flex-wrap items-start sm:items-center justify-between gap-4">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+                      <div className="flex items-center gap-1 sm:gap-2 text-sm sm:text-lg text-gray-400">
+                        <CalendarIcon className="h-4 w-4 sm:h-6 sm:w-6 text-primary" />
+                        <span className="font-medium whitespace-nowrap">{match.date}</span>
+                      </div>
+                      <Badge className="bg-gray-800 text-white hover:bg-gray-700 text-xs sm:text-base py-1 px-2 sm:py-1.5 sm:px-4 rounded-md font-bold uppercase tracking-wider text-center max-w-[120px] sm:max-w-none truncate block">
+                        {match.league}
+                      </Badge>
+                    </div>
+                    <div className="text-right flex flex-col items-end gap-1 shrink-0">
+                      <Badge className="bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[8px] sm:text-[10px] uppercase font-black tracking-widest py-0.5 px-1 sm:px-2">
+                        {match.isVerified ? "VERIFIED" : "SELF-LOGGED"}
+                      </Badge>
+                      <div className="text-2xl sm:text-3xl font-black text-[#00FF62]">
+                        {Number(match.rating).toFixed(1)}
+                      </div>
+                      <div className="text-[10px] sm:text-xs uppercase tracking-widest text-gray-500 font-black">
+                        Rating
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Teams and Score */}
+                  <div className="mb-6 sm:mb-8 flex items-center justify-between gap-2 sm:gap-4">
+                    <div className="flex-1 text-center min-w-0">
+                      <div className="text-sm sm:text-xl font-black uppercase tracking-tight text-white mb-1 truncate">
+                        {match.team1}
+                      </div>
+                      <div className="h-1 w-8 sm:w-12 bg-primary/30 mx-auto rounded-full"></div>
+                    </div>
+                    <div className="shrink-0 bg-[#111111] border border-white/5 p-2 sm:p-4 px-4 sm:px-8 rounded-xl shadow-inner">
+                      <div className="text-2xl sm:text-4xl font-black text-white tracking-tighter">
+                        {match.score}
+                      </div>
+                    </div>
+                    <div className="flex-1 text-center min-w-0">
+                      <div className="text-sm sm:text-xl font-black uppercase tracking-tight text-white mb-1 truncate">
+                        {match.team2}
+                      </div>
+                      <Badge className={cn(getResultColor(match.result), "font-black text-[10px] sm:text-sm uppercase px-2 sm:px-3")}>
+                        {getResultText(match.result)}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Stadium */}
+                  <div className="flex items-center gap-2 sm:gap-3 text-sm sm:text-lg text-gray-400 mb-4 sm:mb-6 bg-white/5 p-2 sm:p-3 rounded-lg truncate">
+                    <MapPinIcon className="h-4 w-4 sm:h-6 sm:w-6 text-primary shrink-0" />
+                    <span className="font-medium truncate">{match.stadium}</span>
+                  </div>
+
+                  {/* Stats Grid */}
+                  <div className="mb-4 sm:mb-6 grid grid-cols-4 gap-2 sm:gap-4 border-t border-b border-border/50 py-4 sm:py-6 mt-4">
+                    <div className="text-center">
+                      <div className="text-xl sm:text-3xl font-black text-white mb-1">{match.goals}</div>
+                      <div className="text-[8px] sm:text-[10px] text-gray-500 uppercase font-black tracking-widest truncate">
+                        Goals
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl sm:text-3xl font-black text-white mb-1">{match.assists}</div>
+                      <div className="text-[8px] sm:text-[10px] text-gray-500 uppercase font-black tracking-widest truncate">
+                        Assists
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl sm:text-3xl font-black text-white mb-1">{match.passes}</div>
+                      <div className="text-[8px] sm:text-[10px] text-gray-500 uppercase font-black tracking-widest truncate">
+                        Passes
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl sm:text-3xl font-black text-white mb-1">{match.minutesPlayed}</div>
+                      <div className="text-[8px] sm:text-[10px] text-gray-500 uppercase font-black tracking-widest truncate">
+                        Minutes
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cards and Accuracy + Download Button */}
+                <div className="space-y-4 border-t border-white/5 pt-4">
+                  <div className="flex items-center justify-between px-2 gap-4">
+                    <div className="flex items-center gap-3 sm:gap-6">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <div className="h-6 w-4 sm:h-8 sm:w-5 bg-[#FFCC00] rounded-sm shadow-md" />
+                        <span className="text-base sm:text-xl font-black text-white">{match.yellowCards}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <div className="h-6 w-4 sm:h-8 sm:w-5 bg-[#DC143C] rounded-sm shadow-md" />
+                        <span className="text-base sm:text-xl font-black text-white">{match.redCards}</span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xl sm:text-2xl font-black text-white">
+                        {match.passAccuracy}%
+                      </div>
+                      <div className="text-[8px] sm:text-[10px] uppercase tracking-widest text-gray-500 font-black">
+                        Accuracy
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    disabled={downloadingReportId !== null}
+                    onClick={() => handleDownloadPDF(match)}
+                    className="w-full flex items-center justify-center gap-2 bg-[#E31B23] hover:bg-[#C2181F] text-white text-[11px] font-black uppercase tracking-wider py-3.5 rounded-xl cursor-pointer transition-all disabled:opacity-50 font-orbitron"
+                  >
+                    <IconDownload size={15} />
+                    {downloadingReportId === match.id ? "Downloading..." : "Download Report PDF"}
+                  </button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="border border-white/10 bg-black/60 p-8 sm:p-14 text-center rounded-2xl flex flex-col items-center justify-center gap-3 w-full">
+            <div className="size-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 mb-2">
+              <CalendarIcon className="size-7 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-bold text-white uppercase tracking-wider font-heading">
+              No Game Reports Logged Yet
+            </h3>
+            <p className="text-sm text-gray-400 max-w-md">
+              This player has not logged any match reports in the database yet. Verified reports and performance analytics will appear here as matches are recorded.
+            </p>
+          </div>
+        )}
+
+        {/* View All / Archive Button (Only when more than 4 real DB matches exist) */}
+        {cvMatches.length > 4 && (
+          <div className="flex justify-center mt-10">
             <button
-              disabled={downloadingReportId !== null}
-              onClick={() => handleDownloadPDF(match)}
-              className="w-full flex items-center justify-center gap-2 bg-[#E31B23] hover:bg-[#C2181F] text-white text-[11px] font-black uppercase tracking-wider py-3.5 rounded-xl cursor-pointer transition-all disabled:opacity-50 font-orbitron"
+              onClick={() => setShowArchive(true)}
+              className="bg-white/5 border border-white/10 hover:bg-white/10 text-white text-xs font-black uppercase tracking-widest px-8 py-4.5 rounded-2xl cursor-pointer transition-all font-orbitron"
             >
-              <IconDownload size={15} />
-              {downloadingReportId === match.id ? "Downloading..." : "Download Report PDF"}
+              View All Game Reports ({cvMatches.length})
             </button>
           </div>
-        </Card>
-      ))}
-    </div>
+        )}
 
-    {/* View All / Archive Button */}
-    {effectiveMatches.length > 4 && (
-      <div className="flex justify-center mt-10">
-        <button
-          onClick={() => setShowArchive(true)}
-          className="bg-white/5 border border-white/10 hover:bg-white/10 text-white text-xs font-black uppercase tracking-widest px-8 py-4.5 rounded-2xl cursor-pointer transition-all font-orbitron"
-        >
-          View All Game Reports (Archive)
-        </button>
-      </div>
-    )}
+        {/* Archive Dialog */}
+        <Dialog open={showArchive} onOpenChange={setShowArchive}>
+          <DialogContent className="max-w-4xl bg-[#0e0e0e] border-white/10 text-white rounded-4xl overflow-hidden max-h-[85vh] flex flex-col p-8">
+            <DialogHeader className="mb-4">
+              <DialogTitle className="text-3xl font-black uppercase text-white font-orbitron tracking-tight leading-none">
+                Game Reports Archive
+              </DialogTitle>
+              <p className="text-white/40 font-bold uppercase tracking-widest text-[10px] mt-1">
+                A complete log of all verified, paid game performance reports
+              </p>
+            </DialogHeader>
 
-    {/* Archive Dialog */}
-    <Dialog open={showArchive} onOpenChange={setShowArchive}>
-      <DialogContent className="max-w-4xl bg-[#0e0e0e] border-white/10 text-white rounded-4xl overflow-hidden max-h-[85vh] flex flex-col p-8">
-        <DialogHeader className="mb-4">
-          <DialogTitle className="text-3xl font-black uppercase text-white font-orbitron tracking-tight leading-none">
-            Game Reports Archive
-          </DialogTitle>
-          <p className="text-white/40 font-bold uppercase tracking-widest text-[10px] mt-1">
-            A complete log of all verified, paid game performance reports
-          </p>
-        </DialogHeader>
-
-        <div className="flex-1 overflow-y-auto space-y-4 pr-2">
-          {effectiveMatches.map((match: any) => (
-            <div 
-              key={match.id} 
-              className="bg-black/40 border border-white/5 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-white/15 transition-all"
-            >
-              <div className="flex-1 space-y-3">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-white/40 font-medium">{match.date}</span>
-                  <Badge className="bg-white/5 text-white/60 hover:bg-white/10 text-[9px] uppercase tracking-wider font-bold">
-                    {match.league}
-                  </Badge>
-                </div>
-                <div className="text-lg font-black uppercase tracking-tight text-white font-orbitron">
-                  {match.team1} <span className="text-[#E31B23] italic">vs</span> {match.team2}
-                </div>
-                <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-white/50">
-                  <div>Score: <strong className="text-white">{match.score}</strong></div>
-                  <div>Venue: <strong className="text-white">{match.stadium}</strong></div>
-                  <div>Goals: <strong className="text-white">{match.goals}</strong></div>
-                  <div>Assists: <strong className="text-white">{match.assists}</strong></div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-6 shrink-0 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-white/5 pt-4 md:pt-0">
-                <div className="text-center">
-                  <div className="text-2xl font-black text-[#00FF62] font-orbitron">{Number(match.rating).toFixed(1)}</div>
-                  <div className="text-[9px] uppercase tracking-widest text-gray-500 font-bold">Rating</div>
-                </div>
-
-                <button
-                  disabled={downloadingReportId !== null}
-                  onClick={() => handleDownloadPDF(match)}
-                  className="flex items-center gap-2 bg-[#E31B23] hover:bg-[#C2181F] text-white text-[10px] font-black uppercase tracking-widest px-5 py-3 rounded-xl cursor-pointer transition-all disabled:opacity-50 font-orbitron"
+            <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+              {cvMatches.map((match: any) => (
+                <div
+                  key={match.id}
+                  className="bg-black/40 border border-white/5 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-white/15 transition-all"
                 >
-                  <IconDownload size={14} />
-                  {downloadingReportId === match.id ? "Wait..." : "Download PDF"}
-                </button>
-              </div>
+                  <div className="flex-1 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-white/40 font-medium">{match.date}</span>
+                      <Badge className="bg-white/5 text-white/60 hover:bg-white/10 text-[9px] uppercase tracking-wider font-bold">
+                        {match.league}
+                      </Badge>
+                    </div>
+                    <div className="text-lg font-black uppercase tracking-tight text-white font-orbitron">
+                      {match.team1} <span className="text-[#E31B23] italic">vs</span> {match.team2}
+                    </div>
+                    <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-white/50">
+                      <div>Score: <strong className="text-white">{match.score}</strong></div>
+                      <div>Venue: <strong className="text-white">{match.stadium}</strong></div>
+                      <div>Goals: <strong className="text-white">{match.goals}</strong></div>
+                      <div>Assists: <strong className="text-white">{match.assists}</strong></div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-6 shrink-0 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-white/5 pt-4 md:pt-0">
+                    <div className="text-center">
+                      <div className="text-2xl font-black text-[#00FF62] font-orbitron">
+                        {Number(match.rating).toFixed(1)}
+                      </div>
+                      <div className="text-[9px] uppercase tracking-widest text-gray-500 font-bold">Rating</div>
+                    </div>
+
+                    <button
+                      disabled={downloadingReportId !== null}
+                      onClick={() => handleDownloadPDF(match)}
+                      className="flex items-center gap-2 bg-[#E31B23] hover:bg-[#C2181F] text-white text-[10px] font-black uppercase tracking-widest px-5 py-3 rounded-xl cursor-pointer transition-all disabled:opacity-50 font-orbitron"
+                    >
+                      <IconDownload size={14} />
+                      {downloadingReportId === match.id ? "Wait..." : "Download PDF"}
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </DialogContent>
-    </Dialog>
-  </div>
-</div>
-);
-}
+          </DialogContent>
+        </Dialog>
+      </div>
+    </div>
+  );
+};
+
 export default SportsAnalycies;

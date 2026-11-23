@@ -8,7 +8,13 @@ import { usePlayer } from "@/hooks/usePlayer";
 import { addReport, completeReportRequest, addReportRequest, updateReport } from "@/lib/constants/reports";
 import ReportDetailsForm from "./ReportDetailsForm";
 import StripePaymentModal from "./StripePaymentModal";
-import MatchStatisticsForm, { PitchLine, DEFAULT_FORM_STATS } from "./MatchStatisticsForm";
+import MatchStatisticsForm, {
+  PitchLine,
+  DEFAULT_FORM_STATS,
+  OUTFIELD_SLIDES,
+  GK_SLIDE_1,
+  GK_SLIDE_4,
+} from "./MatchStatisticsForm";
 import ReportPdfPreview from "./ReportPdfPreview";
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHooks";
@@ -18,11 +24,13 @@ import {
   useCompleteSelfGameReportMutation,
   useRequestCoachGameReportMutation,
   useGetMyPlayerProfileQuery,
+  useGetMyGameReportByIdQuery,
 } from "@/redux/features/player/playerApi";
 import {
   useCompleteCoachGameReportMutation,
   useGetCoachGameReportsQuery,
 } from "@/redux/features/coach/coachApi";
+import { useGetSingleGameReportQuery } from "@/redux/features/academy/academyApi";
 import {
   ICreateSelfGameReportPayload,
   ICompleteSelfGameReportPayload,
@@ -76,6 +84,39 @@ const formatMinutesPlayed = (val: string | number | undefined | null): string =>
   if (m > 130) m = 130;
 
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+};
+
+/** Stat keys collected by the Match Statistics form for a position (same order as the form). */
+const getStatKeysForPosition = (isGK: boolean): string[] => {
+  const slides = isGK
+    ? [GK_SLIDE_1, OUTFIELD_SLIDES[0], OUTFIELD_SLIDES[1], GK_SLIDE_4]
+    : OUTFIELD_SLIDES;
+  return Array.from(new Set(slides.flat().map((item) => item.key)));
+};
+
+/** Older drafts / records may use legacy key names — read those as a fallback. */
+const LEGACY_STAT_ALIASES: Record<string, string[]> = {
+  goal: ["goalScored"],
+  assist: ["assists"],
+  shotOnTarget: ["shotsOnGoal"],
+  penaltyWon: ["penaltiesTaken"],
+  completedPass: ["passAccurate"],
+  incompletePass: ["wrongPass"],
+  freeKickWon: ["freeKick"],
+  tackleWon: ["standTackle"],
+  foulCommitted: ["fault"],
+  save: ["savesAccurate"],
+  save1v1: ["oneOnOneSave"],
+  goalConceded: ["goalUnsave"],
+};
+
+/** The entered value for a stat (0 when nothing was entered). */
+const readStat = (stats: Record<string, number>, key: string): number => {
+  for (const k of [key, ...(LEGACY_STAT_ALIASES[key] || [])]) {
+    const v = stats[k];
+    if (v !== undefined && v !== null && !isNaN(Number(v))) return Number(v);
+  }
+  return 0;
 };
 
 interface CreateGameReportWizardProps {
@@ -141,6 +182,13 @@ export const CreateGameReportWizard = ({
   const viewOnly = searchParams.get("viewOnly") === "true";
   const urlPosition = searchParams.get("position");
 
+  const { data: myGameReportResponse } = useGetMyGameReportByIdQuery(reportId || "", {
+    skip: !reportId,
+  });
+  const { data: singleGameReportResponse } = useGetSingleGameReportQuery(reportId || "", {
+    skip: !reportId,
+  });
+
   const stepParam = searchParams.get("step");
   const initialStep =
     stepParam && STEP_NAME_TO_NUMBER[stepParam.toLowerCase()]
@@ -193,30 +241,36 @@ export const CreateGameReportWizard = ({
     }
   };
 
-  const [characteristics, setCharacteristics] = useState<string[]>(["FAST", "SKILLFUL", "FINISHER"]);
+  // All values start empty: they are filled from the player profile (step 1)
+  // or from the saved game report in the database (preview / view-only).
+  const [characteristics, setCharacteristics] = useState<string[]>([]);
   const [coachFeedback, setCoachFeedback] = useState<string>("");
   const [formData, setFormData] = useState({
-    playerName: "EDEGELSON RICCI",
-    dob: "2014-03-27",
-    clubName: "INTER MIAMI",
-    position: searchParams.get("position")?.trim().toUpperCase() || "STRIKER",
-    foot: "RIGHT",
-    weight: "45",
-    height: "1.20",
+    playerName: "",
+    dob: "",
+    clubName: "",
+    position: searchParams.get("position")?.trim().toUpperCase() || "",
+    foot: "",
+    weight: "",
+    height: "",
+    // A game report always describes exactly one match.
     matchesPlayed: "1",
     minutesPlayed: "00:00",
-    manOfTheMatch: "1",
-    scoutName: "MARIO LOPEZ",
-    gameType: "FRIENDLY CHAMPIONSHIP CATARINESE",
-    gameDate: "2021-02-22",
-    gameLocation: "LONDON",
-    matchResult: "EDEGELSON RICCI 2 X 0 OPPONENT",
-    weather: "RAINY",
-    temperature: "19",
-    opponentTeam: "Chelsea U19",
-    ownTeam: "FC Barcelona",
-    homeScore: 2,
-    awayScore: 1
+    manOfTheMatch: "",
+    scoutName: "",
+    gameType: "",
+    gameDate: "",
+    gameLocation: "",
+    matchResult: "",
+    weather: "",
+    temperature: "",
+    opponentTeam: "",
+    ownTeam: "",
+    homeScore: 0,
+    awayScore: 0,
+    playerImage: "",
+    scoutRating: undefined as number | undefined,
+    rating: undefined as number | undefined,
   });
 
   const [stats, setStats] = useState<Record<string, number>>(DEFAULT_FORM_STATS);
@@ -404,133 +458,212 @@ export const CreateGameReportWizard = ({
     }
   }, [pathname, viewOnly]);
 
+  // The saved game report from the database (if any). When present it is the
+  // single source of truth for everything rendered in the preview / PDF.
+  const apiReport: any =
+    myGameReportResponse?.data?.report ||
+    myGameReportResponse?.data ||
+    singleGameReportResponse?.data ||
+    null;
+  const hasApiReport = Boolean(apiReport);
+
+  // Sync dynamic game report from API whenever reportId is present (e.g. after Stripe redirect or direct link).
+  // Runs once per report version so refetches don't wipe what the user is entering.
+  const syncedReportKey = React.useRef<string | null>(null);
+  useEffect(() => {
+    if (!apiReport) return;
+    const reportKey = `${apiReport._id ?? reportId}:${apiReport.updatedAt ?? ""}:${myProfileResponse ? 1 : 0}`;
+    if (syncedReportKey.current === reportKey) return;
+    syncedReportKey.current = reportKey;
+
+    const pInfo = apiReport.playerInfo || {};
+    const pObj = apiReport.player || {};
+    const profile: any = myProfileResponse?.data || {};
+
+    // First non-empty value from the database record (falls back to the
+    // player's own profile record only for bio fields the report lacks).
+    const pick = (...vals: any[]): string => {
+      for (const v of vals) {
+        if (v !== undefined && v !== null && String(v).trim() !== "") return String(v).trim();
+      }
+      return "";
+    };
+
+    const pName = pick(pInfo.playerName, apiReport.playerName, pObj.fullName, pObj.name, profile.fullName);
+    const pDob = pick(pInfo.dateOfBirth, pObj.dateOfBirth, pObj.dob, profile.dateOfBirth);
+    const pClub = pick(pInfo.clubName, pObj.currentClub, profile.currentClub);
+    const pPos = pick(pInfo.position, apiReport.position, apiReport.playerPosition, pObj.position, urlPosition, profile.position);
+    const pFoot = pick(pInfo.foot, apiReport.foot, pObj.preferredFoot, profile.preferredFoot);
+    const pWeight = pick(pInfo.weight, apiReport.weight, pObj.weight, profile.weight);
+    const pHeight = pick(pInfo.height, apiReport.height, pObj.height, profile.height);
+    const pImg = pick(
+      pObj.profileImage, pObj.profileImg, pObj.avatar, apiReport.playerAvatar,
+      profile.cardImage, profile.cardPhoto, profile.profileImage, profile.profileImg
+    );
+
+    const scout = pick(apiReport.scoutName, apiReport.evaluatorName, apiReport.evaluator?.name, apiReport.coach?.name, apiReport.authorName);
+    const gDate = formatDateToYMD(pick(apiReport.gameDate, apiReport.date));
+    const gType = pick(apiReport.gameType, apiReport.league);
+    const gLocation = pick(apiReport.gameLocation, apiReport.stadium, apiReport.location);
+    const own = pick(apiReport.ownTeam, apiReport.team1);
+    const opp = pick(apiReport.opponentTeam, apiReport.team2);
+    const hasScore = typeof apiReport.homeScore === "number" && typeof apiReport.awayScore === "number";
+    const mResult = pick(
+      apiReport.matchResult,
+      own && opp && hasScore ? `${own} ${apiReport.homeScore} - ${apiReport.awayScore} ${opp}` : "",
+      own && opp && apiReport.score ? `${own} ${apiReport.score} ${opp}` : ""
+    );
+    const rating = apiReport.scoutRating ?? apiReport.rating;
+
+    setFormData(prev => ({
+      ...prev,
+      playerName: pName,
+      dob: pDob ? formatDateToYMD(pDob) : "",
+      clubName: pClub,
+      position: pPos.toUpperCase(),
+      foot: pFoot.toUpperCase(),
+      weight: pWeight,
+      height: pHeight,
+      playerImage: pImg,
+      matchesPlayed: pick(apiReport.matchesPlayed, "1"),
+      // A report is created (before payment) with no minutes yet, so a stored
+      // "00:00"/0 must not overwrite the minutes the user entered in step 2.
+      minutesPlayed: (() => {
+        const stored = formatMinutesPlayed(pick(apiReport.minutesPlayed, apiReport.timePlayedMinutes));
+        return stored !== "00:00" ? stored : prev.minutesPlayed;
+      })(),
+      manOfTheMatch: pick(apiReport.manOfTheMatch),
+      scoutName: scout,
+      gameDate: gDate,
+      gameType: gType.toUpperCase(),
+      gameLocation: gLocation.toUpperCase(),
+      matchResult: mResult,
+      weather: pick(apiReport.weather).toUpperCase(),
+      temperature: pick(apiReport.temperature),
+      opponentTeam: opp,
+      ownTeam: own,
+      homeScore: typeof apiReport.homeScore === "number" ? apiReport.homeScore : prev.homeScore,
+      awayScore: typeof apiReport.awayScore === "number" ? apiReport.awayScore : prev.awayScore,
+      scoutRating: typeof rating === "number" ? rating : undefined,
+      rating: typeof rating === "number" ? rating : undefined,
+    }));
+
+    const chars = pInfo.characteristics ?? apiReport.characteristics ?? pObj.playerStyles;
+    if (Array.isArray(chars)) {
+      setCharacteristics(chars.map((c: any) => String(c).toUpperCase()));
+    }
+
+    // Stats: only override the in-progress form when the report actually has
+    // stats saved (i.e. it was completed). Otherwise keep what the user entered.
+    if (apiReport.stats && Object.keys(apiReport.stats).length > 0) {
+      setStats({ ...DEFAULT_FORM_STATS, ...apiReport.stats });
+    }
+
+    if (Array.isArray(apiReport.accurateShots) && apiReport.accurateShots.length > 0) {
+      setGoalMarkers(apiReport.accurateShots.map((s: any) => ({ x: s.x, y: s.y })));
+    }
+
+    if (Array.isArray(apiReport.accurateAssists) && apiReport.accurateAssists.length > 0) {
+      setPitchMarkers(apiReport.accurateAssists.map((a: any) => ({
+        x1: a.fromX,
+        y1: a.fromY,
+        x2: a.toX,
+        y2: a.toY,
+      })));
+    }
+
+    const feedback = pick(apiReport.coachFeedback, apiReport.scoutAnalysis);
+    if (feedback) setCoachFeedback(feedback);
+  }, [apiReport, reportId, urlPosition, myProfileResponse]);
+
   // Pre-fill from Redux player list and request data
   useEffect(() => {
-    let pName = "EDEGELSON RICCI";
-    let pDob = "27-03-2014";
-    let pClub = "INTER MIAMI";
-    let pPos = "STRIKER";
-    let pFoot = "RIGHT";
-    let pWeight = "45";
-    let pHeight = "1.20";
-    let pMatches = "1";
-    let pMinutes = "00:00";
-    let pScout = "MARIO LOPEZ";
+    // A saved report from the database always wins over local/mock data.
+    if (hasApiReport) return;
 
     // check if viewOnly
     const viewOnly = searchParams.get("viewOnly") === "true";
-    const savedReport = viewOnly ? reports.find(r => r.playerId === Number(playerId)) : null;
+    const savedReport = viewOnly && !reportId ? reports.find(r => r.playerId === Number(playerId)) : null;
 
     if (savedReport) {
-      // Find player dob from player list if available
-      let foundDob = pDob;
+      let foundDob = "";
       if (playerId) {
         const player = players.find(p => String(p.id) === String(playerId) || (p as any)._id === playerId);
         if (player) {
-          foundDob = player.dob || "15-03-1996";
+          foundDob = player.dob || "";
         }
       }
 
-      setFormData({
-        playerName: savedReport.playerName || pName,
-        dob: foundDob,
-        clubName: savedReport.team1 || pClub,
-        position: savedReport.playerPosition.toUpperCase() || pPos,
-        foot: savedReport.foot.toUpperCase() || pFoot,
-        weight: savedReport.weight.replace("kg", "") || pWeight,
-        height: savedReport.height.replace("m", "") || pHeight,
+      setFormData(prev => ({
+        ...prev,
+        playerName: savedReport.playerName || prev.playerName,
+        dob: foundDob || savedReport.date || prev.dob,
+        clubName: savedReport.team1 || prev.clubName,
+        position: savedReport.playerPosition ? savedReport.playerPosition.toUpperCase() : prev.position,
+        foot: savedReport.foot ? savedReport.foot.toUpperCase() : prev.foot,
+        weight: savedReport.weight ? savedReport.weight.replace("kg", "") : prev.weight,
+        height: savedReport.height ? savedReport.height.replace("m", "") : prev.height,
         matchesPlayed: "1",
-        minutesPlayed: formatMinutesPlayed(savedReport.timePlayedMinutes || pMinutes),
+        minutesPlayed: formatMinutesPlayed(savedReport.timePlayedMinutes || prev.minutesPlayed),
         manOfTheMatch: "1",
-        scoutName: savedReport.scoutName || pScout,
-        gameType: savedReport.league || "COMPETITIVE MATCH",
-        gameDate: savedReport.date || "2021-02-22",
-        gameLocation: savedReport.stadium || "LONDON",
-        matchResult: `${savedReport.team1} ${savedReport.score} ${savedReport.team2}`,
-        weather: savedReport.weather.toUpperCase() || "SUNNY",
-        temperature: savedReport.temperature || "22",
-        opponentTeam: savedReport.team2 || "Chelsea U19",
-        ownTeam: savedReport.team1 || "FC Barcelona",
-        homeScore: 2,
-        awayScore: 1
-      });
+        scoutName: savedReport.scoutName || prev.scoutName,
+        gameType: savedReport.league || prev.gameType || "COMPETITIVE MATCH",
+        gameDate: savedReport.date || prev.gameDate,
+        gameLocation: savedReport.stadium || prev.gameLocation,
+        matchResult: savedReport.team1 && savedReport.team2 ? `${savedReport.team1} ${savedReport.score || ""} ${savedReport.team2}` : prev.matchResult,
+        weather: savedReport.weather ? savedReport.weather.toUpperCase() : prev.weather,
+        temperature: savedReport.temperature || prev.temperature,
+        opponentTeam: savedReport.team2 || prev.opponentTeam,
+        ownTeam: savedReport.team1 || prev.ownTeam,
+        homeScore: typeof (savedReport as any)?.homeScore === "number" ? (savedReport as any).homeScore : prev.homeScore,
+        awayScore: typeof (savedReport as any)?.awayScore === "number" ? (savedReport as any).awayScore : prev.awayScore,
+      }));
       if (savedReport.characteristics) {
         setCharacteristics(savedReport.characteristics.map(c => c.toUpperCase()));
       }
       
-      // Load saved markers if available, otherwise fallback to defaults
       if (savedReport.goalMarkers && savedReport.goalMarkers.length > 0) {
         setGoalMarkers(savedReport.goalMarkers);
-      } else {
-        setGoalMarkers([{ x: 15, y: 25 }, { x: 85, y: 25 }, { x: 50, y: 50 }]);
       }
-
       if (savedReport.pitchMarkers && savedReport.pitchMarkers.length > 0) {
         setPitchMarkers(savedReport.pitchMarkers);
-      } else {
-        const isGK = savedReport.playerPosition.toUpperCase() === "GOALKEEPER";
-        if (isGK) {
-          setPitchMarkers([{ x1: 45, y1: 65, x2: 56, y2: 40 }]);
-        } else {
-          setPitchMarkers([{ x1: 48, y1: 62, x2: 56, y2: 46 }]);
+      }
+      return;
+    }
+
+    if (playerId) {
+      const player = players.find(p => String(p.id) === String(playerId) || (p as any)._id === playerId);
+      if (player) {
+        const posUpper = (player.position || "").toUpperCase();
+        let pPos = "STRIKER";
+        if (posUpper.includes("GOALKEEPER")) pPos = "GOALKEEPER";
+        else if (posUpper.includes("MIDFIELDER")) pPos = "MIDFIELDER";
+        else if (posUpper.includes("WINGER")) pPos = "WINGER";
+        else if (posUpper.includes("DEFENDER") || posUpper.includes("BACK")) pPos = "DEFENDER";
+
+        setFormData(prev => ({
+          ...prev,
+          playerName: player.fullName || prev.playerName,
+          dob: player.dob || prev.dob,
+          clubName: (player.academyName && player.academyName !== "N/A") ? player.academyName : prev.clubName,
+          position: pPos,
+          foot: player.rightLegUsage > player.leftLegUsage ? "RIGHT" : (player.leftLegUsage > player.rightLegUsage ? "LEFT" : prev.foot),
+          weight: player.weight || prev.weight,
+          height: player.height || prev.height,
+          matchesPlayed: player.seasonStats?.matches ? player.seasonStats.matches.toString() : prev.matchesPlayed,
+          minutesPlayed: player.seasonStats?.matches ? `${player.seasonStats.matches * 90}:00` : prev.minutesPlayed,
+          scoutName: (player.coachName && player.coachName !== "N/A") ? player.coachName : prev.scoutName,
+          playerImage: (player as any).profileImg || (player as any).avatar || prev.playerImage,
+        }));
+
+        if (player.selectedStyleIds && player.selectedStyleIds.length > 0) {
+          setCharacteristics(player.selectedStyleIds.map(s => s.toUpperCase()));
         }
       }
+    }
 
-      // Default mock 24 stats for viewOnly
-      const isGK = savedReport.playerPosition.toUpperCase() === "GOALKEEPER";
-      if (isGK) {
-        setStats({
-          shotsOnGoal: 0, goalScored: savedReport.goals, assists: savedReport.assists, passAccurate: savedReport.passes, wrongPass: 2, penaltiesTaken: 0,
-          standTackle: 0, slidingTackle: 0, interception: 0, savesAccurate: 10, freeKick: 0, cornerKick: 0,
-          goalUnsave: 1, penaltiesSaves: 1, appearances: savedReport.timePlayedMinutes ? 1 : 15, fault: 1, redCard: savedReport.redCards, yellowCard: savedReport.yellowCards,
-          punching: 5, handling: 10, reflex: 1, aerialAbility: 5, throwing: 8, reactions: 1
-        });
-      } else {
-        setStats({
-          shotsOnGoal: 8, goalScored: savedReport.goals, assists: savedReport.assists, passAccurate: savedReport.passes, wrongPass: 2, penaltiesTaken: 4,
-          standTackle: 12, slidingTackle: 12, interception: 2, savesAccurate: 10, freeKick: 12, cornerKick: 4,
-          goalUnsave: 1, penaltiesSaves: 1, appearances: savedReport.timePlayedMinutes ? 1 : 15, fault: 1, redCard: savedReport.redCards, yellowCard: savedReport.yellowCards,
-          punching: 5, handling: 10, reflex: 1, aerialAbility: 5, throwing: 8, reactions: 1
-        });
-      }
-    } else {
-      // 1. Fill player details
-      if (playerId) {
-        const player = players.find(p => String(p.id) === String(playerId) || (p as any)._id === playerId);
-        if (player) {
-          pName = player.fullName;
-          pDob = player.dob || "15-03-1996";
-          pClub = player.academyName && player.academyName !== "N/A" ? player.academyName : "INTER MIAMI";
-          pFoot = player.rightLegUsage > player.leftLegUsage ? "RIGHT" : "LEFT";
-          pWeight = player.weight || "45";
-          pHeight = player.height || "1.20";
-          pMatches = player.seasonStats?.matches ? player.seasonStats.matches.toString() : "1";
-          pMinutes = player.seasonStats?.matches ? `${player.seasonStats.matches * 90}:00` : "00:00";
-          pScout = player.coachName && player.coachName !== "N/A" ? player.coachName : "MARIO LOPEZ";
-
-          const posUpper = player.position.toUpperCase();
-          if (posUpper.includes("GOALKEEPER")) pPos = "GOALKEEPER";
-          else if (posUpper.includes("MIDFIELDER")) pPos = "MIDFIELDER";
-          else if (posUpper.includes("WINGER")) pPos = "WINGER";
-          else if (posUpper.includes("DEFENDER") || posUpper.includes("BACK")) pPos = "DEFENDER";
-
-          if (player.selectedStyleIds && player.selectedStyleIds.length > 0) {
-            setCharacteristics(player.selectedStyleIds.map(s => s.toUpperCase()));
-          } else {
-            setCharacteristics(["FAST", "SKILLFUL"]);
-          }
-        }
-      }
-
-      // 2. Fill request match details
-      let mDate = "2021-02-22";
-      let mLocation = "LONDON";
-      let mType = "FRIENDLY CHAMPIONSHIP CATARINESE";
-      let mResult = `${pName.toUpperCase()} 2 x 0 OPPONENT`;
-      let mWeather = "RAINY";
-      let mTemp = "19";
-
-      // Check coach game reports list for coach report requests
+    // Check coach game reports list for coach report requests
+    if (requestId) {
       const coachReport = coachGameReportsResponse?.data?.reports?.find(
         (r) =>
           r._id === requestId ||
@@ -538,103 +671,214 @@ export const CreateGameReportWizard = ({
       );
 
       if (coachReport) {
-        if (coachReport.player?.name) pName = coachReport.player.name;
-        if (coachReport.player?.position) pPos = coachReport.player.position.toUpperCase();
-        if (coachReport.matches) mResult = coachReport.matches;
-        if (coachReport.date) mDate = coachReport.date;
+        setFormData(prev => ({
+          ...prev,
+          playerName: coachReport.player?.name || prev.playerName,
+          position: coachReport.player?.position ? coachReport.player.position.toUpperCase() : prev.position,
+          matchResult: coachReport.matches || prev.matchResult,
+          gameDate: coachReport.date ? formatDateToYMD(coachReport.date) : prev.gameDate,
+        }));
       }
 
-      if (requestId) {
-        const request = requests.find(r => r.id === Number(requestId));
-        if (request) {
-          mDate = request.date;
-          mLocation = request.location || "LONDON";
-          mType = request.league || "COMPETITIVE MATCH";
-          mResult = `${pName.toUpperCase()} vs ${request.opponent || "OPPONENT"}`;
-          mWeather = request.weather || "SUNNY";
-          mTemp = request.temperature || "22";
-
-          // If the player filled the full form, load their data
-          if (request.formData) {
-            setFormData(request.formData);
-            if (request.statsData) setStats(request.statsData);
-            if (request.goalMarkers) setGoalMarkers(request.goalMarkers);
-            if (request.pitchMarkers) setPitchMarkers(request.pitchMarkers);
-            if (request.characteristics) setCharacteristics(request.characteristics);
-            return; // Skip setting default formData below
-          }
+      const request = requests.find(r => r.id === Number(requestId));
+      if (request) {
+        if (request.formData) {
+          setFormData(request.formData);
+          if (request.statsData) setStats(request.statsData);
+          if (request.goalMarkers) setGoalMarkers(request.goalMarkers);
+          if (request.pitchMarkers) setPitchMarkers(request.pitchMarkers);
+          if (request.characteristics) setCharacteristics(request.characteristics);
+        } else {
+          setFormData(prev => ({
+            ...prev,
+            gameDate: request.date ? formatDateToYMD(request.date) : prev.gameDate,
+            gameLocation: request.location || prev.gameLocation,
+            gameType: request.league || prev.gameType,
+            matchResult: request.opponent ? `${prev.playerName} vs ${request.opponent}` : prev.matchResult,
+            weather: request.weather || prev.weather,
+            temperature: request.temperature || prev.temperature,
+            opponentTeam: request.opponent || prev.opponentTeam,
+          }));
         }
       }
-
-      setFormData({
-        playerName: pName,
-        dob: pDob,
-        clubName: pClub,
-        position: pPos,
-        foot: pFoot,
-        weight: pWeight,
-        height: pHeight,
-        matchesPlayed: pMatches,
-        minutesPlayed: formatMinutesPlayed(pMinutes),
-        manOfTheMatch: "1",
-        scoutName: pScout,
-        gameType: mType,
-        gameDate: mDate,
-        gameLocation: mLocation,
-        matchResult: mResult,
-        weather: mWeather,
-        temperature: mTemp,
-        opponentTeam: "Chelsea U19",
-        ownTeam: "FC Barcelona",
-        homeScore: 2,
-        awayScore: 1
-      });
     }
-  }, [playerId, requestId, players, searchParams, requests, coachGameReportsResponse]);
+  }, [playerId, requestId, reportId, players, searchParams, requests, coachGameReportsResponse, hasApiReport]);
 
  
 
 
 
-  const buildPayload = (): ICreateSelfGameReportPayload => {
-    let hScore = typeof formData.homeScore === "number" ? formData.homeScore : parseInt(String(formData.homeScore ?? "2"), 10);
-    let aScore = typeof formData.awayScore === "number" ? formData.awayScore : parseInt(String(formData.awayScore ?? "1"), 10);
-    if (isNaN(hScore)) hScore = 2;
-    if (isNaN(aScore)) aScore = 1;
+  /**
+   * Builds the player + match info that is persisted with the report.
+   * Every value comes from what the user entered (pre-filled from their
+   * profile). Nothing is invented: if a required field is missing we show an
+   * error and return null instead of saving placeholder data.
+   */
+  const buildPayload = (scoutNameOverride?: string): ICreateSelfGameReportPayload | null => {
+    const toInt = (v: unknown) => {
+      const n = typeof v === "number" ? v : parseInt(String(v ?? ""), 10);
+      return isNaN(n) ? 0 : n;
+    };
+    const toNum = (v: unknown) => {
+      const n = parseFloat(String(v ?? "").replace(/[^\d.-]/g, ""));
+      return isNaN(n) ? NaN : n;
+    };
 
-    const payload: ICreateSelfGameReportPayload = {
+    const hScore = toInt(formData.homeScore);
+    const aScore = toInt(formData.awayScore);
+    const pName = formData.playerName?.trim() || "";
+    const pClub = formData.clubName?.trim() || "";
+    const pDob = formatDateToYMD(formData.dob || "");
+    const pPos = (urlPosition || formData.position || "").trim().toUpperCase();
+    const pFoot = (formData.foot || "").trim().toUpperCase();
+    const pWeight = toNum(formData.weight);
+    const pHeight = toNum(formData.height);
+    const own = formData.ownTeam?.trim() || pClub;
+    const opp = formData.opponentTeam?.trim() || "";
+    const gDate = formatDateToYMD(formData.gameDate || "");
+    const gType = (formData.gameType || "").trim().toUpperCase();
+    const scoutName =
+      scoutNameOverride !== undefined
+        ? scoutNameOverride.trim()
+        : (formData.scoutName || "").trim() || (isCoach ? authUser?.name || "" : "SELF");
+
+    const missing: string[] = [];
+    if (!pName) missing.push("Player name");
+    if (!pDob) missing.push("Date of birth");
+    if (!pClub) missing.push("Club name");
+    if (!pPos) missing.push("Position");
+    if (!pFoot) missing.push("Foot");
+    if (!(pWeight > 0)) missing.push("Weight");
+    if (!(pHeight > 0)) missing.push("Height");
+    if (!scoutName) missing.push("Scout name");
+    if (!gType) missing.push("Game type");
+    if (!gDate) missing.push("Game date");
+    if (!own) missing.push("Own team");
+    if (!opp) missing.push("Opponent team");
+
+    if (missing.length > 0) {
+      toast.error(`Please fill in: ${missing.join(", ")}`);
+      navigateToStep(1);
+      return null;
+    }
+
+    return {
       playerInfo: {
-        playerName: formData.playerName?.trim() || "EDEGELSON RICCI",
-        dateOfBirth: formatDateToYMD(formData.dob) || "2014-03-27",
-        clubName: formData.clubName?.trim() || "INTER MIAMI",
-        position: (urlPosition || formData.position)?.trim().toUpperCase() || "STRIKER",
-        foot: formData.foot?.trim().toUpperCase() || "RIGHT",
-        characteristics: characteristics && characteristics.length > 0 ? characteristics : ["FAST", "SKILLFUL", "FINISHER"],
-        weight: Number(String(formData.weight).replace(/[^\d.]/g, "")) || 45,
-        height: Number(String(formData.height).replace(/[^\d.]/g, "")) || 1.20,
+        playerName: pName,
+        dateOfBirth: pDob,
+        clubName: pClub,
+        position: pPos,
+        foot: pFoot,
+        characteristics: characteristics || [],
+        weight: pWeight,
+        height: pHeight,
       },
-      scoutName: formData.scoutName?.trim() || "MARIO LOPEZ",
-      gameType: formData.gameType?.trim().toUpperCase() || "FRIENDLY CHAMPIONSHIP CATARINESE",
-      gameDate: formatDateToYMD(formData.gameDate) || "2021-02-22",
-      gameLocation: formData.gameLocation?.trim().toUpperCase() || "LONDON",
-      matchResult: formData.matchResult?.trim() || "EDEGELSON RICCI 2 X 0 OPPONENT",
-      weather: formData.weather?.trim().toUpperCase() || "RAINY",
-      temperature: Number(String(formData.temperature).replace(/[^\d.-]/g, "")) || 19,
-      opponentTeam: formData.opponentTeam?.trim() || "Chelsea U19",
-      ownTeam: formData.ownTeam?.trim() || "FC Barcelona",
+      scoutName,
+      gameType: gType,
+      gameDate: gDate,
+      opponentTeam: opp,
+      ownTeam: own,
       homeScore: hScore,
       awayScore: aScore,
     };
+  };
 
-    console.log("🚀 CREATE SELF GAME REPORT PAYLOAD:", payload);
-    console.log("📦 PAYLOAD JSON:\n", JSON.stringify(payload, null, 2));
+  const isGKPosition = () => {
+    const pos = (urlPosition || formData.position || "").trim().toUpperCase();
+    return pos === "GOALKEEPER" || pos === "GK";
+  };
 
-    return payload;
+  /**
+   * Builds the "complete game report" payload from exactly what was entered
+   * in the Match Statistics step. The stat keys are taken from the same slide
+   * definitions the form and the PDF use, so form ⇄ payload ⇄ PDF always match.
+   * Returns null (with an error toast) when required input is missing.
+   */
+  const buildCompletePayload = (): ICompleteSelfGameReportPayload | null => {
+    const isGK = isGKPosition();
+    const keys = getStatKeysForPosition(isGK);
+
+    const statsPayload: Record<string, number> = {};
+    for (const key of keys) statsPayload[key] = readStat(stats, key);
+
+    const minutesPlayed = formatMinutesPlayed(formData.minutesPlayed);
+    const feedback = coachFeedback?.trim() || "";
+
+    const missing: string[] = [];
+    if (minutesPlayed === "00:00") missing.push("Minutes played");
+    if (!feedback) missing.push("Coach tactical feedback");
+    if (missing.length > 0) {
+      toast.error(`Please fill in: ${missing.join(", ")}`);
+      navigateToStep(2);
+      return null;
+    }
+
+    const accurateShots = (goalMarkers || []).map((m) => ({
+      x: Number(Number(m.x).toFixed(1)),
+      y: Number(Number(m.y).toFixed(1)),
+    }));
+    const accurateAssists = (pitchMarkers || []).map((m) => ({
+      fromX: Number(Number(m.x1).toFixed(1)),
+      fromY: Number(Number(m.y1).toFixed(1)),
+      toX: Number(Number(m.x2).toFixed(1)),
+      toY: Number(Number(m.y2).toFixed(1)),
+    }));
+
+    return {
+      minutesPlayed,
+      stats: statsPayload,
+      accurateShots,
+      accurateAssists,
+      coachFeedback: feedback,
+    };
+  };
+
+  /** Summary kept in the local reports list — derived only from entered data. */
+  const buildLocalReportSummary = (overallRating: number) => {
+    const home = Number(formData.homeScore) || 0;
+    const away = Number(formData.awayScore) || 0;
+    const [mins, secs] = formatMinutesPlayed(formData.minutesPlayed).split(":").map(Number);
+    const completed = readStat(stats, "completedPass");
+    const incomplete = readStat(stats, "incompletePass");
+    const attempted = completed + incomplete;
+    const unit = (val: string, suffix: string) => (val ? `${val}${suffix}` : "");
+
+    return {
+      date: formData.gameDate,
+      league: formData.gameType,
+      team1: formData.ownTeam || formData.clubName,
+      team2: formData.opponentTeam,
+      score: `${home}-${away}`,
+      result: (home > away ? "W" : home < away ? "L" : "D") as "W" | "D" | "L",
+      stadium: formData.gameLocation,
+      goals: readStat(stats, "goal"),
+      assists: readStat(stats, "assist"),
+      passes: completed,
+      timePlayedMinutes: mins + (secs >= 30 ? 1 : 0),
+      yellowCards: readStat(stats, "yellowCard"),
+      redCards: readStat(stats, "redCard"),
+      passAccuracy: attempted > 0 ? Math.round((completed / attempted) * 100) : 0,
+      rating: overallRating / 10,
+      scoutName: formData.scoutName,
+      gameType: formData.gameType,
+      weather: formData.weather,
+      temperature: formData.temperature,
+      playerPosition: formData.position,
+      foot: formData.foot,
+      characteristics,
+      weight: unit(formData.weight, "kg"),
+      height: unit(formData.height, parseFloat(formData.height) > 3 ? "cm" : "m"),
+      playerId: playerId ? Number(playerId) : undefined,
+      playerName: formData.playerName,
+      pitchMarkers,
+      goalMarkers,
+    };
   };
 
   const handleSelfReportSubmit = async () => {
-    // 1. Build payload from current details and defaults
+    // 1. Build payload from the entered details (aborts if anything is missing)
     const payload = buildPayload();
+    if (!payload) return;
 
     // 2. Persist current draft in sessionStorage so after Stripe redirect, all details are restored
     try {
@@ -702,6 +946,7 @@ export const CreateGameReportWizard = ({
     // Only attempt creating self game report if user has NOT already created and paid via Stripe
     if (!reportId && !currentSessionId && !existingReport) {
       const payload = buildPayload();
+      if (!payload) return;
       try {
         const res = await createSelfGameReport(payload).unwrap();
         const checkoutUrl =
@@ -729,102 +974,8 @@ export const CreateGameReportWizard = ({
         : parseInt(String(currentReportId).replace(/\D/g, "").slice(0, 8), 10) ||
           Math.floor(Math.random() * 10000);
 
-    const isGK =
-      (urlPosition || formData.position)?.trim().toUpperCase() === "GOALKEEPER" ||
-      (urlPosition || formData.position)?.trim().toUpperCase() === "GK";
-
-    const commonStats = {
-      goal: Number(stats.goal ?? stats.goalScored ?? 2),
-      assist: Number(stats.assist ?? stats.assists ?? 1),
-      shotOnTarget: Number(stats.shotOnTarget ?? stats.shotsOnGoal ?? 4),
-      shotOffTarget: Number(stats.shotOffTarget ?? 1),
-      bigChanceCreated: Number(stats.bigChanceCreated ?? 2),
-      bigChanceMissed: Number(stats.bigChanceMissed ?? 0),
-      successfulDribble: Number(stats.successfulDribble ?? 3),
-      failedDribble: Number(stats.failedDribble ?? 1),
-      penaltyWon: Number(stats.penaltyWon ?? stats.penaltiesTaken ?? 1),
-      penaltyMissed: Number(stats.penaltyMissed ?? 0),
-
-      completedPass: Number(stats.completedPass ?? stats.passAccurate ?? (isGK ? 43 : 28)),
-      incompletePass: Number(stats.incompletePass ?? stats.wrongPass ?? (isGK ? 7 : 4)),
-      keyPass: Number(stats.keyPass ?? 3),
-      throughBallCompleted: Number(stats.throughBallCompleted ?? 2),
-      longPassCompleted: Number(stats.longPassCompleted ?? (isGK ? 10 : 3)),
-      crossCompleted: Number(stats.crossCompleted ?? 2),
-      crossFailed: Number(stats.crossFailed ?? 1),
-
-      ballRetention: Number(stats.ballRetention ?? 5),
-      turnover: Number(stats.turnover ?? 2),
-      freeKickWon: Number(stats.freeKickWon ?? stats.freeKick ?? 3),
-      successfulCarry: Number(stats.successfulCarry ?? 4),
-
-      tackleWon: Number(stats.tackleWon ?? stats.standTackle ?? 3),
-      tackleLost: Number(stats.tackleLost ?? 1),
-      interception: Number(stats.interception ?? (isGK ? 3 : 2)),
-      clearance: Number(stats.clearance ?? (isGK ? 4 : 1)),
-      block: Number(stats.block ?? 1),
-      aerialDuelWon: Number(stats.aerialDuelWon ?? (isGK ? 4 : 2)),
-      aerialDuelLost: Number(stats.aerialDuelLost ?? (isGK ? 2 : 1)),
-      groundDuelWon: Number(stats.groundDuelWon ?? 4),
-      groundDuelLost: Number(stats.groundDuelLost ?? 2),
-      recovery: Number(stats.recovery ?? (isGK ? 7 : 3)),
-      defensiveError: Number(stats.defensiveError ?? 0),
-      errorLeadingToGoal: Number(stats.errorLeadingToGoal ?? 0),
-
-      foulCommitted: Number(stats.foulCommitted ?? stats.fault ?? 1),
-      yellowCard: Number(stats.yellowCard ?? 0),
-      redCard: Number(stats.redCard ?? 0),
-    };
-
-    const gkStats = {
-      ...commonStats,
-      save: Number(stats.save ?? stats.savesAccurate ?? 6),
-      bigSave: Number(stats.bigSave ?? 2),
-      save1v1: Number(stats.save1v1 ?? stats.oneOnOneSave ?? 1),
-      goalConceded: Number(stats.goalConceded ?? stats.goalUnsave ?? 1),
-      cleanSheet: Number(stats.cleanSheet ?? 0),
-      crossClaimed: Number(stats.crossClaimed ?? 4),
-      crossMissed: Number(stats.crossMissed ?? 0),
-      distributionCompleted: Number(stats.distributionCompleted ?? 18),
-      distributionFailed: Number(stats.distributionFailed ?? 2),
-    };
-
-    const finalStatsPayload = isGK ? gkStats : commonStats;
-
-    const accurateShots = (goalMarkers && goalMarkers.length > 0
-      ? goalMarkers
-      : [{ x: 15.2, y: 28.4 }, { x: 84.6, y: 22.1 }]
-    ).map((m) => ({
-      x: Number(Number(m.x).toFixed(1)),
-      y: Number(Number(m.y).toFixed(1)),
-    }));
-
-    const accurateAssists = (pitchMarkers && pitchMarkers.length > 0
-      ? pitchMarkers
-      : [{ x1: 45.0, y1: 70.0, x2: 50.0, y2: 55.0 }]
-    ).map((m) => ({
-      fromX: Number(Number(m.x1).toFixed(1)),
-      fromY: Number(Number(m.y1).toFixed(1)),
-      toX: Number(Number(m.x2).toFixed(1)),
-      toY: Number(Number(m.y2).toFixed(1)),
-    }));
-
-    const rawMins = formData.minutesPlayed;
-    const formattedMins = formatMinutesPlayed(rawMins);
-    const finalMinutes = (formattedMins && formattedMins !== "00:00")
-      ? formattedMins
-      : (isGK ? "98:08" : "08:08");
-
-    const completePayload: ICompleteSelfGameReportPayload = {
-      minutesPlayed: finalMinutes,
-      stats: finalStatsPayload,
-      accurateShots,
-      accurateAssists,
-      coachFeedback: coachFeedback?.trim() || "",
-    };
-
-    console.log("🚀 COMPLETE SELF GAME REPORT PAYLOAD (Dynamic):", completePayload);
-    console.log("📦 COMPLETE SELF PAYLOAD JSON:\n", JSON.stringify(completePayload, null, 2));
+    const completePayload = buildCompletePayload();
+    if (!completePayload) return;
 
     const targetReportId = reportId || (typeof window !== "undefined" ? sessionStorage.getItem("k10_last_self_report_id") : null);
 
@@ -837,44 +988,19 @@ export const CreateGameReportWizard = ({
         }).unwrap();
         isCompleteApiSuccess = true;
       } catch (err: any) {
-        console.warn("Could not complete self game report via API:", err?.data?.message || err?.message || err);
+        // Do not pretend the report was saved — the database is the source of truth.
+        toast.error(err?.data?.message || err?.message || "Failed to save game report. Please try again.");
+        return;
       }
     }
 
     const finalReport = {
+      ...buildLocalReportSummary(overallRating),
       id: numericId,
       reportId: reportId || undefined,
       sessionId: currentSessionId,
-      date: formData.gameDate,
-      league: formData.gameType,
-      team1: formData.clubName,
-      team2: formData.matchResult.includes(" vs ") ? formData.matchResult.split(" vs ")[1] : (formData.matchResult.split(" x ")[1] || "OPPONENT"),
-      score: formData.matchResult.includes(" x ") ? formData.matchResult.split(" ").slice(-3).join(" ") : "2-1",
-      result: "W" as const,
-      stadium: formData.gameLocation,
-      goals: stats.goal ?? stats.goalScored ?? 0,
-      assists: stats.assist ?? stats.assists ?? 0,
-      passes: stats.completedPass ?? stats.passAccurate ?? 50,
-      timePlayedMinutes: Number(formData.minutesPlayed.replace(/[^\d]/g, "")) || 90,
-      yellowCards: stats.yellowCard ?? 0,
-      redCards: stats.redCard ?? 0,
-      passAccuracy: Math.round(((stats.completedPass || stats.passAccurate || 1) / ((stats.completedPass || stats.passAccurate || 1) + (stats.incompletePass || stats.wrongPass || 0))) * 100) || 85,
-      rating: overallRating / 10,
-      scoutName: formData.scoutName,
-      gameType: formData.gameType,
-      weather: formData.weather,
-      temperature: formData.temperature,
-      playerPosition: formData.position,
-      foot: formData.foot,
-      characteristics,
-      weight: `${formData.weight}kg`,
-      height: `${formData.height}m`,
       status: "Paid" as const,
       amount: "$ 3.99",
-      playerId: playerId ? Number(playerId) : undefined,
-      playerName: formData.playerName,
-      pitchMarkers,
-      goalMarkers,
       stats,
     };
 
@@ -914,62 +1040,24 @@ export const CreateGameReportWizard = ({
       return;
     }
 
-    const statsPayload = {
-      ...DEFAULT_FORM_STATS,
-      ...stats,
-      shotsOnGoal: Number(stats.shotsOnGoal ?? stats.shotOnTarget ?? 4),
-      goalScored: Number(stats.goalScored ?? stats.goal ?? 2),
-      assists: Number(stats.assists ?? stats.assist ?? 1),
-      passAccurate: Number(stats.passAccurate ?? stats.completedPass ?? 28),
-      wrongPass: Number(stats.wrongPass ?? stats.incompletePass ?? 4),
-      penaltiesTaken: Number(stats.penaltiesTaken ?? stats.penaltyWon ?? 1),
-      standTackle: Number(stats.standTackle ?? stats.tackleWon ?? 3),
-      slidingTackle: Number(stats.slidingTackle ?? stats.tackleWon ?? 3),
-      interception: Number(stats.interception ?? 2),
-      appearances: Number(stats.appearances ?? 15),
-      fault: Number(stats.fault ?? stats.foulCommitted ?? 1),
-      redCard: Number(stats.redCard ?? 0),
-      yellowCard: Number(stats.yellowCard ?? 0),
-      punching: Number(stats.punching ?? 5),
-      handling: Number(stats.handling ?? 10),
-      reflex: Number(stats.reflex ?? 1),
-      aerialAbility: Number(stats.aerialAbility ?? 5),
-      throwing: Number(stats.throwing ?? 8),
-      reactions: Number(stats.reactions ?? 1),
-      savesAccurate: Number(stats.savesAccurate ?? 10),
-      freeKick: Number(stats.freeKick ?? stats.freeKickWon ?? 3),
-      cornerKick: Number(stats.cornerKick ?? 4),
-      goalUnsave: Number(stats.goalUnsave ?? 1),
-      penaltiesSaves: Number(stats.penaltiesSaves ?? 1),
-    };
+    // Same payload as the self-report (same keys, same validation) …
+    const base = buildCompletePayload();
+    if (!base) return;
 
-    const accurateShots = (goalMarkers && goalMarkers.length > 0
-      ? goalMarkers
-      : [{ x: 15.2, y: 28.4 }, { x: 84.6, y: 22.1 }]
-    ).map((m) => ({
-      x: Number(Number(m.x).toFixed(1)),
-      y: Number(Number(m.y).toFixed(1)),
-    }));
-
-    const accurateAssists = (pitchMarkers && pitchMarkers.length > 0
-      ? pitchMarkers
-      : [{ x1: 45.0, y1: 70.0, x2: 50.0, y2: 55.0 }]
-    ).map((m) => ({
-      fromX: Number(Number(m.x1).toFixed(1)),
-      fromY: Number(Number(m.y1).toFixed(1)),
-      toX: Number(Number(m.x2).toFixed(1)),
-      toY: Number(Number(m.y2).toFixed(1)),
-    }));
+    // … plus the legacy key names the coach endpoint has historically read,
+    // mirrored from the entered values (never invented).
+    const legacyAliases: Record<string, number> = {};
+    for (const [key, aliases] of Object.entries(LEGACY_STAT_ALIASES)) {
+      if (key in base.stats) {
+        for (const alias of aliases) legacyAliases[alias] = base.stats[key];
+      }
+    }
 
     const payload = {
       reportId: targetReportId,
-      minutesPlayed: formatMinutesPlayed(formData.minutesPlayed) || "00:00",
-      stats: statsPayload,
-      accurateShots,
-      accurateAssists,
-      coachFeedback:
-        coachFeedback?.trim() ||
-        "Impressive tactical positioning, clinical shooting and accurate ball distribution throughout the game.",
+      ...base,
+      coachFeedback: base.coachFeedback || "",
+      stats: { ...base.stats, ...legacyAliases },
     };
 
     try {
@@ -982,47 +1070,10 @@ export const CreateGameReportWizard = ({
       }
 
       const finalReport = {
+        ...buildLocalReportSummary(overallRating),
         id: Math.floor(Math.random() * 10000),
-        date: formData.gameDate,
-        league: formData.gameType,
-        team1: formData.clubName,
-        team2: formData.matchResult.includes(" vs ")
-          ? formData.matchResult.split(" vs ")[1]
-          : formData.matchResult.split(" x ")[1] || "OPPONENT",
-        score: formData.matchResult.includes(" x ")
-          ? formData.matchResult.split(" ").slice(-3).join(" ")
-          : "2-1",
-        result: "W" as const,
-        stadium: formData.gameLocation,
-        goals: stats.goalScored || 0,
-        assists: stats.assists || 0,
-        passes: stats.passAccurate || 50,
-        timePlayedMinutes:
-          Number(formData.minutesPlayed.replace(/[^\d]/g, "")) || 90,
-        yellowCards: stats.yellowCard || 0,
-        redCards: stats.redCard || 0,
-        passAccuracy:
-          Math.round(
-            ((stats.passAccurate || 1) /
-              ((stats.passAccurate || 1) + (stats.wrongPass || 0))) *
-              100
-          ) || 85,
-        rating: overallRating / 10,
-        scoutName: formData.scoutName,
-        gameType: formData.gameType,
-        weather: formData.weather,
-        temperature: formData.temperature,
-        playerPosition: formData.position,
-        foot: formData.foot,
-        characteristics,
-        weight: `${formData.weight}kg`,
-        height: `${formData.height}m`,
         status: "Completed" as const,
         amount: "$ 6.99",
-        playerId: playerId ? Number(playerId) : undefined,
-        playerName: formData.playerName,
-        pitchMarkers,
-        goalMarkers,
       };
 
       dispatch(addGameReport(finalReport));
@@ -1036,12 +1087,15 @@ export const CreateGameReportWizard = ({
       }
     } catch (err: any) {
       console.error("Failed to complete coach game report:", err);
+      toast.error(err?.data?.message || err?.message || "Failed to complete game report. Please try again.");
     }
   };
 
   // Pre-fill from player profile query if available
   useEffect(() => {
-    if (myProfileResponse?.data && !playerId && !requestId) {
+    // Only pre-fill from the profile for a brand-new report; an existing report
+    // is loaded from the database by the effect above.
+    if (myProfileResponse?.data && !playerId && !requestId && !hasApiReport) {
       const p = myProfileResponse.data;
       const urlPos = searchParams.get("position");
       setFormData(prev => ({
@@ -1053,12 +1107,13 @@ export const CreateGameReportWizard = ({
         foot: p.preferredFoot ? p.preferredFoot.toUpperCase() : prev.foot,
         weight: p.weight ? String(p.weight) : prev.weight,
         height: p.height ? String(p.height) : prev.height,
+        playerImage: p.cardImage || p.cardPhoto || p.profileImage || prev.playerImage,
       }));
       if (p.playerStyles && p.playerStyles.length > 0) {
         setCharacteristics(p.playerStyles.map(s => String(s).toUpperCase()));
       }
     }
-  }, [myProfileResponse, playerId, requestId, searchParams]);
+  }, [myProfileResponse, playerId, requestId, searchParams, hasApiReport]);
 
   const handlePlayerSubmit = async () => {
     if (coachRequestMode === "custom") {
@@ -1086,10 +1141,14 @@ export const CreateGameReportWizard = ({
       }
     }
 
-    let hScore = typeof formData.homeScore === "number" ? formData.homeScore : parseInt(String(formData.homeScore ?? "2"), 10);
-    let aScore = typeof formData.awayScore === "number" ? formData.awayScore : parseInt(String(formData.awayScore ?? "1"), 10);
-    if (isNaN(hScore)) hScore = 2;
-    if (isNaN(aScore)) aScore = 1;
+    // The scout is the coach who will complete the report.
+    const coachScoutName =
+      coachRequestMode === "custom"
+        ? customCoachName.trim()
+        : formData.scoutName?.trim() || (selectedCoachEmail ? selectedCoachEmail.split("@")[0] : "");
+
+    const basePayload = buildPayload(coachScoutName);
+    if (!basePayload) return;
 
     const payload: IRequestCoachGameReportPayload = {
       ...(coachRequestMode === "custom"
@@ -1100,27 +1159,7 @@ export const CreateGameReportWizard = ({
         : {
             coachId: selectedCoachId,
           }),
-      playerInfo: {
-        playerName: formData.playerName?.trim() || "EDEGELSON RICCI",
-        dateOfBirth: formatDateToYMD(formData.dob) || "2014-03-27",
-        clubName: formData.clubName?.trim() || "INTER MIAMI",
-        position: (urlPosition || formData.position)?.trim().toUpperCase() || "STRIKER",
-        foot: formData.foot?.trim().toUpperCase() || "RIGHT",
-        characteristics: characteristics && characteristics.length > 0 ? characteristics : ["FAST", "SKILLFUL", "FINISHER"],
-        weight: Number(String(formData.weight).replace(/[^\d.]/g, "")) || 45,
-        height: Number(String(formData.height).replace(/[^\d.]/g, "")) || 1.20,
-      },
-      scoutName: formData.scoutName?.trim() || "MARIO LOPEZ",
-      gameType: formData.gameType?.trim().toUpperCase() || "FRIENDLY CHAMPIONSHIP CATARINESE",
-      gameDate: formatDateToYMD(formData.gameDate) || "2021-02-22",
-      gameLocation: formData.gameLocation?.trim().toUpperCase() || "LONDON",
-      matchResult: formData.matchResult?.trim() || `${formData.playerName} ${hScore} X ${aScore} OPPONENT`,
-      weather: formData.weather?.trim().toUpperCase() || "RAINY",
-      temperature: Number(String(formData.temperature).replace(/[^\d.-]/g, "")) || 19,
-      ownTeam: formData.ownTeam?.trim() || formData.clubName?.trim() || "FC Barcelona",
-      opponentTeam: formData.opponentTeam?.trim() || "Chelsea U19",
-      homeScore: hScore,
-      awayScore: aScore,
+      ...basePayload,
     };
 
     try {

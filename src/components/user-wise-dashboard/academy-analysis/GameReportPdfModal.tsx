@@ -98,7 +98,7 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
     return getStatsFromReport(selectedCard);
   }, [reportDetails, selectedCard]);
 
-  const rawPosition = reportDetails?.position || selectedCard?.playerPosition || "FORWARD";
+  const rawPosition = reportDetails?.position || selectedCard?.playerPosition || "";
   const displayPosition = safeString(rawPosition).toUpperCase();
   const isGK = displayPosition === "GOALKEEPER";
 
@@ -107,7 +107,7 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
     if (displayPosition === "GOALKEEPER") return "GK";
     if (displayPosition === "MIDFIELDER") return "MID";
     if (displayPosition === "DEFENDER") return "DEF";
-    return displayPosition.substring(0, 3) || "ST";
+    return displayPosition.substring(0, 3) || "N/A";
   }, [displayPosition]);
 
   // Radar Stats from categoryRatings or calculation
@@ -115,12 +115,12 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
     if (reportDetails?.categoryRatings) {
       const cr = reportDetails.categoryRatings;
       return [
-        { label: "ATT", value: cr.Attack ?? 100 },
-        { label: "PAS", value: cr.Passing ?? 73 },
-        { label: "POS", value: cr.Possession ?? 50 },
-        { label: "DEF", value: cr.Defending ?? 65 },
-        { label: "DIS", value: cr.Discipline ?? 45 },
-        { label: "GK", value: cr.Goalkeeping ?? 50 },
+        { label: "ATT", value: cr.Attack ?? 0 },
+        { label: "PAS", value: cr.Passing ?? 0 },
+        { label: "POS", value: cr.Possession ?? 0 },
+        { label: "DEF", value: cr.Defending ?? 0 },
+        { label: "DIS", value: cr.Discipline ?? 0 },
+        { label: "GK", value: cr.Goalkeeping ?? 0 },
       ];
     }
 
@@ -255,33 +255,13 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
     return "Alex Ferguson";
   }, [reportDetails, selectedCard]);
 
-  // Match Result
-  const displayMatchResult = useMemo(() => {
-    if (reportDetails?.title && reportDetails?.score) {
-      return `${reportDetails.title} (${reportDetails.score})`;
-    }
-    if (reportDetails?.title) {
-      return reportDetails.title;
-    }
-    if (selectedCard?.matchTitle && selectedCard?.score) {
-      return `${selectedCard.matchTitle} (${selectedCard.score})`;
-    }
-    if (selectedCard?.matchTitle) {
-      return selectedCard.matchTitle;
-    }
-    if (selectedCard?.team1 && selectedCard?.team2) {
-      return `${selectedCard.team1} VS ${selectedCard.team2}`;
-    }
-    return safeString(selectedCard?.team1 || "N/A");
-  }, [reportDetails, selectedCard]);
-
   // Club Name
   const displayClubName = useMemo(() => {
     if (reportDetails?.title) {
       const parts = reportDetails.title.split(/\s+(?:VS|vs)\s+/);
       if (parts[0]) return parts[0].trim();
     }
-    return safeString(selectedCard?.team1 || "K10 ACADEMY");
+    return safeString(selectedCard?.team1 || "N/A");
   }, [reportDetails, selectedCard]);
 
   // Date
@@ -295,9 +275,8 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
     return raw;
   }, [reportDetails, selectedCard]);
 
-  // Game Location & Type
-  const displayGameLocation = reportDetails?.league || selectedCard?.stadium || "LONDON";
-  const displayGameType = reportDetails?.league || selectedCard?.gameType || "CHAMPIONSHIP MATCH";
+  // Game Type
+  const displayGameType = (reportDetails as any)?.gameType || reportDetails?.league || selectedCard?.gameType || "N/A";
 
   // Player image lookup
   const matchingPlayer = selectedCard
@@ -310,8 +289,8 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
       if (typeof matchingPlayer.playerImage === "string") return matchingPlayer.playerImage;
       if (matchingPlayer.playerImage.src) return matchingPlayer.playerImage.src;
     }
-    return isGK ? "/pngegg.png" : "/ronaldo.png";
-  }, [selectedCard, matchingPlayer, isGK]);
+    return "/profile_placeholder.png";
+  }, [selectedCard, matchingPlayer]);
 
   // Handle PDF Download
   const handleDownloadPDF = async () => {
@@ -525,31 +504,27 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
                     </div>
                     <div>
                       <span className="font-bold text-slate-900 uppercase font-orbitron">DOB:</span>
-                      <p className="text-slate-700 text-xs font-bold mt-0.5">{matchingPlayer?.dob || "27-03-2014"}</p>
+                      <p className="text-slate-700 text-xs font-bold mt-0.5">{matchingPlayer?.dob || "N/A"}</p>
                     </div>
                     <div>
                       <span className="font-bold text-slate-900 uppercase font-orbitron">MATCHES PLAYED:</span>
-                      <p className="text-slate-700 text-xs font-bold mt-0.5">{activeStats?.appearances || matchingPlayer?.seasonStats?.matches || "1"}</p>
+                      <p className="text-slate-700 text-xs font-bold mt-0.5">{activeStats?.appearances || matchingPlayer?.seasonStats?.matches || "N/A"}</p>
                     </div>
                     <div>
                       <span className="font-bold text-slate-900 uppercase font-orbitron">WEIGHT:</span>
-                      <p className="text-slate-700 text-xs font-bold mt-0.5">{selectedCard.weight || "45 KG"}</p>
+                      <p className="text-slate-700 text-xs font-bold mt-0.5">{selectedCard.weight || "N/A"}</p>
                     </div>
                     <div>
                       <span className="font-bold text-slate-900 uppercase font-orbitron">MINUTES PLAYED:</span>
-                      <p className="text-slate-700 text-xs font-bold mt-0.5">{selectedCard.timePlayedMinutes || "90"} MIN</p>
+                      <p className="text-slate-700 text-xs font-bold mt-0.5">{selectedCard.timePlayedMinutes ? `${selectedCard.timePlayedMinutes} MIN` : "N/A"}</p>
                     </div>
                     <div>
                       <span className="font-bold text-slate-900 uppercase font-orbitron">HEIGHT:</span>
-                      <p className="text-slate-700 text-xs font-bold mt-0.5">{selectedCard.height || "1.20 M"}</p>
-                    </div>
-                    <div>
-                      <span className="font-bold text-slate-900 uppercase font-orbitron">MAN OF THE MATCH:</span>
-                      <p className="text-slate-700 text-xs font-bold mt-0.5">1</p>
+                      <p className="text-slate-700 text-xs font-bold mt-0.5">{selectedCard.height || "N/A"}</p>
                     </div>
                     <div>
                       <span className="font-bold text-slate-900 uppercase font-orbitron">FOOT:</span>
-                      <p className="text-slate-700 text-xs font-bold mt-0.5 uppercase">{selectedCard.foot || "RIGHT"}</p>
+                      <p className="text-slate-700 text-xs font-bold mt-0.5 uppercase">{selectedCard.foot || "N/A"}</p>
                     </div>
                   </div>
 
@@ -569,14 +544,14 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
                           alt="Player Card Image"
                           className="h-full object-contain"
                           onError={(e) => {
-                            e.currentTarget.src = isGK ? "/pngegg.png" : "/ronaldo.png";
+                            e.currentTarget.src = "/profile_placeholder.png";
                           }}
                           width={80}
                           height={100}
                         />
                       </div>
                       <div className="w-full text-center bg-sky-500/10 py-0.5 rounded border border-sky-400/20 mt-1">
-                        <div className="text-[10px] font-black text-sky-600 truncate uppercase font-orbitron leading-none">{safeString(selectedCard.playerName).split(" ")[0] || "PLAYER"}</div>
+                        <div className="text-[10px] font-black text-sky-600 truncate uppercase font-orbitron leading-none">{safeString(selectedCard.playerName).split(" ")[0] || "N/A"}</div>
                       </div>
                     </div>
                   </div>
@@ -588,7 +563,7 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
                     PLAYER CHARACTERISTIC:
                   </div>
                   <div className="flex flex-wrap gap-4 pl-2">
-                    {(selectedCard.characteristics || ["FAST", "SKILLFUL", "FINISHER"]).map((tag, idx) => (
+                    {(selectedCard.characteristics || []).map((tag, idx) => (
                       <div key={idx} className="flex items-center gap-1.5 text-[10px] font-bold text-slate-800">
                         <span className="text-sky-500">⚽</span>
                         <span className="font-orbitron">{tag}</span>
@@ -602,33 +577,17 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
                   <div className="bg-[#E31B23] text-white font-orbitron px-4 py-1.5 rounded text-[10px] font-black uppercase tracking-wider mb-3 shadow">
                     MATCH INFORMATION
                   </div>
-                  <div className="grid grid-cols-2 gap-x-12 gap-y-1.5 text-[10px] font-medium text-slate-600 pl-2">
-                    <div>
-                      <span className="font-bold text-slate-950 font-orbitron">SCOUT NAME:</span>
-                      <span className="ml-2 text-slate-700 font-bold uppercase">{displayScoutName}</span>
-                    </div>
-                    <div>
-                      <span className="font-bold text-slate-950 font-orbitron">GAME DATE:</span>
-                      <span className="ml-2 text-slate-700 font-bold">{displayDate}</span>
-                    </div>
-                    <div>
-                      <span className="font-bold text-slate-950 font-orbitron">MATCH RESULT:</span>
-                      <span className="ml-2 text-slate-700 font-bold uppercase">
-                        {displayMatchResult}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="font-bold text-slate-950 font-orbitron">GAME LOCATION:</span>
-                      <span className="ml-2 text-slate-700 font-bold uppercase">{displayGameLocation}</span>
-                    </div>
-                    <div>
-                      <span className="font-bold text-slate-950 font-orbitron">WEATHER/TEMPERATURE:</span>
-                      <span className="ml-2 text-slate-700 font-bold uppercase">{selectedCard.weather || "RAINY"} {selectedCard.temperature ?? "18"}C</span>
-                    </div>
-                    <div>
-                      <span className="font-bold text-slate-950 font-orbitron">GAME TYPE:</span>
-                      <span className="ml-2 text-slate-700 font-bold uppercase">{displayGameType}</span>
-                    </div>
+                  <div className="grid grid-cols-3 gap-x-8 gap-y-1.5 text-[10px] font-medium text-slate-600 pl-2">
+                    {[
+                      { label: "SCOUT NAME", value: displayScoutName },
+                      { label: "GAME DATE", value: displayDate },
+                      { label: "GAME TYPE", value: displayGameType },
+                    ].map((field) => (
+                      <div key={field.label} className="min-w-0">
+                        <span className="font-bold text-slate-950 font-orbitron">{field.label}:</span>
+                        <p className="mt-0.5 text-slate-700 font-bold uppercase break-words">{field.value}</p>
+                      </div>
+                    ))}
                   </div>
                 </div>
 

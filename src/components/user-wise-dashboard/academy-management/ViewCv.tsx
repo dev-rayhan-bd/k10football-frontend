@@ -20,18 +20,19 @@ import { useAppSelector } from "@/hooks/reduxHooks";
 import CvNotEditable from "./CvNotEditable";
 
 const ViewCv = () => {
-  const { playerData } = usePlayer();
+  const { cvData, playerData } = usePlayer();
   const { role: contextRole } = usePlayerStats();
   const [role, setRole] = useState<string>("player");
-  const reports = useAppSelector(state => state.reports.reports);
-  const gameReports = reports
-    .filter(r => r.status === "Paid")
-    .slice(0, 3)
-    .map(r => ({
-      id: r.id,
-      opponent: `vs ${r.team2}`,
-      rating: r.rating
-    }));
+  const rawMatches = Array.isArray(cvData?.recentMatches) && cvData.recentMatches.length > 0
+    ? cvData.recentMatches
+    : Array.isArray((playerData as any)?.recentMatches)
+      ? (playerData as any).recentMatches
+      : [];
+  const gameReports = rawMatches.slice(0, 3).map((r: any, idx: number) => ({
+    id: r._id || idx + 1,
+    opponent: `vs ${r.awayTeam || r.opponent || "Opponent"}`,
+    rating: Number(r.rating || r.playerRating || 0).toFixed(1),
+  }));
   useEffect(() => {
     const userRole = localStorage.getItem("userRole") || "player";
     setRole(userRole);
@@ -370,7 +371,7 @@ const ViewCv = () => {
               </h3>
             </div>
             <div className="space-y-2 sm:space-y-3 min-w-0 w-full">
-              {gameReports.map((report) => (
+              {gameReports.map((report: any) => (
                 <div key={report.id} className="border border-white/10 rounded-xl p-3 sm:p-4 flex items-center justify-between hover:bg-white/5 transition group w-full min-w-0 gap-3">
                   <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                     <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-white/40 group-hover:text-[#E31B23] transition-colors shrink-0" />

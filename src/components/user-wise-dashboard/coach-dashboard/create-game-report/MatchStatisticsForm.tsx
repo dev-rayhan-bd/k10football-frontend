@@ -80,82 +80,82 @@ export interface PitchLine {
   y2: number;
 }
 
-// Default initial stats mapping all 36 keys with legacy fallbacks
+// Default initial stats mapping all 36 keys with 0 defaults
 export const DEFAULT_FORM_STATS: Record<string, number> = {
-  goal: 2,
-  assist: 1,
-  shotOnTarget: 4,
-  shotOffTarget: 1,
-  bigChanceCreated: 2,
+  goal: 0,
+  assist: 0,
+  shotOnTarget: 0,
+  shotOffTarget: 0,
+  bigChanceCreated: 0,
   bigChanceMissed: 0,
-  successfulDribble: 3,
-  failedDribble: 1,
-  penaltyWon: 1,
+  successfulDribble: 0,
+  failedDribble: 0,
+  penaltyWon: 0,
   penaltyMissed: 0,
 
-  completedPass: 28,
-  incompletePass: 4,
-  keyPass: 3,
-  throughBallCompleted: 2,
-  longPassCompleted: 3,
-  crossCompleted: 2,
-  crossFailed: 1,
+  completedPass: 0,
+  incompletePass: 0,
+  keyPass: 0,
+  throughBallCompleted: 0,
+  longPassCompleted: 0,
+  crossCompleted: 0,
+  crossFailed: 0,
 
-  ballRetention: 5,
-  turnover: 2,
-  freeKickWon: 3,
-  successfulCarry: 4,
+  ballRetention: 0,
+  turnover: 0,
+  freeKickWon: 0,
+  successfulCarry: 0,
 
-  tackleWon: 3,
-  tackleLost: 1,
-  interception: 2,
-  clearance: 1,
-  block: 1,
-  aerialDuelWon: 2,
-  aerialDuelLost: 1,
-  groundDuelWon: 4,
-  groundDuelLost: 2,
-  recovery: 3,
+  tackleWon: 0,
+  tackleLost: 0,
+  interception: 0,
+  clearance: 0,
+  block: 0,
+  aerialDuelWon: 0,
+  aerialDuelLost: 0,
+  groundDuelWon: 0,
+  groundDuelLost: 0,
+  recovery: 0,
   defensiveError: 0,
   errorLeadingToGoal: 0,
 
-  foulCommitted: 1,
+  foulCommitted: 0,
   yellowCard: 0,
   redCard: 0,
 
   // Goalkeeper Specific stats
-  save: 10,
-  bigSave: 2,
-  goalConceded: 1,
+  save: 0,
+  bigSave: 0,
+  goalConceded: 0,
   cleanSheet: 0,
-  crossClaimed: 5,
-  crossMissed: 1,
-  oneOnOneSave: 3,
-  distributionCompleted: 15,
-  distributionFailed: 3,
+  crossClaimed: 0,
+  crossMissed: 0,
+  save1v1: 0,
+  distributionCompleted: 0,
+  distributionFailed: 0,
 
   // Legacy aliases
-  shotsOnGoal: 4,
-  goalScored: 2,
-  assists: 1,
-  passAccurate: 28,
-  wrongPass: 4,
-  penaltiesTaken: 1,
-  standTackle: 3,
-  slidingTackle: 3,
-  fault: 1,
-  appearances: 15,
-  savesAccurate: 10,
-  freeKick: 3,
-  cornerKick: 4,
-  goalUnsave: 1,
-  penaltiesSaves: 1,
-  punching: 5,
-  handling: 10,
-  reflex: 1,
-  aerialAbility: 5,
-  throwing: 8,
-  reactions: 1,
+  shotsOnGoal: 0,
+  goalScored: 0,
+  assists: 0,
+  passAccurate: 0,
+  wrongPass: 0,
+  penaltiesTaken: 0,
+  standTackle: 0,
+  slidingTackle: 0,
+  fault: 0,
+  appearances: 0,
+  savesAccurate: 0,
+  freeKick: 0,
+  cornerKick: 0,
+  goalUnsave: 0,
+  penaltiesSaves: 0,
+  punching: 0,
+  handling: 0,
+  reflex: 0,
+  aerialAbility: 0,
+  throwing: 0,
+  reactions: 0,
 };
 
 // Outfield slides (3 slides, 12 stats each = 36 stats)
@@ -215,7 +215,7 @@ export const GK_SLIDE_1 = [
   { label: "Clean Sheet", key: "cleanSheet", color: "bg-[#2DD4BF]" },
   { label: "Cross Claimed", key: "crossClaimed", color: "bg-[#8B5CF6]" },
   { label: "Cross Missed", key: "crossMissed", color: "bg-[#EF4444]" },
-  { label: "1v1 Save", key: "oneOnOneSave", color: "bg-[#4ADE80]" },
+  { label: "1v1 Save", key: "save1v1", color: "bg-[#4ADE80]" },
   { label: "Distribution Completed", key: "distributionCompleted", color: "bg-[#00D1FF]" },
   { label: "Distribution Failed", key: "distributionFailed", color: "bg-[#EF4444]" },
   { label: "Foul Committed", key: "foulCommitted", color: "bg-[#EF4444]" },
@@ -468,14 +468,12 @@ const MatchStatisticsForm = ({
   const statsLeft = activeSlides.flatMap(slide => slide.filter((_, idx) => idx % 2 === 0));
   const statsRight = activeSlides.flatMap(slide => slide.filter((_, idx) => idx % 2 !== 0));
 
-  // Load default stats if empty
+  // Initialise every stat to 0 if empty (no sample markers — the user places them)
   useEffect(() => {
     if (Object.keys(stats).length === 0) {
       setStats(DEFAULT_FORM_STATS);
-      setGoalMarkers([{ x: 15.2, y: 28.4 }, { x: 84.6, y: 22.1 }]);
-      setPitchMarkers([{ x1: 45.0, y1: 70.0, x2: 50.0, y2: 55.0 }]);
     }
-  }, [stats, setStats, setGoalMarkers, setPitchMarkers]);
+  }, [stats, setStats]);
 
   const handleStatChange = (key: string, val: number) => {
     const updated = { ...stats, [key]: val };

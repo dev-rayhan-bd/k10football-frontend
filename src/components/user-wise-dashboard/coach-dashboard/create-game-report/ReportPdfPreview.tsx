@@ -10,6 +10,19 @@ import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { toast } from "sonner";
 import { GK_SLIDE_1, OUTFIELD_SLIDES, GK_SLIDE_4 } from "./MatchStatisticsForm";
+
+const NA = "N/A";
+
+const formatHeight = (val: any) => {
+  if (!val) return NA;
+  const num = parseFloat(String(val).replace(/[^\d.]/g, ""));
+  if (isNaN(num)) return String(val);
+  if (num > 3) {
+    return `${num} CM`;
+  }
+  return `${num.toFixed(2)} M`;
+};
+
 interface ReportPdfPreviewProps {
   formData: any;
   characteristics: string[];
@@ -111,7 +124,7 @@ const ReportPdfPreview = ({
       { label: "DIV", value: mapStat((getStatValue("reflex") || 0) + getStatValue("save"), 25) },
       { label: "HAN", value: mapStat((getStatValue("handling") || 0) + (getStatValue("crossClaimed") || getStatValue("punching")), 25) },
       { label: "KIC", value: mapStat((getStatValue("distributionCompleted") || getStatValue("throwing") || getStatValue("completedPass")), 25) },
-      { label: "REF", value: mapStat((getStatValue("oneOnOneSave") || getStatValue("reflex") || 0) * 2 + (getStatValue("bigSave") || 0) * 3, 20) },
+      { label: "REF", value: mapStat((getStatValue("save1v1") || getStatValue("reflex") || 0) * 2 + (getStatValue("bigSave") || 0) * 3, 20) },
       { label: "SPD", value: mapStat((getStatValue("distributionCompleted") || getStatValue("reactions") || 0), 25) },
       { label: "POS", value: mapStat((getStatValue("cleanSheet") * 5) + getStatValue("save"), 25) }
     ]
@@ -123,9 +136,48 @@ const ReportPdfPreview = ({
       { label: "DEF", value: mapStat(getStatValue("tackleWon") * 2 + getStatValue("interception") + getStatValue("clearance"), 30) },
       { label: "PHY", value: mapStat(getStatValue("groundDuelWon") + getStatValue("aerialDuelWon") + getStatValue("recovery"), 30) }
     ];
-  const overallRating = Math.round(
-    radarStats.reduce((sum, s) => sum + s.value, 0) / radarStats.length
-  );
+  const calculatedRating = radarStats.length > 0
+    ? Math.round(radarStats.reduce((sum, s) => sum + s.value, 0) / radarStats.length)
+    : 75;
+
+  const overallRating = React.useMemo(() => {
+    const raw = formData?.scoutRating ?? formData?.rating;
+    if (raw !== undefined && raw !== null && Number(raw) > 0) {
+      const num = Number(raw);
+      return num <= 10 ? Math.round(num * 10) : Math.round(num);
+    }
+    return calculatedRating;
+  }, [formData?.scoutRating, formData?.rating, calculatedRating]);
+
+  // Every value shown in the PDF comes straight from formData, which is
+  // populated from the database record. Missing values render as "N/A" —
+  // nothing is substituted or invented here.
+  const show = (val: any): string => {
+    if (val === undefined || val === null) return NA;
+    const str = String(val).trim();
+    return str ? str : NA;
+  };
+
+  const displayPosition = (effectivePosition || formData?.position || "").trim().toUpperCase();
+
+  // Fields rendered in the PDF. Kept as data so the layout stays uniform.
+  const playerDetails = [
+    { label: "PLAYER NAME", value: show(formData.playerName) },
+    { label: "CLUB NAME", value: show(formData.clubName) },
+    { label: "DOB", value: show(formData.dob) },
+    { label: "MATCHES PLAYED", value: show(formData.matchesPlayed) },
+    { label: "WEIGHT", value: formData.weight ? `${formData.weight} KG` : NA },
+    { label: "MINUTES PLAYED", value: formData.minutesPlayed ? `${formData.minutesPlayed} MIN` : NA },
+    { label: "HEIGHT", value: formatHeight(formData.height) },
+    { label: "FOOT", value: show(formData.foot) },
+  ];
+
+  const matchDetails = [
+    { label: "SCOUT NAME", value: show(formData.scoutName) },
+    { label: "GAME DATE", value: show(formData.gameDate) },
+    { label: "GAME TYPE", value: show(formData.gameType) },
+  ];
+  const playerImageSrc = formData?.playerImage || "/profile_placeholder.png";
   const handleDownloadPdf = async () => {
     if (!previewRef.current) return;
     setDownloading(true);
@@ -250,73 +302,37 @@ const ReportPdfPreview = ({
           >
             {/* Watermark Logo */}
             <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none z-0">
-              <Image src="/pdf_logo.jpg" alt="Logo Watermark" className="w-24 h-24 object-contain" width={500} height={500} />
+              <Image src="/pdf_logo.jpg" alt="Logo Watermark" className="size-24 object-contain" width={886} height={640} unoptimized />
             </div>
             {/* Header */}
-            <div className="relative z-10 flex items-center justify-between border-b-4 border-slate-900 pb-3 mb-4">
-              <div className="flex items-center gap-4">
-                <Image src="/pdf_logo.jpg" alt="K10 Logo" className="w-28 h-28 object-contain" width={80} height={80} />
-                <div>
+            {/* Brand block (fixed width, never shrinks) + title filling the remaining width */}
+            <div className="relative z-10 flex items-center gap-4 border-b-4 border-slate-900 pb-3 mb-4">
+              <div className="flex shrink-0 items-center gap-3">
+                <Image src="/pdf_logo.jpg" alt="K10 Logo" className="size-20 object-contain" width={886} height={640} unoptimized />
+                <div className="whitespace-nowrap">
                   <div className="text-sm font-black tracking-widest text-slate-900 font-orbitron">K10 FOOTBALL</div>
                   <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest font-orbitron mt-0.5">ANALYSIS CV</div>
                 </div>
               </div>
-              <div className="text-center">
-                <h2 className="text-3xl font-black text-[#E31B23] font-orbitron uppercase tracking-tighter italic">
+              <div className="min-w-0 flex-1 text-center">
+                <h2 className="text-2xl leading-tight font-black text-[#E31B23] font-orbitron uppercase tracking-tighter italic">
                   PLAYER ANALYSIS PROFILE
                 </h2>
                 <div className="text-[10px] text-slate-900 font-black uppercase tracking-widest mt-1">
-                  POSITION : {effectivePosition || formData.position} ⚽
+                  POSITION : {show(displayPosition)} ⚽
                 </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="text-right">
-                  <div className="text-sm font-black tracking-widest text-slate-900 font-orbitron">K10 FOOTBALL</div>
-                  <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest font-orbitron mt-0.5">ANALYSIS CV</div>
-                </div>
-                <Image src="/pdf_logo.jpg" alt="K10 Logo" className="w-28 h-28 object-contain" width={80} height={80} />
               </div>
             </div>
             {/* Body Content */}
             <div className="relative z-10 grid grid-cols-12 gap-6 mb-4">
               {/* Player details */}
-              <div className="col-span-8 grid grid-cols-2 gap-x-6 gap-y-2.5 text-[11px] font-medium text-slate-600">
-                <div>
-                  <span className="font-bold text-slate-900 uppercase font-orbitron">PLAYER NAME:</span>
-                  <p className="text-slate-700 text-xs font-bold mt-0.5 uppercase">{formData.playerName}</p>
-                </div>
-                <div>
-                  <span className="font-bold text-slate-900 uppercase font-orbitron">CLUB NAME:</span>
-                  <p className="text-slate-700 text-xs font-bold mt-0.5 uppercase">{formData.clubName}</p>
-                </div>
-                <div>
-                  <span className="font-bold text-slate-900 uppercase font-orbitron">DOB:</span>
-                  <p className="text-slate-700 text-xs font-bold mt-0.5">{formData.dob}</p>
-                </div>
-                <div>
-                  <span className="font-bold text-slate-900 uppercase font-orbitron">MATCHES PLAYED:</span>
-                  <p className="text-slate-700 text-xs font-bold mt-0.5">{formData.matchesPlayed}</p>
-                </div>
-                <div>
-                  <span className="font-bold text-slate-900 uppercase font-orbitron">WEIGHT:</span>
-                  <p className="text-slate-700 text-xs font-bold mt-0.5">{formData.weight} KG</p>
-                </div>
-                <div>
-                  <span className="font-bold text-slate-900 uppercase font-orbitron">MINUTES PLAYED:</span>
-                  <p className="text-slate-700 text-xs font-bold mt-0.5">{formData.minutesPlayed} MIN</p>
-                </div>
-                <div>
-                  <span className="font-bold text-slate-900 uppercase font-orbitron">HEIGHT:</span>
-                  <p className="text-slate-700 text-xs font-bold mt-0.5">{formData.height} M</p>
-                </div>
-                <div>
-                  <span className="font-bold text-slate-900 uppercase font-orbitron">MAN OF THE MATCH:</span>
-                  <p className="text-slate-700 text-xs font-bold mt-0.5">{formData.manOfTheMatch}</p>
-                </div>
-                <div>
-                  <span className="font-bold text-slate-900 uppercase font-orbitron">FOOT:</span>
-                  <p className="text-slate-700 text-xs font-bold mt-0.5 uppercase">{formData.foot}</p>
-                </div>
+              <div className="col-span-8 grid min-w-0 grid-cols-2 content-start gap-x-6 gap-y-2.5 text-[11px] font-medium text-slate-600">
+                {playerDetails.map((field) => (
+                  <div key={field.label} className="min-w-0">
+                    <span className="font-bold text-slate-900 uppercase font-orbitron">{field.label}:</span>
+                    <p className="text-slate-700 text-xs font-bold mt-0.5 uppercase break-words">{field.value}</p>
+                  </div>
+                ))}
               </div>
               {/* FUT player card photo preview */}
               <div className="col-span-4 flex justify-end">
@@ -325,26 +341,27 @@ const ReportPdfPreview = ({
                   <div className="flex justify-between w-full items-start">
                     <div className="flex flex-col items-center">
                       <div className="text-2xl font-black text-sky-600 font-orbitron italic leading-none">{overallRating}</div>
-                      <div className="text-[8px] font-bold text-sky-500 uppercase font-orbitron leading-none mt-0.5">{isGK ? "GK" : (effectivePosition || formData.position).slice(0, 3)}</div>
+                      <div className="text-[8px] font-bold text-sky-500 uppercase font-orbitron leading-none mt-0.5">{isGK ? "GK" : displayPosition.slice(0, 3)}</div>
                     </div>
                     <Image src="/logo.png" alt="Club Logo" className="w-5 h-5 object-contain" width={50} height={50} />
                   </div>
                   {/* Player image in FUT Card */}
                   <div className="w-24 h-28 overflow-hidden relative mt-1 flex items-end justify-center">
                     <Image
-                      src={isGK ? "/mini__GP15525.webp" : "/sergio-ramos.png"}
+                      src={playerImageSrc}
                       alt="Player Card Image"
                       className="h-full object-contain"
                       onError={(e) => {
-                        e.currentTarget.src = isGK ? "/pngegg.png" : "/ronaldo.png";
+                        e.currentTarget.src = "/profile_placeholder.png";
                       }}
-                      width={50}
-                      height={50}
+                      width={96}
+                      height={112}
+                      unoptimized
                     />
                   </div>
                   {/* FUT card footer */}
                   <div className="w-full text-center bg-sky-500/10 py-0.5 rounded border border-sky-400/20 mt-1">
-                    <div className="text-[10px] font-black text-sky-600 truncate uppercase font-orbitron leading-none">{formData.playerName.split(" ")[0]}</div>
+                    <div className="text-[10px] font-black text-sky-600 truncate uppercase font-orbitron leading-none">{(formData.playerName || "").trim().split(" ")[0] || NA}</div>
                   </div>
                 </div>
               </div>
@@ -355,12 +372,16 @@ const ReportPdfPreview = ({
                 PLAYER CHARACTERISTIC:
               </div>
               <div className="flex flex-wrap gap-4 pl-2">
-                {characteristics.map(tag => (
-                  <div key={tag} className="flex items-center gap-1.5 text-[10px] font-bold text-slate-800">
-                    <span className="text-sky-500">⚽</span>
-                    <span className="font-orbitron">{tag}</span>
-                  </div>
-                ))}
+                {characteristics && characteristics.length > 0 ? (
+                  characteristics.map(tag => (
+                    <div key={tag} className="flex min-w-0 items-center gap-1.5 text-[10px] font-bold text-slate-800">
+                      <span className="text-sky-500">⚽</span>
+                      <span className="font-orbitron uppercase break-words">{tag}</span>
+                    </div>
+                  ))
+                ) : (
+                  <span className="text-slate-500 text-xs italic pl-2">No player characteristics listed</span>
+                )}
               </div>
             </div>
             {/* Match Information Section */}
@@ -368,31 +389,13 @@ const ReportPdfPreview = ({
               <div className="bg-[#E31B23] text-white font-orbitron px-4 py-1.5 rounded text-[10px] font-black uppercase tracking-wider mb-3 shadow">
                 MATCH INFORMATION
               </div>
-              <div className="grid grid-cols-2 gap-x-12 gap-y-2.5 text-[11px] font-medium text-slate-600 pl-2">
-                <div>
-                  <span className="font-bold text-slate-950 font-orbitron">SCOUT NAME:</span>
-                  <span className="ml-2 text-slate-700 font-bold uppercase">{formData.scoutName}</span>
-                </div>
-                <div>
-                  <span className="font-bold text-slate-950 font-orbitron">GAME DATE:</span>
-                  <span className="ml-2 text-slate-700 font-bold">{formData.gameDate}</span>
-                </div>
-                <div>
-                  <span className="font-bold text-slate-950 font-orbitron">MATCH RESULT:</span>
-                  <span className="ml-2 text-slate-700 font-bold uppercase">{formData.matchResult}</span>
-                </div>
-                <div>
-                  <span className="font-bold text-slate-950 font-orbitron">GAME LOCATION:</span>
-                  <span className="ml-2 text-slate-700 font-bold uppercase">{formData.gameLocation}</span>
-                </div>
-                <div>
-                  <span className="font-bold text-slate-950 font-orbitron">WEATHER/TEMPERATURE:</span>
-                  <span className="ml-2 text-slate-700 font-bold uppercase">{formData.weather} {formData.temperature}C</span>
-                </div>
-                <div>
-                  <span className="font-bold text-slate-950 font-orbitron">GAME TYPE:</span>
-                  <span className="ml-2 text-slate-700 font-bold uppercase">{formData.gameType}</span>
-                </div>
+              <div className="grid grid-cols-3 gap-x-8 gap-y-2.5 text-[11px] font-medium text-slate-600 pl-2">
+                {matchDetails.map((field) => (
+                  <div key={field.label} className="min-w-0">
+                    <span className="font-bold text-slate-950 font-orbitron">{field.label}:</span>
+                    <p className="mt-0.5 text-slate-700 font-bold uppercase break-words">{field.value}</p>
+                  </div>
+                ))}
               </div>
             </div>
             {/* Match Statistics Section */}
@@ -402,9 +405,9 @@ const ReportPdfPreview = ({
               </div>
               <div className="grid grid-cols-3 gap-x-8 gap-y-2 text-[10px] pl-2">
                 {statItems.map((item, idx) => (
-                  <div key={idx} className="flex justify-between border-b border-slate-100 py-1 pr-2">
-                    <span className="text-slate-500 font-bold uppercase font-orbitron">{item.label}:</span>
-                    <span className="text-slate-800 font-black font-orbitron">{getStatValue(item.key)}</span>
+                  <div key={idx} className="flex min-w-0 items-start justify-between gap-2 border-b border-slate-100 py-1 pr-2">
+                    <span className="min-w-0 break-words text-slate-500 font-bold uppercase font-orbitron">{item.label}:</span>
+                    <span className="shrink-0 tabular-nums text-slate-800 font-black font-orbitron">{getStatValue(item.key)}</span>
                   </div>
                 ))}
               </div>
@@ -428,7 +431,7 @@ const ReportPdfPreview = ({
               </div>
               {/* Logo and tag */}
               <div className="flex flex-col items-center gap-1.5 w-45">
-                <Image src="/pdf_logo.jpg" alt="K10 Logo" className="w-24 h-24 object-contain" width={10} height={10} />
+                <Image src="/pdf_logo.jpg" alt="K10 Logo" className="size-24 object-contain" width={886} height={640} unoptimized />
                 <div className="text-center leading-none">
                   <div className="text-[10px] font-black tracking-widest text-slate-900 font-orbitron">K10 FOOTBALL</div>
                   <div className="text-[7px] text-slate-500 font-bold uppercase tracking-widest font-orbitron">ANALYSIS CV</div>
@@ -436,7 +439,7 @@ const ReportPdfPreview = ({
               </div>
             </div>
             {/* Diagrams Section */}
-            <div className="relative z-10 grid grid-cols-2 gap-8 mt-4 mb-4 shrink-0">
+            <div className="relative z-10 grid grid-cols-2 items-start gap-8 mt-4 mb-4 shrink-0">
               {/* Goal Diagram */}
               <div className="bg-slat-200 border border-slate-200 rounded-3xl overflow-hidden flex flex-col items-center w-full">
                 <div className="bg-slate-100 py-2 px-4 text-center border-b border-slate-200 w-full">
@@ -446,6 +449,13 @@ const ReportPdfPreview = ({
                 </div>
                 <div className="relative overflow-hidden w-full bg-white" style={{ aspectRatio: "800/500" }}>
                   <Image src="/goal-bar.png" alt="Goal" className="w-full h-auto block scale-[1.4] origin-[50%_90%]" width={800} height={500} />
+                  {(!goalMarkers || goalMarkers.length === 0) && (
+                    <div className="absolute inset-x-0 bottom-3 flex justify-center">
+                      <span className="rounded bg-white/85 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-slate-700 font-orbitron">
+                        {isGK ? "No saves recorded" : "No shots recorded"}
+                      </span>
+                    </div>
+                  )}
                   {goalMarkers?.map((marker: any, idx: number) => (
                     <div key={idx} className="absolute w-6 h-6 -ml-3 -mt-3 flex items-center justify-center drop-shadow-lg" style={{ left: `${marker.x}%`, top: `${marker.y}%` }}>
                       <span className="text-lg leading-none">{isGK ? "🧤" : "⚽"}</span>
@@ -463,6 +473,13 @@ const ReportPdfPreview = ({
                 </div>
                 <div className="relative w-full bg-[#092b15]" style={{ aspectRatio: "500/700" }}>
                   <Image src="/field.png" alt="Pitch" className="w-full h-full object-cover" width={500} height={700} />
+                  {(!pitchMarkers || pitchMarkers.length === 0) && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="rounded bg-white/85 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-slate-700 font-orbitron">
+                        {isGK ? "No saves recorded" : "No assists recorded"}
+                      </span>
+                    </div>
+                  )}
                   {pitchMarkers?.map((line: any, idx: number) => {
                     const dx = line.x2 - line.x1;
                     const dy = line.y2 - line.y1;

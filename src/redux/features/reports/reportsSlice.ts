@@ -7,8 +7,8 @@ export interface ReportsSliceState {
 }
 
 const initialState: ReportsSliceState = {
-  reports: SHARED_REPORTS_DATA,
-  requests: REPORT_REQUESTS_DATA,
+  reports: [],
+  requests: [],
 };
 
 export const reportsSlice = createSlice({

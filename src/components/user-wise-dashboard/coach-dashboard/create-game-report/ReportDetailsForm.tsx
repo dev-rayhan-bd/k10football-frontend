@@ -101,10 +101,8 @@ const ReportDetailsForm = ({
       Boolean(formData.scoutName?.trim()) &&
       Boolean(formData.gameType?.trim()) &&
       Boolean(formData.gameDate?.trim()) &&
-      Boolean(formData.gameLocation?.trim()) &&
-      Boolean(formData.matchResult?.trim()) &&
-      Boolean(formData.weather?.trim()) &&
-      Boolean(formData.temperature?.trim()) &&
+      Boolean(formData.ownTeam?.trim()) &&
+      Boolean(formData.opponentTeam?.trim()) &&
       (reportCompletedBy === "parent" || (reportCompletedBy === "coach" && isCoachSelected))
     );
   };
@@ -238,7 +236,7 @@ const ReportDetailsForm = ({
                   value={formData.height}
                   onChange={(e) => handleChange("height", e.target.value)}
                 />
-                <span className="absolute right-4 top-3.5 text-gray-500 text-xs font-bold font-orbitron">M</span>
+                <span className="absolute right-4 top-3.5 text-gray-500 text-xs font-bold font-orbitron">{parseFloat(formData.height) > 3 ? "CM" : "M"}</span>
               </div>
             </div>
           </div>
@@ -283,30 +281,11 @@ const ReportDetailsForm = ({
               </div>
             </div>
             <div className="space-y-2">
-              <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Game Location:</Label>
-              <Input 
-                className="bg-[#161616] border-white/10 text-white h-12 uppercase font-bold focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]" 
-                value={formData.gameLocation}
-                onChange={(e) => handleChange("gameLocation", e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Match Result:</Label>
-              <Input 
-                className="bg-[#161616] border-white/10 text-white h-12 uppercase font-bold focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]" 
-                value={formData.matchResult}
-                placeholder="e.g. EDEGELSON RICCI 2 X 0 OPPONENT"
-                onChange={(e) => handleChange("matchResult", e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
               <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Own Team:</Label>
               <Input 
                 className="bg-[#161616] border-white/10 text-white h-12 uppercase font-bold focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]" 
                 value={formData.ownTeam || ""}
-                placeholder="e.g. FC Barcelona"
+                placeholder="e.g. My Club / Team"
                 onChange={(e) => handleChange("ownTeam", e.target.value)}
               />
             </div>
@@ -316,7 +295,7 @@ const ReportDetailsForm = ({
               <Input 
                 className="bg-[#161616] border-white/10 text-white h-12 uppercase font-bold focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]" 
                 value={formData.opponentTeam || ""}
-                placeholder="e.g. Chelsea U19"
+                placeholder="e.g. Opponent Club / Team"
                 onChange={(e) => handleChange("opponentTeam", e.target.value)}
               />
             </div>
@@ -328,7 +307,7 @@ const ReportDetailsForm = ({
                   <Input 
                     type="number"
                     className="bg-[#161616] border-white/10 text-white h-12 font-bold focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]" 
-                    value={formData.homeScore ?? 2}
+                    value={formData.homeScore ?? 0}
                     placeholder="Home"
                     onChange={(e) => handleChange("homeScore", parseInt(e.target.value, 10) || 0)}
                   />
@@ -338,38 +317,11 @@ const ReportDetailsForm = ({
                   <Input 
                     type="number"
                     className="bg-[#161616] border-white/10 text-white h-12 font-bold focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]" 
-                    value={formData.awayScore ?? 1}
+                    value={formData.awayScore ?? 0}
                     placeholder="Away"
                     onChange={(e) => handleChange("awayScore", parseInt(e.target.value, 10) || 0)}
                   />
                   <span className="absolute right-4 top-3.5 text-gray-500 text-[10px] font-bold uppercase font-orbitron">Away</span>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Weather/Temperature:</Label>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="relative">
-                  <select 
-                    className="w-full bg-[#161616] border border-white/10 text-white h-12 rounded-lg px-4 uppercase font-bold appearance-none focus:outline-none focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]"
-                    value={formData.weather}
-                    onChange={(e) => handleChange("weather", e.target.value)}
-                  >
-                    <option value="RAINY">RAINY</option>
-                    <option value="SUNNY">SUNNY</option>
-                    <option value="CLOUDY">CLOUDY</option>
-                    <option value="WINDY">WINDY</option>
-                    <option value="SNOWY">SNOWY</option>
-                  </select>
-                  <IconChevronDown className="absolute right-4 top-3.5 text-gray-500 pointer-events-none" size={18} />
-                </div>
-                <div className="relative">
-                  <Input 
-                    className="bg-[#161616] border-white/10 text-white h-12 font-bold focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]" 
-                    value={formData.temperature}
-                    onChange={(e) => handleChange("temperature", e.target.value)}
-                  />
-                  <span className="absolute right-4 top-3.5 text-gray-500 text-xs font-bold font-orbitron">C</span>
                 </div>
               </div>
             </div>
