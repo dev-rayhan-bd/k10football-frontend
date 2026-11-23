@@ -11,9 +11,6 @@ import StripePaymentModal from "./StripePaymentModal";
 import MatchStatisticsForm, {
   PitchLine,
   DEFAULT_FORM_STATS,
-  OUTFIELD_SLIDES,
-  GK_SLIDE_1,
-  GK_SLIDE_4,
 } from "./MatchStatisticsForm";
 import ReportPdfPreview from "./ReportPdfPreview";
 import { toast } from "sonner";
@@ -31,6 +28,7 @@ import {
   useGetCoachGameReportsQuery,
 } from "@/redux/features/coach/coachApi";
 import { useGetSingleGameReportQuery } from "@/redux/features/academy/academyApi";
+import { formatMinutesPlayed, getStatKeysForPosition } from "./reportHelpers";
 import {
   ICreateSelfGameReportPayload,
   ICompleteSelfGameReportPayload,
@@ -53,45 +51,6 @@ const formatDateToYMD = (dateStr: string): string => {
     return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
   }
   return trimmed;
-};
-
-const formatMinutesPlayed = (val: string | number | undefined | null): string => {
-  if (val === undefined || val === null) return "00:00";
-  const str = String(val).trim();
-  if (!str) return "00:00";
-
-  let m = 0;
-  let s = 0;
-
-  if (str.includes(":")) {
-    const parts = str.split(":");
-    m = parseInt(parts[0], 10);
-    s = parseInt(parts[1], 10);
-  } else {
-    m = parseInt(str.replace(/[^\d]/g, ""), 10);
-    s = 0;
-  }
-
-  if (isNaN(m)) m = 0;
-  if (isNaN(s)) s = 0;
-
-  if (s >= 60) {
-    m += Math.floor(s / 60);
-    s = s % 60;
-  }
-  if (s < 0) s = 0;
-  if (m < 0) m = 0;
-  if (m > 130) m = 130;
-
-  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-};
-
-/** Stat keys collected by the Match Statistics form for a position (same order as the form). */
-const getStatKeysForPosition = (isGK: boolean): string[] => {
-  const slides = isGK
-    ? [GK_SLIDE_1, OUTFIELD_SLIDES[0], OUTFIELD_SLIDES[1], GK_SLIDE_4]
-    : OUTFIELD_SLIDES;
-  return Array.from(new Set(slides.flat().map((item) => item.key)));
 };
 
 /** Older drafts / records may use legacy key names — read those as a fallback. */
@@ -490,7 +449,76 @@ export const CreateGameReportWizard = ({
       return "";
     };
 
-    const rating = apiReport.scoutRating ?? apiReport.rating;
+    // Ratings exist only once the report has been completed (by the coach or,
+    // for self reports, after the stats were submitted). A pending report may
+    // carry a placeholder rating from the backend — never show it.
+    const evaluation = String(apiReport.evaluationStatus ?? "").toUpperCase();
+    const hasSavedStats = Boolean(apiReport.stats && Object.keys(apiReport.stats).length > 0);
+    const isCompleted = evaluation ? evaluation === "COMPLETED" : hasSavedStats;
+    const rawRating = apiReport.scoutRating ?? apiReport.rating;
+    const rating = isCompleted && typeof rawRating === "number" ? rawRating : undefined;
+    const categoryRatings =
+      isCompleted && apiReport.categoryRatings && typeof apiReport.categoryRatings === "object"
+        ? (apiReport.categoryRatings as Record<string, number>)
+        : undefined;
+
+    // Viewing a saved report: show ONLY what the report record contains.
+    // No draft values, no profile values, no defaults — missing fields render as N/A.
+    if (viewOnly) {
+      const dbOnly = (v: any) => (v === undefined || v === null ? "" : String(v).trim());
+      const minutesRaw = dbOnly(apiReport.minutesPlayed ?? apiReport.timePlayedMinutes);
+      const dbDob = dbOnly(pInfo.dateOfBirth ?? apiReport.dateOfBirth);
+      const dbDate = dbOnly(apiReport.gameDate ?? apiReport.date);
+
+      setFormData(prev => ({
+        ...prev,
+        playerName: dbOnly(pInfo.playerName ?? apiReport.playerName),
+        dob: dbDob ? formatDateToYMD(dbDob) : "",
+        clubName: dbOnly(pInfo.clubName ?? apiReport.clubName),
+        position: dbOnly(pInfo.position ?? apiReport.position).toUpperCase(),
+        foot: dbOnly(pInfo.foot ?? apiReport.foot).toUpperCase(),
+        weight: dbOnly(pInfo.weight ?? apiReport.weight),
+        height: dbOnly(pInfo.height ?? apiReport.height),
+        // The report has no photo of its own; use the player's own photo.
+        playerImage: pick(
+          pObj.cardImage, pObj.profileImage, pObj.profileImg, pObj.avatar, apiReport.playerAvatar,
+          profile.cardImage, profile.cardPhoto, profile.profileImage, profile.profileImg
+        ),
+        matchesPlayed: dbOnly(apiReport.matchesPlayed),
+        minutesPlayed: minutesRaw ? formatMinutesPlayed(minutesRaw) : "",
+        manOfTheMatch: dbOnly(apiReport.manOfTheMatch),
+        scoutName: dbOnly(apiReport.scoutName),
+        gameDate: dbDate ? formatDateToYMD(dbDate) : "",
+        gameType: dbOnly(apiReport.gameType ?? apiReport.league).toUpperCase(),
+        gameLocation: dbOnly(apiReport.gameLocation).toUpperCase(),
+        matchResult: dbOnly(apiReport.matchResult),
+        weather: dbOnly(apiReport.weather).toUpperCase(),
+        temperature: dbOnly(apiReport.temperature),
+        ownTeam: dbOnly(apiReport.ownTeam ?? apiReport.homeTeam),
+        opponentTeam: dbOnly(apiReport.opponentTeam ?? apiReport.awayTeam),
+        homeScore: typeof apiReport.homeScore === "number" ? apiReport.homeScore : undefined,
+        awayScore: typeof apiReport.awayScore === "number" ? apiReport.awayScore : undefined,
+        scoutRating: rating,
+        rating,
+        categoryRatings,
+      }) as typeof prev);
+
+      const dbChars = [pInfo.characteristics, apiReport.characteristics].find(
+        (c) => Array.isArray(c) && c.length > 0
+      );
+      setCharacteristics(Array.isArray(dbChars) ? dbChars.map((c: any) => String(c).toUpperCase()) : []);
+      setStats(hasSavedStats ? { ...apiReport.stats } : {});
+      setGoalMarkers(
+        Array.isArray(apiReport.accurateShots) ? apiReport.accurateShots.map((m: any) => ({ x: m.x, y: m.y })) : []
+      );
+      setPitchMarkers(
+        Array.isArray(apiReport.accurateAssists)
+          ? apiReport.accurateAssists.map((a: any) => ({ x1: a.fromX, y1: a.fromY, x2: a.toX, y2: a.toY }))
+          : []
+      );
+      setCoachFeedback(pick(apiReport.coachFeedback, apiReport.scoutAnalysis));
+      return;
+    }
 
     // Priority per field: saved report → what the user already entered (draft) → player profile.
     // The details endpoint may omit some fields, so a missing value never wipes entered data.
@@ -535,13 +563,10 @@ export const CreateGameReportWizard = ({
         ownTeam: own,
         homeScore,
         awayScore,
-        scoutRating: typeof rating === "number" ? rating : undefined,
-        rating: typeof rating === "number" ? rating : undefined,
         // Calculated by the backend once the report is completed — never computed here.
-        categoryRatings:
-          apiReport.categoryRatings && typeof apiReport.categoryRatings === "object"
-            ? (apiReport.categoryRatings as Record<string, number>)
-            : undefined,
+        scoutRating: rating,
+        rating,
+        categoryRatings,
       };
     });
 
@@ -575,7 +600,7 @@ export const CreateGameReportWizard = ({
 
     const feedback = pick(apiReport.coachFeedback, apiReport.scoutAnalysis);
     if (feedback) setCoachFeedback(feedback);
-  }, [apiReport, reportId, urlPosition, myProfileResponse]);
+  }, [apiReport, reportId, urlPosition, myProfileResponse, viewOnly]);
 
   // Pre-fill from Redux player list and request data
   useEffect(() => {

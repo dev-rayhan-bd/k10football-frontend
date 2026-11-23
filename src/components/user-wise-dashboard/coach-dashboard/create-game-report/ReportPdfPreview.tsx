@@ -123,6 +123,9 @@ const ReportPdfPreview = ({
     }
   };
 
+  // A saved report that hasn't been completed yet has no stats in the database.
+  const hasSavedStats = Object.keys(stats || {}).length > 0;
+
   const [contentHeight, setContentHeight] = useState(1500);
 
   useEffect(() => {
@@ -201,6 +204,8 @@ const ReportPdfPreview = ({
   const matchResultText = (() => {
     const raw = String(formData?.matchResult ?? "").trim();
     if (raw) return raw;
+    // A saved report shows only what is stored — no derived value.
+    if (viewOnly) return NA;
     const own = String(formData?.ownTeam ?? "").trim();
     const opp = String(formData?.opponentTeam ?? "").trim();
     return own && opp
@@ -514,7 +519,9 @@ const ReportPdfPreview = ({
                 {statItems.map((item, idx) => (
                   <div key={idx} className="flex min-w-0 items-start justify-between gap-2 border-b border-slate-100 py-1 pr-2">
                     <span className="min-w-0 break-words text-slate-500 font-bold uppercase font-orbitron">{item.label}:</span>
-                    <span className="shrink-0 tabular-nums text-slate-800 font-black font-orbitron">{getStatValue(item.key)}</span>
+                    <span className="shrink-0 tabular-nums text-slate-800 font-black font-orbitron">
+                      {viewOnly && !hasSavedStats ? NA : getStatValue(item.key)}
+                    </span>
                   </div>
                 ))}
               </div>
