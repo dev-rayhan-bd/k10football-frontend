@@ -753,7 +753,7 @@ return (
                 </h3>
               </div>
 
-              {/* Stats */}
+              {/* Stats... */}
               <div className="absolute top-[59%] left-1/2 -translate-x-1/2 w-[86%] text-black z-20">
                 <div className="flex items-center justify-between gap-2 p-2">
                   {/* left */}
