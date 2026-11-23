@@ -49,7 +49,6 @@ import {
   DeleteMediaModal,
 } from "@/components/user-wise-dashboard/academy-analysis/media";
 import { useMediaUpload } from "@/providers/MediaUploadProvider";
-import { MediaUploadProgressWidget } from "@/components/user-wise-dashboard/player-dashboard/images-videos";
 import { useGetAgentAnalyticsQuery } from "@/redux/features/agent/agentApi";
 
 const areaData = [
@@ -205,7 +204,7 @@ const AgentDashboard = () => {
       : barData;
 
   // Media upload background context
-  const { activeUploadTask, startUpload, cancelUpload, dismissUpload } = useMediaUpload();
+  const { startUpload } = useMediaUpload();
 
   // Media queries
   const {
@@ -511,14 +510,6 @@ const AgentDashboard = () => {
         </div>
       </div>
 
-      {/* Background Image Upload Progress Widget */}
-      {activeUploadTask && activeUploadTask.type === "image" && (
-        <MediaUploadProgressWidget
-          task={activeUploadTask}
-          onCancel={cancelUpload}
-          onDismiss={dismissUpload}
-        />
-      )}
 
       {/* My Images Section */}
       <DashboardSection
@@ -590,14 +581,6 @@ const AgentDashboard = () => {
         )}
       </DashboardSection>
 
-      {/* Background Video Upload Progress Widget */}
-      {activeUploadTask && activeUploadTask.type === "video" && (
-        <MediaUploadProgressWidget
-          task={activeUploadTask}
-          onCancel={cancelUpload}
-          onDismiss={dismissUpload}
-        />
-      )}
 
       {/* My Videos Section */}
       <DashboardSection

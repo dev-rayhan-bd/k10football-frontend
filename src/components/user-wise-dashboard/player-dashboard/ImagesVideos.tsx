@@ -35,13 +35,12 @@ import {
   MediaSection,
   UploadMediaModal,
   MediaViewerModal,
-  MediaUploadProgressWidget,
 } from "./images-videos";
 import { toast } from "sonner";
 
 const PlayerImagesAndVideos = () => {
   // Global Upload Context
-  const { activeUploadTask, startUpload, cancelUpload, dismissUpload } = useMediaUpload();
+  const { startUpload } = useMediaUpload();
 
   // Fetch Images from API: GET /media/me?mediaType=IMAGE
   const {
@@ -170,14 +169,6 @@ const PlayerImagesAndVideos = () => {
 
   return (
     <div className="flex flex-col gap-10 pb-16">
-      {/* Live Upload Percentage Widget (Above Header Cards) */}
-      {activeUploadTask && (
-        <MediaUploadProgressWidget
-          task={activeUploadTask}
-          onCancel={cancelUpload}
-          onDismiss={dismissUpload}
-        />
-      )}
 
       {/* Header & Stats */}
       <MediaStatsHeader stats={stats} />

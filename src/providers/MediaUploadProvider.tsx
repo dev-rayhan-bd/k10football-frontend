@@ -5,9 +5,9 @@ import React, {
   useState,
   useRef,
   useCallback,
+  useEffect,
   ReactNode,
 } from "react";
-import { usePathname } from "next/navigation";
 import { BASE_URL } from "@/constants/global.constant";
 import { getToken } from "@/helpers/SessionHelper";
 import { SuccessToast, ErrorToast, WarningToast } from "@/helpers/ValidationHelper";
@@ -34,6 +34,18 @@ export const MediaUploadProvider: React.FC<{ children: ReactNode }> = ({ childre
   const [activeUploadTask, setActiveUploadTask] = useState<UploadTask | null>(null);
   const xhrRef = useRef<XMLHttpRequest | null>(null);
   const dispatch = useAppDispatch();
+
+  // Closing or reloading the tab aborts the upload — warn the user while it's running.
+  const isUploadRunning = activeUploadTask?.status === "uploading";
+  useEffect(() => {
+    if (!isUploadRunning) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isUploadRunning]);
 
   const cancelUpload = useCallback(() => {
     if (xhrRef.current) {
@@ -188,31 +200,17 @@ export const MediaUploadProvider: React.FC<{ children: ReactNode }> = ({ childre
       }}
     >
       {children}
+      {activeUploadTask && (
+        // Floating, so the progress stays visible on every page and scroll position.
+        <div className="fixed bottom-4 right-4 left-4 z-50 sm:left-auto sm:w-110">
+          <MediaUploadProgressWidget
+            task={activeUploadTask}
+            onCancel={cancelUpload}
+            onDismiss={dismissUpload}
+          />
+        </div>
+      )}
     </MediaUploadContext.Provider>
-  );
-};
-
-export const GlobalUploadWidget: React.FC = () => {
-  const { activeUploadTask, cancelUpload, dismissUpload } = useMediaUpload();
-  const pathname = usePathname();
-
-  // On pages that render MediaUploadProgressWidget directly, avoid duplicate widget
-  if (
-    !activeUploadTask ||
-    pathname === "/dashboard/player/images-videos" ||
-    pathname === "/dashboard/club"
-  ) {
-    return null;
-  }
-
-  return (
-    <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-300">
-      <MediaUploadProgressWidget
-        task={activeUploadTask}
-        onCancel={cancelUpload}
-        onDismiss={dismissUpload}
-      />
-    </div>
   );
 };
 

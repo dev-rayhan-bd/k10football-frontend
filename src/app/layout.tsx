@@ -4,6 +4,7 @@ import "./globals.css";
 import AuthGuard from "@/providers/AuthGuard";
 import { Toaster } from "@/components/ui/sonner";
 import StoreProvider from "@/providers/StoreProvider";
+import { MediaUploadProvider } from "@/providers/MediaUploadProvider";
 import NextTopLoader from "nextjs-toploader";
 import ScrollToTop from "@/components/ScrollToTop";
 
@@ -71,9 +72,11 @@ return (
     />
     <StoreProvider>
       <AuthGuard>
-        {children}
-        <ScrollToTop />
-        <Toaster />
+        <MediaUploadProvider>
+          {children}
+          <ScrollToTop />
+          <Toaster />
+        </MediaUploadProvider>
       </AuthGuard>
     </StoreProvider>
   </body>

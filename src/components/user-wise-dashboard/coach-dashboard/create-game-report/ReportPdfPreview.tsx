@@ -5,7 +5,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import RadarChart from "./RadarChart";
-import { IconDownload, IconCheck, IconLoader2 } from "@tabler/icons-react";
+import { IconDownload, IconCheck, IconLoader2, IconInfoCircle } from "@tabler/icons-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { toast } from "sonner";
@@ -13,6 +14,44 @@ import { cn } from "@/lib/utils";
 import { GK_SLIDE_1, OUTFIELD_SLIDES, GK_SLIDE_4 } from "./MatchStatisticsForm";
 
 const NA = "N/A";
+
+const isRemoteUrl = (src: string) =>
+  /^https?:\/\//i.test(src) && (typeof window === "undefined" || !src.startsWith(window.location.origin));
+
+const blobToDataUrl = (blob: Blob) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+
+const inlinedImageCache = new Map<string, string>();
+
+/** Loads a remote image as a data URL via same-origin routes; null if every route fails. */
+const inlineImage = async (src: string): Promise<string | null> => {
+  const cached = inlinedImageCache.get(src);
+  if (cached) return cached;
+  const candidates = [
+    `/api/image-proxy?url=${encodeURIComponent(src)}`,
+    `/_next/image?url=${encodeURIComponent(src)}&w=384&q=90`,
+    src,
+  ];
+  for (const url of candidates) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) continue;
+      const blob = await res.blob();
+      if (!blob.type.startsWith("image/")) continue;
+      const data = await blobToDataUrl(blob);
+      inlinedImageCache.set(src, data);
+      return data;
+    } catch {
+      // try the next candidate
+    }
+  }
+  return null;
+};
 
 const formatHeight = (val: any) => {
   if (!val) return NA;
@@ -115,40 +154,23 @@ const ReportPdfPreview = ({
     return () => observer.disconnect();
   }, []);
 
-  // Helper to scale/normalize stats to a rating between 50 and 99
-  const mapStat = (val: number, maxVal = 15) => {
-    return Math.min(99, Math.max(50, Math.round(50 + (val / maxVal) * 49)));
-  };
-  // Compute attributes for the radar chart
-  const radarStats = isGK
-    ? [
-      { label: "DIV", value: mapStat((getStatValue("reflex") || 0) + getStatValue("save"), 25) },
-      { label: "HAN", value: mapStat((getStatValue("handling") || 0) + (getStatValue("crossClaimed") || getStatValue("punching")), 25) },
-      { label: "KIC", value: mapStat((getStatValue("distributionCompleted") || getStatValue("throwing") || getStatValue("completedPass")), 25) },
-      { label: "REF", value: mapStat((getStatValue("save1v1") || getStatValue("reflex") || 0) * 2 + (getStatValue("bigSave") || 0) * 3, 20) },
-      { label: "SPD", value: mapStat((getStatValue("distributionCompleted") || getStatValue("reactions") || 0), 25) },
-      { label: "POS", value: mapStat((getStatValue("cleanSheet") * 5) + getStatValue("save"), 25) }
-    ]
-    : [
-      { label: "PAC", value: mapStat((getStatValue("reactions") || 0) + (characteristics.includes("FAST") ? 8 : 4), 20) },
-      { label: "SHO", value: mapStat((getStatValue("goal") * 3) + getStatValue("shotOnTarget") + getStatValue("penaltyWon"), 25) },
-      { label: "PAS", value: mapStat((getStatValue("assist") * 2) + getStatValue("completedPass"), 25) },
-      { label: "DRI", value: mapStat(getStatValue("successfulDribble") * 2 + (characteristics.includes("SKILLFUL") ? 8 : 4), 20) },
-      { label: "DEF", value: mapStat(getStatValue("tackleWon") * 2 + getStatValue("interception") + getStatValue("clearance"), 30) },
-      { label: "PHY", value: mapStat(getStatValue("groundDuelWon") + getStatValue("aerialDuelWon") + getStatValue("recovery"), 30) }
-    ];
-  const calculatedRating = radarStats.length > 0
-    ? Math.round(radarStats.reduce((sum, s) => sum + s.value, 0) / radarStats.length)
-    : 75;
+  // Ratings are calculated by the backend when the report is submitted
+  // (`categoryRatings`, `scoutRating`/`rating` from GET /players/me/game-reports/:id).
+  // Nothing is calculated here: before submit they are simply not available yet.
+  const radarStats = Object.entries((formData?.categoryRatings ?? {}) as Record<string, unknown>)
+    .filter(([, v]) => v !== null && v !== undefined && !isNaN(Number(v)))
+    .map(([name, v]) => ({
+      label: name.slice(0, 3).toUpperCase(),
+      fullLabel: name,
+      value: Number(v),
+    }));
+  const hasCategoryRatings = radarStats.length >= 3;
 
-  const overallRating = React.useMemo(() => {
-    const raw = formData?.scoutRating ?? formData?.rating;
-    if (raw !== undefined && raw !== null && Number(raw) > 0) {
-      const num = Number(raw);
-      return num <= 10 ? Math.round(num * 10) : Math.round(num);
-    }
-    return calculatedRating;
-  }, [formData?.scoutRating, formData?.rating, calculatedRating]);
+  const rawOverall = formData?.scoutRating ?? formData?.rating;
+  const overallRating: number | null =
+    rawOverall !== undefined && rawOverall !== null && !isNaN(Number(rawOverall)) ? Number(rawOverall) : null;
+  const overallText = overallRating === null ? "—" : String(overallRating);
+  const AFTER_SUBMIT_HINT = "Calculated by K10 from your match statistics after the report is submitted.";
 
   // Every value shown in the PDF comes straight from formData, which is
   // populated from the database record. Missing values render as "N/A" —
@@ -207,39 +229,16 @@ const ReportPdfPreview = ({
   const playerImageSrc = formData?.playerImage || "/profile_placeholder.png";
 
   // html2canvas drops cross-origin images that lack CORS headers (e.g. S3 photos),
-  // leaving an empty card in the PDF. Load remote photos as a data URL through
-  // Next's same-origin image route so the exported PDF always contains the photo.
+  // leaving an empty card in the PDF. Remote photos are converted to data URLs
+  // through same-origin routes so the exported PDF always contains the photo.
   const [inlinedImage, setInlinedImage] = useState<{ src: string; data: string } | null>(null);
   useEffect(() => {
     const src = playerImageSrc;
-    if (!/^https?:\/\//i.test(src)) return;
+    if (!isRemoteUrl(src)) return;
     let cancelled = false;
-
-    const toDataUrl = async (url: string): Promise<string> => {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const blob = await res.blob();
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result));
-        reader.onerror = () => reject(reader.error);
-        reader.readAsDataURL(blob);
-      });
-    };
-
-    (async () => {
-      const candidates = [`/_next/image?url=${encodeURIComponent(src)}&w=384&q=90`, src];
-      for (const url of candidates) {
-        try {
-          const data = await toDataUrl(url);
-          if (!cancelled) setInlinedImage({ src, data });
-          return;
-        } catch {
-          // try the next candidate
-        }
-      }
-    })();
-
+    inlineImage(src).then((data) => {
+      if (!cancelled && data) setInlinedImage({ src, data });
+    });
     return () => {
       cancelled = true;
     };
@@ -329,6 +328,20 @@ const ReportPdfPreview = ({
 
     try {
       const element = previewRef.current;
+
+      // Make sure every remote image is embedded before rendering, so the
+      // player photo can't be dropped (CORS) or still be loading.
+      const remoteSrcs = Array.from(element.querySelectorAll("img"))
+        .map((img) => img.getAttribute("src") || "")
+        .filter(isRemoteUrl);
+      const inlined = new Map<string, string>();
+      await Promise.all(
+        [...new Set(remoteSrcs)].map(async (src) => {
+          const data = await inlineImage(src);
+          if (data) inlined.set(src, data);
+        })
+      );
+
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
@@ -340,6 +353,13 @@ const ReportPdfPreview = ({
           if (clonedElement && clonedElement.parentElement) {
             clonedElement.parentElement.style.transform = "none";
           }
+          clonedDoc.querySelectorAll("img").forEach((img) => {
+            const data = inlined.get(img.getAttribute("src") || "");
+            if (data) {
+              img.removeAttribute("srcset");
+              img.src = data;
+            }
+          });
         },
       });
       const imgData = canvas.toDataURL("image/png");
@@ -422,7 +442,12 @@ const ReportPdfPreview = ({
                   {/* FUT card header */}
                   <div className="flex justify-between w-full items-start">
                     <div className="flex flex-col items-center">
-                      <div className="text-2xl font-black text-sky-600 font-orbitron italic leading-none">{overallRating}</div>
+                      <div
+                        className="text-2xl font-black text-sky-600 font-orbitron italic leading-none"
+                        title={overallRating === null ? AFTER_SUBMIT_HINT : "Overall rating"}
+                      >
+                        {overallText}
+                      </div>
                       <div className="text-[8px] font-bold text-sky-500 uppercase font-orbitron leading-none mt-0.5">{isGK ? "GK" : displayPosition.slice(0, 3)}</div>
                     </div>
                     <Image src="/logo.png" alt="Club Logo" className="w-5 h-5 object-contain" width={50} height={50} />
@@ -497,19 +522,45 @@ const ReportPdfPreview = ({
             {/* Bottom section (Radar, Overall, Logos) */}
             <div className="relative z-10 flex items-center justify-between border-t-2 border-slate-200 pt-4 mb-4">
               {/* Radar Chart */}
-              <div className="w-45">
-                <RadarChart
-                  stats={radarStats}
-                  size={140}
-                  color="#0284c7"
-                  fillColor="rgba(2, 132, 199, 0.25)"
-                />
+              <div className="flex w-45 justify-center">
+                {hasCategoryRatings ? (
+                  <RadarChart
+                    stats={radarStats}
+                    size={140}
+                    color="#0284c7"
+                    fillColor="rgba(2, 132, 199, 0.25)"
+                  />
+                ) : (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex size-35 cursor-help flex-col items-center justify-center gap-1 rounded-full border-2 border-dashed border-slate-300 p-4 text-center">
+                        <IconInfoCircle size={18} className="text-slate-400" />
+                        <span className="text-[9px] font-bold uppercase text-slate-500 font-orbitron">
+                          Category ratings available after submit
+                        </span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>{AFTER_SUBMIT_HINT}</TooltipContent>
+                  </Tooltip>
+                )}
               </div>
-              {/* Overall score */}
-              <div className="text-center flex-1 min-w-0">
-                <div className="text-4xl font-black text-emerald-600 font-orbitron tracking-tighter italic">
-                  OVERALL = {overallRating}%
-                </div>
+              {/* Overall score — from the backend only */}
+              <div className="flex min-w-0 flex-1 flex-col items-center gap-1 text-center">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="cursor-help text-4xl font-black text-emerald-600 font-orbitron tracking-tighter italic">
+                      OVERALL = {overallText}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {overallRating === null ? AFTER_SUBMIT_HINT : "Overall rating calculated by K10 for this report."}
+                  </TooltipContent>
+                </Tooltip>
+                {overallRating === null && (
+                  <span className="text-[9px] font-bold uppercase text-slate-500 font-orbitron">
+                    Available after submit
+                  </span>
+                )}
               </div>
               {/* Logo and tag */}
               <div className="flex flex-col items-center gap-1.5 w-45">
@@ -628,7 +679,7 @@ const ReportPdfPreview = ({
           </Button>
         ) : (
           <Button
-            onClick={() => onSave(overallRating)}
+            onClick={() => onSave(overallRating ?? 0)}
             disabled={downloading || isSubmitting}
             className="flex-1 bg-[#00FF62] hover:bg-[#00D150] text-black h-14 rounded-xl text-sm font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(0,255,98,0.2)] flex items-center justify-center gap-2 font-orbitron min-w-0"
           >

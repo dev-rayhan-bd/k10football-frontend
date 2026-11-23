@@ -48,7 +48,6 @@ import {
   DeleteMediaModal,
 } from "@/components/user-wise-dashboard/academy-analysis/media";
 import { useMediaUpload } from "@/providers/MediaUploadProvider";
-import { MediaUploadProgressWidget } from "@/components/user-wise-dashboard/player-dashboard/images-videos";
 import {
   useGetClubDashboardAnalyticsQuery,
   useToggleScoutingBoardFavouriteMutation,
@@ -81,7 +80,7 @@ const ClubDashboard = () => {
   const recentActivities = dashboardData?.recentActivity || [];
 
   // Global Upload Context (Background uploader with real-time percentage)
-  const { activeUploadTask, startUpload, cancelUpload, dismissUpload } = useMediaUpload();
+  const { startUpload } = useMediaUpload();
 
   // Query images and videos from mediaApi
   const {
@@ -647,14 +646,6 @@ const ClubDashboard = () => {
             )}
           </DashboardSection>
 
-          {/* Background Image Upload Progress Widget */}
-          {activeUploadTask && activeUploadTask.type === "image" && (
-            <MediaUploadProgressWidget
-              task={activeUploadTask}
-              onCancel={cancelUpload}
-              onDismiss={dismissUpload}
-            />
-          )}
 
           {/* Images */}
           <DashboardSection
@@ -726,14 +717,6 @@ const ClubDashboard = () => {
             )}
           </DashboardSection>
 
-          {/* Background Video Upload Progress Widget */}
-          {activeUploadTask && activeUploadTask.type === "video" && (
-            <MediaUploadProgressWidget
-              task={activeUploadTask}
-              onCancel={cancelUpload}
-              onDismiss={dismissUpload}
-            />
-          )}
 
           {/* Videos */}
           <DashboardSection

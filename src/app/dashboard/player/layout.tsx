@@ -12,10 +12,6 @@ import {
   IconLock,
 } from "@tabler/icons-react";
 import { ReactNode, useEffect, useRef } from "react";
-import {
-  MediaUploadProvider,
-  GlobalUploadWidget,
-} from "@/providers/MediaUploadProvider";
 import { useGetMySubscriptionQuery } from "@/redux/features/subscription/subscriptionApi";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -124,15 +120,12 @@ const PlayerLayout = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <MediaUploadProvider>
-      <DashboardLayout
-        sidebarItems={currentSidebarItems}
-        tier={{ name: tierName, color: tierColor }}
-      >
-        <GlobalUploadWidget />
-        {content}
-      </DashboardLayout>
-    </MediaUploadProvider>
+    <DashboardLayout
+      sidebarItems={currentSidebarItems}
+      tier={{ name: tierName, color: tierColor }}
+    >
+      {content}
+    </DashboardLayout>
   );
 };
 

@@ -270,6 +270,7 @@ export const CreateGameReportWizard = ({
     awayScore: 0,
     playerImage: "",
     scoutRating: undefined as number | undefined,
+    categoryRatings: undefined as Record<string, number> | undefined,
     rating: undefined as number | undefined,
   });
 
@@ -536,6 +537,11 @@ export const CreateGameReportWizard = ({
         awayScore,
         scoutRating: typeof rating === "number" ? rating : undefined,
         rating: typeof rating === "number" ? rating : undefined,
+        // Calculated by the backend once the report is completed — never computed here.
+        categoryRatings:
+          apiReport.categoryRatings && typeof apiReport.categoryRatings === "object"
+            ? (apiReport.categoryRatings as Record<string, number>)
+            : undefined,
       };
     });
 
@@ -1048,24 +1054,14 @@ export const CreateGameReportWizard = ({
       return;
     }
 
-    // Same payload as the self-report (same keys, same validation) …
+    // Same body as the self-report completion (same keys, same validation).
     const base = buildCompletePayload();
     if (!base) return;
-
-    // … plus the legacy key names the coach endpoint has historically read,
-    // mirrored from the entered values (never invented).
-    const legacyAliases: Record<string, number> = {};
-    for (const [key, aliases] of Object.entries(LEGACY_STAT_ALIASES)) {
-      if (key in base.stats) {
-        for (const alias of aliases) legacyAliases[alias] = base.stats[key];
-      }
-    }
 
     const payload = {
       reportId: targetReportId,
       ...base,
       coachFeedback: base.coachFeedback || "",
-      stats: { ...base.stats, ...legacyAliases },
     };
 
     try {

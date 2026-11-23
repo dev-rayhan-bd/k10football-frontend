@@ -2,7 +2,7 @@
 import React from "react";
 
 interface RadarChartProps {
-  stats: { label: string; value: number }[];
+  stats: { label: string; value: number; fullLabel?: string }[];
   size?: number;
   color?: string;
   fillColor?: string;
@@ -20,14 +20,15 @@ const RadarChart = ({
 }: RadarChartProps) => {
   const center = size / 2;
   const r = size * 0.35; // Maximum radius
+  const count = Math.max(stats.length, 1);
 
   // Calculate coordinates for 6 points
   const points = stats.map((stat, i) => {
-    const angle = (i * 2 * Math.PI) / 6 - Math.PI / 2; // Start from top
+    const angle = (i * 2 * Math.PI) / count - Math.PI / 2; // Start from top
     const valueRatio = Math.max(10, Math.min(100, stat.value)) / 100;
     const x = center + r * valueRatio * Math.cos(angle);
     const y = center + r * valueRatio * Math.sin(angle);
-    return { x, y, label: stat.label, value: stat.value, angle };
+    return { x, y, label: stat.label, fullLabel: stat.fullLabel, value: stat.value, angle };
   });
 
   const polygonPath = points.map((p) => `${p.x},${p.y}`).join(" ");
@@ -41,7 +42,7 @@ const RadarChart = ({
         {/* Draw background grids (hexagons) */}
         {gridLevels.map((level, idx) => {
           const gridPoints = stats.map((_, i) => {
-            const angle = (i * 2 * Math.PI) / 6 - Math.PI / 2;
+            const angle = (i * 2 * Math.PI) / count - Math.PI / 2;
             const x = center + r * level * Math.cos(angle);
             const y = center + r * level * Math.sin(angle);
             return `${x},${y}`;
@@ -59,7 +60,7 @@ const RadarChart = ({
 
         {/* Draw axes lines */}
         {stats.map((_, i) => {
-          const angle = (i * 2 * Math.PI) / 6 - Math.PI / 2;
+          const angle = (i * 2 * Math.PI) / count - Math.PI / 2;
           const x = center + r * Math.cos(angle);
           const y = center + r * Math.sin(angle);
           return (
@@ -93,6 +94,7 @@ const RadarChart = ({
 
           return (
             <g key={i}>
+              <title>{`${p.fullLabel || p.label}: ${p.value}`}</title>
               {/* Vertex dot */}
               <circle cx={p.x} cy={p.y} r="3" fill={color} />
               

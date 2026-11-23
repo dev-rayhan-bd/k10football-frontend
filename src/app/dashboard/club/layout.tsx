@@ -14,7 +14,6 @@ import {
   IconShieldCheck,
 } from "@tabler/icons-react";
 import { ReactNode, useEffect, useRef } from "react";
-import { GlobalUploadWidget } from "@/providers/MediaUploadProvider";
 import { useGetClubProfileQuery } from "@/redux/features/club/clubApi";
 import { useGetMySubscriptionQuery } from "@/redux/features/subscription/subscriptionApi";
 import { usePathname, useRouter } from "next/navigation";
@@ -208,7 +207,6 @@ const ClubLayout = ({ children }: { children: ReactNode }) => {
       sidebarItems={currentSidebarItems}
       tier={{ name: tierName, color: "#00FF62" }}
     >
-      <GlobalUploadWidget />
       {content}
     </DashboardLayout>
   );
