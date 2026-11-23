@@ -71,6 +71,9 @@ class SessionHelper {
     if (!token) return;
 
     if (typeof window !== "undefined" && window.localStorage) {
+      // A new session starts without a parent link. Switching from a parent into a
+      // child account stores `switchedFromParentId` again right after this call.
+      localStorage.removeItem("switchedFromParentId");
       localStorage.setItem("token", token);
       const decoded = getDecodedToken(token);
       if (decoded?.role) {
@@ -97,6 +100,7 @@ class SessionHelper {
     if (typeof window !== "undefined" && window.localStorage) {
       localStorage.removeItem("token");
       localStorage.removeItem("accessToken");
+      localStorage.removeItem("switchedFromParentId");
     }
   };
 

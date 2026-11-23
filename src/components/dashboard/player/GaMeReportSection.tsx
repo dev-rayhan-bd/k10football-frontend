@@ -132,9 +132,12 @@ const GameReportSection = () => {
   const detailScore =
     detail?.score ||
     `${detail?.homeScore ?? 0} - ${detail?.awayScore ?? 0}`;
-  const detailEvaluatedBy = String(
-    detail?.evaluatedBy || detail?.reportCompletionType || detail?.evaluator?.type || "SELF"
-  ).toUpperCase();
+  const detailEvaluatedBy =
+    String(detail?.evaluatedBy || detail?.reportCompletionType || detail?.evaluator?.type || "")
+      .toUpperCase()
+      .replace(/_/g, " ") || "N/A";
+  // Any coach variant (COACH, EXTERNAL_COACH, …) is a coach evaluation.
+  const isDetailCoach = detailEvaluatedBy.includes("COACH") || detailEvaluatedBy.includes("SCOUT");
   const detailEvaluatorName =
     detail?.evaluatorName || detail?.evaluator?.name || detail?.authorName || "";
   const detailGoals =
@@ -378,12 +381,12 @@ const GameReportSection = () => {
                     <span
                       className={cn(
                         "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase font-orbitron border",
-                        detailEvaluatedBy === "COACH"
+                        isDetailCoach
                           ? "bg-[#00FF62]/10 text-[#00FF62] border-[#00FF62]/30"
                           : "bg-white/5 text-gray-300 border-white/10"
                       )}
                     >
-                      {detailEvaluatedBy === "COACH" ? (
+                      {isDetailCoach ? (
                         <UserCheck className="size-3" />
                       ) : (
                         <User className="size-3" />

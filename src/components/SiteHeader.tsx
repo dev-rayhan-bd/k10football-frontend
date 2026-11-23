@@ -21,6 +21,29 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import NotificationBellDropdown from "@/components/notifications/NotificationBellDropdown";
 import ChatHeaderIcon from "@/components/chat/ChatHeaderIcon";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useGetMyPlayerProfileQuery } from "@/redux/features/player/playerApi";
+import { getDecodedToken, getToken } from "@/helpers/SessionHelper";
+
+/**
+ * Whether the signed-in athlete has a parent account to switch to. True when the
+ * session was opened from a parent (switched profile), or the player profile
+ * references a parent.
+ */
+const detectLinkedParent = (profile: Record<string, unknown> | undefined): boolean => {
+  if (typeof window === "undefined") return false;
+  if (localStorage.getItem("switchedFromParentId")) return true;
+
+  const claims = getDecodedToken(getToken()) || {};
+  if (claims.switchedFromParentId || claims.parentId || claims.parentUserId || claims.switchedFrom) return true;
+
+  if (!profile) return false;
+  const nonEmpty = (v: unknown) =>
+    Array.isArray(v) ? v.length > 0 : Boolean(v && (typeof v !== "object" || Object.keys(v as object).length > 0));
+  return ["parent", "parentId", "parentUserId", "parents", "linkedParent", "linkedParents", "guardian"].some((k) =>
+    nonEmpty(profile[k])
+  );
+};
 
 const SiteHeader = ({
   showToggle = false,
@@ -71,6 +94,15 @@ const SiteHeader = ({
       localStorage.setItem("childUserId", childId);
     }
   }, [parentDashboard?.selectedChild, myChildrenResponse]);
+
+  // Athlete → Parent is only possible when a parent account is linked.
+  const { data: myPlayerProfile, isLoading: isPlayerProfileLoading } = useGetMyPlayerProfileQuery(undefined, {
+    skip: !isPlayerPage,
+  });
+  const hasLinkedParent =
+    !isPlayerPage || detectLinkedParent(myPlayerProfile?.data as Record<string, unknown> | undefined);
+  const parentSwitchDisabled = isPlayerPage && (isPlayerProfileLoading || !hasLinkedParent);
+  const parentSwitchHint = isPlayerProfileLoading ? "Checking parent account…" : "Parent not added";
 
   const isSwitching =
     isSwitchingToChild ||
@@ -159,7 +191,7 @@ const SiteHeader = ({
   };
 
   const handleSwitchToParent = async () => {
-    if (isParentPage || isSwitching) return;
+    if (isParentPage || isSwitching || parentSwitchDisabled) return;
 
     try {
       const res = await switchToParent().unwrap();
@@ -297,42 +329,55 @@ const SiteHeader = ({
         {/* Parent / Athlete Switcher Toggle */}
         {isParentOrPlayerSpace && (
           <div className="flex items-center bg-white/5 rounded-lg p-1.5 sm:p-1.5 gap-2 sm:gap-1.5 mr-0 sm:mr-2 border border-white/10 shadow-inner">
-            <button
-              type="button"
-              disabled={isSwitching}
-              onClick={handleSwitchToParent}
-              className={cn(
-                "px-3 sm:px-4 py-1.5 sm:py-1.5 rounded-md text-xs sm:text-[11px] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer disabled:opacity-50",
-                isParentPage
-                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/35"
-                  : "text-white/40 hover:text-white/60"
-              )}
-            >
-              Parent
-            </button>
-            <div
-              onClick={handleParentAthleteToggle}
-              className={cn(
-                "w-10 sm:w-10 h-5 sm:h-5 bg-white/10 rounded-full relative cursor-pointer group border border-white/5 transition-opacity",
-                isSwitching && "opacity-60 cursor-not-allowed"
-              )}
-              title={
-                isParentPage
-                  ? `Switch to ${activeChildName}'s Athlete Profile`
-                  : "Switch to Parent Profile"
-              }
-            >
-              <div
-                className={cn(
-                  "absolute top-1/2 -translate-y-1/2 size-4 sm:size-3.5 bg-white rounded-full transition-all duration-300 shadow-sm flex items-center justify-center",
-                  isPlayerPage ? "right-0.5" : "left-0.5"
-                )}
-              >
-                {isSwitching && (
-                  <IconLoader2 size={10} className="animate-spin text-black" />
-                )}
-              </div>
-            </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                {/* span wrapper: disabled buttons don't emit hover events */}
+                <span className="flex items-center gap-2 sm:gap-1.5" tabIndex={parentSwitchDisabled ? 0 : -1}>
+                  <button
+                    type="button"
+                    disabled={isSwitching || parentSwitchDisabled}
+                    onClick={handleSwitchToParent}
+                    className={cn(
+                      "px-3 sm:px-4 py-1.5 sm:py-1.5 rounded-md text-xs sm:text-[11px] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
+                      isParentPage
+                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/35"
+                        : "text-white/40 hover:text-white/60"
+                    )}
+                  >
+                    Parent
+                  </button>
+                  <div
+                    role="switch"
+                    aria-checked={isPlayerPage}
+                    aria-disabled={isSwitching || parentSwitchDisabled}
+                    onClick={parentSwitchDisabled ? undefined : handleParentAthleteToggle}
+                    className={cn(
+                      "w-10 sm:w-10 h-5 sm:h-5 bg-white/10 rounded-full relative cursor-pointer group border border-white/5 transition-opacity",
+                      (isSwitching || parentSwitchDisabled) && "opacity-50 cursor-not-allowed"
+                    )}
+                    title={
+                      parentSwitchDisabled
+                        ? undefined
+                        : isParentPage
+                          ? `Switch to ${activeChildName}'s Athlete Profile`
+                          : "Switch to Parent Profile"
+                    }
+                  >
+                    <div
+                      className={cn(
+                        "absolute top-1/2 -translate-y-1/2 size-4 sm:size-3.5 bg-white rounded-full transition-all duration-300 shadow-sm flex items-center justify-center",
+                        isPlayerPage ? "right-0.5" : "left-0.5"
+                      )}
+                    >
+                      {isSwitching && (
+                        <IconLoader2 size={10} className="animate-spin text-black" />
+                      )}
+                    </div>
+                  </div>
+                </span>
+              </TooltipTrigger>
+              {parentSwitchDisabled && <TooltipContent>{parentSwitchHint}</TooltipContent>}
+            </Tooltip>
             <button
               type="button"
               disabled={isSwitching}

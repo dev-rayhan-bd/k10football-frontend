@@ -28,7 +28,7 @@ import {
   useGetCoachGameReportsQuery,
 } from "@/redux/features/coach/coachApi";
 import { useGetSingleGameReportQuery } from "@/redux/features/academy/academyApi";
-import { formatMinutesPlayed, getStatKeysForPosition } from "./reportHelpers";
+import { formatDateToYMD, formatMinutesPlayed, getStatKeysForPosition, mapSavedReportForPreview } from "./reportHelpers";
 import {
   ICreateSelfGameReportPayload,
   ICompleteSelfGameReportPayload,
@@ -37,21 +37,6 @@ import {
 import { IconCircleCheck } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 
-const formatDateToYMD = (dateStr: string): string => {
-  if (!dateStr) return "";
-  const trimmed = dateStr.trim();
-  const ddmmyyyy = trimmed.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/);
-  if (ddmmyyyy) {
-    const [, day, month, year] = ddmmyyyy;
-    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-  }
-  const yyyymmdd = trimmed.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
-  if (yyyymmdd) {
-    const [, year, month, day] = yyyymmdd;
-    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-  }
-  return trimmed;
-};
 
 /** Older drafts / records may use legacy key names — read those as a fallback. */
 const LEGACY_STAT_ALIASES: Record<string, string[]> = {
@@ -465,58 +450,13 @@ export const CreateGameReportWizard = ({
     // Viewing a saved report: show ONLY what the report record contains.
     // No draft values, no profile values, no defaults — missing fields render as N/A.
     if (viewOnly) {
-      const dbOnly = (v: any) => (v === undefined || v === null ? "" : String(v).trim());
-      const minutesRaw = dbOnly(apiReport.minutesPlayed ?? apiReport.timePlayedMinutes);
-      const dbDob = dbOnly(pInfo.dateOfBirth ?? apiReport.dateOfBirth);
-      const dbDate = dbOnly(apiReport.gameDate ?? apiReport.date);
-
-      setFormData(prev => ({
-        ...prev,
-        playerName: dbOnly(pInfo.playerName ?? apiReport.playerName),
-        dob: dbDob ? formatDateToYMD(dbDob) : "",
-        clubName: dbOnly(pInfo.clubName ?? apiReport.clubName),
-        position: dbOnly(pInfo.position ?? apiReport.position).toUpperCase(),
-        foot: dbOnly(pInfo.foot ?? apiReport.foot).toUpperCase(),
-        weight: dbOnly(pInfo.weight ?? apiReport.weight),
-        height: dbOnly(pInfo.height ?? apiReport.height),
-        // The report has no photo of its own; use the player's own photo.
-        playerImage: pick(
-          pObj.cardImage, pObj.profileImage, pObj.profileImg, pObj.avatar, apiReport.playerAvatar,
-          profile.cardImage, profile.cardPhoto, profile.profileImage, profile.profileImg
-        ),
-        matchesPlayed: dbOnly(apiReport.matchesPlayed),
-        minutesPlayed: minutesRaw ? formatMinutesPlayed(minutesRaw) : "",
-        manOfTheMatch: dbOnly(apiReport.manOfTheMatch),
-        scoutName: dbOnly(apiReport.scoutName),
-        gameDate: dbDate ? formatDateToYMD(dbDate) : "",
-        gameType: dbOnly(apiReport.gameType ?? apiReport.league).toUpperCase(),
-        gameLocation: dbOnly(apiReport.gameLocation).toUpperCase(),
-        matchResult: dbOnly(apiReport.matchResult),
-        weather: dbOnly(apiReport.weather).toUpperCase(),
-        temperature: dbOnly(apiReport.temperature),
-        ownTeam: dbOnly(apiReport.ownTeam ?? apiReport.homeTeam),
-        opponentTeam: dbOnly(apiReport.opponentTeam ?? apiReport.awayTeam),
-        homeScore: typeof apiReport.homeScore === "number" ? apiReport.homeScore : undefined,
-        awayScore: typeof apiReport.awayScore === "number" ? apiReport.awayScore : undefined,
-        scoutRating: rating,
-        rating,
-        categoryRatings,
-      }) as typeof prev);
-
-      const dbChars = [pInfo.characteristics, apiReport.characteristics].find(
-        (c) => Array.isArray(c) && c.length > 0
-      );
-      setCharacteristics(Array.isArray(dbChars) ? dbChars.map((c: any) => String(c).toUpperCase()) : []);
-      setStats(hasSavedStats ? { ...apiReport.stats } : {});
-      setGoalMarkers(
-        Array.isArray(apiReport.accurateShots) ? apiReport.accurateShots.map((m: any) => ({ x: m.x, y: m.y })) : []
-      );
-      setPitchMarkers(
-        Array.isArray(apiReport.accurateAssists)
-          ? apiReport.accurateAssists.map((a: any) => ({ x1: a.fromX, y1: a.fromY, x2: a.toX, y2: a.toY }))
-          : []
-      );
-      setCoachFeedback(pick(apiReport.coachFeedback, apiReport.scoutAnalysis));
+      const mapped = mapSavedReportForPreview(apiReport, profile);
+      setFormData(prev => ({ ...prev, ...mapped.formData }) as typeof prev);
+      setCharacteristics(mapped.characteristics);
+      setStats(mapped.stats);
+      setGoalMarkers(mapped.goalMarkers);
+      setPitchMarkers(mapped.pitchMarkers);
+      setCoachFeedback(mapped.coachFeedback);
       return;
     }
 

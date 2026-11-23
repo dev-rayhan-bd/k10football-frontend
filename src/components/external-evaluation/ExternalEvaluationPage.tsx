@@ -9,6 +9,7 @@ import {
   IconCircleCheck,
   IconClockX,
   IconExternalLink,
+  IconFileText,
   IconLinkOff,
   IconLoader2,
   IconX,
@@ -21,6 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import MatchStatisticsForm, {
   PitchLine,
 } from "@/components/user-wise-dashboard/coach-dashboard/create-game-report/MatchStatisticsForm";
+import ReportPdfPreview from "@/components/user-wise-dashboard/coach-dashboard/create-game-report/ReportPdfPreview";
 import {
   formatMinutesPlayed,
   getStatKeysForPosition,
@@ -40,7 +42,8 @@ type View =
   | { kind: "rejected"; byMe: boolean }
   | { kind: "respond" }
   | { kind: "form" }
-  | { kind: "success"; result: IAccessLinkSubmitResult };
+  | { kind: "success"; result: IAccessLinkSubmitResult }
+  | { kind: "preview"; result: IAccessLinkSubmitResult };
 
 const NA = "N/A";
 const text = (v: unknown) => (v === undefined || v === null || String(v).trim() === "" ? NA : String(v));
@@ -287,16 +290,36 @@ const ExternalEvaluationPage = () => {
                     </span>
                   </div>
                 )}
-                <div className="flex flex-wrap justify-center gap-3">
-                  {(view.result.pdfViewUrl || view.result.reportPdfUrl) && (
-                    <PdfLink href={(view.result.pdfViewUrl || view.result.reportPdfUrl) as string} label="View report PDF" />
-                  )}
-                  {view.result.pdfDownloadUrl && (
-                    <PdfLink href={view.result.pdfDownloadUrl} label="Download PDF" variant="outline" />
-                  )}
-                </div>
+                <Button
+                  onClick={() => {
+                    setView({ kind: "preview", result: view.result });
+                    window.scrollTo({ top: 0 });
+                  }}
+                  className="bg-[#00FF62] text-black hover:bg-[#00D150]"
+                >
+                  <IconFileText />
+                  View report
+                </Button>
               </div>
             }
+          />
+        )}
+
+        {view.kind === "preview" && report && (
+          <ReportPdfPreview
+            viewOnly
+            formData={buildReportFormData(report, position, {
+              minutesPlayed: formatMinutesPlayed(minutesPlayed),
+              evaluatorName: evaluatorName.trim(),
+              overallRating: view.result.overallRating,
+            })}
+            characteristics={[]}
+            stats={stats}
+            goalMarkers={goalMarkers}
+            pitchMarkers={pitchMarkers}
+            coachFeedback={coachFeedback}
+            onSave={() => {}}
+            onBack={() => setView({ kind: "success", result: view.result })}
           />
         )}
 
@@ -405,6 +428,47 @@ const ExternalEvaluationPage = () => {
   );
 };
 
+/**
+ * Maps this report's data for the report preview: match + athlete from the
+ * access-link response, plus what the coach just submitted. Fields the
+ * access link doesn't return (DOB, weight, height, foot, characteristics,
+ * matches played) are left empty and render as N/A — nothing is invented.
+ */
+const buildReportFormData = (
+  report: IAccessLinkReport,
+  position: string,
+  submitted: { minutesPlayed: string; evaluatorName: string; overallRating?: number }
+) => {
+  const m = report.matchDetails || {};
+  const a = report.athlete || {};
+  const str = (v: unknown) => (v === undefined || v === null ? "" : String(v).trim());
+  return {
+    playerName: str(a.name),
+    clubName: str(a.club),
+    position,
+    playerImage: str(a.profileImage),
+    dob: "",
+    weight: "",
+    height: "",
+    foot: "",
+    matchesPlayed: "",
+    minutesPlayed: submitted.minutesPlayed,
+    scoutName: submitted.evaluatorName,
+    gameDate: str(m.matchDate).slice(0, 10),
+    gameType: str(m.leagueType).toUpperCase(),
+    gameLocation: str(m.location).toUpperCase(),
+    weather: str(m.weather).toUpperCase(),
+    temperature: str(m.temperature),
+    matchResult: str(m.result),
+    ownTeam: str(m.homeTeam),
+    opponentTeam: str(m.awayTeam),
+    homeScore: typeof m.homeScore === "number" ? m.homeScore : undefined,
+    awayScore: typeof m.awayScore === "number" ? m.awayScore : undefined,
+    scoutRating: typeof submitted.overallRating === "number" ? submitted.overallRating : undefined,
+    rating: typeof submitted.overallRating === "number" ? submitted.overallRating : undefined,
+  };
+};
+
 const MatchSummary = ({ report, position }: { report: IAccessLinkReport; position: string }) => {
   const m = report.matchDetails || {};
   const a = report.athlete || {};
@@ -480,8 +544,8 @@ const StatusCard = ({
   </section>
 );
 
-const PdfLink = ({ href, label, variant }: { href: string; label: string; variant?: "outline" }) => (
-  <Button asChild variant={variant} className={variant ? undefined : "bg-[#00FF62] text-black hover:bg-[#00D150]"}>
+const PdfLink = ({ href, label }: { href: string; label: string }) => (
+  <Button asChild className="bg-[#00FF62] text-black hover:bg-[#00D150]">
     <a href={href} target="_blank" rel="noopener noreferrer">
       <IconExternalLink />
       {label}

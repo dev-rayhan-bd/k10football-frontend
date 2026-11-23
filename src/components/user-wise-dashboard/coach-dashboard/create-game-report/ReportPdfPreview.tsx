@@ -75,6 +75,10 @@ interface ReportPdfPreviewProps {
   isPlayer?: boolean;
   coachFeedback?: string;
   isSubmitting?: boolean;
+  /** Generate and download the PDF as soon as the report has rendered (used for off-screen export). */
+  autoDownload?: boolean;
+  /** Called after an auto-download finishes (successfully or not). */
+  onAutoDownloadDone?: () => void;
 }
 const ReportPdfPreview = ({
   formData,
@@ -87,7 +91,9 @@ const ReportPdfPreview = ({
   viewOnly,
   isPlayer,
   coachFeedback,
-  isSubmitting
+  isSubmitting,
+  autoDownload,
+  onAutoDownloadDone,
 }: ReportPdfPreviewProps) => {
   const previewRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -383,8 +389,29 @@ const ReportPdfPreview = ({
       // Restore original getComputedStyle
       window.getComputedStyle = originalGetComputedStyle;
       setDownloading(false);
+      if (autoDownload) onAutoDownloadDone?.();
     }
   };
+
+  // Off-screen export: download once, after fonts are ready and the layout has settled.
+  const downloadRef = useRef(handleDownloadPdf);
+  useEffect(() => {
+    downloadRef.current = handleDownloadPdf;
+  });
+  const autoDownloadStarted = useRef(false);
+  useEffect(() => {
+    if (!autoDownload || autoDownloadStarted.current) return;
+    autoDownloadStarted.current = true;
+    (async () => {
+      try {
+        await document.fonts?.ready;
+      } catch {
+        // ignore
+      }
+      await new Promise((r) => setTimeout(r, 300));
+      downloadRef.current();
+    })();
+  }, [autoDownload]);
   return (
     <div className="space-y-8 pb-12 animate-in fade-in duration-500 max-w-4xl mx-auto">
       <div className="flex flex-col gap-2">
@@ -543,11 +570,13 @@ const ReportPdfPreview = ({
                       <div className="flex size-35 cursor-help flex-col items-center justify-center gap-1 rounded-full border-2 border-dashed border-slate-300 p-4 text-center">
                         <IconInfoCircle size={18} className="text-slate-400" />
                         <span className="text-[9px] font-bold uppercase text-slate-500 font-orbitron">
-                          Category ratings available after submit
+                          {overallRating === null ? "Category ratings available after submit" : "Category ratings not available"}
                         </span>
                       </div>
                     </TooltipTrigger>
-                    <TooltipContent>{AFTER_SUBMIT_HINT}</TooltipContent>
+                    <TooltipContent>
+                      {overallRating === null ? AFTER_SUBMIT_HINT : "This report has no category ratings."}
+                    </TooltipContent>
                   </Tooltip>
                 )}
               </div>

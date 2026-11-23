@@ -11,13 +11,14 @@ import { useGetMyAcademyHomepageQuery } from "@/redux/features/academy/academyAp
 import { useGetMyGameReportsQuery } from "@/redux/features/player/playerApi";
 import { usePlayer } from "@/hooks/usePlayer";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const RightSideContent = () => {
   const router = useRouter();
   const { cvData } = usePlayer();
   const { data: subscriptionResponse } = useGetMySubscriptionQuery();
   const { data: academyHomepageResponse } = useGetMyAcademyHomepageQuery();
-  const { data: gameReportsResponse } = useGetMyGameReportsQuery({ page: 1, limit: 5 });
+  const { data: gameReportsResponse, isLoading: isGameReportsLoading } = useGetMyGameReportsQuery({ page: 1, limit: 5 });
 
   const affiliatedAcademy = academyHomepageResponse?.data?.academyInfo;
   const hasActiveSubscription = Boolean(subscriptionResponse?.data?.hasActiveSubscription);
@@ -200,7 +201,11 @@ const RightSideContent = () => {
         </div>
 
         <div className="flex flex-col gap-3">
-          {gameReports.map((report: any) => (
+          {isGameReportsLoading &&
+            Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-12 rounded-xl bg-white/5" />
+            ))}
+          {!isGameReportsLoading && gameReports.map((report: any) => (
             <div
               key={report.id}
               onClick={() => router.push("/dashboard/player/game-reports")}
@@ -217,7 +222,7 @@ const RightSideContent = () => {
               </span>
             </div>
           ))}
-          {gameReports.length === 0 && (
+          {!isGameReportsLoading && gameReports.length === 0 && (
             <p className="text-gray-500 text-xs italic text-center py-2">
               No recent game reports available.
             </p>

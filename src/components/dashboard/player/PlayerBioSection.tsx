@@ -28,6 +28,10 @@ const PlayerBioSection = () => {
     cvData?.coverImage ||
     "/placeholder_img.jpg";
 
+  // The player's own photo only — no stock image when there isn't one.
+  const playerImageSrc =
+    typeof playerData.playerImage === "string" ? playerData.playerImage : playerData.playerImage?.src || "";
+
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -129,15 +133,17 @@ const PlayerBioSection = () => {
         <div className="absolute inset-0 bg-linear-to-r from-black via-black/80 md:via-transparent to-transparent z-10" />
 
         {/* Player Image absolute overlay - Full height aligned to the bottom right */}
-        <div className="absolute right-0 bottom-0 h-full w-[60%] sm:w-[50%] md:w-[55%] flex items-end justify-end pointer-events-none opacity-25 sm:opacity-40 md:opacity-100 z-10">
-          <Image
-            src={typeof playerData.playerImage === 'string' ? playerData.playerImage : (playerData.playerImage?.src || "/ronaldo.png")}
-            alt={playerData.fullName}
-            className="h-[85%] md:h-full object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.9)]"
-            width={500}
-            height={500}
-          />
-        </div>
+        {playerImageSrc && (
+          <div className="absolute right-0 bottom-0 h-full w-[60%] sm:w-[50%] md:w-[55%] flex items-end justify-end pointer-events-none opacity-25 sm:opacity-40 md:opacity-100 z-10">
+            <Image
+              src={playerImageSrc}
+              alt={playerData.fullName}
+              className="h-[85%] md:h-full object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.9)]"
+              width={500}
+              height={500}
+            />
+          </div>
+        )}
 
         {/* Content Container */}
         <div className="relative z-20 flex items-center w-full">

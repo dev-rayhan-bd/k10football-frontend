@@ -24,6 +24,7 @@ export const usePlayer = () => {
   const dispatch = useAppDispatch();
   const players = useAppSelector((state) => state.player.players);
   const selectedPlayerId = useAppSelector((state) => state.player.selectedPlayerId);
+  const syncedFromApi = useAppSelector((state) => state.player.syncedFromApi);
   const playerData = players.find((p) => p.id === selectedPlayerId) || players[0];
 
   const hasToken =
@@ -694,6 +695,15 @@ export const usePlayer = () => {
       (playerData as any).documents ||
       [],
     isLoading: isCvLoading || isCvFetching || isProfileLoading || isProfileFetching,
+    /**
+     * First load of the signed-in player's own data. While true, `playerData`
+     * still holds built-in sample data — render skeletons, never the values.
+     * (Unlike `isLoading`, background refetches don't flip this back on.)
+     */
+    isInitialLoading:
+      hasToken &&
+      !isViewingSpecificPlayer &&
+      (isCvLoading || isProfileLoading || (!syncedFromApi && !cvError && !profileError)),
     isUpdating,
     isAddingClub,
     isDeletingClub,

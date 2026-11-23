@@ -367,6 +367,12 @@ export interface PlayerStateItem extends PlayerData {
 export interface PlayerSliceState {
   players: PlayerStateItem[];
   selectedPlayerId: number;
+  /**
+   * True once the signed-in player's real data (GET /players/me or /players/me/cv)
+   * has been synced in. Until then `players` only holds the built-in sample data,
+   * which must never be shown — the UI renders skeletons instead.
+   */
+  syncedFromApi: boolean;
 }
 
 const createMockPlayer = (
@@ -446,6 +452,7 @@ const playersDataList = [
 const initialState: PlayerSliceState = {
   players: playersDataList,
   selectedPlayerId: 1,
+  syncedFromApi: false,
 };
 
 export const playerSlice = createSlice({
@@ -480,6 +487,7 @@ export const playerSlice = createSlice({
     syncFromCvResponse: (state, action: PayloadAction<any>) => {
       const data = action.payload;
       if (!data) return;
+      state.syncedFromApi = true;
       const activePlayer = state.players.find((p) => p.id === state.selectedPlayerId) || state.players[0];
       if (activePlayer) {
         if (data.fullName) activePlayer.fullName = data.fullName;

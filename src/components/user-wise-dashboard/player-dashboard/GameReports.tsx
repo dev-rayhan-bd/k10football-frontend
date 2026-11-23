@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
+import GameReportPdfDownloader from "./GameReportPdfDownloader";
 import Link from "next/link";
 import {
   IconFileText,
   IconStar,
   IconCircleCheck,
+  IconCircleX,
   IconClock,
   IconEye,
   IconDownload,
@@ -67,6 +69,69 @@ const toTenScale = (raw: unknown): number | null => {
 };
 
 /**
+ * Who evaluated the report, from `evaluatedBy` (→ `reportCompletionType` → `evaluator.type`).
+ * Any coach variant (COACH, EXTERNAL_COACH, …) counts as a coach evaluation.
+ */
+const evaluatorTypeView = (...raws: Array<string | null | undefined>) => {
+  const raw = raws.map((v) => String(v ?? "").trim()).find(Boolean) || "";
+  const value = raw.toUpperCase();
+  return {
+    isCoach: value.includes("COACH") || value.includes("SCOUT"),
+    label: value ? value.replace(/_/g, " ") : NA,
+  };
+};
+
+/** A report can be downloaded once it has been submitted (evaluation completed). */
+const canDownloadReport = (r: IGameReportItem) => {
+  const v = String(r.evaluationStatus ?? "").trim().toUpperCase();
+  return v ? v === "COMPLETED" : true;
+};
+
+type StatusTone = "success" | "warning" | "danger" | "muted";
+
+/** Payment status straight from `paymentStatus` (PAID / UNPAID / FREE). */
+const paymentStatusView = (raw?: string | null): { label: string; tone: StatusTone } => {
+  const v = String(raw ?? "").trim().toUpperCase();
+  if (!v) return { label: "N/A", tone: "muted" };
+  if (v === "PAID" || v === "FREE") return { label: v, tone: "success" };
+  if (v === "FAILED" || v === "REFUNDED") return { label: v, tone: "danger" };
+  return { label: v, tone: "warning" };
+};
+
+/** Submission status straight from `evaluationStatus` (COMPLETED / PENDING / UNREQUESTED…). */
+const submissionStatusView = (raw?: string | null): { label: string; tone: StatusTone } => {
+  const v = String(raw ?? "").trim().toUpperCase();
+  if (!v) return { label: "N/A", tone: "muted" };
+  if (v === "COMPLETED") return { label: "SUBMITTED", tone: "success" };
+  if (v === "REJECTED" || v === "DECLINED" || v === "EXPIRED") return { label: v, tone: "danger" };
+  if (v === "UNREQUESTED") return { label: "NOT SUBMITTED", tone: "muted" };
+  return { label: v, tone: "warning" };
+};
+
+const STATUS_TONE_CLASS: Record<StatusTone, string> = {
+  success: "text-green-500",
+  warning: "text-orange-500",
+  danger: "text-red-500",
+  muted: "text-gray-400",
+};
+
+const StatusIndicator = ({ label, tone, compact }: { label: string; tone: StatusTone; compact?: boolean }) => {
+  const Icon = tone === "success" ? IconCircleCheck : tone === "danger" ? IconCircleX : IconClock;
+  return (
+    <div
+      className={cn(
+        "flex items-center",
+        compact ? "w-fit gap-1.5 rounded-md bg-white/5 px-2.5 py-1" : "gap-2",
+        STATUS_TONE_CLASS[tone]
+      )}
+    >
+      <Icon size={compact ? 14 : 16} className="shrink-0" />
+      <span className={cn("font-bold uppercase tracking-wider", compact ? "text-[10px]" : "text-xs")}>{label}</span>
+    </div>
+  );
+};
+
+/**
  * Maps the GET /players/me/game-reports/:reportId response (`data`) to what the
  * detail drawer shows. Uses only fields the API returns; stats and the
  * shot / assist coordinates are intentionally not displayed here.
@@ -76,7 +141,8 @@ const buildDetailView = (r: IGameReportDetail | IGameReportItem | null) => {
   const ev = r.evaluator || {};
   const metrics = r.performanceMetrics;
   const hasScore = typeof r.homeScore === "number" && typeof r.awayScore === "number";
-  const evaluatedBy = pickText(r.evaluatedBy, r.reportCompletionType, ev.type).toUpperCase();
+  const evaluator = evaluatorTypeView(r.evaluatedBy, r.reportCompletionType, ev.type);
+  const evaluatedBy = evaluator.label;
   const categoryRatings = (r as IGameReportDetail).categoryRatings;
 
   return {
@@ -85,7 +151,7 @@ const buildDetailView = (r: IGameReportDetail | IGameReportItem | null) => {
     subtitle: pickText(r.subtitle),
     rating: toTenScale(r.scoutRating ?? r.rating),
     position: pickText(r.position).toUpperCase(),
-    isCoach: evaluatedBy === "COACH",
+    isCoach: evaluator.isCoach,
     evaluatedBy,
     isVerified: r.isProfessionallyVerified === true,
     status: pickText(r.status).toUpperCase(),
@@ -212,17 +278,29 @@ const GameReports = () => {
     setIsOpen(true);
   };
 
+  // Downloads the Player Analysis Profile PDF (same design as the report page),
+  // generated from the saved report — not the backend-generated PDF file.
+  const [downloadingReportId, setDownloadingReportId] = useState<string | null>(null);
+  const finishDownload = useCallback(() => setDownloadingReportId(null), []);
+
   const handleDownload = (e: React.MouseEvent, report: IGameReportItem) => {
     e.stopPropagation();
-    if (report.reportPdfUrl) {
-      window.open(report.reportPdfUrl, "_blank", "noopener,noreferrer");
-    } else {
-      WarningToast("PDF report is not available yet.");
+    if (!canDownloadReport(report)) {
+      WarningToast("This report hasn't been submitted yet.");
+      return;
     }
+    if (downloadingReportId) {
+      WarningToast("A report is already downloading. Please wait.");
+      return;
+    }
+    setDownloadingReportId(report._id);
   };
 
   return (
     <div className="flex flex-col gap-10 pb-16">
+      {downloadingReportId && (
+        <GameReportPdfDownloader key={downloadingReportId} reportId={downloadingReportId} onDone={finishDownload} />
+      )}
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2 sm:px-0">
         <div className="flex flex-col gap-2">
@@ -324,7 +402,8 @@ const GameReports = () => {
                     <th className="pb-6">Amount</th>
                     <th className="pb-6">Approval Date</th>
                     <th className="pb-6">Evaluated By</th>
-                    <th className="pb-6">Status</th>
+                    <th className="pb-6">Payment</th>
+                    <th className="pb-6">Submission</th>
                     <th className="pb-6 text-center">Action</th>
                   </tr>
                 </thead>
@@ -355,12 +434,14 @@ const GameReports = () => {
                           <Skeleton className="h-2.5 w-20 bg-white/5 rounded" />
                         </div>
                       </td>
-                      <td className="py-6">
-                        <div className="flex items-center gap-2">
-                          <Skeleton className="size-4 rounded-full bg-white/10 shrink-0" />
-                          <Skeleton className="h-3 w-14 bg-white/10 rounded" />
-                        </div>
-                      </td>
+                      {[0, 1].map((col) => (
+                        <td key={col} className="py-6">
+                          <div className="flex items-center gap-2">
+                            <Skeleton className="size-4 rounded-full bg-white/10 shrink-0" />
+                            <Skeleton className="h-3 w-14 bg-white/10 rounded" />
+                          </div>
+                        </td>
+                      ))}
                       <td className="py-6">
                         <div className="flex items-center justify-center gap-4">
                           <Skeleton className="size-5 rounded bg-white/10" />
@@ -436,19 +517,23 @@ const GameReports = () => {
                     <th className="pb-6">Amount</th>
                     <th className="pb-6">Approval Date</th>
                     <th className="pb-6">Evaluated By</th>
-                    <th className="pb-6">Status</th>
+                    <th className="pb-6">Payment</th>
+                    <th className="pb-6">Submission</th>
                     <th className="pb-6 text-center">Action</th>
                   </tr>
                 </thead>
                 <tbody className="text-sm font-medium">
                   {filteredReports.map((item) => {
-                    const isPaid = item.status?.toUpperCase() === "PAID";
                     const ratingValue = item.scoutRating ?? item.rating ?? 0;
                     const reportTitle = item.report || (item.awayTeam ? `vs ${item.awayTeam}` : item.title);
                     const amountText = item.amount || (item.amountNumber !== undefined ? `$ ${item.amountNumber.toFixed(2)}` : NA);
                     const dateText = item.approvalDate || item.date || "N/A";
-                    const evaluatedBy = (item.evaluatedBy || item.reportCompletionType || item.evaluator?.type || "SELF").toUpperCase();
-                    const isCoachEvaluated = evaluatedBy === "COACH";
+                    const { label: evaluatedBy, isCoach: isCoachEvaluated } = evaluatorTypeView(
+                      item.evaluatedBy,
+                      item.reportCompletionType,
+                      item.evaluator?.type
+                    );
+                    
 
                     return (
                       <tr
@@ -482,12 +567,12 @@ const GameReports = () => {
                               {isCoachEvaluated ? (
                                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#00FF62]/10 text-[#00FF62] border border-[#00FF62]/20 font-orbitron">
                                   <IconUserCheck size={12} stroke={2} />
-                                  COACH
+                                  {evaluatedBy}
                                 </span>
                               ) : (
                                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/5 text-gray-300 border border-white/10 font-orbitron">
                                   <IconUser size={12} stroke={1.8} />
-                                  SELF
+                                  {evaluatedBy}
                                 </span>
                               )}
                             </div>
@@ -499,17 +584,10 @@ const GameReports = () => {
                           </div>
                         </td>
                         <td className="py-6">
-                          <div
-                            className={cn(
-                              "flex items-center gap-2",
-                              isPaid ? "text-green-500" : "text-orange-500"
-                            )}
-                          >
-                            {isPaid ? <IconCircleCheck size={16} /> : <IconClock size={16} />}
-                            <span className="text-xs font-bold uppercase tracking-wider">
-                              {item.status}
-                            </span>
-                          </div>
+                          <StatusIndicator {...paymentStatusView(item.paymentStatus)} />
+                        </td>
+                        <td className="py-6">
+                          <StatusIndicator {...submissionStatusView(item.evaluationStatus)} />
                         </td>
                         <td className="py-6">
                           <div className="flex items-center justify-center gap-4">
@@ -522,15 +600,20 @@ const GameReports = () => {
                             </button>
                             <button
                               onClick={(e) => handleDownload(e, item)}
-                              title={item.reportPdfUrl ? "Download PDF" : "Download (Not Available)"}
+                              disabled={downloadingReportId === item._id}
+                              title={canDownloadReport(item) ? "Download PDF" : "Not submitted yet"}
                               className={cn(
                                 "transition-colors cursor-pointer",
-                                item.reportPdfUrl
+                                canDownloadReport(item)
                                   ? "text-white hover:text-gray-300"
                                   : "text-white/40 hover:text-white/60"
                               )}
                             >
-                              <IconDownload size={18} stroke={1.5} />
+                              {downloadingReportId === item._id ? (
+                                <IconLoader2 size={18} stroke={1.5} className="animate-spin" />
+                              ) : (
+                                <IconDownload size={18} stroke={1.5} />
+                              )}
                             </button>
                           </div>
                         </td>
@@ -544,13 +627,16 @@ const GameReports = () => {
             {/* Mobile Cards */}
             <div className="flex flex-col gap-4 lg:hidden">
               {filteredReports.map((item) => {
-                const isPaid = item.status?.toUpperCase() === "PAID";
                 const ratingValue = item.scoutRating ?? item.rating ?? 0;
                 const reportTitle = item.report || (item.awayTeam ? `vs ${item.awayTeam}` : item.title);
                 const amountText = item.amount || (item.amountNumber !== undefined ? `$ ${item.amountNumber.toFixed(2)}` : NA);
                 const dateText = item.approvalDate || item.date || "N/A";
-                const evaluatedBy = (item.evaluatedBy || item.reportCompletionType || item.evaluator?.type || "SELF").toUpperCase();
-                const isCoachEvaluated = evaluatedBy === "COACH";
+                const { label: evaluatedBy, isCoach: isCoachEvaluated } = evaluatorTypeView(
+                      item.evaluatedBy,
+                      item.reportCompletionType,
+                      item.evaluator?.type
+                    );
+                
 
                 return (
                   <div
@@ -578,7 +664,7 @@ const GameReports = () => {
                       </div>
                     </div>
 
-                    <div className="relative z-10 grid grid-cols-3 gap-2 pt-3 border-t border-white/10">
+                    <div className="relative z-10 grid grid-cols-2 gap-x-2 gap-y-3 pt-3 border-t border-white/10">
                       <div className="flex flex-col gap-0.5">
                         <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Amount</span>
                         <span className="text-gray-300 text-sm font-bold">{amountText}</span>
@@ -602,17 +688,13 @@ const GameReports = () => {
                           </span>
                         )}
                       </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Payment</span>
+                        <StatusIndicator compact {...paymentStatusView(item.paymentStatus)} />
+                      </div>
                       <div className="flex flex-col gap-1 items-end">
-                        <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Status</span>
-                        <div
-                          className={cn(
-                            "flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/5",
-                            isPaid ? "text-green-500" : "text-orange-500"
-                          )}
-                        >
-                          {isPaid ? <IconCircleCheck size={14} /> : <IconClock size={14} />}
-                          <span className="text-[10px] font-bold uppercase tracking-wider">{item.status}</span>
-                        </div>
+                        <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Submission</span>
+                        <StatusIndicator compact {...submissionStatusView(item.evaluationStatus)} />
                       </div>
                     </div>
 
@@ -628,7 +710,11 @@ const GameReports = () => {
                         onClick={(e) => handleDownload(e, item)}
                         className="flex-1 sm:flex-none flex justify-center items-center gap-2 px-4 py-2.5 rounded-lg bg-white/5 text-white hover:bg-white/10 text-xs font-bold uppercase transition-colors cursor-pointer min-w-0"
                       >
-                        <IconDownload size={16} />
+                        {downloadingReportId === item._id ? (
+                          <IconLoader2 size={16} className="animate-spin" />
+                        ) : (
+                          <IconDownload size={16} />
+                        )}
                         Save
                       </button>
                     </div>
@@ -764,12 +850,12 @@ const GameReports = () => {
                     {detail.isCoach ? (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#00FF62]/10 text-[#00FF62] border border-[#00FF62]/20 font-orbitron">
                         <IconUserCheck size={12} stroke={2} />
-                        Coach
+                        {detail.evaluatedBy}
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/5 text-gray-300 border border-white/10 font-orbitron">
                         <IconUser size={12} stroke={1.8} />
-                        {detail.evaluatedBy !== NA ? detail.evaluatedBy : "Self"}
+                        {detail.evaluatedBy}
                       </span>
                     )}
                     <span
