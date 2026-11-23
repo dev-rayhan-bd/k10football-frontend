@@ -9,6 +9,7 @@ import { IconDownload, IconCheck, IconLoader2 } from "@tabler/icons-react";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import { GK_SLIDE_1, OUTFIELD_SLIDES, GK_SLIDE_4 } from "./MatchStatisticsForm";
 
 const NA = "N/A";
@@ -172,22 +173,111 @@ const ReportPdfPreview = ({
     { label: "FOOT", value: show(formData.foot) },
   ];
 
-  const matchDetails = [
+  const scoreText = (v: unknown) =>
+    v === undefined || v === null || String(v).trim() === "" ? NA : String(v);
+
+  const matchResultText = (() => {
+    const raw = String(formData?.matchResult ?? "").trim();
+    if (raw) return raw;
+    const own = String(formData?.ownTeam ?? "").trim();
+    const opp = String(formData?.opponentTeam ?? "").trim();
+    return own && opp
+      ? `${own} ${formData.homeScore ?? 0} X ${formData.awayScore ?? 0} ${opp}`
+      : NA;
+  })();
+
+  const weatherText = (() => {
+    const weather = String(formData?.weather ?? "").trim();
+    const temp = String(formData?.temperature ?? "").trim();
+    const parts = [weather, temp ? `${temp}°C` : ""].filter(Boolean);
+    return parts.length ? parts.join(" / ") : NA;
+  })();
+
+  // 3-column grid: rows of 3, last row = weather + match result (spans 2).
+  const matchDetails: Array<{ label: string; value: string; wide?: boolean }> = [
     { label: "SCOUT NAME", value: show(formData.scoutName) },
     { label: "GAME DATE", value: show(formData.gameDate) },
     { label: "GAME TYPE", value: show(formData.gameType) },
+    { label: "GAME LOCATION", value: show(formData.gameLocation) },
+    { label: "HOME SCORE", value: scoreText(formData.homeScore) },
+    { label: "AWAY SCORE", value: scoreText(formData.awayScore) },
+    { label: "WEATHER / TEMPERATURE", value: weatherText },
+    { label: "MATCH RESULT", value: matchResultText, wide: true },
   ];
   const playerImageSrc = formData?.playerImage || "/profile_placeholder.png";
+
+  // html2canvas drops cross-origin images that lack CORS headers (e.g. S3 photos),
+  // leaving an empty card in the PDF. Load remote photos as a data URL through
+  // Next's same-origin image route so the exported PDF always contains the photo.
+  const [inlinedImage, setInlinedImage] = useState<{ src: string; data: string } | null>(null);
+  useEffect(() => {
+    const src = playerImageSrc;
+    if (!/^https?:\/\//i.test(src)) return;
+    let cancelled = false;
+
+    const toDataUrl = async (url: string): Promise<string> => {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(blob);
+      });
+    };
+
+    (async () => {
+      const candidates = [`/_next/image?url=${encodeURIComponent(src)}&w=384&q=90`, src];
+      for (const url of candidates) {
+        try {
+          const data = await toDataUrl(url);
+          if (!cancelled) setInlinedImage({ src, data });
+          return;
+        } catch {
+          // try the next candidate
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [playerImageSrc]);
+
+  const cardImageSrc =
+    inlinedImage && inlinedImage.src === playerImageSrc ? inlinedImage.data : playerImageSrc;
   const handleDownloadPdf = async () => {
     if (!previewRef.current) return;
     setDownloading(true);
     const toastId = toast.loading("Generating PDF report... Please wait.");
 
-    // Save original getComputedStyle and create dummy div to convert modern colors (oklch, lab, etc.)
+    // html2canvas can't parse modern colour functions (oklch/lab…) that Tailwind v4 uses.
+    // Convert them to rgba by painting a 1×1 canvas pixel and reading it back — this works
+    // even where getComputedStyle returns the oklch() string unchanged (newer Chrome),
+    // which previously made every such colour fall back to black.
     const originalGetComputedStyle = window.getComputedStyle;
-    const dummy = document.createElement("div");
-    dummy.style.display = "none";
-    document.body.appendChild(dummy);
+    const colorCanvas = document.createElement("canvas");
+    colorCanvas.width = 1;
+    colorCanvas.height = 1;
+    const colorCtx = colorCanvas.getContext("2d", { willReadFrequently: true });
+    const colorCache = new Map<string, string>();
+
+    const toRgba = (color: string): string => {
+      const cached = colorCache.get(color);
+      if (cached) return cached;
+      let result = "rgba(0, 0, 0, 0)";
+      if (colorCtx) {
+        colorCtx.clearRect(0, 0, 1, 1);
+        colorCtx.fillStyle = "rgba(0, 0, 0, 0)";
+        colorCtx.fillStyle = color;
+        colorCtx.fillRect(0, 0, 1, 1);
+        const [r, g, b, a] = colorCtx.getImageData(0, 0, 1, 1).data;
+        result = `rgba(${r}, ${g}, ${b}, ${Number((a / 255).toFixed(3))})`;
+      }
+      colorCache.set(color, result);
+      return result;
+    };
 
     const convertModernColor = (value: string) => {
       if (typeof value !== "string") return value;
@@ -201,14 +291,9 @@ const ReportPdfPreview = ({
       }
       return value.replace(/(oklch|oklab|lab|lch)\([^)]+\)/g, (match) => {
         try {
-          dummy.style.color = match;
-          const resolved = originalGetComputedStyle(dummy).color;
-          if (resolved && (resolved.startsWith("rgb") || resolved.startsWith("#"))) {
-            return resolved;
-          }
-          return "rgb(0, 0, 0)";
+          return toRgba(match);
         } catch {
-          return "rgb(0, 0, 0)";
+          return "rgba(0, 0, 0, 0)";
         }
       });
     };
@@ -272,9 +357,6 @@ const ReportPdfPreview = ({
     } finally {
       // Restore original getComputedStyle
       window.getComputedStyle = originalGetComputedStyle;
-      if (dummy.parentNode) {
-        dummy.parentNode.removeChild(dummy);
-      }
       setDownloading(false);
     }
   };
@@ -348,7 +430,7 @@ const ReportPdfPreview = ({
                   {/* Player image in FUT Card */}
                   <div className="w-24 h-28 overflow-hidden relative mt-1 flex items-end justify-center">
                     <Image
-                      src={playerImageSrc}
+                      src={cardImageSrc}
                       alt="Player Card Image"
                       className="h-full object-contain"
                       onError={(e) => {
@@ -391,7 +473,7 @@ const ReportPdfPreview = ({
               </div>
               <div className="grid grid-cols-3 gap-x-8 gap-y-2.5 text-[11px] font-medium text-slate-600 pl-2">
                 {matchDetails.map((field) => (
-                  <div key={field.label} className="min-w-0">
+                  <div key={field.label} className={cn("min-w-0", field.wide && "col-span-2")}>
                     <span className="font-bold text-slate-950 font-orbitron">{field.label}:</span>
                     <p className="mt-0.5 text-slate-700 font-bold uppercase break-words">{field.value}</p>
                   </div>

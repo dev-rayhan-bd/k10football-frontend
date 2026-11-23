@@ -250,6 +250,9 @@ interface MatchStatisticsFormProps {
   setCoachFeedback?: (val: string) => void;
   onCancel: () => void;
   onSubmit: () => void;
+  /** The player's own photo (profile / card image). */
+  playerImage?: string;
+  playerName?: string;
 }
 
 const MatchStatisticsForm = ({
@@ -265,7 +268,9 @@ const MatchStatisticsForm = ({
   coachFeedback,
   setCoachFeedback,
   onCancel,
-  onSubmit
+  onSubmit,
+  playerImage,
+  playerName,
 }: MatchStatisticsFormProps) => {
   const searchParams = useSearchParams();
   const urlPosition = searchParams?.get("position");
@@ -859,29 +864,18 @@ const MatchStatisticsForm = ({
             </div>
 
             <div className="hidden lg:flex lg:col-span-6 justify-center items-center h-full relative min-h-125 sticky top-28 self-start">
-              {isGK ? (
-                <Image
-                  src="/mini__GP15525.webp"
-                  alt="Goalkeeper"
-                  className="h-130 object-contain drop-shadow-[0_25px_50px_rgba(0,0,0,0.9)] select-none pointer-events-none"
-                  width={500}
-                  height={500}
-                  onError={(e) => {
-                    e.currentTarget.src = "/pngegg.png";
-                  }}
-                />
-              ) : (
-                <Image
-                  src="/sergio-ramos.png"
-                  alt="Sergio Ramos"
-                  className="h-130 object-contain drop-shadow-[0_25px_50px_rgba(0,0,0,0.9)] select-none pointer-events-none"
-                  width={500}
-                  height={500}
-                  onError={(e) => {
-                    e.currentTarget.src = "/ronaldo.png";
-                  }}
-                />
-              )}
+              {/* The player's own photo (falls back to a neutral placeholder) */}
+              <Image
+                src={playerImage || "/profile_placeholder.png"}
+                alt={playerName ? `${playerName}` : "Player"}
+                className="max-h-130 w-auto max-w-full rounded-3xl object-contain drop-shadow-[0_25px_50px_rgba(0,0,0,0.9)] select-none pointer-events-none"
+                width={500}
+                height={500}
+                unoptimized
+                onError={(e) => {
+                  e.currentTarget.src = "/profile_placeholder.png";
+                }}
+              />
             </div>
 
             <div className="lg:col-span-3 flex flex-col gap-4 z-20 items-end">

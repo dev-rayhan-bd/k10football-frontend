@@ -37,26 +37,98 @@ import {
   useGetMyGameReportsQuery,
   useGetMyGameReportByIdQuery,
 } from "@/redux/features/player/playerApi";
-import { IGameReportItem } from "@/types/player.type";
+import { IGameReportDetail, IGameReportItem } from "@/types/player.type";
 import { WarningToast } from "@/helpers/ValidationHelper";
 
-const DETAIL_STAT_LABELS: Array<{ key: string; label: string }> = [
-  { key: "shotsOnGoal", label: "Shots on Goal" },
-  { key: "goalScored", label: "Goals Scored" },
-  { key: "assists", label: "Assists" },
-  { key: "passAccurate", label: "Accurate Passes" },
-  { key: "wrongPass", label: "Wrong Passes" },
-  { key: "standTackle", label: "Standing Tackles" },
-  { key: "slidingTackle", label: "Sliding Tackles" },
-  { key: "interception", label: "Interceptions" },
-  { key: "freeKick", label: "Free Kicks" },
-  { key: "cornerKick", label: "Corner Kicks" },
-  { key: "penaltiesTaken", label: "Penalties" },
-  { key: "fault", label: "Fouls" },
-  { key: "yellowCard", label: "Yellow Cards" },
-  { key: "redCard", label: "Red Cards" },
-  { key: "savesAccurate", label: "Saves" },
-];
+const NA = "N/A";
+
+/** First non-empty value, or "N/A". */
+const pickText = (...vals: unknown[]): string => {
+  for (const v of vals) {
+    if (v !== undefined && v !== null && String(v).trim() !== "") return String(v).trim();
+  }
+  return NA;
+};
+
+const formatDate = (raw?: string | null): string => {
+  if (!raw) return NA;
+  const d = new Date(raw);
+  if (isNaN(d.getTime())) return raw;
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+};
+
+const yesNo = (v: unknown): string => (v === true ? "Yes" : v === false ? "No" : NA);
+
+/** Ratings may be stored on a 10 or 100 scale — display on a 10 scale. */
+const toTenScale = (raw: unknown): number | null => {
+  const n = Number(raw);
+  if (raw === undefined || raw === null || isNaN(n)) return null;
+  return n > 10 ? n / 10 : n;
+};
+
+/**
+ * Maps the GET /players/me/game-reports/:reportId response (`data`) to what the
+ * detail drawer shows. Uses only fields the API returns; stats and the
+ * shot / assist coordinates are intentionally not displayed here.
+ */
+const buildDetailView = (r: IGameReportDetail | IGameReportItem | null) => {
+  if (!r) return null;
+  const ev = r.evaluator || {};
+  const metrics = r.performanceMetrics;
+  const hasScore = typeof r.homeScore === "number" && typeof r.awayScore === "number";
+  const evaluatedBy = pickText(r.evaluatedBy, r.reportCompletionType, ev.type).toUpperCase();
+  const categoryRatings = (r as IGameReportDetail).categoryRatings;
+
+  return {
+    id: String(r._id || ""),
+    title: pickText(r.title, r.report),
+    subtitle: pickText(r.subtitle),
+    rating: toTenScale(r.scoutRating ?? r.rating),
+    position: pickText(r.position).toUpperCase(),
+    isCoach: evaluatedBy === "COACH",
+    evaluatedBy,
+    isVerified: r.isProfessionallyVerified === true,
+    status: pickText(r.status).toUpperCase(),
+    reportPdfUrl: r.reportPdfUrl || null,
+    scoutAnalysis: pickText(r.scoutAnalysis),
+    matchFields: [
+      { label: "Position", value: pickText(r.position).toUpperCase() },
+      { label: "Date", value: formatDate(r.date || r.approvalDate || null) },
+      { label: "League", value: pickText(r.league).toUpperCase() },
+      { label: "Score", value: hasScore ? `${r.homeScore} - ${r.awayScore}` : pickText(r.score) },
+      { label: "Home Score", value: pickText(r.homeScore) },
+      { label: "Away Score", value: pickText(r.awayScore) },
+    ],
+    evaluationFields: [
+      { label: "Evaluated By", value: evaluatedBy },
+      { label: "Completion Type", value: pickText(r.reportCompletionType).toUpperCase() },
+      { label: "Evaluator Name", value: pickText(r.evaluatorName, ev.name) },
+      { label: "Evaluator Role", value: pickText(r.evaluatorRole, ev.role).toUpperCase() },
+      { label: "Evaluator Email", value: pickText(r.evaluatorEmail, ev.email) },
+      { label: "Club / Organisation", value: pickText(ev.clubOrOrg) },
+      { label: "Author Name", value: pickText(r.authorName) },
+      { label: "Author Role", value: pickText(r.authorRole).toUpperCase() },
+      { label: "Professionally Verified", value: yesNo(r.isProfessionallyVerified ?? ev.isProfessionallyVerified) },
+      { label: "External Coach", value: yesNo(r.isExternalCoach ?? ev.isExternal) },
+      { label: "Via Access Link", value: yesNo(r.evaluatedViaAccessLink ?? ev.evaluatedViaAccessLink) },
+    ],
+    metrics: [
+      { label: "Goals", value: metrics?.goals },
+      { label: "Assists", value: metrics?.assists },
+      { label: "Passes", value: metrics?.passes },
+    ].map((m) => ({ ...m, value: typeof m.value === "number" ? String(m.value) : NA })),
+    categoryRatings: categoryRatings
+      ? Object.entries(categoryRatings)
+          .filter(([, v]) => typeof v === "number")
+          .map(([label, v]) => ({ label, value: toTenScale(v) ?? 0 }))
+      : [],
+    paymentFields: [
+      { label: "Status", value: pickText(r.status).toUpperCase() },
+      { label: "Payment Status", value: pickText(r.paymentStatus).toUpperCase() },
+    ],
+    reportCode: pickText(r.reportId, r._id ? `#${String(r._id).slice(-6).toUpperCase()}` : ""),
+  };
+};
 
 const GameReports = () => {
   const router = useRouter();
@@ -75,14 +147,20 @@ const GameReports = () => {
   const [selectedReport, setSelectedReport] = useState<IGameReportItem | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
+  // Full report from GET /players/me/game-reports/:reportId
   const {
     data: singleReportRes,
     isLoading: isDetailLoading,
     isFetching: isDetailFetching,
+    isError: isDetailError,
+    refetch: refetchDetail,
   } = useGetMyGameReportByIdQuery(selectedReport?._id || "", {
     skip: !selectedReport?._id || !isOpen,
   });
-  const detailReport: any = singleReportRes?.data || selectedReport;
+  const apiDetail: IGameReportDetail | null = singleReportRes?.data ?? null;
+  // Until the detail request resolves, show what the list row already has.
+  const detailReport: IGameReportDetail | IGameReportItem | null = apiDetail || selectedReport;
+  const detail = buildDetailView(detailReport);
 
   const reports: IGameReportItem[] = response?.data?.reports || [];
   const meta = response?.data?.meta || response?.data?.pagination;
@@ -367,7 +445,7 @@ const GameReports = () => {
                     const isPaid = item.status?.toUpperCase() === "PAID";
                     const ratingValue = item.scoutRating ?? item.rating ?? 0;
                     const reportTitle = item.report || (item.awayTeam ? `vs ${item.awayTeam}` : item.title);
-                    const amountText = item.amount || (item.amountNumber !== undefined ? `$ ${item.amountNumber.toFixed(2)}` : "$ 6.99");
+                    const amountText = item.amount || (item.amountNumber !== undefined ? `$ ${item.amountNumber.toFixed(2)}` : NA);
                     const dateText = item.approvalDate || item.date || "N/A";
                     const evaluatedBy = (item.evaluatedBy || item.reportCompletionType || item.evaluator?.type || "SELF").toUpperCase();
                     const isCoachEvaluated = evaluatedBy === "COACH";
@@ -469,7 +547,7 @@ const GameReports = () => {
                 const isPaid = item.status?.toUpperCase() === "PAID";
                 const ratingValue = item.scoutRating ?? item.rating ?? 0;
                 const reportTitle = item.report || (item.awayTeam ? `vs ${item.awayTeam}` : item.title);
-                const amountText = item.amount || (item.amountNumber !== undefined ? `$ ${item.amountNumber.toFixed(2)}` : "$ 6.99");
+                const amountText = item.amount || (item.amountNumber !== undefined ? `$ ${item.amountNumber.toFixed(2)}` : NA);
                 const dateText = item.approvalDate || item.date || "N/A";
                 const evaluatedBy = (item.evaluatedBy || item.reportCompletionType || item.evaluator?.type || "SELF").toUpperCase();
                 const isCoachEvaluated = evaluatedBy === "COACH";
@@ -648,10 +726,10 @@ const GameReports = () => {
         )}
       </div>
 
-      {/* Report Detail Drawer (backed by GET /players/me/game-reports/:reportId) */}
+      {/* Report Detail Drawer — all data from GET /players/me/game-reports/:reportId */}
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent className="bg-black border-white/10 p-5 text-white sm:max-w-xl overflow-y-auto">
-          {(isDetailLoading || isDetailFetching) && !singleReportRes?.data ? (
+          {(isDetailLoading || isDetailFetching) && !apiDetail ? (
             <div className="flex flex-col gap-5 pt-6">
               <div className="flex items-center gap-2 text-xs text-gray-400 font-orbitron">
                 <IconLoader2 size={16} className="animate-spin text-red-500" />
@@ -662,190 +740,200 @@ const GameReports = () => {
               <Skeleton className="h-28 w-full bg-white/5 rounded-2xl" />
               <Skeleton className="h-36 w-full bg-white/5 rounded-2xl" />
             </div>
-          ) : detailReport ? (
+          ) : isDetailError && !apiDetail ? (
+            <div className="flex flex-col items-center justify-center gap-4 pt-20 text-center">
+              <SheetTitle className="text-lg font-bold text-white">Could not load this report</SheetTitle>
+              <SheetDescription className="text-sm text-gray-400">
+                Something went wrong while fetching the game report.
+              </SheetDescription>
+              <button
+                onClick={() => refetchDetail()}
+                className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold uppercase tracking-wider cursor-pointer"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : detail ? (
             <>
-              <SheetHeader className="mb-8">
-                <div className="flex items-center justify-between">
-                  <Badge className="bg-red-600 text-white font-black italic uppercase tracking-tighter">
-                    Game Report Details
-                  </Badge>
-                  <div className="text-right">
-                    <div className="text-4xl font-black text-[#00FF62] italic">
-                      {(() => {
-                        const r = Number(detailReport.scoutRating ?? detailReport.rating ?? 0);
-                        const on10 = r > 10 ? r / 10 : r;
-                        return on10.toFixed(1);
-                      })()}
+              <SheetHeader className="mb-6 p-0">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge className="bg-red-600 text-white font-black italic uppercase tracking-tighter">
+                      Game Report
+                    </Badge>
+                    {detail.isCoach ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#00FF62]/10 text-[#00FF62] border border-[#00FF62]/20 font-orbitron">
+                        <IconUserCheck size={12} stroke={2} />
+                        Coach
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/5 text-gray-300 border border-white/10 font-orbitron">
+                        <IconUser size={12} stroke={1.8} />
+                        {detail.evaluatedBy !== NA ? detail.evaluatedBy : "Self"}
+                      </span>
+                    )}
+                    <span
+                      className={cn(
+                        "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border font-orbitron",
+                        detail.isVerified
+                          ? "bg-[#00FF62]/10 text-[#00FF62] border-[#00FF62]/20"
+                          : "bg-orange-500/10 text-orange-400 border-orange-500/20"
+                      )}
+                    >
+                      {detail.isVerified ? "Verified" : "Unverified"}
+                    </span>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <div className="text-4xl font-black text-[#00FF62] italic leading-none">
+                      {detail.rating !== null ? detail.rating.toFixed(1) : "—"}
                       <span className="text-base text-gray-400 not-italic font-normal">/10</span>
                     </div>
-                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
-                      Scout Rating (10 Scale)
+                    <div className="mt-1 text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+                      Scout Rating
                     </div>
                   </div>
                 </div>
-                <SheetTitle className="text-2xl sm:text-3xl font-black text-white uppercase italic tracking-tighter mt-4 text-left">
-                  {detailReport.title || `${detailReport.homeTeam || ""} vs ${detailReport.awayTeam || ""}`}
+                <SheetTitle className="mt-4 text-left text-2xl sm:text-3xl font-black text-white uppercase italic tracking-tighter break-words">
+                  {detail.title}
                 </SheetTitle>
-                <SheetDescription className="text-gray-500 italic text-left">
-                  {detailReport.subtitle || "Professional Performance Analysis"}
-                </SheetDescription>
+                {detail.subtitle !== NA && (
+                  <SheetDescription className="text-left text-gray-500 italic break-words">
+                    {detail.subtitle}
+                  </SheetDescription>
+                )}
               </SheetHeader>
 
-              <div className="flex flex-col gap-8">
-                {/* Core Info */}
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="flex flex-col gap-1">
-                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Position</div>
-                    <div className="text-lg font-bold text-white uppercase">{detailReport.position || "N/A"}</div>
+              <div className="flex flex-col gap-6">
+                {/* Match Details */}
+                <section className="p-5 rounded-2xl border border-white/10 bg-[#0D0D0D] flex flex-col gap-4">
+                  <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest font-orbitron">
+                    Match Details
+                  </h3>
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                    {detail.matchFields.map((field) => (
+                      <div key={field.label} className="flex min-w-0 flex-col gap-1">
+                        <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{field.label}</span>
+                        <span className="text-sm font-bold text-white break-words">{field.value}</span>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex flex-col gap-1">
-                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Date</div>
-                    <div className="text-lg font-bold text-white uppercase">{detailReport.approvalDate || detailReport.date || "N/A"}</div>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">League</div>
-                    <div className="text-lg font-bold text-white uppercase">{detailReport.league || "N/A"}</div>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Score</div>
-                    <div className="text-lg font-bold text-red-600 italic">
-                      {detailReport.score || `${detailReport.homeScore ?? 0} - ${detailReport.awayScore ?? 0}`}
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-1 col-span-2">
-                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Evaluated By</div>
-                    <div className="flex items-center gap-2 mt-1">
-                      {(detailReport.evaluatedBy || detailReport.reportCompletionType || "SELF").toUpperCase() === "COACH" ? (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-[#00FF62]/10 text-[#00FF62] border border-[#00FF62]/30 font-orbitron">
-                          <IconUserCheck size={14} stroke={2} />
-                          COACH
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white/5 text-gray-300 border border-white/10 font-orbitron">
-                          <IconUser size={14} stroke={1.8} />
-                          SELF
-                        </span>
-                      )}
-                      {(detailReport.evaluatorName || detailReport.evaluator?.name) && (
-                        <span className="text-sm font-bold text-gray-300">
-                          ({detailReport.evaluatorName || detailReport.evaluator?.name})
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                </section>
 
-                {/* Stats Grid */}
-                <div className="p-8 rounded-3xl border border-white/10 bg-[#0D0D0D] flex flex-col gap-6">
-                  <div className="flex items-center gap-3 mb-2">
-                    <IconReportAnalytics size={20} className="text-[#00FF62]" />
-                    <h3 className="text-sm font-black text-white uppercase tracking-widest">Performance Metrics</h3>
+                {/* Performance Metrics */}
+                <section className="p-5 rounded-2xl border border-white/10 bg-[#0D0D0D] flex flex-col gap-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest font-orbitron">
+                      Performance Metrics
+                    </h3>
+                    <IconReportAnalytics size={18} className="shrink-0 text-[#00FF62]" />
                   </div>
-                  <div className="grid grid-cols-3 gap-6">
-                    <div className="text-center">
-                      <div className="text-3xl font-black text-white italic">
-                        {detailReport.performanceMetrics?.goals ?? detailReport.stats?.goalScored ?? 0}
+                  <div className="grid grid-cols-3 gap-2">
+                    {detail.metrics.map((m) => (
+                      <div
+                        key={m.label}
+                        className="flex min-w-0 flex-col items-center gap-1 rounded-xl border border-white/5 bg-white/5 p-3 text-center"
+                      >
+                        <span className="text-2xl font-black text-white italic font-orbitron tabular-nums">{m.value}</span>
+                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{m.label}</span>
                       </div>
-                      <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Goals</div>
-                    </div>
-                    <div className="text-center border-l border-white/5">
-                      <div className="text-3xl font-black text-white italic">
-                        {detailReport.performanceMetrics?.assists ?? detailReport.stats?.assists ?? 0}
-                      </div>
-                      <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Assists</div>
-                    </div>
-                    <div className="text-center border-l border-white/5">
-                      <div className="text-3xl font-black text-white italic">
-                        {detailReport.performanceMetrics?.passes ?? detailReport.stats?.passAccurate ?? 0}
-                      </div>
-                      <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Passes</div>
-                    </div>
+                    ))}
                   </div>
-                </div>
+                </section>
 
                 {/* Category Ratings (10-scale) */}
-                {detailReport.categoryRatings &&
-                  Object.entries(detailReport.categoryRatings).some(([, v]) => typeof v === "number") && (
-                    <div className="p-6 rounded-3xl border border-white/10 bg-[#0D0D0D] flex flex-col gap-4">
-                      <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest font-orbitron">
-                        Category Ratings (10 Scale)
-                      </h3>
-                      <div className="flex flex-col gap-3">
-                        {Object.entries(detailReport.categoryRatings)
-                          .filter(([, v]) => typeof v === "number")
-                          .map(([cat, rawVal]) => {
-                            const n = Number(rawVal);
-                            const on10 = n > 10 ? n / 10 : n;
-                            return (
-                              <div key={cat} className="flex flex-col gap-1">
-                                <div className="flex justify-between text-xs">
-                                  <span className="text-gray-300 capitalize">{cat}</span>
-                                  <span className="font-bold text-white font-orbitron">
-                                    {Number.isInteger(on10) ? `${on10}/10` : `${on10.toFixed(1)}/10`}
-                                  </span>
-                                </div>
-                                <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
-                                  <div
-                                    className="h-full bg-red-600 rounded-full"
-                                    style={{ width: `${Math.min(100, Math.max(0, on10 * 10))}%` }}
-                                  />
-                                </div>
-                              </div>
-                            );
-                          })}
-                      </div>
-                    </div>
-                  )}
-
-                {/* Detailed Match Statistics */}
-                {detailReport.stats &&
-                  DETAIL_STAT_LABELS.some(({ key }) => typeof detailReport.stats[key] === "number" && detailReport.stats[key] > 0) && (
-                    <div className="p-6 rounded-3xl border border-white/10 bg-[#0D0D0D] flex flex-col gap-4">
-                      <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest font-orbitron">
-                        Match Statistics
-                      </h3>
-                      <div className="grid grid-cols-3 gap-3">
-                        {DETAIL_STAT_LABELS.filter(
-                          ({ key }) => typeof detailReport.stats[key] === "number" && detailReport.stats[key] > 0
-                        ).map(({ key, label }) => (
-                          <div key={key} className="bg-white/5 border border-white/5 rounded-xl p-3 text-center">
-                            <div className="text-lg font-black text-white font-orbitron">{detailReport.stats[key]}</div>
-                            <div className="text-[10px] text-gray-400 uppercase">{label}</div>
+                {detail.categoryRatings.length > 0 && (
+                  <section className="p-5 rounded-2xl border border-white/10 bg-[#0D0D0D] flex flex-col gap-4">
+                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest font-orbitron">
+                      Category Ratings (10 Scale)
+                    </h3>
+                    <div className="flex flex-col gap-3">
+                      {detail.categoryRatings.map(({ label, value }) => (
+                        <div key={label} className="flex flex-col gap-1">
+                          <div className="flex justify-between gap-2 text-xs">
+                            <span className="min-w-0 break-words text-gray-300 capitalize">{label}</span>
+                            <span className="shrink-0 font-bold text-white font-orbitron">
+                              {Number.isInteger(value) ? `${value}/10` : `${value.toFixed(1)}/10`}
+                            </span>
                           </div>
-                        ))}
-                      </div>
+                          <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+                            <div
+                              className="h-full bg-red-600 rounded-full"
+                              style={{ width: `${Math.min(100, Math.max(0, value * 10))}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  )}
-
-                {/* Scout Analysis */}
-                <div className="flex flex-col gap-3">
-                  <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Scout Analysis</div>
-                  <p className="text-sm text-gray-400 leading-relaxed italic">
-                    {detailReport.scoutAnalysis ||
-                      detailReport.coachFeedback ||
-                      (detailReport.status?.toUpperCase() === "PAID"
-                        ? "No additional scout comments provided."
-                        : "Analysis pending payment and scout review.")}
-                  </p>
-                </div>
-
-                {/* Action button if PDF available */}
-                {detailReport.reportPdfUrl && (
-                  <button
-                    onClick={(e) => handleDownload(e, detailReport)}
-                    className="w-full py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <IconDownload size={16} />
-                    Download PDF Report
-                  </button>
+                  </section>
                 )}
 
-                {/* Footer Info */}
-                <div className="pt-6 border-t border-white/5 flex justify-between items-center text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                  <span>Report ID: {detailReport.reportId || `#${String(detailReport._id || "").slice(-6).toUpperCase()}`}</span>
-                  <span className={detailReport.status?.toUpperCase() === "PAID" ? "text-green-500" : "text-orange-500"}>
-                    Status: {detailReport.status}
-                  </span>
+                {/* Evaluation */}
+                <section className="p-5 rounded-2xl border border-white/10 bg-[#0D0D0D] flex flex-col gap-4">
+                  <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest font-orbitron">
+                    Evaluation
+                  </h3>
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                    {detail.evaluationFields.map((field) => (
+                      <div key={field.label} className="flex min-w-0 flex-col gap-1">
+                        <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{field.label}</span>
+                        <span className="text-sm font-bold text-white break-words">{field.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Scout Analysis */}
+                <section className="flex flex-col gap-2">
+                  <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Scout Analysis</span>
+                  <p className="text-sm text-gray-300 leading-relaxed italic break-words">
+                    {detail.scoutAnalysis !== NA ? detail.scoutAnalysis : "No scout analysis provided."}
+                  </p>
+                </section>
+
+                {/* Payment */}
+                <section className="p-5 rounded-2xl border border-white/10 bg-[#0D0D0D] flex flex-col gap-4">
+                  <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest font-orbitron">
+                    Payment
+                  </h3>
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                    {detail.paymentFields.map((field) => (
+                      <div key={field.label} className="flex min-w-0 flex-col gap-1">
+                        <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{field.label}</span>
+                        <span
+                          className={cn(
+                            "text-sm font-bold break-words",
+                            field.value === "PAID" ? "text-green-500" : field.value === NA ? "text-white" : "text-orange-500"
+                          )}
+                        >
+                          {field.value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Actions */}
+                <div className="flex">
+                  <button
+                    onClick={() => {
+                      const params = new URLSearchParams({
+                        step: "preview",
+                        reportId: detail.id,
+                        viewOnly: "true",
+                      });
+                      if (detail.position !== NA) params.set("position", detail.position);
+                      router.push(`/dashboard/player/game-reports/create?${params.toString()}`);
+                    }}
+                    className="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <IconEye size={16} />
+                    View Full Report
+                  </button>
+                </div>
+
+                {/* Footer */}
+                <div className="pt-5 border-t border-white/5 text-[10px] font-bold text-gray-500 uppercase tracking-widest break-all">
+                  Report ID: {detail.reportCode}
                 </div>
               </div>
             </>

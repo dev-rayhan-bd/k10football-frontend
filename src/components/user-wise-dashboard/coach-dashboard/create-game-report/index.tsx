@@ -489,66 +489,61 @@ export const CreateGameReportWizard = ({
       return "";
     };
 
-    const pName = pick(pInfo.playerName, apiReport.playerName, pObj.fullName, pObj.name, profile.fullName);
-    const pDob = pick(pInfo.dateOfBirth, pObj.dateOfBirth, pObj.dob, profile.dateOfBirth);
-    const pClub = pick(pInfo.clubName, pObj.currentClub, profile.currentClub);
-    const pPos = pick(pInfo.position, apiReport.position, apiReport.playerPosition, pObj.position, urlPosition, profile.position);
-    const pFoot = pick(pInfo.foot, apiReport.foot, pObj.preferredFoot, profile.preferredFoot);
-    const pWeight = pick(pInfo.weight, apiReport.weight, pObj.weight, profile.weight);
-    const pHeight = pick(pInfo.height, apiReport.height, pObj.height, profile.height);
-    const pImg = pick(
-      pObj.profileImage, pObj.profileImg, pObj.avatar, apiReport.playerAvatar,
-      profile.cardImage, profile.cardPhoto, profile.profileImage, profile.profileImg
-    );
-
-    const scout = pick(apiReport.scoutName, apiReport.evaluatorName, apiReport.evaluator?.name, apiReport.coach?.name, apiReport.authorName);
-    const gDate = formatDateToYMD(pick(apiReport.gameDate, apiReport.date));
-    const gType = pick(apiReport.gameType, apiReport.league);
-    const gLocation = pick(apiReport.gameLocation, apiReport.stadium, apiReport.location);
-    const own = pick(apiReport.ownTeam, apiReport.team1);
-    const opp = pick(apiReport.opponentTeam, apiReport.team2);
-    const hasScore = typeof apiReport.homeScore === "number" && typeof apiReport.awayScore === "number";
-    const mResult = pick(
-      apiReport.matchResult,
-      own && opp && hasScore ? `${own} ${apiReport.homeScore} - ${apiReport.awayScore} ${opp}` : "",
-      own && opp && apiReport.score ? `${own} ${apiReport.score} ${opp}` : ""
-    );
     const rating = apiReport.scoutRating ?? apiReport.rating;
 
-    setFormData(prev => ({
-      ...prev,
-      playerName: pName,
-      dob: pDob ? formatDateToYMD(pDob) : "",
-      clubName: pClub,
-      position: pPos.toUpperCase(),
-      foot: pFoot.toUpperCase(),
-      weight: pWeight,
-      height: pHeight,
-      playerImage: pImg,
-      matchesPlayed: pick(apiReport.matchesPlayed, "1"),
-      // A report is created (before payment) with no minutes yet, so a stored
-      // "00:00"/0 must not overwrite the minutes the user entered in step 2.
-      minutesPlayed: (() => {
-        const stored = formatMinutesPlayed(pick(apiReport.minutesPlayed, apiReport.timePlayedMinutes));
-        return stored !== "00:00" ? stored : prev.minutesPlayed;
-      })(),
-      manOfTheMatch: pick(apiReport.manOfTheMatch),
-      scoutName: scout,
-      gameDate: gDate,
-      gameType: gType.toUpperCase(),
-      gameLocation: gLocation.toUpperCase(),
-      matchResult: mResult,
-      weather: pick(apiReport.weather).toUpperCase(),
-      temperature: pick(apiReport.temperature),
-      opponentTeam: opp,
-      ownTeam: own,
-      homeScore: typeof apiReport.homeScore === "number" ? apiReport.homeScore : prev.homeScore,
-      awayScore: typeof apiReport.awayScore === "number" ? apiReport.awayScore : prev.awayScore,
-      scoutRating: typeof rating === "number" ? rating : undefined,
-      rating: typeof rating === "number" ? rating : undefined,
-    }));
+    // Priority per field: saved report → what the user already entered (draft) → player profile.
+    // The details endpoint may omit some fields, so a missing value never wipes entered data.
+    setFormData(prev => {
+      const own = pick(apiReport.ownTeam, apiReport.team1, prev.ownTeam);
+      const opp = pick(apiReport.opponentTeam, apiReport.team2, prev.opponentTeam);
+      const homeScore = typeof apiReport.homeScore === "number" ? apiReport.homeScore : prev.homeScore;
+      const awayScore = typeof apiReport.awayScore === "number" ? apiReport.awayScore : prev.awayScore;
+      const dob = pick(pInfo.dateOfBirth, pObj.dateOfBirth, pObj.dob, prev.dob, profile.dateOfBirth);
+      const storedMinutes = formatMinutesPlayed(pick(apiReport.minutesPlayed, apiReport.timePlayedMinutes));
 
-    const chars = pInfo.characteristics ?? apiReport.characteristics ?? pObj.playerStyles;
+      return {
+        ...prev,
+        playerName: pick(pInfo.playerName, apiReport.playerName, pObj.fullName, pObj.name, prev.playerName, profile.fullName),
+        dob: dob ? formatDateToYMD(dob) : "",
+        clubName: pick(pInfo.clubName, pObj.currentClub, prev.clubName, profile.currentClub),
+        position: pick(pInfo.position, apiReport.position, apiReport.playerPosition, pObj.position, urlPosition, prev.position, profile.position).toUpperCase(),
+        foot: pick(pInfo.foot, apiReport.foot, pObj.preferredFoot, prev.foot, profile.preferredFoot).toUpperCase(),
+        weight: pick(pInfo.weight, apiReport.weight, pObj.weight, prev.weight, profile.weight),
+        height: pick(pInfo.height, apiReport.height, pObj.height, prev.height, profile.height),
+        playerImage: pick(
+          pObj.cardImage, pObj.profileImage, pObj.profileImg, pObj.avatar, apiReport.playerAvatar,
+          prev.playerImage, profile.cardImage, profile.cardPhoto, profile.profileImage, profile.profileImg
+        ),
+        matchesPlayed: pick(apiReport.matchesPlayed, "1"),
+        // A report is created (before payment) with no minutes yet, so a stored
+        // "00:00"/0 must not overwrite the minutes the user entered in step 2.
+        minutesPlayed: storedMinutes !== "00:00" ? storedMinutes : prev.minutesPlayed,
+        manOfTheMatch: pick(apiReport.manOfTheMatch, prev.manOfTheMatch),
+        scoutName: pick(apiReport.scoutName, prev.scoutName, apiReport.evaluatorName, apiReport.evaluator?.name, apiReport.authorName),
+        gameDate: formatDateToYMD(pick(apiReport.gameDate, apiReport.date, prev.gameDate)),
+        gameType: pick(apiReport.gameType, apiReport.league, prev.gameType).toUpperCase(),
+        gameLocation: pick(apiReport.gameLocation, apiReport.stadium, apiReport.location, prev.gameLocation).toUpperCase(),
+        matchResult: pick(
+          apiReport.matchResult,
+          prev.matchResult,
+          own && opp ? `${own} ${homeScore ?? 0} X ${awayScore ?? 0} ${opp}`.toUpperCase() : ""
+        ),
+        weather: pick(apiReport.weather, prev.weather).toUpperCase(),
+        temperature: pick(apiReport.temperature, prev.temperature),
+        opponentTeam: opp,
+        ownTeam: own,
+        homeScore,
+        awayScore,
+        scoutRating: typeof rating === "number" ? rating : undefined,
+        rating: typeof rating === "number" ? rating : undefined,
+      };
+    });
+
+    // Report's own characteristics first; the details endpoint may omit playerInfo,
+    // so fall back to the player's profile styles.
+    const chars = [pInfo.characteristics, apiReport.characteristics, pObj.playerStyles, profile.playerStyles].find(
+      (c) => Array.isArray(c) && c.length > 0
+    );
     if (Array.isArray(chars)) {
       setCharacteristics(chars.map((c: any) => String(c).toUpperCase()));
     }
@@ -737,6 +732,12 @@ export const CreateGameReportWizard = ({
     const opp = formData.opponentTeam?.trim() || "";
     const gDate = formatDateToYMD(formData.gameDate || "");
     const gType = (formData.gameType || "").trim().toUpperCase();
+    const gLocation = (formData.gameLocation || "").trim().toUpperCase();
+    const weather = (formData.weather || "").trim().toUpperCase();
+    const temperature = toNum(formData.temperature);
+    const matchResult =
+      (formData.matchResult || "").trim().toUpperCase() ||
+      `${own} ${hScore} X ${aScore} ${opp}`.toUpperCase();
     const scoutName =
       scoutNameOverride !== undefined
         ? scoutNameOverride.trim()
@@ -753,8 +754,11 @@ export const CreateGameReportWizard = ({
     if (!scoutName) missing.push("Scout name");
     if (!gType) missing.push("Game type");
     if (!gDate) missing.push("Game date");
+    if (!gLocation) missing.push("Game location");
     if (!own) missing.push("Own team");
     if (!opp) missing.push("Opponent team");
+    if (!weather) missing.push("Weather");
+    if (isNaN(temperature)) missing.push("Temperature");
 
     if (missing.length > 0) {
       toast.error(`Please fill in: ${missing.join(", ")}`);
@@ -776,6 +780,10 @@ export const CreateGameReportWizard = ({
       scoutName,
       gameType: gType,
       gameDate: gDate,
+      gameLocation: gLocation,
+      matchResult,
+      weather,
+      temperature,
       opponentTeam: opp,
       ownTeam: own,
       homeScore: hScore,
@@ -1095,7 +1103,8 @@ export const CreateGameReportWizard = ({
   useEffect(() => {
     // Only pre-fill from the profile for a brand-new report; an existing report
     // is loaded from the database by the effect above.
-    if (myProfileResponse?.data && !playerId && !requestId && !hasApiReport) {
+    // Don't overwrite a restored draft (e.g. returning from Stripe) with profile defaults.
+    if (myProfileResponse?.data && !playerId && !requestId && !hasApiReport && !isRestoredFromDraft.current) {
       const p = myProfileResponse.data;
       const urlPos = searchParams.get("position");
       setFormData(prev => ({
@@ -1142,10 +1151,14 @@ export const CreateGameReportWizard = ({
     }
 
     // The scout is the coach who will complete the report.
+    // Scout name is what the user entered; fall back to the requested coach's name.
     const coachScoutName =
-      coachRequestMode === "custom"
+      formData.scoutName?.trim() ||
+      (coachRequestMode === "custom"
         ? customCoachName.trim()
-        : formData.scoutName?.trim() || (selectedCoachEmail ? selectedCoachEmail.split("@")[0] : "");
+        : selectedCoachEmail
+        ? selectedCoachEmail.split("@")[0]
+        : "");
 
     const basePayload = buildPayload(coachScoutName);
     if (!basePayload) return;
@@ -1263,6 +1276,8 @@ export const CreateGameReportWizard = ({
           setPitchMarkers={setPitchMarkers}
           coachFeedback={coachFeedback}
           setCoachFeedback={setCoachFeedback}
+          playerImage={formData.playerImage}
+          playerName={formData.playerName}
           onCancel={() => {
             if (isCoach) {
               clearDraft();
@@ -1294,7 +1309,7 @@ export const CreateGameReportWizard = ({
               await handleSave(overallRating);
             }
           }}
-          onBack={() => navigateToStep(2)}
+          onBack={() => (viewOnly ? onCancel() : navigateToStep(2))}
           isPlayer={!isCoach}
         />
       )}

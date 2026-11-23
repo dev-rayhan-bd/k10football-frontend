@@ -16,6 +16,51 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useGetAllCoachesQuery } from "@/redux/features/coach/coachApi";
 
+/** Normalises stored dates (YYYY-MM-DD, DD-MM-YYYY, DD/MM/YYYY, ISO) to YYYY-MM-DD for <input type="date">. */
+const toDateInputValue = (raw?: string): string => {
+  if (!raw) return "";
+  const s = String(raw).trim();
+  const ymd = s.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
+  if (ymd) return `${ymd[1]}-${ymd[2].padStart(2, "0")}-${ymd[3].padStart(2, "0")}`;
+  const dmy = s.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/);
+  if (dmy) return `${dmy[3]}-${dmy[2].padStart(2, "0")}-${dmy[1].padStart(2, "0")}`;
+  return "";
+};
+
+const todayISO = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
+/** Native date picker styled like the other inputs; clicking anywhere opens the calendar. */
+const DateField = ({
+  value,
+  onChange,
+  max,
+}: {
+  value?: string;
+  onChange: (val: string) => void;
+  max?: string;
+}) => (
+  <div className="relative">
+    <Input
+      type="date"
+      max={max}
+      value={toDateInputValue(value)}
+      onChange={(e) => onChange(e.target.value)}
+      onClick={(e) => {
+        try {
+          e.currentTarget.showPicker?.();
+        } catch {
+          // showPicker can throw if not triggered by a user gesture; the native control still works
+        }
+      }}
+      className="bg-[#161616] border-white/10 text-white h-12 pr-12 cursor-pointer [color-scheme:dark] focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62] [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-12 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+    />
+    <IconCalendar className="pointer-events-none absolute right-4 top-3.5 text-gray-500" size={18} />
+  </div>
+);
+
 interface ReportDetailsFormProps {
   formData: any;
   setFormData: (data: any) => void;
@@ -101,8 +146,11 @@ const ReportDetailsForm = ({
       Boolean(formData.scoutName?.trim()) &&
       Boolean(formData.gameType?.trim()) &&
       Boolean(formData.gameDate?.trim()) &&
+      Boolean(formData.gameLocation?.trim()) &&
       Boolean(formData.ownTeam?.trim()) &&
       Boolean(formData.opponentTeam?.trim()) &&
+      Boolean(formData.weather?.trim()) &&
+      String(formData.temperature ?? "").trim() !== "" &&
       (reportCompletedBy === "parent" || (reportCompletedBy === "coach" && isCoachSelected))
     );
   };
@@ -146,14 +194,11 @@ const ReportDetailsForm = ({
             </div>
             <div className="space-y-2">
               <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Date of Birth:</Label>
-              <div className="relative">
-                <Input 
-                  className="bg-[#161616] border-white/10 text-white h-12 focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]" 
-                  value={formData.dob}
-                  onChange={(e) => handleChange("dob", e.target.value)}
-                />
-                <IconCalendar className="absolute right-4 top-3.5 text-gray-500" size={18} />
-              </div>
+              <DateField
+                value={formData.dob}
+                max={todayISO()}
+                onChange={(val) => handleChange("dob", val)}
+              />
             </div>
 
             <div className="space-y-2">
@@ -271,15 +316,22 @@ const ReportDetailsForm = ({
 
             <div className="space-y-2">
               <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Game Date:</Label>
-              <div className="relative">
-                <Input 
-                  className="bg-[#161616] border-white/10 text-white h-12 focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]" 
-                  value={formData.gameDate}
-                  onChange={(e) => handleChange("gameDate", e.target.value)}
-                />
-                <IconCalendar className="absolute right-4 top-3.5 text-gray-500" size={18} />
-              </div>
+              <DateField
+                value={formData.gameDate}
+                max={todayISO()}
+                onChange={(val) => handleChange("gameDate", val)}
+              />
             </div>
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Game Location:</Label>
+              <Input
+                className="bg-[#161616] border-white/10 text-white h-12 uppercase font-bold focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]"
+                value={formData.gameLocation || ""}
+                placeholder="e.g. Stadium / City"
+                onChange={(e) => handleChange("gameLocation", e.target.value)}
+              />
+            </div>
+
             <div className="space-y-2">
               <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Own Team:</Label>
               <Input 
@@ -324,6 +376,57 @@ const ReportDetailsForm = ({
                   <span className="absolute right-4 top-3.5 text-gray-500 text-[10px] font-bold uppercase font-orbitron">Away</span>
                 </div>
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Weather / Temperature:</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="relative">
+                  <select
+                    className="w-full bg-[#161616] border border-white/10 text-white h-12 rounded-lg px-4 pr-10 uppercase font-bold appearance-none focus:outline-none focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]"
+                    value={formData.weather || ""}
+                    onChange={(e) => handleChange("weather", e.target.value)}
+                  >
+                    <option value="" disabled>
+                      Select
+                    </option>
+                    <option value="SUNNY">SUNNY</option>
+                    <option value="CLOUDY">CLOUDY</option>
+                    <option value="RAINY">RAINY</option>
+                    <option value="WINDY">WINDY</option>
+                    <option value="SNOWY">SNOWY</option>
+                  </select>
+                  <IconChevronDown className="absolute right-4 top-3.5 text-gray-500 pointer-events-none" size={18} />
+                </div>
+                <div className="relative">
+                  <Input
+                    type="number"
+                    inputMode="numeric"
+                    className="bg-[#161616] border-white/10 text-white h-12 pr-10 font-bold focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]"
+                    value={formData.temperature ?? ""}
+                    placeholder="Temp"
+                    onChange={(e) => handleChange("temperature", e.target.value)}
+                  />
+                  <span className="absolute right-4 top-3.5 text-gray-500 text-xs font-bold font-orbitron">°C</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Match Result:</Label>
+              <Input
+                className="bg-[#161616] border-white/10 text-white h-12 uppercase font-bold focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]"
+                value={formData.matchResult || ""}
+                placeholder={
+                  formData.ownTeam && formData.opponentTeam
+                    ? `${formData.ownTeam} ${formData.homeScore ?? 0} X ${formData.awayScore ?? 0} ${formData.opponentTeam}`.toUpperCase()
+                    : "e.g. MY TEAM 2 X 1 OPPONENT"
+                }
+                onChange={(e) => handleChange("matchResult", e.target.value)}
+              />
+              <p className="text-[10px] text-gray-500">
+                Leave empty to use the teams and score above.
+              </p>
             </div>
           </div>
         </div>

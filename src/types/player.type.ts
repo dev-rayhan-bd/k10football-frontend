@@ -275,10 +275,10 @@ export interface ICreateSelfGameReportPayload {
   scoutName: string;
   gameType: string;
   gameDate: string;
-  gameLocation?: string;
-  matchResult?: string;
-  weather?: string;
-  temperature?: number;
+  gameLocation: string;
+  matchResult: string;
+  weather: string;
+  temperature: number;
   opponentTeam: string;
   ownTeam: string;
   homeScore: number;
@@ -454,6 +454,28 @@ export interface IGameReportItem {
     view?: boolean;
     download?: boolean;
   };
+}
+
+/** GET /players/me/game-reports/:reportId → data */
+export interface IGameReportDetail extends IGameReportItem {
+  categoryRatings?: Record<string, number>;
+  stats?: Record<string, number>;
+  accurateShots?: Array<{ x: number; y: number; target?: string; _id?: string }>;
+  accurateAssists?: Array<{
+    fromX: number;
+    fromY: number;
+    toX: number;
+    toY: number;
+    assistType?: string;
+    _id?: string;
+  }>;
+}
+
+export interface IGameReportDetailResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: IGameReportDetail;
 }
 
 export interface IGameReportsSummary {
