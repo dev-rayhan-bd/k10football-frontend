@@ -11,6 +11,7 @@ import positionMap from "@/assets/cvs/id/position-map.png";
 import leftLeg from "@/assets/cvs/id/left_foot.png";
 import rightLeg from "@/assets/cvs/id/right_foot.png";
 import { formatDate } from "@/lib/utils";
+import { stylesFromApi } from "@/components/cvs/player-cv-details/bio-components/bioConstants";
 
 export interface ViewPlayerData {
   id: string;
@@ -316,7 +317,7 @@ export const PlayerCvViewProvider = ({
       position: data.position || "CM",
       secondaryPositions: Array.isArray(data.secondaryPositions) ? data.secondaryPositions : [],
       jerseyNumber: data.jerseyNumber ?? 10,
-      selectedStyleIds: Array.isArray(data.playerStyles) ? data.playerStyles : [],
+      selectedStyleIds: stylesFromApi(data.playerStyles),
       careerHighlights: Array.isArray(data.accomplishments)
         ? data.accomplishments.map((a: any) => ({
             year: String(a.year || ""),

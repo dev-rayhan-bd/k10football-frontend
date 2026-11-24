@@ -14,10 +14,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
 import { IconDownload } from "@tabler/icons-react";
 import { usePlayer } from "@/hooks/usePlayer";
+import GameReportPdfDownloader from "@/components/user-wise-dashboard/player-dashboard/GameReportPdfDownloader";
 
 const getResultColor = (result: "W" | "D" | "L") => {
   switch (result) {
@@ -75,6 +74,7 @@ const SportsAnalycies = ({ editable = false }: { editable?: boolean }) => {
 
     return {
       id: m._id || idx + 1,
+      reportId: typeof m._id === "string" ? m._id : "",
       date: formattedDate,
       team1: m.homeTeam || "Home Team",
       team2: m.awayTeam || m.opponent || "Away Team",
@@ -170,150 +170,27 @@ const SportsAnalycies = ({ editable = false }: { editable?: boolean }) => {
       ? summary.formGuide.map((f: string) => f.toUpperCase() as "W" | "D" | "L")
       : cvMatches.map((m) => m.result);
 
-  const handleDownloadPDF = async (match: any) => {
-    setDownloadingReportId(match.id);
-    const toastId = toast.loading(`Generating Scouting Report vs ${match.team2}...`);
-    try {
-      const printElement = document.createElement("div");
-      printElement.style.position = "fixed";
-      printElement.style.left = "-9999px";
-      printElement.style.top = "-9999px";
-      printElement.style.width = "794px";
-      printElement.style.height = "1123px";
-      printElement.style.backgroundColor = "#ffffff";
-      printElement.style.color = "#1e293b";
-      printElement.style.padding = "40px";
-      printElement.style.fontFamily = "sans-serif";
-      printElement.style.boxSizing = "border-box";
-
-      printElement.innerHTML = `
-        <div style="border: 2px solid #E31B23; padding: 25px; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
-          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.03; pointer-events: none;">
-            <img src="/logo.png" style="width: 400px; object-fit: contain;" />
-          </div>
-
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; z-index: 10;">
-            <div>
-              <div style="font-size: 10px; font-weight: 900; color: #E31B23; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px;">K10 Football</div>
-              <h1 style="font-size: 28px; font-weight: 900; color: #1e1b4b; text-transform: uppercase; margin: 0; letter-spacing: -1px;">TECHNICAL SCOUTING REPORT</h1>
-              <div style="font-size: 12px; font-weight: 600; color: #64748b; margin-top: 5px; text-transform: uppercase;">Match Performance Evaluation</div>
-            </div>
-            <div style="text-align: right;">
-              <div style="font-size: 11px; font-weight: 800; color: #e2e8f0; background-color: #1e1b4b; padding: 4px 10px; border-radius: 4px; display: inline-block; text-transform: uppercase; margin-bottom: 5px;">${match.isVerified ? "VERIFIED" : "REPORT"}</div>
-              <div style="font-size: 32px; font-weight: 900; color: #16a34a; margin: 0; line-height: 1;">${Number(match.rating).toFixed(1)}</div>
-              <div style="font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">OVERALL RATING</div>
-            </div>
-          </div>
-
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 25px; z-index: 10;">
-            <div style="background-color: #f8fafc; border: 1px solid #f1f5f9; padding: 15px; border-radius: 8px;">
-              <h3 style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-top: 0; margin-bottom: 10px; letter-spacing: 1px;">Match Details</h3>
-              <table style="width: 100%; border-collapse: collapse; font-size: 12px; line-height: 1.6;">
-                <tr><td style="color: #64748b; font-weight: 500; width: 40%;">Date:</td><td style="color: #0f172a; font-weight: 700;">${match.date}</td></tr>
-                <tr><td style="color: #64748b; font-weight: 500;">League:</td><td style="color: #0f172a; font-weight: 700;">${match.league}</td></tr>
-                <tr><td style="color: #64748b; font-weight: 500;">Stadium:</td><td style="color: #0f172a; font-weight: 700;">${match.stadium}</td></tr>
-                <tr><td style="color: #64748b; font-weight: 500;">Scout:</td><td style="color: #0f172a; font-weight: 700;">${match.scoutName || "Scout Analyst"}</td></tr>
-              </table>
-            </div>
-
-            <div style="background-color: #f8fafc; border: 1px solid #f1f5f9; padding: 15px; border-radius: 8px;">
-              <h3 style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-top: 0; margin-bottom: 10px; letter-spacing: 1px;">Score & Outcome</h3>
-              <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 75px; text-align: center;">
-                <div style="font-size: 20px; font-weight: 900; color: #1e1b4b; text-transform: uppercase; margin-bottom: 4px;">
-                  ${match.team1} vs ${match.team2}
-                </div>
-                <div style="font-size: 24px; font-weight: 900; color: #E31B23; letter-spacing: 2px;">
-                  ${match.score} (${match.result})
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div style="margin-top: 25px; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; z-index: 10;">
-            <div style="background-color: #1e1b4b; color: white; padding: 8px 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Player Performance Metrics</div>
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 15px; background-color: #ffffff; text-align: center;">
-              <div>
-                <div style="font-size: 22px; font-weight: 900; color: #0f172a;">${match.goals}</div>
-                <div style="font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase;">Goals</div>
-              </div>
-              <div>
-                <div style="font-size: 22px; font-weight: 900; color: #0f172a;">${match.assists}</div>
-                <div style="font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase;">Assists</div>
-              </div>
-              <div>
-                <div style="font-size: 22px; font-weight: 900; color: #0f172a;">${match.passes}</div>
-                <div style="font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase;">Passes</div>
-              </div>
-              <div>
-                <div style="font-size: 22px; font-weight: 900; color: #0f172a;">${match.minutesPlayed}</div>
-                <div style="font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase;">Minutes</div>
-              </div>
-            </div>
-          </div>
-
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 25px; z-index: 10;">
-            <div style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px;">
-              <h4 style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-top: 0; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">Discipline & Accuracy</h4>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span style="font-size: 12px; color: #64748b;">Pass Accuracy:</span>
-                <span style="font-size: 14px; font-weight: 800; color: #16a34a;">${match.passAccuracy}%</span>
-              </div>
-              <div style="display: flex; gap: 15px;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <div style="width: 12px; height: 18px; background-color: #FFCC00; border-radius: 2px; border: 1px solid #e2e8f0;"></div>
-                  <span style="font-size: 13px; font-weight: 800;">${match.yellowCards} Yellow Cards</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <div style="width: 12px; height: 18px; background-color: #DC143C; border-radius: 2px; border: 1px solid #e2e8f0;"></div>
-                  <span style="font-size: 13px; font-weight: 800;">${match.redCards} Red Cards</span>
-                </div>
-              </div>
-            </div>
-
-            <div style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px;">
-              <h4 style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-top: 0; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">Key Characteristics</h4>
-              <div style="display: flex; flex-wrap: wrap; gap: 5px; align-content: flex-start;">
-                ${(match.characteristics || ["Agile", "Fast", "Playmaker"]).map((c: string) => `
-                  <span style="font-size: 9px; font-weight: 800; background-color: #1e1b4b; color: #ffffff; padding: 2px 8px; border-radius: 4px; text-transform: uppercase;">${c}</span>
-                `).join('')}
-              </div>
-            </div>
-          </div>
-
-          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: auto; font-size: 9px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; z-index: 10;">
-            <span>Report ID: ${match.id}</span>
-            <span>Generated: ${new Date().toISOString().split("T")[0]}</span>
-            <span>System: K10 Football Platform</span>
-          </div>
-        </div>
-      `;
-
-      document.body.appendChild(printElement);
-      const canvas = await html2canvas(printElement, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        logging: false,
-      });
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const imgWidth = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-      pdf.save(`Scouting_Report_vs_${match.team2.replace(/\s+/g, "_")}.pdf`);
-      document.body.removeChild(printElement);
-      toast.success("PDF Report downloaded successfully!", { id: toastId });
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to generate PDF.", { id: toastId });
-    } finally {
-      setDownloadingReportId(null);
+  // Downloads the same "Player Analysis Profile" design as the Game Reports page,
+  // built from the saved report (GET /players/me/game-reports/:id).
+  const handleDownloadPDF = (match: any) => {
+    if (downloadingReportId !== null) return;
+    if (!match?.reportId) {
+      toast.error("This report is not available for download.");
+      return;
     }
+    setDownloadingReportId(match.id);
   };
+
+  const downloadingMatch = cvMatches.find((m: any) => m.id === downloadingReportId);
 
   return (
     <div className="container w-full min-w-0 overflow-hidden">
+      {downloadingMatch?.reportId && (
+        <GameReportPdfDownloader
+          reportId={downloadingMatch.reportId}
+          onDone={() => setDownloadingReportId(null)}
+        />
+      )}
       <h1 className="mb-6 sm:mb-8 text-center text-2xl sm:text-3xl font-bold text-white font-heading">
         GAME SUMMARY (LAST 4 MATCHES)
       </h1>

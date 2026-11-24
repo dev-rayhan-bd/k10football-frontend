@@ -67,74 +67,28 @@ export const StrengthSection = ({
 
   const handleSaveStrength = async () => {
     try {
+      // Send only the strengths the user actually changed. Each strength is
+      // independent — never fan a value out to other attributes, or saving one
+      // bar would overwrite (and shift) the others.
+      const saved = (playerData?.strengths ?? {}) as Record<string, number>;
+      const changed: Record<string, number> = {};
+      STRENGTH_KEYS.forEach(({ key }) => {
+        const draftValue = strengthDraft[key];
+        if (draftValue === undefined) return;
+        const next = clampStrength(draftValue);
+        if (next !== saved[key]) changed[key] = next;
+      });
+
+      if (Object.keys(changed).length === 0) {
+        setIsStrengthDirty(false);
+        return;
+      }
+
       setIsSavingStrength(true);
-      const pace = clampStrength(strengthDraft.pace ?? 50);
-      const shooting = clampStrength(strengthDraft.shooting ?? 50);
-      const passing = clampStrength(strengthDraft.passing ?? 50);
-      const dribbling = clampStrength(strengthDraft.dribbling ?? 50);
-      const defending = clampStrength(strengthDraft.defending ?? 50);
-      const physical = clampStrength(strengthDraft.physical ?? 50);
-      const heading = clampStrength(strengthDraft.heading ?? 50);
-
-      const payload = {
-        attributes: {
-          pace,
-          acceleration: pace,
-          sprintSpeed: pace,
-          shotStopping: pace,
-
-          shooting,
-          finishing: shooting,
-          longShots: shooting,
-          shotPower: shooting,
-          handling: shooting,
-          crossClaiming: shooting,
-
-          passing,
-          shortPassing: passing,
-          vision: passing,
-          longPassing: passing,
-          crossing: passing,
-          distribution: passing,
-
-          dribbling,
-          ballControl: dribbling,
-          agility: dribbling,
-          reflexes: dribbling,
-          oneOnOne: dribbling,
-
-          defending,
-          marking: defending,
-          standingTackle: defending,
-          tackling: defending,
-          interceptions: defending,
-          interception: defending,
-          footwork: defending,
-          defensiveAwareness: defending,
-
-          physical,
-          strength: physical,
-          stamina: physical,
-          jumping: physical,
-          positioning: physical,
-          decisions: physical,
-
-          heading,
-          headingAccuracy: heading,
-          aerialDuels: heading,
-        },
-        strengths: {
-          pace,
-          shooting,
-          passing,
-          dribbling,
-          defending,
-          physical,
-          heading,
-        },
-      };
-      await updatePlayerProfile(payload);
-      dispatch(updatePlayerField({ field: "strengths", value: strengthDraft }));
+      await updatePlayerProfile({ strengths: changed });
+      dispatch(
+        updatePlayerField({ field: "strengths", value: { ...saved, ...changed } })
+      );
       setIsStrengthDirty(false);
       toast.success("Strengths updated successfully!");
     } catch (err: any) {

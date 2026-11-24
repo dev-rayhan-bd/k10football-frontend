@@ -70,6 +70,32 @@ export const ALL_STYLES = [
   { id: "whipped-cross", label: "Whipped Cross" },
 ];
 
+const normalizeStyle = (s: unknown) => String(s ?? "").trim().toLowerCase().replace(/[\s_]+/g, "-");
+
+/**
+ * Accepts a style id ("finesse-shot") or the backend enum label ("Finesse Shot")
+ * and returns the frontend id, or "" if unknown.
+ */
+export const toStyleId = (style: unknown): string => {
+  const n = normalizeStyle(style);
+  const match = ALL_STYLES.find((s) => s.id === n || normalizeStyle(s.label) === n);
+  return match?.id ?? "";
+};
+
+/** Frontend id → backend PLAYER_STYLES enum label (e.g. "finesse-shot" → "Finesse Shot"). */
+export const toStyleLabel = (style: unknown): string => {
+  const id = toStyleId(style);
+  return ALL_STYLES.find((s) => s.id === id)?.label ?? "";
+};
+
+/** Backend `playerStyles` → unique frontend ids. */
+export const stylesFromApi = (styles: unknown): string[] =>
+  Array.isArray(styles) ? Array.from(new Set(styles.map(toStyleId).filter(Boolean))) : [];
+
+/** Frontend ids → backend `playerStyles` (enum labels only). */
+export const stylesToApi = (styles: unknown): string[] =>
+  (Array.isArray(styles) ? styles : [styles]).map(toStyleLabel).filter(Boolean);
+
 export const COUNTRY_CODES: Record<string, string> = {
   "afghanistan": "af", "albania": "al", "algeria": "dz", "andorra": "ad", "angola": "ao",
   "antigua and barbuda": "ag", "argentina": "ar", "armenia": "am", "australia": "au",
@@ -316,3 +342,106 @@ export const getMarkersForPosition = (position: string, isFutsal: boolean) => {
     name: `position${idx + 1}`
   }));
 };
+
+/* ------------------------------------------------------------------ */
+/* Pitch map: 6 markers — 3 attacking + 3 defending                    */
+/* ------------------------------------------------------------------ */
+
+export type PitchPhase = "attacking" | "defending";
+
+export interface PitchMarker {
+  id: string;
+  phase: PitchPhase;
+  /** 1–3 within its phase */
+  index: number;
+  x: number;
+  y: number;
+}
+
+export const PITCH_MARKERS_PER_PHASE = 3;
+
+/** "Attacking 1" … "Defending 3" — stored in the backend `slot` field. */
+export const pitchSlotLabel = (phase: PitchPhase, index: number) =>
+  `${phase === "attacking" ? "Attacking" : "Defending"} ${index}`;
+
+const clampPct = (n: number) => Math.max(6, Math.min(94, n));
+
+/**
+ * Default layout around the player's natural lateral position: three
+ * markers in the attacking half (top of the pitch image) and three in the
+ * defending half (bottom).
+ */
+const defaultPitchMarkers = (position: string, isFutsal: boolean): PitchMarker[] => {
+  const baseX = _getMarkersForPosition(position, isFutsal)[0]?.x ?? 50;
+  const x = Math.max(22, Math.min(78, baseX));
+  const make = (phase: PitchPhase, index: number, px: number, py: number): PitchMarker => ({
+    id: `${phase}-${index}`,
+    phase,
+    index,
+    x: clampPct(px),
+    y: clampPct(py),
+  });
+  return [
+    make("attacking", 1, x, 18),
+    make("attacking", 2, x - 16, 30),
+    make("attacking", 3, x + 16, 30),
+    make("defending", 1, x, 82),
+    make("defending", 2, x - 16, 70),
+    make("defending", 3, x + 16, 70),
+  ];
+};
+
+/** Reads the phase/index from a saved marker's `slot` / `role` (e.g. "Attacking 2"). */
+const parseSavedPhase = (m: any): { phase?: PitchPhase; index?: number } => {
+  const text = `${m?.slot ?? ""} ${m?.role ?? ""}`.toLowerCase();
+  const phase: PitchPhase | undefined = text.includes("attack")
+    ? "attacking"
+    : text.includes("defen")
+      ? "defending"
+      : undefined;
+  const num = Number(String(m?.slot ?? "").match(/(\d+)/)?.[1]);
+  return { phase, index: num >= 1 && num <= PITCH_MARKERS_PER_PHASE ? num : undefined };
+};
+
+/**
+ * Always returns exactly 6 markers (3 attacking + 3 defending). Saved markers
+ * keep their coordinates; legacy markers without a phase are placed by pitch
+ * half (top = attacking); any missing slot gets a default spot.
+ */
+export const buildPitchMarkers = (saved: any[] | undefined, position: string, isFutsal: boolean): PitchMarker[] => {
+  const result = defaultPitchMarkers(position, isFutsal);
+  const filled = new Set<string>();
+  const place = (phase: PitchPhase, index: number | undefined, m: any) => {
+    const target =
+      (index && !filled.has(`${phase}-${index}`) && result.find((r) => r.phase === phase && r.index === index)) ||
+      result.find((r) => r.phase === phase && !filled.has(r.id));
+    if (!target) return;
+    target.x = clampPct(Number(m.x));
+    target.y = clampPct(Number(m.y));
+    filled.add(target.id);
+  };
+
+  const valid = (Array.isArray(saved) ? saved : []).filter(
+    (m) => m && Number.isFinite(Number(m.x)) && Number.isFinite(Number(m.y))
+  );
+  // Markers with an explicit phase first, then legacy ones by pitch half.
+  valid.forEach((m) => {
+    const { phase, index } = parseSavedPhase(m);
+    if (phase) place(phase, index, m);
+  });
+  valid.forEach((m) => {
+    if (parseSavedPhase(m).phase) return;
+    place(Number(m.y) < 50 ? "attacking" : "defending", undefined, m);
+  });
+  return result;
+};
+
+/** Backend payload for positionMap / futsalMap. */
+export const toPitchMapPayload = (markers: PitchMarker[], playerPosition: string) =>
+  markers.map((m) => ({
+    slot: pitchSlotLabel(m.phase, m.index),
+    position: playerPosition || "",
+    role: m.phase === "attacking" ? "Attacking" : "Defending",
+    x: Math.round(m.x),
+    y: Math.round(m.y),
+  }));

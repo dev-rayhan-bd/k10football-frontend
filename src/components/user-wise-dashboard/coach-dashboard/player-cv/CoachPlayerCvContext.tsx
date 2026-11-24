@@ -7,6 +7,7 @@ import flagIt from "@/assets/cvs/id/flag-itally.png";
 import playerDefaultImage from "@/assets/cvs/id/player-image.png";
 import trofeeIcon from "@/assets/cvs/id/trofeeIcon.png";
 import { formatDate } from "@/lib/utils";
+import { stylesFromApi } from "@/components/cvs/player-cv-details/bio-components/bioConstants";
 
 export interface CoachViewPlayerData {
   id: string;
@@ -393,7 +394,7 @@ export const CoachPlayerCvProvider = ({
       position: data.position || "ST",
       secondaryPositions: data.secondaryPositions || ["Winger", "CF"],
       jerseyNumber: 10,
-      selectedStyleIds: data.playerStyles || ["technical", "finesse-shot"],
+      selectedStyleIds: stylesFromApi(data.playerStyles),
       careerHighlights:
         Array.isArray(data.accomplishments) && data.accomplishments.length > 0
           ? data.accomplishments.map((a: any) => ({

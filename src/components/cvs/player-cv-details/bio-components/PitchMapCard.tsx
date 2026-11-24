@@ -8,7 +8,12 @@ import positionMap from "@/assets/cvs/id/position-map.png";
 import futsalPitch from "@/assets/cvs/id/Futsal Pitch.jpg";
 import positionIcon from "@/assets/cvs/id/positionIcon.png";
 import { cn } from "@/lib/utils";
-import { getMarkersForPosition } from "./bioConstants";
+import {
+  buildPitchMarkers,
+  pitchSlotLabel,
+  toPitchMapPayload,
+  type PitchMarker,
+} from "./bioConstants";
 import { useAppDispatch } from "@/hooks/reduxHooks";
 import { updatePlayerField } from "@/redux/features/player/playerSlice";
 import { useUpdateMyPlayerProfileMutation } from "@/redux/features/player/playerApi";
@@ -38,20 +43,13 @@ export const PitchMapCard = ({
   const [isPositionDirty, setIsPositionDirty] = useState(false);
   const [isFutsalDirty, setIsFutsalDirty] = useState(false);
 
-  // Initial markers for both maps
-  const [positionMarkers, setPositionMarkers] = useState<any[]>(() => {
-    if (Array.isArray(playerData?.positionMarkers) && playerData.positionMarkers.length > 0) {
-      return playerData.positionMarkers;
-    }
-    return getMarkersForPosition(playerData?.position || "Striker", false);
-  });
+  // Each map always has 6 markers: 3 attacking + 3 defending.
+  const playerPosition: string = playerData?.position || "";
+  const savedPositionMarkers = () => buildPitchMarkers(playerData?.positionMarkers, playerPosition, false);
+  const savedFutsalMarkers = () => buildPitchMarkers(playerData?.futsalMarkers, playerPosition, true);
 
-  const [futsalMarkers, setFutsalMarkers] = useState<any[]>(() => {
-    if (Array.isArray(playerData?.futsalMarkers) && playerData.futsalMarkers.length > 0) {
-      return playerData.futsalMarkers;
-    }
-    return getMarkersForPosition(playerData?.position || "Striker", true);
-  });
+  const [positionMarkers, setPositionMarkers] = useState<PitchMarker[]>(savedPositionMarkers);
+  const [futsalMarkers, setFutsalMarkers] = useState<PitchMarker[]>(savedFutsalMarkers);
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const prevPositionRef = useRef<string>("");
@@ -75,16 +73,12 @@ export const PitchMapCard = ({
 
   // Sync with playerData from API if user hasn't made unsaved changes
   useEffect(() => {
-    if (!isPositionDirty && Array.isArray(playerData?.positionMarkers) && playerData.positionMarkers.length > 0) {
-      setPositionMarkers(playerData.positionMarkers);
-    }
-  }, [playerData?.positionMarkers, isPositionDirty]);
+    if (!isPositionDirty) setPositionMarkers(savedPositionMarkers());
+  }, [playerData?.positionMarkers, playerPosition, isPositionDirty]);
 
   useEffect(() => {
-    if (!isFutsalDirty && Array.isArray(playerData?.futsalMarkers) && playerData.futsalMarkers.length > 0) {
-      setFutsalMarkers(playerData.futsalMarkers);
-    }
-  }, [playerData?.futsalMarkers, isFutsalDirty]);
+    if (!isFutsalDirty) setFutsalMarkers(savedFutsalMarkers());
+  }, [playerData?.futsalMarkers, playerPosition, isFutsalDirty]);
 
   const updateMarkerPosition = (
     e: MouseEvent | React.MouseEvent | TouchEvent | React.TouchEvent
@@ -111,12 +105,12 @@ export const PitchMapCard = ({
 
     if (activeMarker.type === "position") {
       setPositionMarkers((prev) =>
-        prev.map((m: any) => (m.id === activeMarker.id ? { ...m, x, y } : m))
+        prev.map((m) => (m.id === activeMarker.id ? { ...m, x, y } : m))
       );
       setIsPositionDirty(true);
     } else {
       setFutsalMarkers((prev) =>
-        prev.map((m: any) => (m.id === activeMarker.id ? { ...m, x, y } : m))
+        prev.map((m) => (m.id === activeMarker.id ? { ...m, x, y } : m))
       );
       setIsFutsalDirty(true);
     }
@@ -157,31 +151,15 @@ export const PitchMapCard = ({
     try {
       setIsSaving(true);
       if (isPositionMap) {
-        const payload = {
-          positionMap: positionMarkers.map((m: any, idx: number) => ({
-            slot: m.slot || (idx === 0 ? "Primary" : idx === 1 ? "Secondary" : "Third Position"),
-            position: m.position || m.name || playerData?.position || "Defensive Midfielder",
-            role: m.role || "Anchor Man",
-            x: Math.round(m.x),
-            y: Math.round(m.y),
-          })),
-        };
-        await updateMyPlayerProfile(payload).unwrap();
-        dispatch(updatePlayerField({ field: "positionMarkers", value: positionMarkers }));
+        const positionMap = toPitchMapPayload(positionMarkers, playerPosition);
+        await updateMyPlayerProfile({ positionMap }).unwrap();
+        dispatch(updatePlayerField({ field: "positionMarkers", value: positionMap.map((m, i) => ({ id: positionMarkers[i].id, ...m })) }));
         setIsPositionDirty(false);
         toast.success("Position map saved successfully!");
       } else {
-        const payload = {
-          futsalMap: futsalMarkers.map((m: any, idx: number) => ({
-            slot: m.slot || (idx === 0 ? "Primary" : idx === 1 ? "Secondary" : "Third Position"),
-            position: m.position || m.name || "Pivot",
-            role: m.role || "Attacker",
-            x: Math.round(m.x),
-            y: Math.round(m.y),
-          })),
-        };
-        await updateMyPlayerProfile(payload).unwrap();
-        dispatch(updatePlayerField({ field: "futsalMarkers", value: futsalMarkers }));
+        const futsalMap = toPitchMapPayload(futsalMarkers, playerPosition);
+        await updateMyPlayerProfile({ futsalMap }).unwrap();
+        dispatch(updatePlayerField({ field: "futsalMarkers", value: futsalMap.map((m, i) => ({ id: futsalMarkers[i].id, ...m })) }));
         setIsFutsalDirty(false);
         toast.success("Futsal map saved successfully!");
       }
@@ -195,18 +173,10 @@ export const PitchMapCard = ({
 
   const handleCancel = () => {
     if (isPositionMap) {
-      if (Array.isArray(playerData?.positionMarkers) && playerData.positionMarkers.length > 0) {
-        setPositionMarkers(playerData.positionMarkers);
-      } else {
-        setPositionMarkers(getMarkersForPosition(playerData?.position || "Striker", false));
-      }
+      setPositionMarkers(savedPositionMarkers());
       setIsPositionDirty(false);
     } else {
-      if (Array.isArray(playerData?.futsalMarkers) && playerData.futsalMarkers.length > 0) {
-        setFutsalMarkers(playerData.futsalMarkers);
-      } else {
-        setFutsalMarkers(getMarkersForPosition(playerData?.position || "Striker", true));
-      }
+      setFutsalMarkers(savedFutsalMarkers());
       setIsFutsalDirty(false);
     }
   };
@@ -263,10 +233,11 @@ export const PitchMapCard = ({
           priority
         />
 
-        {/* Render markers */}
-        {currentDisplayMarkers.map((marker: any, idx: number) => (
+        {/* Render markers — 3 attacking + 3 defending */}
+        {currentDisplayMarkers.map((marker) => (
           <div
-            key={marker.id || idx}
+            key={marker.id}
+            title={pitchSlotLabel(marker.phase, marker.index)}
             className={cn(
               "absolute z-20 group/marker flex flex-col items-center select-none",
               canEditBio ? "cursor-move" : "cursor-default"
@@ -293,34 +264,43 @@ export const PitchMapCard = ({
               });
             }}
           >
-            <Image
-              src={positionIcon}
-              alt="position icon"
-              width={idx === 0 ? 40 : 28}
-              height={idx === 0 ? 40 : 28}
+            <span
               className={cn(
-                "pointer-events-none drop-shadow-lg transition-transform group-hover/marker:scale-110",
-                idx === 0
-                  ? "w-8 h-8 sm:w-10 sm:h-10"
-                  : "w-5 h-5 sm:w-7 sm:h-7"
+                "flex rounded-full ring-2 transition-transform group-hover/marker:scale-110",
+                marker.phase === "attacking" ? "ring-destructive" : "ring-sky-500"
               )}
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.srcset = "";
-                target.src = "/placeholder_img.jpg";
-              }}
-            />
-            {marker.name && (
-              <div
-                className={cn(
-                  "mt-1 px-1 sm:px-1.5 py-0.5 rounded bg-black/85 border border-white/10 text-white text-[8px] sm:text-[9px] font-medium text-center whitespace-nowrap shadow-md pointer-events-none tracking-wide select-none transition-all"
-                )}
-              >
-                Position-{idx + 1}
-              </div>
-            )}
+            >
+              <Image
+                src={positionIcon}
+                alt={pitchSlotLabel(marker.phase, marker.index)}
+                width={28}
+                height={28}
+                className="pointer-events-none size-6 drop-shadow-lg sm:size-7"
+                draggable={false}
+              />
+            </span>
+            <div
+              className={cn(
+                "mt-1 rounded border px-1 py-0.5 text-center text-[8px] font-bold whitespace-nowrap text-white shadow-md pointer-events-none select-none sm:px-1.5 sm:text-[9px]",
+                marker.phase === "attacking"
+                  ? "border-destructive/60 bg-destructive/85"
+                  : "border-sky-500/60 bg-sky-600/85"
+              )}
+            >
+              {marker.phase === "attacking" ? "ATT" : "DEF"} {marker.index}
+            </div>
           </div>
         ))}
+      </div>
+
+      {/* Legend */}
+      <div className="mt-3 flex items-center justify-center gap-4 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <span className="flex items-center gap-1.5">
+          <span className="size-2.5 rounded-full bg-destructive" /> Attacking (3)
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="size-2.5 rounded-full bg-sky-500" /> Defending (3)
+        </span>
       </div>
 
       {/* Save Changes Footer Bar */}

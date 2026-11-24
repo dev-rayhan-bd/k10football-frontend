@@ -184,7 +184,7 @@ const getHexColor = (val: number) => {
 const getFlagUrl = (countryName: string) => {
   if (!countryName) return "";
   const code = COUNTRY_CODES[countryName.toLowerCase()];
-  return code ? `https://flagcdn.com/${code}.svg` : "";
+  return code ? `https://flagcdn.com/w160/${code}.png` : "";
 };
 const KEY_ALIASES: Record<string, string[]> = {
   composure: ["composure", "composition"],
@@ -643,7 +643,9 @@ return (
     {/* Left Section - Player Card */}
     <div className="lg:col-span-1 bg-cardBg h-fit rounded-xl overflow-visible">
       <div className="overflow-visible">
-        <div className="aspect-square rounded-t-xl overflow-hidden bg-linear-to-b from-[#2df168] to-[#39493b] flex items-center justify-center">
+        {/* Height follows the card (270×385) so it's never clipped; the bottom
+            padding leaves room for the overlapping rating circle. */}
+        <div className="rounded-t-xl overflow-hidden bg-linear-to-b from-[#2df168] to-[#39493b] flex items-center justify-center px-6 pt-8 pb-20">
           <div onClick={() => router.push("/cvs/player-cv-details")} className="flex justify-center cursor-pointer w-full max-w-67.5 mx-auto">
             <div className={`relative w-full aspect-270/385 hover:scale-105 transition-all duration-300 z-0 ${
               currentPlayer.cardType === "gold"
@@ -851,6 +853,7 @@ return (
           </div>
           <CMSField
             value={getFullWithShortForm(playerData.position) || playerData.position || "Central Midfielder (CM)"}
+            displayValue={getShortForm(playerData.position) || canonicalPosition}
             onUpdate={(val) => handleInfoChange("position", val)}
             canEdit={editable}
             type="combobox"

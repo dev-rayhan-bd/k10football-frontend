@@ -31,6 +31,8 @@ interface CMSFieldProps {
   noTruncate?: boolean;
   min?: number;
   max?: number;
+  /** Shown instead of `value` when not editing (e.g. a short label). */
+  displayValue?: React.ReactNode;
 }
 
 const EMOJIS = ["⚽", "👀", "🎯", "🧠", "💪", "🌍", "🏆", "🔥", "⚡", "📈", "👏", "🙌", "❤️", "👍"];
@@ -51,6 +53,7 @@ const CMSField = ({
   noTruncate = false,
   min,
   max,
+  displayValue,
 }: CMSFieldProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [tempValue, setTempValue] = useState(value);
@@ -430,7 +433,7 @@ const CMSField = ({
         type !== "textarea" && !noTruncate && "truncate",
         type !== "textarea" && noTruncate && "whitespace-normal wrap-break-word",
         type === "textarea" && "whitespace-pre-wrap"
-      )}>{value}</span>
+      )}>{displayValue ?? value}</span>
       {canEdit && !hideIcon && (
         <PencilIcon className="h-3 w-3 opacity-0 group-hover:opacity-100 text-primary transition-opacity" />
       )}

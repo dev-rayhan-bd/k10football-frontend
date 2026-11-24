@@ -14,6 +14,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { calculateWeightedRating } from "@/lib/utils/rating";
 import { formatDate } from "@/lib/utils";
 import { IPlayerDocument } from "@/types/player.type";
+import { stylesFromApi } from "@/components/cvs/player-cv-details/bio-components/bioConstants";
 
 export interface Club {
   id: string;
@@ -114,6 +115,9 @@ export interface Marker {
   x: number; // percentage from left
   y: number; // percentage from top
   name?: string;
+  slot?: string;
+  role?: string;
+  position?: string;
 }
 
 export interface Skill {
@@ -183,7 +187,7 @@ const basePlayerData: PlayerData = {
   currentClub: "Manchester City",
   mainFlag: flagImage,
   position: "Defensive Midfielder",
-  selectedStyleIds: ["technical", "finesse-shot", "incisive-pass"],
+  selectedStyleIds: [],
   careerHighlights: [
     {
       year: "2019",
@@ -346,8 +350,8 @@ const basePlayerData: PlayerData = {
   ],
   futsalMap: futsalMap,
   positionMap: positionMap,
-  positionMarkers: [{ id: "1", x: 50, y: 50 }],
-  futsalMarkers: [{ id: "1", x: 50, y: 50 }],
+  positionMarkers: [],
+  futsalMarkers: [],
   coachName: "Pep Guardiola",
   academyName: "Manchester City Academy",
   coachLicenseNumber: "CBF-2026-4587",
@@ -590,18 +594,24 @@ export const playerSlice = createSlice({
             activePlayer.clubs.push(newClubItem);
           }
         }
-        if (Array.isArray(data.positionMap) && data.positionMap.length > 0) {
+        if (Array.isArray(data.positionMap)) {
           activePlayer.positionMarkers = data.positionMap.map((m: any, idx: number) => ({
             id: m._id || `pos-${idx + 1}`,
             name: `position${idx + 1}`,
+            slot: m.slot,
+            role: m.role,
+            position: m.position,
             x: m.x,
             y: m.y
           }));
         }
-        if (Array.isArray(data.futsalMap) && data.futsalMap.length > 0) {
+        if (Array.isArray(data.futsalMap)) {
           activePlayer.futsalMarkers = data.futsalMap.map((m: any, idx: number) => ({
             id: m._id || `futsal-${idx + 1}`,
             name: `futsal${idx + 1}`,
+            slot: m.slot,
+            role: m.role,
+            position: m.position,
             x: m.x,
             y: m.y
           }));
@@ -626,7 +636,7 @@ export const playerSlice = createSlice({
           };
         }
         if (Array.isArray(data.playerStyles)) {
-          activePlayer.selectedStyleIds = data.playerStyles;
+          activePlayer.selectedStyleIds = stylesFromApi(data.playerStyles);
         }
         if (Array.isArray(data.accomplishments) && data.accomplishments.length > 0) {
           activePlayer.careerHighlights = data.accomplishments.map((a: any) => ({

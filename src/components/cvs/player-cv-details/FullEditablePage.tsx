@@ -91,6 +91,10 @@ export const PlayerStatsProvider = ({
     );
 };
 
+// Plain block wrapper: sections keep their own top margins, so the on-screen
+// layout is unchanged; the wrapper only marks what goes on each PDF page.
+const PDF_PAGE_CLASS = "w-full min-w-0";
+
 const FullEditablePage = ({ editable = false }: { editable?: boolean }) => {
     const { role } = usePlayerStats() || { role: 'player' };
     const { accessToken } = useAppSelector((state) => state.auth as AuthState);
@@ -108,18 +112,32 @@ const FullEditablePage = ({ editable = false }: { editable?: boolean }) => {
     return (
         <>
             <div id="player-bio"></div>
-            <PlayerBioSection editable={isActuallyEditable} />
-            <ClubSection />
-            <SkillsAttributes editable={canEditEvaluations} />
-            <PerformanceAnalytics />
-            <AttributesAnalysis editable={canEditEvaluations} />
-            <MetricsAnalysis editable={canEditEvaluations} />
-            <SportsAnalytics editable={canEditEvaluations} />
-            <PlayerProfile editable={canEditEvaluations} />
-            <DocSection editable={canEditMedia} />
-            <MyImagesSection editable={canEditMedia} />
-            <MyVideosSection editable={canEditMedia} />
-            <AdditionalNotesSection editable={canEditEvaluations} />
+            {/* Each group below is exported as exactly one page of the CV PDF
+                (see `data-cv-pdf-page` in GenerateCv). */}
+            {/* Page 1 — personal info → clubs */}
+            <div data-cv-pdf-page="1" className={PDF_PAGE_CLASS}>
+                <PlayerBioSection editable={isActuallyEditable} />
+                <ClubSection />
+            </div>
+            {/* Page 2 — skills attributes */}
+            <div data-cv-pdf-page="2" className={PDF_PAGE_CLASS}>
+                <SkillsAttributes editable={canEditEvaluations} />
+            </div>
+            {/* Page 3 — performance, attributes, metrics, game reports */}
+            <div data-cv-pdf-page="3" className={PDF_PAGE_CLASS}>
+                <PerformanceAnalytics />
+                <AttributesAnalysis editable={canEditEvaluations} />
+                <MetricsAnalysis editable={canEditEvaluations} />
+                <SportsAnalytics editable={canEditEvaluations} />
+            </div>
+            {/* Page 4 — positional co-efficients → the rest */}
+            <div data-cv-pdf-page="4" className={PDF_PAGE_CLASS}>
+                <PlayerProfile editable={canEditEvaluations} />
+                <DocSection editable={canEditMedia} />
+                <MyImagesSection editable={canEditMedia} />
+                <MyVideosSection editable={canEditMedia} />
+                <AdditionalNotesSection editable={canEditEvaluations} />
+            </div>
         </>
     );
 };

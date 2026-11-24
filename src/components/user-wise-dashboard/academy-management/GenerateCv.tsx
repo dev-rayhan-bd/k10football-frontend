@@ -20,6 +20,8 @@ import FullEditablePage from "@/components/cvs/player-cv-details/FullEditablePag
 import { usePlayer } from "@/hooks/usePlayer";
 import { usePlayerStats } from "@/components/cvs/player-cv-details/FullEditablePage";
 import { getFullWithShortForm, formatDate } from "@/lib/utils";
+import { getFlagUrl } from "@/components/cvs/player-cv-details/bio-components/bioConstants";
+import { domPagesToPdf } from "@/lib/pdf/domToPdf";
 import { FileText } from 'lucide-react';
 import { useAppDispatch } from "@/hooks/reduxHooks";
 import { updatePlayerField } from "@/redux/features/player/playerSlice";
@@ -32,6 +34,10 @@ const GenerateCv = () => {
   const [role, setRole] = useState<string>("player");
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const coverFileInputRef = useRef<HTMLInputElement>(null);
+
+  // The player's own photo only — no stock image when there isn't one.
+  const playerImageSrc: string =
+    typeof playerData.playerImage === "string" ? playerData.playerImage : playerData.playerImage?.src || "";
 
   const coverImgSrc =
     playerData.coverImage ||
@@ -111,204 +117,36 @@ const GenerateCv = () => {
     const userRole = localStorage.getItem("userRole") || "player";
     setRole(userRole);
   }, []);
-  const generateProfessionalPDF = () => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-    const htmlContent = `
-      <html>
-        <head>
-          <title>Technical Scouting Report - ${playerData.fullName}</title>
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
-            body {
-              font-family: 'Inter', sans-serif;
-              color: #111;
-              margin: 0;
-              padding: 50px;
-              line-height: 1.4;
-              background: #fff;
-            }
-            .header {
-              display: flex;
-              justify-content: space-between;
-              align-items: flex-start;
-              border-bottom: 4px solid #E31B23;
-              padding-bottom: 40px;
-              margin-bottom: 50px;
-            }
-            .brand { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 3px; color: #E31B23; margin-bottom: 10px; }
-            .player-name { font-size: 48px; font-weight: 900; text-transform: uppercase; letter-spacing: -2px; margin: 0; line-height: 1; }
-            .player-title { font-size: 16px; font-weight: 600; color: #666; margin-top: 5px; text-transform: uppercase; }
-            .rating-circle {
-              width: 100px;
-              height: 100px;
-              background: #111;
-              color: #fff;
-              border-radius: 50%;
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              justify-content: center;
-              border: 4px solid #E31B23;
-            }
-            .rating-value { font-size: 36px; font-weight: 900; line-height: 1; }
-            .rating-label { font-size: 10px; font-weight: 800; text-transform: uppercase; opacity: 0.6; }
-            .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
-            .section { margin-bottom: 40px; }
-            .section-header { 
-              font-size: 14px; 
-              font-weight: 900; 
-              text-transform: uppercase; 
-              letter-spacing: 2px; 
-              color: #111;
-              border-bottom: 2px solid #eee;
-              padding-bottom: 8px;
-              margin-bottom: 20px;
-              display: flex;
-              justify-content: space-between;
-            }
-            .attribute-table { width: 100%; border-collapse: collapse; }
-            .attribute-row { border-bottom: 1px solid #f0f0f0; }
-            .attribute-cell { padding: 10px 0; font-size: 13px; }
-            .attr-label { color: #666; font-weight: 600; }
-            .attr-value { font-weight: 900; text-align: right; color: #111; }
-            .attr-bar-bg { width: 60px; height: 6px; background: #eee; border-radius: 3px; display: inline-block; margin-left: 15px; position: relative; top: -2px; }
-            .attr-bar-fill { height: 100%; background: #E31B23; border-radius: 3px; }
-            .full-width { grid-column: span 2; }
-            .highlight-box { background: #f9f9f9; padding: 25px; border-radius: 15px; border: 1px solid #eee; }
-            .footer {
-              margin-top: 80px;
-              padding-top: 30px;
-              border-top: 1px solid #eee;
-              display: flex;
-              justify-content: space-between;
-              font-size: 10px;
-              color: #999;
-              font-weight: 600;
-              text-transform: uppercase;
-              letter-spacing: 1px;
-            }
-            @media print {
-              body { padding: 0; }
-              .no-print { display: none; }
-              -webkit-print-color-adjust: exact;
-            }
-          </style>
-        </head>
-        <body oncontextmenu="return false;">
-          <div class="header">
-            <div>
-              <div class="brand">Eddie Ricci Football Management</div>
-              <h1 class="player-name">${playerData.fullName}</h1>
-              <div class="player-title">${getFullWithShortForm(playerData.position)} • ${playerData.clubs[0]?.name || 'Unattached'} • ${playerData.birthCountry}</div>
-            </div>
-            <div class="rating-circle">
-              <span class="rating-label">Overall</span>
-              <span class="rating-value">${playerData.rating}</span>
-            </div>
-          </div>
-          <div class="main-grid">
-            <!-- Bio Section -->
-            <div class="section">
-              <div class="section-header">Biological Profile</div>
-              <table class="attribute-table">
-                <tr class="attribute-row"><td class="attribute-cell attr-label">Age / DOB</td><td class="attribute-cell attr-value">${playerData.age} / ${playerData.dob}</td></tr>
-                <tr class="attribute-row"><td class="attribute-cell attr-label">Height / Weight</td><td class="attribute-cell attr-value">${playerData.height}m / ${playerData.weight}kg</td></tr>
-                <tr class="attribute-row"><td class="attribute-cell attr-label">Primary Foot</td><td class="attribute-cell attr-value">Right (${playerData.rightLegUsage}%)</td></tr>
-                <tr class="attribute-row"><td class="attribute-cell attr-label">Secondary Foot</td><td class="attribute-cell attr-value">Left (${playerData.leftLegUsage}%)</td></tr>
-                <tr class="attribute-row"><td class="attribute-cell attr-label">Nationality</td><td class="attribute-cell attr-value">${playerData.birthCountry} / ${playerData.dualNationality || 'N/A'}</td></tr>
-              </table>
-            </div>
-            <!-- Performance Metrics -->
-            <div class="section">
-              <div class="section-header">Scouting Summary</div>
-              <table class="attribute-table">
-                <tr class="attribute-row"><td class="attribute-cell attr-label">Market Value</td><td class="attribute-cell attr-value">€${playerData.marketValue}</td></tr>
-                <tr class="attribute-row"><td class="attribute-cell attr-label">Contract Until</td><td class="attribute-cell attr-value">${formatDate(playerData.contractUntil)}</td></tr>
-                <tr class="attribute-row"><td class="attribute-cell attr-label">Agency</td><td class="attribute-cell attr-value">${playerData.agency}</td></tr>
-                <tr class="attribute-row"><td class="attribute-cell attr-label">Agent</td><td class="attribute-cell attr-value">${playerData.agent}</td></tr>
-              </table>
-            </div>
-            <!-- Technical Evaluation -->
-            <div class="section">
-              <div class="section-header">Technical Attributes</div>
-              <table class="attribute-table">
-                ${playerData.skillsCategories.find(c => c.category === "Technical")?.skills.slice(0, 5).map(skill => `
-                  <tr class="attribute-row"><td class="attribute-cell attr-label">${skill.name}</td><td class="attribute-cell attr-value">${skill.value} <div class="attr-bar-bg"><div class="attr-bar-fill" style="width: ${skill.value}%"></div></div></td></tr>
-                `).join('') || ''}
-              </table>
-            </div>
-            <!-- Physical Evaluation -->
-            <div class="section">
-              <div class="section-header">Physical Profile</div>
-              <table class="attribute-table">
-                ${playerData.skillsCategories.find(c => c.category === "Physical")?.skills.slice(0, 5).map(skill => `
-                  <tr class="attribute-row"><td class="attribute-cell attr-label">${skill.name}</td><td class="attribute-cell attr-value">${skill.value} <div class="attr-bar-bg"><div class="attr-bar-fill" style="width: ${skill.value}%"></div></div></td></tr>
-                `).join('') || ''}
-              </table>
-            </div>
-            <!-- Mental/Tactical Evaluation -->
-            <div class="section">
-              <div class="section-header">Mental & Tactical</div>
-              <table class="attribute-table">
-                ${playerData.skillsCategories.find(c => c.category === "Tactical")?.skills.slice(0, 5).map(skill => `
-                  <tr class="attribute-row"><td class="attribute-cell attr-label">${skill.name}</td><td class="attribute-cell attr-value">${skill.value} <div class="attr-bar-bg"><div class="attr-bar-fill" style="width: ${skill.value}%"></div></div></td></tr>
-                `).join('') || ''}
-              </table>
-            </div>
-            <!-- Advanced Metrics -->
-            <div class="section">
-              <div class="section-header">Intelligence Metrics</div>
-              <table class="attribute-table">
-                <tr class="attribute-row"><td class="attribute-cell attr-label">Pass Accuracy</td><td class="attribute-cell attr-value">${playerData.performanceMetrics.passAccuracy}%</td></tr>
-                <tr class="attribute-row"><td class="attribute-cell attr-label">Shoot Accuracy</td><td class="attribute-cell attr-value">${playerData.performanceMetrics.shootAccuracy}%</td></tr>
-                <tr class="attribute-row"><td class="attribute-cell attr-label">Dribble Success</td><td class="attribute-cell attr-value">${playerData.performanceMetrics.dribbleSuccess}%</td></tr>
-                <tr class="attribute-row"><td class="attribute-cell attr-label">Tackle Success</td><td class="attribute-cell attr-value">${playerData.performanceMetrics.tackleSuccess}%</td></tr>
-              </table>
-            </div>
-            <!-- Career Timeline -->
-            <div class="section full-width">
-              <div class="section-header">Professional Career History</div>
-              <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-                <tr style="background: #f9f9f9; text-align: left; font-size: 11px; font-weight: 900; text-transform: uppercase;">
-                  <th style="padding: 12px; border-bottom: 2px solid #eee">Season</th>
-                  <th style="padding: 12px; border-bottom: 2px solid #eee">Organization</th>
-                  <th style="padding: 12px; border-bottom: 2px solid #eee">Level / Role</th>
-                  <th style="padding: 12px; border-bottom: 2px solid #eee">Status</th>
-                </tr>
-                ${playerData.clubs.map(club => `
-                  <tr style="font-size: 13px;">
-                    <td style="padding: 12px; border-bottom: 1px solid #eee">${club.from} - ${club.to}</td>
-                    <td style="padding: 12px; border-bottom: 1px solid #eee">${club.name}</td>
-                    <td style="padding: 12px; border-bottom: 1px solid #eee">${club.category || 'N/A'}</td>
-                    <td style="padding: 12px; border-bottom: 1px solid #eee">Active</td>
-                  </tr>
-                `).join('')}
-              </table>
-            </div>
-            <div class="section full-width highlight-box">
-              <div class="section-header">Coach Evaluation Notes</div>
-              <p style="font-size: 13px; color: #444; margin: 0;">
-                ${playerData.fullName} demonstrates elite-level vision and technical control under pressure. Current overall rating is verified at ${playerData.rating}.
-              </p>
-            </div>
-          </div>
-          <div class="footer">
-            <span>Tech ID: 9F8E7D6C • Confirmed By: ER Scouting Dept</span>
-            <span>Page 1 of 1 • Internal Document</span>
-            <span>Date: ${new Date().toLocaleDateString()}</span>
-          </div>
-          <script>
-            window.onload = function() { 
-              window.print();
-              setTimeout(function() { window.close(); }, 500);
-            };
-          </script>
-        </body>
-      </html>
-    `;
-    printWindow.document.write(htmlContent);
-    printWindow.document.close();
+  // Exports the CV exactly as it looks on this page, as 4 A4 pages:
+  //  1) personal info -> clubs (3 in one row)  2) skills attributes
+  //  3) performance, attributes, metrics, game reports
+  //  4) positional co-efficients -> documents, images/videos (3 each), notes.
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const generateProfessionalPDF = async () => {
+    if (isExportingPdf) return;
+    const pages = [1, 2, 3, 4]
+      .map((n) => document.querySelector<HTMLElement>(`[data-cv-pdf-page="${n}"]`))
+      .filter((el): el is HTMLElement => Boolean(el));
+    if (pages.length !== 4) {
+      toast.error("The CV is still loading. Please try again in a moment.");
+      return;
+    }
+    setIsExportingPdf(true);
+    const toastId = toast.loading("Generating CV PDF... Please wait.");
+    try {
+      const safeName = (playerData.fullName || "Player").trim().replace(/\s+/g, "_");
+      await domPagesToPdf({
+        pages,
+        fileName: `CV_${safeName}.pdf`,
+        footer: (page, total) => `${playerData.fullName || "Player"} - Player CV - Page ${page} of ${total}`,
+      });
+      toast.success("CV PDF downloaded.", { id: toastId });
+    } catch (err) {
+      console.error("CV PDF export failed:", err);
+      toast.error("Failed to generate the CV PDF. Please try again.", { id: toastId });
+    } finally {
+      setIsExportingPdf(false);
+    }
   };
   return (
     <div className="flex flex-col gap-6 sm:gap-8 pb-10 w-full min-w-0 overflow-hidden text-white">
@@ -320,9 +158,11 @@ const GenerateCv = () => {
         </div>
         <Button
           onClick={generateProfessionalPDF}
+          disabled={isExportingPdf}
           className="bg-[#222222] hover:bg-[#333333] text-white border border-white/5 gap-2 px-6 py-4 rounded-xl font-bold uppercase tracking-widest text-[10px] h-12 w-full md:w-auto shrink-0 transition-all"
         >
-          <IconDownload size={18} /> Download CV PDF
+          {isExportingPdf ? <IconLoader2 size={18} className="animate-spin" /> : <IconDownload size={18} />}
+          {isExportingPdf ? "Generating PDF..." : "Download CV PDF"}
         </Button>
       </div>
       {/* Main Content */}
@@ -374,18 +214,19 @@ const GenerateCv = () => {
               />
             </div>
 
-            <div className="absolute right-0 bottom-0 h-full w-[80%] md:w-[55%] flex items-end justify-end pointer-events-none opacity-50 md:opacity-100 z-0">
+            {/* Player photo — fits inside the hero (pt keeps the head clear of the top edge) */}
+            <div className="absolute right-0 bottom-0 h-full w-[80%] md:w-[55%] flex items-end justify-end pt-6 md:pt-10 pointer-events-none opacity-50 md:opacity-100 z-0">
               {isLoading ? (
                 <div className="w-48 h-72 md:w-64 md:h-96 bg-white/5 rounded-2xl animate-pulse" />
-              ) : (
+              ) : playerImageSrc ? (
                 <Image
-                  src={typeof playerData.playerImage === 'string' ? playerData.playerImage : (playerData.playerImage?.src || "/ronaldo.png")}
-                  alt="Player"
-                  className="h-[90%] md:h-[105%] object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.9)]"
-                  height={500}
-                  width={500}
+                  src={playerImageSrc}
+                  alt={playerData.fullName || "Player"}
+                  className="h-full w-auto max-w-full object-contain object-bottom drop-shadow-[0_40px_80px_rgba(0,0,0,0.9)]"
+                  height={800}
+                  width={600}
                 />
-              )}
+              ) : null}
             </div>
             <div className="relative p-4 sm:p-6 md:p-10 w-full space-y-8 min-w-0 z-10">
               <div className="flex flex-col gap-4 sm:gap-6 w-full min-w-0">
@@ -402,7 +243,10 @@ const GenerateCv = () => {
                       <span className="text-white shrink-0">{playerData.age} Years Old</span>
                       <span className="text-white/20 hidden sm:inline">/</span>
                       <span className="flex items-center gap-2 sm:gap-3 text-white shrink-0">
-                        <Image width={16} height={16} src={`https://flagcdn.com/br.svg`} alt={playerData.birthCountry} className="w-3.5 h-2.5 sm:w-4 sm:h-3 md:w-5 md:h-3.5 object-cover rounded-sm shadow-sm" /> {playerData.birthCountry}
+                        {getFlagUrl(playerData.birthCountry) && (
+                          <Image width={16} height={16} unoptimized src={getFlagUrl(playerData.birthCountry)} alt={`${playerData.birthCountry} flag`} className="w-3.5 h-2.5 sm:w-4 sm:h-3 md:w-5 md:h-3.5 object-cover rounded-sm shadow-sm" />
+                        )}{" "}
+                        {playerData.birthCountry}
                       </span>
                     </div>
                   </div>

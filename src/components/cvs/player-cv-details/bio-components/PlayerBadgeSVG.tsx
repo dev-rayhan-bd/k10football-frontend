@@ -5,7 +5,7 @@ export const PlayerBadgeSVG = ({ playerData, className }: { playerData: any, cla
             <div className="p-4 sm:p-6 border-none rounded-2xl relative overflow-hidden group hover:border-primary/20 transition-all w-full min-w-0">
               {/* SVG certificate container */}
               <div className="w-full max-w-full aspect-square relative select-none">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%" data-pdf-rasterize>
                   <defs>
                     <style>{`
                       @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
@@ -484,7 +484,7 @@ export const PlayerBadgeSVG = ({ playerData, className }: { playerData: any, cla
                 </svg>
                 {/* Pending Validation Badge */}
                 {(!playerData?.isVerifiedByCoach || playerData?.validationStatus !== "verified") && (
-                  <div className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center p-3 z-20 backdrop-blur-xs rounded-xl">
+                  <div data-pdf-hide className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center p-3 z-20 backdrop-blur-xs rounded-xl">
                     <div className="text-yellow-500 font-black uppercase text-xs tracking-widest mb-1.5 flex items-center gap-1">
                       <span>⚠️</span> Pending Validation
                     </div>

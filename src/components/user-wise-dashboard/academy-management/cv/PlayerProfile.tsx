@@ -161,7 +161,7 @@ const getHexColor = (val: number) => {
 const getFlagUrl = (countryName: string) => {
   if (!countryName) return "";
   const code = COUNTRY_CODES[countryName.toLowerCase()];
-  return code ? `https://flagcdn.com/${code}.svg` : "";
+  return code ? `https://flagcdn.com/w160/${code}.png` : "";
 };
 const PlayerProfile = ({
   editable = false,

@@ -236,8 +236,8 @@ export const PhysicalStatsLanguagesCard = ({
                 value={lang.name}
                 onUpdate={(val) => handleUpdate(`languages.${idx}.name`, val)}
                 canEdit={canEditBio}
-                className="flex-1 min-w-0 font-medium text-gray-200"
-                inputClassName="w-full min-w-0 truncate text-xs sm:text-sm"
+                className="flex-1 min-w-0 font-medium text-gray-200 uppercase"
+                inputClassName="uppercase w-full min-w-0 truncate text-xs sm:text-sm"
               />
               <CMSField
                 value={lang.level || "Fluent"}
@@ -245,8 +245,8 @@ export const PhysicalStatsLanguagesCard = ({
                 canEdit={canEditBio}
                 type="select"
                 options={["Native", "Fluent", "Intermediate", "Beginner"]}
-                className="w-24 sm:w-32 justify-end shrink-0"
-                inputClassName="text-right text-primary font-bold text-[10px] sm:text-sm w-full truncate"
+                className="w-24 sm:w-32 justify-end shrink-0 uppercase"
+                inputClassName="uppercase text-right text-primary font-bold text-[10px] sm:text-sm w-full truncate"
                 hideIcon={true}
               />
             </div>

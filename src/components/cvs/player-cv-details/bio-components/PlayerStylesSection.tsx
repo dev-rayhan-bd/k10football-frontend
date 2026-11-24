@@ -1,19 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { PencilIcon } from "lucide-react";
-import { ALL_STYLES, STYLE_ICONS } from "./bioConstants";
+import { cn } from "@/lib/utils";
+import { ALL_STYLES, STYLE_ICONS, stylesFromApi } from "./bioConstants";
+
+const MAX_STYLES = 4;
 
 interface PlayerStylesSectionProps {
   playerData: any;
@@ -26,16 +31,34 @@ export const PlayerStylesSection = ({
   handleUpdate,
   canEditBio,
 }: PlayerStylesSectionProps) => {
+  const savedStyles: string[] = stylesFromApi(playerData?.selectedStyleIds);
+
+  // Selections are kept as a local draft while the dialog is open and saved
+  // once with "Save" — ticking a box never calls the API by itself.
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState<string[]>(savedStyles);
+
+  const handleOpenChange = (next: boolean) => {
+    if (next) setDraft(savedStyles);
+    setOpen(next);
+  };
+
   const toggleStyle = (id: string) => {
-    const currentStyles = playerData?.selectedStyleIds || [];
-    if (currentStyles.includes(id)) {
-      handleUpdate(
-        "selectedStyleIds",
-        currentStyles.filter((styleId: any) => styleId !== id)
-      );
-    } else if (currentStyles.length < 4) {
-      handleUpdate("selectedStyleIds", [...currentStyles, id]);
-    }
+    setDraft((prev) =>
+      prev.includes(id)
+        ? prev.filter((styleId) => styleId !== id)
+        : prev.length < MAX_STYLES
+          ? [...prev, id]
+          : prev
+    );
+  };
+
+  const isDraftChanged =
+    draft.length !== savedStyles.length || draft.some((id, i) => id !== savedStyles[i]);
+
+  const handleSave = () => {
+    if (isDraftChanged) handleUpdate("selectedStyleIds", draft);
+    setOpen(false);
   };
 
   const orderedSelectedStyles = (playerData?.selectedStyleIds || [])
@@ -65,7 +88,7 @@ export const PlayerStylesSection = ({
             Player Style
           </h3>
           {canEditBio && (
-            <Dialog>
+            <Dialog open={open} onOpenChange={handleOpenChange}>
               <DialogTrigger asChild>
                 <Button
                   variant="ghost"
@@ -77,35 +100,45 @@ export const PlayerStylesSection = ({
               </DialogTrigger>
               <DialogContent className="bg-cardBg border-border text-foreground w-[95vw] sm:w-125 max-w-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>Select Player Styles (Max 4)</DialogTitle>
+                  <DialogTitle>Select Player Styles (Max {MAX_STYLES})</DialogTitle>
+                  <DialogDescription>
+                    {draft.length}/{MAX_STYLES} selected
+                  </DialogDescription>
                 </DialogHeader>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 py-4">
-                  {ALL_STYLES.map((style) => (
-                    <div
-                      key={style.id}
-                      className="flex items-center gap-2"
-                    >
-                      <Checkbox
-                        id={style.id}
-                        checked={(playerData?.selectedStyleIds || []).includes(
-                          style.id
-                        )}
-                        onCheckedChange={() => toggleStyle(style.id)}
-                        disabled={
-                          !(playerData?.selectedStyleIds || []).includes(
-                            style.id
-                          ) && (playerData?.selectedStyleIds || []).length >= 4
-                        }
-                      />
-                      <Label
-                        htmlFor={style.id}
-                        className="text-xs sm:text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                      >
-                        {style.label}
-                      </Label>
-                    </div>
-                  ))}
+                  {ALL_STYLES.map((style) => {
+                    const checked = draft.includes(style.id);
+                    const disabled = !checked && draft.length >= MAX_STYLES;
+                    return (
+                      <div key={style.id} className="flex items-center gap-2">
+                        <Checkbox
+                          id={`style-${style.id}`}
+                          checked={checked}
+                          onCheckedChange={() => toggleStyle(style.id)}
+                          disabled={disabled}
+                          className="border-muted-foreground"
+                        />
+                        <Label
+                          htmlFor={`style-${style.id}`}
+                          className={cn(
+                            "text-xs sm:text-sm font-medium leading-none cursor-pointer",
+                            disabled && "cursor-not-allowed opacity-50"
+                          )}
+                        >
+                          {style.label}
+                        </Label>
+                      </div>
+                    );
+                  })}
                 </div>
+                <DialogFooter className="gap-2">
+                  <Button variant="outline" onClick={() => setOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSave} disabled={!isDraftChanged}>
+                    Save
+                  </Button>
+                </DialogFooter>
               </DialogContent>
             </Dialog>
           )}

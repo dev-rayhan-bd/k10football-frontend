@@ -22,7 +22,7 @@ export const PersonalInfoContactCard = ({
         <h2 className="text-base sm:text-lg text-center font-heading font-normal mb-4 text-white">
           Personal Information
         </h2>
-        <div className="space-y-3 text-xs sm:text-sm w-full min-w-0">
+        <div className="space-y-3 text-xs sm:text-sm w-full min-w-0 uppercase">
           <div className="flex justify-between items-center gap-2 w-full min-w-0">
             <span className="text-gray-400 shrink-0">Full Name</span>
             <CMSField
@@ -30,7 +30,7 @@ export const PersonalInfoContactCard = ({
               onUpdate={(val) => handleUpdate("fullName", val)}
               canEdit={canEditBio}
               className="flex-1 min-w-0 justify-end"
-              inputClassName="text-right w-full min-w-0 truncate"
+              inputClassName="uppercase text-right w-full min-w-0 truncate"
             />
           </div>
           <div className="flex justify-between items-center gap-2 w-full min-w-0">
@@ -47,7 +47,7 @@ export const PersonalInfoContactCard = ({
               }}
               canEdit={canEditBio}
               className="flex-1 min-w-0 justify-end"
-              inputClassName="text-right w-full min-w-0 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-sm"
+              inputClassName="uppercase text-right w-full min-w-0 bg-gray-900/50 border-gray-700 focus:border-primary transition-all px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-sm"
             />
           </div>
           <div className="flex justify-between items-center gap-2 w-full min-w-0">
@@ -67,7 +67,7 @@ export const PersonalInfoContactCard = ({
                 type="combobox"
                 options={ALL_COUNTRIES}
                 className="w-auto min-w-24 sm:min-w-32 justify-end"
-                inputClassName="text-right w-full min-w-0 truncate text-[10px] sm:text-sm"
+                inputClassName="uppercase text-right w-full min-w-0 truncate text-[10px] sm:text-sm"
               />
               {playerData.birthCountry && getFlagUrl(playerData.birthCountry) ? (
                 <div className="relative w-5 h-3.5 sm:w-6 sm:h-4 overflow-hidden rounded-sm border border-border shrink-0">
@@ -96,7 +96,7 @@ export const PersonalInfoContactCard = ({
                 type="combobox"
                 options={ALL_COUNTRIES}
                 className="w-auto min-w-24 sm:min-w-32 justify-end"
-                inputClassName="text-right w-full min-w-0 truncate text-[10px] sm:text-sm"
+                inputClassName="uppercase text-right w-full min-w-0 truncate text-[10px] sm:text-sm"
               />
               {playerData.dualNationality && getFlagUrl(playerData.dualNationality) ? (
                 <div className="relative w-5 h-3.5 sm:w-6 sm:h-4 overflow-hidden rounded-sm border border-border shrink-0">
@@ -122,7 +122,7 @@ export const PersonalInfoContactCard = ({
               onUpdate={(val) => handleUpdate("academyName", val)}
               canEdit={canEditBio}
               className="flex-1 min-w-0 justify-end"
-              inputClassName="text-right w-full min-w-0 truncate"
+              inputClassName="uppercase text-right w-full min-w-0 truncate"
             />
           </div>
           <div className="flex justify-between items-center gap-2 w-full min-w-0">
@@ -132,7 +132,7 @@ export const PersonalInfoContactCard = ({
               onUpdate={(val) => handleUpdate("coachName", val)}
               canEdit={canEditBio}
               className="flex-1 min-w-0 justify-end"
-              inputClassName="text-right w-full min-w-0 truncate"
+              inputClassName="uppercase text-right w-full min-w-0 truncate"
             />
           </div>
           <div className="flex justify-between items-center gap-2 w-full min-w-0">
@@ -142,7 +142,7 @@ export const PersonalInfoContactCard = ({
               onUpdate={(val) => handleUpdate("clubManaged", val)}
               canEdit={canEditBio}
               className="flex-1 min-w-0 justify-end"
-              inputClassName="text-right w-full min-w-0 truncate"
+              inputClassName="uppercase text-right w-full min-w-0 truncate"
             />
           </div>
         </div>

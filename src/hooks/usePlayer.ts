@@ -19,6 +19,7 @@ import {
 } from "@/redux/features/player/playerApi";
 import { IUpdatePlayerPayload } from "@/types/player.type";
 import { toast } from "sonner";
+import { stylesToApi } from "@/components/cvs/player-cv-details/bio-components/bioConstants";
 
 export const usePlayer = () => {
   const dispatch = useAppDispatch();
@@ -314,7 +315,8 @@ export const usePlayer = () => {
         case "selectedStyleIds":
         case "playerStyles":
           backendPayload = {
-            playerStyles: Array.isArray(value) ? value : [String(value)],
+            // Backend expects the PLAYER_STYLES enum labels ("Finesse Shot"), not ids.
+            playerStyles: stylesToApi(value),
           };
           break;
         case "clubs":
@@ -387,73 +389,15 @@ export const usePlayer = () => {
           break;
         case "strengths":
         case "strength": {
+          // Pass through only the strength keys provided — each strength is
+          // independent and must not be copied into other attributes.
           const s = (typeof value === "object" && value !== null) ? value : {};
-          const pace = Number(s.pace ?? 50);
-          const shooting = Number(s.shooting ?? 50);
-          const passing = Number(s.passing ?? 50);
-          const dribbling = Number(s.dribbling ?? 50);
-          const defending = Number(s.defending ?? 50);
-          const physical = Number(s.physical ?? 50);
-          const heading = Number(s.heading ?? 50);
-
-          backendPayload = {
-            attributes: {
-              pace,
-              acceleration: pace,
-              sprintSpeed: pace,
-              shotStopping: pace,
-
-              shooting,
-              finishing: shooting,
-              longShots: shooting,
-              shotPower: shooting,
-              handling: shooting,
-              crossClaiming: shooting,
-
-              passing,
-              shortPassing: passing,
-              vision: passing,
-              longPassing: passing,
-              crossing: passing,
-              distribution: passing,
-
-              dribbling,
-              ballControl: dribbling,
-              agility: dribbling,
-              reflexes: dribbling,
-              oneOnOne: dribbling,
-
-              defending,
-              marking: defending,
-              standingTackle: defending,
-              tackling: defending,
-              interceptions: defending,
-              interception: defending,
-              footwork: defending,
-              defensiveAwareness: defending,
-
-              physical,
-              strength: physical,
-              stamina: physical,
-              jumping: physical,
-              positioning: physical,
-              decisions: physical,
-
-              heading,
-              headingAccuracy: heading,
-              aerialDuels: heading,
-            },
-            strengths: {
-              pace,
-              shooting,
-              passing,
-              dribbling,
-              defending,
-              physical,
-              heading,
-            },
-            strength: physical,
-          };
+          const strengths: Record<string, number> = {};
+          ["pace", "shooting", "passing", "dribbling", "defending", "physical", "heading"].forEach((k) => {
+            const n = Number(s[k]);
+            if (s[k] !== undefined && !isNaN(n)) strengths[k] = n;
+          });
+          backendPayload = Object.keys(strengths).length > 0 ? { strengths } : null;
           break;
         }
         case "additionalNotes":

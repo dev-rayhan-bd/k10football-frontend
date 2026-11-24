@@ -295,7 +295,7 @@ const ClubSection = ({ editable = true }: { editable?: boolean }) => {
         <h1 className="text-3xl sm:text-4xl font-light text-center text-foreground font-heading order-1 sm:order-2 w-full sm:w-1/3">
           Clubs
         </h1>
-        <div className="order-3 w-full sm:w-1/3 flex justify-center sm:justify-end">
+        <div data-pdf-hide className="order-3 w-full sm:w-1/3 flex justify-center sm:justify-end">
           {editable && (
             <Button
               onClick={() => {
@@ -321,7 +321,7 @@ const ClubSection = ({ editable = true }: { editable?: boolean }) => {
       </div>
 
       <div className="border border-border bg-black/30 rounded-2xl p-4 sm:p-8 w-full min-w-0">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 w-full min-w-0">
+        <div data-pdf-row="3" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 w-full min-w-0">
           {playerData?.clubs?.map((club) => {
             if (editingClubId === club.id) {
               return (

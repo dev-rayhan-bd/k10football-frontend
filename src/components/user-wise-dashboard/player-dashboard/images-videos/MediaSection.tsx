@@ -34,6 +34,7 @@ export const MediaSection: React.FC<MediaSectionProps> = ({
         </div>
         {onUploadClick && (
           <button
+            data-pdf-hide
             onClick={onUploadClick}
             type="button"
             className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-[#1A1A1A] border border-white/10 text-[10px] sm:text-xs font-bold text-white hover:bg-[#252525] hover:border-white/20 transition-all flex items-center justify-center sm:justify-start gap-2.5 uppercase tracking-wider cursor-pointer"
@@ -82,7 +83,7 @@ export const MediaSection: React.FC<MediaSectionProps> = ({
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+        <div data-pdf-row="3" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
           {items.map((item, idx) => (
             <MediaCard
               key={item.id || idx}

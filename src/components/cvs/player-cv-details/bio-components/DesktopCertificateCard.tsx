@@ -12,6 +12,7 @@ export const DesktopCertificateCard = ({ playerData }: { playerData: any }) => {
           viewBox="0 0 800 800"
           width="100%"
           height="100%"
+          data-pdf-rasterize
         >
           <defs>
             <style>{`
@@ -242,7 +243,7 @@ export const DesktopCertificateCard = ({ playerData }: { playerData: any }) => {
 
         {/* Pending Validation Badge */}
         {(!playerData.isVerifiedByCoach || playerData.validationStatus !== "verified") && (
-          <div className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center p-3 z-20 backdrop-blur-xs rounded-xl">
+          <div data-pdf-hide className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center p-3 z-20 backdrop-blur-xs rounded-xl">
             <div className="text-yellow-500 font-black uppercase text-xs tracking-widest mb-1.5 flex items-center gap-1">
               <span>⚠️</span> Pending Validation
             </div>
