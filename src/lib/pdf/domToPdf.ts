@@ -219,7 +219,12 @@ export interface DomPagesToPdfOptions {
   fileName: string;
   /** Page background (also used behind content). */
   backgroundColor?: string;
-  /** Viewport width used to lay out the capture (keeps desktop layout on any screen). */
+  /**
+   * Viewport width used to lay out the capture. Defaults to the live page's
+   * content width: html2canvas crops using the element's *live* position and
+   * size, so laying the copy out at any other width shifts/crops full-width
+   * sections.
+   */
   windowWidth?: number;
   /** Page margin in mm. */
   marginMm?: number;
@@ -242,7 +247,7 @@ export const domPagesToPdf = async ({
   pages,
   fileName,
   backgroundColor = "#0a0a0a",
-  windowWidth = 1440,
+  windowWidth,
   marginMm = 6,
   footer,
 }: DomPagesToPdfOptions) => {
@@ -274,7 +279,7 @@ export const domPagesToPdf = async ({
           allowTaint: false,
           backgroundColor,
           logging: false,
-          windowWidth,
+          windowWidth: windowWidth ?? document.documentElement.clientWidth,
           onclone: (clonedDoc) => {
             clonedDoc.querySelectorAll("img").forEach((img) => {
               const data = inlined.get(img.getAttribute("src") || "");

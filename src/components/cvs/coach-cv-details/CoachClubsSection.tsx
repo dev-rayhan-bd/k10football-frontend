@@ -241,6 +241,7 @@ const CoachClubsSection = ({ editable = true }: { editable?: boolean }) => {
         <div className="order-3 w-full sm:w-1/3 flex justify-center sm:justify-end">
           {canEdit ? (
             <Button
+ data-pdf-hide
               onClick={() => {
                 if (isLimitReached) {
                   toast.error("Maximum 6 clubs allowed. Remove an entry to add a new one.");

@@ -81,6 +81,7 @@ export const CoachAccomplishments = ({ canEdit }: { canEdit: boolean }) => {
             <Dialog open={isAddAccOpen} onOpenChange={setIsAddAccOpen}>
               <DialogTrigger asChild>
                 <Button
+ data-pdf-hide
                   variant="outline"
                   className="w-full mt-6 border-dashed border-white/20 hover:border-primary hover:bg-transparent text-gray-400 hover:text-white flex items-center justify-center gap-2"
                 >
@@ -231,6 +232,7 @@ export const CoachAccomplishments = ({ canEdit }: { canEdit: boolean }) => {
 
             {canEdit && (
               <Button
+ data-pdf-hide
                 variant="outline"
                 onClick={() => {
                   const newTrophy = {

@@ -401,6 +401,7 @@ const TestimonialSection = ({ editable = false }: { editable?: boolean }) => {
 
           {canEdit && (
             <Button
+ data-pdf-hide
               type="button"
               onClick={handleOpenAdd}
               className="mt-3 bg-white/5 hover:bg-white/10 text-white border border-white/15 gap-2 px-6 py-3 rounded-xl font-bold uppercase tracking-wider text-xs h-auto font-orbitron transition-all cursor-pointer"

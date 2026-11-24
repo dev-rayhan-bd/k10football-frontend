@@ -152,9 +152,30 @@ export const COACH_STYLE_GROUPS = [
   },
 ];
 
+// Labels are exactly the backend COACH_STYLES enum values.
 export const ALL_COACH_STYLES = COACH_STYLE_GROUPS.flatMap(group =>
   group.styles.map(style => ({
     id: style.toLowerCase().replace(/ /g, "-"),
     label: style
   }))
 );
+
+const normalizeStyleKey = (value: string) =>
+  String(value).trim().toLowerCase().replace(/[_\s]+/g, "-");
+
+/** Any form ("Tiki-Taka", "TIKI_TAKA", "tiki-taka") → UI id ("tiki-taka"), or null. */
+export const toCoachStyleId = (value: unknown): string | null => {
+  if (!value) return null;
+  const key = normalizeStyleKey(String(value));
+  return ALL_COACH_STYLES.find((s) => s.id === key)?.id ?? null;
+};
+
+/** Backend `coachStyles` → unique UI ids (unknown values dropped). */
+export const coachStylesFromApi = (values: unknown): string[] =>
+  Array.isArray(values)
+    ? Array.from(new Set(values.map(toCoachStyleId).filter((id): id is string => Boolean(id))))
+    : [];
+
+/** UI ids → backend enum values ("Tiki-Taka", "Park the Bus", ...). */
+export const coachStylesToApi = (ids: unknown): string[] =>
+  coachStylesFromApi(ids).map((id) => ALL_COACH_STYLES.find((s) => s.id === id)!.label);

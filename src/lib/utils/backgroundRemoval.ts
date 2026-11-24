@@ -279,6 +279,110 @@ export async function removeSolidBackground(file: File, tolerance = 45): Promise
 }
 
 /**
+ * Cleans the raw AI cutout of a person photo:
+ *  1. Hardens the alpha mask — faint, half-sure pixels (blurred crowd, grass
+ *     glow) are dropped, near-solid pixels become fully opaque.
+ *  2. Keeps only the main subject: connected regions much smaller than the
+ *     largest one (stray specks of background) are erased.
+ *  3. Softens the outermost edge pixels so no coloured halo from the old
+ *     background remains.
+ */
+function cleanSubjectMask(canvas: HTMLCanvasElement) {
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) return;
+  const { width: w, height: h } = canvas;
+  const imgData = ctx.getImageData(0, 0, w, h);
+  const d = imgData.data;
+  const n = w * h;
+
+  // 1. Harden alpha.
+  const LOW = 120;
+  const HIGH = 210;
+  for (let p = 0; p < n; p++) {
+    const i = p * 4 + 3;
+    const a = d[i];
+    d[i] = a <= LOW ? 0 : a >= HIGH ? 255 : Math.round(((a - LOW) / (HIGH - LOW)) * 255);
+  }
+
+  // 2. Connected components (4-neighbour) of visible pixels.
+  const label = new Int32Array(n).fill(-1);
+  const sizes: number[] = [];
+  const stack: number[] = [];
+  for (let start = 0; start < n; start++) {
+    if (label[start] !== -1 || d[start * 4 + 3] === 0) continue;
+    const id = sizes.length;
+    let size = 0;
+    label[start] = id;
+    stack.push(start);
+    while (stack.length) {
+      const p = stack.pop()!;
+      size++;
+      const x = p % w;
+      const neighbours = [
+        x > 0 ? p - 1 : -1,
+        x < w - 1 ? p + 1 : -1,
+        p - w >= 0 ? p - w : -1,
+        p + w < n ? p + w : -1,
+      ];
+      for (const q of neighbours) {
+        if (q >= 0 && label[q] === -1 && d[q * 4 + 3] > 0) {
+          label[q] = id;
+          stack.push(q);
+        }
+      }
+    }
+    sizes.push(size);
+  }
+  if (sizes.length > 1) {
+    const largest = Math.max(...sizes);
+    const minKeep = largest * 0.08; // keep e.g. a separate ball, drop specks
+    for (let p = 0; p < n; p++) {
+      const id = label[p];
+      if (id >= 0 && sizes[id] < minKeep) d[p * 4 + 3] = 0;
+    }
+  }
+
+  // 3. Soften the 1px border of the subject (removes background-coloured halo).
+  const alpha = new Uint8ClampedArray(n);
+  for (let p = 0; p < n; p++) alpha[p] = d[p * 4 + 3];
+  for (let p = 0; p < n; p++) {
+    if (alpha[p] === 0) continue;
+    const x = p % w;
+    const touchesEmpty =
+      (x > 0 && alpha[p - 1] === 0) ||
+      (x < w - 1 && alpha[p + 1] === 0) ||
+      (p - w >= 0 && alpha[p - w] === 0) ||
+      (p + w < n && alpha[p + w] === 0);
+    if (touchesEmpty) d[p * 4 + 3] = Math.min(alpha[p], 110);
+  }
+
+  ctx.putImageData(imgData, 0, 0);
+}
+
+/** Loads a Blob into a canvas. */
+async function blobToCanvas(blob: Blob): Promise<HTMLCanvasElement> {
+  const url = URL.createObjectURL(blob);
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const el = new window.Image();
+      el.onload = () => resolve(el);
+      el.onerror = () => reject(new Error("Failed to load cutout"));
+      el.src = url;
+    });
+    const canvas = document.createElement("canvas");
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    canvas.getContext("2d")?.drawImage(img, 0, 0);
+    return canvas;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+const canvasToPngBlob = (canvas: HTMLCanvasElement) =>
+  new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
+
+/**
  * Loads @imgly/background-removal natively in the browser via ESM CDN.
  * Intentionally avoids bundler-transformed imports because Next.js 16 Turbopack
  * breaks onnxruntime-web's default export and dynamic blob: WASM worker imports.
@@ -325,7 +429,9 @@ export async function removeBackgroundWithAI(
   const inputBlob = await resizeImageForSegmentation(file, 1024);
 
   const blob: Blob = await removeBackground(inputBlob, {
-    model: "isnet_quint8",
+    // fp16 gives noticeably cleaner edges than the 8-bit model on busy
+    // backgrounds (stadium crowds, grass); downloaded once and cached.
+    model: "isnet_fp16",
     device: "cpu",
     publicPath: "https://staticimgly.com/@imgly/background-removal-data/1.7.0/dist/",
     output: {
@@ -374,6 +480,17 @@ export async function smartRemoveBackground(
     const aiFile = await Promise.race([aiPromise, timeoutPromise]);
     if (isLogo) {
       return await trimTransparentFile(aiFile);
+    }
+    // Person photos: clean leftover background, then crop to the subject so
+    // it fills its frame.
+    try {
+      const canvas = await blobToCanvas(aiFile);
+      cleanSubjectMask(canvas);
+      const trimmed = trimTransparentCanvas(canvas, 0.01);
+      const blob = await canvasToPngBlob(trimmed);
+      if (blob) return new File([blob], aiFile.name, { type: "image/png" });
+    } catch (cleanErr) {
+      console.warn("[BG Removal] Cutout clean-up skipped:", cleanErr);
     }
     return aiFile;
   } catch (aiErr) {

@@ -26,6 +26,7 @@ import { useAppDispatch } from "@/hooks/reduxHooks";
 import { useGetMyCoachCvQuery } from "@/redux/features/coach/coachApi";
 import { syncFromCoachCvResponse, updateCoachField } from "@/redux/features/coach/coachSlice";
 import { cn } from "@/lib/utils";
+import { domPagesToPdf } from "@/lib/pdf/domToPdf";
 
 const COUNTRY_CODES: Record<string, string> = {
   "afghanistan": "af", "albania": "al", "algeria": "dz", "andorra": "ad", "angola": "ao",
@@ -79,6 +80,8 @@ const getFlagUrl = (countryName?: string) => {
   if (!code) return "";
   return `https://flagcdn.com/w160/${code}.png`;
 };
+
+const MAX_VALIDATIONS_PREVIEW = 3;
 
 const GenerateCvCoach = () => {
   const router = useRouter();
@@ -234,18 +237,21 @@ const GenerateCvCoach = () => {
       : [];
 
   // Filter players who need validation (fallback)
-  const validationNeededPlayers = players
-    .filter((player) => {
-      return (
-        player.validationStatus === "pending" ||
-        player.validationStatus === "expired" ||
-        player.requestedValidation ||
-        (player.assignedMonthsAgo &&
-          player.assignedMonthsAgo >= 3 &&
-          player.validationStatus !== "verified")
-      );
-    })
-    .slice(0, 3);
+  const validationNeededPlayers = players.filter((player) => {
+    return (
+      player.validationStatus === "pending" ||
+      player.validationStatus === "expired" ||
+      player.requestedValidation ||
+      (player.assignedMonthsAgo &&
+        player.assignedMonthsAgo >= 3 &&
+        player.validationStatus !== "verified")
+    );
+  });
+
+  // The validations card shares a row with Completion Status and Tier; showing
+  // only a preview keeps that row compact (the full list is one click away).
+  const validationsTotal =
+    assignedReviews.length > 0 ? assignedReviews.length : validationNeededPlayers.length;
 
   const getValidationReason = (player: any) => {
     if (player.requestedValidation) return "Requested";
@@ -255,142 +261,37 @@ const GenerateCvCoach = () => {
     return "Pending";
   };
 
-  const generateProfessionalPDF = () => {
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) return;
-    const htmlContent = `
-      <html>
-        <head>
-          <title>${fullName} - Technical Coaching Profile</title>
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
-            body {
-              font-family: 'Inter', sans-serif;
-              color: #111;
-              margin: 0;
-              padding: 50px;
-              line-height: 1.4;
-              background: #fff;
-            }
-            .header {
-              display: flex;
-              justify-content: space-between;
-              align-items: flex-start;
-              border-bottom: 4px solid #E31B23;
-              padding-bottom: 40px;
-              margin-bottom: 50px;
-            }
-            .brand { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 3px; color: #E31B23; margin-bottom: 10px; }
-            .coach-name { font-size: 48px; font-weight: 900; text-transform: uppercase; letter-spacing: -2px; margin: 0; line-height: 1; }
-            .coach-title { font-size: 16px; font-weight: 600; color: #666; margin-top: 5px; text-transform: uppercase; }
-            .rating-circle {
-              width: 100px;
-              height: 100px;
-              background: #111;
-              color: #fff;
-              border-radius: 50%;
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              justify-content: center;
-              border: 4px solid #E31B23;
-            }
-            .rating-value { font-size: 36px; font-weight: 900; line-height: 1; }
-            .rating-label { font-size: 10px; font-weight: 800; text-transform: uppercase; opacity: 0.6; }
-            .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
-            .section { margin-bottom: 40px; }
-            .section-header { 
-              font-size: 14px; 
-              font-weight: 900; 
-              text-transform: uppercase; 
-              letter-spacing: 2px; 
-              color: #111;
-              border-bottom: 2px solid #eee;
-              padding-bottom: 8px;
-              margin-bottom: 20px;
-              display: flex;
-              justify-content: space-between;
-            }
-            .attribute-table { width: 100%; border-collapse: collapse; }
-            .attribute-row { border-bottom: 1px solid #f0f0f0; }
-            .attribute-cell { padding: 10px 0; font-size: 13px; }
-            .attr-label { color: #666; font-weight: 600; }
-            .attr-value { font-weight: 900; text-align: right; color: #111; }
-            .attr-bar-bg { width: 60px; height: 6px; background: #eee; border-radius: 3px; display: inline-block; margin-left: 15px; position: relative; top: -2px; }
-            .attr-bar-fill { height: 100%; background: #E31B23; border-radius: 3px; }
-            .full-width { grid-column: span 2; }
-            .highlight-box { background: #f9f9f9; padding: 25px; border-radius: 15px; border: 1px solid #eee; }
-            .footer {
-              margin-top: 80px;
-              padding-top: 30px;
-              border-top: 1px solid #eee;
-              display: flex;
-              justify-content: space-between;
-              font-size: 10px;
-              color: #999;
-              font-weight: 600;
-              text-transform: uppercase;
-              letter-spacing: 1px;
-            }
-            @media print {
-              body { padding: 0; }
-              .no-print { display: none; }
-              -webkit-print-color-adjust: exact;
-            }
-          </style>
-        </head>
-        <body oncontextmenu="return false;">
-          <div class="header">
-            <div>
-              <div class="brand">Eddie Ricci Football Management</div>
-              <h1 class="coach-name">${fullName}</h1>
-              <div class="coach-title">${title}</div>
-            </div>
-            <div class="rating-circle">
-              <span class="rating-label">Overall</span>
-              <span class="rating-value">${overallRating}</span>
-            </div>
-          </div>
-          <div class="main-grid">
-            <!-- Bio Section -->
-            <div class="section">
-              <div class="section-header">Professional Profile</div>
-              <table class="attribute-table">
-                <tr class="attribute-row"><td class="attribute-cell attr-label">Experience</td><td class="attribute-cell attr-value">${experienceText}</td></tr>
-                <tr class="attribute-row"><td class="attribute-cell attr-label">Current Role</td><td class="attribute-cell attr-value">${title}</td></tr>
-                <tr class="attribute-row"><td class="attribute-cell attr-label">Current Club</td><td class="attribute-cell attr-value">${currentClub}</td></tr>
-                <tr class="attribute-row"><td class="attribute-cell attr-label">Nationality</td><td class="attribute-cell attr-value">${birthCountry || "International"}</td></tr>
-                <tr class="attribute-row"><td class="attribute-cell attr-label">Contact</td><td class="attribute-cell attr-value">${contactPhone}</td></tr>
-                <tr class="attribute-row"><td class="attribute-cell attr-label">Email</td><td class="attribute-cell attr-value">${contactEmail}</td></tr>
-              </table>
-            </div>
-            <!-- Performance Metrics -->
-            <div class="section">
-              <div class="section-header">Coaching Summary</div>
-              <table class="attribute-table">
-                <tr class="attribute-row"><td class="attribute-cell attr-label">License</td><td class="attribute-cell attr-value">${validationStatus}</td></tr>
-                <tr class="attribute-row"><td class="attribute-cell attr-label">Tier Status</td><td class="attribute-cell attr-value">${cvTier}</td></tr>
-                <tr class="attribute-row"><td class="attribute-cell attr-label">Profile Completion</td><td class="attribute-cell attr-value">${completionPercentage}%</td></tr>
-                <tr class="attribute-row"><td class="attribute-cell attr-label">Status</td><td class="attribute-cell attr-value">${statusBadge}</td></tr>
-              </table>
-            </div>
-          </div>
-          <div class="footer">
-            <span>Tech ID: ${cv?._id || "COACH-CV"} • Confirmed By: K10 Football Management</span>
-            <span>Internal Document</span>
-            <span>Date: ${new Date().toLocaleDateString()}</span>
-          </div>
-          <script>
-            window.onload = function() { 
-              window.print();
-              setTimeout(function() { window.close(); }, 500);
-            };
-          </script>
-        </body>
-      </html>
-    `;
-    printWindow.document.write(htmlContent);
-    printWindow.document.close();
+  // Exports the CV exactly as it looks on screen: one PDF page per
+  // `data-cv-pdf-page` group in FullEditableCv (same exporter as the player CV).
+  //  1) personal info, photo, styles, stats  2) clubs & courses
+  //  3) formations & testimonials           4) documents, images/videos (3 each), story
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const generateProfessionalPDF = async () => {
+    if (isExportingPdf) return;
+    const pages = [1, 2, 3, 4]
+      .map((n) => document.querySelector<HTMLElement>(`[data-cv-pdf-page="${n}"]`))
+      .filter((el): el is HTMLElement => Boolean(el));
+    if (pages.length !== 4) {
+      toast.error("The CV is still loading. Please try again in a moment.");
+      return;
+    }
+    setIsExportingPdf(true);
+    const toastId = toast.loading("Generating CV PDF... Please wait.");
+    try {
+      const displayName = (fullName || "Coach").trim();
+      const safeName = displayName.replace(/\s+/g, "_");
+      await domPagesToPdf({
+        pages,
+        fileName: `CV_${safeName}.pdf`,
+        footer: (page, total) => `${displayName} - Coach CV - Page ${page} of ${total}`,
+      });
+      toast.success("CV PDF downloaded.", { id: toastId });
+    } catch (err) {
+      console.error("Coach CV PDF export failed:", err);
+      toast.error("Failed to generate the CV PDF. Please try again.", { id: toastId });
+    } finally {
+      setIsExportingPdf(false);
+    }
   };
 
   return (
@@ -414,9 +315,11 @@ const GenerateCvCoach = () => {
           )}
           <Button
             onClick={generateProfessionalPDF}
+            disabled={isExportingPdf}
             className="w-full md:w-auto bg-[#222222] hover:bg-[#333333] text-white border border-white/5 gap-2 px-6 py-4 rounded-xl font-bold uppercase tracking-widest text-[10px] h-auto cursor-pointer"
           >
-            <IconDownload size={18} /> Download CV PDF
+            {isExportingPdf ? <IconLoader2 size={18} className="animate-spin" /> : <IconDownload size={18} />}
+            {isExportingPdf ? "Generating PDF..." : "Download CV PDF"}
           </Button>
         </div>
       </div>
@@ -669,7 +572,7 @@ const GenerateCvCoach = () => {
             </div>
             <div className="flex flex-col gap-4">
               {assignedReviews && assignedReviews.length > 0 ? (
-                assignedReviews.map((review: any, idx: number) => (
+                assignedReviews.slice(0, MAX_VALIDATIONS_PREVIEW).map((review: any, idx: number) => (
                   <div
                     key={review._id || review.id || idx}
                     className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 group hover:border-[#E31B23]/50 transition-colors"
@@ -702,9 +605,11 @@ const GenerateCvCoach = () => {
                       </div>
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-2">
-                      <div className="text-base sm:text-lg font-black text-white italic">
-                        {review.rating ?? 0}
-                      </div>
+                      {Number(review.rating) > 0 && (
+                        <div className="text-base sm:text-lg font-black text-white italic">
+                          {review.rating}
+                        </div>
+                      )}
                       <button
                         onClick={() => {
                           router.push("/dashboard/coach/player-cv-validations");
@@ -717,7 +622,7 @@ const GenerateCvCoach = () => {
                   </div>
                 ))
               ) : validationNeededPlayers.length > 0 ? (
-                validationNeededPlayers.map((player) => {
+                validationNeededPlayers.slice(0, MAX_VALIDATIONS_PREVIEW).map((player) => {
                   const reason = getValidationReason(player);
                   const reasonColors =
                     reason === "Requested"
@@ -755,9 +660,11 @@ const GenerateCvCoach = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-2">
-                        <div className="text-base sm:text-lg font-black text-white italic">
-                          {player.rating}
-                        </div>
+                        {Number(player.rating) > 0 && (
+                          <div className="text-base sm:text-lg font-black text-white italic">
+                            {player.rating}
+                          </div>
+                        )}
                         <button
                           onClick={() => {
                             selectPlayer(player.id);
@@ -775,6 +682,15 @@ const GenerateCvCoach = () => {
                 <div className="text-center py-6 text-xs text-white/40 uppercase tracking-wider font-bold">
                   All Player CVs Validated
                 </div>
+              )}
+              {validationsTotal > MAX_VALIDATIONS_PREVIEW && (
+                <button
+                  type="button"
+                  onClick={() => router.push("/dashboard/coach/player-cv-validations")}
+                  className="w-full py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer"
+                >
+                  View all ({validationsTotal})
+                </button>
               )}
             </div>
           </section>

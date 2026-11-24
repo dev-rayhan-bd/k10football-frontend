@@ -3,9 +3,9 @@
 import Image from "next/image";
 import React, { useContext, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useAppSelector } from "@/hooks/reduxHooks";
 import { CoachContext } from "@/app/dashboard/coach/layout";
 import { useCoach } from "@/hooks/useCoach";
+import { calculateAge } from "@/components/cvs/coach-cv-details/bio-components/utils";
 import {
   IconBallFootball,
   IconEye,
@@ -36,6 +36,7 @@ import {
 import {
   useGetMyCoachAnalyticsQuery,
   useGetMyTeamsQuery,
+  useGetCoachGameReportsQuery,
   useUpdatePlayerFitnessStatusMutation,
 } from "@/redux/features/coach/coachApi";
 import { useGetMySubscriptionQuery } from "@/redux/features/subscription/subscriptionApi";
@@ -74,11 +75,6 @@ import DashboardHero from "@/components/dashboard/DashboardHero";
 const DEFAULT_AVATAR =
   "https://res.cloudinary.com/da1uxchgo/image/upload/v1789553255/player_profiles/ejlqkaqmvctx4xodazzj.jpg";
 
-const clubsInterested = [
-  { id: 1, name: "Manchester City", logo: "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg", action: "Viewed your profile" },
-  { id: 2, name: "Liverpool FC", logo: "https://upload.wikimedia.org/wikipedia/en/0/0c/Liverpool_FC.svg", action: "Viewed your profile" },
-  { id: 3, name: "Chelsea FC", logo: "https://upload.wikimedia.org/wikipedia/en/c/cc/Chelsea_FC.svg", action: "Viewed your profile" },
-];
 
 const formatDate = (dateStr?: string) => {
   if (!dateStr) return "N/A";
@@ -120,11 +116,58 @@ const MediaCardSkeleton = ({ isVideo }: { isVideo?: boolean }) => (
   </div>
 );
 
+/**
+ * Video card preview: the uploaded thumbnail if there is one, otherwise the
+ * video's own first frame. (A video URL can't be used as an <img> source —
+ * that is what left uploaded videos showing the grey placeholder.)
+ */
+const VideoThumbnail = ({ item }: { item: IMediaItem }) => {
+  const [thumbFailed, setThumbFailed] = useState(false);
+  const className =
+    "size-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-90";
+
+  if (item.thumbnailUrl && !thumbFailed) {
+    return (
+      <Image
+        width={400}
+        height={250}
+        src={item.thumbnailUrl}
+        className={className}
+        alt={item.title}
+        unoptimized
+        onError={() => setThumbFailed(true)}
+      />
+    );
+  }
+  if (item.url) {
+    return (
+      <video
+        // "#t=0.1" makes browsers paint the first frame instead of a black box.
+        src={`${item.url}#t=0.1`}
+        className={cn(className, "pointer-events-none")}
+        muted
+        playsInline
+        preload="metadata"
+      />
+    );
+  }
+  return (
+    <Image width={400} height={250} src="/placeholder_img.jpg" className={className} alt={item.title} />
+  );
+};
+
 const CoachDashboard = () => {
   const { hasAcademy } = useContext(CoachContext);
   const { coachData, isLoading: isCoachLoading, handleUpdate, isUpdating: isUpdatingCoach } = useCoach();
   const router = useRouter();
-  const requests = useAppSelector(state => state.reports.requests);
+  // Pending game reports come from the backend (not the local request store).
+  const {
+    data: gameReportsResponse,
+    isLoading: isLoadingGameReports,
+  } = useGetCoachGameReportsQuery({ status: "PENDING", limit: 5 });
+  const pendingReports = (gameReportsResponse?.data?.reports || [])
+    .filter((r) => r.status?.toUpperCase() === "PENDING")
+    .slice(0, 5);
 
   // Coach Analytics API Query
   const {
@@ -135,6 +178,65 @@ const CoachDashboard = () => {
   const analytics = analyticsResponse?.data;
   const profileAnalysis = analytics?.coachProfileAnalysis;
   const tournamentStats = analytics?.tournamentStats;
+
+  // ---- Hero values: backend data only, no invented fallbacks ----
+  // The CV's overallRatingScore is the coach's rating; analytics is only a fallback.
+  const ratingValue = Number(coachData.overallRatingScore || profileAnalysis?.overall || 0);
+  const heroRating = ratingValue > 0 ? ratingValue : undefined; // hidden when unknown
+  // True when the analytics API has no attribute scores yet (all six are 0).
+  const hasProfileAnalysis = Boolean(
+    profileAnalysis &&
+      ["tactics", "leadership", "communication", "adaptability", "discipline", "development"].some(
+        (k) => Number((profileAnalysis as unknown as Record<string, unknown>)[k]) > 0
+      )
+  );
+  const heroBadge = coachData.transferStatus ? `${coachData.transferStatus} Coach` : undefined;
+  const coachTypeRaw = coachData.coachType || "";
+  const heroCoachType = coachTypeRaw
+    ? coachTypeRaw
+        .toLowerCase()
+        .split("_")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ")
+    : coachData.title || "Coach";
+  // Age is derived from the date of birth when available, so it can't
+  // disagree with the DOB shown on the CV.
+  const ageFromDob = coachData.dob ? calculateAge(coachData.dob) : "";
+  const heroAge = ageFromDob !== "" ? String(ageFromDob) : (coachData.age || "").replace(/\D/g, "");
+  const heroDetails = [
+    heroAge ? { text: `${heroAge} Years` } : null,
+    coachData.birthCountry ? { text: coachData.birthCountry } : null,
+  ].filter((d): d is { text: string } => Boolean(d));
+  // ---- My CV card: all from GET /coaches/me/cv ----
+  const profileCompletion = Math.max(
+    0,
+    Math.min(100, Math.round(Number(coachData.profileCompletion || coachData.completionPercentage || 0)))
+  );
+  const cvTierLabel = (coachData.cvTier || analytics?.cvTier || "").toUpperCase();
+  const cvChecklist = [
+    { label: "Personal Info", checked: Boolean(coachData.fullName && coachData.dob && coachData.birthCountry) },
+    { label: "Key Accomplishments", checked: (coachData.accomplishments?.length ?? 0) > 0 },
+    { label: "Major Trophies", checked: (coachData.majorTrophies?.length ?? 0) > 0 },
+    { label: "Key Skills", checked: (coachData.keySkills?.length ?? 0) > 0 },
+    { label: "Courses", checked: (coachData.courses?.length ?? 0) > 0 },
+  ];
+  const handleShareCv = async () => {
+    if (!coachData._id) {
+      toast.error("Your CV is still loading. Please try again.");
+      return;
+    }
+    const link = `${window.location.origin}/cvs/coach-cv-details?coachId=${coachData._id}`;
+    try {
+      await navigator.clipboard.writeText(link);
+      toast.success("CV link copied. Share it with agents and clubs.");
+    } catch {
+      toast.error("Couldn't copy the link. Please copy it manually: " + link);
+    }
+  };
+
+  const heroValidationStatus = coachData.validationStatus
+    ? coachData.validationStatus.replace(/_/g, " ").toUpperCase()
+    : "Not validated yet";
 
   // Radar chart data for Coach Profile Analysis
   const profileAnalysisData = useMemo(() => {
@@ -575,18 +677,15 @@ const CoachDashboard = () => {
           {/* Hero Section */}
           <DashboardHero
             backgroundImage={coachData.coverImage || "/stadium-night.jpg"}
-            rating={profileAnalysis?.overall ?? coachData.overallRatingScore ?? 58}
-            badgeText={`${coachData.transferStatus || "Active"} Coach`}
+            rating={heroRating}
+            badgeText={heroBadge}
             title={coachData.fullName || "Coach"}
-            subtitle={coachData.coachType || coachData.title || "Coach"}
-            details={[
-              { text: coachData.age ? coachData.age.replace(/\D/g, "") : "" },
-              { text: coachData.birthCountry }
-            ]}
+            subtitle={heroCoachType}
+            details={heroDetails}
             contacts={[
-              { type: "club", label: "Current Club", value: coachData.agency || coachData.currentClub || "Not specified" },
+              { type: "club", label: "Current Club", value: coachData.currentClub || "Not specified" },
               { type: "phone", label: "Contact", value: coachData.phone || "N/A" },
-              { type: "license", label: "Validation Status", value: coachData.licenseStatus || "UEFA A License" },
+              { type: "license", label: "Validation Status", value: heroValidationStatus },
               { type: "email", label: "Email", value: coachData.email || "N/A" },
             ]}
             characterImage={coachData.profileImage || coachData.coachImage || "/coach-image.png"}
@@ -640,19 +739,26 @@ const CoachDashboard = () => {
                         Coach Profile Analysis
                       </h3>
                     </div>
-                    {profileAnalysis?.overall !== undefined && (
+                    {heroRating !== undefined && (
                       <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#E31B23]/10 border border-[#E31B23]/30">
                         <span className="text-[10px] uppercase font-bold text-white/60 tracking-wider">
                           Overall:
                         </span>
                         <span className="text-xs font-black text-[#E31B23] font-orbitron">
-                          {profileAnalysis.overall}
+                          {heroRating}
                         </span>
                       </div>
                     )}
                   </div>
 
-                  <div className="size-full min-h-0">
+                  <div className="relative size-full min-h-0">
+                    {!hasProfileAnalysis && (
+                      <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+                        <span className="px-3 py-1.5 rounded-lg bg-black/70 border border-white/10 text-[10px] font-bold text-white/60 uppercase tracking-wider">
+                          No evaluation data yet
+                        </span>
+                      </div>
+                    )}
                     <ResponsiveContainer width="100%" height="100%">
                       <RadarChart cx="50%" cy="50%" outerRadius="68%" data={profileAnalysisData}>
                         <PolarGrid stroke="#2a2a2a" />
@@ -790,43 +896,55 @@ const CoachDashboard = () => {
               {/* Progress Card */}
               <div className="p-5 rounded-xl border border-white/10 bg-white/2 w-full lg:w-auto min-w-50">
                 <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Profile Completion</span>
-                <div className="text-4xl font-black text-[#E31B23] italic mt-1 mb-3">85%</div>
+                <div className="text-4xl font-black text-[#E31B23] italic mt-1 mb-3">
+                  {isCoachLoading ? "--" : `${profileCompletion}%`}
+                </div>
                 <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                  <div className="h-full bg-[#E31B23] rounded-full" style={{ width: '85%' }} />
+                  <div className="h-full bg-[#E31B23] rounded-full transition-all duration-500" style={{ width: `${profileCompletion}%` }} />
                 </div>
               </div>
               {/* Info and Checklist */}
               <div className="flex-1 space-y-6 min-w-0">
                 <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-                  {[
-                    { label: 'Personal Info', checked: true },
-                    { label: 'Key Accomplishments', checked: true },
-                    { label: 'Major Trophies', checked: true },
-                    { label: 'Key Skills', checked: true },
-                    { label: 'Courses', checked: true }
-                  ].map((item) => (
+                  {cvChecklist.map((item) => (
                     <div key={item.label} className="flex items-center gap-2">
-                      <IconCircleCheck size={18} className="text-green-500" />
-                      <span className="text-sm font-bold text-white">{item.label}</span>
+                      <IconCircleCheck
+                        size={18}
+                        className={item.checked ? "text-green-500" : "text-white/20"}
+                      />
+                      <span className={cn("text-sm font-bold", item.checked ? "text-white" : "text-white/40")}>
+                        {item.label}
+                      </span>
                     </div>
                   ))}
                 </div>
-                <div className="flex gap-4">
-                  <div className="w-1 h-12 bg-white/40 rounded-full" />
-                  <div>
-                    <h4 className="text-base font-bold text-white mb-1 italic">Silver</h4>
-                    <p className="text-xs text-gray-500 max-w-md leading-relaxed">
-                      Your CV meets silver standards and is ready to share with top clubs and agents.
-                    </p>
+                {cvTierLabel && (
+                  <div className="flex gap-4">
+                    <div className="w-1 h-12 bg-white/40 rounded-full" />
+                    <div>
+                      <h4 className="text-base font-bold text-white mb-1 italic">{cvTierLabel}</h4>
+                      <p className="text-xs text-gray-500 max-w-md leading-relaxed">
+                        Your CV meets {cvTierLabel.toLowerCase()} standards and is ready to share with top clubs and agents.
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
               {/* Buttons */}
               <div className="flex flex-col gap-2 w-full lg:w-auto">
-                <button className="px-6 py-2.5 rounded-lg border border-white/10 bg-white/10 text-xs font-bold text-white hover:bg-white/20 transition-all text-center">
+                {/* The CV PDF is generated on My CV (it captures that page). */}
+                <button
+                  type="button"
+                  onClick={() => router.push("/dashboard/coach/my-cv")}
+                  className="px-6 py-2.5 rounded-lg border border-white/10 bg-white/10 text-xs font-bold text-white hover:bg-white/20 transition-all text-center cursor-pointer"
+                >
                   Download PDF
                 </button>
-                <button className="px-6 py-2.5 rounded-lg border border-white/10 bg-white/10 text-xs font-bold text-white hover:bg-white/20 transition-all text-center">
+                <button
+                  type="button"
+                  onClick={handleShareCv}
+                  className="px-6 py-2.5 rounded-lg border border-white/10 bg-white/10 text-xs font-bold text-white hover:bg-white/20 transition-all text-center cursor-pointer"
+                >
                   Share Agent
                 </button>
               </div>
@@ -1022,19 +1140,7 @@ const CoachDashboard = () => {
                         onClick={() => setPreviewMedia(item)}
                         className="relative aspect-video overflow-hidden cursor-pointer bg-black/40"
                       >
-                        <Image
-                          width={400}
-                          height={250}
-                          src={item.thumbnailUrl || item.url || "/placeholder_img.jpg"}
-                          className="size-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-90"
-                          alt={item.title}
-                          unoptimized
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.onerror = null;
-                            target.src = "/placeholder_img.jpg";
-                          }}
-                        />
+                        <VideoThumbnail item={item} />
                         {/* Play button overlay */}
                         <div className="absolute inset-0 flex items-center justify-center">
                           <div className="size-10 rounded-full bg-[#E31B23] flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
@@ -1190,40 +1296,75 @@ const CoachDashboard = () => {
         </div>
         {/* Right Column */}
         <div className="lg:col-span-3 space-y-6 min-w-0">
-          {/* Pending Game Reports */}
+          {/* Pending Game Reports — GET /players/coach/game-reports?status=PENDING */}
           <section className="p-6 rounded-2xl border border-white/20 bg-[#0D0D0D]">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="p-2 rounded-lg bg-[#E31B23]/10 text-[#E31B23]">
-                <IconBallFootball size={20} />
-              </div>
-              <h2 className="text-sm font-bold text-white uppercase tracking-widest">Pending Game Reports</h2>
-            </div>
-            <div className="space-y-4">
-              {requests.filter(req => req.status === 'Pending').map((req) => (
-                <div
-                  key={req.id}
-                  onClick={() => router.push(`/dashboard/coach/game-reports/create?playerId=${req.playerId}&requestId=${req.id}`)}
-                  className="flex items-center justify-between p-3 rounded-xl bg-white/10 border border-white/20 group hover:border-[#E31B23]/50 transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center gap-3">
-                    <Image
-                      width={40}
-                      height={40}
-                      src={players.find(p => String(p.id || p._id) === String(req.playerId))?.avatar || DEFAULT_AVATAR}
-                      className="size-10 rounded-full object-cover"
-                      alt={req.playerName}
-                    />
-                    <div>
-                      <div className="text-sm font-bold text-white">{req.playerName}</div>
-                      <div className="text-[10px] text-gray-500 uppercase tracking-widest">{req.playerPosition}</div>
-                    </div>
-                  </div>
-                  <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">CREATE</div>
+            <div className="flex items-center justify-between gap-2 mb-6">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="p-2 rounded-lg bg-[#E31B23]/10 text-[#E31B23]">
+                  <IconBallFootball size={20} />
                 </div>
-              ))}
+                <h2 className="text-sm font-bold text-white uppercase tracking-widest truncate">Pending Game Reports</h2>
+              </div>
+              {(gameReportsResponse?.meta?.total ?? 0) > pendingReports.length && (
+                <button
+                  type="button"
+                  onClick={() => router.push("/dashboard/coach/game-reports")}
+                  className="text-[10px] font-bold text-gray-400 hover:text-white uppercase tracking-wider shrink-0 cursor-pointer"
+                >
+                  View all
+                </button>
+              )}
+            </div>
+            <div className="flex flex-col gap-4">
+              {isLoadingGameReports ? (
+                [1, 2, 3].map((i) => (
+                  <div key={i} className="h-16 rounded-xl bg-white/5 border border-white/10 animate-pulse" />
+                ))
+              ) : pendingReports.length === 0 ? (
+                <div className="text-center py-6 text-xs text-white/40 uppercase tracking-wider font-bold">
+                  No pending game reports
+                </div>
+              ) : (
+                pendingReports.map((report) => {
+                  const playerId = report.player?._id || "";
+                  return (
+                    <div
+                      key={report._id}
+                      onClick={() =>
+                        router.push(
+                          `/dashboard/coach/game-reports/create?playerId=${playerId}&requestId=${report._id}`
+                        )
+                      }
+                      className="flex items-center justify-between gap-3 p-3 rounded-xl bg-white/10 border border-white/20 group hover:border-[#E31B23]/50 transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Image
+                          width={40}
+                          height={40}
+                          src={report.player?.avatar || "/profile_placeholder.jpg"}
+                          className="size-10 rounded-full object-cover shrink-0"
+                          alt={report.player?.name || "Player"}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.srcset = "";
+                            target.src = "/profile_placeholder.jpg";
+                          }}
+                        />
+                        <div className="min-w-0">
+                          <div className="text-sm font-bold text-white truncate">{report.player?.name || "Player"}</div>
+                          <div className="text-[10px] text-gray-500 uppercase tracking-widest truncate">
+                            {report.player?.position || report.matches || ""}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider shrink-0">Create</div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </section>
-          {/* Clubs Interested */}
+          {/* Clubs Interested — no backend endpoint yet, so nothing invented is shown. */}
           <section className="p-6 rounded-2xl border border-white/20 bg-[#0D0D0D]">
             <div className="flex items-center gap-2 mb-6">
               <div className="p-2 rounded-lg bg-[#E31B23]/10 text-[#E31B23]">
@@ -1231,18 +1372,8 @@ const CoachDashboard = () => {
               </div>
               <h2 className="text-sm font-bold text-white uppercase tracking-widest">Clubs Interested</h2>
             </div>
-            <div className="space-y-4">
-              {clubsInterested.map((club) => (
-                <div key={club.id} className="flex items-center gap-4 p-3 rounded-xl bg-white/10 border border-white/20 group hover:bg-white/10 transition-colors">
-                  <div className="w-10 h-10 p-1 rounded-lg bg-white/10 flex items-center justify-center">
-                    <Image width={50} height={50} src={club.logo} className="w-full h-full object-contain" alt={club.name} />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-white">{club.name}</div>
-                    <div className="text-[10px] text-gray-500 uppercase tracking-widest">{club.action}</div>
-                  </div>
-                </div>
-              ))}
+            <div className="text-center py-6 text-xs text-white/40 uppercase tracking-wider font-bold">
+              No club activity yet
             </div>
           </section>
           {/* Quick Stats */}
@@ -1262,12 +1393,12 @@ const CoachDashboard = () => {
                 },
                 {
                   label: "Losses",
-                  value: (tournamentStats?.loss ?? Math.max(2, coachData.seasonStats.losses || 0)).toString(),
+                  value: (tournamentStats?.loss ?? coachData.seasonStats.losses ?? 0).toString(),
                   color: "text-red-500",
                 },
                 {
                   label: "Draws",
-                  value: (tournamentStats?.draw ?? Math.max(2, coachData.seasonStats.draws || 0)).toString(),
+                  value: (tournamentStats?.draw ?? coachData.seasonStats.draws ?? 0).toString(),
                   color: "text-blue-500",
                 },
                 {

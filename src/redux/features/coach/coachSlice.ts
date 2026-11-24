@@ -10,6 +10,7 @@ import courseLogo2 from "@/assets/cvs/id/courses-logo2.png";
 import courseLogo3 from "@/assets/cvs/id/courses-logo3.png";
 import courseLogo4 from "@/assets/cvs/id/courses-logo4.png";
 import { ICoachProfileData } from "@/types/coach.type";
+import { coachStylesFromApi } from "@/components/cvs/coach-cv-details/bio-components/constants";
 
 export interface CoachLanguage {
   name: string;
@@ -99,7 +100,7 @@ const initialState: CoachData = {
   fullName: "",
   title: "Coach",
   yearsExperience: 0,
-  cvTier: "BRONZE",
+  cvTier: "",
   profileCompletion: 0,
   completionPercentage: 0,
   speciality: "",
@@ -138,8 +139,8 @@ const initialState: CoachData = {
     winRate: 0,
     cleanSheets: 0,
   },
-  transferStatus: "Active",
-  statusBadge: "Active",
+  transferStatus: "",
+  statusBadge: "",
   contractUntil: "",
   agent: "",
   agency: "",
@@ -152,7 +153,7 @@ const initialState: CoachData = {
   clubs: [],
   qualifications: [],
   accomplishments: [],
-  selectedStyleIds: ["tiki-taka", "motivator", "youth-development"],
+  selectedStyleIds: [],
   complementaryLogos: [
     { id: 1, name: 'Logo 1', image: courseLogo1 },
     { id: 2, name: 'Logo 2', image: courseLogo2 },
@@ -350,8 +351,8 @@ export const coachSlice = createSlice({
       }
 
       // Coach Styles
-      if (Array.isArray(data.coachStyles) && data.coachStyles.length > 0) {
-        state.selectedStyleIds = data.coachStyles.map((s: string) => s.toLowerCase().replace(/[_\s]/g, "-"));
+      if (Array.isArray(data.coachStyles)) {
+        state.selectedStyleIds = coachStylesFromApi(data.coachStyles);
       }
 
       // Major Trophies

@@ -9,7 +9,7 @@ import {
 } from "@/redux/features/coach/coachApi";
 import { IUpdateCoachPayload } from "@/types/coach.type";
 import { toast } from "sonner";
-import { ALL_COACH_STYLES, COUNTRY_CODES } from "@/components/cvs/coach-cv-details/bio-components/constants";
+import { coachStylesToApi, COUNTRY_CODES } from "@/components/cvs/coach-cv-details/bio-components/constants";
 
 const getCountryCode = (countryName?: string) => {
   if (!countryName) return undefined;
@@ -270,12 +270,7 @@ export const useCoach = (explicitCoachId?: string) => {
         case "selectedStyleIds":
         case "coachStyles":
           backendPayload = {
-            coachStyles: Array.isArray(value)
-              ? value.map((s: string) => {
-                  const found = ALL_COACH_STYLES.find((item) => item.id === s.toLowerCase());
-                  return found ? found.label.toUpperCase() : s.toUpperCase();
-                })
-              : value,
+            coachStyles: coachStylesToApi(value),
           };
           break;
         case "clubs":

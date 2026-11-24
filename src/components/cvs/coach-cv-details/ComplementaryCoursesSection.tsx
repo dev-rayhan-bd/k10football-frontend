@@ -206,6 +206,7 @@ return (
         <Dialog open={isAddCourseOpen} onOpenChange={setIsAddCourseOpen}>
           <DialogTrigger asChild>
             <Button
+ data-pdf-hide
               variant="outline"
               className="w-full mt-6 border-dashed border-white/20 hover:border-primary hover:bg-transparent text-gray-400 hover:text-white flex items-center justify-center gap-2"
             >

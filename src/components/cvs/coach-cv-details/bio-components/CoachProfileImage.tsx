@@ -17,12 +17,15 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { IconLoader2 } from "@tabler/icons-react";
+import { smartRemoveBackground } from "@/lib/utils/backgroundRemoval";
 import CMSField from "@/components/shared/CMSField";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -30,7 +33,9 @@ import {
 import { Label } from "@/components/ui/label";
 import { PencilIcon } from "lucide-react";
 import { useCoach } from "@/hooks/useCoach";
-import { ALL_COACH_STYLES, COACH_TYPES } from "./constants";
+import { ALL_COACH_STYLES, COACH_TYPES, coachStylesFromApi } from "./constants";
+
+const MAX_COACH_STYLES = 4;
 import { getFlagUrl, handleImageUpload } from "./utils";
 
 const COACH_STYLE_ICONS: Record<string, { src: string }> = {
@@ -72,11 +77,30 @@ const EditableImage = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isImgLoaded, setIsImgLoaded] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState("Processing image...");
 
+  // Same flow as the player photo: strip the background in the browser, then
+  // upload the transparent PNG.
   const onFileChange = async (file: File) => {
+    if (isUploading) return;
     setIsUploading(true);
+    const toastId = `img-upload-${field}`;
     try {
-      await handleImageUpload(file, field, handleUpdate);
+      let processedFile = file;
+      if (field === "coachImage") {
+        setUploadStatus("Removing background...");
+        toast.loading("Removing background from coach photo...", { id: toastId });
+        processedFile = await smartRemoveBackground(file, false, (percent, stage) => {
+          const msg = `${stage} ${percent}%`;
+          setUploadStatus(msg);
+          toast.loading(msg, { id: toastId });
+        });
+        toast.dismiss(toastId);
+      }
+      await handleImageUpload(processedFile, field, handleUpdate);
+    } catch (err) {
+      console.error("Coach image upload error:", err);
+      toast.error("Failed to remove background. Please try again.", { id: toastId });
     } finally {
       setIsUploading(false);
     }
@@ -85,7 +109,7 @@ const EditableImage = ({
   return (
     <div
       className={cn(
-        "relative group w-full h-full flex items-center justify-center min-h-[280px]",
+        "relative group w-full h-full flex items-end justify-center",
         canEdit && !isUploading ? "cursor-pointer" : ""
       )}
       onClick={() => canEdit && !isUploading && fileInputRef.current?.click()}
@@ -94,7 +118,7 @@ const EditableImage = ({
         <div className="w-full h-70 sm:h-95 md:h-125 bg-white/5 animate-pulse rounded-2xl flex flex-col items-center justify-center gap-3 border border-white/10">
           <IconLoader2 className="size-8 animate-spin text-[#E31B23]" />
           <span className="text-xs text-white/70 font-bold uppercase tracking-wider text-center px-4">
-            Removing Background & Saving...
+            {uploadStatus}
           </span>
         </div>
       ) : (
@@ -125,6 +149,7 @@ const EditableImage = ({
                 accept="image/*"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
+                  e.target.value = "";
                   if (file) onFileChange(file);
                 }}
               />
@@ -139,23 +164,39 @@ const EditableImage = ({
 export const CoachProfileImage = ({ canEdit }: { canEdit: boolean }) => {
   const { coachData, handleUpdate } = useCoach();
 
-  const toggleStyle = (styleId: string) => {
-    const currentStyles = coachData.selectedStyleIds || [];
-    if (currentStyles.includes(styleId)) {
-      handleUpdate(
-        "selectedStyleIds",
-        currentStyles.filter((id) => id !== styleId)
-      );
-    } else if (currentStyles.length < 4) {
-      handleUpdate("selectedStyleIds", [...currentStyles, styleId]);
-    } else {
-      toast.error("Maximum 4 styles allowed");
-    }
+  const savedStyles = coachStylesFromApi(coachData.selectedStyleIds);
+
+  // Same flow as the player's Player Style: ticking only edits a local draft;
+  // "Save" sends the whole selection once.
+  const [stylesOpen, setStylesOpen] = useState(false);
+  const [draft, setDraft] = useState<string[]>(savedStyles);
+
+  const handleStylesOpenChange = (next: boolean) => {
+    if (next) setDraft(savedStyles);
+    setStylesOpen(next);
   };
 
-  const orderedSelectedStyles = (coachData.selectedStyleIds || []).map(
-    (id: string) => ALL_COACH_STYLES.find((s) => s.id === id)!
-  ).filter(Boolean);
+  const toggleStyle = (styleId: string) => {
+    setDraft((prev) =>
+      prev.includes(styleId)
+        ? prev.filter((id) => id !== styleId)
+        : prev.length < MAX_COACH_STYLES
+          ? [...prev, styleId]
+          : prev
+    );
+  };
+
+  const isDraftChanged =
+    draft.length !== savedStyles.length || draft.some((id, i) => id !== savedStyles[i]);
+
+  const handleSaveStyles = () => {
+    if (isDraftChanged) handleUpdate("selectedStyleIds", draft);
+    setStylesOpen(false);
+  };
+
+  const orderedSelectedStyles = savedStyles
+    .map((id) => ALL_COACH_STYLES.find((s) => s.id === id))
+    .filter((s): s is { id: string; label: string } => Boolean(s));
 
   return (
     <div className="col-span-12 order-2 xl:order-0 xl:col-span-4 flex flex-col items-center">
@@ -230,73 +271,87 @@ export const CoachProfileImage = ({ canEdit }: { canEdit: boolean }) => {
         />
       </div>
 
-      {/* Coach Style Section */}
-      <div className="w-full space-y-6">
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-4 mb-6">
-            <h3 className="text-2xl font-bold font-heading">
+      {/* Coach Style Section — mirrors the player's Player Style section */}
+      <div className="w-full min-w-0 px-2 sm:px-0">
+        <div className="text-center w-full min-w-0">
+          <div className="flex items-center justify-center gap-2 sm:gap-4 mb-4 sm:mb-6 w-full min-w-0">
+            <h3 className="text-xl sm:text-2xl font-bold font-heading truncate">
               Coach Style
             </h3>
             {canEdit && (
-              <Dialog>
+              <Dialog open={stylesOpen} onOpenChange={handleStylesOpenChange}>
                 <DialogTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-primary hover:bg-primary/10">
-                    <PencilIcon className="h-4 w-4" />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-6 sm:size-7 text-primary hover:bg-primary/10 shrink-0 cursor-pointer"
+                  >
+                    <PencilIcon className="size-3 sm:size-4" />
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="bg-cardBg border-border text-foreground">
+                <DialogContent className="bg-cardBg border-border text-foreground w-[95vw] sm:w-125 max-w-lg max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>Select Coach Styles (Max 4)</DialogTitle>
+                    <DialogTitle>Select Coach Styles (Max {MAX_COACH_STYLES})</DialogTitle>
+                    <DialogDescription>
+                      {draft.length}/{MAX_COACH_STYLES} selected
+                    </DialogDescription>
                   </DialogHeader>
-                  <div className="grid grid-cols-2 gap-4 py-4 max-h-[60vh] overflow-y-auto">
-                    {ALL_COACH_STYLES.map((style) => (
-                      <div
-                        key={style.id}
-                        className="flex items-center space-x-2"
-                      >
-                        <Checkbox
-                          id={style.id}
-                          checked={(coachData.selectedStyleIds || []).includes(
-                            style.id
-                          )}
-                          onCheckedChange={() => toggleStyle(style.id)}
-                          disabled={
-                            !(coachData.selectedStyleIds || []).includes(
-                              style.id
-                            ) && (coachData.selectedStyleIds || []).length >= 4
-                          }
-                        />
-                        <Label
-                          htmlFor={style.id}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                        >
-                          {style.label}
-                        </Label>
-                      </div>
-                    ))}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 py-4">
+                    {ALL_COACH_STYLES.map((style) => {
+                      const checked = draft.includes(style.id);
+                      const disabled = !checked && draft.length >= MAX_COACH_STYLES;
+                      return (
+                        <div key={style.id} className="flex items-center gap-2">
+                          <Checkbox
+                            id={`coach-style-${style.id}`}
+                            checked={checked}
+                            onCheckedChange={() => toggleStyle(style.id)}
+                            disabled={disabled}
+                            className="border-muted-foreground"
+                          />
+                          <Label
+                            htmlFor={`coach-style-${style.id}`}
+                            className={cn(
+                              "text-xs sm:text-sm font-medium leading-none cursor-pointer",
+                              disabled && "cursor-not-allowed opacity-50"
+                            )}
+                          >
+                            {style.label}
+                          </Label>
+                        </div>
+                      );
+                    })}
                   </div>
+                  <DialogFooter className="gap-2">
+                    <Button variant="outline" onClick={() => setStylesOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleSaveStyles} disabled={!isDraftChanged}>
+                      Save
+                    </Button>
+                  </DialogFooter>
                 </DialogContent>
               </Dialog>
             )}
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {orderedSelectedStyles.map((style: any) => {
+          <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-2 gap-4 w-full min-w-0">
+            {orderedSelectedStyles.map((style) => {
               const icon = COACH_STYLE_ICONS[style.id];
               const iconSrc = icon ? icon.src : badge2.src;
 
               return (
-                <div key={style.id} className="flex flex-col items-center justify-center gap-2">
-                  <div className="flex justify-center shrink-0">
+                <div key={style.id} className="flex flex-col gap-2 sm:gap-4 w-full min-w-0">
+                  <div className="flex justify-center">
                     <Image
                       src={iconSrc}
-                      className="w-16 h-16 sm:w-20 sm:h-20 object-contain drop-shadow-md"
+                      className="size-16 sm:size-20 object-contain drop-shadow-md"
                       alt={style.label}
-                      width={80}
-                      height={80}
+                      width={200}
+                      height={200}
                     />
                   </div>
-                  <p className="text-[10px] sm:text-xs md:text-sm font-heading text-white text-center uppercase tracking-widest leading-snug wrap-break-word">
+                  <p className="text-xs sm:text-base md:text-lg font-heading truncate w-full px-1">
                     {style.label}
                   </p>
                 </div>
