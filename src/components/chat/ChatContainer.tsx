@@ -7,7 +7,8 @@ import { ChatConversationItem } from "./ChatConversationItem";
 import { ChatMessageItem } from "./ChatMessageItem";
 import { NewChatModal } from "./NewChatModal";
 import { ImageViewerModal } from "./ImageViewerModal";
-import { getMessageDateGroup, getRoleBadgeStyle } from "@/helpers/ChatHelper";
+import { getConversationAvatar, getMessageDateGroup, getRoleBadgeStyle } from "@/helpers/ChatHelper";
+import ChatAvatar from "./ChatAvatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +21,6 @@ import {
   IconPhoto,
   IconLoader2,
   IconX,
-  IconUsers,
   IconArrowDown,
   IconMessageDots,
 } from "@tabler/icons-react";
@@ -191,7 +191,9 @@ export const ChatContainer = ({
   const activeTitle = isGroup
     ? activeConversation.name || "Group Chat"
     : activeUser?.fullName || activeUser?.name || "Member";
-  const activeAvatar = isGroup ? activeConversation?.avatar : activeUser?.avatar;
+  const activeAvatar = getConversationAvatar(
+    activeConversation as unknown as Parameters<typeof getConversationAvatar>[0]
+  );
   const isUserOnline = !isGroup && Boolean(activeUser?.isOnline);
   const roleStyle = getRoleBadgeStyle(activeUser?.role);
 
@@ -306,21 +308,7 @@ export const ChatContainer = ({
 
                   {/* Active Participant / Group Avatar */}
                   <div className="relative shrink-0">
-                    {activeAvatar ? (
-                      <img
-                        src={activeAvatar}
-                        alt={activeTitle}
-                        className="size-10 rounded-full object-cover border border-white/10"
-                      />
-                    ) : isGroup ? (
-                      <div className="size-10 rounded-full bg-gradient-to-br from-red-600 to-amber-600 flex items-center justify-center text-white">
-                        <IconUsers size={18} />
-                      </div>
-                    ) : (
-                      <div className="size-10 rounded-full bg-white/10 flex items-center justify-center text-sm font-bold text-white/80">
-                        {activeTitle.charAt(0).toUpperCase()}
-                      </div>
-                    )}
+                    <ChatAvatar src={activeAvatar} name={activeTitle} isGroup={isGroup} className="size-10 text-sm" />
                     {isUserOnline && (
                       <span className="absolute bottom-0 right-0 size-2.5 rounded-full bg-emerald-500 ring-2 ring-[#111111]" />
                     )}

@@ -113,16 +113,33 @@ export const CreateGameReportWizard = ({
   const [completeSelfGameReport, { isLoading: isCompletingSelfReport }] = useCompleteSelfGameReportMutation();
   const [requestCoachGameReport, { isLoading: isRequestingCoachReport }] = useRequestCoachGameReportMutation();
   const [completeCoachGameReport, { isLoading: isCompletingCoachReport }] = useCompleteCoachGameReportMutation();
-  const { data: coachGameReportsResponse } = useGetCoachGameReportsQuery(undefined, {
-    skip: !isCoach,
-  });
+  const playerId = searchParams.get("playerId");
+  const requestId = searchParams.get("requestId");
+  const reportId = searchParams.get("reportId") || requestId;
+
+  // Filtered by player so the request is found even if it isn't on page 1.
+  const { data: coachGameReportsResponse } = useGetCoachGameReportsQuery(
+    playerId ? { playerId } : undefined,
+    { skip: !isCoach }
+  );
   const { data: myProfileResponse } = useGetMyPlayerProfileQuery(undefined, {
     skip: isCoach,
   });
 
-  const playerId = searchParams.get("playerId");
-  const requestId = searchParams.get("requestId");
-  const reportId = searchParams.get("reportId") || requestId;
+  // Coaches have no player-profile query (that's where the player dashboard
+  // gets the photo) and the single-report endpoint carries no player photo,
+  // so take it from the coach's report list entry for this player.
+  const coachListPlayer: any = coachGameReportsResponse?.data?.reports?.find(
+    (r) =>
+      (reportId && r._id === reportId) ||
+      (playerId && (r.player?._id === playerId || (r.player as any)?.id === playerId))
+  )?.player;
+  const coachListPlayerImage: string =
+    coachListPlayer?.avatar ||
+    coachListPlayer?.cardImage ||
+    coachListPlayer?.profileImage ||
+    coachListPlayer?.profileImg ||
+    "";
   const viewOnly = searchParams.get("viewOnly") === "true";
   const urlPosition = searchParams.get("position");
 
@@ -541,6 +558,13 @@ export const CreateGameReportWizard = ({
     const feedback = pick(apiReport.coachFeedback, apiReport.scoutAnalysis);
     if (feedback) setCoachFeedback(feedback);
   }, [apiReport, reportId, urlPosition, myProfileResponse, viewOnly]);
+
+  // Coach side: fill the player photo from the report list whenever the form
+  // has none (runs again if a report sync above leaves it empty).
+  useEffect(() => {
+    if (!isCoach || !coachListPlayerImage || formData.playerImage) return;
+    setFormData((prev) => (prev.playerImage ? prev : { ...prev, playerImage: coachListPlayerImage }));
+  }, [isCoach, coachListPlayerImage, formData.playerImage]);
 
   // Pre-fill from Redux player list and request data
   useEffect(() => {

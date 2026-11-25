@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
+import ChatAvatar from "./ChatAvatar";
 
 import React, { useState, useMemo, useRef } from "react";
 import {
@@ -240,17 +241,7 @@ export const NewChatModal = ({
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="relative shrink-0">
-                            {contact.avatar ? (
-                              <img
-                                src={contact.avatar}
-                                alt={contact.name}
-                                className="size-10 rounded-full object-cover border border-white/10"
-                              />
-                            ) : (
-                              <div className="size-10 rounded-full bg-white/10 flex items-center justify-center text-white/70 font-bold text-sm">
-                                {(contact.name || "U").charAt(0).toUpperCase()}
-                              </div>
-                            )}
+                            <ChatAvatar src={contact.avatar} name={contact.name} className="size-10 text-sm" />
                             {contact.isOnline && (
                               <span className="absolute bottom-0 right-0 size-2.5 rounded-full bg-emerald-500 ring-2 ring-[#121212]" />
                             )}
@@ -381,17 +372,7 @@ export const NewChatModal = ({
                               className="border-white/30 data-[state=checked]:bg-[#E31B23] data-[state=checked]:border-[#E31B23]"
                             />
                             <div className="size-8 rounded-full bg-white/10 overflow-hidden shrink-0">
-                              {contact.avatar ? (
-                                <img
-                                  src={contact.avatar}
-                                  alt={contact.name}
-                                  className="size-full object-cover"
-                                />
-                              ) : (
-                                <div className="size-full flex items-center justify-center text-xs font-bold text-white/70">
-                                  {(contact.name || "U").charAt(0).toUpperCase()}
-                                </div>
-                              )}
+                              <ChatAvatar src={contact.avatar} name={contact.name} className="size-full text-xs border-0" />
                             </div>
                             <div className="min-w-0">
                               <span className="text-xs font-semibold text-white truncate block">

@@ -17,6 +17,22 @@ export const formatDateToYMD = (dateStr: string): string => {
   return trimmed;
 };
 
+/**
+ * Display-only: turns a stored minutes-played value ("MM:SS", or plain
+ * minutes) into "HH:MM:SS", e.g. "00:15" → "00:00:15", "95:30" → "01:35:30".
+ * A value that already has hours ("H:MM:SS") is just zero-padded.
+ */
+export const formatPlayedTimeHMS = (val: string | number | undefined | null): string => {
+  if (val === undefined || val === null || String(val).trim() === "") return "";
+  const parts = String(val).trim().split(":").map((p) => parseInt(p.replace(/[^\d]/g, ""), 10) || 0);
+  let totalSeconds: number;
+  if (parts.length >= 3) totalSeconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
+  else if (parts.length === 2) totalSeconds = parts[0] * 60 + parts[1];
+  else totalSeconds = parts[0] * 60;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${pad(Math.floor(totalSeconds / 3600))}:${pad(Math.floor((totalSeconds % 3600) / 60))}:${pad(totalSeconds % 60)}`;
+};
+
 /** Normalises minutes played to "MM:SS" (max 130 minutes). */
 export const formatMinutesPlayed = (val: string | number | undefined | null): string => {
   if (val === undefined || val === null) return "00:00";

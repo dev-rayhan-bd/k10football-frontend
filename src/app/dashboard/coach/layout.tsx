@@ -11,18 +11,18 @@ import {
   IconUserCheck,
   IconClipboardCheck,
   IconCreditCard,
-  IconLock,
   IconMessageCircle,
 } from "@tabler/icons-react";
-import { ReactNode, useState, useEffect, createContext, useRef } from "react";
+import { ReactNode, useState, useEffect, createContext } from "react";
 import { useCoach } from "@/hooks/useCoach";
 import { useGetMySubscriptionQuery } from "@/redux/features/subscription/subscriptionApi";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 
 export const CoachContext = createContext<{ hasAcademy: boolean }>({ hasAcademy: false });
+
+const SUBSCRIPTION_URL = "/dashboard/coach/my-subscription";
+const SUBSCRIPTION_REQUIRED_MESSAGE = "Active subscription required to access this feature. Please subscribe.";
 
 const LOCKED_COACH_PATHS = [
   "/dashboard/coach/game-reports",
@@ -55,55 +55,41 @@ const coachSidebarItemsWithAcademy = [
 ];
 
 const CoachLayout = ({ children }: { children: ReactNode }) => {
-  const { coachData, handleUpdate } = useCoach();
-  const [hasAcademy, setHasAcademy] = useState(false);
+  const { coachData, cvData } = useCoach();
+  // The view starts from the backend coachType; any coach can switch freely.
+  // (Switching is view-only — it no longer overwrites the stored coachType.)
+  const apiCoachType = String(cvData?.coachType || "").toUpperCase();
+  const [viewOverride, setViewOverride] = useState<boolean | null>(null);
+  const hasAcademy = viewOverride ?? apiCoachType === "CLUB_COACH";
   const pathname = usePathname();
   const router = useRouter();
-  const redirectedPathRef = useRef<string | null>(null);
 
   const { data: subscriptionResponse, isLoading: isSubLoading } = useGetMySubscriptionQuery();
   const hasActiveSubscription = Boolean(subscriptionResponse?.data?.hasActiveSubscription);
-
-  useEffect(() => {
-    if (coachData?.coachType) {
-      setHasAcademy(coachData.coachType === "CLUB_COACH");
-    }
-  }, [coachData?.coachType]);
 
   const isCurrentRouteLocked = LOCKED_COACH_PATHS.some(
     (lockedPath) => pathname === lockedPath || pathname.startsWith(`${lockedPath}/`)
   );
 
-  // Route protection: If coach navigates directly via browser URL bar or link to a locked route without active subscription
+  // Without an active subscription these pages are fully locked: no entry at all.
+  const isBlocked = isCurrentRouteLocked && !isSubLoading && !hasActiveSubscription;
+
   useEffect(() => {
-    if (!isSubLoading && !hasActiveSubscription && isCurrentRouteLocked) {
-      if (redirectedPathRef.current !== pathname) {
-        redirectedPathRef.current = pathname;
-        toast.error("Active subscription required to access this feature. Redirecting to subscription...");
-        router.replace("/dashboard/coach/my-subscription");
-      }
-    } else if (!isCurrentRouteLocked) {
-      redirectedPathRef.current = null;
-    }
-  }, [isSubLoading, hasActiveSubscription, isCurrentRouteLocked, pathname, router]);
+    if (!isBlocked) return;
+    toast.error(SUBSCRIPTION_REQUIRED_MESSAGE, { id: "coach-subscription-required" });
+    router.replace(SUBSCRIPTION_URL);
+  }, [isBlocked, router]);
 
   const baseSidebarItems = hasAcademy ? coachSidebarItemsWithAcademy : coachSidebarItemsWithoutAcademy;
 
-  const currentSidebarItems = baseSidebarItems.map((item) => {
-    const isLocked = !hasActiveSubscription && LOCKED_COACH_PATHS.some((path) => item.url === path);
-    return {
-      ...item,
-      isLocked,
-      lockedMessage:
-        "Active subscription required to access this feature. Please subscribe.",
-      lockedRedirectUrl: "/dashboard/coach/my-subscription",
-    };
-  });
+  // Locked items get a lock icon; clicking them shows the error and opens My Subscription.
+  const currentSidebarItems = baseSidebarItems.map((item) =>
+    !isSubLoading && !hasActiveSubscription && LOCKED_COACH_PATHS.includes(item.url)
+      ? { ...item, isLocked: true, lockedMessage: SUBSCRIPTION_REQUIRED_MESSAGE, lockedRedirectUrl: SUBSCRIPTION_URL }
+      : item
+  );
 
-  const toggleCoachType = (isClub: boolean) => {
-    setHasAcademy(isClub);
-    handleUpdate("coachType", isClub ? "CLUB_COACH" : "INDIVIDUAL_COACH");
-  };
+  const toggleCoachType = (isClub: boolean) => setViewOverride(isClub);
 
   const customToggle = (
     <div className="flex items-center bg-[#1a1a1a] rounded-lg p-1 sm:p-1.5 gap-1 sm:gap-1.5 border border-white/5 ml-auto sm:ml-2 shrink-0">
@@ -114,12 +100,15 @@ const CoachLayout = ({ children }: { children: ReactNode }) => {
         Individual <span className="hidden sm:inline">Coach</span>
       </button>
       <div
+        role="switch"
+        aria-checked={hasAcademy}
         onClick={() => toggleCoachType(!hasAcademy)}
         className="w-8 sm:w-10 h-4 sm:h-5 shrink-0 bg-white/10 rounded-full relative cursor-pointer group border border-white/5 mx-0.5 sm:mx-0"
       >
         <div className={`absolute top-1/2 -translate-y-1/2 w-3 sm:w-3.5 h-3 sm:h-3.5 bg-white rounded-full transition-all duration-300 shadow-sm ${hasAcademy ? 'right-0.5' : 'left-0.5'}`}></div>
       </div>
       <button
+        type="button"
         onClick={() => toggleCoachType(true)}
         className={`px-2 sm:px-4 py-1.5 rounded-md text-[8px] sm:text-[11px] font-bold uppercase tracking-wider transition-all leading-tight text-center whitespace-nowrap sm:whitespace-normal ${hasAcademy ? 'bg-[#E31B23] text-white' : 'text-white/40 hover:text-white/60'}`}
       >
@@ -139,46 +128,15 @@ const CoachLayout = ({ children }: { children: ReactNode }) => {
       ? "#C0C0C0"
       : "#CD7F32";
 
-  // Prevent rendering locked children if unsubscribed or while checking status
-  let content = children;
-  if (isCurrentRouteLocked) {
-    if (isSubLoading) {
-      content = (
-        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-center">
-          <div className="size-8 rounded-full border-2 border-[#E31B23] border-t-transparent animate-spin" />
-          <p className="text-sm text-muted-foreground">Checking subscription access...</p>
-        </div>
-      );
-    } else if (!hasActiveSubscription) {
-      content = (
-        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center px-4 max-w-lg mx-auto">
-          <div className="size-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-muted-foreground">
-            <IconLock className="size-8 text-[#E31B23]" />
-          </div>
-          <div className="flex flex-col gap-2">
-            <h2 className="text-2xl font-bold font-heading uppercase tracking-wide text-white">
-              Subscription Required
-            </h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              This feature is exclusively available for subscribed coaches. You need an active subscription to access Game Reports, Player CV Validations, and Player Evaluations.
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3 w-full justify-center">
-            <Link href="/dashboard/coach/my-subscription">
-              <Button className="w-full sm:w-auto bg-[#E31B23] hover:bg-[#c9151c] text-white">
-                View Subscription Plans
-              </Button>
-            </Link>
-            <Link href="/dashboard/coach">
-              <Button variant="outline" className="w-full sm:w-auto">
-                Back to Dashboard
-              </Button>
-            </Link>
-          </div>
-        </div>
-      );
-    }
-  }
+  // Never render a locked page's content — not even while the subscription is loading.
+  const shouldHideContent = isCurrentRouteLocked && (isSubLoading || !hasActiveSubscription);
+  const content = shouldHideContent ? (
+    <div className="flex min-h-[60vh] items-center justify-center text-sm text-muted-foreground">
+      {isSubLoading ? "Checking subscription..." : "Redirecting to My Subscription..."}
+    </div>
+  ) : (
+    children
+  );
 
   return (
     <CoachContext.Provider value={{ hasAcademy }}>

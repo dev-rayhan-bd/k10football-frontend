@@ -20,6 +20,7 @@ import { useOptionalParentDashboard } from "@/providers/ParentDashboardProvider"
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import NotificationBellDropdown from "@/components/notifications/NotificationBellDropdown";
+import GlobalPlayerSearch from "@/components/GlobalPlayerSearch";
 import ChatHeaderIcon from "@/components/chat/ChatHeaderIcon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useGetMyPlayerProfileQuery } from "@/redux/features/player/playerApi";
@@ -299,27 +300,8 @@ const SiteHeader = ({
           <SidebarTrigger className="text-white relative z-10 scale-125 md:scale-150 transition-transform duration-300 hover:text-[#E31B23] drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
         </div>
 
-        <div className="hidden sm:relative sm:block w-full max-w-2xl">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.3-4.3" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Search By Age Range, Country, Gender And Positions..."
-            className="w-full bg-white/5 border border-white/10 rounded-full py-2 pl-10 pr-4 text-sm text-gray-300 focus:outline-none focus:ring-1 focus:ring-[#E31B23]"
-          />
+        <div className="hidden sm:block w-full max-w-2xl">
+          <GlobalPlayerSearch />
         </div>
 
         {customToggle && <div className="flex ml-auto sm:ml-0">{customToggle}</div>}

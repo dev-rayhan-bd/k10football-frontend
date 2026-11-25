@@ -22,87 +22,13 @@ import { cn } from "@/lib/utils";
 import { ErrorToast } from "@/helpers/ValidationHelper";
 import {
   useGetMyCoachTestimonialsQuery,
+  useGetCoachTestimonialsByIdQuery,
   useCreateCoachTestimonialMutation,
   useUpdateCoachTestimonialMutation,
   useDeleteCoachTestimonialMutation,
 } from "@/redux/features/coach/coachApi";
 import { ICoachTestimonial } from "@/types/coach.type";
 import { useCoach } from "@/hooks/useCoach";
-
-const DEFAULT_TESTIMONIALS = [
-  {
-    id: 1,
-    authorName: "Emanuel",
-    authorRole: "Assistant Coach",
-    rating: 5,
-    comment: "Working with this coach changed everything for our team. Skills that felt impossible now look effortless.",
-    authorAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
-  },
-  {
-    id: 2,
-    authorName: "Dylan Hodges",
-    authorRole: "Head Coach of the club",
-    rating: 5,
-    comment: "The coach improved our squad faster than we expected. Progress that used to take months now shows within days.",
-    authorAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
-  },
-  {
-    id: 3,
-    authorName: "Madonna",
-    authorRole: "Youth Academy Director",
-    rating: 5,
-    comment: "Our players develop twice as fast under this coach. What once felt confusing is now clear and structured.",
-    authorAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop",
-  },
-  {
-    id: 4,
-    authorName: "Iris Barrows",
-    authorRole: "Professional Scout",
-    rating: 5,
-    comment: "This coach unlocked a new level in my son's game. Techniques that took ages to grasp now make perfect sense.",
-    authorAvatar: "https://images.unsplash.com/photo-1534528741775-53a8c9c0c0d0?w=400&h=400&fit=crop",
-  },
-  {
-    id: 5,
-    authorName: "Jitzsche",
-    authorRole: "National Data Engineer",
-    rating: 5,
-    comment: "Simplified learning for our players. Skills that took forever to pick up now come quickly.",
-    authorAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop",
-  },
-  {
-    id: 6,
-    authorName: "Elliott",
-    authorRole: "Senior Tactics Executive",
-    rating: 5,
-    comment: "The coach has simplified learning for our players. Skills that took forever to pick up now come quickly.",
-    authorAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
-  },
-  {
-    id: 7,
-    authorName: "Evelyn Pollich",
-    authorRole: "Strategist",
-    rating: 5,
-    comment: "Our team grows rapidly with this coach. Drills that used to drain the boys now boost their confidence.",
-    authorAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
-  },
-  {
-    id: 8,
-    authorName: "Shanelle",
-    authorRole: "Coordinator",
-    rating: 5,
-    comment: "The coach brought discipline and clarity. Progress that was slow before now happens session after session.",
-    authorAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop",
-  },
-  {
-    id: 9,
-    authorName: "Aletha",
-    authorRole: "Assistant",
-    rating: 5,
-    comment: "This coach helps players improve. Techniques that took repeated practice now look natural.",
-    authorAvatar: "https://images.unsplash.com/photo-1534528741775-53a8c9c0c0d0?w=400&h=400&fit=crop",
-  },
-];
 
 interface FormState {
   authorName: string;
@@ -119,15 +45,23 @@ const initialFormState: FormState = {
 };
 
 const TestimonialSection = ({ editable = false }: { editable?: boolean }) => {
-  const { isViewingSpecificCoach } = useCoach();
+  const { isViewingSpecificCoach, targetCoachId } = useCoach();
   const hasToken =
     typeof window !== "undefined" &&
     Boolean(localStorage.getItem("token") || localStorage.getItem("accessToken"));
 
-  const { data: testimonialsResponse, isLoading } = useGetMyCoachTestimonialsQuery(
+  // Own CV: the logged-in coach's testimonials.
+  const { data: myTestimonialsResponse, isLoading: isMyLoading } = useGetMyCoachTestimonialsQuery(
     undefined,
     { skip: !hasToken || isViewingSpecificCoach }
   );
+  // Shared/public CV (?coachId=…): that coach's testimonials, no login needed.
+  const { data: publicTestimonialsResponse, isLoading: isPublicLoading } = useGetCoachTestimonialsByIdQuery(
+    targetCoachId,
+    { skip: !isViewingSpecificCoach || !targetCoachId }
+  );
+  const testimonialsResponse = isViewingSpecificCoach ? publicTestimonialsResponse : myTestimonialsResponse;
+  const isLoading = isViewingSpecificCoach ? isPublicLoading : isMyLoading;
 
   const canEdit = editable && !isViewingSpecificCoach;
 
@@ -152,7 +86,8 @@ const TestimonialSection = ({ editable = false }: { editable?: boolean }) => {
   const [itemToDelete, setItemToDelete] = useState<any | null>(null);
 
   const apiTestimonials = testimonialsResponse?.data || [];
-  const testimonials = apiTestimonials.length > 0 ? apiTestimonials : DEFAULT_TESTIMONIALS;
+  // Only real testimonials — no sample data (the public CV must not show made-up reviews).
+  const testimonials = apiTestimonials;
 
   const resetAddForm = () => {
     setAddForm(initialFormState);
@@ -416,6 +351,8 @@ const TestimonialSection = ({ editable = false }: { editable?: boolean }) => {
           <div className="flex items-center justify-center py-12">
             <IconLoader2 className="size-8 text-[#E31B23] animate-spin" />
           </div>
+        ) : testimonials.length === 0 ? (
+          <p className="text-center text-sm text-muted-foreground py-8">No testimonials yet.</p>
         ) : (
           <>
             {/* First Marquee Row */}

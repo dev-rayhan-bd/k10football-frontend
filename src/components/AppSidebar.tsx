@@ -50,7 +50,9 @@ return (
       </SidebarMenu>
     </SidebarHeader>
     <SidebarContent className={`px-2 pt-4 overflow-hidden ${collapsed ? 'flex-col items-center' : ''}`}>
-      <ScrollArea className="flex-1 px-2">
+      {/* Radix wraps content in a display:table div that grows past the sidebar width and gets
+          clipped; force it to block so long labels truncate and the lock icon stays visible. */}
+      <ScrollArea className="flex-1 px-2 [&_[data-radix-scroll-area-viewport]>div]:block!">
         <NavDocuments items={sidebarItems} />
       </ScrollArea>
     </SidebarContent>

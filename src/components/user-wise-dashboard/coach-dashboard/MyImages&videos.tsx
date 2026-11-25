@@ -34,6 +34,7 @@ import {
   useDeleteMediaMutation,
 } from "@/redux/features/media/mediaApi";
 import { IMediaItem } from "@/types/media.type";
+import VideoThumbnail from "@/components/shared/VideoThumbnail";
 import { toast } from "sonner";
 
 const formatDate = (dateStr?: string) => {
@@ -567,18 +568,9 @@ const MyImagesAndVideos = () => {
                     onClick={() => setPreviewMedia(item)}
                     className="relative aspect-video overflow-hidden cursor-pointer bg-black/60"
                   >
-                    <Image
-                      src={item.thumbnailUrl || item.url || "/placeholder_img.jpg"}
-                      alt={item.title}
-                      width={600}
-                      height={400}
-                      className="size-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-100"
-                      unoptimized
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.onerror = null;
-                        target.src = "/placeholder_img.jpg";
-                      }}
+                    <VideoThumbnail
+                      item={item}
+                      className="group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-100"
                     />
 
                     {/* Big Center Play Button */}
@@ -905,13 +897,17 @@ const MyImagesAndVideos = () => {
               {/* Media Preview */}
               <div className="flex items-center gap-3 p-3 rounded-xl bg-white/3 border border-white/10">
                 <div className="size-14 rounded-lg overflow-hidden relative border border-white/10 bg-black/50 shrink-0">
-                  <Image
-                    src={editingMedia.thumbnailUrl || editingMedia.url || "/placeholder_img.jpg"}
-                    alt={editingMedia.title}
-                    fill
-                    className="object-cover"
-                    unoptimized
-                  />
+                  {editingMedia.mediaType === "VIDEO" ? (
+                    <VideoThumbnail item={editingMedia} />
+                  ) : (
+                    <Image
+                      src={editingMedia.thumbnailUrl || editingMedia.url || "/placeholder_img.jpg"}
+                      alt={editingMedia.title}
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
+                  )}
                 </div>
                 <div className="flex flex-col min-w-0">
                   <span className="text-[10px] uppercase font-bold text-[#00FF85] tracking-wider">

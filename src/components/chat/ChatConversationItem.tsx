@@ -1,12 +1,12 @@
-/* eslint-disable @next/next/no-img-element */
+ 
 "use client";
 
 import React from "react";
 import { IConversation } from "@/types/chat.type";
-import { formatConversationTime, getRoleBadgeStyle } from "@/helpers/ChatHelper";
+import { formatConversationTime, getConversationAvatar, getRoleBadgeStyle } from "@/helpers/ChatHelper";
 import { Badge } from "@/components/ui/badge";
-import { IconUsers } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
+import ChatAvatar from "./ChatAvatar";
 
 interface ChatConversationItemProps {
   conversation: IConversation;
@@ -26,7 +26,7 @@ export const ChatConversationItem = ({
     ? conversation.name || "Group Chat"
     : user?.fullName || user?.name || "Member";
 
-  const avatarUrl = isGroup ? conversation.avatar : user?.avatar;
+  const avatarUrl = getConversationAvatar(conversation as unknown as Parameters<typeof getConversationAvatar>[0]);
   const isOnline = !isGroup && Boolean(user?.isOnline);
   const timeFormatted = formatConversationTime(
     conversation.lastMessageTime || conversation.updatedAt || conversation.createdAt
@@ -48,21 +48,7 @@ export const ChatConversationItem = ({
     >
       {/* Avatar Container */}
       <div className="relative shrink-0">
-        {avatarUrl ? (
-          <img
-            src={avatarUrl}
-            alt={displayName}
-            className="size-11 rounded-full object-cover border border-white/10"
-          />
-        ) : isGroup ? (
-          <div className="size-11 rounded-full bg-gradient-to-br from-red-600 to-amber-600 flex items-center justify-center text-white">
-            <IconUsers size={20} />
-          </div>
-        ) : (
-          <div className="size-11 rounded-full bg-white/10 flex items-center justify-center text-sm font-bold text-white/80">
-            {displayName.charAt(0).toUpperCase()}
-          </div>
-        )}
+        <ChatAvatar src={avatarUrl} name={displayName} isGroup={isGroup} className="size-11 text-sm" />
 
         {/* Online Indicator for 1-on-1 */}
         {isOnline && (

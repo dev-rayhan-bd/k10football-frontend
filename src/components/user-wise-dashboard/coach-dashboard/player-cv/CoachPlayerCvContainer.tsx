@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useGetPlayerCvByIdQuery } from "@/redux/features/player/playerApi";
 import { CoachPlayerCvProvider } from "./CoachPlayerCvContext";
@@ -23,7 +23,6 @@ import {
   IconRefresh,
   IconShieldCheck,
   IconCheck,
-  IconEdit,
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -88,15 +87,18 @@ const CoachPlayerCvSkeleton = () => {
 export const CoachPlayerCvContainer = ({ playerId }: CoachPlayerCvContainerProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [isValidateModalOpen, setIsValidateModalOpen] = useState(
-    searchParams.get("validate") === "true"
-  );
-
-  useEffect(() => {
-    if (searchParams.get("validate") === "true") {
-      setIsValidateModalOpen(true);
-    }
-  }, [searchParams]);
+  // Validation is only allowed when the validations list said so (`canValidate` from the API);
+  // the server still enforces it (402 / 403 / 409).
+  const canValidate = searchParams.get("canValidate") === "true";
+  // `?validate=true` opens the form once on arrival; closing it dismisses that auto-open.
+  const autoOpen = canValidate && searchParams.get("validate") === "true";
+  const [isManuallyOpen, setIsManuallyOpen] = useState(false);
+  const [isAutoOpenDismissed, setIsAutoOpenDismissed] = useState(false);
+  const isValidateModalOpen = isManuallyOpen || (autoOpen && !isAutoOpenDismissed);
+  const setIsValidateModalOpen = (open: boolean) => {
+    setIsManuallyOpen(open);
+    if (!open) setIsAutoOpenDismissed(true);
+  };
 
   // API Call: GET {{baseUrl}}/players/:playerId/cv
   const {
@@ -146,7 +148,7 @@ export const CoachPlayerCvContainer = ({ playerId }: CoachPlayerCvContainerProps
   const isVerified = Boolean(cv.isVerifiedByCoach ?? cv.coachVerification?.isVerified);
 
   return (
-    <CoachPlayerCvProvider apiData={cv} openValidateModal={() => setIsValidateModalOpen(true)}>
+    <CoachPlayerCvProvider apiData={cv} openValidateModal={canValidate ? () => setIsValidateModalOpen(true) : undefined}>
       <div className="flex flex-col gap-6 w-full min-w-0">
         {/* Coach Navigation Bar */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
@@ -176,23 +178,13 @@ export const CoachPlayerCvContainer = ({ playerId }: CoachPlayerCvContainerProps
           </div>
 
           <div className="flex items-center gap-3">
-            {isVerified ? (
-              <div className="flex items-center gap-2.5">
-                <Badge variant="outline" className="border-green-500/40 bg-green-500/10 text-green-400 py-1.5 px-3 text-xs gap-1.5 font-bold">
-                  <IconShieldCheck className="size-4" />
-                  Verified by Coach
-                </Badge>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsValidateModalOpen(true)}
-                  className="gap-1.5 border-white/20 bg-white/5 hover:bg-white/10 text-white font-bold text-xs uppercase"
-                >
-                  <IconEdit className="size-3.5 text-primary" />
-                  Update Evaluation
-                </Button>
-              </div>
-            ) : (
+            {isVerified && (
+              <Badge variant="outline" className="border-green-500/40 bg-green-500/10 text-green-400 py-1.5 px-3 text-xs gap-1.5 font-bold">
+                <IconShieldCheck className="size-4" />
+                Verified by Coach
+              </Badge>
+            )}
+            {canValidate && (
               <Button
                 onClick={() => setIsValidateModalOpen(true)}
                 className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs uppercase tracking-wider shadow-lg"
@@ -223,8 +215,11 @@ export const CoachPlayerCvContainer = ({ playerId }: CoachPlayerCvContainerProps
           onClose={() => setIsValidateModalOpen(false)}
           playerId={playerId}
           playerName={cv.fullName || "Player"}
-          initialData={cv}
-          onSuccess={() => refetch()}
+          onSuccess={() => {
+            refetch();
+            // Validated once per payment — drop the permission so the button disappears.
+            router.replace(`/dashboard/coach/player-cv-validations/${playerId}`);
+          }}
         />
       </div>
     </CoachPlayerCvProvider>

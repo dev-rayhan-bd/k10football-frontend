@@ -15,6 +15,7 @@ import {
   IconCreditCard,
 } from "@tabler/icons-react";
 import { useLazyVerifyFeePaymentQuery } from "@/redux/features/parent/parentApi";
+import CvValidationPaymentResult from "@/components/cv-validation/CvValidationPaymentResult";
 
 const PaymentSuccessContent = () => {
   const searchParams = useSearchParams();
@@ -224,10 +225,19 @@ const PaymentSuccessSkeleton = () => (
   </div>
 );
 
+// CV validation checkouts return here with `type=CV_VALIDATION`; everything else is an academy fee.
+const PaymentSuccessRouter = () => {
+  const searchParams = useSearchParams();
+  if (searchParams.get("type") === "CV_VALIDATION") {
+    return <CvValidationPaymentResult sessionId={searchParams.get("session_id") || ""} />;
+  }
+  return <PaymentSuccessContent />;
+};
+
 export default function PaymentSuccessPage() {
   return (
     <Suspense fallback={<PaymentSuccessSkeleton />}>
-      <PaymentSuccessContent />
+      <PaymentSuccessRouter />
     </Suspense>
   );
 }

@@ -101,16 +101,15 @@ const NavDocuments = ({
                     <span className="text-[15px] font-medium truncate">
                       {item.name}
                     </span>
+                    {/* Sits right after the label so the sidebar scroll area can't clip it. */}
+                    {isLocked && (
+                      <IconLock
+                        size={16}
+                        className="shrink-0 text-destructive"
+                        aria-label="Subscription required"
+                      />
+                    )}
                   </div>
-
-                  {isLocked && (
-                    <div
-                      className="shrink-0 flex items-center justify-center size-6 rounded-md bg-white/5 text-muted-foreground ml-2"
-                      title="Subscription Required"
-                    >
-                      <IconLock size={14} />
-                    </div>
-                  )}
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

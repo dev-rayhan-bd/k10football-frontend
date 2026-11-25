@@ -63,6 +63,7 @@ const GameReportsSkeleton = () => {
             <div className="h-3 w-14 bg-white/10 rounded" />
             <div className="h-3 w-12 bg-white/10 rounded" />
             <div className="h-3 w-14 bg-white/10 rounded" />
+            <div className="h-3 w-14 bg-white/10 rounded" />
             <div className="h-3 w-12 bg-white/10 rounded" />
           </div>
 
@@ -99,6 +100,9 @@ const GameReportsSkeleton = () => {
 
                 {/* Amount */}
                 <div className="h-4 w-12 bg-white/10 rounded" />
+
+                {/* Payment */}
+                <div className="h-6 w-16 rounded-full bg-white/10" />
 
                 {/* Status */}
                 <div className="h-6 w-20 rounded-full bg-white/10" />
@@ -310,7 +314,39 @@ const GameReports = () => {
         key: "amount",
         align: "center",
         cellClassName: "text-sm text-gray-300 font-bold font-orbitron",
-        render: (row) => row.amount || "$ 6.99",
+        render: (row) => row.amount || "—",
+      },
+      {
+        header: "Payment",
+        key: "paymentStatus",
+        align: "center",
+        render: (row) => {
+          // Prefer the backend's paymentStatus; fall back to the isPaid flag.
+          const raw = row.paymentStatus
+            ? String(row.paymentStatus)
+            : typeof row.isPaid === "boolean"
+            ? row.isPaid ? "PAID" : "UNPAID"
+            : "";
+          if (!raw) return <span className="text-gray-600">—</span>;
+
+          const status = raw.toUpperCase();
+          const isPaid = ["PAID", "SUCCEEDED", "SUCCESS", "COMPLETED"].includes(status);
+          const isFailed = ["FAILED", "CANCELLED", "CANCELED", "REFUNDED", "EXPIRED"].includes(status);
+          return (
+            <span
+              className={cn(
+                "px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest",
+                isPaid
+                  ? "bg-green-500/10 text-green-500"
+                  : isFailed
+                  ? "bg-red-500/10 text-red-500"
+                  : "bg-orange-500/10 text-orange-500"
+              )}
+            >
+              {status.replace(/_/g, " ")}
+            </span>
+          );
+        },
       },
       {
         header: "Status",

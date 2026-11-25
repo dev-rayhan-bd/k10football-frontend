@@ -142,7 +142,19 @@ export const chatSlice = createSlice({
       }
 
       const msgId = normalizedMsg._id || normalizedMsg.id;
-      const existingIdx = state.messages[convId].findIndex((m) => (m._id || m.id) === msgId);
+      let existingIdx = state.messages[convId].findIndex((m) => (m._id || m.id) === msgId);
+
+      // The server's copy of a message I just sent replaces its optimistic
+      // "sending" placeholder (temp id) instead of being added a second time.
+      if (existingIdx < 0 && isSentByMe && !normalizedMsg.isSending) {
+        existingIdx = state.messages[convId].findIndex(
+          (m) =>
+            m.isSending &&
+            String(m._id || m.id).startsWith("temp-") &&
+            (m.text || "") === (normalizedMsg.text || "") &&
+            (m.imageUrl || "") === (normalizedMsg.imageUrl || "")
+        );
+      }
 
       if (existingIdx >= 0) {
         state.messages[convId][existingIdx] = normalizedMsg;

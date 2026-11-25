@@ -36,7 +36,7 @@ import { useCoach } from "@/hooks/useCoach";
 import { ALL_COACH_STYLES, COACH_TYPES, coachStylesFromApi } from "./constants";
 
 const MAX_COACH_STYLES = 4;
-import { getFlagUrl, handleImageUpload } from "./utils";
+import { getDisplayAge, getFlagUrl, handleImageUpload } from "./utils";
 
 const COACH_STYLE_ICONS: Record<string, { src: string }> = {
   "tiki-taka": iconTikiTaka,
@@ -129,8 +129,9 @@ const EditableImage = ({
             </div>
           )}
           <Image
-            src={src}
-            alt={alt}
+            // Neutral placeholder when the coach hasn't uploaded a photo.
+            src={src || "/profile_placeholder.png"}
+            alt={alt || "Coach"}
             onLoad={() => setIsImgLoaded(true)}
             className={cn(className, !isImgLoaded && "opacity-0", "transition-opacity duration-300")}
             {...(!fill ? { width: width || 500, height: height || 500 } : { fill: true })}
@@ -163,6 +164,7 @@ const EditableImage = ({
 
 export const CoachProfileImage = ({ canEdit }: { canEdit: boolean }) => {
   const { coachData, handleUpdate } = useCoach();
+  const displayAge = getDisplayAge(coachData.dob, coachData.age);
 
   const savedStyles = coachStylesFromApi(coachData.selectedStyleIds);
 
@@ -239,7 +241,8 @@ export const CoachProfileImage = ({ canEdit }: { canEdit: boolean }) => {
             canEdit={canEdit}
             className="text-2xl font-bold font-heading uppercase"
           />
-          <span className="text-primary">[{coachData.age ? coachData.age.replace(/\D/g, "") : ""}]</span>
+          {/* Age (not editable — it comes from the date of birth). Hidden when unknown. */}
+          {displayAge && <span className="text-primary">[{displayAge}]</span>}
         </h1>
       </div>
 

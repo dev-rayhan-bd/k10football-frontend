@@ -6,11 +6,9 @@ import Image from "next/image";
 import React, { useState, useEffect, useRef } from "react";
 import {
   IconDownload,
-  IconClock,
   IconPhone,
   IconMail,
   IconShield,
-  IconShare,
   IconUserCheck,
   IconLoader2,
   IconCamera,
@@ -20,7 +18,6 @@ import { Button } from "@/components/ui/button";
 import FullEditableCv from "@/components/cvs/coach-cv-details/FullEditableCv";
 import { useCoach } from "@/hooks/useCoach";
 import { usePlayerStats } from "@/components/cvs/player-cv-details/FullEditablePage";
-import { usePlayer } from "@/hooks/usePlayer";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/hooks/reduxHooks";
 import { useGetMyCoachCvQuery } from "@/redux/features/coach/coachApi";
@@ -97,7 +94,6 @@ const GenerateCvCoach = () => {
 
   // 2. Redux Coach State
   const { coachData, assignedPlayerReviews, isUpdating, updateCoachProfile } = useCoach();
-  const { players, selectPlayer } = usePlayer();
   const [role, setRole] = useState<string>("coach");
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [isProfileImgLoaded, setIsProfileImgLoaded] = useState(false);
@@ -162,7 +158,7 @@ const GenerateCvCoach = () => {
     cv?.transferStatus?.statusBadge ||
     coachData.statusBadge ||
     coachData.status ||
-    "ACTIVE";
+    "";
 
   const fullName =
     cv?.fullName ||
@@ -186,7 +182,7 @@ const GenerateCvCoach = () => {
       ? `${yearsExperience}+ Years Experience`
       : yearsExperience === 0
       ? "0 Years Experience"
-      : "15+ Years Experience";
+      : "";
 
   const birthCountry =
     cv?.personalInformation?.birthCountry || coachData.birthCountry || "";
@@ -200,14 +196,14 @@ const GenerateCvCoach = () => {
 
   const contactPhone = cv?.contact?.phone || coachData.phone || "N/A";
 
-  const validationStatus =
-    cv?.validationStatus ||
-    cv?.licenseStatus ||
-    (cv?.revalidationRequested ? "Re-validation Requested" : "") ||
-    coachData.validationStatus ||
-    "UEFA A License";
-
   const contactEmail = cv?.contact?.email || coachData.email || "N/A";
+
+  // The coach's own uploaded photo only — no stock image when none is saved.
+  const coachPhoto: string =
+    cv?.profileImage ||
+    coachData.profileImage ||
+    (typeof coachData.coachImage === "string" ? coachData.coachImage : "") ||
+    "";
 
   const completionPercentage =
     cv?.profileCompletion ??
@@ -236,30 +232,9 @@ const GenerateCvCoach = () => {
       ? assignedPlayerReviews
       : [];
 
-  // Filter players who need validation (fallback)
-  const validationNeededPlayers = players.filter((player) => {
-    return (
-      player.validationStatus === "pending" ||
-      player.validationStatus === "expired" ||
-      player.requestedValidation ||
-      (player.assignedMonthsAgo &&
-        player.assignedMonthsAgo >= 3 &&
-        player.validationStatus !== "verified")
-    );
-  });
-
   // The validations card shares a row with Completion Status and Tier; showing
   // only a preview keeps that row compact (the full list is one click away).
-  const validationsTotal =
-    assignedReviews.length > 0 ? assignedReviews.length : validationNeededPlayers.length;
-
-  const getValidationReason = (player: any) => {
-    if (player.requestedValidation) return "Requested";
-    if (player.validationStatus === "expired") return "Expired";
-    if (player.assignedMonthsAgo && player.assignedMonthsAgo >= 3)
-      return "Assigned > 3M";
-    return "Pending";
-  };
+  const validationsTotal = assignedReviews.length;
 
   // Exports the CV exactly as it looks on screen: one PDF page per
   // `data-cv-pdf-page` group in FullEditableCv (same exporter as the player CV).
@@ -387,7 +362,7 @@ const GenerateCvCoach = () => {
                     {isUpdating ? "Updating Photo..." : "Loading Coach..."}
                   </span>
                 </div>
-              ) : (
+              ) : coachPhoto ? (
                 <div className="relative h-[90%] md:h-[105%] w-full flex items-end justify-center">
                   {!isProfileImgLoaded && (
                     <div className="absolute inset-0 m-auto h-[90%] w-36 sm:w-48 md:w-56 bg-white/5 animate-pulse rounded-2xl flex items-center justify-center border border-white/10">
@@ -395,12 +370,7 @@ const GenerateCvCoach = () => {
                     </div>
                   )}
                   <Image
-                    src={
-                      coachData.profileImage ||
-                      coachData.coachImage?.src ||
-                      coachData.coachImage ||
-                      "/coach-image.png"
-                    }
+                    src={coachPhoto}
                     alt={fullName}
                     width={400}
                     height={500}
@@ -411,7 +381,7 @@ const GenerateCvCoach = () => {
                     )}
                   />
                 </div>
-              )}
+              ) : null}
             </div>
             <div className="relative p-6 md:p-10 w-full flex flex-col gap-8">
               <div className="flex flex-col gap-6">
@@ -421,17 +391,23 @@ const GenerateCvCoach = () => {
                   </span>
                 </div>
                 <div className="flex flex-col gap-4">
-                  <div className="bg-[#E31B23] border border-[#E31B23]/20 px-4 py-1.5 rounded-full text-[10px] font-black text-white uppercase w-fit tracking-[0.2em] shadow-[0_0_20px_rgba(227,27,35,0.3)]">
-                    {statusBadge}
-                  </div>
+                  {statusBadge && (
+                    <div className="bg-[#E31B23] border border-[#E31B23]/20 px-4 py-1.5 rounded-full text-[10px] font-black text-white uppercase w-fit tracking-[0.2em] shadow-[0_0_20px_rgba(227,27,35,0.3)]">
+                      {statusBadge}
+                    </div>
+                  )}
                   <div className="flex flex-col gap-2">
                     <h1 className="text-3xl md:text-6xl font-black text-white font-orbitron uppercase tracking-tighter leading-none">
                       {fullName}
                     </h1>
                     <div className="flex flex-wrap items-center gap-3 md:gap-6 text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] pt-1">
                       <span className="text-[#E31B23]">{title}</span>
-                      <span className="text-white/20 hidden md:inline">/</span>
-                      <span className="text-white">{experienceText}</span>
+                      {experienceText && (
+                        <>
+                          <span className="text-white/20 hidden md:inline">/</span>
+                          <span className="text-white">{experienceText}</span>
+                        </>
+                      )}
                       {birthCountry ? (
                         <>
                           <span className="text-white/20 hidden md:inline">/</span>
@@ -480,20 +456,6 @@ const GenerateCvCoach = () => {
                     </p>
                     <p className="text-xs md:text-sm font-bold text-white truncate">
                       {contactPhone}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 md:gap-4 min-w-0">
-                  <div className="p-2 md:p-3 bg-white/5 rounded-xl border border-white/10 text-white/40 shrink-0">
-                    <IconClock size={16} className="md:size-5" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[9px] md:text-[10px] text-white/40 uppercase font-black tracking-widest truncate">
-                      Validation Status
-                    </p>
-                    <p className="text-xs md:text-sm font-bold text-[#FBBF24] truncate">
-                      {validationStatus}
                     </p>
                   </div>
                 </div>
@@ -555,19 +517,16 @@ const GenerateCvCoach = () => {
             <p className="text-[9px] md:text-[10px] text-white/60 font-bold leading-relaxed uppercase tracking-wider mt-0 md:mt-2">
               Your CV meets {cvTier} standards and is ready to share with top clubs and agents.
             </p>
-            <Button className="bg-white/5 hover:bg-white/10 text-white border border-white/10 gap-2 w-full py-3 md:py-4 rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] h-auto mt-auto cursor-pointer">
-              <IconShare size={16} className="text-white/40" /> Request Re-validation
-            </Button>
           </div>
 
-          {/* Player CV Validations */}
+          {/* Assigned Players for Review */}
           <section className="p-6 rounded-2xl border border-white/20 bg-[#0D0D0D]">
             <div className="flex items-center gap-2 mb-6">
               <div className="p-2 rounded-lg bg-[#E31B23]/10 text-[#E31B23]">
                 <IconUserCheck size={20} />
               </div>
               <h2 className="text-sm font-bold text-white uppercase tracking-widest">
-                Player CV Validations
+                Assigned Players for Review
               </h2>
             </div>
             <div className="flex flex-col gap-4">
@@ -621,66 +580,9 @@ const GenerateCvCoach = () => {
                     </div>
                   </div>
                 ))
-              ) : validationNeededPlayers.length > 0 ? (
-                validationNeededPlayers.slice(0, MAX_VALIDATIONS_PREVIEW).map((player) => {
-                  const reason = getValidationReason(player);
-                  const reasonColors =
-                    reason === "Requested"
-                      ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
-                      : reason === "Expired"
-                      ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
-                      : "bg-red-500/10 text-red-400 border-red-500/20";
-                  return (
-                    <div
-                      key={player.id}
-                      className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 group hover:border-[#E31B23]/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                        <Image
-                          width={100}
-                          height={100}
-                          src={player.playerImage}
-                          className="size-10 rounded-full object-cover border border-white/10 shrink-0"
-                          alt={player.fullName}
-                        />
-                        <div className="min-w-0">
-                          <div className="text-xs sm:text-sm font-bold text-white truncate">
-                            {player.fullName}
-                          </div>
-                          <div className="flex flex-wrap items-center gap-1 sm:gap-2 mt-0.5">
-                            <span className="text-[9px] text-gray-500 uppercase tracking-widest truncate">
-                              {player.position}
-                            </span>
-                            <span
-                              className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider border whitespace-nowrap ${reasonColors}`}
-                            >
-                              {reason}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-2">
-                        {Number(player.rating) > 0 && (
-                          <div className="text-base sm:text-lg font-black text-white italic">
-                            {player.rating}
-                          </div>
-                        )}
-                        <button
-                          onClick={() => {
-                            selectPlayer(player.id);
-                            router.push("/cvs/player-cv-details");
-                          }}
-                          className="px-2 sm:px-3 py-1.5 bg-[#E31B23] hover:bg-[#ff2d35] text-white text-[8px] sm:text-[9px] font-black uppercase tracking-widest rounded-lg transition-all border border-[#E31B23]/50 cursor-pointer"
-                        >
-                          Review
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })
               ) : (
                 <div className="text-center py-6 text-xs text-white/40 uppercase tracking-wider font-bold">
-                  All Player CVs Validated
+                  No players assigned for review
                 </div>
               )}
               {validationsTotal > MAX_VALIDATIONS_PREVIEW && (

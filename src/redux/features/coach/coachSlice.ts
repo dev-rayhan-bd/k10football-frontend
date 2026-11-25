@@ -2,7 +2,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import clubImage from "@/assets/cvs/club1.png";
 import flagImage from "@/assets/cvs/id/coach-bio-flag.png";
-import coachStyleImage from "@/assets/cvs/id/coach-style-image.png";
 import flagFr from "@/assets/cvs/id/flag-fr.png";
 import flagIt from "@/assets/cvs/id/flag-itally.png";
 import courseLogo1 from "@/assets/cvs/id/courses-logo1.png";
@@ -146,7 +145,7 @@ const initialState: CoachData = {
   agency: "",
   salary: "",
   majorTrophies: [],
-  coachImage: coachStyleImage,
+  coachImage: "",
   mainFlag: flagImage,
   cupHistory: [],
   keySkills: [],
@@ -160,12 +159,7 @@ const initialState: CoachData = {
     { id: 3, name: 'Logo 3', image: courseLogo3 },
     { id: 4, name: 'Logo 4', image: courseLogo4 },
   ],
-  complementaryCourses: [
-    { id: 1, title: 'UEFA Pro Licence', icon: 'award', isCompleted: true, isSelected: true },
-    { id: 2, title: 'UEFA A Licence', icon: 'award', isCompleted: true, isSelected: true },
-    { id: 3, title: 'Level 3 Coaching Certificate', icon: 'award', isCompleted: true, isSelected: true },
-    { id: 4, title: 'Performance Analysis in Professional Football', icon: 'award', isCompleted: true, isSelected: true },
-  ],
+  complementaryCourses: [],
   associations: [
     { name: "CAF", code: "CAF", isSelected: true },
     { name: "CONCACAF", code: "CONCACAF", isSelected: true },
@@ -177,44 +171,11 @@ const initialState: CoachData = {
     { name: "RFEF", code: "RFEF", isSelected: true },
     { name: "FFF", code: "FFF", isSelected: true },
   ],
-  formationMarkers: [
-    [
-      { id: "pin-1", x: 50, y: 90 },
-      { id: "pin-2", x: 35, y: 75 },
-      { id: "pin-3", x: 65, y: 75 },
-      { id: "pin-4", x: 50, y: 20 },
-    ],
-    [
-      { id: "pin-1", x: 55, y: 55 },
-    ],
-    [],
-  ],
+  formationMarkers: [[], [], []],
   formations: [],
   documents: [],
   assignedPlayerReviews: [],
-  testimonials: [
-    {
-      id: 1,
-      name: 'Emanuel',
-      role: 'Assistant Coach',
-      text: 'Working with this coach changed everything for our team. Skills that felt impossible now look effortless.',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop'
-    },
-    {
-      id: 2,
-      name: 'Dylan Hodges',
-      role: 'Head Coach of the club',
-      text: 'The coach improved our squad faster than we expected. Progress that used to take months now shows within days.',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop'
-    },
-    {
-      id: 3,
-      name: 'Madonna',
-      role: 'Youth Academy Director',
-      text: 'Our players develop twice as fast under this coach. What once felt confusing is now clear and structured.',
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop'
-    },
-  ]
+  testimonials: [],
 };
 
 export const coachSlice = createSlice({
@@ -245,6 +206,12 @@ export const coachSlice = createSlice({
     syncFromCoachCvResponse: (state, action: PayloadAction<ICoachProfileData | any>) => {
       const data = action.payload;
       if (!data) return;
+
+      // A different coach (e.g. a public CV opened after your own dashboard):
+      // start from a clean state so nothing from the previous coach leaks in.
+      if (data._id && state._id && data._id !== state._id) {
+        Object.assign(state, initialState, { _id: undefined, userId: undefined, cvData: undefined });
+      }
 
       if (data._id !== undefined) state._id = data._id;
       if (data.userId !== undefined) state.userId = data.userId;
@@ -329,7 +296,7 @@ export const coachSlice = createSlice({
       }
 
       // Languages
-      if (Array.isArray(data.languages) && data.languages.length > 0) {
+      if (Array.isArray(data.languages)) {
         state.languages = data.languages.map((l: any, i: number) => ({
           name: l.language || l.name || "",
           level: l.proficiency || l.level || "",
@@ -338,7 +305,7 @@ export const coachSlice = createSlice({
       }
 
       // Accomplishments
-      if (Array.isArray(data.accomplishments) && data.accomplishments.length > 0) {
+      if (Array.isArray(data.accomplishments)) {
         state.accomplishments = data.accomplishments.map((a: any) => ({
           id: a._id,
           text: a.text || "",
@@ -356,7 +323,7 @@ export const coachSlice = createSlice({
       }
 
       // Major Trophies
-      if (Array.isArray(data.majorTrophies) && data.majorTrophies.length > 0) {
+      if (Array.isArray(data.majorTrophies)) {
         state.majorTrophies = data.majorTrophies.map((t: any) => ({
           id: t._id,
           name: t.title || t.name || "",
@@ -366,12 +333,12 @@ export const coachSlice = createSlice({
       }
 
       // Cups Played
-      if (Array.isArray(data.cupsPlayed) && data.cupsPlayed.length > 0) {
+      if (Array.isArray(data.cupsPlayed)) {
         state.cupHistory = data.cupsPlayed.map((c: any) => `${c.year} - ${c.tournament}`);
       }
 
       // Key Skills
-      if (Array.isArray(data.keySkills) && data.keySkills.length > 0) {
+      if (Array.isArray(data.keySkills)) {
         state.keySkills = data.keySkills.map((k: any, idx: number) => ({
           id: k._id || idx + 1,
           text: k.name || k.text || "",
@@ -399,7 +366,7 @@ export const coachSlice = createSlice({
       }
 
       // Formations
-      if (Array.isArray(data.formations) && data.formations.length > 0) {
+      if (Array.isArray(data.formations)) {
         state.formations = data.formations;
         const markers: { id: number | string; x: number; y: number }[][] = [[], [], []];
         data.formations.forEach((f: any) => {
@@ -416,7 +383,7 @@ export const coachSlice = createSlice({
       }
 
       // Courses & Associations
-      if (Array.isArray(data.courses) && data.courses.length > 0) {
+      if (Array.isArray(data.courses)) {
         state.courses = data.courses;
         state.complementaryCourses = data.courses.map((c: any, idx: number) => ({
           id: idx + 1,

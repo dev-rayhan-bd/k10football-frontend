@@ -369,6 +369,15 @@ export const coachApi = apiSlice.injectEndpoints({
             providesTags: [TagTypes.TESTIMONIALS, TagTypes.COACHES],
         }),
 
+        // Public (no login): a specific coach's testimonials, for the shared CV page.
+        getCoachTestimonialsById: builder.query<ICoachTestimonialsResponse, string>({
+            query: (coachId) => ({
+                url: `/coaches/${coachId}/testimonials`,
+                method: "GET",
+            }),
+            providesTags: [TagTypes.TESTIMONIALS],
+        }),
+
         createCoachTestimonial: builder.mutation<any, FormData | ICreateCoachTestimonialPayload | any>({
             query: (payload) => {
                 let body = payload;
@@ -785,6 +794,7 @@ export const {
     useUpdateCoachDocumentMutation,
     useGetMyCoachTestimonialsQuery,
     useLazyGetMyCoachTestimonialsQuery,
+    useGetCoachTestimonialsByIdQuery,
     useCreateCoachTestimonialMutation,
     useUpdateCoachTestimonialMutation,
     useDeleteCoachTestimonialMutation,

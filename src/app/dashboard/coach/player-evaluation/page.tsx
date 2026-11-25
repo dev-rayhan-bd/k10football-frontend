@@ -22,6 +22,9 @@ import {
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import logo from "@/assets/logo.png";
+import { resolveChatMediaUrl } from "@/components/chat/ChatAvatar";
+
+const PLAYER_PLACEHOLDER_IMG = "/placeholder_img.jpg";
 
 const DEFAULT_EVALUATION = {
   // Techniques
@@ -78,6 +81,7 @@ const PlayerEvaluationPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedPlayer, setSelectedPlayer] = useState<EvaluationPlayer | null>(null);
+  const [failedImgSrc, setFailedImgSrc] = useState<string | null>(null);
   const [evaluation, setEvaluation] = useState<EvaluationData>(DEFAULT_EVALUATION as EvaluationData);
 
   useEffect(() => {
@@ -133,8 +137,8 @@ const PlayerEvaluationPage = () => {
       rating: player.rating || 0,
       academyName: player.academy || "N/A",
       academy: player.academy || "N/A",
-      playerImage: player.avatar || "/placeholder_img.jpg",
-      avatar: player.avatar || "/placeholder_img.jpg",
+      playerImage: player.avatar || "",
+      avatar: player.avatar || "",
       age: player.age || 18,
       evaluationDate:
         player.lastEvaluated && player.lastEvaluated !== "Pending Review"
@@ -181,11 +185,24 @@ const PlayerEvaluationPage = () => {
 
     const toastId = toast.loading("Generating PDF report... Please wait.");
 
+    // html2canvas draws text too low when images are display:block (Tailwind preflight),
+    // which makes row borders cut through the labels. Patch only the cloned document.
+    const fixCloneForCanvas = (clonedDoc: Document) => {
+      const style = clonedDoc.createElement("style");
+      style.innerHTML = "img { display: inline-block !important; }";
+      clonedDoc.head.appendChild(style);
+    };
+
     // Save original getComputedStyle and create dummy div to convert modern colors (oklch, lab, etc.)
     const originalGetComputedStyle = window.getComputedStyle;
     const dummy = document.createElement("div");
     dummy.style.display = "none";
     document.body.appendChild(dummy);
+    const colorCanvas = document.createElement("canvas");
+    colorCanvas.width = 1;
+    colorCanvas.height = 1;
+    const colorCtx = colorCanvas.getContext("2d", { willReadFrequently: true });
+    const colorCache = new Map<string, string>();
 
     const convertModernColor = (value: string) => {
       if (typeof value !== "string") return value;
@@ -193,16 +210,28 @@ const PlayerEvaluationPage = () => {
         return value;
       }
       return value.replace(/(oklch|oklab|lab|lch)\([^)]+\)/g, (match) => {
+        const cached = colorCache.get(match);
+        if (cached) return cached;
+        let resolved = "rgb(0, 0, 0)";
         try {
-          dummy.style.color = match;
-          const resolved = originalGetComputedStyle(dummy).color;
-          if (resolved && (resolved.startsWith("rgb") || resolved.startsWith("#"))) {
-            return resolved;
+          // Chrome keeps oklch() in computed styles, so rasterize the color to get real RGB.
+          if (colorCtx) {
+            colorCtx.clearRect(0, 0, 1, 1);
+            colorCtx.fillStyle = "#000";
+            colorCtx.fillStyle = match;
+            colorCtx.fillRect(0, 0, 1, 1);
+            const [r, g, b, a] = colorCtx.getImageData(0, 0, 1, 1).data;
+            resolved = `rgba(${r}, ${g}, ${b}, ${Number((a / 255).toFixed(3))})`;
+          } else {
+            dummy.style.color = match;
+            const computed = originalGetComputedStyle(dummy).color;
+            if (computed.startsWith("rgb") || computed.startsWith("#")) resolved = computed;
           }
-          return "rgb(0, 0, 0)";
         } catch {
-          return "rgb(0, 0, 0)";
+          // keep the fallback
         }
+        colorCache.set(match, resolved);
+        return resolved;
       });
     };
 
@@ -247,8 +276,9 @@ const PlayerEvaluationPage = () => {
         canvas1 = await html2canvas(page1, {
           scale: 2,
           useCORS: true,
-          logging: true,
+          logging: false,
           backgroundColor: "#ffffff",
+          onclone: fixCloneForCanvas,
         });
       } catch (err) {
         throw new Error(`Page 1 render failed: ${err instanceof Error ? err.message : String(err)}`);
@@ -261,8 +291,9 @@ const PlayerEvaluationPage = () => {
         canvas2 = await html2canvas(page2, {
           scale: 2,
           useCORS: true,
-          logging: true,
+          logging: false,
           backgroundColor: "#ffffff",
+          onclone: fixCloneForCanvas,
         });
       } catch (err) {
         throw new Error(`Page 2 render failed: ${err instanceof Error ? err.message : String(err)}`);
@@ -338,7 +369,10 @@ const PlayerEvaluationPage = () => {
 
   // Evaluation Details Screen
   if (selectedPlayer) {
-    const playerImgSrc = selectedPlayer.playerImage || selectedPlayer.avatar || "/ronaldo.png";
+    // Relative upload paths live on the API host; a missing/broken file falls back to the placeholder.
+    const resolvedPlayerImg = resolveChatMediaUrl(selectedPlayer.playerImage || selectedPlayer.avatar);
+    const playerImgSrc =
+      resolvedPlayerImg && failedImgSrc !== resolvedPlayerImg ? resolvedPlayerImg : PLAYER_PLACEHOLDER_IMG;
 
     return (
       <div className="space-y-6 pb-12">
@@ -365,7 +399,7 @@ const PlayerEvaluationPage = () => {
             <div className="flex justify-between items-center w-full relative z-10">
               {/* Logo Badge */}
               <div className="flex items-center">
-                <Image src={logo.src} alt="K10 Football Logo" className="h-10 object-contain" width={100} height={100}/>
+                <Image src={logo} alt="K10 Football Logo" className="h-10 w-auto"/>
               </div>
               {/* Date */}
               <div className="text-gray-500 text-xs font-bold font-mono">
@@ -425,9 +459,10 @@ const PlayerEvaluationPage = () => {
             <div className="relative sm:absolute right-0 bottom-0 mt-8 sm:mt-0 h-96 sm:h-[80%] w-full sm:w-[50%] flex items-end justify-center sm:justify-end pointer-events-none z-0 opacity-100">
               <Image src={playerImgSrc}
                 alt={selectedPlayer.fullName}
-                className="h-full object-contain object-bottom relative z-10"
+                className="h-full w-auto max-w-full object-contain object-bottom relative z-10"
                 width={500}
                 height={500}
+                onError={() => setFailedImgSrc(playerImgSrc)}
               />
             </div>
           </div>
@@ -441,7 +476,7 @@ const PlayerEvaluationPage = () => {
             <div className="flex justify-between items-center w-full relative z-10">
               {/* Logo Badge */}
               <div className="flex items-center">
-                <Image src={logo.src} alt="K10 Football Logo" className="h-10 object-contain" width={500} height={500}/>
+                <Image src={logo} alt="K10 Football Logo" className="h-10 w-auto"/>
               </div>
               {/* Date */}
               <div className="text-gray-500 text-xs font-bold font-mono">
@@ -809,7 +844,7 @@ const PlayerEvaluationPage = () => {
                         <div className="flex items-center gap-3">
                           <div className="relative size-10 rounded-full overflow-hidden bg-gray-900 border border-white/10 shrink-0">
                             <Image
-                              src={player.avatar || "/placeholder_img.jpg"}
+                              src={resolveChatMediaUrl(player.avatar) || PLAYER_PLACEHOLDER_IMG}
                               className="size-full object-cover"
                               alt={player.name || "Player"}
                               width={40}
@@ -833,7 +868,7 @@ const PlayerEvaluationPage = () => {
                       </td>
                       <td className="py-4 px-4 text-center">
                         <span className="text-sm font-black text-red-600 italic">
-                          {player.rating ?? "—"}
+                          {player.rating ?? "â€”"}
                         </span>
                       </td>
                       <td className="py-4 px-4 text-sm text-gray-300 font-semibold">

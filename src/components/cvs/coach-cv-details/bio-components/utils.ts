@@ -22,7 +22,18 @@ export const calculateAge = (dobString: string) => {
   return age;
 };
 
-export const getFlagUrl = (countryName: string) => {
+/**
+ * Age to display: from the date of birth when there is one, otherwise the
+ * stored age. Returns "" when unknown (so callers can hide it, never show 0).
+ */
+export const getDisplayAge = (dob?: string, storedAge?: string | number): string => {
+  const fromDob = calculateAge(dob || "");
+  if (typeof fromDob === "number" && fromDob > 0) return String(fromDob);
+  const stored = String(storedAge ?? "").replace(/\D/g, "");
+  return Number(stored) > 0 ? stored : "";
+};
+
+export const getFlagUrl =(countryName: string) => {
   if (!countryName) return "";
   const code = COUNTRY_CODES[countryName.toLowerCase()];
   if (!code) return "";

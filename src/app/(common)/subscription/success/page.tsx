@@ -24,6 +24,7 @@ import {
   normalizeRole,
 } from "@/helpers/SessionHelper";
 import { toast } from "sonner";
+import CvValidationPaymentResult from "@/components/cv-validation/CvValidationPaymentResult";
 
 const SubscriptionSuccessContent = () => {
   const searchParams = useSearchParams();
@@ -175,7 +176,7 @@ const SubscriptionSuccessContent = () => {
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {plan.features.map((feat, i) => (
                   <li key={i} className="text-xs text-gray-300 flex items-start gap-2">
-                    <span className="text-[#00ff88] font-black select-none">✓</span>
+                    <span className="text-[#00ff88] font-black select-none">âœ“</span>
                     <span>{feat}</span>
                   </li>
                 ))}
@@ -221,10 +222,19 @@ const SubscriptionSuccessSkeleton = () => (
   </div>
 );
 
+// CV validation checkouts may return here with `type=CV_VALIDATION`.
+const SubscriptionSuccessRouter = () => {
+  const searchParams = useSearchParams();
+  if (searchParams.get("type") === "CV_VALIDATION") {
+    return <CvValidationPaymentResult sessionId={searchParams.get("session_id") || ""} />;
+  }
+  return <SubscriptionSuccessContent />;
+};
+
 export default function SubscriptionSuccessPage() {
   return (
     <Suspense fallback={<SubscriptionSuccessSkeleton />}>
-      <SubscriptionSuccessContent />
+      <SubscriptionSuccessRouter />
     </Suspense>
   );
 }

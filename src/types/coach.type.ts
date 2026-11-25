@@ -504,6 +504,7 @@ export interface ICoachPlayerCvValidationSummary {
   verifiedCvs: number;
   updatedThisMonth: number;
   expiredStatus: number;
+  awaitingPayment?: number;
 }
 
 export interface ICoachPlayerCvValidationPlayer {
@@ -518,8 +519,11 @@ export interface ICoachPlayerCvValidationPlayer {
   goals: number;
   assists: number;
   matches?: number;
-  lastValidated?: string;
-  status: "VERIFIED" | "PENDING" | "EXPIRED" | string;
+  lastValidated?: string | null;
+  status: "VERIFIED" | "PENDING" | "AWAITING_PAYMENT" | "EXPIRED" | string;
+  paymentStatus?: string;
+  /** The only source of truth for showing the ✓ Validate action. */
+  canValidate?: boolean;
   createdAt?: string;
 }
 
@@ -636,48 +640,43 @@ export interface ICoachCompleteGameReportResponse {
   data?: any;
 }
 
-export interface ICoachValidatePlayerCvTechnical {
-  ballControl: number;
-  dribbling: number;
-  shortPassing: number;
-  longPassing: number;
-  crossing: number;
-  shooting: number;
-  finishing: number;
-  longShots: number;
+// POST /coaches/players/:playerId/validate-cv — values 0–100; untouched fields are omitted.
+export interface ICoachValidatePlayerCvPhysical {
+  pace?: number;
+  acceleration?: number;
+  stamina?: number;
+  strength?: number;
+  agility?: number;
 }
 
-export interface ICoachValidatePlayerCvPhysical {
-  acceleration: number;
-  sprintSpeed: number;
-  stamina: number;
-  strength: number;
-  balance: number;
-  agility: number;
-  reactions: number;
-  jumping: number;
+export interface ICoachValidatePlayerCvTechnical {
+  ballControl?: number;
+  dribbling?: number;
+  shortPassing?: number;
+  shooting?: number;
+  finishing?: number;
 }
 
 export interface ICoachValidatePlayerCvBehavioral {
-  creativity: number;
-  leadership: number;
-  confidence: number;
-  composure: number;
-  motivation: number;
-  focus: number;
-  determination: number;
-  workRate: number;
-  teamwork: number;
-  consistency: number;
-  decisionMaking: number;
+  leadership?: number;
+  teamwork?: number;
+  workRate?: number;
+  decisions?: number;
+}
+
+export interface ICoachValidatePlayerCvMental {
+  composure?: number;
+  confidence?: number;
+  focus?: number;
 }
 
 export interface ICoachValidatePlayerCvPayload {
   playerId: string;
-  technical: ICoachValidatePlayerCvTechnical;
-  physical: ICoachValidatePlayerCvPhysical;
-  behavioral: ICoachValidatePlayerCvBehavioral;
-  coachFeedback: string;
+  physical?: ICoachValidatePlayerCvPhysical;
+  technical?: ICoachValidatePlayerCvTechnical;
+  behavioral?: ICoachValidatePlayerCvBehavioral;
+  mental?: ICoachValidatePlayerCvMental;
+  coachFeedback?: string;
 }
 
 export interface ICoachValidatePlayerCvResponse {

@@ -9,7 +9,33 @@ export const formatMessageTime = (dateString?: string): string => {
   }
 };
 
-export const formatConversationTime = (dateString?: string): string => {
+/**
+ * Group photo: the field name varies between backend responses, so accept the
+ * common ones. Individual chats use the other participant's avatar.
+ */
+export const getConversationAvatar = (conv?: {
+  type?: string;
+  avatar?: string;
+  user?: { avatar?: string };
+  [key: string]: unknown;
+} | null): string => {
+  if (!conv) return "";
+  if (conv.type !== "GROUP") return conv.user?.avatar || "";
+  // The conversations API puts the group photo in `user.avatar` (user.role = "GROUP").
+  const candidates = [
+    conv.avatar,
+    conv.user?.avatar,
+    conv.groupAvatar,
+    conv.groupImage,
+    conv.image,
+    conv.photo,
+    conv.imageUrl,
+  ];
+  const found = candidates.find((v) => typeof v === "string" && v.trim() !== "");
+  return (found as string) || "";
+};
+
+export const formatConversationTime =(dateString?: string): string => {
   if (!dateString) return "";
   try {
     const d = new Date(dateString);

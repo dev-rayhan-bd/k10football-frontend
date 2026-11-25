@@ -12,6 +12,7 @@ import html2canvas from "html2canvas";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { GK_SLIDE_1, OUTFIELD_SLIDES, GK_SLIDE_4 } from "./MatchStatisticsForm";
+import { formatPlayedTimeHMS } from "./reportHelpers";
 
 const NA = "N/A";
 
@@ -199,7 +200,7 @@ const ReportPdfPreview = ({
     { label: "DOB", value: show(formData.dob) },
     { label: "MATCHES PLAYED", value: show(formData.matchesPlayed) },
     { label: "WEIGHT", value: formData.weight ? `${formData.weight} KG` : NA },
-    { label: "MINUTES PLAYED", value: formData.minutesPlayed ? `${formData.minutesPlayed} MIN` : NA },
+    { label: "MINUTES PLAYED", value: formData.minutesPlayed ? `${formatPlayedTimeHMS(formData.minutesPlayed)} MIN` : NA },
     { label: "HEIGHT", value: formatHeight(formData.height) },
     { label: "FOOT", value: show(formData.foot) },
   ];

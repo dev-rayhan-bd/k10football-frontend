@@ -2,7 +2,7 @@ import CMSField from "@/components/shared/CMSField";
 import Image from "next/image";
 import { useCoach } from "@/hooks/useCoach";
 import { ALL_COUNTRIES } from "./constants";
-import { calculateAge, getFlagUrl } from "./utils";
+import { calculateAge, getDisplayAge, getFlagUrl } from "./utils";
 
 const FlagThumb = ({ country, alt }: { country?: string; alt: string }) =>
   country && getFlagUrl(country) ? (
@@ -65,8 +65,14 @@ export const CoachPersonalInfo = ({ canEdit }: { canEdit: boolean }) => {
           <div className="flex justify-between items-center gap-2 w-full min-w-0">
             <span className="text-gray-400 shrink-0">Age</span>
             <div className="flex items-center gap-1 shrink-0">
-              <span className="text-white">{coachData.age ? coachData.age.replace(/\D/g, "") : 0}</span>{" "}
-              <span className="text-gray-400 text-xs sm:text-sm">Years</span>
+              {getDisplayAge(coachData.dob, coachData.age) ? (
+                <>
+                  <span className="text-white">{getDisplayAge(coachData.dob, coachData.age)}</span>{" "}
+                  <span className="text-gray-400 text-xs sm:text-sm">Years</span>
+                </>
+              ) : (
+                <span className="text-gray-400">-</span>
+              )}
             </div>
           </div>
           <div className="flex justify-between items-center gap-2 w-full min-w-0">

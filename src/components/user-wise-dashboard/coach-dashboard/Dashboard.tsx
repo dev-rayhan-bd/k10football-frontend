@@ -42,6 +42,7 @@ import {
 import { useGetMySubscriptionQuery } from "@/redux/features/subscription/subscriptionApi";
 import { ICoachTeamPlayer } from "@/types/coach.type";
 import { IMediaItem } from "@/types/media.type";
+import VideoThumbnail from "@/components/shared/VideoThumbnail";
 import {
   Dialog,
   DialogContent,
@@ -115,46 +116,6 @@ const MediaCardSkeleton = ({ isVideo }: { isVideo?: boolean }) => (
     </div>
   </div>
 );
-
-/**
- * Video card preview: the uploaded thumbnail if there is one, otherwise the
- * video's own first frame. (A video URL can't be used as an <img> source —
- * that is what left uploaded videos showing the grey placeholder.)
- */
-const VideoThumbnail = ({ item }: { item: IMediaItem }) => {
-  const [thumbFailed, setThumbFailed] = useState(false);
-  const className =
-    "size-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-90";
-
-  if (item.thumbnailUrl && !thumbFailed) {
-    return (
-      <Image
-        width={400}
-        height={250}
-        src={item.thumbnailUrl}
-        className={className}
-        alt={item.title}
-        unoptimized
-        onError={() => setThumbFailed(true)}
-      />
-    );
-  }
-  if (item.url) {
-    return (
-      <video
-        // "#t=0.1" makes browsers paint the first frame instead of a black box.
-        src={`${item.url}#t=0.1`}
-        className={cn(className, "pointer-events-none")}
-        muted
-        playsInline
-        preload="metadata"
-      />
-    );
-  }
-  return (
-    <Image width={400} height={250} src="/placeholder_img.jpg" className={className} alt={item.title} />
-  );
-};
 
 const CoachDashboard = () => {
   const { hasAcademy } = useContext(CoachContext);
@@ -296,6 +257,8 @@ const CoachDashboard = () => {
       },
     ];
   }, [tournamentStats]);
+  // With every count at 0 the pie would still draw a full "100%" circle.
+  const hasTournamentData = tournamentStatsData.some((d) => Number(d.count) > 0);
 
   // My Teams API Query & Mutation
   const {
@@ -688,7 +651,8 @@ const CoachDashboard = () => {
               { type: "license", label: "Validation Status", value: heroValidationStatus },
               { type: "email", label: "Email", value: coachData.email || "N/A" },
             ]}
-            characterImage={coachData.profileImage || coachData.coachImage || "/coach-image.png"}
+            // The coach's own photo only — no stock image when none is saved.
+            characterImage={coachData.profileImage || coachData.coachImage || ""}
             isLoading={isCoachLoading}
             onCoverUpload={(file) => {
               const reader = new FileReader();
@@ -810,11 +774,18 @@ const CoachDashboard = () => {
                     )}
                   </div>
 
-                  <div className="size-full min-h-0">
+                  <div className="relative size-full min-h-0">
+                    {!hasTournamentData && (
+                      <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+                        <span className="px-3 py-1.5 rounded-lg bg-black/70 border border-white/10 text-[10px] font-bold text-white/60 uppercase tracking-wider">
+                          No match data yet
+                        </span>
+                      </div>
+                    )}
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
-                          data={tournamentStatsData}
+                          data={hasTournamentData ? tournamentStatsData : []}
                           cx="50%"
                           cy="46%"
                           outerRadius={95}
@@ -865,10 +836,7 @@ const CoachDashboard = () => {
                             fontSize: "12px",
                           }}
                           itemStyle={{ color: "#fff" }}
-                          formatter={(value: any, name: any, item: any) => [
-                            `${value}% (${item?.payload?.count ?? 0} matches)`,
-                            name,
-                          ]}
+                          formatter={(value: any, name: any) => [`${value}%`, name]}
                         />
                         <Legend
                           verticalAlign="bottom"
@@ -932,14 +900,6 @@ const CoachDashboard = () => {
               </div>
               {/* Buttons */}
               <div className="flex flex-col gap-2 w-full lg:w-auto">
-                {/* The CV PDF is generated on My CV (it captures that page). */}
-                <button
-                  type="button"
-                  onClick={() => router.push("/dashboard/coach/my-cv")}
-                  className="px-6 py-2.5 rounded-lg border border-white/10 bg-white/10 text-xs font-bold text-white hover:bg-white/20 transition-all text-center cursor-pointer"
-                >
-                  Download PDF
-                </button>
                 <button
                   type="button"
                   onClick={handleShareCv}
@@ -1140,7 +1100,10 @@ const CoachDashboard = () => {
                         onClick={() => setPreviewMedia(item)}
                         className="relative aspect-video overflow-hidden cursor-pointer bg-black/40"
                       >
-                        <VideoThumbnail item={item} />
+                        <VideoThumbnail
+                          item={item}
+                          className="group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-90"
+                        />
                         {/* Play button overlay */}
                         <div className="absolute inset-0 flex items-center justify-center">
                           <div className="size-10 rounded-full bg-[#E31B23] flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">

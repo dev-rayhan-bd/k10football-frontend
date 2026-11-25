@@ -131,29 +131,43 @@ const ReportDetailsForm = ({
     }
   };
 
-  const isFormValid = () => {
-    const isCoachSelected = coachRequestMode === "custom"
-      ? Boolean(customCoachName?.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customCoachEmail?.trim() || ""))
-      : Boolean(selectedCoachId?.trim() || selectedCoachEmail?.trim());
-    return (
-      Boolean(formData.playerName?.trim()) &&
-      Boolean(formData.dob?.trim()) &&
-      Boolean(formData.clubName?.trim()) &&
-      Boolean(formData.position?.trim()) &&
-      Boolean(formData.foot?.trim()) &&
-      Boolean(formData.weight?.trim()) &&
-      Boolean(formData.height?.trim()) &&
-      Boolean(formData.scoutName?.trim()) &&
-      Boolean(formData.gameType?.trim()) &&
-      Boolean(formData.gameDate?.trim()) &&
-      Boolean(formData.gameLocation?.trim()) &&
-      Boolean(formData.ownTeam?.trim()) &&
-      Boolean(formData.opponentTeam?.trim()) &&
-      Boolean(formData.weather?.trim()) &&
-      String(formData.temperature ?? "").trim() !== "" &&
-      (reportCompletedBy === "parent" || (reportCompletedBy === "coach" && isCoachSelected))
-    );
+  /** Labels of the required fields that are still empty (shown under the button). */
+  const getMissingFields = (): string[] => {
+    const filled = (v: unknown) => String(v ?? "").trim() !== "";
+    const required: [string, unknown][] = [
+      ["Player Name", formData.playerName],
+      ["Date of Birth", formData.dob],
+      ["Club Name", formData.clubName],
+      ["Position", formData.position],
+      // Must be one of the dropdown options, otherwise the select shows a placeholder.
+      ["Foot", ["RIGHT", "LEFT", "BOTH"].includes(formData.foot) ? formData.foot : ""],
+      ["Weight", formData.weight],
+      ["Height", formData.height],
+      ["Scout Name", formData.scoutName],
+      ["Game Type", formData.gameType],
+      ["Game Date", formData.gameDate],
+      ["Game Location", formData.gameLocation],
+      ["Own Team", formData.ownTeam],
+      ["Opponent Team", formData.opponentTeam],
+      ["Weather", formData.weather],
+      ["Temperature", formData.temperature],
+    ];
+    const missing = required.filter(([, v]) => !filled(v)).map(([label]) => label);
+
+    if (reportCompletedBy === "coach") {
+      if (coachRequestMode === "custom") {
+        if (!customCoachName?.trim()) missing.push("Coach Name");
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customCoachEmail?.trim() || "")) missing.push("Valid Coach Email");
+      } else if (!selectedCoachId?.trim() && !selectedCoachEmail?.trim()) {
+        missing.push("Coach");
+      }
+    } else if (reportCompletedBy !== "parent") {
+      missing.push("Report Completion option");
+    }
+    return missing;
   };
+  const missingFields = getMissingFields();
+  const isFormValid = () => missingFields.length === 0;
 
   return (
     <div className="space-y-8 pb-12 animate-in fade-in duration-500">
@@ -217,6 +231,7 @@ const ReportDetailsForm = ({
                   value={formData.position}
                   onChange={(e) => handleChange("position", e.target.value)}
                 >
+                  <option value="" disabled>SELECT POSITION</option>
                   <option value="STRIKER">STRIKER</option>
                   <option value="MIDFIELDER">MIDFIELDER</option>
                   <option value="WINGER">WINGER</option>
@@ -232,9 +247,12 @@ const ReportDetailsForm = ({
               <div className="relative">
                 <select 
                   className="w-full bg-[#161616] border border-white/10 text-white h-12 rounded-lg px-4 uppercase font-bold appearance-none focus:outline-none focus:border-[#00FF62] focus:ring-1 focus:ring-[#00FF62]"
-                  value={formData.foot}
+                  value={["RIGHT", "LEFT", "BOTH"].includes(formData.foot) ? formData.foot : ""}
                   onChange={(e) => handleChange("foot", e.target.value)}
                 >
+                  {/* Without an empty option the browser shows "RIGHT" while the
+                      value is still empty, and re-picking RIGHT fires no change. */}
+                  <option value="" disabled>SELECT FOOT</option>
                   <option value="RIGHT">RIGHT</option>
                   <option value="LEFT">LEFT</option>
                   <option value="BOTH">BOTH</option>
@@ -606,6 +624,11 @@ const ReportDetailsForm = ({
           )}
         </Button>
       </div>
+      {missingFields.length > 0 && (
+        <p className="text-xs text-destructive text-right -mt-4">
+          Please fill in: {missingFields.join(", ")}
+        </p>
+      )}
     </div>
   );
 };

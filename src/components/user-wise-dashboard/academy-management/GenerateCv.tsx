@@ -26,6 +26,7 @@ import { FileText } from 'lucide-react';
 import { useAppDispatch } from "@/hooks/reduxHooks";
 import { updatePlayerField } from "@/redux/features/player/playerSlice";
 import { useGetMyGameReportsQuery } from "@/redux/features/player/playerApi";
+import RequestCvValidationButton from "@/components/cv-validation/RequestCvValidationButton";
 
 const GenerateCv = () => {
   const dispatch = useAppDispatch();
@@ -319,9 +320,13 @@ const GenerateCv = () => {
             <p className="text-[9px] sm:text-[10px] text-white/60 font-bold leading-relaxed uppercase tracking-wider mt-1 sm:mt-2 relative z-10 line-clamp-2">
               Your CV meets {cvData?.cvTier || (playerData as any).cvTier || "GOLD"} standards and is ready to share with top clubs and agents.
             </p>
-            <Button className="bg-white/5 hover:bg-white/10 text-white border border-white/10 gap-2 w-full py-3 sm:py-4 rounded-xl font-black uppercase tracking-widest text-[9px] sm:text-[10px] h-auto mt-2 sm:mt-4 relative z-10">
-              <IconShare size={16} className="text-white/40 sm:w-4.5 sm:h-4.5" /> Request Re-validation
-            </Button>
+            {role.toLowerCase() === "player" ? (
+              <RequestCvValidationButton className="w-full py-3 sm:py-4 h-auto mt-2 sm:mt-4 relative z-10 text-[9px] sm:text-[10px]" />
+            ) : (
+              <Button className="bg-white/5 hover:bg-white/10 text-white border border-white/10 gap-2 w-full py-3 sm:py-4 rounded-xl font-black uppercase tracking-widest text-[9px] sm:text-[10px] h-auto mt-2 sm:mt-4 relative z-10">
+                <IconShare size={16} className="text-white/40 sm:w-4.5 sm:h-4.5" /> Request Re-validation
+              </Button>
+            )}
           </div>
           {/* Career Journey / Last Evaluated */}
           {/* New Game Reports */}

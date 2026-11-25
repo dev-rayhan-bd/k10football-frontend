@@ -35,6 +35,7 @@ import {
 import { useParentDashboard } from "@/providers/ParentDashboardProvider";
 import { ILinkedChild } from "@/types/parent.type";
 import { cn } from "@/lib/utils";
+import RequestCvValidationButton from "@/components/cv-validation/RequestCvValidationButton";
 
 interface ChildProfileForm {
   fullName: string;
@@ -353,6 +354,15 @@ const ManageChildProfile = () => {
               <IconPlus size={16} />
               <span>Create Child</span>
             </Button>
+          )}
+
+          {/* Request CV validation for the selected child (parent pays, coach validates) */}
+          {!isEditing && selectedChild?.childPlayerId && (
+            <RequestCvValidationButton
+              key={selectedChild.childPlayerId}
+              playerId={selectedChild.childPlayerId}
+              className="w-full sm:w-auto px-5 py-2.5 h-auto text-xs shrink-0"
+            />
           )}
 
           {/* If children array > 0, ONLY show Edit Profile button */}

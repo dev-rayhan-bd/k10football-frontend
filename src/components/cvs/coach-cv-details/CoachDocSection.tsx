@@ -24,6 +24,7 @@ import {
   useUpdateCoachDocumentMutation,
 } from "@/redux/features/coach/coachApi";
 import { toast } from "sonner";
+import { UploadDocumentModal } from "@/components/cvs/player-cv-details/UploadDocumentModal";
 
 interface CoachDocSectionProps {
   editable?: boolean;
@@ -35,6 +36,7 @@ export const CoachDocSection = ({ editable = false, coachId }: CoachDocSectionPr
   const [deleteCoachDocument, { isLoading: isDeleting }] = useDeleteCoachDocumentMutation();
   const [updateCoachDocument, { isLoading: isUpdatingTitle }] = useUpdateCoachDocumentMutation();
   const [docToDelete, setDocToDelete] = useState<any | null>(null);
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
 
   const rawDocs: any[] =
     (cvData?.documents && Array.isArray(cvData.documents) ? cvData.documents : null) ||
@@ -94,6 +96,18 @@ export const CoachDocSection = ({ editable = false, coachId }: CoachDocSectionPr
               </p>
             </div>
           </div>
+          {canEdit && (
+            <Button
+              data-pdf-hide
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsUploadOpen(true)}
+              className="gap-2 cursor-pointer shrink-0"
+            >
+              <Plus className="size-4" /> Upload Document
+            </Button>
+          )}
         </div>
 
         {rawDocs.length === 0 ? (
@@ -101,8 +115,21 @@ export const CoachDocSection = ({ editable = false, coachId }: CoachDocSectionPr
             <FileText className="size-10 opacity-30" />
             <p className="text-sm font-medium">No documents uploaded yet</p>
             <p className="text-xs max-w-sm">
-              Official coaching licences and documentation will appear here once verified.
+              {canEdit
+                ? "Upload your coaching licences and certificates (PDF, max 15MB)."
+                : "Official coaching licences and documentation will appear here once verified."}
             </p>
+            {canEdit && (
+              <Button
+                data-pdf-hide
+                type="button"
+                size="sm"
+                onClick={() => setIsUploadOpen(true)}
+                className="mt-3 gap-2 cursor-pointer"
+              >
+                <Plus className="size-4" /> Upload First Document
+              </Button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
@@ -168,6 +195,18 @@ export const CoachDocSection = ({ editable = false, coachId }: CoachDocSectionPr
           </div>
         )}
       </div>
+
+      {/* Upload (POST /coaches/me/documents) — the CV refetches via tag invalidation */}
+      {canEdit && (
+        <UploadDocumentModal
+          isOpen={isUploadOpen}
+          onClose={() => {
+            setIsUploadOpen(false);
+            refetchCv();
+          }}
+          isCoach
+        />
+      )}
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={!!docToDelete} onOpenChange={(open) => !open && setDocToDelete(null)}>

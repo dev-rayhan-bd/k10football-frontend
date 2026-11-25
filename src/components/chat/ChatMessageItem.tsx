@@ -4,6 +4,7 @@
 import React from "react";
 import { IMessage } from "@/types/chat.type";
 import { formatMessageTime, getRoleBadgeStyle } from "@/helpers/ChatHelper";
+import ChatAvatar from "./ChatAvatar";
 import { IconCheck, IconChecks, IconLoader2 } from "@tabler/icons-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -20,7 +21,9 @@ export const ChatMessageItem = ({
   onImageClick,
 }: ChatMessageItemProps) => {
   const isMe = Boolean(message.isMe);
-  const timeFormatted = message.time || formatMessageTime(message.createdAt);
+  // createdAt is converted to the viewer's time zone; the server's pre-formatted
+  // `time` is in the server's zone (UTC), so it's only a fallback.
+  const timeFormatted = formatMessageTime(message.createdAt) || message.time;
   const senderRole = message.sender?.role;
   const roleStyle = getRoleBadgeStyle(senderRole);
 
@@ -34,17 +37,7 @@ export const ChatMessageItem = ({
       {/* Incoming Avatar for Group Chats or DM */}
       {!isMe && (
         <div className="shrink-0 self-end mb-1">
-          {message.sender?.avatar ? (
-            <img
-              src={message.sender.avatar}
-              alt={message.sender.name || "Sender"}
-              className="size-7 rounded-full object-cover border border-white/10"
-            />
-          ) : (
-            <div className="size-7 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold text-white/70">
-              {(message.sender?.name || "U").charAt(0).toUpperCase()}
-            </div>
-          )}
+          <ChatAvatar src={message.sender?.avatar} name={message.sender?.name} className="size-7 text-[10px]" />
         </div>
       )}
 
