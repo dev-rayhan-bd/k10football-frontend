@@ -19,6 +19,7 @@ import {
   IconCoins,
   IconInbox,
   IconLock,
+  IconClipboardList,
 } from "@tabler/icons-react";
 import { ReactNode, useEffect, useRef } from "react";
 import { useGetMySubscriptionQuery } from "@/redux/features/subscription/subscriptionApi";
@@ -50,6 +51,7 @@ const managementSidebarItems = [
   { name: "Game Reports", url: "/dashboard/academy/management/game-reports", icon: IconFileText },
   { name: "Validate CV", url: "/dashboard/academy/management/validate-cv", icon: IconFileText },
   { name: "Player Evaluation", url: "/dashboard/academy/management/player-evaluation", icon: IconUsers },
+  { name: "Evaluation Requests", url: "/dashboard/academy/management/evaluation-requests", icon: IconClipboardList },
   { name: "Analytics Report", url: "/dashboard/academy/management/analytics-report", icon: IconChartBar },
   { name: "Product Store", url: "/dashboard/academy/management/product-store", icon: IconBuildingStore },
   { name: "My Subscription", url: "/dashboard/academy/management/my-subscription", icon: IconCreditCard },

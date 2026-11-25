@@ -10,6 +10,7 @@ import {
   IconBell,
   IconSettings,
   IconLock,
+  IconClipboardCheck,
 } from "@tabler/icons-react";
 import { ReactNode, useEffect, useRef } from "react";
 import { useGetMySubscriptionQuery } from "@/redux/features/subscription/subscriptionApi";
@@ -28,6 +29,7 @@ const playerSidebarItems = [
   { name: "My Images & Videos", url: "/dashboard/player/images-videos", icon: IconPhotoVideo },
   { name: "Game Reports", url: "/dashboard/player/game-reports", icon: IconReportAnalytics },
   { name: "Analytics", url: "/dashboard/player/analytics", icon: IconChartBar },
+  { name: "My Evaluations", url: "/dashboard/player/evaluations", icon: IconClipboardCheck },
   { name: "My Subscription", url: "/dashboard/player/my-subscription", icon: IconCreditCard },
   { name: "Notification", url: "/dashboard/player/notifications", icon: IconBell },
   { name: "Settings", url: "/dashboard/player/settings", icon: IconSettings },

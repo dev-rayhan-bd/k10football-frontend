@@ -73,6 +73,18 @@ const Settings = () => {
   const stripeAccountId = stripeData?.stripeAccountId;
   const accountStatus = stripeData?.accountStatus || (isStripeConnected ? "CONNECTED" : "NOT_CONNECTED");
   const payoutSummary = stripeData?.payoutSummary;
+  // Amounts are in the currency the API reports (platform fees are USD — e.g. "$12.00 per validation").
+  const payoutCurrency = String(payoutSummary?.currency || stripeData?.currency || "USD").toUpperCase();
+  const formatPayoutAmount = (value: unknown) => {
+    const amount = Number(value ?? 0);
+    try {
+      return new Intl.NumberFormat("en-US", { style: "currency", currency: payoutCurrency }).format(
+        Number.isFinite(amount) ? amount : 0
+      );
+    } catch {
+      return `${payoutCurrency} ${Number.isFinite(amount) ? amount : 0}`;
+    }
+  };
 
   // Handle returnUrl / refreshUrl query params
   useEffect(() => {
@@ -442,7 +454,7 @@ const Settings = () => {
                       </div>
                     </div>
                     <div className="text-2xl font-black font-orbitron text-foreground">
-                      £{payoutSummary?.totalEarnedCommission ?? 0}
+                      {formatPayoutAmount(payoutSummary?.totalEarnedCommission)}
                     </div>
                     <span className="text-[10px] text-muted-foreground">
                       Lifetime earned commission
@@ -460,7 +472,7 @@ const Settings = () => {
                       </div>
                     </div>
                     <div className="text-2xl font-black font-orbitron text-[#00FF62]">
-                      £{payoutSummary?.totalTransferredAmount ?? 0}
+                      {formatPayoutAmount(payoutSummary?.totalTransferredAmount)}
                     </div>
                     <span className="text-[10px] text-muted-foreground">
                       {payoutSummary?.transferredCount ?? 0} payouts successfully processed
@@ -478,7 +490,7 @@ const Settings = () => {
                       </div>
                     </div>
                     <div className="text-2xl font-black font-orbitron text-amber-400">
-                      £{payoutSummary?.pendingTransferAmount ?? 0}
+                      {formatPayoutAmount(payoutSummary?.pendingTransferAmount)}
                     </div>
                     <span className="text-[10px] text-muted-foreground">
                       {payoutSummary?.pendingTransferCount ?? 0} transfers in processing queue

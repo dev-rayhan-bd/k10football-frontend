@@ -357,11 +357,16 @@ export const domPagesToPdf = async ({
     return { h, pageH: h + marginMm * 2 + footerSpace };
   });
 
-  const pdf = new jsPDF({ unit: "mm", format: [pageW, sizes[0]?.pageH ?? 297], orientation: "p" });
+  // jsPDF swaps width/height to match the orientation, so a page shorter than
+  // it is wide must be "l" — forcing "p" made those pages narrow (content cut
+  // off on the right) with an unpainted white strip at the bottom.
+  const orientationFor = (pageH: number) => (pageH >= pageW ? "p" : "l");
+  const firstH = sizes[0]?.pageH ?? 297;
+  const pdf = new jsPDF({ unit: "mm", format: [pageW, firstH], orientation: orientationFor(firstH) });
 
   canvases.forEach((canvas, i) => {
     const { h, pageH } = sizes[i];
-    if (i > 0) pdf.addPage([pageW, pageH], "p");
+    if (i > 0) pdf.addPage([pageW, pageH], orientationFor(pageH));
     pdf.setFillColor(backgroundColor);
     pdf.rect(0, 0, pageW, pageH, "F");
     pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", marginMm, marginMm, contentW, h);

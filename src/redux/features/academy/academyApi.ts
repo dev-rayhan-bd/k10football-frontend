@@ -49,10 +49,6 @@ import {
   IAcademyNewsMetaResponse,
   IAcademyNewsResponse,
   IGetAcademyNewsParams,
-  IAcademyPlayerEvaluationsResponse,
-  IGetAcademyPlayerEvaluationsParams,
-  IAcademyPlayerEvaluationPdfResponse,
-  IPlayerEvaluationDetailsResponse,
   IAcademyGameReportsResponse,
   IGetAcademyGameReportsParams,
   ISingleGameReportResponse,
@@ -1450,37 +1446,6 @@ export const academyApi = apiSlice.injectEndpoints({
       },
     }),
 
-    getAcademyPlayerEvaluations: builder.query<IAcademyPlayerEvaluationsResponse, IGetAcademyPlayerEvaluationsParams | void>({
-      query: (params) => ({
-        url: "/academies/player-evaluations",
-        method: "GET",
-        params: params || {},
-      }),
-      providesTags: [TagTypes.ACADEMY, TagTypes.PLAYER_EVALUATIONS],
-    }),
-
-    getAcademyPlayerEvaluationPdf: builder.query<IAcademyPlayerEvaluationPdfResponse, string>({
-      query: (evaluationId) => ({
-        url: `/academies/player-evaluations/${evaluationId}/pdf`,
-        method: "GET",
-      }),
-      providesTags: (_result, _error, evaluationId) => [
-        { type: TagTypes.PLAYER_EVALUATIONS, id: evaluationId },
-        TagTypes.ACADEMY,
-      ],
-    }),
-
-    getPlayerEvaluationDetails: builder.query<IPlayerEvaluationDetailsResponse, string>({
-      query: (evaluationId) => ({
-        url: `/coaches/player-evaluations/${evaluationId}`,
-        method: "GET",
-      }),
-      providesTags: (_result, _error, evaluationId) => [
-        { type: TagTypes.PLAYER_EVALUATIONS, id: evaluationId },
-        TagTypes.ACADEMY,
-      ],
-    }),
-
     getAcademyGameReports: builder.query<IAcademyGameReportsResponse, IGetAcademyGameReportsParams | void>({
       query: (params) => ({
         url: "/academies/game-reports",
@@ -1676,12 +1641,6 @@ export const {
   useMoveNewsToBinMutation,
   useRestoreNewsFromBinMutation,
   useDeleteAcademyNewsMutation,
-  useGetAcademyPlayerEvaluationsQuery,
-  useLazyGetAcademyPlayerEvaluationsQuery,
-  useGetAcademyPlayerEvaluationPdfQuery,
-  useLazyGetAcademyPlayerEvaluationPdfQuery,
-  useGetPlayerEvaluationDetailsQuery,
-  useLazyGetPlayerEvaluationDetailsQuery,
   useGetAcademyGameReportsQuery,
   useLazyGetAcademyGameReportsQuery,
   useGetSingleGameReportQuery,
