@@ -10,10 +10,20 @@ const statusVariant = (status: string) => {
   return "secondary" as const;
 };
 
+/** Open requests (NEED_EVALUATION / PENDING) are yellow; EVALUATED green; EXPIRED red. */
+const isOpenStatus = (status: string) => /NEED_EVALUATION|PENDING/i.test(status);
+
 export const EvaluationStatusBadge = ({ status, className }: { status?: string | null; className?: string }) => {
   if (!status) return null;
   return (
-    <Badge variant={statusVariant(status)} className={cn("uppercase tracking-wider font-bold", className)}>
+    <Badge
+      variant={statusVariant(status)}
+      className={cn(
+        "uppercase tracking-wider font-bold",
+        isOpenStatus(status) && "border-amber-500/30 bg-amber-500/15 text-amber-400",
+        className
+      )}
+    >
       {humanize(status)}
     </Badge>
   );

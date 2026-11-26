@@ -173,6 +173,7 @@ export type IAcademyEvaluationAnalyticsResponse = IApiEnvelope<IAcademyEvaluatio
 
 // ---------- A5. GET /academies/player-evaluations/:id ----------
 export interface IEvaluationSheetSkill {
+  key?: string;
   skill: string;
   rating: number | string | null;
   grade?: string | null;

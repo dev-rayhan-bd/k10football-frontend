@@ -23,7 +23,9 @@ import {
   IconUserCheck,
   IconSparkles,
   IconTrash,
+  IconUserMinus,
 } from "@tabler/icons-react";
+import RemoveCoachFromAcademyDialog from "./RemoveCoachFromAcademyDialog";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -114,6 +116,7 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
   const [isAssignCoachOpen, setIsAssignCoachOpen] = useState(false);
   const [isAssignPlayerOpen, setIsAssignPlayerOpen] = useState(false);
   const [coachToRemove, setCoachToRemove] = useState<ITeamRosterCoachItem | null>(null);
+  const [coachToRelease, setCoachToRelease] = useState<ITeamRosterCoachItem | null>(null);
   const [playerToRemove, setPlayerToRemove] = useState<ITeamRosterPlayerItem | null>(null);
 
   // Coach modal state
@@ -677,6 +680,15 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
               {/* Status Indicator & Remove Action */}
               <div className="shrink-0 flex items-center gap-2.5">
                 <span className="size-2 rounded-full bg-[#00FF85] shadow-[0_0_8px_#00FF85]" />
+                <button
+                  type="button"
+                  onClick={() => setCoachToRelease(coach)}
+                  className="p-1.5 rounded-lg bg-white/5 hover:bg-destructive/20 border border-white/10 hover:border-destructive/30 text-white/60 hover:text-destructive transition-all cursor-pointer hover:scale-105"
+                  title="Remove coach from academy"
+                  aria-label={`Remove ${coach.name} from academy`}
+                >
+                  <IconUserMinus size={14} />
+                </button>
                 <button
                   type="button"
                   onClick={() => setCoachToRemove(coach)}
@@ -1384,6 +1396,11 @@ export const TeamDetails = ({ teamId }: TeamDetailsProps) => {
           </form>
         </DialogContent>
       </Dialog>
+      <RemoveCoachFromAcademyDialog
+        coach={coachToRelease ? { id: coachToRelease._id, name: coachToRelease.name } : null}
+        onClose={() => setCoachToRelease(null)}
+        onRemoved={() => refetch()}
+      />
       {/* Remove Coach Confirmation Dialog */}
       <Dialog open={Boolean(coachToRemove)} onOpenChange={(open) => !open && setCoachToRemove(null)}>
         <DialogContent className="bg-[#111111] border border-white/10 text-white rounded-3xl max-w-md p-6 sm:p-8">

@@ -15,10 +15,12 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useGetAcademyCoachesQuery, useGetAcademyPlayersQuery } from "@/redux/features/academy/academyApi";
 import {
-  useGetMyPlayersForTransferQuery,
-  useGetTrainingSessionCoachesQuery,
-} from "@/redux/features/academy/academyApi";
+  INACTIVE_COACH_STATUSES,
+  toAcademyCoachRows,
+  toAcademyPlayerOptions,
+} from "@/components/user-wise-dashboard/academy-management/academyLists";
 import {
   getEvaluationApiError,
   useRemindEvaluationMutation,
@@ -62,18 +64,19 @@ export const RequestEvaluationModal = ({
   /** Set on 409: an open request already exists for this player + coach. */
   const [conflict, setConflict] = useState<{ playerId: string; coachId: string; message: string } | null>(null);
 
-  const { data: playersRes, isLoading: loadingPlayers } = useGetMyPlayersForTransferQuery(undefined, { skip: !open });
-  const { data: coachesRes, isLoading: loadingCoaches } = useGetTrainingSessionCoachesQuery(undefined, { skip: !open });
+  const { data: playersRes, isLoading: loadingPlayers } = useGetAcademyPlayersQuery(undefined, { skip: !open });
+  const { data: coachesRes, isLoading: loadingCoaches } = useGetAcademyCoachesQuery(undefined, { skip: !open });
   const [requestEvaluation, { isLoading: isRequesting }] = useRequestEvaluationMutation();
   const [remindEvaluation, { isLoading: isReminding }] = useRemindEvaluationMutation();
 
-  const players = playersRes?.data ?? [];
-  const coaches = coachesRes?.data ?? [];
+  const players = toAcademyPlayerOptions(playersRes?.data);
+  // Only approved coaches can be asked (removed/rejected affiliations are skipped).
+  const coaches = toAcademyCoachRows(coachesRes?.data).filter(
+    (c) => c.coachProfileId && !INACTIVE_COACH_STATUSES.includes(c.status) && c.status !== "PENDING"
+  );
 
-  const prefillPlayerMissing =
-    Boolean(prefill?.playerId) && !players.some((p) => (p._id || p.id) === prefill?.playerId);
-  const prefillCoachMissing =
-    Boolean(prefill?.coachId) && !coaches.some((c) => (c.coachId || c._id) === prefill?.coachId);
+  const prefillPlayerMissing = Boolean(prefill?.playerId) && !players.some((p) => p.id === prefill?.playerId);
+  const prefillCoachMissing = Boolean(prefill?.coachId) && !coaches.some((c) => c.coachProfileId === prefill?.coachId);
 
   // Derived (not stored) so it follows the refetched dashboard list.
   const openRequest = conflict
@@ -145,16 +148,12 @@ export const RequestEvaluationModal = ({
                 {prefillPlayerMissing && prefill?.playerId && (
                   <SelectItem value={prefill.playerId}>{prefill.playerName || prefill.playerId}</SelectItem>
                 )}
-                {players.map((p) => {
-                  const id = p._id || p.id || "";
-                  if (!id) return null;
-                  return (
-                    <SelectItem key={id} value={id}>
-                      {p.name}
-                      {p.position ? ` · ${p.position}` : ""}
-                    </SelectItem>
-                  );
-                })}
+                {players.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.name}
+                    {p.position ? ` · ${p.position}` : ""}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             {!loadingPlayers && players.length === 0 && (
@@ -178,16 +177,12 @@ export const RequestEvaluationModal = ({
                 {prefillCoachMissing && prefill?.coachId && (
                   <SelectItem value={prefill.coachId}>{prefill.coachName || prefill.coachId}</SelectItem>
                 )}
-                {coaches.map((c) => {
-                  const id = c.coachId || c._id;
-                  if (!id) return null;
-                  return (
-                    <SelectItem key={id} value={id}>
-                      {c.displayName || c.fullName}
-                      {!c.displayName && c.title ? ` · ${c.title}` : ""}
-                    </SelectItem>
-                  );
-                })}
+                {coaches.map((c) => (
+                  <SelectItem key={c.coachProfileId} value={c.coachProfileId}>
+                    {c.name}
+                    {c.role ? ` · ${c.role}` : ""}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             {!loadingCoaches && coaches.length === 0 && (

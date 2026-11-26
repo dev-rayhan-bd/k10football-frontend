@@ -1,6 +1,6 @@
 "use client";
 
-import { useGetPlayerCvByIdQuery } from "@/redux/features/player/playerApi";
+import { useGetPlayerCvByIdQuery, useGetSharedPlayerCvQuery } from "@/redux/features/player/playerApi";
 import { PlayerCvViewProvider } from "./PlayerCvViewContext";
 import { ViewPlayerBioSection } from "./ViewPlayerBioSection";
 import { ViewClubSection } from "./ViewClubSection";
@@ -19,6 +19,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 interface PlayerCvViewPageProps {
   playerId: string;
+  /** "share": public shared link — loads GET /players/share/:playerId. */
+  source?: "cv" | "share";
 }
 
 const PlayerCvViewSkeleton = () => {
@@ -85,16 +87,11 @@ const PlayerCvViewSkeleton = () => {
   );
 };
 
-export const PlayerCvViewPage = ({ playerId }: PlayerCvViewPageProps) => {
-  // Fetch Player CV by ID: GET {{baseUrl}}/players/:playerId/cv
-  const {
-    data: playerCvResponse,
-    isLoading,
-    isError,
-    refetch,
-  } = useGetPlayerCvByIdQuery(playerId, {
-    skip: !playerId,
-  });
+export const PlayerCvViewPage = ({ playerId, source = "cv" }: PlayerCvViewPageProps) => {
+  // GET /players/:playerId/cv, or the public GET /players/share/:playerId for shared links.
+  const cvQuery = useGetPlayerCvByIdQuery(playerId, { skip: !playerId || source === "share" });
+  const sharedQuery = useGetSharedPlayerCvQuery(playerId, { skip: !playerId || source !== "share" });
+  const { data: playerCvResponse, isLoading, isError, refetch } = source === "share" ? sharedQuery : cvQuery;
 
   if (isLoading) {
     return <PlayerCvViewSkeleton />;

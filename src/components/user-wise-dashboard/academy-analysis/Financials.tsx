@@ -21,11 +21,14 @@ import {
   IconChevronRight,
   IconReceipt,
   IconPercentage,
+  IconHourglass,
+  IconLock,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useGetFinanceCommitteeQuery } from "@/redux/features/academy/academyApi";
 import { IFinanceTransactionItem } from "@/types/academy.type";
+import { PAYOUT_STATUSES, PAYOUT_STATUS_LABELS, PayoutStatusBadge } from "@/components/finance/PayoutStatusBadge";
 
 interface StatCardProps {
   icon: React.ComponentType<{ size?: number; className?: string }>;
@@ -50,7 +53,7 @@ const FinancialStatCard = ({
       <p className="text-white text-2xl sm:text-3xl font-black font-orbitron truncate">
         {isLoading ? "..." : value}
       </p>
-      <p className="text-white/40 text-[9px] sm:text-[11px] font-bold uppercase tracking-wider truncate mt-1">
+      <p className="text-white/40 text-[9px] sm:text-[11px] font-bold uppercase tracking-wider line-clamp-2 mt-1">
         {label}
       </p>
     </div>
@@ -63,6 +66,7 @@ export const Financials = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [typeFilter, setTypeFilter] = useState<string>("ALL");
+  const [payoutStatusFilter, setPayoutStatusFilter] = useState<string>("ALL");
 
   // Modal State
   const [selectedTransaction, setSelectedTransaction] = useState<IFinanceTransactionItem | null>(null);
@@ -79,6 +83,7 @@ export const Financials = () => {
     limit: 10,
     searchTerm: searchTerm.trim() || undefined,
     status: statusFilter === "ALL" ? undefined : statusFilter,
+    payoutStatus: payoutStatusFilter === "ALL" ? undefined : payoutStatusFilter,
   });
 
   const financeData = response?.data;
@@ -120,9 +125,12 @@ export const Financials = () => {
       const matchesType =
         typeFilter === "ALL" || itemType === typeFilter.toUpperCase();
 
-      return matchesSearch && matchesStatus && matchesType;
+      const matchesPayout =
+        payoutStatusFilter === "ALL" || (item.payoutStatus || "").toUpperCase() === payoutStatusFilter;
+
+      return matchesSearch && matchesStatus && matchesType && matchesPayout;
     });
-  }, [transactions, searchTerm, statusFilter, typeFilter]);
+  }, [transactions, searchTerm, statusFilter, typeFilter, payoutStatusFilter]);
 
   // Export to CSV function
   const handleExportCSV = () => {
@@ -140,6 +148,7 @@ export const Financials = () => {
       "Commission Percentage",
       "Date",
       "Status",
+      "Payout Status",
       "Notes",
     ];
 
@@ -152,6 +161,7 @@ export const Financials = () => {
       `"${t.commissionPercentage || "N/A"}"`,
       `"${t.date || (t.transactionDate ? t.transactionDate.split("T")[0] : "N/A")}"`,
       `"${t.status || "N/A"}"`,
+      `"${t.payoutStatus || "N/A"}"`,
       `"${(t.notes || "").replace(/"/g, '""')}"`,
     ]);
 
@@ -235,7 +245,7 @@ export const Financials = () => {
       </div>
 
       {/* Summary Stats Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-7 gap-3 sm:gap-4 md:gap-6">
         <FinancialStatCard
           icon={IconFileText}
           value={stats?.gameReportsCount ?? 0}
@@ -275,6 +285,20 @@ export const Financials = () => {
           }
           label="This Month"
           iconColor="text-blue-400"
+          isLoading={isLoading}
+        />
+        <FinancialStatCard
+          icon={IconHourglass}
+          value={stats?.onHoldPayoutsFormatted || (stats?.currency || "$ ") + (stats?.onHoldPayouts?.toFixed(2) ?? "0.00")}
+          label="Awaiting coach validation"
+          iconColor="text-white/60"
+          isLoading={isLoading}
+        />
+        <FinancialStatCard
+          icon={IconLock}
+          value={stats?.lockedPayoutsFormatted || (stats?.currency || "$ ") + (stats?.lockedPayouts?.toFixed(2) ?? "0.00")}
+          label="Locked until subscription is active"
+          iconColor="text-red-500"
           isLoading={isLoading}
         />
       </div>
@@ -375,6 +399,32 @@ export const Financials = () => {
               />
             </div>
 
+            {/* Payout Status Filter */}
+            <div className="relative shrink-0">
+              <select
+                value={payoutStatusFilter}
+                onChange={(e) => {
+                  setPayoutStatusFilter(e.target.value);
+                  setPage(1);
+                }}
+                aria-label="Filter by payout status"
+                className="w-full sm:w-auto bg-white/5 border border-white/15 rounded-xl px-3.5 py-2 pr-9 text-xs font-bold text-white uppercase tracking-wider focus:outline-none focus:border-white/30 cursor-pointer appearance-none"
+              >
+                <option value="ALL" className="bg-[#111111] text-white">
+                  All Payouts
+                </option>
+                {PAYOUT_STATUSES.map((value) => (
+                  <option key={value} value={value} className="bg-[#111111] text-white">
+                    {PAYOUT_STATUS_LABELS[value]}
+                  </option>
+                ))}
+              </select>
+              <IconChevronDown
+                size={14}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none"
+              />
+            </div>
+
             {/* Export CSV Button */}
             <button
               onClick={handleExportCSV}
@@ -444,7 +494,7 @@ export const Financials = () => {
                       </div>
                       <p className="text-sm font-bold text-white">No transactions found</p>
                       <p className="text-xs text-white/50 max-w-sm">
-                        {searchTerm || statusFilter !== "ALL" || typeFilter !== "ALL"
+                        {searchTerm || statusFilter !== "ALL" || typeFilter !== "ALL" || payoutStatusFilter !== "ALL"
                           ? "Try adjusting your filters or search keywords to view transactions."
                           : "No financial transactions logged yet."}
                       </p>
@@ -534,7 +584,10 @@ export const Financials = () => {
 
                       {/* Status */}
                       <td className="px-6 py-5 border-r border-white/15 text-center">
-                        {renderStatusBadge(row.status)}
+                        <div className="flex flex-col items-center gap-1.5">
+                          {renderStatusBadge(row.status)}
+                          <PayoutStatusBadge status={row.payoutStatus} />
+                        </div>
                       </td>
 
                       {/* Action */}
@@ -639,7 +692,10 @@ export const Financials = () => {
                   <h3 className="text-base font-black text-white uppercase truncate">
                     {selectedTransaction.player?.name || "Athlete"}
                   </h3>
-                  {renderStatusBadge(selectedTransaction.status)}
+                  <div className="flex flex-col items-end gap-1.5">
+                    {renderStatusBadge(selectedTransaction.status)}
+                    <PayoutStatusBadge status={selectedTransaction.payoutStatus} />
+                  </div>
                 </div>
                 {selectedTransaction.player?.position && (
                   <span className="font-bold text-[#00FF62] text-xs mt-1">

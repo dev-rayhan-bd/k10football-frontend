@@ -1,4 +1,5 @@
 "use client";
+import { getUserRole, normalizeRole } from "@/helpers/SessionHelper";
 import React, { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
@@ -31,7 +32,7 @@ import {
   useMarkNotificationAsReadMutation,
   useDeleteNotificationMutation,
 } from "@/redux/features/notification/notificationApi";
-import { INotificationItem } from "@/types/notification.type";
+import { getCoachReassignmentPath, getEvaluationReportPath, INotificationItem } from "@/types/notification.type";
 import { cn } from "@/lib/utils";
 
 const formatRelativeTime = (dateString?: string) => {
@@ -123,6 +124,20 @@ export const NotificationBellDropdown = () => {
     }
 
     // Handle deep link if notification has actionUrl
+    const evaluationPath = getEvaluationReportPath(item);
+    if (evaluationPath) {
+      setIsOpen(false);
+      router.push(evaluationPath);
+      return;
+    }
+
+    const reassignPath = getCoachReassignmentPath(item, normalizeRole(getUserRole() || ""));
+    if (reassignPath) {
+      setIsOpen(false);
+      router.push(reassignPath);
+      return;
+    }
+
     const actionUrl = item.data?.actionUrl;
     if (actionUrl) {
       setIsOpen(false);

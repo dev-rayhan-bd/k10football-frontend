@@ -3,8 +3,8 @@ import { Navbar } from '@/components/shared/Navbar'
 import HideOnRoutes from '@/components/shared/HideOnRoutes'
 import React from 'react'
 
-// Shared coach CV links (Share Agent) are standalone pages — no site navbar or footer.
-const STANDALONE_ROUTES = ['/cvs/coach-cv-details']
+// Shared CV links (coach Share Agent, player CVs Library share) are standalone pages — no site navbar or footer.
+const STANDALONE_ROUTES = ['/cvs/coach-cv-details', '/players/share']
 
 const Layout = ({children}: { children: React.ReactNode }) => {
   return (

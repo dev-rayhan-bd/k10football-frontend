@@ -26,6 +26,7 @@ import {
   savePlan,
   Team
 } from "./TeamDataStore";
+import AcademyCoaches from "@/components/user-wise-dashboard/academy-management/AcademyCoaches";
 
 export const CoachAndPlayer = () => {
   const router = useRouter();
@@ -321,6 +322,9 @@ export const CoachAndPlayer = () => {
           </table>
         </div>
       </div>
+
+      {/* Coaches affiliated with the academy (live API) */}
+      <AcademyCoaches />
 
       {/* Add Team Modal */}
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>

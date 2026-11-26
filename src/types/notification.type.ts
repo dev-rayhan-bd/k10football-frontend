@@ -10,6 +10,8 @@ export interface INotificationData {
   newsId?: string;
   affiliationId?: string;
   coachId?: string;
+  /** CV validation is paid but its coach left the academy — the user must pick another coach. */
+  needsCoachReassignment?: boolean;
   [key: string]: any;
 }
 
@@ -96,3 +98,19 @@ export interface IUpdateNotificationSettingsResponse {
   data: INotificationSettingsData;
 }
 
+
+/** PLAYER_EVALUATION_COMPLETED: open the player evaluation report. */
+export const getEvaluationReportPath = (item: INotificationItem): string | null => {
+  if (item.type !== "PLAYER_EVALUATION_COMPLETED") return null;
+  const evaluationId = item.data?.evaluationId;
+  return evaluationId
+    ? `/dashboard/player/evaluations?evaluationId=${encodeURIComponent(String(evaluationId))}`
+    : "/dashboard/player/evaluations";
+};
+
+/** CV validation whose coach left: send the player/parent to the "choose another coach" banner. */
+export const getCoachReassignmentPath = (item: INotificationItem, role: string): string | null => {
+  if (item.data?.needsCoachReassignment !== true) return null;
+  if (item.type !== "CV_VALIDATION_REQUEST" && item.type !== "PAYMENT_SUCCESS") return null;
+  return role === "parent" ? "/dashboard/parent/profiles" : "/dashboard/player/my-cv";
+};

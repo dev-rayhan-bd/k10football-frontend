@@ -23,11 +23,10 @@ export const isStatus = (row: Pick<ICoachEvaluationRow, "status">, status: strin
   (row.status || "").toUpperCase() === status;
 
 /**
- * B3 `:id` — the open request's evaluationId when the row is PENDING and has one;
- * otherwise the player id (team player, or re-evaluating an expired/evaluated one).
+ * Submit `:playerId` — always the player _id. The backend attaches the academy's
+ * open request automatically.
  */
-export const getSubmitId = (row: ICoachEvaluationRow) =>
-  row.evaluationId && isStatus(row, "PENDING") ? row.evaluationId : row._id;
+export const getSubmitId = (row: ICoachEvaluationRow) => row._id;
 
 /** B4 `:id` — the evaluation if known, otherwise the player (latest evaluation). */
 export const getReportId = (row: ICoachEvaluationRow) => row.evaluationId || row._id;

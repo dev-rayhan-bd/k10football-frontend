@@ -15,7 +15,10 @@ const CvValidationPaymentResult = ({ sessionId }: { sessionId: string }) => {
   const [verify, { data, isFetching, isError, error }] = useLazyVerifyCvValidationPaymentQuery();
   const startedRef = useRef(false);
 
-  const dashboardPath = useMemo(() => getDashboardPathForRole(normalizeRole(getUserRole() || "")), []);
+  const role = useMemo(() => normalizeRole(getUserRole() || ""), []);
+  const dashboardPath = useMemo(() => getDashboardPathForRole(role), [role]);
+  // Where the "choose another coach" banner lives for this role.
+  const cvPath = role === "parent" ? "/dashboard/parent/profiles" : "/dashboard/player/my-cv";
 
   const runVerify = useCallback(() => {
     if (sessionId) verify(sessionId, false);
@@ -28,6 +31,7 @@ const CvValidationPaymentResult = ({ sessionId }: { sessionId: string }) => {
   }, [runVerify]);
 
   const isPaid = !isFetching && !isError && data?.data?.success === true;
+  const needsNewCoach = isPaid && data?.data?.needsCoachReassignment === true;
   const errorMessage = isError ? getApiError(error, "We couldn't confirm your payment.").message : "";
 
   return (
@@ -42,6 +46,17 @@ const CvValidationPaymentResult = ({ sessionId }: { sessionId: string }) => {
           <>
             <IconLoader2 className="size-12 animate-spin text-primary" />
             <h1 className="text-2xl font-black uppercase font-orbitron">Verifying payment...</h1>
+          </>
+        ) : needsNewCoach ? (
+          <>
+            <IconAlertCircle className="size-12 text-amber-400" />
+            <h1 className="text-2xl font-black uppercase font-orbitron">Payment received</h1>
+            <p className="text-sm text-muted-foreground">
+              Your coach is no longer with an academy. Your payment is kept — choose another coach.
+            </p>
+            <Button asChild className="w-full">
+              <Link href={cvPath}>Choose another coach</Link>
+            </Button>
           </>
         ) : isPaid ? (
           <>

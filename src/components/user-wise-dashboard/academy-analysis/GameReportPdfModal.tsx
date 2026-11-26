@@ -4,8 +4,7 @@
 
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
+import { domPagesToPdf } from "@/lib/pdf/domToPdf";
 import { toast } from "sonner";
 import {
   IconLoader2,
@@ -23,6 +22,7 @@ import {
 
 import RadarChart from "@/components/user-wise-dashboard/coach-dashboard/create-game-report/RadarChart";
 import { useGetSingleGameReportQuery } from "@/redux/features/academy/academyApi";
+import { useGetPlayerCvByIdQuery } from "@/redux/features/player/playerApi";
 import { BASE_URL } from "@/constants/global.constant";
 import { getToken } from "@/helpers/SessionHelper";
 
@@ -62,6 +62,51 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
     skip: !reportId,
   });
   const reportDetails = detailsResponse?.data;
+
+  // Player bio for the header: the report's own playerInfo snapshot first, then the player's CV.
+  const cardPlayerId = selectedCard?.playerId ? String(selectedCard.playerId) : "";
+  const { data: playerCvResponse } = useGetPlayerCvByIdQuery(cardPlayerId, { skip: !cardPlayerId });
+  const playerCv = playerCvResponse?.data;
+  const reportPlayerInfo = ((reportDetails as any)?.playerInfo ?? {}) as Record<string, any>;
+
+  const firstValue = (...values: unknown[]) => {
+    for (const value of values) {
+      if (value !== undefined && value !== null && value !== "") return value;
+    }
+    return undefined;
+  };
+  const withUnit = (value: unknown, unit: string) => {
+    if (value === undefined) return "N/A";
+    return typeof value === "number" || /^\d+(\.\d+)?$/.test(String(value)) ? `${value} ${unit}` : String(value);
+  };
+  const formatDob = (value: unknown) => {
+    if (value === undefined) return "N/A";
+    const date = new Date(String(value));
+    return Number.isNaN(date.getTime())
+      ? String(value)
+      : date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+  };
+
+  const bioDob = formatDob(firstValue(reportPlayerInfo.dateOfBirth, playerCv?.dateOfBirth, (selectedCard as any)?.dob));
+  const bioWeight = withUnit(firstValue(reportPlayerInfo.weight, selectedCard?.weight, playerCv?.weight), "KG");
+  const bioHeight = withUnit(firstValue(reportPlayerInfo.height, selectedCard?.height, playerCv?.height), "CM");
+  const bioFoot = String(firstValue(reportPlayerInfo.foot, selectedCard?.foot, playerCv?.preferredFoot) ?? "N/A");
+  // Matches played is a player total (CV match summary), not a per-report stat.
+  const bioMatchesPlayed = String(
+    firstValue(
+      playerCv?.matchSummary?.totalMatches,
+      playerCv?.matchSummary?.careerTotals?.totalMatches,
+      playerCv?.totalReports
+    ) ?? "N/A"
+  );
+  const rawMinutes = firstValue(
+    (reportDetails as any)?.minutesPlayed,
+    (reportDetails as any)?.timePlayedMinutes,
+    (reportDetails as any)?.minutes,
+    (reportDetails as any)?.timePlayed,
+    selectedCard?.timePlayedMinutes
+  );
+  const bioMinutes = withUnit(rawMinutes, "MIN");
 
   // ResizeObserver to handle scaling
   useEffect(() => {
@@ -316,11 +361,14 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
           ? reportDetails.reportPdfUrl
           : `${baseOrigin}${reportDetails.reportPdfUrl.startsWith("/") ? "" : "/"}${reportDetails.reportPdfUrl}`;
 
+        // Only our own API gets the token — S3/CDN links reject an Authorization header cross-site.
+        const isApiUrl = targetUrl.startsWith(baseOrigin);
         const res = await fetch(targetUrl, {
           method: "GET",
-          headers: {
-            ...(token ? { Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}` } : {}),
-          },
+          headers:
+            isApiUrl && token
+              ? { Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}` }
+              : undefined,
         });
 
         if (res.ok) {
@@ -355,21 +403,14 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
     }
 
     try {
-      const canvas = await html2canvas(page, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: false,
+      // Shared exporter: converts Tailwind v4 oklch() colours (plain html2canvas throws on them)
+      // and inlines remote images so they don't taint the canvas.
+      await domPagesToPdf({
+        pages: [page],
+        fileName: `Game_Report_${safeFileName || "Player"}.pdf`,
         backgroundColor: "#ffffff",
-        logging: false,
+        marginMm: 0,
       });
-
-      const imgData = canvas.toDataURL("image/png");
-      const imgWidth = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      const pdf = new jsPDF("p", "mm", [210, Math.max(297, imgHeight)]);
-
-      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-      pdf.save(`Game_Report_${safeFileName || "Player"}.pdf`);
       toast.success("PDF report downloaded successfully!", { id: toastId });
     } catch (error) {
       console.error("PDF generation failed:", error);
@@ -504,27 +545,27 @@ const GameReportPdfModal: React.FC<GameReportPdfModalProps> = ({
                     </div>
                     <div>
                       <span className="font-bold text-slate-900 uppercase font-orbitron">DOB:</span>
-                      <p className="text-slate-700 text-xs font-bold mt-0.5">{matchingPlayer?.dob || "N/A"}</p>
+                      <p className="text-slate-700 text-xs font-bold mt-0.5">{bioDob}</p>
                     </div>
                     <div>
                       <span className="font-bold text-slate-900 uppercase font-orbitron">MATCHES PLAYED:</span>
-                      <p className="text-slate-700 text-xs font-bold mt-0.5">{activeStats?.appearances || matchingPlayer?.seasonStats?.matches || "N/A"}</p>
+                      <p className="text-slate-700 text-xs font-bold mt-0.5">{bioMatchesPlayed}</p>
                     </div>
                     <div>
                       <span className="font-bold text-slate-900 uppercase font-orbitron">WEIGHT:</span>
-                      <p className="text-slate-700 text-xs font-bold mt-0.5">{selectedCard.weight || "N/A"}</p>
+                      <p className="text-slate-700 text-xs font-bold mt-0.5">{bioWeight}</p>
                     </div>
                     <div>
                       <span className="font-bold text-slate-900 uppercase font-orbitron">MINUTES PLAYED:</span>
-                      <p className="text-slate-700 text-xs font-bold mt-0.5">{selectedCard.timePlayedMinutes ? `${selectedCard.timePlayedMinutes} MIN` : "N/A"}</p>
+                      <p className="text-slate-700 text-xs font-bold mt-0.5">{bioMinutes}</p>
                     </div>
                     <div>
                       <span className="font-bold text-slate-900 uppercase font-orbitron">HEIGHT:</span>
-                      <p className="text-slate-700 text-xs font-bold mt-0.5">{selectedCard.height || "N/A"}</p>
+                      <p className="text-slate-700 text-xs font-bold mt-0.5">{bioHeight}</p>
                     </div>
                     <div>
                       <span className="font-bold text-slate-900 uppercase font-orbitron">FOOT:</span>
-                      <p className="text-slate-700 text-xs font-bold mt-0.5 uppercase">{selectedCard.foot || "N/A"}</p>
+                      <p className="text-slate-700 text-xs font-bold mt-0.5 uppercase">{bioFoot}</p>
                     </div>
                   </div>
 

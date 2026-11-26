@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import {
   IconActivity,
   IconAlertCircle,
@@ -40,6 +40,8 @@ export interface EvaluationSheetProps {
   pdfSource: "academy" | "player";
   /** Rendered on the left of the action bar (e.g. a back button). */
   leading?: ReactNode;
+  /** Start the PDF download as soon as the sheet and PDF data are ready (table "Download PDF"). */
+  autoDownload?: boolean;
 }
 
 const cardClass = "bg-[#111111] border border-white/20 rounded-3xl";
@@ -49,6 +51,16 @@ const SECTIONS = [
   { key: "mental", title: "Mental", icon: IconActivity },
   { key: "physical", title: "Physical", icon: IconFlame },
 ] as const;
+
+const GRADE_VALUES = ["EXCELLENT", "GOOD", "IMPROVEMENT"];
+/** `rating` is the grade (EXCELLENT | GOOD | IMPROVEMENT | null); older payloads put it in `grade`. */
+const gradeOf = (item: IEvaluationSheetSkill) => {
+  for (const value of [item.grade, item.rating]) {
+    if (typeof value === "string" && GRADE_VALUES.includes(value.toUpperCase())) return value.toUpperCase();
+  }
+  return null;
+};
+const numericRatingOf = (item: IEvaluationSheetSkill) => (typeof item.rating === "number" ? item.rating : null);
 
 const SkillList = ({ skills }: { skills?: IEvaluationSheetSkill[] }) => {
   if (!skills || skills.length === 0) {
@@ -63,8 +75,14 @@ const SkillList = ({ skills }: { skills?: IEvaluationSheetSkill[] }) => {
         >
           <span className="text-sm font-semibold text-white/80 truncate">{display(item.skill)}</span>
           <span className="flex items-center gap-2 shrink-0">
-            <EvaluationGradeBadge grade={item.grade} />
-            <span className="text-sm font-black font-orbitron text-white tabular-nums">{display(item.rating)}</span>
+            {gradeOf(item) ? (
+              <EvaluationGradeBadge grade={gradeOf(item)} />
+            ) : (
+              <span className="text-xs font-semibold italic text-muted-foreground">Not graded</span>
+            )}
+            {numericRatingOf(item) !== null && (
+              <span className="text-sm font-black font-orbitron text-white tabular-nums">{numericRatingOf(item)}</span>
+            )}
           </span>
         </li>
       ))}
@@ -84,7 +102,8 @@ const MetaItem = ({ icon: Icon, label, value }: { icon: typeof IconCalendar; lab
   </div>
 );
 
-export const EvaluationSheet = ({ evaluationId, pdfSource, leading }: EvaluationSheetProps) => {
+export const EvaluationSheet = ({ evaluationId, pdfSource, leading, autoDownload }: EvaluationSheetProps) => {
+  const autoDownloadStartedRef = useRef(false);
   const sheetRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -128,6 +147,16 @@ export const EvaluationSheet = ({ evaluationId, pdfSource, leading }: Evaluation
       setIsDownloading(false);
     }
   };
+
+  useEffect(() => {
+    if (!autoDownload || autoDownloadStartedRef.current || !canDownload || !sheet) return;
+    autoDownloadStartedRef.current = true;
+    // Let the sheet paint (fonts/images) before capturing it.
+    const timer = setTimeout(() => void handleDownload(), 400);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoDownload, canDownload, sheet]);
+
 
   if (!evaluationId) return null;
 
@@ -238,6 +267,12 @@ export const EvaluationSheet = ({ evaluationId, pdfSource, leading }: Evaluation
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {String(sheet.status || "").toUpperCase() === "NEED_EVALUATION" && (
+          <div className="flex items-center gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-5 py-4 text-sm font-semibold text-amber-300">
+            Awaiting coach — this evaluation has been requested but not submitted yet.
           </div>
         )}
 

@@ -26,7 +26,8 @@ import { FileText } from 'lucide-react';
 import { useAppDispatch } from "@/hooks/reduxHooks";
 import { updatePlayerField } from "@/redux/features/player/playerSlice";
 import { useGetMyGameReportsQuery } from "@/redux/features/player/playerApi";
-import RequestCvValidationButton from "@/components/cv-validation/RequestCvValidationButton";
+import CvValidationAction from "@/components/cv-validation/CvValidationAction";
+import CvCoachReassignmentBanner from "@/components/cv-validation/CvCoachReassignmentBanner";
 
 const GenerateCv = () => {
   const dispatch = useAppDispatch();
@@ -151,6 +152,7 @@ const GenerateCv = () => {
   };
   return (
     <div className="flex flex-col gap-6 sm:gap-8 pb-10 w-full min-w-0 overflow-hidden text-white">
+      {role.toLowerCase() === "player" && <CvCoachReassignmentBanner className="print:hidden" />}
       {/* Header */}
       <div className="flex flex-col md:flex-row md:justify-between items-start md:items-end gap-4 print:hidden w-full min-w-0 shrink-0">
         <div className="w-full min-w-0">
@@ -321,7 +323,11 @@ const GenerateCv = () => {
               Your CV meets {cvData?.cvTier || (playerData as any).cvTier || "GOLD"} standards and is ready to share with top clubs and agents.
             </p>
             {role.toLowerCase() === "player" ? (
-              <RequestCvValidationButton className="w-full py-3 sm:py-4 h-auto mt-2 sm:mt-4 relative z-10 text-[9px] sm:text-[10px]" />
+              <CvValidationAction
+                hideReassignNotice
+                className="mt-2 sm:mt-4 relative z-10"
+                buttonClassName="w-full py-3 sm:py-4 h-auto text-[9px] sm:text-[10px]"
+              />
             ) : (
               <Button className="bg-white/5 hover:bg-white/10 text-white border border-white/10 gap-2 w-full py-3 sm:py-4 rounded-xl font-black uppercase tracking-widest text-[9px] sm:text-[10px] h-auto mt-2 sm:mt-4 relative z-10">
                 <IconShare size={16} className="text-white/40 sm:w-4.5 sm:h-4.5" /> Request Re-validation

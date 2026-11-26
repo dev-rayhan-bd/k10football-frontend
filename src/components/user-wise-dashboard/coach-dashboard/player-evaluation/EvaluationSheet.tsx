@@ -72,11 +72,9 @@ export const EvaluationSheet = ({ row, onClose }: EvaluationSheetProps) => {
     try {
       const res = await submitEvaluation(payload).unwrap();
       const newRating = res?.data?.player?.overallRating;
-      toast.success(
-        typeof newRating === "number"
-          ? `Evaluation submitted. New overall rating: ${newRating}`
-          : res?.message || "Evaluation submitted."
-      );
+      toast.success("Evaluation submitted. Valid for 4 months", {
+        description: typeof newRating === "number" ? `New overall rating: ${newRating}` : undefined,
+      });
       onClose();
     } catch (err) {
       const { status, message } = getEvaluationApiError(err, "Failed to submit evaluation");

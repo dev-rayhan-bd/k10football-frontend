@@ -1,6 +1,8 @@
 import { apiSlice } from "../api/apiSlice";
 import TagTypes from "@/constants/tagType.constant";
 import {
+  ICoachDropdownResponse,
+  IGetCoachDropdownParams,
   IRequestCvValidationPayload,
   IRequestCvValidationResponse,
   IVerifyCvValidationPaymentResponse,
@@ -14,6 +16,17 @@ export const cvValidationApi = apiSlice.injectEndpoints({
         url: "/players/me/request-cv-validation",
         method: "POST",
         body,
+      }),
+      // A reassignment (checkoutUrl null) changes the CV's coach — refresh it.
+      invalidatesTags: (result) => (result?.success ? [TagTypes.PLAYERS] : []),
+    }),
+
+    // Academy-verified coaches for the CV validation picker.
+    getCoachDropdown: builder.query<ICoachDropdownResponse, IGetCoachDropdownParams | void>({
+      query: (params) => ({
+        url: "/coaches/dropdown",
+        method: "GET",
+        params: Object.fromEntries(Object.entries(params || {}).filter(([, v]) => v)),
       }),
     }),
 
@@ -29,7 +42,8 @@ export const cvValidationApi = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useRequestCvValidationMutation, useLazyVerifyCvValidationPaymentQuery } = cvValidationApi;
+export const { useRequestCvValidationMutation, useLazyVerifyCvValidationPaymentQuery, useGetCoachDropdownQuery } =
+  cvValidationApi;
 
 /** `{ status, message }` from an RTK Query error, falling back to a generic message. */
 export const getApiError = (err: unknown, fallback: string) => {

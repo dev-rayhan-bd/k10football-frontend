@@ -1,4 +1,5 @@
 "use client";
+import { getUserRole, normalizeRole } from "@/helpers/SessionHelper";
 import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -28,7 +29,7 @@ import {
   useMarkNotificationAsReadMutation,
   useDeleteNotificationMutation,
 } from "@/redux/features/notification/notificationApi";
-import { INotificationItem } from "@/types/notification.type";
+import { getCoachReassignmentPath, getEvaluationReportPath, INotificationItem } from "@/types/notification.type";
 import { cn } from "@/lib/utils";
 
 type FilterTab = "all" | "unread" | "read" | "settings";
@@ -153,6 +154,18 @@ export const NotificationsView = () => {
       } catch {
         // Handled
       }
+    }
+
+    const evaluationPath = getEvaluationReportPath(item);
+    if (evaluationPath) {
+      router.push(evaluationPath);
+      return;
+    }
+
+    const reassignPath = getCoachReassignmentPath(item, normalizeRole(getUserRole() || ""));
+    if (reassignPath) {
+      router.push(reassignPath);
+      return;
     }
 
     const actionUrl = item.data?.actionUrl;

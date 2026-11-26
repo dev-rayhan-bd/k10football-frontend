@@ -317,6 +317,15 @@ export const playerApi = apiSlice.injectEndpoints({
             providesTags: [TagTypes.PLAYERS],
         }),
 
+        // Public shared CV (no login) — the link copied from the CVs Library: /players/share/:playerId
+        getSharedPlayerCv: builder.query<any, string>({
+            query: (playerId: string) => ({
+                url: `/players/share/${playerId}`,
+                method: "GET",
+            }),
+            providesTags: [TagTypes.PLAYERS],
+        }),
+
         getPlayerCvById: builder.query<any, string>({
             query: (playerId: string) => ({
                 url: `/players/${playerId}/cv`,
@@ -636,6 +645,7 @@ export const {
     useUpdateMyPlayerAttributesMutation,
     useGetPlayerByIdQuery,
     useGetPlayerCvByIdQuery,
+    useGetSharedPlayerCvQuery,
     useLazyGetPlayerCvByIdQuery,
     useGetMyPlayerMediaQuery,
     useUploadPlayerMediaMutation,

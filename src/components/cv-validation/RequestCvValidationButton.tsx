@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { IconCheck, IconClock, IconLoader2, IconSearch, IconShieldCheck, IconUsers } from "@tabler/icons-react";
+import { useEffect, useRef, useState } from "react";
+import { IconCheck, IconLoader2, IconSearch, IconShieldCheck, IconUsers } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,63 +13,90 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useGetAllCoachesQuery } from "@/redux/features/coach/coachApi";
-import { getApiError, useRequestCvValidationMutation } from "@/redux/features/cvValidation/cvValidationApi";
-import { ICoachListItem } from "@/types/coach.type";
+import {
+  getApiError,
+  useGetCoachDropdownQuery,
+  useRequestCvValidationMutation,
+} from "@/redux/features/cvValidation/cvValidationApi";
+import type { ICoachDropdownItem } from "@/types/cvValidation.type";
 import ChatAvatar from "@/components/chat/ChatAvatar";
 import { cn } from "@/lib/utils";
 
-const getCoachName = (coach: ICoachListItem) =>
-  coach.fullName || (typeof coach.userId === "object" ? coach.userId?.name : "") || "Coach";
+const SEARCH_DEBOUNCE_MS = 400;
 
-const getCoachAvatar = (coach: ICoachListItem) =>
-  coach.profileImage ||
-  coach.cardStats?.cardImage ||
-  (typeof coach.userId === "object" ? coach.userId?.avatar : "") ||
-  "";
+/** "" / null → "—" (unknown, never invented). */
+const show = (value: unknown) => (value === null || value === undefined || value === "" ? "—" : String(value));
 
-const getCoachClub = (coach: ICoachListItem) =>
-  coach.currentClub ||
-  (Array.isArray(coach.clubHistory) ? coach.clubHistory.find((c: { isCurrent?: boolean }) => c.isCurrent)?.clubName : "") ||
-  "";
+const coachSubtitle = (coach: ICoachDropdownItem) =>
+  [
+    coach.title || null,
+    coach.academyName || null,
+    coach.licenseStatus || null,
+    coach.yearsExperience !== undefined && coach.yearsExperience !== "" ? `${coach.yearsExperience} yrs` : null,
+  ]
+    .filter(Boolean)
+    .join(" • ") || "—";
 
 interface RequestCvValidationButtonProps {
   /** Parent flow: the linked child's player id. Omit for the logged-in player. */
   playerId?: string;
+  /**
+   * "reassign": a PAID request lost its coach (coach left the academy). Picking a new coach
+   * moves the request — the server returns checkoutUrl: null and no payment is taken.
+   */
+  mode?: "request" | "reassign";
+  /** Button text (defaults depend on mode). */
+  label?: string;
+  /** Open the picker immediately (e.g. after a payment that needs a new coach). */
+  defaultOpen?: boolean;
   className?: string;
 }
 
 /**
- * "Request CV validation": pick an academy-approved coach, then pay the fixed $24 fee on Stripe.
- * The price is set by the server — it is never sent from here.
+ * Coach picker (GET /coaches/dropdown — academy-verified coaches only) → POST
+ * /players/me/request-cv-validation. Normal requests redirect to Stripe ($24, price set by the
+ * server); a reassignment (checkoutUrl null) just moves the paid request.
  */
-const RequestCvValidationButton = ({ playerId, className }: RequestCvValidationButtonProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+const RequestCvValidationButton = ({
+  playerId,
+  mode = "request",
+  label,
+  defaultOpen = false,
+  className,
+}: RequestCvValidationButtonProps) => {
+  const isReassign = mode === "reassign";
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [selectedCoachId, setSelectedCoachId] = useState("");
-  // 409 → a paid request is already waiting for its coach (tracked per player).
-  const [waitingFor, setWaitingFor] = useState<string | null>(null);
-  const playerKey = playerId || "me";
-  const isWaiting = waitingFor === playerKey;
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { data: coachesResponse, isLoading: isCoachesLoading, isError: isCoachesError } = useGetAllCoachesQuery(
-    { isVerifiedByAcademy: true, limit: 100 },
-    { skip: !isOpen }
+  useEffect(
+    () => () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    },
+    []
   );
-  const [requestCvValidation, { isLoading: isRequesting }] = useRequestCvValidationMutation();
 
-  const coaches = useMemo(() => {
-    const list = coachesResponse?.data || [];
-    const term = search.trim().toLowerCase();
-    if (!term) return list;
-    return list.filter((coach) =>
-      [getCoachName(coach), getCoachClub(coach)].some((v) => v.toLowerCase().includes(term))
-    );
-  }, [coachesResponse, search]);
+  const {
+    data: coachesResponse,
+    isFetching: isCoachesLoading,
+    isError: isCoachesError,
+    error: coachesError,
+  } = useGetCoachDropdownQuery(search ? { search } : undefined, { skip: !isOpen });
+  const [requestCvValidation, { isLoading: isRequesting }] = useRequestCvValidationMutation();
+  const coaches = coachesResponse?.data ?? [];
+
+  const handleSearchChange = (value: string) => {
+    setSearchInput(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setSearch(value.trim()), SEARCH_DEBOUNCE_MS);
+  };
 
   const closeModal = () => {
     if (isRequesting) return;
     setIsOpen(false);
+    setSearchInput("");
     setSearch("");
     setSelectedCoachId("");
   };
@@ -82,7 +109,10 @@ const RequestCvValidationButton = ({ playerId, className }: RequestCvValidationB
       ).unwrap();
       const checkoutUrl = res?.data?.checkoutUrl;
       if (!checkoutUrl) {
-        toast.error(res?.message || "Could not start the payment. Please try again.");
+        // Paid request moved to the new coach — no Stripe. The CV refetches via tag invalidation.
+        toast.success(res?.message || "Your request was moved to the new coach. No extra payment needed.");
+        setIsOpen(false);
+        setSelectedCoachId("");
         return;
       }
       toast.loading("Redirecting to secure payment...", { id: "cv-validation-checkout" });
@@ -91,7 +121,6 @@ const RequestCvValidationButton = ({ playerId, className }: RequestCvValidationB
       const { status, message } = getApiError(err, "Failed to request CV validation");
       if (status === 401) return; // apiSlice handles session expiry
       if (status === 409) {
-        setWaitingFor(playerKey);
         setIsOpen(false);
         toast.info(message || "A paid validation request is already waiting for the coach.");
         return;
@@ -99,19 +128,6 @@ const RequestCvValidationButton = ({ playerId, className }: RequestCvValidationB
       toast.error(message);
     }
   };
-
-  if (isWaiting) {
-    return (
-      <div
-        className={cn(
-          "flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground",
-          className
-        )}
-      >
-        <IconClock className="size-4" /> Waiting for coach
-      </div>
-    );
-  }
 
   return (
     <>
@@ -123,45 +139,47 @@ const RequestCvValidationButton = ({ playerId, className }: RequestCvValidationB
           className
         )}
       >
-        <IconShieldCheck className="size-4" /> Request CV validation
+        <IconShieldCheck className="size-4" /> {label || (isReassign ? "Choose new coach" : "Request Validation ($24)")}
       </Button>
 
       <Dialog open={isOpen} onOpenChange={(open) => (open ? setIsOpen(true) : closeModal())}>
         <DialogContent className="sm:max-w-lg bg-[#111111] border-white/10 text-white">
           <DialogHeader>
-            <DialogTitle className="font-orbitron uppercase tracking-tight">Request CV validation</DialogTitle>
+            <DialogTitle className="font-orbitron uppercase tracking-tight">
+              {isReassign ? "Choose a new coach" : "Request CV validation"}
+            </DialogTitle>
             <DialogDescription>
-              Choose an academy-approved coach. You&apos;ll pay a one-time $24 fee, then the coach is notified.
+              {isReassign
+                ? "Your payment is kept. Pick an academy-verified coach and your request moves to them. No extra payment."
+                : "Choose an academy-verified coach. You'll pay a one-time $24 fee, then the coach is notified. The validation is valid for 1 year."}
             </DialogDescription>
           </DialogHeader>
 
           <div className="relative">
             <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search coach or club..."
+              value={searchInput}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              placeholder="Search coach or academy..."
               className="pl-9 bg-white/5 border-white/10"
             />
           </div>
 
           <div className="flex max-h-80 flex-col gap-2 overflow-y-auto pr-1">
-            {isCoachesLoading ? (
+            {isCoachesLoading && coaches.length === 0 ? (
               [...Array(3)].map((_, i) => <div key={i} className="h-16 rounded-xl bg-white/5 animate-pulse" />)
             ) : isCoachesError ? (
-              <p className="py-8 text-center text-sm text-destructive">Failed to load coaches.</p>
+              <p className="py-8 text-center text-sm text-destructive">
+                {getApiError(coachesError, "Failed to load coaches.").message}
+              </p>
             ) : coaches.length === 0 ? (
               <div className="flex flex-col items-center gap-2 py-8 text-center text-muted-foreground">
                 <IconUsers className="size-6" />
-                <p className="text-sm">
-                  {search ? "No coaches match your search." : "No academy-approved coaches available yet."}
-                </p>
+                <p className="text-sm">{search ? "No coaches match your search." : "No academy-verified coaches available yet."}</p>
               </div>
             ) : (
               coaches.map((coach) => {
                 const isSelected = coach._id === selectedCoachId;
-                const name = getCoachName(coach);
-                const club = getCoachClub(coach);
                 return (
                   <button
                     key={coach._id}
@@ -172,13 +190,14 @@ const RequestCvValidationButton = ({ playerId, className }: RequestCvValidationB
                       isSelected ? "border-primary bg-primary/10" : "border-white/10 bg-white/5 hover:bg-white/10"
                     )}
                   >
-                    <ChatAvatar src={getCoachAvatar(coach)} name={name} className="size-10" />
+                    <ChatAvatar src={coach.avatar} name={coach.name} className="size-10" />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-bold">{name}</p>
-                      <p className="truncate text-xs text-muted-foreground">
-                        {[club, coach.licenseStatus].filter(Boolean).join(" • ") || "Coach"}
-                      </p>
+                      <p className="truncate text-sm font-bold">{show(coach.name)}</p>
+                      <p className="truncate text-xs text-muted-foreground">{coachSubtitle(coach)}</p>
                     </div>
+                    {coach.overallRatingScore !== undefined && coach.overallRatingScore !== "" && (
+                      <span className="shrink-0 font-orbitron text-sm font-black text-white/80">{coach.overallRatingScore}</span>
+                    )}
                     {isSelected && <IconCheck className="size-5 shrink-0 text-primary" />}
                   </button>
                 );
@@ -192,7 +211,7 @@ const RequestCvValidationButton = ({ playerId, className }: RequestCvValidationB
             </Button>
             <Button type="button" onClick={handleRequest} disabled={!selectedCoachId || isRequesting} className="gap-2">
               {isRequesting && <IconLoader2 className="size-4 animate-spin" />}
-              Continue to payment ($24)
+              {isReassign ? "Move my request" : "Continue to payment ($24)"}
             </Button>
           </DialogFooter>
         </DialogContent>

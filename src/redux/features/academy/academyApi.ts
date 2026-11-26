@@ -11,6 +11,12 @@ import {
   ITeamRosterResponse,
   ISuccessStoriesMetaResponse,
   ISuccessStoriesResponse,
+  ISuccessStoryResponse,
+  IRemoveAcademyCoachResponse,
+  IAcademyCvsLibraryResponse,
+  IGetAcademyCvsLibraryParams,
+  IAcademyCvLikeResponse,
+  IAcademyCvShareResponse,
   IGetSuccessStoriesParams,
   IAcademyParentsResponse,
   IGetAcademyParentsParams,
@@ -234,6 +240,14 @@ export const academyApi = apiSlice.injectEndpoints({
         url: "/academies/success-stories",
         method: "GET",
         params: params || {},
+      }),
+      providesTags: [TagTypes.SUCCESS_STORIES],
+    }),
+
+    getSuccessStoryById: builder.query<ISuccessStoryResponse, string>({
+      query: (storyId) => ({
+        url: `/academies/success-stories/${storyId}`,
+        method: "GET",
       }),
       providesTags: [TagTypes.SUCCESS_STORIES],
     }),
@@ -474,6 +488,68 @@ export const academyApi = apiSlice.injectEndpoints({
           }
         }
       },
+    }),
+
+    // CVs Library: cards + tabs + filter options + table in one call. Empty params are dropped.
+    getAcademyCvsLibrary: builder.query<IAcademyCvsLibraryResponse, IGetAcademyCvsLibraryParams>({
+      query: (params) => ({
+        url: "/academies/cvs-library",
+        method: "GET",
+        params: Object.fromEntries(
+          Object.entries(params).filter(([, value]) => value !== undefined && value !== null && value !== "")
+        ),
+      }),
+      providesTags: [TagTypes.CVS_LIBRARY],
+    }),
+
+    // Toggle like. Refetching keeps the liked card count and the LIKED tab in sync. Caller toasts.
+    toggleAcademyCvLike: builder.mutation<IAcademyCvLikeResponse, string>({
+      query: (playerId) => ({
+        url: `/academies/cvs-library/${playerId}/like`,
+        method: "POST",
+      }),
+      invalidatesTags: (result) => (result?.success ? [TagTypes.CVS_LIBRARY] : []),
+    }),
+
+    // Record a share and get the public link. Caller copies it and toasts.
+    shareAcademyCv: builder.mutation<IAcademyCvShareResponse, string>({
+      query: (playerId) => ({
+        url: `/academies/cvs-library/${playerId}/share`,
+        method: "POST",
+      }),
+      invalidatesTags: (result) => (result?.success ? [TagTypes.CVS_LIBRARY] : []),
+    }),
+
+    // Players of this academy (evaluation request picker). Shape normalised in academyLists.ts.
+    getAcademyPlayers: builder.query<{ success: boolean; message: string; data: unknown }, void>({
+      query: () => ({
+        url: "/academies/players",
+        method: "GET",
+      }),
+      providesTags: [TagTypes.PLAYERS, TagTypes.ACADEMY],
+    }),
+
+    // Coaches affiliated with this academy. Response shape is normalised in AcademyCoaches.tsx.
+    getAcademyCoaches: builder.query<{ success: boolean; message: string; data: unknown; meta?: unknown }, void>({
+      query: () => ({
+        url: "/academies/coaches",
+        method: "GET",
+      }),
+      providesTags: [TagTypes.COACHES, TagTypes.ACADEMY],
+    }),
+
+    // Release a coach from the academy (affiliation → REMOVED). Feedback is shown by the caller.
+    // :affiliationId may be the AcademyCoach affiliation _id or the CoachProfile _id.
+    removeCoachFromAcademy: builder.mutation<IRemoveAcademyCoachResponse, { affiliationId: string; academyId?: string }>({
+      query: ({ affiliationId, academyId }) => ({
+        url: `/academies/coaches/${affiliationId}`,
+        method: "DELETE",
+        params: academyId ? { academyId } : undefined,
+      }),
+      invalidatesTags: (result) =>
+        result?.success
+          ? [TagTypes.ACADEMY, TagTypes.TEAMS, TagTypes.COACHES, TagTypes.PLAYER_EVALUATIONS]
+          : [],
     }),
 
     removeCoachFromTeam: builder.mutation<any, { teamId: string; coachId: string }>({
@@ -1235,10 +1311,11 @@ export const academyApi = apiSlice.injectEndpoints({
       providesTags: [TagTypes.REPORTS, TagTypes.ACADEMY],
     }),
 
-    getAcademyDashboard: builder.query<IAcademyDashboardResponse, void>({
-      query: () => ({
+    getAcademyDashboard: builder.query<IAcademyDashboardResponse, { year?: number } | void>({
+      query: (params) => ({
         url: "/academies/dashboard",
         method: "GET",
+        params: params?.year ? { year: params.year } : undefined,
       }),
       providesTags: [TagTypes.ACADEMY],
     }),
@@ -1566,6 +1643,13 @@ export const {
   useLazyGetAcademyCoachAndPlayersQuery,
   useGetSuccessStoriesMetaQuery,
   useGetSuccessStoriesQuery,
+  useGetSuccessStoryByIdQuery,
+  useRemoveCoachFromAcademyMutation,
+  useGetAcademyCoachesQuery,
+  useGetAcademyPlayersQuery,
+  useGetAcademyCvsLibraryQuery,
+  useToggleAcademyCvLikeMutation,
+  useShareAcademyCvMutation,
   useLazyGetSuccessStoriesQuery,
   useAddSuccessStoryMutation,
   useUpdateSuccessStoryMutation,

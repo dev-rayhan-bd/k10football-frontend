@@ -35,7 +35,8 @@ import {
 import { useParentDashboard } from "@/providers/ParentDashboardProvider";
 import { ILinkedChild } from "@/types/parent.type";
 import { cn } from "@/lib/utils";
-import RequestCvValidationButton from "@/components/cv-validation/RequestCvValidationButton";
+import CvValidationAction from "@/components/cv-validation/CvValidationAction";
+import CvCoachReassignmentBanner from "@/components/cv-validation/CvCoachReassignmentBanner";
 
 interface ChildProfileForm {
   fullName: string;
@@ -303,6 +304,9 @@ const ManageChildProfile = () => {
 
   return (
     <div className="flex flex-col gap-8 pb-24 md:pb-12 min-w-0">
+      {selectedChild?.childPlayerId && (
+        <CvCoachReassignmentBanner key={selectedChild.childPlayerId} playerId={selectedChild.childPlayerId} />
+      )}
       {/* Header with Title and Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -358,10 +362,12 @@ const ManageChildProfile = () => {
 
           {/* Request CV validation for the selected child (parent pays, coach validates) */}
           {!isEditing && selectedChild?.childPlayerId && (
-            <RequestCvValidationButton
+            <CvValidationAction
               key={selectedChild.childPlayerId}
               playerId={selectedChild.childPlayerId}
-              className="w-full sm:w-auto px-5 py-2.5 h-auto text-xs shrink-0"
+              hideReassignNotice
+              className="w-full sm:w-auto shrink-0"
+              buttonClassName="w-full sm:w-auto px-5 py-2.5 h-auto text-xs"
             />
           )}
 

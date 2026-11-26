@@ -99,6 +99,7 @@ const PlayerCVValidations = () => {
     data: validationsResponse,
     isLoading,
     isError,
+    error,
     refetch,
     isFetching,
   } = useGetCoachPlayerCvValidationsQuery({ status, searchTerm, page, limit: PAGE_LIMIT });
@@ -174,6 +175,11 @@ const PlayerCVValidations = () => {
 
   if (isLoading) return <PlayerCvValidationsSkeleton />;
 
+  // The access gate answers 402 (no subscription) or 403 (not academy-verified).
+  const gateStatus = (error as { status?: unknown } | undefined)?.status;
+  const isGateError = gateStatus === 402 || gateStatus === 403;
+  const gateMessage = isGateError ? (error as { data?: { message?: string } } | undefined)?.data?.message : undefined;
+
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center py-20 px-4 text-center border border-dashed border-destructive/20 rounded-3xl bg-[#0D0D0D] my-8">
@@ -181,9 +187,14 @@ const PlayerCVValidations = () => {
           <IconAlertCircle size={28} />
         </div>
         <h2 className="text-xl font-bold text-white uppercase italic tracking-tight mb-2">
-          Failed to Load Player CV Validations
+          {isGateError ? "Subscribe / get academy-approved" : "Failed to Load Player CV Validations"}
         </h2>
-        <p className="text-gray-400 text-sm max-w-md mb-6">Please check your connection and try again.</p>
+        <p className="text-gray-400 text-sm max-w-md mb-6">
+          {gateMessage ||
+            (isGateError
+              ? "CV validations need an active coach subscription and approval from your academy."
+              : "Please check your connection and try again.")}
+        </p>
         <button
           onClick={() => refetch()}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#E31B23] hover:bg-[#c0161d] text-white text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"

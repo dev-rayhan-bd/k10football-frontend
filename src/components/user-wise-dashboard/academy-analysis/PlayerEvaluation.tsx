@@ -4,7 +4,11 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  IconBell,
   IconChevronLeft,
+  IconDownload,
+  IconEye,
+  IconRefresh,
   IconChevronRight,
   IconClipboardList,
   IconFileText,
@@ -23,6 +27,8 @@ import { cn } from "@/lib/utils";
 import {
   getEvaluationApiError,
   useGetAcademyEvaluationAnalyticsQuery,
+  useGetAcademyEvaluationsDashboardQuery,
+  useRemindEvaluationMutation,
 } from "@/redux/features/evaluation/evaluationApi";
 import type { AcademyEvaluationStatusFilter, IAcademyEvaluationAnalyticsRow } from "@/types/evaluation.type";
 import { EvaluationStatusBadge } from "@/components/evaluations/EvaluationBadges";
@@ -30,6 +36,7 @@ import { DASH, display, formatDate, initials } from "@/components/evaluations/ev
 
 import { SummaryCard } from "./player-evaluation/SummaryCard";
 import { PlayerEvaluationSidebar } from "./player-evaluation/PlayerEvaluationSidebar";
+import { RequestEvaluationModal, type RequestEvaluationPrefill } from "./player-evaluation/RequestEvaluationModal";
 
 const STATUS_TABS: { value: AcademyEvaluationStatusFilter; label: string }[] = [
   { value: "ALL", label: "All" },
@@ -94,11 +101,37 @@ const PlayerEvaluation = () => {
 
   const basePath = (pathname || "/dashboard/academy/management/player-evaluation").replace(/\/$/, "");
 
-  const openSheet = (row: IAcademyEvaluationAnalyticsRow) => {
+  const openSheet = (row: IAcademyEvaluationAnalyticsRow, download = false) => {
     const id = sheetIdFor(row);
     if (!id || isAwaitingCoach(row)) return;
-    router.push(`${basePath}/${id}`);
+    router.push(`${basePath}/${id}${download ? "?download=1" : ""}`);
   };
+
+  // Row actions: remind (open request), request again (expired).
+  const [remindEvaluation] = useRemindEvaluationMutation();
+  const [remindingId, setRemindingId] = useState<string | null>(null);
+  const handleRemind = async (row: IAcademyEvaluationAnalyticsRow) => {
+    if (!row.evaluationId || remindingId) return;
+    setRemindingId(row.evaluationId);
+    try {
+      await remindEvaluation(row.evaluationId).unwrap(); // toasts in the API slice
+    } catch {
+      // toasted in the API slice
+    } finally {
+      setRemindingId(null);
+    }
+  };
+
+  const [requestPrefill, setRequestPrefill] = useState<RequestEvaluationPrefill | null>(null);
+  const { data: requestsDashboard, isFetching: isRequestsFetching, refetch: refetchRequests } =
+    useGetAcademyEvaluationsDashboardQuery(undefined, { skip: !requestPrefill });
+  const requestAgain = (row: IAcademyEvaluationAnalyticsRow) =>
+    setRequestPrefill({
+      playerId: row.playerId || row.player?._id || null,
+      playerName: row.player?.name ?? null,
+      coachId: row.coach?._id ?? null,
+      coachName: row.coach?.name ?? null,
+    });
 
   const avgRating =
     metrics?.avgOverallRating === null || metrics?.avgOverallRating === undefined || metrics?.avgOverallRating === ""
@@ -231,7 +264,8 @@ const PlayerEvaluation = () => {
                       <th className="px-3 py-3 font-bold">Mental</th>
                       <th className="px-3 py-3 font-bold">Status</th>
                       <th className="px-3 py-3 font-bold">Next due</th>
-                      <th className="px-5 py-3 font-bold text-right">Reminders</th>
+                      <th className="px-3 py-3 font-bold text-right">Reminders</th>
+                      <th className="px-5 py-3 font-bold text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -296,7 +330,57 @@ const PlayerEvaluation = () => {
                             <EvaluationStatusBadge status={row.status} />
                           </td>
                           <td className="px-3 py-3 whitespace-nowrap">{display(formatDate(row.nextEvaluationDue))}</td>
-                          <td className="px-5 py-3 text-right tabular-nums">{display(row.reminderCount)}</td>
+                          <td className="px-3 py-3 text-right tabular-nums">{display(row.reminderCount)}</td>
+                          <td className="px-5 py-3" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-end gap-1.5">
+                              {awaiting ? (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  disabled={!row.evaluationId || remindingId === row.evaluationId}
+                                  onClick={() => handleRemind(row)}
+                                  className="text-[10px] font-bold uppercase tracking-wider"
+                                >
+                                  {remindingId === row.evaluationId ? <IconLoader2 className="animate-spin" /> : <IconBell />}
+                                  Remind coach
+                                </Button>
+                              ) : (
+                                <>
+                                  <Button
+                                    size="icon-sm"
+                                    variant="outline"
+                                    title="View report"
+                                    aria-label="View report"
+                                    disabled={!clickable}
+                                    onClick={() => openSheet(row)}
+                                  >
+                                    <IconEye />
+                                  </Button>
+                                  <Button
+                                    size="icon-sm"
+                                    variant="outline"
+                                    title="Download PDF"
+                                    aria-label="Download PDF"
+                                    disabled={!clickable}
+                                    onClick={() => openSheet(row, true)}
+                                  >
+                                    <IconDownload />
+                                  </Button>
+                                  {row.status === "EXPIRED" && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => requestAgain(row)}
+                                      className="text-[10px] font-bold uppercase tracking-wider"
+                                    >
+                                      <IconRefresh />
+                                      Request again
+                                    </Button>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          </td>
                         </tr>
                       );
                     })}
@@ -341,6 +425,18 @@ const PlayerEvaluation = () => {
           isLoading={isLoading}
         />
       </div>
+
+      {requestPrefill && (
+        <RequestEvaluationModal
+          key={`${requestPrefill.playerId}-${requestPrefill.coachId}`}
+          open
+          onOpenChange={(open) => !open && setRequestPrefill(null)}
+          prefill={requestPrefill}
+          dueItems={requestsDashboard?.data?.due ?? []}
+          onConflict={() => refetchRequests()}
+          isRefreshing={isRequestsFetching}
+        />
+      )}
     </div>
   );
 };

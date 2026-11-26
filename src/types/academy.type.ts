@@ -147,9 +147,15 @@ export interface ITeamRosterResponse {
 }
 
 // Success Story Types
+export type SuccessStoryStatus = "PENDING" | "APPROVED" | "REJECTED";
+export type SuccessStoryStatusFilter = "ALL" | SuccessStoryStatus;
+
 export interface ISuccessStoriesMeta {
+  currentAcademy?: string;
   categories: string[];
   positions: string[];
+  statuses?: SuccessStoryStatus[];
+  counts?: ISuccessStoryCounts;
 }
 
 export interface ISuccessStoriesMetaResponse {
@@ -170,11 +176,12 @@ export interface ISuccessStoryItem {
   category: string;
   photo: string;
   storyContent: string;
-  status: "APPROVED" | "PENDING" | "REJECTED" | string;
+  status: SuccessStoryStatus | string;
   statusBadge?: {
     label: string;
-    variant: string;
+    variant: "green" | "yellow" | "red" | string;
   };
+  rejectionReason?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -206,8 +213,15 @@ export interface ISuccessStoriesResponse {
   data: ISuccessStoriesData;
 }
 
+export interface ISuccessStoryResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: ISuccessStoryItem;
+}
+
 export interface IGetSuccessStoriesParams {
-  status?: string;
+  status?: SuccessStoryStatusFilter;
   category?: string;
   searchTerm?: string;
   page?: number;
@@ -520,6 +534,12 @@ export interface IFinanceStats {
   thisMonth: number;
   thisMonthFormatted: string;
   currency: string;
+  /** Player paid, coach hasn't validated yet — not earned / payable. */
+  onHoldPayouts?: number;
+  onHoldPayoutsFormatted?: string;
+  /** Held until the academy has an active subscription. */
+  lockedPayouts?: number;
+  lockedPayoutsFormatted?: string;
 }
 
 export interface IFinancePlayer {
@@ -545,6 +565,7 @@ export interface IFinanceTransactionItem {
   transactionDate?: string;
   date: string;
   status: "COMPLETED" | "PENDING" | "REJECTED" | string;
+  payoutStatus?: "PENDING" | "PAID" | "PROCESSING" | "ON_HOLD" | "LOCKED_NO_SUBSCRIPTION" | string;
   notes?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -578,6 +599,7 @@ export interface IGetFinanceCommitteeParams {
   page?: number;
   limit?: number;
   status?: string;
+  payoutStatus?: string;
   searchTerm?: string;
 }
 
@@ -2234,3 +2256,116 @@ export interface IAcademyHomepageResponse {
 
 
 
+
+// Remove (release) a coach from the academy — DELETE /academies/coaches/:affiliationId
+export interface IRemovedCoachTeam {
+  _id: string;
+  teamName: string;
+  coachesCount?: number;
+  totalMembers?: number;
+}
+
+export interface IRemoveAcademyCoachData {
+  affiliationId: string;
+  coachId: string;
+  coachName: string;
+  academyId: string;
+  status: "REMOVED" | string;
+  removedFromTeams: IRemovedCoachTeam[];
+  cancelledEvaluationRequests: number;
+  cvValidationRequestsReleased: { paid: number; unpaid: number };
+}
+
+export interface IRemoveAcademyCoachResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: IRemoveAcademyCoachData;
+}
+
+// Academy → CVs Library (GET /academies/cvs-library)
+export type AcademyCvsTab = "ALL" | "LIKED" | "SHARED";
+export type AcademyCvStatus = "GOLD" | "SILVER" | "BRONZE";
+
+export interface IAcademyCvsMetric {
+  label: string;
+  count: number;
+}
+
+/** Dropdown item: show `label`, send `value`. "ALL" = no filter. */
+export interface IAcademyCvsFilterOption {
+  value: string;
+  label: string;
+}
+
+export interface IAcademyCvsAgeRangeOption extends IAcademyCvsFilterOption {
+  minAge?: number | null;
+  maxAge?: number | null;
+}
+
+export interface IAcademyCvsLibraryItem {
+  playerId: string;
+  name: string;
+  position: string;
+  avatar: string | null;
+  rating: string | null;
+  rawRating: number | null;
+  club: string;
+  country: string;
+  age: number | null;
+  status: AcademyCvStatus | string;
+  isLiked: boolean;
+  shareCount: number;
+  shareableUrl: string;
+}
+
+export interface IAcademyCvsLibraryData {
+  metrics: {
+    allCvs: IAcademyCvsMetric;
+    likedCvs: IAcademyCvsMetric;
+    profilesShared: IAcademyCvsMetric;
+  };
+  filterOptions: {
+    positions: IAcademyCvsFilterOption[];
+    countries: IAcademyCvsFilterOption[];
+    ageRanges: IAcademyCvsAgeRangeOption[];
+    statuses: IAcademyCvsFilterOption[];
+  };
+  currentTab: AcademyCvsTab;
+  meta: { page: number; limit: number; total: number; totalPages: number };
+  data: IAcademyCvsLibraryItem[];
+}
+
+export interface IAcademyCvsLibraryResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: IAcademyCvsLibraryData;
+}
+
+export interface IGetAcademyCvsLibraryParams {
+  tab?: AcademyCvsTab;
+  searchTerm?: string;
+  position?: string;
+  country?: string;
+  /** Value from filterOptions.ageRanges (e.g. U18). */
+  ageRange?: string;
+  status?: AcademyCvStatus | string;
+  page?: number;
+  limit?: number;
+  sort?: string;
+}
+
+export interface IAcademyCvLikeResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: { playerId: string; playerName: string; isLiked: boolean; likedCount: number; playerTotalLikes: number; message?: string };
+}
+
+export interface IAcademyCvShareResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: { playerId: string; playerName: string; shareableUrl: string; shareCount: number; uniqueSharedProfiles: number; message?: string };
+}

@@ -657,25 +657,11 @@ export interface ICoachValidatePlayerCvTechnical {
   finishing?: number;
 }
 
-export interface ICoachValidatePlayerCvBehavioral {
-  leadership?: number;
-  teamwork?: number;
-  workRate?: number;
-  decisions?: number;
-}
-
-export interface ICoachValidatePlayerCvMental {
-  composure?: number;
-  confidence?: number;
-  focus?: number;
-}
-
 export interface ICoachValidatePlayerCvPayload {
   playerId: string;
   physical?: ICoachValidatePlayerCvPhysical;
   technical?: ICoachValidatePlayerCvTechnical;
-  behavioral?: ICoachValidatePlayerCvBehavioral;
-  mental?: ICoachValidatePlayerCvMental;
+  mental?: Record<string, number>;
   coachFeedback?: string;
 }
 
@@ -684,4 +670,36 @@ export interface ICoachValidatePlayerCvResponse {
   success: boolean;
   message: string;
   data?: any;
+}
+
+// GET /coaches/me/finances
+export type CoachPayoutStatus = "PENDING" | "PAID" | "PROCESSING" | "ON_HOLD" | "LOCKED_NO_SUBSCRIPTION";
+
+export interface ICoachFinancesSummary {
+  currency?: string;
+  totalEarnings?: number;
+  totalEarningsFormatted?: string;
+  pendingPayouts?: number;
+  pendingPayoutsFormatted?: string;
+  /** Player paid, coach hasn't validated the CV yet — excluded from totalEarnings / pendingPayouts. */
+  onHoldPayouts?: number;
+  onHoldPayoutsFormatted?: string;
+  [key: string]: unknown;
+}
+
+export interface ICoachFinanceTransaction {
+  _id?: string;
+  id?: string;
+  payoutStatus?: CoachPayoutStatus | string;
+  [key: string]: unknown;
+}
+
+export interface ICoachFinancesResponse {
+  success: boolean;
+  message: string;
+  data: {
+    summary?: ICoachFinancesSummary;
+    transactions?: ICoachFinanceTransaction[];
+    [key: string]: unknown;
+  };
 }

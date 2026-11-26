@@ -1,6 +1,7 @@
-import SuccessStory from "@/components/user-wise-dashboard/academy-analysis/SuccessStory";
+"use client";
+import SuccessStoryManagement from "@/components/user-wise-dashboard/academy-management/SuccessStory";
 
 const SuccessStoryPage = () => {
-return <SuccessStory />;
-}
+  return <SuccessStoryManagement />;
+};
 export default SuccessStoryPage;

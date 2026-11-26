@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useState, useMemo } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
@@ -10,22 +9,33 @@ import {
   IconLoader2,
   IconCheck,
   IconArrowLeft,
+  IconDownload,
 } from "@tabler/icons-react";
-import { COACH_POOL } from "@/components/user-wise-dashboard/academy-analysis/TeamDataStore";
-import ViewCv from "@/components/user-wise-dashboard/academy-management/ViewCv";
+import { toast } from "sonner";
+import { domPagesToPdf } from "@/lib/pdf/domToPdf";
+import ChatAvatar from "@/components/chat/ChatAvatar";
+import { useGetAcademyCoachesQuery } from "@/redux/features/academy/academyApi";
+import {
+  INACTIVE_COACH_STATUSES,
+  toAcademyCoachRows,
+} from "@/components/user-wise-dashboard/academy-management/academyLists";
+import PlayerCvViewPage from "@/components/cvs/player-cv-view/PlayerCvViewPage";
+import { useGetPlayerCvByIdQuery } from "@/redux/features/player/playerApi";
 import {
   useGetAcademyValidateCvQuery,
   useNotifyCoachToValidateCvMutation,
 } from "@/redux/features/academy/academyApi";
 
-// ─── CV Tier calculation ───────────────────────────────────────────────────
+// ─── CV Tier (from the backend, never computed here) ───────────────────────
 type CvTier = "Gold" | "Silver" | "Bronze";
 
-function getCvTier(rating: number): CvTier {
-  if (rating >= 80) return "Gold";
-  if (rating >= 60) return "Silver";
-  return "Bronze";
-}
+const toCvTier = (value: unknown): CvTier | null => {
+  const upper = String(value || "").toUpperCase();
+  if (upper.includes("GOLD")) return "Gold";
+  if (upper.includes("SILVER")) return "Silver";
+  if (upper.includes("BRONZE")) return "Bronze";
+  return null;
+};
 
 const TIER_STYLES: Record<CvTier, { label: string; color: string; border: string; bg: string; glow: string }> = {
   Gold: { label: "GOLD", color: "text-[#FBBF24]", border: "border-[#FBBF24]/40", bg: "bg-[#FBBF24]/10", glow: "shadow-[0_0_16px_rgba(251,191,36,0.25)]" },
@@ -45,10 +55,13 @@ const ViewCVDetailsPage = () => {
 
   const [notifyCoach, { isLoading: isNotifyingCoach }] = useNotifyCoachToValidateCvMutation();
 
-  const playerName = playerItem?.player?.name || "Player CV";
-  const playerRating = playerItem?.rating ?? 80;
-  const tier = getCvTier(playerRating);
-  const tierStyle = TIER_STYLES[tier];
+  // The CV of the player in the URL (same request PlayerCvViewPage makes — cached).
+  const { data: playerCvResponse } = useGetPlayerCvByIdQuery(playerId, { skip: !playerId });
+  const playerCv = playerCvResponse?.data;
+
+  const playerName = playerItem?.player?.name || playerCv?.fullName || "Player CV";
+  const tier = toCvTier(playerItem?.cvTier ?? playerItem?.cvTierBadge?.label ?? playerCv?.cvTier);
+  const tierStyle = tier ? TIER_STYLES[tier] : null;
   const assignedCoach = playerItem?.coach || "the assigned coach";
 
   const [notified, setNotified] = useState(false);
@@ -59,13 +72,22 @@ const ViewCVDetailsPage = () => {
   const [selectedCoachIds, setSelectedCoachIds] = useState<string[]>([]);
   const [isNotifyingCoaches, setIsNotifyingCoaches] = useState(false);
 
+  // Only this academy's coaches (GET /academies/coaches), minus removed/rejected/pending ones.
+  const { data: academyCoachesResponse, isLoading: isLoadingCoaches } = useGetAcademyCoachesQuery();
+  const academyCoaches = useMemo(
+    () =>
+      toAcademyCoachRows(academyCoachesResponse?.data)
+        .filter((c) => c.coachProfileId && !INACTIVE_COACH_STATUSES.includes(c.status) && c.status !== "PENDING")
+        .map((c) => ({ id: c.coachProfileId, name: c.name, role: c.role, avatar: c.avatar })),
+    [academyCoachesResponse]
+  );
+
   const filteredCoaches = useMemo(() => {
-    return COACH_POOL.filter(
-      (c) =>
-        c.name.toLowerCase().includes(coachSearch.toLowerCase()) ||
-        c.role.toLowerCase().includes(coachSearch.toLowerCase())
+    const term = coachSearch.toLowerCase();
+    return academyCoaches.filter(
+      (c) => c.name.toLowerCase().includes(term) || c.role.toLowerCase().includes(term)
     );
-  }, [coachSearch]);
+  }, [academyCoaches, coachSearch]);
 
   const toggleCoachSelection = (coachId: string) => {
     setSelectedCoachIds((prev) =>
@@ -106,6 +128,28 @@ const ViewCVDetailsPage = () => {
     }
   };
 
+  const [isDownloading, setIsDownloading] = useState(false);
+  const handleDownloadCv = async () => {
+    const content = document.getElementById("validate-cv-content");
+    if (!content || isDownloading || !playerCv) {
+      toast.error("The CV is still loading. Please try again in a moment.");
+      return;
+    }
+    setIsDownloading(true);
+    const toastId = toast.loading("Generating CV PDF...");
+    try {
+      await domPagesToPdf({
+        pages: [content],
+        fileName: `CV_${playerName.trim().replace(/\s+/g, "_") || "Player"}.pdf`,
+      });
+      toast.success("CV PDF downloaded.", { id: toastId });
+    } catch {
+      toast.error("Failed to generate the CV PDF. Please try again.", { id: toastId });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   const backToManagement = () => {
     router.push("/dashboard/academy/management/validate-cv");
   };
@@ -121,9 +165,11 @@ const ViewCVDetailsPage = () => {
             >
               <IconArrowLeft size={18} />
             </button>
-            <div className={`px-3 sm:px-4 py-1.5 rounded-full text-[10px] sm:text-[11px] font-black uppercase tracking-widest border shrink-0 ${tierStyle.bg} ${tierStyle.border} ${tierStyle.color}`}>
-              {tier} CV
-            </div>
+            {tier && tierStyle && (
+              <div className={`px-3 sm:px-4 py-1.5 rounded-full text-[10px] sm:text-[11px] font-black uppercase tracking-widest border shrink-0 ${tierStyle.bg} ${tierStyle.border} ${tierStyle.color}`}>
+                {tier} CV
+              </div>
+            )}
             <h2 className="text-lg sm:text-xl font-black uppercase text-white font-orbitron tracking-tight truncate">
               {playerName}
             </h2>
@@ -182,22 +228,13 @@ const ViewCVDetailsPage = () => {
                           >
                             <div className="flex items-center gap-2 min-w-0">
                               <div className="size-8 rounded-full overflow-hidden bg-white/5 border border-white/10 shrink-0">
-                                <Image
-                                  width={100}
-                                  height={100}
-                                  src={coach.avatar}
-                                  alt={coach.name}
-                                  className="size-full object-cover"
-                                  onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    target.srcset = "";
-                                    target.src = "/placeholder_img.jpg";
-                                  }}
-                                />
+                                <ChatAvatar src={coach.avatar} name={coach.name} className="size-full" />
                               </div>
                               <div className="min-w-0">
                                 <p className="text-[11px] font-black text-white truncate">{coach.name}</p>
-                                <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest">{coach.role}</p>
+                                {coach.role && (
+                                  <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest">{coach.role}</p>
+                                )}
                               </div>
                             </div>
                             <div
@@ -213,14 +250,20 @@ const ViewCVDetailsPage = () => {
                         );
                       })}
                       {filteredCoaches.length === 0 && (
-                        <p className="text-center text-[10px] text-white/30 py-4 uppercase font-bold">No coaches found</p>
+                        <p className="text-center text-[10px] text-white/30 py-4 uppercase font-bold">
+                          {isLoadingCoaches
+                            ? "Loading coaches..."
+                            : academyCoaches.length === 0
+                              ? "No coaches in your academy"
+                              : "No coaches found"}
+                        </p>
                       )}
                     </div>
 
                     {/* Select options */}
                     <div className="flex gap-2 pt-2 border-t border-white/10">
                       <button
-                        onClick={() => setSelectedCoachIds(COACH_POOL.map((c) => c.id))}
+                        onClick={() => setSelectedCoachIds(academyCoaches.map((c) => c.id))}
                         className="flex-1 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[9px] font-black uppercase text-white/60 hover:text-white tracking-widest transition-all min-w-0"
                       >
                         Select All
@@ -252,6 +295,17 @@ const ViewCVDetailsPage = () => {
               )}
             </div>
 
+            {/* Download the selected player's CV */}
+            <button
+              type="button"
+              onClick={handleDownloadCv}
+              disabled={isDownloading || !playerCv}
+              className="flex items-center justify-center gap-2 px-3 sm:px-5 py-2.5 rounded-2xl text-[9px] sm:text-[11px] font-black uppercase tracking-widest transition-all cursor-pointer border bg-white/5 hover:bg-white/10 border-white/10 text-white/70 hover:text-white disabled:opacity-50 disabled:cursor-wait w-full sm:w-auto flex-1 md:flex-none"
+            >
+              {isDownloading ? <IconLoader2 size={16} className="animate-spin shrink-0" /> : <IconDownload size={16} className="shrink-0" />}
+              <span className="truncate">Download CV</span>
+            </button>
+
             {/* Auto Notify Coach Button */}
             <button
               onClick={handleNotifyCoach}
@@ -280,7 +334,10 @@ const ViewCVDetailsPage = () => {
         </div>
       </div>
 
-      <ViewCv />
+      {/* The selected player's CV — not the logged-in user's. */}
+      <div id="validate-cv-content" className="w-full min-w-0">
+        <PlayerCvViewPage playerId={playerId} />
+      </div>
     </>
   );
 };

@@ -13,6 +13,8 @@
 
   /* brand colors */
   --primary: #00FF62;
+  /* Text on the bright green primary — dark for contrast (was undefined → inherited white). */
+  --primary-foreground: #0A0A0A;
   --yellow: #FDC700;
   --red: #FF1010;
   --blue: #0077FF;
@@ -74,6 +76,7 @@
   --color-foreground: var(--foreground);
 
   --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-yellow: var(--yellow);

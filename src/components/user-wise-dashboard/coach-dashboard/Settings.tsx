@@ -27,6 +27,7 @@ import {
   SettingsToggle 
 } from "@/components/dashboard/DashboardSettingsElements";
 import NotificationSettingsCard from "@/components/notifications/NotificationSettingsCard";
+import CoachFinancesSection from "./CoachFinancesSection";
 import { useChangePasswordMutation } from "@/redux/features/auth/authApi";
 import { 
   useGetMyCoachProfileQuery, 
@@ -527,6 +528,9 @@ const Settings = () => {
             </div>
           )}
         </SettingsSection>
+
+        {/* Earnings, payouts and ON_HOLD (awaiting CV validation) */}
+        <CoachFinancesSection />
 
         {/* Security */}
         <SettingsSection title="Security" icon={<IconLock size={20} />}>

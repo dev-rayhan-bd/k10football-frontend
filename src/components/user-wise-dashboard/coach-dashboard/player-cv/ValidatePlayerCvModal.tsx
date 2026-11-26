@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import DashboardModal from "@/components/dashboard/DashboardModal";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { IconBallFootball, IconBolt, IconBrain, IconCheck, IconLoader2, IconUsersGroup, IconX } from "@tabler/icons-react";
+import { IconBallFootball, IconBolt, IconBrain, IconCheck, IconLoader2, IconX } from "@tabler/icons-react";
 import { useValidatePlayerCvMutation } from "@/redux/features/coach/coachApi";
 import { ICoachValidatePlayerCvPayload } from "@/types/coach.type";
 import { cn } from "@/lib/utils";
@@ -17,22 +17,10 @@ interface ValidatePlayerCvModalProps {
   onSuccess?: () => void;
 }
 
-type GroupKey = "physical" | "technical" | "behavioral" | "mental";
+type GroupKey = "technical" | "physical" | "mental";
 
-// Exactly the fields POST /coaches/players/:playerId/validate-cv accepts.
+// POST /coaches/players/:playerId/validate-cv accepts technical / physical / mental score maps (0-100, all optional).
 const GROUPS: { key: GroupKey; label: string; icon: typeof IconBolt; fields: { key: string; label: string }[] }[] = [
-  {
-    key: "physical",
-    label: "Physical",
-    icon: IconBolt,
-    fields: [
-      { key: "pace", label: "Pace" },
-      { key: "acceleration", label: "Acceleration" },
-      { key: "stamina", label: "Stamina" },
-      { key: "strength", label: "Strength" },
-      { key: "agility", label: "Agility" },
-    ],
-  },
   {
     key: "technical",
     label: "Technical",
@@ -46,14 +34,15 @@ const GROUPS: { key: GroupKey; label: string; icon: typeof IconBolt; fields: { k
     ],
   },
   {
-    key: "behavioral",
-    label: "Behavioral",
-    icon: IconUsersGroup,
+    key: "physical",
+    label: "Physical",
+    icon: IconBolt,
     fields: [
-      { key: "leadership", label: "Leadership" },
-      { key: "teamwork", label: "Teamwork" },
-      { key: "workRate", label: "Work Rate" },
-      { key: "decisions", label: "Decisions" },
+      { key: "pace", label: "Pace" },
+      { key: "acceleration", label: "Acceleration" },
+      { key: "stamina", label: "Stamina" },
+      { key: "strength", label: "Strength" },
+      { key: "agility", label: "Agility" },
     ],
   },
   {
@@ -64,12 +53,16 @@ const GROUPS: { key: GroupKey; label: string; icon: typeof IconBolt; fields: { k
       { key: "composure", label: "Composure" },
       { key: "confidence", label: "Confidence" },
       { key: "focus", label: "Focus" },
+      { key: "decisions", label: "Decisions" },
+      { key: "leadership", label: "Leadership" },
+      { key: "teamwork", label: "Teamwork" },
+      { key: "workRate", label: "Work Rate" },
     ],
   },
 ];
 
 type Scores = Record<GroupKey, Record<string, number>>;
-const EMPTY_SCORES: Scores = { physical: {}, technical: {}, behavioral: {}, mental: {} };
+const EMPTY_SCORES: Scores = { technical: {}, physical: {}, mental: {} };
 
 const clampScore = (value: number) => Math.max(0, Math.min(100, Math.round(value)));
 
@@ -81,7 +74,7 @@ export const ValidatePlayerCvModal = ({
   playerName = "Player",
   onSuccess,
 }: ValidatePlayerCvModalProps) => {
-  const [activeGroup, setActiveGroup] = useState<GroupKey>("physical");
+  const [activeGroup, setActiveGroup] = useState<GroupKey>("technical");
   const [scores, setScores] = useState<Scores>(EMPTY_SCORES);
   const [coachFeedback, setCoachFeedback] = useState("");
   const [validatePlayerCv, { isLoading }] = useValidatePlayerCvMutation();
@@ -90,7 +83,7 @@ export const ValidatePlayerCvModal = ({
   const handleClose = () => {
     setScores(EMPTY_SCORES);
     setCoachFeedback("");
-    setActiveGroup("physical");
+    setActiveGroup("technical");
     onClose();
   };
 
@@ -109,7 +102,8 @@ export const ValidatePlayerCvModal = ({
     () => Object.values(scores).reduce((sum, group) => sum + Object.keys(group).length, 0),
     [scores]
   );
-  const canSubmit = touchedCount > 0 || coachFeedback.trim().length > 0;
+  // Scores are optional: the coach can validate the CV without changing any skill.
+  const canSubmit = true;
 
   const handleSubmit = async () => {
     if (!playerId || !canSubmit) return;
