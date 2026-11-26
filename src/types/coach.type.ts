@@ -661,6 +661,7 @@ export interface ICoachValidatePlayerCvPayload {
   playerId: string;
   physical?: ICoachValidatePlayerCvPhysical;
   technical?: ICoachValidatePlayerCvTechnical;
+  behavioral?: Record<string, number>;
   mental?: Record<string, number>;
   coachFeedback?: string;
 }
@@ -684,6 +685,10 @@ export interface ICoachFinancesSummary {
   /** Player paid, coach hasn't validated the CV yet — excluded from totalEarnings / pendingPayouts. */
   onHoldPayouts?: number;
   onHoldPayoutsFormatted?: string;
+  completedPayouts?: number;
+  completedPayoutsFormatted?: string;
+  thisMonthEarnings?: number;
+  thisMonthEarningsFormatted?: string;
   [key: string]: unknown;
 }
 

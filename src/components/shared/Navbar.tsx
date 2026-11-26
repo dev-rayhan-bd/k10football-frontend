@@ -119,6 +119,7 @@ export const Navbar = () => {
     { label: 'Home', href: '/' },
     { label: 'Services', href: '/services' },
     { label: 'CVs', href: '/cvs' },
+    { label: 'Events', href: '/events' },
     { label: 'K10 Plans', href: '/k10plans' },
     { label: 'About', href: '/about' },
   ]

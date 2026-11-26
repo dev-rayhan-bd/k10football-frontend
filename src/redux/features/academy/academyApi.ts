@@ -13,6 +13,12 @@ import {
   ISuccessStoriesResponse,
   ISuccessStoryResponse,
   IRemoveAcademyCoachResponse,
+  IAcademyCoachListResponse,
+  IAcademyCoachListParams,
+  IAcademyCoachMutationResponse,
+  IInviteAcademyCoachPayload,
+  IRespondAcademyCoachPayload,
+  ICoachAffiliationsResponse,
   IAcademyCvsLibraryResponse,
   IGetAcademyCvsLibraryParams,
   IAcademyCvLikeResponse,
@@ -530,12 +536,39 @@ export const academyApi = apiSlice.injectEndpoints({
     }),
 
     // Coaches affiliated with this academy. Response shape is normalised in AcademyCoaches.tsx.
-    getAcademyCoaches: builder.query<{ success: boolean; message: string; data: unknown; meta?: unknown }, void>({
-      query: () => ({
+    // { status=ALL|APPROVED|PENDING|REJECTED|NOT_AFFILIATED, searchTerm, page, limit } → { summary, coaches }.
+    getAcademyCoaches: builder.query<IAcademyCoachListResponse, IAcademyCoachListParams | void>({
+      query: (params) => ({
         url: "/academies/coaches",
         method: "GET",
+        params: Object.fromEntries(
+          Object.entries(params || {}).filter(([, v]) => v !== undefined && v !== null && v !== "")
+        ),
       }),
       providesTags: [TagTypes.COACHES, TagTypes.ACADEMY],
+    }),
+
+    // Academy invites a coach (by CoachProfile _id or email). Feedback is shown by the caller.
+    inviteAcademyCoach: builder.mutation<IAcademyCoachMutationResponse, IInviteAcademyCoachPayload>({
+      query: (body) => ({ url: "/academies/coaches/invite", method: "POST", body }),
+      invalidatesTags: (result) => (result?.success ? [TagTypes.COACHES, TagTypes.ACADEMY] : []),
+    }),
+
+    // Academy approves/rejects a coach's join request, or a coach accepts/declines an invitation.
+    respondAcademyCoachAffiliation: builder.mutation<IAcademyCoachMutationResponse, IRespondAcademyCoachPayload>({
+      query: ({ affiliationId, ...body }) => ({
+        url: `/academies/coaches/${affiliationId}/respond`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: (result) =>
+        result?.success ? [TagTypes.COACHES, TagTypes.ACADEMY, TagTypes.PROFILE, TagTypes.TEAMS] : [],
+    }),
+
+    // Coach token: the coach's academy affiliations (invitations included).
+    getMyAcademyAffiliations: builder.query<ICoachAffiliationsResponse, void>({
+      query: () => ({ url: "/academies/coaches/my-affiliations", method: "GET" }),
+      providesTags: [TagTypes.COACHES],
     }),
 
     // Release a coach from the academy (affiliation → REMOVED). Feedback is shown by the caller.
@@ -1646,6 +1679,9 @@ export const {
   useGetSuccessStoryByIdQuery,
   useRemoveCoachFromAcademyMutation,
   useGetAcademyCoachesQuery,
+  useInviteAcademyCoachMutation,
+  useRespondAcademyCoachAffiliationMutation,
+  useGetMyAcademyAffiliationsQuery,
   useGetAcademyPlayersQuery,
   useGetAcademyCvsLibraryQuery,
   useToggleAcademyCvLikeMutation,

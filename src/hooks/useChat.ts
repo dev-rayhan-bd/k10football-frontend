@@ -17,8 +17,11 @@ import {
   setUserStopTyping,
   setLoadingConversations,
   setLoadingMessages,
+  patchConversation,
+  removeConversation,
 } from "@/redux/features/chat/chatSlice";
 import {
+  chatApi,
   useGetConversationsQuery,
   useLazyGetMessagesQuery,
   useUploadAttachmentMutation,
@@ -29,6 +32,7 @@ import { getToken, getDecodedToken, getUserInfo } from "@/helpers/SessionHelper"
 import { IConversation, IMessage, IChatUser } from "@/types/chat.type";
 import { toast } from "sonner";
 import { formatMessageTime } from "@/helpers/ChatHelper";
+import TagTypes from "@/constants/tagType.constant";
 
 export const useChat = () => {
   const dispatch = useAppDispatch();
@@ -196,8 +200,28 @@ export const useChat = () => {
       lastMessageTime?: string;
       unreadIncrement?: number;
       senderName?: string;
+      name?: string;
+      avatar?: string | null;
+      groupUpdated?: boolean;
     }) => {
+      if (data.groupUpdated) {
+        // Group renamed / new image: update in place (no reorder) and refresh an open info panel.
+        dispatch(patchConversation({ conversationId: data.conversationId, name: data.name, avatar: data.avatar }));
+        dispatch(chatApi.util.invalidateTags([{ type: TagTypes.CONVERSATIONS, id: data.conversationId }]));
+        return;
+      }
       dispatch(updateConversationSidebar(data));
+    };
+
+    const handleConversationDeleted = (data: { conversationId: string; name?: string }) => {
+      if (!data?.conversationId) return;
+      const wasOpen = activeConversationIdRef.current === data.conversationId;
+      if (wasOpen) {
+        socketService.leaveConversation(data.conversationId);
+        socketService.setActiveConversation(null);
+      }
+      dispatch(removeConversation(data.conversationId));
+      if (wasOpen) toast.info("This group was deleted by the admin");
     };
 
     const handleMessagesRead = (data: {
@@ -256,6 +280,7 @@ export const useChat = () => {
     socket.on("user_online", handleUserOnline);
     socket.on("user_offline", handleUserOffline);
     socket.on("conversation_started", handleConversationStarted);
+    socket.on("conversation_deleted", handleConversationDeleted);
     socket.on("chat_error", handleChatError);
 
     return () => {
@@ -268,6 +293,7 @@ export const useChat = () => {
       socket.off("user_online", handleUserOnline);
       socket.off("user_offline", handleUserOffline);
       socket.off("conversation_started", handleConversationStarted);
+      socket.off("conversation_deleted", handleConversationDeleted);
       socket.off("chat_error", handleChatError);
     };
   }, [token, currentUserId, dispatch, selectConversation, refetchConversations, markMessagesReadMutation]);

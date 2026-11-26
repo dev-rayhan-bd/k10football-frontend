@@ -324,6 +324,37 @@ export const chatSlice = createSlice({
       }
     },
 
+    // Group name / avatar / member count changed (PATCH response or socket groupUpdated). No reordering.
+    patchConversation(
+      state,
+      action: PayloadAction<{ conversationId: string; name?: string; avatar?: string | null; membersCount?: number }>
+    ) {
+      const { conversationId, ...changes } = action.payload;
+      const patch: Partial<IConversation> = {};
+      if (changes.name !== undefined) patch.name = changes.name;
+      if (changes.avatar !== undefined) patch.avatar = changes.avatar || "";
+      if (changes.membersCount !== undefined) patch.membersCount = changes.membersCount;
+
+      const index = state.conversations.findIndex((c) => (c._id || c.id) === conversationId);
+      if (index >= 0) state.conversations[index] = { ...state.conversations[index], ...patch };
+      if (state.activeConversation && (state.activeConversation._id || state.activeConversation.id) === conversationId) {
+        state.activeConversation = { ...state.activeConversation, ...patch };
+      }
+    },
+
+    // Group deleted (by me or by the admin): drop it from the list and close it if open.
+    removeConversation(state, action: PayloadAction<string>) {
+      const conversationId = action.payload;
+      state.conversations = state.conversations.filter((c) => (c._id || c.id) !== conversationId);
+      delete state.messages[conversationId];
+      delete state.typingUsers[conversationId];
+      if (state.activeConversationId === conversationId) {
+        state.activeConversationId = null;
+        state.activeConversation = null;
+      }
+      state.totalUnreadCount = calculateTotalUnread(state.conversations);
+    },
+
     setLoadingConversations(state, action: PayloadAction<boolean>) {
       state.isLoadingConversations = action.payload;
     },
@@ -346,6 +377,8 @@ export const {
   setUserOnlineStatus,
   setUserTyping,
   setUserStopTyping,
+  patchConversation,
+  removeConversation,
   setLoadingConversations,
   setLoadingMessages,
 } = chatSlice.actions;

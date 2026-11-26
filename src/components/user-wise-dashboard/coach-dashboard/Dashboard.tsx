@@ -72,6 +72,7 @@ import {
 import DashboardTable, { Column } from "@/components/dashboard/DashboardTable";
 import TableActionButtons from "@/components/dashboard/TableActionButtons";
 import DashboardHero from "@/components/dashboard/DashboardHero";
+import CoachAcademyInvitations from "./CoachAcademyInvitations";
 
 const DEFAULT_AVATAR =
   "https://res.cloudinary.com/da1uxchgo/image/upload/v1789553255/player_profiles/ejlqkaqmvctx4xodazzj.jpg";
@@ -637,6 +638,9 @@ const CoachDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column */}
         <div className="lg:col-span-9 space-y-6 min-w-0">
+          {/* Pending academy invitations (renders nothing when there are none) */}
+          <CoachAcademyInvitations compact />
+
           {/* Hero Section */}
           <DashboardHero
             backgroundImage={coachData.coverImage || "/stadium-night.jpg"}

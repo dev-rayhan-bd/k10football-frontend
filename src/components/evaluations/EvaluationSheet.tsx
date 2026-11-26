@@ -14,12 +14,13 @@ import {
   IconTarget,
   IconUser,
 } from "@tabler/icons-react";
-import { toast } from "sonner";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { domPagesToPdf } from "@/lib/pdf/domToPdf";
+import { EVALUATION_PAGE_IDS } from "@/components/user-wise-dashboard/coach-dashboard/player-evaluation/EvaluationPages";
+import { EvaluationReportPages } from "@/components/user-wise-dashboard/coach-dashboard/player-evaluation/EvaluationReport";
+import { generateEvaluationPdf } from "@/components/user-wise-dashboard/coach-dashboard/player-evaluation/generateEvaluationPdf";
 import {
   getEvaluationApiError,
   useGetAcademyEvaluationPdfQuery,
@@ -104,7 +105,6 @@ const MetaItem = ({ icon: Icon, label, value }: { icon: typeof IconCalendar; lab
 
 export const EvaluationSheet = ({ evaluationId, pdfSource, leading, autoDownload }: EvaluationSheetProps) => {
   const autoDownloadStartedRef = useRef(false);
-  const sheetRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
 
   const { data, isLoading, isError, error, refetch } = useGetEvaluationSheetQuery(evaluationId, {
@@ -129,20 +129,14 @@ export const EvaluationSheet = ({ evaluationId, pdfSource, leading, autoDownload
   const position = refField(sheet?.player, "position");
   const categoryScores = pdfData?.categoryScores;
 
+  // Same "Player Development Programme" report the coach downloads: the hidden pages below are
+  // captured (generateEvaluationPdf shows its own progress / error toasts).
   const handleDownload = async () => {
-    if (!sheetRef.current) return;
+    if (!pdfData || isDownloading) return;
     setIsDownloading(true);
-    const toastId = toast.loading("Generating PDF...");
     try {
-      const safeName = (playerName || "player").replace(/[^\w-]+/g, "_");
-      await domPagesToPdf({
-        pages: [sheetRef.current],
-        fileName: `Evaluation_${safeName}${sheet?.formattedDate ? `_${sheet.formattedDate.replace(/[^\w-]+/g, "_")}` : ""}.pdf`,
-      });
-      toast.success("PDF downloaded", { id: toastId });
-    } catch (err) {
-      console.error("Evaluation PDF generation failed:", err);
-      toast.error("Failed to generate PDF", { id: toastId });
+      const safeName = (playerName || "Player").replace(/[^\w-]+/g, "_");
+      await generateEvaluationPdf(EVALUATION_PAGE_IDS, `Evaluation_Report_${safeName}.pdf`);
     } finally {
       setIsDownloading(false);
     }
@@ -206,7 +200,14 @@ export const EvaluationSheet = ({ evaluationId, pdfSource, leading, autoDownload
         )}
       </div>
 
-      <div ref={sheetRef} className="flex flex-col gap-6 bg-[#0a0a0a]">
+      {/* Off-screen PDF template (white two-page report), kept mounted so its images are loaded. */}
+      {pdfData && (
+        <div aria-hidden className="pointer-events-none fixed top-0 -left-[10000px] w-282.5">
+          <EvaluationReportPages report={pdfData} fallbackName={playerName} fallbackAvatar={refAvatar(sheet.player)} />
+        </div>
+      )}
+
+      <div className="flex flex-col gap-6 bg-[#0a0a0a]">
         {/* Header */}
         <div className={cn(cardClass, "p-6 md:p-8 flex flex-col lg:flex-row justify-between gap-6")}>
           <div className="flex items-center gap-5 min-w-0">

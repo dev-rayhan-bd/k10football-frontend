@@ -7,6 +7,10 @@ import { ChatConversationItem } from "./ChatConversationItem";
 import { ChatMessageItem } from "./ChatMessageItem";
 import { NewChatModal } from "./NewChatModal";
 import { ImageViewerModal } from "./ImageViewerModal";
+import { ChatGroupInfoPanel } from "./ChatGroupInfoPanel";
+import { useAppDispatch } from "@/redux/hooks/hooks";
+import { useGetConversationDetailsQuery } from "@/redux/features/chat/chatApi";
+import { removeConversation } from "@/redux/features/chat/chatSlice";
 import { getConversationAvatar, getMessageDateGroup, getRoleBadgeStyle } from "@/helpers/ChatHelper";
 import ChatAvatar from "./ChatAvatar";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +27,7 @@ import {
   IconX,
   IconArrowDown,
   IconMessageDots,
+  IconInfoCircle,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -62,6 +67,34 @@ export const ChatContainer = ({
   const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false);
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [showScrollBottomPill, setShowScrollBottomPill] = useState(false);
+  const [isGroupInfoOpen, setIsGroupInfoOpen] = useState(false);
+  const dispatch = useAppDispatch();
+
+  // Deep link: /…/chat?userId=<user id> opens (or creates) the 1-on-1 chat with that user.
+  const deepLinkHandledRef = useRef(false);
+  useEffect(() => {
+    if (deepLinkHandledRef.current || typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    const targetUserId = url.searchParams.get("userId");
+    if (!targetUserId) return;
+    // Wait for the conversation list so an existing chat is reused instead of starting a new one.
+    if (isLoadingConversations) return;
+    deepLinkHandledRef.current = true;
+
+    const existing = conversations.find(
+      (conv) =>
+        conv.type !== "GROUP" &&
+        (conv.user?._id === targetUserId ||
+          conv.user?.id === targetUserId ||
+          conv.participants?.some((p) => p._id === targetUserId || p.id === targetUserId))
+    );
+    if (existing) selectConversation(existing._id || existing.id, existing);
+    else startIndividualConversation(targetUserId);
+
+    // Drop the param so a refresh doesn't reopen it.
+    url.searchParams.delete("userId");
+    window.history.replaceState(null, "", url.pathname + (url.search || ""));
+  }, [conversations, isLoadingConversations, selectConversation, startIndividualConversation]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -195,6 +228,21 @@ export const ChatContainer = ({
     activeConversation as unknown as Parameters<typeof getConversationAvatar>[0]
   );
   const isUserOnline = !isGroup && Boolean(activeUser?.isOnline);
+
+  // Group header count: membersCount from GET /chats/conversations/:id (includes me).
+  const { data: groupDetailsResponse } = useGetConversationDetailsQuery(activeConversationId || "", {
+    skip: !activeConversationId || !isGroup,
+  });
+  const groupMembersCount =
+    groupDetailsResponse?.data?._id === activeConversationId
+      ? groupDetailsResponse.data.membersCount
+      : activeConversation?.membersCount;
+
+  const handleGroupDeleted = (conversationId: string) => {
+    setIsGroupInfoOpen(false);
+    closeConversation();
+    dispatch(removeConversation(conversationId));
+  };
   const roleStyle = getRoleBadgeStyle(activeUser?.role);
 
   return (
@@ -314,8 +362,20 @@ export const ChatContainer = ({
                     )}
                   </div>
 
-                  {/* Active Info */}
-                  <div className="min-w-0">
+                  {/* Active Info (groups: click to open the group info panel) */}
+                  <div
+                    className={cn("min-w-0", isGroup && "cursor-pointer")}
+                    onClick={isGroup ? () => setIsGroupInfoOpen(true) : undefined}
+                    role={isGroup ? "button" : undefined}
+                    tabIndex={isGroup ? 0 : undefined}
+                    onKeyDown={
+                      isGroup
+                        ? (e) => {
+                            if (e.key === "Enter" || e.key === " ") setIsGroupInfoOpen(true);
+                          }
+                        : undefined
+                    }
+                  >
                     <div className="flex items-center gap-2">
                       <h2 className="text-sm font-bold text-white truncate">
                         {activeTitle}
@@ -333,13 +393,26 @@ export const ChatContainer = ({
                     </div>
                     <p className="text-[11px] text-white/40 truncate">
                       {isGroup
-                        ? `${activeConversation?.participants?.length || activeConversation?.participantIds?.length || 2} members`
+                        ? groupMembersCount !== undefined
+                          ? `${groupMembersCount} members`
+                          : "Group members"
                         : isUserOnline
                         ? "Active now"
                         : "Offline"}
                     </p>
                   </div>
                 </div>
+
+                {isGroup && (
+                  <button
+                    type="button"
+                    onClick={() => setIsGroupInfoOpen(true)}
+                    title="Group info"
+                    className="shrink-0 cursor-pointer rounded-lg p-2 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+                  >
+                    <IconInfoCircle size={20} />
+                  </button>
+                )}
               </div>
 
               {/* MESSAGES VIEWPORT */}
@@ -522,6 +595,14 @@ export const ChatContainer = ({
         onSelectIndividual={startIndividualConversation}
         onCreateGroup={startGroupConversation}
         onUploadAttachment={uploadAttachment}
+      />
+
+      {/* Group info: members, edit image/name, delete (admins) */}
+      <ChatGroupInfoPanel
+        conversationId={isGroup ? activeConversationId : null}
+        open={isGroupInfoOpen && isGroup}
+        onOpenChange={setIsGroupInfoOpen}
+        onDeleted={handleGroupDeleted}
       />
 
       {/* Image Preview Lightbox Modal */}

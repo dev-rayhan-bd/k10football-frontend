@@ -3,7 +3,8 @@
 
 type AnyRecord = Record<string, unknown>;
 
-export const INACTIVE_COACH_STATUSES = ["REMOVED", "REJECTED"];
+// Not academy-verified: never offered in coach pickers.
+export const INACTIVE_COACH_STATUSES = ["REMOVED", "REJECTED", "NOT_AFFILIATED"];
 
 const asRecord = (value: unknown): AnyRecord | null =>
   value && typeof value === "object" && !Array.isArray(value) ? (value as AnyRecord) : null;
@@ -56,11 +57,17 @@ const toCoachRow = (raw: unknown): AcademyCoachRow | null => {
   const user = asRecord(coach.userId) ?? asRecord(item.userId) ?? asRecord(coach.user);
 
   const coachIdString = typeof item.coachId === "string" ? item.coachId : "";
-  const removeId = str(item._id, item.affiliationId, coachIdString, coach._id);
+  const removeId = str(item.affiliationId, item._id, coachIdString, coach._id);
   if (!removeId) return null;
   const coachProfileId = str(populated?._id, coachIdString, item.coachProfileId, item._id);
 
-  const rawTeams = Array.isArray(item.teams) ? item.teams : Array.isArray(coach.teams) ? coach.teams : null;
+  const rawTeams = Array.isArray(item.assignedTeams)
+    ? item.assignedTeams
+    : Array.isArray(item.teams)
+      ? item.teams
+      : Array.isArray(coach.teams)
+        ? coach.teams
+        : null;
   const teams = (rawTeams ?? [])
     .map((team) => (typeof team === "string" ? team : str(asRecord(team)?.teamName, asRecord(team)?.name)))
     .filter(Boolean);

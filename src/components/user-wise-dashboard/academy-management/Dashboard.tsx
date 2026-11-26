@@ -31,15 +31,64 @@ import AcademyDashboardProducts from "./AcademyDashboardProducts";
 import { useGetAcademyDashboardQuery } from "@/redux/features/academy/academyApi";
 import { cn } from "@/lib/utils";
 
-const PlayerEvalSidebarItem = ({ player, status, onClick }: { player: any, status: any, onClick?: () => void }) => {
-  const playerImgSrc = typeof player.playerImage === 'string' && player.playerImage
-    ? player.playerImage
-    : (player.playerImage?.src || player.avatar || player.playerAvatar || "/placeholder_img.jpg");
-  return (
-    <div onClick={onClick} className="p-4 bg-white/2 border border-white/5 rounded-2xl hover:bg-white/4 transition-all group flex items-center justify-between gap-3 cursor-pointer">
+type SidebarBadgeTone = "danger" | "warning" | "success" | "info";
+
+const SIDEBAR_BADGE_CLASSES: Record<SidebarBadgeTone, string> = {
+  danger: "text-red-500 bg-red-500/10 border border-red-500/20",
+  warning: "text-yellow-500 bg-yellow-500/10 border border-yellow-500/20",
+  success: "text-emerald-500 bg-emerald-500/10 border border-emerald-500/20",
+  info: "text-sky-400 bg-sky-500/10 border border-sky-500/20",
+};
+
+const PlayerEvalSidebarItem = ({
+  player,
+  status,
+  tone,
+  href,
+  onClick,
+}: {
+  player: any;
+  status: any;
+  tone?: SidebarBadgeTone;
+  href?: string;
+  onClick?: () => void;
+}) => {
+  const playerImgSrc =
+    typeof player.playerImage === "string" && player.playerImage
+      ? player.playerImage
+      : player.playerImage?.src || player.avatar || player.playerAvatar || "/placeholder_img.jpg";
+
+  const resolvedTone: SidebarBadgeTone =
+    tone ??
+    (status?.status === "EVALUATED" || status?.badge === "EVALUATED"
+      ? "success"
+      : status?.status === "EXPIRED" ||
+          status?.status === "NEEDS_NEW_COACH" ||
+          status?.isOverdue ||
+          status?.badge?.toUpperCase().includes("EXPIRED") ||
+          status?.badge?.toUpperCase().includes("NEEDS NEW COACH")
+        ? "danger"
+        : status?.status === "NEED_EVALUATION"
+          ? "info"
+          : "warning");
+
+  const content = (
+    <div
+      onClick={onClick}
+      className="p-4 bg-white/2 border border-white/5 rounded-2xl hover:bg-white/4 transition-all group flex items-center justify-between gap-3 cursor-pointer"
+    >
       <div className="flex items-center gap-3 min-w-0">
         <div className="size-10 md:size-12 rounded-full overflow-hidden border border-white/10 shrink-0">
-          <Image width={100} height={100} src={playerImgSrc} alt={player.fullName || player.playerName || player.title || "Player"} className="size-full object-cover" onError={(e) => { e.currentTarget.src = "/placeholder_img.jpg"; }} />
+          <Image
+            width={100}
+            height={100}
+            src={playerImgSrc}
+            alt={player.fullName || player.playerName || player.title || "Player"}
+            className="size-full object-cover"
+            onError={(e) => {
+              e.currentTarget.src = "/placeholder_img.jpg";
+            }}
+          />
         </div>
         <div className="min-w-0">
           <p className="text-xs font-bold text-white group-hover:text-[#E31B23] transition-colors truncate">
@@ -52,31 +101,25 @@ const PlayerEvalSidebarItem = ({ player, status, onClick }: { player: any, statu
       </div>
       <div className="shrink-0 text-right">
         {status?.badge ? (
-          <span className={cn(
-            "px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider",
-            status.isOverdue
-              ? "text-red-500 bg-red-500/10 border border-red-500/20"
-              : status.status === "EVALUATED" || status.badge === "EVALUATED"
-              ? "text-emerald-500 bg-emerald-500/10 border border-emerald-500/20"
-              : "text-yellow-500 bg-yellow-500/10 border border-yellow-500/20"
-          )}>
+          <span
+            className={cn(
+              "px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider",
+              SIDEBAR_BADGE_CLASSES[resolvedTone]
+            )}
+          >
             {status.badge}
           </span>
-        ) : status?.expired ? (
-          <span className="px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider text-red-500 bg-red-500/10 border border-red-500/20">
-            {status.remainingDays < 0 ? `Overdue ${Math.abs(status.remainingDays)}d` : "Expired"}
-          </span>
-        ) : status?.remainingDays !== undefined && status.remainingDays <= 15 ? (
-          <span className="px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider text-yellow-500 bg-yellow-500/10 border border-yellow-500/20">
-            {status.remainingDays}d left
-          </span>
-        ) : (
-          <span className="px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider text-emerald-500 bg-emerald-500/10 border border-emerald-500/20">
-            {status?.remainingDays !== undefined ? `${status.remainingDays}d left` : "Evaluated"}
-          </span>
-        )}
+        ) : null}
       </div>
     </div>
+  );
+
+  return href ? (
+    <Link href={href} className="block">
+      {content}
+    </Link>
+  ) : (
+    content
   );
 };
 
@@ -90,48 +133,6 @@ const AcademyManagementDashboard = () => {
   const metricCards = dashboardData?.metricCards;
   const analytics = dashboardData?.analytics;
   const sidebar = dashboardData?.sidebar;
-
-  // Local fallback players from redux if needed
-  const players = useAppSelector((state) => state.player.players);
-  const evaluationRecords = useAppSelector((state) => state.evaluation.records);
-  const getEvaluationStatus = (player: any) => {
-    const reduxRecord = evaluationRecords[player.id];
-    const evalDateStr = reduxRecord?.date || player.evaluationDate || player.lastValidatedDate;
-    if (!evalDateStr) {
-      return {
-        expired: true,
-        remainingDays: 0,
-        label: "Expired",
-      };
-    }
-    const evalDate = new Date(evalDateStr);
-    const currentDate = new Date();
-    evalDate.setHours(0, 0, 0, 0);
-    currentDate.setHours(0, 0, 0, 0);
-    const dueDate = new Date(evalDate.getTime());
-    dueDate.setDate(dueDate.getDate() + 90);
-    const diffTime = dueDate.getTime() - currentDate.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return {
-      expired: diffDays <= 0,
-      remainingDays: diffDays,
-      label: diffDays <= 0
-        ? `Expired (${Math.abs(diffDays)}d overdue)`
-        : `${diffDays}d remaining`,
-    };
-  };
-
-  const playersWithStatus = players.map(player => ({
-    player,
-    status: getEvaluationStatus(player)
-  })).sort((a, b) => {
-    if (a.status.expired && !b.status.expired) return -1;
-    if (!a.status.expired && b.status.expired) return 1;
-    if (a.status.expired && b.status.expired) {
-      return a.status.remainingDays - b.status.remainingDays;
-    }
-    return a.status.remainingDays - b.status.remainingDays;
-  });
 
   return (
     <div className="flex flex-col gap-6 md:gap-8 pb-10 w-full max-w-full overflow-x-hidden">

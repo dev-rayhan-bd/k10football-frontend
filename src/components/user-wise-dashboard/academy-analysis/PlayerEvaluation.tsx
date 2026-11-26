@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   IconBell,
   IconChevronLeft,
@@ -61,15 +61,36 @@ const ScoreCell = ({ value }: { value?: number | null }) => (
   </span>
 );
 
+const VALID_STATUS_FILTERS: AcademyEvaluationStatusFilter[] = ["ALL", "NEED_EVALUATION", "EVALUATED", "EXPIRED"];
+
 const PlayerEvaluation = () => {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const initialStatus = (() => {
+    const param = searchParams?.get("status");
+    if (param && VALID_STATUS_FILTERS.includes(param as AcademyEvaluationStatusFilter)) {
+      return param as AcademyEvaluationStatusFilter;
+    }
+    return "ALL";
+  })();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [status, setStatus] = useState<AcademyEvaluationStatusFilter>("ALL");
+  const [status, setStatus] = useState<AcademyEvaluationStatusFilter>(initialStatus);
   const [ageGroup, setAgeGroup] = useState("");
   const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    const param = searchParams?.get("status");
+    const nextStatus =
+      param && VALID_STATUS_FILTERS.includes(param as AcademyEvaluationStatusFilter)
+        ? (param as AcademyEvaluationStatusFilter)
+        : "ALL";
+    setStatus(nextStatus);
+    setPage(1);
+  }, [searchParams]);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 400);
@@ -138,7 +159,12 @@ const PlayerEvaluation = () => {
       ? DASH
       : `${metrics.avgOverallRating}/10`;
 
-  const errorMessage = isError ? getEvaluationApiError(error, "Failed to load evaluations").message : null;
+  const apiError = isError ? getEvaluationApiError(error, "Failed to load evaluations") : null;
+  const isNon2xxError = Boolean(
+    isError &&
+      (apiError?.status === undefined || apiError.status < 200 || apiError.status >= 300)
+  );
+  const errorMessage = isNon2xxError ? apiError?.message || "Failed to load evaluations" : null;
 
   return (
     <div className="flex flex-col gap-6 md:gap-8 pb-10 w-full max-w-full overflow-x-hidden">
@@ -247,7 +273,11 @@ const PlayerEvaluation = () => {
             ) : rows.length === 0 ? (
               <div className="text-center py-16 px-4">
                 <IconFileText size={40} className="mx-auto text-muted-foreground mb-3" />
-                <p className="text-muted-foreground font-bold text-sm">No evaluations match your filters.</p>
+                <p className="text-muted-foreground font-bold text-sm">
+                  {debouncedSearch || status !== "ALL" || ageGroup
+                    ? "No evaluations match your filters."
+                    : "No evaluations yet."}
+                </p>
               </div>
             ) : (
               <div className="overflow-x-auto">

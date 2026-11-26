@@ -21,21 +21,17 @@ import {
 import type { ICoachDropdownItem } from "@/types/cvValidation.type";
 import ChatAvatar from "@/components/chat/ChatAvatar";
 import { cn } from "@/lib/utils";
+import { useAppDispatch } from "@/hooks/reduxHooks";
+import { apiSlice } from "@/redux/features/api/apiSlice";
+import TagTypes from "@/constants/tagType.constant";
 
 const SEARCH_DEBOUNCE_MS = 400;
 
 /** "" / null → "—" (unknown, never invented). */
 const show = (value: unknown) => (value === null || value === undefined || value === "" ? "—" : String(value));
 
-const coachSubtitle = (coach: ICoachDropdownItem) =>
-  [
-    coach.title || null,
-    coach.academyName || null,
-    coach.licenseStatus || null,
-    coach.yearsExperience !== undefined && coach.yearsExperience !== "" ? `${coach.yearsExperience} yrs` : null,
-  ]
-    .filter(Boolean)
-    .join(" • ") || "—";
+const showYears = (value: ICoachDropdownItem["yearsExperience"]) =>
+  value === null || value === undefined || value === "" ? "—" : `${value} yrs`;
 
 interface RequestCvValidationButtonProps {
   /** Parent flow: the linked child's player id. Omit for the logged-in player. */
@@ -85,7 +81,13 @@ const RequestCvValidationButton = ({
     error: coachesError,
   } = useGetCoachDropdownQuery(search ? { search } : undefined, { skip: !isOpen });
   const [requestCvValidation, { isLoading: isRequesting }] = useRequestCvValidationMutation();
-  const coaches = coachesResponse?.data ?? [];
+  // GET /coaches/dropdown only: academy-verified (APPROVED) coaches.
+  const rawCoaches: unknown = coachesResponse?.data;
+  const coaches: ICoachDropdownItem[] = Array.isArray(rawCoaches)
+    ? rawCoaches
+    : Array.isArray((rawCoaches as { coaches?: unknown })?.coaches)
+      ? (rawCoaches as { coaches: ICoachDropdownItem[] }).coaches
+      : [];
 
   const handleSearchChange = (value: string) => {
     setSearchInput(value);
@@ -101,6 +103,16 @@ const RequestCvValidationButton = ({
     setSelectedCoachId("");
   };
 
+  const dispatch = useAppDispatch();
+  const closeAfterReassign = () => {
+    setIsOpen(false);
+    setSearchInput("");
+    setSearch("");
+    setSelectedCoachId("");
+    // Refetch the CV so the card shows the new coach (the mutation also invalidates PLAYERS).
+    dispatch(apiSlice.util.invalidateTags([TagTypes.PLAYERS]));
+  };
+
   const handleRequest = async () => {
     if (!selectedCoachId) return;
     try {
@@ -111,8 +123,7 @@ const RequestCvValidationButton = ({
       if (!checkoutUrl) {
         // Paid request moved to the new coach — no Stripe. The CV refetches via tag invalidation.
         toast.success(res?.message || "Your request was moved to the new coach. No extra payment needed.");
-        setIsOpen(false);
-        setSelectedCoachId("");
+        closeAfterReassign();
         return;
       }
       toast.loading("Redirecting to secure payment...", { id: "cv-validation-checkout" });
@@ -175,7 +186,7 @@ const RequestCvValidationButton = ({
             ) : coaches.length === 0 ? (
               <div className="flex flex-col items-center gap-2 py-8 text-center text-muted-foreground">
                 <IconUsers className="size-6" />
-                <p className="text-sm">{search ? "No coaches match your search." : "No academy-verified coaches available yet."}</p>
+                <p className="text-sm">No academy-verified coaches found</p>
               </div>
             ) : (
               coaches.map((coach) => {
@@ -193,7 +204,12 @@ const RequestCvValidationButton = ({
                     <ChatAvatar src={coach.avatar} name={coach.name} className="size-10" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-bold">{show(coach.name)}</p>
-                      <p className="truncate text-xs text-muted-foreground">{coachSubtitle(coach)}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {show(coach.title)} • {show(coach.academyName)}
+                      </p>
+                      <p className="truncate text-[11px] text-muted-foreground">
+                        License: {show(coach.licenseStatus)} • Experience: {showYears(coach.yearsExperience)}
+                      </p>
                     </div>
                     {coach.overallRatingScore !== undefined && coach.overallRatingScore !== "" && (
                       <span className="shrink-0 font-orbitron text-sm font-black text-white/80">{coach.overallRatingScore}</span>

@@ -90,13 +90,22 @@ export const EvaluationReport = ({ row, onClose }: EvaluationReportProps) => {
           </button>
         </div>
       ) : (
-        <ReportPages report={report} fallbackName={row.name} fallbackAvatar={row.avatar} />
+        <EvaluationReportPages report={report} fallbackName={row.name} fallbackAvatar={row.avatar} />
       )}
     </div>
   );
 };
 
-const ReportPages = ({ report, fallbackName, fallbackAvatar }: { report: IEvaluationPdfData; fallbackName?: string | null; fallbackAvatar?: string | null }) => {
+/** The read-only "Player Development Programme" pages for a submitted evaluation (coach, player, academy). */
+export const EvaluationReportPages = ({
+  report,
+  fallbackName,
+  fallbackAvatar,
+}: {
+  report: IEvaluationPdfData;
+  fallbackName?: string | null;
+  fallbackAvatar?: string | null;
+}) => {
   const player = report.player;
   const playerName = personName(player) || fallbackName || null;
   const tier = personField(player, "tierBadge") || personField(player, "tier");

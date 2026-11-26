@@ -10,8 +10,11 @@ import {
   markMessagesReadInConversation,
   setUserOnlineStatus,
   setConversations,
+  patchConversation,
+  removeConversation,
 } from "@/redux/features/chat/chatSlice";
-import { useGetConversationsQuery } from "@/redux/features/chat/chatApi";
+import { chatApi, useGetConversationsQuery } from "@/redux/features/chat/chatApi";
+import TagTypes from "@/constants/tagType.constant";
 import { IMessage } from "@/types/chat.type";
 import { toast } from "sonner";
 import { usePathname } from "next/navigation";
@@ -86,8 +89,23 @@ export const ChatSocketProvider = () => {
       lastMessageTime?: string;
       unreadIncrement?: number;
       senderName?: string;
+      name?: string;
+      avatar?: string | null;
+      groupUpdated?: boolean;
     }) => {
+      if (data.groupUpdated) {
+        // Group renamed / new image: update in place (no reorder) and refresh an open info panel.
+        dispatch(patchConversation({ conversationId: data.conversationId, name: data.name, avatar: data.avatar }));
+        dispatch(chatApi.util.invalidateTags([{ type: TagTypes.CONVERSATIONS, id: data.conversationId }]));
+        return;
+      }
       dispatch(updateConversationSidebar(data));
+    };
+
+    // Deleted group: drop it from the list. On the chat page useChat also closes it and shows the toast
+    // (removing twice is harmless).
+    const handleConversationDeleted = (data: { conversationId: string }) => {
+      if (data?.conversationId) dispatch(removeConversation(data.conversationId));
     };
 
     const handleMessagesRead = (data: {
@@ -117,6 +135,7 @@ export const ChatSocketProvider = () => {
     socket.on("messages_read", handleMessagesRead);
     socket.on("user_online", handleUserOnline);
     socket.on("user_offline", handleUserOffline);
+    socket.on("conversation_deleted", handleConversationDeleted);
 
     return () => {
       socket.off("new_message", handleNewMessage);
@@ -124,6 +143,7 @@ export const ChatSocketProvider = () => {
       socket.off("messages_read", handleMessagesRead);
       socket.off("user_online", handleUserOnline);
       socket.off("user_offline", handleUserOffline);
+      socket.off("conversation_deleted", handleConversationDeleted);
     };
   }, [token, currentUserId, isExcludedRole, dispatch, pathname]);
 

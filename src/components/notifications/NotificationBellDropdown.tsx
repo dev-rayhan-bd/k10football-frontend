@@ -1,6 +1,9 @@
 "use client";
 import { getUserRole, normalizeRole } from "@/helpers/SessionHelper";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useAppDispatch } from "@/hooks/reduxHooks";
+import { apiSlice } from "@/redux/features/api/apiSlice";
+import TagTypes from "@/constants/tagType.constant";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import {
@@ -32,7 +35,18 @@ import {
   useMarkNotificationAsReadMutation,
   useDeleteNotificationMutation,
 } from "@/redux/features/notification/notificationApi";
-import { getCoachReassignmentPath, getEvaluationReportPath, INotificationItem } from "@/types/notification.type";
+import {
+  getCoachReassignmentPath,
+  getCvValidatedPath,
+  getEvaluationReportPath,
+  getPayoutReviewPath,
+  getAcademyAffiliationPath,
+  getExtraEventPath,
+  CV_REFRESH_NOTIFICATION_TYPES,
+  AFFILIATION_REFRESH_NOTIFICATION_TYPES,
+  EXTRA_EVENT_NOTIFICATION_TYPES,
+  INotificationItem,
+} from "@/types/notification.type";
 import { cn } from "@/lib/utils";
 
 const formatRelativeTime = (dateString?: string) => {
@@ -89,6 +103,42 @@ export const NotificationBellDropdown = () => {
 
   const notifications = notificationsResponse?.data ?? [];
 
+  // New PLAYER_CV_VALIDATED / PAYMENT_SUCCESS / CV_VALIDATION_REQUEST → refetch the CV (tier card state).
+  const dispatch = useAppDispatch();
+  const latestCvNotificationId =
+    notifications.find((n) => CV_REFRESH_NOTIFICATION_TYPES.includes(n.type))?._id ?? null;
+  const lastCvNotificationIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!latestCvNotificationId || latestCvNotificationId === lastCvNotificationIdRef.current) return;
+    const isFirstLoad = lastCvNotificationIdRef.current === null;
+    lastCvNotificationIdRef.current = latestCvNotificationId;
+    if (!isFirstLoad) dispatch(apiSlice.util.invalidateTags([TagTypes.PLAYERS]));
+  }, [latestCvNotificationId, dispatch]);
+
+  // New invitation / withdrawal / approval / rejection → refetch My Coaches and the coach's invitations.
+  const latestAffiliationNotificationId =
+    notifications.find((n) => AFFILIATION_REFRESH_NOTIFICATION_TYPES.includes(n.type))?._id ?? null;
+  const lastAffiliationNotificationIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!latestAffiliationNotificationId || latestAffiliationNotificationId === lastAffiliationNotificationIdRef.current)
+      return;
+    const isFirstLoad = lastAffiliationNotificationIdRef.current === null;
+    lastAffiliationNotificationIdRef.current = latestAffiliationNotificationId;
+    if (!isFirstLoad) dispatch(apiSlice.util.invalidateTags([TagTypes.COACHES, TagTypes.ACADEMY]));
+  }, [latestAffiliationNotificationId, dispatch]);
+
+  // New event registration / confirmed payment → refetch events and "My events".
+  const latestExtraEventNotificationId =
+    notifications.find((n) => EXTRA_EVENT_NOTIFICATION_TYPES.includes(n.type))?._id ?? null;
+  const lastExtraEventNotificationIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!latestExtraEventNotificationId || latestExtraEventNotificationId === lastExtraEventNotificationIdRef.current)
+      return;
+    const isFirstLoad = lastExtraEventNotificationIdRef.current === null;
+    lastExtraEventNotificationIdRef.current = latestExtraEventNotificationId;
+    if (!isFirstLoad) dispatch(apiSlice.util.invalidateTags([TagTypes.EXTRA_EVENTS]));
+  }, [latestExtraEventNotificationId, dispatch]);
+
   // Compute unread count reliably from count query, meta, or notifications array
   const rawCount = countResponse?.data?.unreadCount ?? (countResponse?.data as unknown as number);
   const unreadCount =
@@ -124,6 +174,17 @@ export const NotificationBellDropdown = () => {
     }
 
     // Handle deep link if notification has actionUrl
+    const deepLink =
+      getPayoutReviewPath(item) ||
+      getAcademyAffiliationPath(item) ||
+      getExtraEventPath(item, normalizeRole(getUserRole() || "")) ||
+      getCvValidatedPath(item, normalizeRole(getUserRole() || ""));
+    if (deepLink) {
+      setIsOpen(false);
+      router.push(deepLink);
+      return;
+    }
+
     const evaluationPath = getEvaluationReportPath(item);
     if (evaluationPath) {
       setIsOpen(false);

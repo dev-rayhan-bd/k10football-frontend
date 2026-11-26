@@ -73,7 +73,10 @@ const ViewCVDetailsPage = () => {
   const [isNotifyingCoaches, setIsNotifyingCoaches] = useState(false);
 
   // Only this academy's coaches (GET /academies/coaches), minus removed/rejected/pending ones.
-  const { data: academyCoachesResponse, isLoading: isLoadingCoaches } = useGetAcademyCoachesQuery();
+  const { data: academyCoachesResponse, isLoading: isLoadingCoaches } = useGetAcademyCoachesQuery({
+    status: "APPROVED",
+    limit: 100,
+  });
   const academyCoaches = useMemo(
     () =>
       toAcademyCoachRows(academyCoachesResponse?.data)

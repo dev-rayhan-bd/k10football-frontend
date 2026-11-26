@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import DashboardModal from "@/components/dashboard/DashboardModal";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { IconBallFootball, IconBolt, IconBrain, IconCheck, IconLoader2, IconX } from "@tabler/icons-react";
+import { IconBallFootball, IconBolt, IconBrain, IconCheck, IconLoader2, IconUsersGroup, IconX } from "@tabler/icons-react";
 import { useValidatePlayerCvMutation } from "@/redux/features/coach/coachApi";
 import { ICoachValidatePlayerCvPayload } from "@/types/coach.type";
 import { cn } from "@/lib/utils";
@@ -17,32 +17,63 @@ interface ValidatePlayerCvModalProps {
   onSuccess?: () => void;
 }
 
-type GroupKey = "technical" | "physical" | "mental";
+type GroupKey = "physical" | "technical" | "behavioral" | "mental";
 
-// POST /coaches/players/:playerId/validate-cv accepts technical / physical / mental score maps (0-100, all optional).
-const GROUPS: { key: GroupKey; label: string; icon: typeof IconBolt; fields: { key: string; label: string }[] }[] = [
-  {
-    key: "technical",
-    label: "Technical",
-    icon: IconBallFootball,
-    fields: [
-      { key: "ballControl", label: "Ball Control" },
-      { key: "dribbling", label: "Dribbling" },
-      { key: "shortPassing", label: "Short Passing" },
-      { key: "shooting", label: "Shooting" },
-      { key: "finishing", label: "Finishing" },
-    ],
-  },
+type PayloadGroup = "physical" | "technical" | "behavioral" | "mental";
+
+type Field = {
+  key: string;
+  label: string;
+  /** Counted in the overall rating. */
+  rated?: boolean;
+  /** Body group the backend stores this key under, when it differs from the tab. */
+  sendAs?: PayloadGroup;
+};
+
+// Only keys POST /coaches/players/:playerId/validate-cv actually saves (0-100, all optional).
+// Keys the backend ignores (pace, interception, behavioral confidence/motivation/focus/decisionMaking)
+// are deliberately not offered.
+const GROUPS: { key: GroupKey; label: string; icon: typeof IconBolt; fields: Field[] }[] = [
   {
     key: "physical",
     label: "Physical",
     icon: IconBolt,
     fields: [
-      { key: "pace", label: "Pace" },
-      { key: "acceleration", label: "Acceleration" },
-      { key: "stamina", label: "Stamina" },
-      { key: "strength", label: "Strength" },
-      { key: "agility", label: "Agility" },
+      { key: "acceleration", label: "Acceleration", rated: true },
+      { key: "sprintSpeed", label: "Sprint Speed", rated: true },
+      { key: "stamina", label: "Stamina", rated: true },
+      { key: "strength", label: "Strength", rated: true },
+      { key: "agility", label: "Agility", rated: true },
+      { key: "balance", label: "Balance" },
+      { key: "jumping", label: "Jumping" },
+      { key: "reactions", label: "Reactions" },
+    ],
+  },
+  {
+    key: "technical",
+    label: "Technical",
+    icon: IconBallFootball,
+    fields: [
+      { key: "ballControl", label: "Ball Control", rated: true },
+      { key: "dribbling", label: "Dribbling", rated: true },
+      { key: "shortPassing", label: "Short Passing", rated: true },
+      { key: "longPassing", label: "Long Passing", rated: true },
+      { key: "crossing", label: "Crossing", rated: true },
+      { key: "shooting", label: "Shooting", rated: true },
+      { key: "finishing", label: "Finishing", rated: true },
+      { key: "longShots", label: "Long Shots" },
+    ],
+  },
+  {
+    key: "behavioral",
+    label: "Behavioral",
+    icon: IconUsersGroup,
+    fields: [
+      { key: "composure", label: "Composure", rated: true },
+      { key: "teamwork", label: "Teamwork", rated: true },
+      { key: "decisions", label: "Decisions", rated: true },
+      { key: "workRate", label: "Work Rate" },
+      { key: "composition", label: "Composition" },
     ],
   },
   {
@@ -50,19 +81,20 @@ const GROUPS: { key: GroupKey; label: string; icon: typeof IconBolt; fields: { k
     label: "Mental",
     icon: IconBrain,
     fields: [
-      { key: "composure", label: "Composure" },
-      { key: "confidence", label: "Confidence" },
-      { key: "focus", label: "Focus" },
-      { key: "decisions", label: "Decisions" },
-      { key: "leadership", label: "Leadership" },
-      { key: "teamwork", label: "Teamwork" },
-      { key: "workRate", label: "Work Rate" },
+      { key: "aggression", label: "Aggression", sendAs: "behavioral" },
+      { key: "concentration", label: "Concentration", sendAs: "behavioral" },
+      { key: "consistency", label: "Consistency", sendAs: "behavioral" },
+      { key: "leadership", label: "Leadership", sendAs: "behavioral" },
+      { key: "bravery", label: "Bravery", sendAs: "behavioral" },
+      { key: "determination", label: "Determination", sendAs: "behavioral" },
+      { key: "heading", label: "Heading", sendAs: "behavioral" },
+      { key: "influence", label: "Influence", sendAs: "behavioral" },
     ],
   },
 ];
 
 type Scores = Record<GroupKey, Record<string, number>>;
-const EMPTY_SCORES: Scores = { technical: {}, physical: {}, mental: {} };
+const EMPTY_SCORES: Scores = { physical: {}, technical: {}, behavioral: {}, mental: {} };
 
 const clampScore = (value: number) => Math.max(0, Math.min(100, Math.round(value)));
 
@@ -74,7 +106,7 @@ export const ValidatePlayerCvModal = ({
   playerName = "Player",
   onSuccess,
 }: ValidatePlayerCvModalProps) => {
-  const [activeGroup, setActiveGroup] = useState<GroupKey>("technical");
+  const [activeGroup, setActiveGroup] = useState<GroupKey>("physical");
   const [scores, setScores] = useState<Scores>(EMPTY_SCORES);
   const [coachFeedback, setCoachFeedback] = useState("");
   const [validatePlayerCv, { isLoading }] = useValidatePlayerCvMutation();
@@ -83,7 +115,7 @@ export const ValidatePlayerCvModal = ({
   const handleClose = () => {
     setScores(EMPTY_SCORES);
     setCoachFeedback("");
-    setActiveGroup("technical");
+    setActiveGroup("physical");
     onClose();
   };
 
@@ -108,9 +140,15 @@ export const ValidatePlayerCvModal = ({
   const handleSubmit = async () => {
     if (!playerId || !canSubmit) return;
     const payload: ICoachValidatePlayerCvPayload = { playerId };
-    (Object.keys(scores) as GroupKey[]).forEach((group) => {
-      if (Object.keys(scores[group]).length > 0) payload[group] = { ...scores[group] };
-    });
+    // Each tab's scores go to the body group the backend stores them under.
+    for (const tab of GROUPS) {
+      for (const field of tab.fields) {
+        const value = scores[tab.key][field.key];
+        if (value === undefined) continue;
+        const target = field.sendAs ?? tab.key;
+        payload[target] = { ...(payload[target] ?? {}), [field.key]: value };
+      }
+    }
     if (coachFeedback.trim()) payload.coachFeedback = coachFeedback.trim();
 
     try {
@@ -174,6 +212,11 @@ export const ValidatePlayerCvModal = ({
           })}
         </div>
 
+        <p className="text-[11px] text-muted-foreground">
+          All scores are optional (0–100). Fields tagged <span className="font-bold text-primary">Rating</span> count toward
+          the player&apos;s overall rating; the others are saved on the CV only.
+        </p>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {group.fields.map((field) => {
             const value = scores[group.key][field.key];
@@ -181,7 +224,14 @@ export const ValidatePlayerCvModal = ({
             return (
               <div key={field.key} className="bg-black/30 border border-white/10 rounded-xl p-3.5 flex flex-col gap-2">
                 <div className="flex items-center justify-between gap-2 text-xs">
-                  <span className="font-semibold text-gray-200">{field.label}</span>
+                  <span className="flex items-center gap-1.5 font-semibold text-gray-200">
+                    {field.label}
+                    {field.rated && (
+                      <span className="rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider text-primary">
+                        Rating
+                      </span>
+                    )}
+                  </span>
                   <div className="flex items-center gap-1.5">
                     <input
                       type="number"

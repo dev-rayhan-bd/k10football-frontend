@@ -35,12 +35,13 @@ import {
 
 const YEAR_OPTIONS_COUNT = 5;
 
-type BadgeTone = "danger" | "warning" | "success";
+type BadgeTone = "danger" | "warning" | "success" | "info";
 
 const BADGE_TONE_CLASSES: Record<BadgeTone, string> = {
   danger: "text-red-500 bg-red-500/10 border-red-500/20",
   warning: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20",
   success: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
+  info: "text-sky-400 bg-sky-500/10 border-sky-500/20",
 };
 
 const PlayerStatusItem = ({
@@ -49,14 +50,17 @@ const PlayerStatusItem = ({
   coachLabel,
   badge,
   tone,
+  href,
 }: {
   name: string;
   avatar: string | null;
   coachLabel: string;
   badge: string;
   tone: BadgeTone;
-}) => (
-  <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/5 bg-white/2 p-4 transition-all hover:bg-white/4">
+  href?: string;
+}) => {
+  const inner = (
+    <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/5 bg-white/2 p-4 transition-all hover:bg-white/4">
     <div className="flex min-w-0 items-center gap-3">
       <div className="size-10 shrink-0 overflow-hidden rounded-full border border-white/10">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -87,7 +91,13 @@ const PlayerStatusItem = ({
       </span>
     )}
   </div>
-);
+  );
+  return href ? (
+    <Link href={href} className="block cursor-pointer">
+      {inner}
+    </Link>
+  ) : inner;
+};
 
 const EmptyText = ({ children }: { children: React.ReactNode }) => (
   <p className="p-3 text-center text-xs font-bold text-white/40">{children}</p>
@@ -294,18 +304,22 @@ const AcademyAnalysisDashboard = () => {
             icon={<IconFileCheck size={24} />}
           >
             {sidebar?.pendingCvValidations?.length ? (
-              sidebar.pendingCvValidations.map((cv) => (
-                <PlayerStatusItem
-                  key={cv.id}
-                  name={cv.playerName}
-                  avatar={cv.playerAvatar}
-                  coachLabel={
-                    cv.coachLabel || `Coach: ${cv.coachName || "Unassigned"}`
-                  }
-                  badge={cv.badge}
-                  tone={cv.isOverdue ? "danger" : "warning"}
-                />
-              ))
+              sidebar.pendingCvValidations.map((cv) => {
+                const isNeedsNewCoach =
+                  cv.status === "NEEDS_NEW_COACH" ||
+                  cv.badge?.toUpperCase().includes("NEEDS NEW COACH");
+                return (
+                  <PlayerStatusItem
+                    key={cv.playerId || cv.id}
+                    name={cv.playerName}
+                    avatar={cv.playerAvatar}
+                    coachLabel={cv.coachLabel || `Coach: ${cv.coachName || "Unassigned"}`}
+                    badge={cv.badge}
+                    tone={isNeedsNewCoach ? "danger" : "warning"}
+                    href={`/dashboard/academy/management/validate-cv/${cv.playerId}`}
+                  />
+                );
+              })
             ) : (
               <EmptyText>
                 {isLoading ? "Loading..." : "No pending CV validations"}
@@ -320,26 +334,21 @@ const AcademyAnalysisDashboard = () => {
             <div className="flex max-h-75 flex-col gap-3 overflow-y-auto pr-1">
               {sidebar?.playerEvaluations?.length ? (
                 sidebar.playerEvaluations.map((evaluation) => {
-                  const isOverdue = /overdue|expired/i.test(
-                    evaluation.badge || "",
-                  );
+                  const tone: BadgeTone =
+                    evaluation.status === "EVALUATED"
+                      ? "success"
+                      : evaluation.status === "EXPIRED"
+                        ? "danger"
+                        : "info";
                   return (
                     <PlayerStatusItem
-                      key={evaluation.id}
+                      key={evaluation.playerId || evaluation.id}
                       name={evaluation.playerName}
                       avatar={evaluation.playerAvatar}
-                      coachLabel={
-                        evaluation.coachLabel ||
-                        `Coach: ${evaluation.coachName || "N/A"}`
-                      }
+                      coachLabel={evaluation.coachLabel || `Coach: ${evaluation.coachName || "N/A"}`}
                       badge={evaluation.badge || evaluation.status}
-                      tone={
-                        isOverdue
-                          ? "danger"
-                          : evaluation.status === "EVALUATED"
-                            ? "success"
-                            : "warning"
-                      }
+                      tone={tone}
+                      href={`/dashboard/academy/analysis/player-evaluation?status=${evaluation.status}`}
                     />
                   );
                 })

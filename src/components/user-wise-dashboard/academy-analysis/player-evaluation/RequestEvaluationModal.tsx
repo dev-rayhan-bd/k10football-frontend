@@ -65,7 +65,10 @@ export const RequestEvaluationModal = ({
   const [conflict, setConflict] = useState<{ playerId: string; coachId: string; message: string } | null>(null);
 
   const { data: playersRes, isLoading: loadingPlayers } = useGetAcademyPlayersQuery(undefined, { skip: !open });
-  const { data: coachesRes, isLoading: loadingCoaches } = useGetAcademyCoachesQuery(undefined, { skip: !open });
+  const { data: coachesRes, isLoading: loadingCoaches } = useGetAcademyCoachesQuery(
+    { status: "APPROVED", limit: 100 },
+    { skip: !open }
+  );
   const [requestEvaluation, { isLoading: isRequesting }] = useRequestEvaluationMutation();
   const [remindEvaluation, { isLoading: isReminding }] = useRemindEvaluationMutation();
 

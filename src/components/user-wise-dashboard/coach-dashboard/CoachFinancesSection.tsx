@@ -1,6 +1,14 @@
 "use client";
 
-import { IconAlertCircle, IconCoins, IconHourglass, IconReportMoney, IconWallet } from "@tabler/icons-react";
+import {
+  IconAlertCircle,
+  IconCalendarMonth,
+  IconCircleCheck,
+  IconCoins,
+  IconHourglass,
+  IconReportMoney,
+  IconWallet,
+} from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SettingsSection } from "@/components/dashboard/DashboardSettingsElements";
 import { PayoutStatusBadge } from "@/components/finance/PayoutStatusBadge";
@@ -92,8 +100,8 @@ const CoachFinancesSection = () => {
   return (
     <SettingsSection title="My Finances" icon={<IconReportMoney size={20} />}>
       {isLoading ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 5 }).map((_, i) => (
             <Skeleton key={i} className="h-24 rounded-xl bg-white/5" />
           ))}
         </div>
@@ -103,7 +111,7 @@ const CoachFinancesSection = () => {
         </div>
       ) : (
         <div className="flex flex-col gap-6">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <SummaryCard
               label="Total Earnings"
               value={summary?.totalEarningsFormatted || formatAmount(summary?.totalEarnings)}
@@ -124,6 +132,20 @@ const CoachFinancesSection = () => {
               hint="Paid by players — validate their CVs to unlock. Not included in the totals."
               icon={<IconHourglass className="size-4" />}
               tone="muted"
+            />
+            <SummaryCard
+              label="Completed Payouts"
+              value={summary?.completedPayoutsFormatted || formatAmount(summary?.completedPayouts)}
+              hint="Already paid out to you"
+              icon={<IconCircleCheck className="size-4" />}
+              tone="default"
+            />
+            <SummaryCard
+              label="This Month"
+              value={summary?.thisMonthEarningsFormatted || formatAmount(summary?.thisMonthEarnings)}
+              hint="Earned this month"
+              icon={<IconCalendarMonth className="size-4" />}
+              tone="default"
             />
           </div>
 

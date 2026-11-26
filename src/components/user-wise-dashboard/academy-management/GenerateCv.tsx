@@ -99,13 +99,19 @@ const GenerateCv = () => {
         ? cvData.recentMatches
         : [];
   const gameReports: IDisplayReport[] = rawReports.slice(0, 3).map((m: any, idx: number) => {
-    const rawRating = m.rating ?? m.scoutRating ?? m.playerRating ?? m.rating10;
+    // 0 means "not rated yet", so take the first real (> 0) rating instead of `??`, which keeps 0.
+    const rawRating = [m.rating, m.scoutRating, m.playerRating, m.rating10]
+      .map((v) => (typeof v === "string" ? Number(v) : v))
+      .find((v) => typeof v === "number" && Number.isFinite(v) && v > 0);
+    const isAwaitingReview = String(m.evaluationStatus || "").toUpperCase() === "PENDING";
     const formattedRating =
-      typeof rawRating === "number" && !isNaN(rawRating)
+      typeof rawRating === "number"
         ? Number.isInteger(rawRating)
           ? rawRating
           : Number(rawRating.toFixed(1))
-        : rawRating || "-";
+        : isAwaitingReview
+          ? "Pending"
+          : "—";
     return {
       id: m._id || m.reportId || m.id || idx,
       opponent:
@@ -352,7 +358,15 @@ const GenerateCv = () => {
                     <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-white/40 group-hover:text-[#E31B23] transition-colors shrink-0" />
                     <span className="text-white/60 text-xs sm:text-sm font-bold truncate">{report.opponent}</span>
                   </div>
-                  <span className="text-white font-black text-lg sm:text-xl font-orbitron shrink-0">{report.rating}</span>
+                  <span
+                    className={
+                      typeof report.rating === "number"
+                        ? "text-white font-black text-lg sm:text-xl font-orbitron shrink-0"
+                        : "text-white/40 font-bold text-[10px] sm:text-xs uppercase tracking-wider shrink-0"
+                    }
+                  >
+                    {report.rating}
+                  </span>
                 </div>
               ))}
               {gameReports.length === 0 && (

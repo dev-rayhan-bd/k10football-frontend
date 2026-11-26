@@ -29,7 +29,15 @@ import {
   useMarkNotificationAsReadMutation,
   useDeleteNotificationMutation,
 } from "@/redux/features/notification/notificationApi";
-import { getCoachReassignmentPath, getEvaluationReportPath, INotificationItem } from "@/types/notification.type";
+import {
+  getCoachReassignmentPath,
+  getCvValidatedPath,
+  getEvaluationReportPath,
+  getPayoutReviewPath,
+  getAcademyAffiliationPath,
+  getExtraEventPath,
+  INotificationItem,
+} from "@/types/notification.type";
 import { cn } from "@/lib/utils";
 
 type FilterTab = "all" | "unread" | "read" | "settings";
@@ -154,6 +162,16 @@ export const NotificationsView = () => {
       } catch {
         // Handled
       }
+    }
+
+    const deepLink =
+      getPayoutReviewPath(item) ||
+      getAcademyAffiliationPath(item) ||
+      getExtraEventPath(item, normalizeRole(getUserRole() || "")) ||
+      getCvValidatedPath(item, normalizeRole(getUserRole() || ""));
+    if (deepLink) {
+      router.push(deepLink);
+      return;
     }
 
     const evaluationPath = getEvaluationReportPath(item);

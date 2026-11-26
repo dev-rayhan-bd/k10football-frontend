@@ -226,7 +226,10 @@ const SubscriptionSuccessSkeleton = () => (
 const SubscriptionSuccessRouter = () => {
   const searchParams = useSearchParams();
   if (searchParams.get("type") === "CV_VALIDATION") {
-    return <CvValidationPaymentResult sessionId={searchParams.get("session_id") || ""} />;
+    return <CvValidationPaymentResult
+        sessionId={searchParams.get("session_id") || ""}
+        playerId={searchParams.get("playerId") || undefined}
+      />;
   }
   return <SubscriptionSuccessContent />;
 };

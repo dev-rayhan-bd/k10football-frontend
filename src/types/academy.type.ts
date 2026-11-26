@@ -1371,25 +1371,31 @@ export interface IAcademyDashboardPendingGameReport {
 }
 
 export interface IAcademyDashboardPendingCvValidation {
-  id: string;
+  id?: string;
   playerId: string;
   playerName: string;
   playerAvatar: string | null;
   coachName: string;
   coachLabel: string;
+  status: "AWAITING_COACH" | "NEEDS_NEW_COACH" | string;
   badge: string;
-  isOverdue: boolean;
+  waitingDays?: number;
+  paidAt?: string | null;
+  isOverdue?: boolean;
 }
 
 export interface IAcademyDashboardPlayerEvaluation {
-  id: string;
+  id?: string;
   playerId: string;
   playerName: string;
   playerAvatar: string | null;
   coachName: string;
   coachLabel: string;
+  status: "NEED_EVALUATION" | "EVALUATED" | "EXPIRED" | string;
   badge: string;
-  status: string;
+  evaluationDate?: string | null;
+  nextEvaluationDue?: string | null;
+  daysToDue?: number | null;
 }
 
 export interface IAcademyDashboardClubInterested {
@@ -2368,4 +2374,104 @@ export interface IAcademyCvShareResponse {
   success: boolean;
   message: string;
   data: { playerId: string; playerName: string; shareableUrl: string; shareCount: number; uniqueSharedProfiles: number; message?: string };
+}
+
+// Academy ↔ coach affiliation (invite / accept). Base /academies/coaches.
+export type AcademyCoachAffiliationStatus = "APPROVED" | "PENDING" | "REJECTED" | "NOT_AFFILIATED" | "REMOVED";
+export type AcademyCoachStatusFilter = "ALL" | "APPROVED" | "PENDING" | "REJECTED" | "NOT_AFFILIATED";
+export type AffiliationRequestedBy = "ACADEMY" | "COACH";
+
+export interface IAcademyCoachListParams {
+  status?: AcademyCoachStatusFilter;
+  searchTerm?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface IAcademyCoachActions {
+  canInvite: boolean;
+  canCancelInvite: boolean;
+  canRespond: boolean;
+  canRemove: boolean;
+}
+
+export interface IAcademyCoachListItem {
+  coachId: string;
+  affiliationId: string | null;
+  fullName: string;
+  email?: string;
+  profileImage?: string;
+  role?: string;
+  licenseStatus?: string;
+  status: AcademyCoachAffiliationStatus | string;
+  requestedBy?: AffiliationRequestedBy | null;
+  statusLabel?: string;
+  actions?: Partial<IAcademyCoachActions>;
+  assignedTeams?: { _id: string; teamName: string; ageGroup?: string }[];
+  joinedAt?: string | null;
+  invitedAt?: string | null;
+}
+
+export interface IAcademyCoachSummary {
+  all: number;
+  approved: number;
+  pending: number;
+  rejected: number;
+  removed: number;
+  notAffiliated: number;
+  assignedToTeams: number;
+}
+
+export interface IAcademyCoachListResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  meta?: { page: number; limit: number; total: number; totalPage: number };
+  data: { summary?: Partial<IAcademyCoachSummary>; coaches: IAcademyCoachListItem[] };
+}
+
+export const ACADEMY_COACH_ROLES = [
+  "Head Coach",
+  "Assistant Coach",
+  "Goalkeeper Coach",
+  "Fitness Coach",
+  "Youth Coach",
+] as const;
+
+export interface IInviteAcademyCoachPayload {
+  coachId?: string;
+  coachEmail?: string;
+  role?: string;
+  message?: string;
+}
+
+export interface IRespondAcademyCoachPayload {
+  affiliationId: string;
+  action: "APPROVE" | "REJECT";
+  responseNote?: string;
+}
+
+export interface IAcademyCoachMutationResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data?: unknown;
+}
+
+// GET /academies/coaches/my-affiliations (coach token)
+export interface ICoachAffiliation {
+  _id: string;
+  status: AcademyCoachAffiliationStatus | string;
+  requestedBy?: AffiliationRequestedBy | null;
+  role?: string;
+  requestMessage?: string;
+  createdAt?: string;
+  academyId?: { _id: string; name?: string; logo?: string; city?: string; country?: string } | null;
+}
+
+export interface ICoachAffiliationsResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: ICoachAffiliation[];
 }

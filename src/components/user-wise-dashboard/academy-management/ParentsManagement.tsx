@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import DashboardModal from "@/components/dashboard/DashboardModal";
 import {
   IconSearch,
@@ -121,6 +122,7 @@ export const ParentsManagement = () => {
   const [showFormModal, setShowFormModal] = useState<boolean>(false);
   const [editingParent, setEditingParent] = useState<IAcademyParentItem | null>(null);
   const [parentToDelete, setParentToDelete] = useState<IAcademyParentItem | null>(null);
+  const router = useRouter();
   const [messagingParent, setMessagingParent] = useState<IAcademyParentItem | null>(null);
   const [messageText, setMessageText] = useState<string>("");
   const [viewingPlayersParent, setViewingPlayersParent] = useState<IAcademyParentItem | null>(null);
@@ -818,8 +820,17 @@ export const ParentsManagement = () => {
                           {/* Message Button */}
                           <button
                             onClick={() => {
-                              setMessagingParent(p);
-                              setMessageText("");
+                              // Open the real 1-on-1 chat with this parent's account.
+                              const rawUserId = p.userId as unknown;
+                              const chatUserId =
+                                typeof rawUserId === "string"
+                                  ? rawUserId
+                                  : (rawUserId as { _id?: string } | null)?._id;
+                              if (!chatUserId) {
+                                toast.error("This parent doesn't have an account to chat with yet.");
+                                return;
+                              }
+                              router.push(`/dashboard/academy/management/chat?userId=${encodeURIComponent(chatUserId)}`);
                             }}
                             className="h-9 px-3.5 flex items-center justify-center gap-1.5 rounded-xl bg-white/5 border border-white/10 text-white/70 hover:text-white hover:bg-white/10 hover:border-white/25 transition-all cursor-pointer font-bold active:scale-95"
                             title="Send Message"

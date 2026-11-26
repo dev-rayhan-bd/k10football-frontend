@@ -2,6 +2,8 @@ import { apiSlice } from "../api/apiSlice";
 import TagTypes from "@/constants/tagType.constant";
 import {
   IContactsResponse,
+  IConversationDetailsResponse,
+  IDeleteConversationResponse,
   IConversationsResponse,
   IMarkReadResponse,
   IMessagesResponse,
@@ -60,6 +62,36 @@ export const chatApi = apiSlice.injectEndpoints({
       ],
     }),
 
+    // Group/1-on-1 info: members (admins first), membersCount (includes me) and my permissions.
+    getConversationDetails: builder.query<IConversationDetailsResponse, string>({
+      query: (conversationId) => ({ url: `/chats/conversations/${conversationId}`, method: "GET" }),
+      providesTags: (_r, _e, conversationId) => [{ type: TagTypes.CONVERSATIONS, id: conversationId }],
+    }),
+
+    // Admin only. multipart: avatar (image file) / name / removeAvatar="true". Returns the GET shape.
+    updateConversation: builder.mutation<IConversationDetailsResponse, { conversationId: string; body: FormData }>({
+      query: ({ conversationId, body }) => ({
+        url: `/chats/conversations/${conversationId}`,
+        method: "PATCH",
+        body,
+      }),
+      async onQueryStarted({ conversationId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          if (data?.data) {
+            dispatch(chatApi.util.upsertQueryData("getConversationDetails", conversationId, data));
+          }
+        } catch {
+          // The caller shows the error.
+        }
+      },
+    }),
+
+    // Admin only: deletes the group and all its messages for everyone.
+    deleteConversation: builder.mutation<IDeleteConversationResponse, string>({
+      query: (conversationId) => ({ url: `/chats/conversations/${conversationId}`, method: "DELETE" }),
+    }),
+
     uploadAttachment: builder.mutation<IUploadAttachmentResponse, FormData>({
       query: (formData) => ({
         url: "/chats/upload-attachment",
@@ -90,4 +122,7 @@ export const {
   useLazyGetMessagesQuery,
   useUploadAttachmentMutation,
   useMarkMessagesReadMutation,
+  useGetConversationDetailsQuery,
+  useUpdateConversationMutation,
+  useDeleteConversationMutation,
 } = chatApi;

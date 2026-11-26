@@ -2,7 +2,14 @@
 "use client";
 import React from "react";
 
+// The wreath branches sit ~130 units either side of centre at the name's height, so the name is
+// sized to fit that gap (heavy font ≈ 0.62em per character), between 20 and 34.
+const NAME_MAX_WIDTH = 230;
+const coachNameFontSize = (name: string) =>
+  Math.round(Math.min(34, Math.max(20, NAME_MAX_WIDTH / (Math.max(name.length, 1) * 0.62))));
+
 export const DesktopCertificateCard = ({ playerData }: { playerData: any }) => {
+  const coachName = String(playerData.coachName || "ALEXANDRE SILVA");
   return (
     <div className="hidden xl:block p-4 sm:p-6 border-none rounded-2xl relative overflow-hidden group hover:border-primary/20 transition-all w-full min-w-0">
       {/* SVG certificate container */}
@@ -131,12 +138,14 @@ export const DesktopCertificateCard = ({ playerData }: { playerData: any }) => {
             </textPath>
           </text>
 
-          {/* Gold Laurel Olive Wreath */}
-          <use href="#wreath-half-static" transform="translate(400, 245) scale(1.15)" />
-          <use href="#wreath-half-static" transform="translate(400, 245) scale(-1.15, 1.15)" />
+          {/* Gold Laurel Olive Wreath: frames the coach name and stays inside the arched header
+              (every leaf tip is < 262 from the centre; the header text starts at r = 276). */}
+          <use href="#wreath-half-static" transform="translate(400, 292) scale(1.05)" />
+          <use href="#wreath-half-static" transform="translate(400, 292) scale(-1.05, 1.05)" />
 
           {/* Top Crown Emblem */}
-          <g filter="url(#glow-static)" transform="translate(400, 115)">
+          {/* Below the arched header (was on top of its letters). */}
+          <g filter="url(#glow-static)" transform="translate(400, 150)">
             <path d="M -22,12 L -28,-10 L -10,-2 L 0,-18 L 10,-2 L 28,-10 L 22,12 Z" fill="url(#gold-bright-static)" stroke="url(#gold-dark-static)" strokeWidth="1" />
             <circle cx="-28" cy="-11" r="2.5" fill="#FFFFFF" />
             <circle cx="0" cy="-19" r="3" fill="#FFFFFF" />
@@ -149,13 +158,13 @@ export const DesktopCertificateCard = ({ playerData }: { playerData: any }) => {
           {/* Coach Name Block */}
           <g transform="translate(400, 192)">
             <text x="0" y="0" fontSize="13" fontWeight="800" className="badge-heading gold-text" textAnchor="middle" letterSpacing="5">HEAD COACH</text>
-            <text x="0" y="38" fontSize="38" fontWeight="900" className="badge-content white-text" textAnchor="middle" letterSpacing="1.5">
-              {playerData.coachName || "ALEXANDRE SILVA"}
+            <text x="0" y="38" fontSize={coachNameFontSize(coachName)} fontWeight="900" className="badge-content white-text" textAnchor="middle" letterSpacing="1">
+              {coachName}
             </text>
-            <line x1="-120" y1="52" x2="120" y2="52" stroke="url(#gold-divider-static)" strokeWidth="1.8" />
-            <circle cx="0" cy="52" r="4.5" fill="url(#gold-bright-static)" />
-            <circle cx="-130" cy="52" r="2.5" fill="url(#gold-bright-static)" />
-            <circle cx="130" cy="52" r="2.5" fill="url(#gold-bright-static)" />
+            <line x1="-85" y1="56" x2="85" y2="56" stroke="url(#gold-divider-static)" strokeWidth="1.8" />
+            <circle cx="0" cy="56" r="4.5" fill="url(#gold-bright-static)" />
+            <circle cx="-93" cy="56" r="2.5" fill="url(#gold-bright-static)" />
+            <circle cx="93" cy="56" r="2.5" fill="url(#gold-bright-static)" />
           </g>
 
           {/* Middle 3-Row Information Container */}

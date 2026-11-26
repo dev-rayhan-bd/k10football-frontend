@@ -12,6 +12,8 @@ import {
   IconClipboardCheck,
   IconCreditCard,
   IconMessageCircle,
+  IconMailOpened,
+  IconCalendarEvent,
 } from "@tabler/icons-react";
 import { ReactNode, useState, useEffect, createContext } from "react";
 import { useCoach } from "@/hooks/useCoach";
@@ -36,6 +38,8 @@ const coachSidebarItemsWithoutAcademy = [
   { name: "My Images & Videos", url: "/dashboard/coach/my-images-videos", icon: IconPhotoVideo },
   { name: "Chat", url: "/dashboard/coach/chat", icon: IconMessageCircle },
   { name: "Analytics", url: "/dashboard/coach/analytics", icon: IconChartBar },
+  { name: "Extra Events", url: "/dashboard/coach/extra-events", icon: IconCalendarEvent },
+  { name: "Academy Invitations", url: "/dashboard/coach/academy-invitations", icon: IconMailOpened },
   { name: "My Subscription", url: "/dashboard/coach/my-subscription", icon: IconCreditCard },
   { name: "Settings", url: "/dashboard/coach/settings", icon: IconSettings },
 ];
@@ -50,6 +54,8 @@ const coachSidebarItemsWithAcademy = [
   { name: "Player Evaluation", url: "/dashboard/coach/player-evaluation", icon: IconClipboardCheck },
   { name: "Chat", url: "/dashboard/coach/chat", icon: IconMessageCircle },
   { name: "Analytics", url: "/dashboard/coach/analytics", icon: IconChartBar },
+  { name: "Extra Events", url: "/dashboard/coach/extra-events", icon: IconCalendarEvent },
+  { name: "Academy Invitations", url: "/dashboard/coach/academy-invitations", icon: IconMailOpened },
   { name: "My Subscription", url: "/dashboard/coach/my-subscription", icon: IconCreditCard },
   { name: "Settings", url: "/dashboard/coach/settings", icon: IconSettings },
 ];

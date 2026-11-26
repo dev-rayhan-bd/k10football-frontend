@@ -14,6 +14,7 @@ import {
   IconMessageCircle,
   IconLoader2,
   IconArrowRight,
+  IconCalendarEvent,
 } from "@tabler/icons-react";
 import { ReactNode, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -48,6 +49,11 @@ const parentSidebarItems = [
     name: "Attendance",
     url: "/dashboard/parent/attendance",
     icon: IconCalendarCheck,
+  },
+  {
+    name: "My Events",
+    url: "/dashboard/parent/my-events",
+    icon: IconCalendarEvent,
   },
   { name: "Chat", url: "/dashboard/parent/chat", icon: IconMessageCircle },
   {

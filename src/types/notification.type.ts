@@ -99,6 +99,43 @@ export interface IUpdateNotificationSettingsResponse {
 }
 
 
+/** Notifications that change the player's CV validation state: refetch the CV when they arrive. */
+export const CV_REFRESH_NOTIFICATION_TYPES = ["PLAYER_CV_VALIDATED", "PAYMENT_SUCCESS", "CV_VALIDATION_REQUEST"];
+
+/** Academy ↔ coach affiliation changes: refetch the coach lists / invitations when they arrive. */
+export const AFFILIATION_REFRESH_NOTIFICATION_TYPES = [
+  "ACADEMY_INVITATION",
+  "ACADEMY_INVITATION_WITHDRAWN",
+  "ACADEMY_AFFILIATION_APPROVED",
+  "ACADEMY_AFFILIATION_REJECTED",
+];
+
+/** ACADEMY_INVITATION (coach) → the invitations view; affiliation answers (academy) → My Coaches. */
+export const getAcademyAffiliationPath = (item: INotificationItem): string | null => {
+  if (item.type === "ACADEMY_INVITATION" || item.type === "ACADEMY_INVITATION_WITHDRAWN") {
+    return "/dashboard/coach/academy-invitations";
+  }
+  if (item.type === "ACADEMY_AFFILIATION_APPROVED" || item.type === "ACADEMY_AFFILIATION_REJECTED") {
+    return "/dashboard/academy/analysis/coach-players";
+  }
+  return null;
+};
+
+/** PAYOUT_REVIEW (admin): a re-assigned CV validation whose share was already paid. */
+export const getPayoutReviewPath = (item: INotificationItem): string | null => {
+  if (item.type !== "PAYOUT_REVIEW") return null;
+  const transactionId = item.data?.transactionId;
+  return transactionId
+    ? `/dashboard/admin/payouts?transactionId=${encodeURIComponent(String(transactionId))}`
+    : "/dashboard/admin/payouts";
+};
+
+/** PLAYER_CV_VALIDATED: the coach validated the CV, so open it. */
+export const getCvValidatedPath = (item: INotificationItem, role: string): string | null => {
+  if (item.type !== "PLAYER_CV_VALIDATED") return null;
+  return role === "parent" ? "/dashboard/parent/profiles" : "/dashboard/player/my-cv";
+};
+
 /** PLAYER_EVALUATION_COMPLETED: open the player evaluation report. */
 export const getEvaluationReportPath = (item: INotificationItem): string | null => {
   if (item.type !== "PLAYER_EVALUATION_COMPLETED") return null;
@@ -113,4 +150,25 @@ export const getCoachReassignmentPath = (item: INotificationItem, role: string):
   if (item.data?.needsCoachReassignment !== true) return null;
   if (item.type !== "CV_VALIDATION_REQUEST" && item.type !== "PAYMENT_SUCCESS") return null;
   return role === "parent" ? "/dashboard/parent/profiles" : "/dashboard/player/my-cv";
+};
+
+/** Academy Extra Events: a new registration (academy) / a paid registration confirmed (player/parent). */
+export const EXTRA_EVENT_NOTIFICATION_TYPES = ["EXTRA_EVENT_REGISTRATION", "EXTRA_EVENT_REGISTERED"];
+
+/**
+ * EXTRA_EVENT_REGISTRATION (academy) → the event's management page;
+ * EXTRA_EVENT_REGISTERED (player/parent) → My Events (or the public event page for other roles).
+ */
+export const getExtraEventPath = (item: INotificationItem, role: string): string | null => {
+  const eventId = item.data?.eventId ? encodeURIComponent(String(item.data.eventId)) : null;
+  if (item.type === "EXTRA_EVENT_REGISTRATION") {
+    return eventId
+      ? `/dashboard/academy/management/extra-events/${eventId}`
+      : "/dashboard/academy/management/extra-events";
+  }
+  if (item.type === "EXTRA_EVENT_REGISTERED") {
+    if (role === "player" || role === "parent") return `/dashboard/${role}/my-events`;
+    return eventId ? `/events/${eventId}` : "/events";
+  }
+  return null;
 };

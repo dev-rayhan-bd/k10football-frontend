@@ -11,6 +11,7 @@ import {
   IconSettings,
   IconLock,
   IconClipboardCheck,
+  IconCalendarEvent,
 } from "@tabler/icons-react";
 import { ReactNode, useEffect, useRef } from "react";
 import { useGetMySubscriptionQuery } from "@/redux/features/subscription/subscriptionApi";
@@ -30,6 +31,7 @@ const playerSidebarItems = [
   { name: "Game Reports", url: "/dashboard/player/game-reports", icon: IconReportAnalytics },
   { name: "Analytics", url: "/dashboard/player/analytics", icon: IconChartBar },
   { name: "My Evaluations", url: "/dashboard/player/evaluations", icon: IconClipboardCheck },
+  { name: "My Events", url: "/dashboard/player/my-events", icon: IconCalendarEvent },
   { name: "My Subscription", url: "/dashboard/player/my-subscription", icon: IconCreditCard },
   { name: "Notification", url: "/dashboard/player/notifications", icon: IconBell },
   { name: "Settings", url: "/dashboard/player/settings", icon: IconSettings },

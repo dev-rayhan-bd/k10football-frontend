@@ -1,21 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useGetPlayerCvByIdQuery } from "@/redux/features/player/playerApi";
-import { CoachPlayerCvProvider } from "./CoachPlayerCvContext";
-import { CoachPlayerBioSection } from "./CoachPlayerBioSection";
-import { CoachPlayerClubsSection } from "./CoachPlayerClubsSection";
-import { CoachPlayerSkillsSection } from "./CoachPlayerSkillsSection";
-import { CoachPlayerPerformanceSection } from "./CoachPlayerPerformanceSection";
-import { CoachPlayerAttributesSection } from "./CoachPlayerAttributesSection";
-import { CoachPlayerMetricsSection } from "./CoachPlayerMetricsSection";
-import { CoachPlayerSportsSection } from "./CoachPlayerSportsSection";
-import { CoachPlayerFifaCardSection } from "./CoachPlayerFifaCardSection";
-import { CoachPlayerDocSection } from "./CoachPlayerDocSection";
-import { CoachPlayerMediaSection } from "./CoachPlayerMediaSection";
-import { CoachPlayerNotesSection } from "./CoachPlayerNotesSection";
+import PlayerCvViewPage from "@/components/cvs/player-cv-view/PlayerCvViewPage";
 import { ValidatePlayerCvModal } from "./ValidatePlayerCvModal";
 import {
   IconArrowLeft,
@@ -148,8 +136,7 @@ export const CoachPlayerCvContainer = ({ playerId }: CoachPlayerCvContainerProps
   const isVerified = Boolean(cv.isVerifiedByCoach ?? cv.coachVerification?.isVerified);
 
   return (
-    <CoachPlayerCvProvider apiData={cv} openValidateModal={canValidate ? () => setIsValidateModalOpen(true) : undefined}>
-      <div className="flex flex-col gap-6 w-full min-w-0">
+    <div className="flex flex-col gap-6 w-full min-w-0">
         {/* Coach Navigation Bar */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
           <div className="flex items-center gap-3">
@@ -196,18 +183,8 @@ export const CoachPlayerCvContainer = ({ playerId }: CoachPlayerCvContainerProps
           </div>
         </div>
 
-        {/* Coach Child Components */}
-        <CoachPlayerBioSection />
-        <CoachPlayerClubsSection />
-        <CoachPlayerSkillsSection />
-        <CoachPlayerPerformanceSection />
-        <CoachPlayerAttributesSection />
-        <CoachPlayerMetricsSection />
-        <CoachPlayerSportsSection />
-        <CoachPlayerFifaCardSection />
-        <CoachPlayerDocSection />
-        <CoachPlayerMediaSection />
-        <CoachPlayerNotesSection />
+        {/* Same read-only CV layout as the player's own CV (and the shared / academy views). */}
+        <PlayerCvViewPage playerId={playerId} />
 
         {/* Validate Player CV Modal */}
         <ValidatePlayerCvModal
@@ -221,7 +198,6 @@ export const CoachPlayerCvContainer = ({ playerId }: CoachPlayerCvContainerProps
             router.replace(`/dashboard/coach/player-cv-validations/${playerId}`);
           }}
         />
-      </div>
-    </CoachPlayerCvProvider>
+    </div>
   );
 };

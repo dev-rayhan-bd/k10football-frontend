@@ -35,6 +35,8 @@ export interface IConversation {
   user?: IChatUser;
   participants?: IChatUser[];
   participantIds?: string[];
+  /** Includes the current user (from GET /chats/conversations/:id). */
+  membersCount?: number;
   lastMessage?: string;
   lastMessageTime?: string;
   time?: string;
@@ -148,4 +150,48 @@ export interface SendMessagePayload {
   text?: string;
   imageUrl?: string;
   attachmentsJson?: string;
+}
+
+// GET /chats/conversations/:conversationId (also returned by PATCH)
+export type ConversationMemberRole = "ADMIN" | "MEMBER";
+
+export interface IConversationMember {
+  id: string;
+  name: string;
+  email?: string;
+  avatar?: string;
+  userRole?: string;
+  chatRole?: ConversationMemberRole | string;
+  isAdmin?: boolean;
+  isCreator?: boolean;
+  isMe?: boolean;
+  isOnline?: boolean;
+  joinedAt?: string;
+}
+
+export interface IConversationDetails {
+  _id: string;
+  type: "GROUP" | "INDIVIDUAL";
+  name?: string;
+  avatar?: string;
+  creatorId?: string;
+  membersCount: number;
+  members: IConversationMember[];
+  myChatRole?: ConversationMemberRole | string;
+  permissions?: { canEdit?: boolean; canDelete?: boolean };
+  createdAt?: string;
+}
+
+export interface IConversationDetailsResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: IConversationDetails;
+}
+
+export interface IDeleteConversationResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: { conversationId: string; deleted: boolean };
 }
