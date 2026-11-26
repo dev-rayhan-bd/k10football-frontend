@@ -7,7 +7,6 @@ import RightSideContent from "@/components/dashboard/player/RightSideContent";
 import MyVideosSection from "@/components/cvs/player-cv-details/MyVideoSection";
 import CVSection from "@/components/dashboard/player/CVSection";
 import GameReportSection from "@/components/dashboard/player/GaMeReportSection";
-import { PlayerAcademySection } from "@/components/dashboard/player/PlayerAcademySection";
 import PlayerDashboardSkeleton from "@/components/dashboard/player/PlayerDashboardSkeleton";
 import { usePlayer } from "@/hooks/usePlayer";
 import { useGetMySubscriptionQuery } from "@/redux/features/subscription/subscriptionApi";
@@ -32,7 +31,6 @@ const PlayerDashboard = () => {
           <PlayerBioSection />
           <PerformanceChart />
           <CVSection />
-          <PlayerAcademySection />
           <MyImagesSection />
           <MyVideosSection />
           <GameReportSection />
