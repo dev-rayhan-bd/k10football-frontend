@@ -189,8 +189,8 @@ export const normalizeMatch = (
   const kind = forcedKind ?? classify(f);
   const home = sideTeam(f, "home", lookup);
   const away = sideTeam(f, "away", lookup);
-  const homeScore = num(f.homeScore ?? f.score1 ?? f.homeGoals);
-  const awayScore = num(f.awayScore ?? f.score2 ?? f.awayGoals);
+  const homeScore = num(f.homeScore ?? f.score1 ?? f.goal1 ?? f.homeGoals);
+  const awayScore = num(f.awayScore ?? f.score2 ?? f.goal2 ?? f.awayGoals);
   const status = (str(f.status) ?? (homeScore !== null && awayScore !== null ? "COMPLETED" : "SCHEDULED")).toUpperCase();
   const isLive = status === "LIVE" || status === "IN_PROGRESS";
   const isCompleted = ["COMPLETED", "FINISHED", "FULL_TIME", "FT", "PLAYED"].includes(status);

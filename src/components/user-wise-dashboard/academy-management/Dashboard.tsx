@@ -15,7 +15,6 @@ import {
   IconClipboardText,
   IconBell
 } from "@tabler/icons-react";
-import { useAppSelector } from "@/hooks/reduxHooks";
 import {
   Dialog,
   DialogContent,
@@ -258,61 +257,68 @@ const AcademyManagementDashboard = () => {
           </DashboardSidebarPanel>
           <DashboardSidebarPanel title="Pending CV Validations" icon={<IconFileAnalytics size={24} />}>
             {sidebar?.pendingCvValidations && sidebar.pendingCvValidations.length > 0 ? (
-              sidebar.pendingCvValidations.map((cv) => (
-                <PlayerEvalSidebarItem
-                  key={cv.id}
-                  player={{
-                    id: cv.id,
-                    fullName: cv.playerName,
-                    coachName: cv.coachName,
-                    coachLabel: cv.coachLabel,
-                    playerImage: cv.playerAvatar,
-                  }}
-                  status={{
-                    badge: cv.badge,
-                    isOverdue: cv.isOverdue,
-                  }}
-                  onClick={() => setSelectedNotifyPlayer({
-                    fullName: cv.playerName,
-                    subtitle: cv.coachLabel || "CV Validation",
-                    playerImage: cv.playerAvatar,
-                  })}
-                />
-              ))
+              sidebar.pendingCvValidations.map((cv) => {
+                const isNeedsNewCoach =
+                  cv.status === "NEEDS_NEW_COACH" ||
+                  cv.badge?.toUpperCase().includes("NEEDS NEW COACH");
+                return (
+                  <PlayerEvalSidebarItem
+                    key={cv.playerId || cv.id}
+                    player={{
+                      id: cv.playerId || cv.id,
+                      fullName: cv.playerName,
+                      coachName: cv.coachName,
+                      coachLabel: cv.coachLabel,
+                      playerImage: cv.playerAvatar,
+                    }}
+                    status={{
+                      badge: cv.badge,
+                      status: cv.status,
+                    }}
+                    tone={isNeedsNewCoach ? "danger" : "warning"}
+                    href={`/dashboard/academy/management/validate-cv/${cv.playerId}`}
+                  />
+                );
+              })
             ) : (
-              <p className="text-xs text-white/40 p-3 text-center font-bold">No pending CV validations</p>
+              <p className="text-xs text-white/40 p-3 text-center font-bold">
+                {isDashboardLoading ? "Loading..." : "No pending CV validations"}
+              </p>
             )}
           </DashboardSidebarPanel>
           <DashboardSidebarPanel title="Player Evaluations" icon={<IconClipboardText size={24} />}>
             <div className="max-h-75 overflow-y-auto pr-1 flex flex-col gap-3 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
               {sidebar?.playerEvaluations && sidebar.playerEvaluations.length > 0 ? (
-                sidebar.playerEvaluations.map((evaluation) => (
-                  <PlayerEvalSidebarItem
-                    key={evaluation.id}
-                    player={{
-                      id: evaluation.id,
-                      fullName: evaluation.playerName,
-                      coachName: evaluation.coachName,
-                      coachLabel: evaluation.coachLabel,
-                      playerImage: evaluation.playerAvatar,
-                    }}
-                    status={{
-                      badge: evaluation.badge || evaluation.status || "EVALUATED",
-                      status: evaluation.status,
-                    }}
-                    onClick={() => setSelectedNotifyPlayer({
-                      fullName: evaluation.playerName,
-                      subtitle: evaluation.coachLabel || "Player Evaluation",
-                      playerImage: evaluation.playerAvatar,
-                    })}
-                  />
-                ))
-              ) : playersWithStatus.length > 0 ? (
-                playersWithStatus.map(({ player, status }) => (
-                  <PlayerEvalSidebarItem key={player.id} player={player} status={status} onClick={() => setSelectedNotifyPlayer(player)} />
-                ))
+                sidebar.playerEvaluations.map((evaluation) => {
+                  const evalTone: SidebarBadgeTone =
+                    evaluation.status === "EVALUATED"
+                      ? "success"
+                      : evaluation.status === "EXPIRED"
+                        ? "danger"
+                        : "info";
+                  return (
+                    <PlayerEvalSidebarItem
+                      key={evaluation.playerId || evaluation.id}
+                      player={{
+                        id: evaluation.playerId || evaluation.id,
+                        fullName: evaluation.playerName,
+                        coachName: evaluation.coachName,
+                        coachLabel: evaluation.coachLabel,
+                        playerImage: evaluation.playerAvatar,
+                      }}
+                      status={{
+                        badge: evaluation.badge || evaluation.status,
+                        status: evaluation.status,
+                      }}
+                      tone={evalTone}
+                      href={`/dashboard/academy/management/player-evaluation?status=${evaluation.status}`}
+                    />
+                  );
+                })
               ) : (
-                <p className="text-xs text-white/40 p-3 text-center font-bold">No player evaluations</p>
+                <p className="text-xs text-white/40 p-3 text-center font-bold">
+                  {isDashboardLoading ? "Loading..." : "No player evaluations"}
+                </p>
               )}
             </div>
           </DashboardSidebarPanel>

@@ -96,6 +96,18 @@ export const extraEventApi = apiSlice.injectEndpoints({
       invalidatesTags: (r, _e, { eventId }) => (r?.success ? [TAG, ...eventTag(eventId)] : []),
     }),
 
+    verifyClubRegistrationPayment: builder.mutation<
+      IApiEnvelope<unknown>,
+      { eventId: string; sessionId: string }
+    >({
+      query: ({ eventId, sessionId }) => ({
+        url: `${BASE}/${eventId}/verify-registration-payment`,
+        method: "POST",
+        body: { sessionId },
+      }),
+      invalidatesTags: (r, _e, { eventId }) => (r?.success ? [TAG, ...eventTag(eventId)] : []),
+    }),
+
     getEventGroupAllocation: builder.query<IApiEnvelope<IGroupAllocationData>, string>({
       query: (id) => ({ url: `${BASE}/${id}/allocate-groups`, method: "GET" }),
       providesTags: (_r, _e, id) => eventTag(id),
@@ -129,7 +141,19 @@ export const extraEventApi = apiSlice.injectEndpoints({
 
     recordEventMatchResult: builder.mutation<
       IApiEnvelope<unknown>,
-      { eventId: string; matchId: string; score1: number; score2: number }
+      {
+        eventId: string;
+        matchId: string;
+        team1Id?: string;
+        team1?: string;
+        team2Id?: string;
+        team2?: string;
+        goal1?: number;
+        goal2?: number;
+        score1?: number;
+        score2?: number;
+        stage?: string;
+      }
     >({
       query: ({ eventId, ...body }) => ({ url: `${BASE}/${eventId}/record-match-result`, method: "POST", body }),
       invalidatesTags: (r, _e, { eventId }) => (r?.success ? [TAG, ...eventTag(eventId)] : []),
@@ -214,6 +238,7 @@ export const {
   useGetEventRegisteredClubsQuery,
   useGetEventClubRosterQuery,
   useRegisterEventClubMutation,
+  useVerifyClubRegistrationPaymentMutation,
   useGetEventGroupAllocationQuery,
   useAllocateEventGroupsMutation,
   useStartEventTournamentMutation,

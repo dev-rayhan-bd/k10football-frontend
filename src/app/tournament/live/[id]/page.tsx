@@ -12,12 +12,14 @@ import {
   useGetEventBadgePresetsQuery,
   useGetEventFixturesQuery,
   useGetEventPublicPortalQuery,
+  useGetEventRegisteredClubsQuery,
 } from "@/redux/features/extraEvent/extraEventApi";
-import type { IBadgePreset, IEventFixture } from "@/types/extraEvent.type";
+import type { IBadgePreset, IEventFixture, IRegisteredClub } from "@/types/extraEvent.type";
 
 import PublicTournamentHeader from "@/components/tournament/PublicTournamentHeader";
 import PublicTournamentHero from "@/components/tournament/PublicTournamentHero";
 import PublicTournamentInfoCards from "@/components/tournament/PublicTournamentInfoCards";
+import PublicTournamentDetailsAndClubs from "@/components/tournament/PublicTournamentDetailsAndClubs";
 import PublicTournamentArena from "@/components/tournament/PublicTournamentArena";
 import PublicTournamentFooter from "@/components/tournament/PublicTournamentFooter";
 import {
@@ -56,6 +58,22 @@ const PublicTournamentLivePage = () => {
     pollingInterval: pollWhileLive ? LIVE_POLL_MS : 0,
   });
   const { data: presetsRes } = useGetEventBadgePresetsQuery(eventId, { skip: !eventId || !event });
+
+  const portalClubs = useMemo(
+    () =>
+      unwrapList<IRegisteredClub>(
+        portal?.registeredClubs ?? (portal as Record<string, unknown> | undefined)?.clubs ?? event?.registeredClubs,
+        ["clubs", "registeredClubs"]
+      ),
+    [portal, event]
+  );
+  const { data: clubsRes, isLoading: isClubsLoading } = useGetEventRegisteredClubsQuery(eventId, {
+    skip: !eventId || !event || portalClubs.length > 0,
+  });
+  const registeredClubs = useMemo(
+    () => (portalClubs.length > 0 ? portalClubs : unwrapList<IRegisteredClub>(clubsRes?.data, ["clubs", "registeredClubs"])),
+    [portalClubs, clubsRes]
+  );
 
   const rawFixtures = useMemo(
     () =>
@@ -166,6 +184,13 @@ const PublicTournamentLivePage = () => {
         />
 
         <PublicTournamentInfoCards event={event} />
+
+        <PublicTournamentDetailsAndClubs
+          event={event}
+          clubs={registeredClubs}
+          presets={presets}
+          isLoadingClubs={isClubsLoading && portalClubs.length === 0}
+        />
 
         {isRegistration && (
           <div className="bg-amber-500/10 border border-amber-500/20 rounded-3xl p-8 text-center flex flex-col items-center gap-3">

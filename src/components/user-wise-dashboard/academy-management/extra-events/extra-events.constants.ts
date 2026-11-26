@@ -151,7 +151,7 @@ export const getStoredEvents = () => {
   }
   try {
     return JSON.parse(stored);
-  } catch {
+  } catch (e) {
     return events;
   }
 };

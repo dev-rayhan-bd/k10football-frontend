@@ -28,8 +28,14 @@ const formatFee = (event: IPublicEvent) => {
 const PublicTournamentInfoCards = ({ event }: TProps) => {
   const start = formatDate(event.eventDate);
   const end = formatDate(event.eventEndDate);
-  const dates = event.formattedDate || (start && end && end !== start ? `${start} – ${end}` : start) || "TBA";
+  const dates = event.formattedDate || (start && end && end !== start ? `${start} – ${end}` : start) || "—";
   const times = [event.startTime, event.endTime].filter(Boolean).join(" – ");
+  const feeSub =
+    event.registrationFee && Number(event.registrationFee) > 0 && event.registrationMode
+      ? event.registrationMode === "CLUB"
+        ? "Per club"
+        : "Per player"
+      : undefined;
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -37,10 +43,15 @@ const PublicTournamentInfoCards = ({ event }: TProps) => {
       <InfoCard
         icon={<IconMapPin size={12} />}
         label="Venue"
-        value={event.venueName || event.venueAddress || "TBA"}
+        value={event.venueName || event.venueAddress || "—"}
         sub={event.venueName ? event.venueAddress : undefined}
       />
-      <InfoCard icon={<IconCoin size={12} />} label="Entry Fee" value={<span className="text-[#00FF62]">{formatFee(event)}</span>} sub="Per team" />
+      <InfoCard
+        icon={<IconCoin size={12} />}
+        label="Entry Fee"
+        value={<span className="text-[#00FF62]">{formatFee(event)}</span>}
+        sub={feeSub}
+      />
       <InfoCard
         icon={<IconTrophy size={12} />}
         label="Stage"
