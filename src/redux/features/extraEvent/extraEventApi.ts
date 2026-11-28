@@ -171,6 +171,19 @@ export const extraEventApi = apiSlice.injectEndpoints({
       invalidatesTags: (r, _e, { eventId }) => (r?.success ? [TAG, ...eventTag(eventId)] : []),
     }),
 
+    /** Academy admin: toggle registration open/closed. 409 when tournament is COMPLETED. */
+    updateEventRegistrationStatus: builder.mutation<
+      IApiEnvelope<{ status: string }>,
+      { eventId: string; status: "OPEN" | "CLOSED" }
+    >({
+      query: ({ eventId, status }) => ({
+        url: `${BASE}/${eventId}/registration-status`,
+        method: "PATCH",
+        body: { status },
+      }),
+      invalidatesTags: (r, _e, { eventId }) => (r?.success ? [TAG, ...eventTag(eventId)] : []),
+    }),
+
     /** Back to REGISTRATION (confirm first). */
     resetEventTournament: builder.mutation<IApiEnvelope<unknown>, string>({
       query: (id) => ({ url: `${BASE}/${id}/reset-tournament`, method: "POST" }),
@@ -245,6 +258,7 @@ export const {
   useUpdateEventFixtureMutation,
   useRecordEventMatchResultMutation,
   useSimulateEventStageMutation,
+  useUpdateEventRegistrationStatusMutation,
   useResetEventTournamentMutation,
   useListPublicEventsQuery,
   useGetPublicEventQuery,

@@ -21,8 +21,11 @@ export const readSession = () => {
 export const isClubEvent = (event: Pick<IPublicEvent, "registrationMode" | "isTournament">) =>
   event.registrationMode ? event.registrationMode === "CLUB" : Boolean(event.isTournament);
 
+export const isCompleted = (event: Pick<IPublicEvent, "status">) =>
+  String(event.status || "").toUpperCase() === "COMPLETED";
+
 export const isClosed = (event: Pick<IPublicEvent, "status" | "canRegister">) =>
-  String(event.status || "").toUpperCase() === "CLOSED" || event.canRegister === false;
+  ["CLOSED", "COMPLETED"].includes(String(event.status || "").toUpperCase()) || event.canRegister === false;
 
 /** Tournament past registration (groups / knock-outs / done) or flagged live → public live view. */
 export const isTournamentStarted = (event: IPublicEvent) =>
@@ -72,6 +75,7 @@ export const spotsLabel = (event: IPublicEvent) => {
 
 export const statusBadgeVariant = (status?: string | null): BadgeVariant => {
   const s = String(status || "").toUpperCase();
+  if (s === "COMPLETED") return "secondary";
   if (s === "CLOSED") return "destructive";
   if (s === "OPEN") return "default";
   return "outline";

@@ -20,7 +20,7 @@ import {
     ICoachValidatePlayerCvPayload,
     ICoachValidatePlayerCvResponse,
 } from "@/types/coach.type";
-import type { ICoachFinancesResponse } from "@/types/coach.type";
+import type { ICoachFinancesResponse, IGetCoachFinancesParams } from "@/types/coach.type";
 
 export const coachApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
@@ -694,10 +694,11 @@ export const coachApi = apiSlice.injectEndpoints({
         }),
 
         // Earnings summary + payout transactions. ON_HOLD = player paid, CV not validated yet (not payable).
-        getCoachFinances: builder.query<ICoachFinancesResponse, void>({
-            query: () => ({
+        getCoachFinances: builder.query<ICoachFinancesResponse, IGetCoachFinancesParams | void>({
+            query: (params) => ({
                 url: "/coaches/me/finances",
                 method: "GET",
+                params: params || {},
             }),
             providesTags: [TagTypes.COACHES, TagTypes.PAYMENTS, TagTypes.FINANCE],
         }),

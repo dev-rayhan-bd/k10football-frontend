@@ -56,6 +56,8 @@ export const getStatusLabel = (e: Partial<IAcademyEventListItem> & { statusBadge
 
 export const statusTone = (label: string) => {
   const s = label.toUpperCase();
+  if (s.includes("COMPLETED")) return "bg-purple-500/10 text-purple-400 border-purple-500/20";
+  if (s.includes("CLOSED")) return "bg-white/5 text-white/40 border-white/10";
   if (s.includes("CLOSING")) return "bg-[#FBBF24]/10 text-[#FBBF24] border-[#FBBF24]/20";
   if (s.includes("OPEN")) return "bg-[#4ADE80]/10 text-[#4ADE80] border-[#4ADE80]/20";
   return "bg-white/10 text-white/50 border-white/10";

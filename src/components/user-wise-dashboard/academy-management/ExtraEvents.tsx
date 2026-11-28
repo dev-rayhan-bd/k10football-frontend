@@ -4,12 +4,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { IconPlus, IconCalendar } from "@tabler/icons-react";
+import { IconAlertTriangle, IconPlus, IconCalendar } from "@tabler/icons-react";
 import { toast } from "sonner";
-import { 
+import {
   useGetExtraEventsMetaQuery,
-  useGetExtraEventsQuery 
+  useGetExtraEventsQuery
 } from "@/redux/features/academy/academyApi";
+import {
+  useDeleteAcademyEventMutation,
+  getExtraEventApiError,
+} from "@/redux/features/extraEvent/extraEventApi";
 import { 
   ExtraEventsFilterBar,
   ExtraEventCard,
@@ -46,6 +50,8 @@ interface ExtraEventsManagementProps {
 
 export const ExtraEventsManagement = ({ readOnly = false, basePath }: ExtraEventsManagementProps) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [deleteConflict, setDeleteConflict] = useState<string | null>(null);
 
   // Filter States
   const [selectedStatus, setSelectedStatus] = useState<string>("");
@@ -59,6 +65,35 @@ export const ExtraEventsManagement = ({ readOnly = false, basePath }: ExtraEvent
     status: selectedStatus || undefined,
     date: selectedDate || undefined,
   });
+
+  const [deleteEvent, { isLoading: isDeleting }] = useDeleteAcademyEventMutation();
+
+  const pendingDeleteEvent = pendingDeleteId
+    ? (eventsResponse?.data?.events ?? []).find((e) => (e._id || e.id) === pendingDeleteId)
+    : null;
+
+  const handleDeleteClick = (id: string) => {
+    setDeleteConflict(null);
+    setPendingDeleteId(id);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!pendingDeleteId) return;
+    try {
+      const res = await deleteEvent(pendingDeleteId).unwrap();
+      toast.success(res?.message || "Event deleted");
+      setPendingDeleteId(null);
+      setDeleteConflict(null);
+    } catch (err) {
+      const { status, message } = getExtraEventApiError(err, "Failed to delete event");
+      if (status === 409) {
+        setDeleteConflict(message);
+      } else {
+        toast.error(message);
+        setPendingDeleteId(null);
+      }
+    }
+  };
 
   const handleCopyEventLink = (eventId: string | number) => {
     if (typeof window !== "undefined") {
@@ -173,10 +208,12 @@ export const ExtraEventsManagement = ({ readOnly = false, basePath }: ExtraEvent
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {displayedEvents.map((event) => (
-            <ExtraEventCard 
-              key={event._id || event.id} 
-              event={event} 
-              onCopyLink={handleCopyEventLink} 
+            <ExtraEventCard
+              key={event._id || event.id}
+              event={event}
+              onCopyLink={handleCopyEventLink}
+              onDelete={!readOnly ? handleDeleteClick : undefined}
+              isDeleting={isDeleting && pendingDeleteId === (event._id || event.id)}
             />
           ))}
         </div>
@@ -189,6 +226,43 @@ export const ExtraEventsManagement = ({ readOnly = false, basePath }: ExtraEvent
           onClose={() => setShowCreateModal(false)}
           meta={meta}
         />
+      )}
+
+      {/* Delete confirm dialog */}
+      {pendingDeleteId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="w-full max-w-md rounded-3xl border border-white/10 bg-[#111111] p-8 flex flex-col gap-5 shadow-2xl">
+            <h3 className="text-base font-black uppercase tracking-widest text-white font-orbitron">
+              Delete Event
+            </h3>
+            <p className="text-sm text-white/60">
+              Delete &ldquo;{pendingDeleteEvent?.eventName || pendingDeleteEvent?.title || "this event"}&rdquo;? This cannot be undone.
+            </p>
+            {deleteConflict && (
+              <div className="flex items-start gap-2 rounded-2xl border border-[#FBBF24]/30 bg-[#FBBF24]/5 p-4 text-xs font-bold text-[#FBBF24]">
+                <IconAlertTriangle size={16} className="shrink-0 mt-0.5" />
+                {deleteConflict}
+              </div>
+            )}
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => { setPendingDeleteId(null); setDeleteConflict(null); }}
+                className="px-5 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-[11px] font-black uppercase tracking-widest text-white/70 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={handleDeleteConfirm}
+                className="px-5 py-2.5 rounded-xl bg-[#E31B23] hover:bg-[#c0151c] disabled:opacity-40 text-[11px] font-black uppercase tracking-widest text-white transition-all"
+              >
+                {isDeleting ? "Deleting…" : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

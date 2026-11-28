@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { IconArrowLeft, IconEdit, IconLock, IconTrash, IconAlertTriangle, IconCopy } from "@tabler/icons-react";
+import { IconArrowLeft, IconEdit, IconLock, IconLockOpen, IconTrash, IconAlertTriangle, IconCopy } from "@tabler/icons-react";
 import { toast } from "sonner";
 import {
   getExtraEventApiError,
@@ -14,6 +14,7 @@ import {
   useGetEventMetaQuery,
   useGetEventRegisteredClubsQuery,
   useUpdateAcademyEventMutation,
+  useUpdateEventRegistrationStatusMutation,
 } from "@/redux/features/extraEvent/extraEventApi";
 import type { IEventFixture, IEventParticipant, IRegisteredClub } from "@/types/extraEvent.type";
 import CreateExtraEventModal from "@/components/user-wise-dashboard/academy-management/extra-events/CreateExtraEventModal";
@@ -50,10 +51,10 @@ export const ExtraEventManageView = ({
   const { data: clubsRes } = useGetEventRegisteredClubsQuery(eventId, { skip: !isClub });
   const { data: allocationRes, isLoading: isAllocationLoading } = useGetEventGroupAllocationQuery(eventId, { skip: !isClub });
 
-  const [updateEvent, { isLoading: isClosing }] = useUpdateAcademyEventMutation();
+  const [updateEvent] = useUpdateAcademyEventMutation();
+  const [updateRegistrationStatus, { isLoading: isTogglingStatus }] = useUpdateEventRegistrationStatusMutation();
   const [deleteEvent, { isLoading: isDeleting }] = useDeleteAcademyEventMutation();
   const [showEdit, setShowEdit] = useState(false);
-  const [confirmClose, setConfirmClose] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleteConflict, setDeleteConflict] = useState<string | null>(null);
 
@@ -92,22 +93,25 @@ export const ExtraEventManageView = ({
     );
   }
 
-  const isClosed = getStatusLabel(event).toUpperCase() === "CLOSED" || String(event.status).toUpperCase() === "CLOSED";
+  const eventStatus = String(event.status || "OPEN").toUpperCase();
+  const isClosed = eventStatus === "CLOSED";
+  const isEventCompleted = eventStatus === "COMPLETED";
   const tournamentStatus = String(event.tournamentStatus || "REGISTRATION").toUpperCase();
   const paidClubs = clubs.filter((c) => String(c.paymentStatus).toUpperCase() === "PAID").length;
   const participants = unwrapList<IEventParticipant>(event.participants, ["participants"]);
   const showKnockout =
     bracket.semis.length > 0 || !!bracket.final || ["SEMIFINALS", "GRAND_FINAL", "COMPLETED"].includes(tournamentStatus);
 
-  const handleClose = async () => {
+  const handleToggleStatus = async () => {
+    if (isEventCompleted) return;
+    const next = isClosed ? "OPEN" : "CLOSED";
     try {
-      const res = await updateEvent({ id: eventId, body: { status: "CLOSED" } }).unwrap();
-      toast.success(res?.message || "Registration closed");
-      setConfirmClose(false);
-      setConfirmDelete(false);
-      setDeleteConflict(null);
+      const res = await updateRegistrationStatus({ eventId, status: next }).unwrap();
+      toast.success(res?.message || (next === "OPEN" ? "Registration is now open" : "Registration closed"));
     } catch (err) {
-      toast.error(getExtraEventApiError(err, "Failed to close registration").message);
+      const { status: httpStatus, message } = getExtraEventApiError(err, "Failed to update registration status");
+      if (httpStatus === 409) toast.error("Cannot re-open: tournament is completed.");
+      else toast.error(message);
     }
   };
 
@@ -146,11 +150,15 @@ export const ExtraEventManageView = ({
               <ActionButton icon={<IconEdit size={14} />} onClick={() => setShowEdit(true)}>
                 Edit
               </ActionButton>
-              {!isClosed && (
-                <ActionButton icon={<IconLock size={14} />} onClick={() => setConfirmClose(true)}>
-                  Close Registration
-                </ActionButton>
-              )}
+              <ActionButton
+                icon={isClosed ? <IconLockOpen size={14} /> : <IconLock size={14} />}
+                loading={isTogglingStatus}
+                disabled={isEventCompleted}
+                title={isEventCompleted ? "Tournament completed — cannot change registration status" : undefined}
+                onClick={handleToggleStatus}
+              >
+                {isClosed ? "Open Registration" : "Close Registration"}
+              </ActionButton>
               <ActionButton
                 variant="danger"
                 icon={<IconTrash size={14} />}
@@ -209,16 +217,6 @@ export const ExtraEventManageView = ({
       )}
 
       <ConfirmModal
-        isOpen={confirmClose}
-        onClose={() => setConfirmClose(false)}
-        title="Close Registration"
-        message="No new registrations will be accepted for this event. Existing registrations are kept."
-        confirmLabel="Close Registration"
-        loading={isClosing}
-        onConfirm={handleClose}
-      />
-
-      <ConfirmModal
         isOpen={confirmDelete}
         onClose={() => {
           setConfirmDelete(false);
@@ -237,8 +235,8 @@ export const ExtraEventManageView = ({
                 <IconAlertTriangle size={16} className="shrink-0 mt-0.5" />
                 {deleteConflict}
               </p>
-              {!isClosed && (
-                <ActionButton icon={<IconLock size={14} />} loading={isClosing} onClick={handleClose} className="w-fit">
+              {!isClosed && !isEventCompleted && (
+                <ActionButton icon={<IconLock size={14} />} loading={isTogglingStatus} onClick={handleToggleStatus} className="w-fit">
                   Close the event instead
                 </ActionButton>
               )}

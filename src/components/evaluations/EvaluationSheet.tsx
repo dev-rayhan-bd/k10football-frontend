@@ -211,8 +211,12 @@ export const EvaluationSheet = ({ evaluationId, pdfSource, leading, autoDownload
         {/* Header */}
         <div className={cn(cardClass, "p-6 md:p-8 flex flex-col lg:flex-row justify-between gap-6")}>
           <div className="flex items-center gap-5 min-w-0">
-            <Avatar className="size-20 md:size-24 rounded-2xl border-2 border-white/20">
-              <AvatarImage src={refAvatar(sheet.player) || undefined} alt={playerName || ""} className="object-cover" />
+            <Avatar className="size-20 md:size-24 rounded-2xl border-2 border-white/20 bg-white/5 shrink-0">
+              <AvatarImage
+                src={refAvatar(sheet.player) || undefined}
+                alt={playerName || ""}
+                className="object-contain p-1"
+              />
               <AvatarFallback className="rounded-2xl text-xl font-black">{initials(playerName)}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col gap-2 min-w-0">

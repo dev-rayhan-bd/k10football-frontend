@@ -213,8 +213,12 @@ const AnalyticsReportSkeleton = () => {
   );
 };
 
+const CURRENT_YEAR = new Date().getFullYear();
+const YEAR_OPTIONS = Array.from({ length: CURRENT_YEAR - 2022 }, (_, i) => CURRENT_YEAR - i);
+
 export const AnalyticsReport = () => {
-  const { data: response, isLoading, isError, refetch } = useGetAcademyAnalyticsReportQuery();
+  const [year, setYear] = useState(CURRENT_YEAR);
+  const { data: response, isLoading, isError, refetch } = useGetAcademyAnalyticsReportQuery({ year });
   const [downloadingReportId, setDownloadingReportId] = useState<string | null>(null);
   const [isExportingFull, setIsExportingFull] = useState(false);
 
@@ -329,45 +333,55 @@ export const AnalyticsReport = () => {
   return (
     <div className="flex flex-col gap-8 md:gap-10 pb-10 w-full max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="min-w-0 w-full md:w-auto">
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-3xl md:text-4xl font-black uppercase text-white font-orbitron tracking-tight leading-none truncate md:whitespace-normal">
-              Analytics Report
-            </h1>
-            {overview?.reportingPeriod && (
-              <span className="bg-white/5 border border-white/10 px-3 py-1 rounded-full text-[10px] font-black uppercase text-white/70 flex items-center gap-1.5 tracking-wider">
-                <IconCalendar size={13} className="text-[#E31B23]" />
-                {overview.reportingPeriod}
-              </span>
-            )}
-          </div>
-          <p className="text-white/60 font-bold uppercase tracking-widest text-[9px] md:text-[11px] mt-2 wrap-break-word">
+          <h1 className="text-3xl md:text-4xl font-black uppercase text-white font-orbitron tracking-tight leading-none">
+            Analytics Report
+          </h1>
+          <p className="text-white/60 font-bold uppercase tracking-widest text-[9px] md:text-[11px] mt-2">
             {overview?.academyName ? `${overview.academyName} • ` : ""}
             Financial, performance, and operational analytics
           </p>
         </div>
 
-        <button
-          type="button"
-          disabled={isExportingFull || isLoading}
-          onClick={() =>
-            handleDownloadPdf(
-              reportData?.exportReportUrl || "/api/v1/academies/analytics-report/export?reportType=FULL_ANALYTICS&year=2026",
-              `analytics_report_${overview?.reportingPeriod?.replace(/\s+/g, "_") || "2026"}.pdf`
-            )
-          }
-          className="w-full md:w-auto justify-center bg-[#E31B23] hover:bg-[#C2181F] text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 cursor-pointer shrink-0 disabled:opacity-50"
-        >
-          {isExportingFull ? (
-            <IconLoader2 size={20} className="animate-spin shrink-0" />
-          ) : (
-            <IconDownload size={20} className="shrink-0" />
-          )}
-          <span className="text-sm font-bold uppercase tracking-widest truncate">
-            {isExportingFull ? "Exporting..." : "Export Report"}
-          </span>
-        </button>
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
+          {/* Year filter */}
+          <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5">
+            <IconCalendar size={16} className="text-white/40 shrink-0" />
+            <select
+              value={year}
+              onChange={(e) => setYear(Number(e.target.value))}
+              className="bg-transparent text-white text-[11px] font-black uppercase tracking-widest outline-none cursor-pointer appearance-none"
+            >
+              {YEAR_OPTIONS.map((y) => (
+                <option key={y} value={y} className="bg-[#111111] text-white">
+                  {y}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button
+            type="button"
+            disabled={isExportingFull || isLoading}
+            onClick={() =>
+              handleDownloadPdf(
+                `/academies/analytics-report/export?reportType=FULL_ANALYTICS&year=${year}`,
+                `analytics_report_${year}.pdf`
+              )
+            }
+            className="justify-center bg-[#E31B23] hover:bg-[#C2181F] text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 cursor-pointer shrink-0 disabled:opacity-50"
+          >
+            {isExportingFull ? (
+              <IconLoader2 size={20} className="animate-spin shrink-0" />
+            ) : (
+              <IconDownload size={20} className="shrink-0" />
+            )}
+            <span className="text-sm font-bold uppercase tracking-widest">
+              {isExportingFull ? "Exporting..." : "Export Report"}
+            </span>
+          </button>
+        </div>
       </div>
 
       {/* Error Retry Banner */}
@@ -1125,8 +1139,10 @@ export const AnalyticsReport = () => {
                     disabled={isThisDownloading}
                     onClick={() =>
                       handleDownloadPdf(
-                        report.downloadPdfUrl,
-                        `${report.title.toLowerCase().replace(/\s+/g, "_")}.pdf`,
+                        report.reportType
+                          ? `/academies/analytics-report/export?reportType=${report.reportType}&year=${year}`
+                          : report.downloadPdfUrl,
+                        `${report.title.toLowerCase().replace(/\s+/g, "_")}_${year}.pdf`,
                         report.id
                       )
                     }

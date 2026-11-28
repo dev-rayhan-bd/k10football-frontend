@@ -99,3 +99,30 @@ export interface IRecordPayoutResult {
 }
 
 export type IRecordPayoutResponse = IApiEnvelope<IRecordPayoutResult>;
+
+export interface IRecordAllPayoutsPayload {
+  recipientType?: PayoutRecipientFilter;
+  notes?: string;
+}
+
+export interface IRecordAllPayoutsResultItem {
+  recipientId?: string;
+  recipientName?: string | null;
+  amountPaid?: number | null;
+  reason?: string | null;
+  error?: string | null;
+}
+
+export interface IRecordAllPayoutsData {
+  summary?: {
+    totalDisbursed?: number;
+    successCount?: number;
+    skippedCount?: number;
+    failedCount?: number;
+  };
+  success?: IRecordAllPayoutsResultItem[];
+  skipped?: IRecordAllPayoutsResultItem[];
+  failed?: IRecordAllPayoutsResultItem[];
+}
+
+export type IRecordAllPayoutsResponse = IApiEnvelope<IRecordAllPayoutsData>;

@@ -3,7 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import CMSField from "@/components/shared/CMSField";
-import { ALL_COUNTRIES, getFlagUrl, calculateAge } from "./bioConstants";
+import { ALL_COUNTRIES, getFlagUrl } from "./bioConstants";
 
 interface PersonalInfoContactCardProps {
   playerData: any;
@@ -40,10 +40,6 @@ export const PersonalInfoContactCard = ({
               type="date"
               onUpdate={(val) => {
                 handleUpdate("dob", val);
-                const newAge = calculateAge(String(val));
-                if (newAge !== "") {
-                  handleUpdate("age", newAge);
-                }
               }}
               canEdit={canEditBio}
               className="flex-1 min-w-0 justify-end"
@@ -53,7 +49,21 @@ export const PersonalInfoContactCard = ({
           <div className="flex justify-between items-center gap-2 w-full min-w-0">
             <span className="text-gray-400 shrink-0">Age</span>
             <div className="flex items-center gap-1 shrink-0">
-              <span className="text-white">{playerData.age || 0}</span>{" "}
+              <CMSField
+                value={playerData.age ?? 0}
+                type="number"
+                min={1}
+                max={100}
+                onUpdate={(val) => {
+                  const parsed = parseInt(String(val), 10);
+                  if (!Number.isNaN(parsed) && parsed > 0) {
+                    handleUpdate("age", parsed);
+                  }
+                }}
+                canEdit={canEditBio}
+                className="w-16 justify-end"
+                inputClassName="text-right w-full text-white"
+              />
               <span className="text-gray-400 text-xs sm:text-sm">Years</span>
             </div>
           </div>

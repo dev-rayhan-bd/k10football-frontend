@@ -50,6 +50,7 @@ export interface IProductsResponseData {
   products: IProductItem[];
   stats: IProductStats;
   meta: IProductMeta;
+  categories?: string[];
 }
 
 export interface IGetProductsResponse {

@@ -2,8 +2,8 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
-import { IconArrowLeft, IconCheck, IconCopy, IconExternalLink, IconEye } from "@tabler/icons-react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { IconAlertTriangle, IconArrowLeft, IconCheck, IconCopy, IconExternalLink, IconEye, IconLock, IconLockOpen, IconTrash } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getUserInfo } from "@/helpers/SessionHelper";
@@ -14,8 +14,10 @@ import {
   useGetEventBadgePresetsQuery,
   useGetEventPublicPortalQuery,
   useGetEventRegisteredClubsQuery,
+  useDeleteAcademyEventMutation,
   useResetEventTournamentMutation,
   useUpdateAcademyEventMutation,
+  useUpdateEventRegistrationStatusMutation,
   useVerifyClubRegistrationPaymentMutation,
 } from "@/redux/features/extraEvent/extraEventApi";
 import type { IBadgePreset, IPublicEvent, IRegisteredClub } from "@/types/extraEvent.type";
@@ -46,11 +48,14 @@ const defaultRoleForUser = (): { initial: ExtraEventPreviewRole; canSwitch: bool
 const ExtraEventDetailPage = () => {
   const params = useParams<{ id: string | string[] }>();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const eventId = (Array.isArray(params?.id) ? params.id[0] : params?.id) ?? "";
 
   const [{ initial, canSwitch }] = useState(() => defaultRoleForUser());
   const [previewRole, setPreviewRole] = useState<ExtraEventPreviewRole>(initial);
   const [showRegModal, setShowRegModal] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleteConflict, setDeleteConflict] = useState<string | null>(null);
   const [copiedInvite, setCopiedInvite] = useState(false);
   const [copiedPublic, setCopiedPublic] = useState(false);
   const verifiedSessionRef = useRef<string | null>(null);
@@ -76,6 +81,8 @@ const ExtraEventDetailPage = () => {
 
   const [updateEvent, { isLoading: isTogglingLive }] = useUpdateAcademyEventMutation();
   const [resetTournament, { isLoading: isResetting }] = useResetEventTournamentMutation();
+  const [updateRegistrationStatus, { isLoading: isTogglingStatus }] = useUpdateEventRegistrationStatusMutation();
+  const [deleteEvent, { isLoading: isDeleting }] = useDeleteAcademyEventMutation();
   const [verifyPayment] = useVerifyClubRegistrationPaymentMutation();
 
   // Verify Stripe registration payment on redirect back with ?session_id=...
@@ -110,10 +117,44 @@ const ExtraEventDetailPage = () => {
     typeof window !== "undefined" ? `${window.location.origin}${publicPath}` : publicPath;
 
   const isLiveMode = Boolean(event?.isLiveMode);
+  const eventStatus = String(event?.status || "OPEN").toUpperCase();
+  const isEventCompleted = eventStatus === "COMPLETED";
+  const isRegistrationClosed = eventStatus === "CLOSED";
   const isRegistrationOpen =
-    event?.status !== "CLOSED" &&
+    !isRegistrationClosed &&
     (!event?.tournamentStatus || event.tournamentStatus === "REGISTRATION");
   const maxTeams = event?.maxCapacity ?? 8;
+
+  const handleDelete = async () => {
+    if (!event) return;
+    try {
+      const res = await deleteEvent(event._id).unwrap();
+      toast.success(res?.message || "Event deleted");
+      setConfirmDelete(false);
+      router.push("/dashboard/academy/management/extra-events");
+    } catch (err) {
+      const { status, message } = getExtraEventApiError(err, "Failed to delete event");
+      if (status === 409) {
+        setDeleteConflict(message);
+      } else {
+        toast.error(message);
+      }
+    }
+  };
+
+  const handleToggleRegistrationStatus = async () => {
+    if (!event || isEventCompleted) return;
+    const next = isRegistrationClosed ? "OPEN" : "CLOSED";
+    try {
+      const res = await updateRegistrationStatus({ eventId: event._id, status: next }).unwrap();
+      toast.success(res?.message || (next === "OPEN" ? "Registration is now open" : "Registration closed"));
+      refetchDetail();
+    } catch (err) {
+      const apiErr = getExtraEventApiError(err, "Failed to update registration status");
+      if (apiErr.status === 409) toast.error("Cannot re-open: tournament is completed.");
+      else toast.error(apiErr.message);
+    }
+  };
 
   const handleToggleLiveMode = async () => {
     if (!event) return;
@@ -297,6 +338,42 @@ const ExtraEventDetailPage = () => {
       {/* VIEW 3: TOURNAMENT OWNER (ADMIN) */}
       {previewRole === "owner_admin" && (
         <div className="space-y-8">
+          {/* Admin action bar */}
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              disabled={isEventCompleted || isTogglingStatus}
+              onClick={handleToggleRegistrationStatus}
+              title={isEventCompleted ? "Tournament completed — cannot change registration status" : undefined}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed text-[10px] md:text-[11px] font-black uppercase tracking-widest text-white/80 hover:text-white transition-all"
+            >
+              {isRegistrationClosed ? (
+                <>
+                  <IconLockOpen size={14} />
+                  Open Registration
+                </>
+              ) : (
+                <>
+                  <IconLock size={14} />
+                  Close Registration
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              disabled={isDeleting}
+              onClick={() => { setDeleteConflict(null); setConfirmDelete(true); }}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#E31B23]/30 bg-[#E31B23]/10 hover:bg-[#E31B23]/20 disabled:opacity-40 disabled:cursor-not-allowed text-[10px] md:text-[11px] font-black uppercase tracking-widest text-[#E31B23] transition-all"
+            >
+              <IconTrash size={14} />
+              Delete Event
+            </button>
+            {isEventCompleted && (
+              <span className="text-[10px] font-bold uppercase tracking-widest text-purple-400">
+                Tournament completed
+              </span>
+            )}
+          </div>
           <GroupStageBuilder
             event={event}
             clubs={clubs}
@@ -318,6 +395,54 @@ const ExtraEventDetailPage = () => {
           refetchClubs();
         }}
       />
+
+      {/* Delete confirm dialog */}
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="w-full max-w-md rounded-3xl border border-white/10 bg-[#111111] p-8 flex flex-col gap-5 shadow-2xl">
+            <h3 className="text-base font-black uppercase tracking-widest text-white font-orbitron">Delete Event</h3>
+            <p className="text-sm text-white/60">
+              Delete &ldquo;{event.eventName}&rdquo;? This cannot be undone.
+            </p>
+            {deleteConflict && (
+              <div className="flex flex-col gap-3 rounded-2xl border border-[#FBBF24]/30 bg-[#FBBF24]/5 p-4">
+                <p className="flex items-start gap-2 text-xs font-bold text-[#FBBF24]">
+                  <IconAlertTriangle size={16} className="shrink-0 mt-0.5" />
+                  {deleteConflict}
+                </p>
+                {!isRegistrationClosed && !isEventCompleted && (
+                  <button
+                    type="button"
+                    disabled={isTogglingStatus}
+                    onClick={handleToggleRegistrationStatus}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-[10px] font-black uppercase tracking-widest text-white/80 transition-all w-fit"
+                  >
+                    <IconLock size={14} />
+                    Close the event instead
+                  </button>
+                )}
+              </div>
+            )}
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => { setConfirmDelete(false); setDeleteConflict(null); }}
+                className="px-5 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-[11px] font-black uppercase tracking-widest text-white/70 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={handleDelete}
+                className="px-5 py-2.5 rounded-xl bg-[#E31B23] hover:bg-[#c0151c] disabled:opacity-40 text-[11px] font-black uppercase tracking-widest text-white transition-all"
+              >
+                {isDeleting ? "Deleting…" : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

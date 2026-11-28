@@ -117,7 +117,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                 fill
                 src={activeImage}
                 alt={product.productName || product.name || "Product"}
-                className="object-cover"
+                className="object-contain"
                 onError={() => setActiveImage("/placeholder_img.jpg")}
               />
             </div>
@@ -138,7 +138,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                       fill
                       src={img}
                       alt={`Thumbnail ${idx + 1}`}
-                      className="object-cover"
+                      className="object-contain"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.src = "/placeholder_img.jpg";

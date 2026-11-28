@@ -154,7 +154,7 @@ export const AcademyDashboardProducts = () => {
                     src={rawImage}
                     alt={productName}
                     fill
-                    className="object-cover group-hover/card:scale-105 transition-transform duration-500"
+                    className="object-contain group-hover/card:scale-105 transition-transform duration-500"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     unoptimized
                     onError={(e) => {
@@ -291,7 +291,6 @@ export const AcademyDashboardProducts = () => {
       <CreateProductModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
-        categoriesList={categoriesList}
       />
 
       <ProductDetailsModal
@@ -312,7 +311,6 @@ export const AcademyDashboardProducts = () => {
         isOpen={!!selectedProductForEdit}
         onClose={() => setSelectedProductForEdit(null)}
         product={selectedProductForEdit}
-        categoriesList={categoriesList}
       />
 
       <DeleteProductModal

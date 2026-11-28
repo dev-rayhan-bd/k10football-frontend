@@ -31,6 +31,7 @@ import {
   formatEventTime,
   formatFee,
   isClosed,
+  isCompleted,
   isClubEvent,
   isTournamentStarted,
   mapUrl,
@@ -76,6 +77,12 @@ const RegistrationPanel = ({ event }: { event: IPublicEvent }) => {
             : `${reg.type === "CLUB" ? "Team entry" : "Individual entry"} · ${paymentStatusLabel(reg.paymentStatus)}`}
         </span>
       </div>
+    );
+  } else if (isCompleted(event)) {
+    action = (
+      <Button disabled className="w-full">
+        Tournament completed
+      </Button>
     );
   } else if (isClosed(event)) {
     action = (

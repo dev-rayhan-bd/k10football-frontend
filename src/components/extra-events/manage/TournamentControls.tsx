@@ -143,6 +143,12 @@ export const TournamentControls = ({
               At least {MIN_PAID_CLUBS} paid clubs are required to start ({paidClubs} paid so far).
             </p>
           )}
+          {status === "REGISTRATION" && canStart && (
+            <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/30">
+              <IconInfoCircle size={14} className="shrink-0" />
+              Tournament can only start on or after the event date. To start early, edit the event date first.
+            </p>
+          )}
           {status === "COMPLETED" && (
             <p className="text-[10px] font-bold uppercase tracking-widest text-[#00FF62]">Tournament completed.</p>
           )}

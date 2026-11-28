@@ -10,6 +10,7 @@ import {
   IconClock,
   IconChevronDown,
   IconEye,
+  IconPencil,
   IconTrash,
   IconMapPin,
   IconTrophy,
@@ -23,9 +24,10 @@ import {
   IconCheck,
   IconX,
 } from "@tabler/icons-react";
-import { 
+import {
   useGetAcademyMatchesQuery,
   useCreateAcademyMatchMutation,
+  useUpdateAcademyMatchMutation,
   useDeleteAcademyMatchMutation,
   useGetAcademyCoachAndPlayersQuery,
 } from "@/redux/features/academy/academyApi";
@@ -37,6 +39,7 @@ export const MatchesManagement = () => {
   const { data: matchesResponse, isLoading, isFetching, refetch } = useGetAcademyMatchesQuery();
   const { data: teamsResponse } = useGetAcademyCoachAndPlayersQuery();
   const [createMatch, { isLoading: isCreating }] = useCreateAcademyMatchMutation();
+  const [updateMatch, { isLoading: isUpdating }] = useUpdateAcademyMatchMutation();
   const [deleteMatch, { isLoading: isDeleting }] = useDeleteAcademyMatchMutation();
 
   // Search & Filter State
@@ -48,6 +51,7 @@ export const MatchesManagement = () => {
 
   // Modals state
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [editingMatch, setEditingMatch] = useState<IAcademyMatchItem | null>(null);
   const [selectedMatchForView, setSelectedMatchForView] = useState<IAcademyMatchItem | null>(null);
   const [matchToDelete, setMatchToDelete] = useState<IAcademyMatchItem | null>(null);
 
@@ -110,6 +114,32 @@ export const MatchesManagement = () => {
       return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
     });
   }, [apiMatches, searchTerm, filterType, filterTeamId, filterStatus, sortOrder]);
+
+  // Open edit modal pre-filled with existing match data
+  const openEditModal = (match: IAcademyMatchItem) => {
+    setEditingMatch(match);
+    setFormData({
+      matchTitle: match.matchTitle || match.title || "",
+      ourTeamId: match.ourTeamId || match.ourTeam?._id || "",
+      opponentTeam: match.opponentTeam || "",
+      matchType: match.matchType || "Friendly",
+      competitionName: match.competitionName || "",
+      homeOrAway: (match.homeOrAway as "HOME GROUND" | "AWAY") || "HOME GROUND",
+      venueName: match.venueName || match.venue?.name || "",
+      venueAddress: match.venueAddress || match.venue?.address || "",
+      matchDate: match.matchDate ? match.matchDate.substring(0, 10) : "",
+      kickOffTime: match.kickOffTime || match.time || "",
+      referees: match.referees || "",
+      travelRequired: match.travelRequired || false,
+      transportCost: match.transportCost !== undefined ? String(match.transportCost) : "",
+      groundCost: match.groundCost !== undefined ? String(match.groundCost) : "",
+      mealsCost: match.mealsCost !== undefined ? String(match.mealsCost) : "",
+      otherCosts: match.otherCosts !== undefined ? String(match.otherCosts) : "",
+      notes: match.notes || "",
+    });
+    setFormErrors({});
+    setShowScheduleModal(true);
+  };
 
   // Handle Form Input Changes
   const handleInputChange = (field: string, value: string | boolean) => {
@@ -186,34 +216,41 @@ export const MatchesManagement = () => {
     return Object.keys(errors).length === 0;
   };
 
-  // Submit Handler
+  // Submit Handler (create or update)
   const handleScheduleSubmit = async () => {
     if (!validateForm()) return;
 
-    try {
-      await createMatch({
-        matchTitle: formData.matchTitle.trim(),
-        title: formData.matchTitle.trim(),
-        ourTeamId: formData.ourTeamId,
-        opponentTeam: formData.opponentTeam.trim(),
-        matchType: formData.matchType,
-        competitionName: formData.competitionName.trim() || undefined,
-        homeOrAway: formData.homeOrAway,
-        venueName: formData.venueName.trim(),
-        venueAddress: formData.venueAddress.trim(),
-        matchDate: formData.matchDate,
-        kickOffTime: formData.kickOffTime,
-        referees: formData.referees.trim() || undefined,
-        travelRequired: formData.travelRequired,
-        transportCost: parseFloat(formData.transportCost) || 0,
-        groundCost: parseFloat(formData.groundCost) || 0,
-        mealsCost: parseFloat(formData.mealsCost) || 0,
-        otherCosts: parseFloat(formData.otherCosts) || 0,
-        estimatedTotalCost: calculatedTotal,
-        notes: formData.notes.trim() || undefined,
-      }).unwrap();
+    const payload = {
+      matchTitle: formData.matchTitle.trim(),
+      title: formData.matchTitle.trim(),
+      ourTeamId: formData.ourTeamId,
+      opponentTeam: formData.opponentTeam.trim(),
+      matchType: formData.matchType,
+      competitionName: formData.competitionName.trim() || undefined,
+      homeOrAway: formData.homeOrAway,
+      venueName: formData.venueName.trim(),
+      venueAddress: formData.venueAddress.trim(),
+      matchDate: formData.matchDate,
+      kickOffTime: formData.kickOffTime,
+      referees: formData.referees.trim() || undefined,
+      travelRequired: formData.travelRequired,
+      transportCost: parseFloat(formData.transportCost) || 0,
+      groundCost: parseFloat(formData.groundCost) || 0,
+      mealsCost: parseFloat(formData.mealsCost) || 0,
+      otherCosts: parseFloat(formData.otherCosts) || 0,
+      estimatedTotalCost: calculatedTotal,
+      notes: formData.notes.trim() || undefined,
+    };
 
+    try {
+      if (editingMatch) {
+        const id = editingMatch._id || editingMatch.id || "";
+        await updateMatch({ id, data: payload }).unwrap();
+      } else {
+        await createMatch(payload).unwrap();
+      }
       setShowScheduleModal(false);
+      setEditingMatch(null);
       setFormData(initialFormState);
       setFormErrors({});
     } catch {
@@ -263,8 +300,9 @@ export const MatchesManagement = () => {
           >
             <IconRefresh size={18} className={cn(isFetching && "animate-spin text-[#E31B23]")} />
           </button>
-          <button 
+          <button
             onClick={() => {
+              setEditingMatch(null);
               setFormData(initialFormState);
               setFormErrors({});
               setShowScheduleModal(true);
@@ -417,6 +455,7 @@ export const MatchesManagement = () => {
           ) : (
             <button
               onClick={() => {
+                setEditingMatch(null);
                 setFormData(initialFormState);
                 setFormErrors({});
                 setShowScheduleModal(true);
@@ -477,7 +516,7 @@ export const MatchesManagement = () => {
                     )}
                   </div>
 
-                  {/* Actions: View Details & Delete */}
+                  {/* Actions: View, Edit & Delete */}
                   <div className="flex items-center gap-1.5 shrink-0">
                     <button
                       onClick={() => setSelectedMatchForView(match)}
@@ -485,6 +524,13 @@ export const MatchesManagement = () => {
                       className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-all cursor-pointer"
                     >
                       <IconEye size={17} />
+                    </button>
+                    <button
+                      onClick={() => openEditModal(match)}
+                      title="Edit Match"
+                      className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-all cursor-pointer"
+                    >
+                      <IconPencil size={17} />
                     </button>
                     <button
                       onClick={() => setMatchToDelete(match)}
@@ -748,44 +794,45 @@ export const MatchesManagement = () => {
         )}
       </DashboardModal>
 
-      {/* Schedule Match Modal */}
+      {/* Schedule / Edit Match Modal */}
       <DashboardModal
         isOpen={showScheduleModal}
         onClose={() => {
-          if (!isCreating) {
+          if (!isCreating && !isUpdating) {
             setShowScheduleModal(false);
+            setEditingMatch(null);
           }
         }}
-        title="Schedule Match"
-        subtitle="Schedule a new match and track associated costs"
+        title={editingMatch ? "Edit Match" : "Schedule Match"}
+        subtitle={editingMatch ? "Update match details and costs" : "Schedule a new match and track associated costs"}
         showBackButton
-        onBack={() => setShowScheduleModal(false)}
+        onBack={() => { setShowScheduleModal(false); setEditingMatch(null); }}
         maxWidth="max-w-4xl"
         footer={
           <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
-            <button 
+            <button
               type="button"
-              disabled={isCreating}
-              onClick={() => setShowScheduleModal(false)}
+              disabled={isCreating || isUpdating}
+              onClick={() => { setShowScheduleModal(false); setEditingMatch(null); }}
               className="w-full sm:w-auto px-4 sm:px-8 py-3.5 rounded-xl border border-white/30 text-[11px] font-black uppercase tracking-widest text-white hover:bg-white/5 transition-all flex items-center justify-center shrink-0 disabled:opacity-50 cursor-pointer"
             >
               Cancel
             </button>
-            <button 
+            <button
               type="button"
               onClick={handleScheduleSubmit}
-              disabled={isCreating}
+              disabled={isCreating || isUpdating}
               className="w-full sm:w-auto px-4 sm:px-8 py-3.5 rounded-xl bg-[#E31B23] hover:bg-[#C2181F] text-[11px] font-black uppercase tracking-widest text-white flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 shrink-0 disabled:opacity-50 cursor-pointer"
             >
-              {isCreating ? (
+              {(isCreating || isUpdating) ? (
                 <>
                   <IconLoader2 size={16} className="animate-spin" />
-                  <span>Scheduling...</span>
+                  <span>{editingMatch ? "Saving..." : "Scheduling..."}</span>
                 </>
               ) : (
                 <>
                   <IconCheck size={16} />
-                  <span>Create Match</span>
+                  <span>{editingMatch ? "Save Changes" : "Create Match"}</span>
                 </>
               )}
             </button>

@@ -19,6 +19,7 @@ import {
 } from "@/redux/features/player/playerApi";
 import { IUpdatePlayerPayload } from "@/types/player.type";
 import { toast } from "sonner";
+import { calculateAge } from "@/components/cvs/player-cv-details/bio-components/bioConstants";
 import { stylesToApi } from "@/components/cvs/player-cv-details/bio-components/bioConstants";
 
 export const usePlayer = () => {
@@ -218,9 +219,15 @@ export const usePlayer = () => {
           backendPayload = { fullName: String(value) };
           break;
         case "dob":
-        case "dateOfBirth":
-          backendPayload = { dateOfBirth: String(value) };
+        case "dateOfBirth": {
+          const dobStr = String(value);
+          backendPayload = { dateOfBirth: dobStr };
+          const computedAge = calculateAge(dobStr);
+          if (computedAge !== "") {
+            dispatch(updatePlayerField({ field: "age", value: computedAge }));
+          }
           break;
+        }
         case "birthCountry":
         case "country":
         case "location":
@@ -255,6 +262,13 @@ export const usePlayer = () => {
         case "weight":
           backendPayload = { weight: parseFloat(String(value)) || 0 };
           break;
+        case "age": {
+          const parsedAge = parseInt(String(value), 10);
+          if (!Number.isNaN(parsedAge) && parsedAge > 0) {
+            backendPayload = { age: parsedAge };
+          }
+          break;
+        }
         case "preferredFoot":
           backendPayload = { preferredFoot: String(value) };
           break;

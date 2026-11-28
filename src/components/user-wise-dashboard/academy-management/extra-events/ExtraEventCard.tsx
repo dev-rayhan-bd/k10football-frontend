@@ -3,11 +3,12 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { 
-  IconCalendar, 
-  IconCurrencyDollar, 
-  IconUsers, 
-  IconCopy 
+import {
+  IconCalendar,
+  IconCurrencyDollar,
+  IconUsers,
+  IconCopy,
+  IconTrash,
 } from "@tabler/icons-react";
 import { IExtraEventItem } from "@/types/academy.type";
 import { cn } from "@/lib/utils";
@@ -16,11 +17,15 @@ import { TOURNAMENT_PRESET_LOGOS } from "./extra-events.constants";
 interface ExtraEventCardProps {
   event: IExtraEventItem;
   onCopyLink: (id: string | number) => void;
+  onDelete?: (id: string) => void;
+  isDeleting?: boolean;
 }
 
 export const ExtraEventCard: React.FC<ExtraEventCardProps> = ({
   event,
   onCopyLink,
+  onDelete,
+  isDeleting,
 }) => {
   const eventId = event._id || event.id;
   const statusLabel = event.statusBadge?.label || event.status || "OPEN";
@@ -77,13 +82,13 @@ export const ExtraEventCard: React.FC<ExtraEventCardProps> = ({
       </div>
 
       <div className="flex gap-2 mt-auto w-full">
-        <Link 
+        <Link
           href={`/dashboard/academy/management/extra-events/${eventId}`}
           className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest text-white/60 hover:text-white transition-all text-center block min-w-0"
         >
           View Details
         </Link>
-        <button 
+        <button
           type="button"
           onClick={() => onCopyLink(String(eventId))}
           className="bg-white/5 hover:bg-white/10 border border-white/10 p-3 rounded-2xl text-white/60 hover:text-white transition-all flex items-center justify-center cursor-pointer shrink-0"
@@ -91,6 +96,17 @@ export const ExtraEventCard: React.FC<ExtraEventCardProps> = ({
         >
           <IconCopy size={16} />
         </button>
+        {onDelete && (
+          <button
+            type="button"
+            disabled={isDeleting}
+            onClick={() => onDelete(String(eventId))}
+            className="bg-[#E31B23]/10 hover:bg-[#E31B23]/20 border border-[#E31B23]/20 p-3 rounded-2xl text-[#E31B23]/60 hover:text-[#E31B23] transition-all flex items-center justify-center cursor-pointer shrink-0 disabled:opacity-40"
+            title="Delete Event"
+          >
+            <IconTrash size={16} />
+          </button>
+        )}
       </div>
     </div>
   );

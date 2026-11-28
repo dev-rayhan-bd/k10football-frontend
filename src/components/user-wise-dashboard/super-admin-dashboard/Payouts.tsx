@@ -32,6 +32,7 @@ import { cn } from "@/lib/utils";
 import {
   useGetAdminPayoutsQuery,
   useRecordPayoutMutation,
+  useRecordAllPayoutsMutation,
 } from "@/redux/features/payout/payoutApi";
 import {
   IPayoutRecipient,
@@ -250,6 +251,11 @@ const SuperAdminPayouts = () => {
     status: statusFilter !== "ALL" ? statusFilter : undefined,
   });
   const [recordPayout, { isLoading: isPaying }] = useRecordPayoutMutation();
+  const [recordAllPayouts, { isLoading: isPayingAll }] = useRecordAllPayoutsMutation();
+
+  const [payAllOpen, setPayAllOpen] = useState(false);
+  const [payAllNotes, setPayAllNotes] = useState("");
+  const [payAllRecipientType, setPayAllRecipientType] = useState<PayoutRecipientFilter>("ALL");
 
   const summary = data?.data?.summary;
   const recipients = useMemo(() => data?.data?.recipients ?? [], [data]);
@@ -327,6 +333,25 @@ const SuperAdminPayouts = () => {
     }
   };
 
+  const handleConfirmPayAll = async () => {
+    const notes = payAllNotes.trim();
+    try {
+      const res = await recordAllPayouts({
+        recipientType: payAllRecipientType,
+        ...(notes ? { notes } : {}),
+      }).unwrap();
+      const s = res?.data?.summary;
+      toast.success(
+        `Bulk payout complete — ${s?.successCount ?? 0} paid, ${s?.skippedCount ?? 0} skipped, ${s?.failedCount ?? 0} failed`,
+        { description: `Total disbursed: ${money(s?.totalDisbursed)}` }
+      );
+      setPayAllOpen(false);
+      setPayAllNotes("");
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Bulk payout failed"));
+    }
+  };
+
   const payDisabledReason = (r: IPayoutRecipient): string | null => {
     if (!(Number(r.pendingAmount) > 0)) return "Nothing payable";
     if (!r.stripePayoutsEnabled) return "Recipient hasn't completed Stripe Connect";
@@ -355,14 +380,25 @@ const SuperAdminPayouts = () => {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => refetch()}
-          className="size-9 rounded-xl border border-white/10 bg-black/40 flex items-center justify-center text-white/60 hover:text-white transition-colors cursor-pointer shrink-0 self-start sm:self-auto"
-          title="Refresh Payouts"
-        >
-          <RefreshCw className={cn("size-3.5", isFetching && "animate-spin")} />
-        </button>
+        <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
+          <Button
+            type="button"
+            onClick={() => { setPayAllNotes(""); setPayAllRecipientType("ALL"); setPayAllOpen(true); }}
+            disabled={isLoading || isError || (summary?.totalPendingOverall ?? 0) === 0}
+            className="rounded-xl text-xs font-black h-9 px-4"
+          >
+            <IconCash size={15} />
+            Pay All
+          </Button>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="size-9 rounded-xl border border-white/10 bg-black/40 flex items-center justify-center text-white/60 hover:text-white transition-colors cursor-pointer"
+            title="Refresh Payouts"
+          >
+            <RefreshCw className={cn("size-3.5", isFetching && "animate-spin")} />
+          </button>
+        </div>
       </div>
 
       {/* Deep-link banner */}
@@ -717,6 +753,100 @@ const SuperAdminPayouts = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Pay All confirm dialog */}
+      {(() => {
+        const payAllAmount =
+          payAllRecipientType === "COACH"
+            ? summary?.totalCoachPending
+            : payAllRecipientType === "ACADEMY"
+            ? summary?.totalAcademyPending
+            : summary?.totalPendingOverall;
+        const payAllOnHold =
+          payAllRecipientType === "COACH"
+            ? summary?.totalCoachOnHold
+            : payAllRecipientType === "ACADEMY"
+            ? summary?.totalAcademyOnHold
+            : summary?.totalOnHoldOverall;
+
+        return (
+          <Dialog open={payAllOpen} onOpenChange={(open) => !open && !isPayingAll && setPayAllOpen(false)}>
+            <DialogContent className="max-w-md bg-[#111111] border border-white/20 text-white p-6 sm:p-8 rounded-3xl">
+              <DialogHeader>
+                <DialogTitle className="text-lg font-black font-orbitron tracking-tight text-white">
+                  Bulk payout —{" "}
+                  {payAllRecipientType === "COACH" ? "coaches" : payAllRecipientType === "ACADEMY" ? "academies" : "all recipients"}
+                </DialogTitle>
+                <DialogDescription className="text-white/60">
+                  Disburse <span className="text-amber-400 font-bold">{money(payAllAmount)}</span> to eligible recipients
+                  whose Stripe accounts are ready. Recipients without Stripe set up are skipped automatically.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="flex flex-col gap-2">
+                <Label className="text-white/70 text-xs">Pay for</Label>
+                <div className="flex items-center gap-1 rounded-xl border border-white/20 bg-black/40 p-1">
+                  {RECIPIENT_TABS.map((tab) => (
+                    <button
+                      key={tab.value}
+                      type="button"
+                      onClick={() => setPayAllRecipientType(tab.value)}
+                      className={cn(
+                        "flex-1 h-8 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer",
+                        payAllRecipientType === tab.value
+                          ? "bg-primary text-white shadow-md shadow-primary/30"
+                          : "text-white/60 hover:text-white hover:bg-white/5"
+                      )}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-center">
+                <div className="rounded-xl bg-white/5 border border-white/10 p-3">
+                  <p className="text-[9px] uppercase font-bold tracking-wider text-white/40">Pending (payable)</p>
+                  <p className="text-sm font-black font-orbitron text-amber-400 mt-0.5 truncate">{money(payAllAmount)}</p>
+                </div>
+                <div className="rounded-xl bg-white/5 border border-white/10 p-3">
+                  <p className="text-[9px] uppercase font-bold tracking-wider text-white/40">On hold (skipped)</p>
+                  <p className="text-sm font-black font-orbitron text-white/60 mt-0.5 truncate">{money(payAllOnHold)}</p>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="pay-all-notes" className="text-white/70 text-xs">
+                  Notes (optional)
+                </Label>
+                <Textarea
+                  id="pay-all-notes"
+                  value={payAllNotes}
+                  onChange={(e) => setPayAllNotes(e.target.value)}
+                  placeholder="e.g. November 2026 bulk payout"
+                  className="bg-black/40 border-white/20 text-white min-h-16"
+                />
+              </div>
+
+              <DialogFooter className="gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={isPayingAll}
+                  onClick={() => setPayAllOpen(false)}
+                  className="border-white/20 text-white hover:bg-white/10 rounded-xl"
+                >
+                  Cancel
+                </Button>
+                <Button type="button" disabled={isPayingAll} onClick={handleConfirmPayAll} className="rounded-xl font-black">
+                  {isPayingAll ? <RefreshCw className="size-3.5 animate-spin" /> : <IconCash size={16} />}
+                  {isPayingAll ? "Paying all..." : `Pay all ${money(payAllAmount)}`}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        );
+      })()}
     </div>
   );
 };

@@ -448,14 +448,12 @@ export const ProductStoreManagement = () => {
       <CreateProductModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
-        categoriesList={categoriesList}
       />
 
       {/* Edit Product Modal (PATCH {{baseUrl}}/shop/products/:slugOrId) */}
       <EditProductModal
         isOpen={Boolean(selectedProductForEdit)}
         product={selectedProductForEdit}
-        categoriesList={categoriesList}
         onClose={() => setSelectedProductForEdit(null)}
       />
 

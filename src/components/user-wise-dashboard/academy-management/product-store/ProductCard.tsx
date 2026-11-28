@@ -60,7 +60,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           src={imgSrc || "/placeholder_img.jpg"}
           alt={productName}
-          className="object-cover"
+          className="object-contain"
           onError={() => {
             setImgSrc("/placeholder_img.jpg");
           }}

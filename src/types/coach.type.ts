@@ -699,12 +699,27 @@ export interface ICoachFinanceTransaction {
   [key: string]: unknown;
 }
 
+export interface IGetCoachFinancesParams {
+  page?: number;
+  limit?: number;
+  payoutStatus?: string;
+  status?: string;
+}
+
+export interface ICoachFinancesMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
 export interface ICoachFinancesResponse {
   success: boolean;
   message: string;
   data: {
     summary?: ICoachFinancesSummary;
     transactions?: ICoachFinanceTransaction[];
+    meta?: ICoachFinancesMeta;
     [key: string]: unknown;
   };
 }

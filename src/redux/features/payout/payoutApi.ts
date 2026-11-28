@@ -5,6 +5,8 @@ import {
   IGetAdminPayoutsParams,
   IRecordPayoutPayload,
   IRecordPayoutResponse,
+  IRecordAllPayoutsPayload,
+  IRecordAllPayoutsResponse,
 } from "@/types/payout.type";
 
 export const payoutApi = apiSlice.injectEndpoints({
@@ -32,7 +34,20 @@ export const payoutApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: [TagTypes.PAYMENTS],
     }),
+
+    recordAllPayouts: builder.mutation<IRecordAllPayoutsResponse, IRecordAllPayoutsPayload | void>({
+      query: (body) => ({
+        url: "/admin/payouts/record-all",
+        method: "POST",
+        body: body ?? {},
+      }),
+      invalidatesTags: [TagTypes.PAYMENTS],
+    }),
   }),
 });
 
-export const { useGetAdminPayoutsQuery, useRecordPayoutMutation } = payoutApi;
+export const {
+  useGetAdminPayoutsQuery,
+  useRecordPayoutMutation,
+  useRecordAllPayoutsMutation,
+} = payoutApi;

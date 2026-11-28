@@ -846,6 +846,30 @@ export const academyApi = apiSlice.injectEndpoints({
       },
     }),
 
+    updateAcademyMatch: builder.mutation<any, { id: string; data: Partial<ICreateAcademyMatchPayload> }>({
+      query: ({ id, data }) => ({
+        url: `/academies/matches/${id}`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: (result) => {
+        if (result?.success || !result?.error) {
+          return [TagTypes.MATCHES, TagTypes.ACADEMY];
+        }
+        return [];
+      },
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Match updated successfully");
+        } catch (err: any) {
+          const status = err?.error?.status;
+          const message = err?.error?.data?.message || "Failed to update match";
+          if (status !== 401) ErrorToast(message);
+        }
+      },
+    }),
+
     getExtraEventsMeta: builder.query<IExtraEventsMetaResponse, void>({
       query: () => ({
         url: "/academies/extra-events/meta",
@@ -1336,10 +1360,11 @@ export const academyApi = apiSlice.injectEndpoints({
       },
     }),
 
-    getAcademyAnalyticsReport: builder.query<IAcademyAnalyticsReportResponse, void>({
-      query: () => ({
+    getAcademyAnalyticsReport: builder.query<IAcademyAnalyticsReportResponse, { year?: number } | void>({
+      query: (params) => ({
         url: "/academies/analytics-report",
         method: "GET",
+        params: params?.year ? { year: params.year } : undefined,
       }),
       providesTags: [TagTypes.REPORTS, TagTypes.ACADEMY],
     }),
@@ -1713,6 +1738,7 @@ export const {
   useGetAcademyMatchesQuery,
   useLazyGetAcademyMatchesQuery,
   useCreateAcademyMatchMutation,
+  useUpdateAcademyMatchMutation,
   useDeleteAcademyMatchMutation,
   useGetExtraEventsMetaQuery,
   useLazyGetExtraEventsMetaQuery,

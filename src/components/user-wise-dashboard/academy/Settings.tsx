@@ -26,9 +26,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { NotificationSettingsCard } from "@/components/notifications/NotificationSettingsCard";
 import { useChangePasswordMutation } from "@/redux/features/auth/authApi";
 import { 
   useGetMyAcademyProfileQuery, 
@@ -817,20 +817,7 @@ const AcademySettings = () => {
 
       {/* Notifications */}
       <SettingsSection icon={IconBell} title="Notifications">
-        <div className="flex flex-col gap-4">
-           {[
-             { title: "New video likes", desc: "Get notified when someone likes your video" },
-             { title: "Profile views", desc: "Get notified when a club views your profile" }
-           ].map((notif, i) => (
-             <div key={i} className="bg-black/40 border border-white/10 rounded-2xl p-6 flex justify-between items-center">
-                <div className="flex flex-col gap-1">
-                   <h4 className="text-white font-bold text-sm">{notif.title}</h4>
-                   <p className="text-white/40 text-xs">{notif.desc}</p>
-                </div>
-                <Switch className="data-[state=checked]:bg-red-600" />
-             </div>
-           ))}
-        </div>
+        <NotificationSettingsCard showHeader={false} />
       </SettingsSection>
     </div>
   );

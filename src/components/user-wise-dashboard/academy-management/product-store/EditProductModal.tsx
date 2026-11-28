@@ -16,31 +16,38 @@ import {
   IconX,
   IconCheck,
 } from "@tabler/icons-react";
-import { useUpdateProductMutation } from "@/redux/features/shop/shopApi";
-import { IProductItem, IProductCategoryItem } from "@/types/shop.type";
+import { useUpdateProductMutation, useGetProductsQuery } from "@/redux/features/shop/shopApi";
+import { IProductItem } from "@/types/shop.type";
 
 interface EditProductModalProps {
   isOpen: boolean;
   onClose: () => void;
   product: IProductItem | null;
-  categoriesList: IProductCategoryItem[];
 }
 
 const COMMON_SIZES = ["XS", "S", "M", "L", "XL", "XXL", "3XL"];
 const COMMON_COLORS = ["BLACK", "WHITE", "RED", "BLUE", "GREEN", "NAVY", "YELLOW"];
+const ADD_NEW = "__add_new__";
 
 export const EditProductModal: React.FC<EditProductModalProps> = ({
   isOpen,
   onClose,
   product,
-  categoriesList,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [updateProduct, { isLoading }] = useUpdateProductMutation();
 
+  // Fetch existing categories dynamically
+  const { data: productsRes } = useGetProductsQuery({ limit: 1 }, { skip: !isOpen });
+  const existingCategories: string[] = productsRes?.data?.categories?.length
+    ? productsRes.data.categories
+    : (productsRes?.data?.stats?.categories?.map((c) => c.name) ?? []);
+
   // Form State
   const [productName, setProductName] = useState("");
   const [category, setCategory] = useState("");
+  const [customCategoryInput, setCustomCategoryInput] = useState("");
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
   const [sku, setSku] = useState("");
   const [regularPrice, setRegularPrice] = useState("");
   const [salePrice, setSalePrice] = useState("");
@@ -364,7 +371,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
                   fill
                   src={displayImage}
                   alt={productName || "Product"}
-                  className="object-cover"
+                  className="object-contain"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.src = "/placeholder_img.jpg";
@@ -448,39 +455,24 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({
                 <label className="text-[11px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
                   Category <span className="text-[#E31B23]">*</span>
                 </label>
-                <div className="relative">
-                  <select
-                    value={category}
-                    onChange={(e) => {
-                      setCategory(e.target.value);
-                      if (errors.category) {
-                        setErrors((prev) => {
-                          const rest = { ...prev };
-                          delete rest.category;
-                          return rest;
-                        });
-                      }
-                    }}
-                    className={`w-full bg-[#111111] border rounded-xl py-3 px-4 text-sm text-white appearance-none focus:outline-none transition-all cursor-pointer ${
-                      errors.category ? "border-[#E31B23]" : "border-white/15 focus:border-white/30"
-                    }`}
-                  >
-                    <option value="" disabled className="text-white/40">
-                      Select category
-                    </option>
-                    {categoriesList
-                      .filter((c) => c.slug?.toLowerCase() !== "all")
-                      .map((c) => (
-                        <option key={c.slug} value={c.name} className="bg-[#111111] text-white">
-                          {c.name}
-                        </option>
-                      ))}
-                  </select>
-                  <IconChevronDown
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none"
-                    size={16}
-                  />
-                </div>
+                <input
+                  type="text"
+                  value={category}
+                  onChange={(e) => {
+                    setCategory(e.target.value);
+                    if (errors.category) {
+                      setErrors((prev) => {
+                        const r = { ...prev };
+                        delete r.category;
+                        return r;
+                      });
+                    }
+                  }}
+                  placeholder="e.g. Jerseys, Training Gear, Boots"
+                  className={`w-full bg-[#111111] border rounded-xl py-3 px-4 text-sm text-white placeholder:text-white/30 focus:outline-none transition-all ${
+                    errors.category ? "border-[#E31B23]" : "border-white/15 focus:border-white/30"
+                  }`}
+                />
                 {errors.category && (
                   <p className="text-[11px] text-[#E31B23] font-bold flex items-center gap-1">
                     <IconAlertCircle size={12} /> {errors.category}
