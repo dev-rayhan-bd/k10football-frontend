@@ -18,14 +18,16 @@ import {
   IconX,
   IconPackage,
   IconLoader2,
+  IconChevronDown,
 } from "@tabler/icons-react";
 import { useGetParentFeesQuery, usePayFeeInvoiceMutation } from "@/redux/features/parent/parentApi";
 import { useParentDashboard } from "@/providers/ParentDashboardProvider";
-import { IParentFeeInvoice } from "@/types/parent.type";
+import { IParentFeeInvoice, ParentFeeType } from "@/types/parent.type";
 
 const ParentFeesAndPayments = () => {
   const { selectedChildPlayerId, selectedChild } = useParentDashboard();
   const [activeTab, setActiveTab] = useState<"ALL" | "UNPAID" | "PAID">("ALL");
+  const [activeFeeType, setActiveFeeType] = useState<ParentFeeType | "ALL">("ALL");
   const [receiptInvoice, setReceiptInvoice] = useState<IParentFeeInvoice | null>(null);
   const [payingInvoiceId, setPayingInvoiceId] = useState<string | null>(null);
 
@@ -33,6 +35,7 @@ const ParentFeesAndPayments = () => {
   const { data: feesResponse, isLoading, isError, refetch } = useGetParentFeesQuery({
     status: activeTab === "ALL" ? undefined : activeTab,
     childPlayerId: selectedChildPlayerId || undefined,
+    feeType: activeFeeType === "ALL" ? undefined : activeFeeType,
   });
 
   const [payFeeInvoice] = usePayFeeInvoiceMutation();
@@ -90,25 +93,43 @@ const ParentFeesAndPayments = () => {
 
       <div className="bg-[#0D0D0D]/40 border border-white/5 p-4 sm:p-8 rounded-2xl sm:rounded-3xl shadow-xl flex flex-col gap-4 sm:gap-6 w-full min-w-0">
         {/* Tabs Filter */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full min-w-0">
-          <div className="flex gap-1 sm:gap-2 bg-black/40 border border-white/5 p-1 rounded-xl w-full sm:w-auto overflow-x-auto scrollbar-hide">
-            {(["ALL", "UNPAID", "PAID"] as const).map((tab) => (
-              <button
-                key={tab}
-                type="button"
-                onClick={() => setActiveTab(tab)}
-                className={cn(
-                  "flex-1 sm:flex-none px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all whitespace-nowrap cursor-pointer",
-                  activeTab === tab
-                    ? "bg-[#E31B23] text-white"
-                    : "text-muted-foreground hover:text-white"
-                )}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 w-full min-w-0">
+          <div className="flex flex-wrap items-center gap-2 min-w-0">
+            {/* Status tabs */}
+            <div className="flex gap-1 bg-black/40 border border-white/5 p-1 rounded-xl overflow-x-auto scrollbar-hide">
+              {(["ALL", "UNPAID", "PAID"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setActiveTab(tab)}
+                  className={cn(
+                    "px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all whitespace-nowrap cursor-pointer",
+                    activeTab === tab
+                      ? "bg-[#E31B23] text-white"
+                      : "text-muted-foreground hover:text-white"
+                  )}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            {/* Fee type dropdown */}
+            <div className="relative shrink-0">
+              <select
+                value={activeFeeType}
+                onChange={(e) => setActiveFeeType(e.target.value as ParentFeeType | "ALL")}
+                className="appearance-none bg-black/40 border border-white/10 h-9 rounded-xl text-white/70 text-[10px] sm:text-xs font-bold uppercase tracking-widest pl-3 pr-8 focus:outline-none focus:border-white/30 transition-colors cursor-pointer"
               >
-                {tab}
-              </button>
-            ))}
+                <option value="ALL" className="bg-[#111111] text-white">All Types</option>
+                <option value="MONTHLY_TRAINING_FEE" className="bg-[#111111] text-white">Training Fee</option>
+                <option value="EVENT_ENTRY_FEE" className="bg-[#111111] text-white">Event Entry Fee</option>
+              </select>
+              <IconChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none" />
+            </div>
           </div>
-          <span className="text-[9px] sm:text-[10px] text-muted-foreground font-bold uppercase tracking-widest truncate w-full sm:w-auto text-left sm:text-right">
+
+          <span className="text-[9px] sm:text-[10px] text-muted-foreground font-bold uppercase tracking-widest shrink-0">
             Showing {invoices.length} billing statement(s)
           </span>
         </div>

@@ -30,12 +30,14 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { NotificationSettingsCard } from "@/components/notifications/NotificationSettingsCard";
 import { useChangePasswordMutation } from "@/redux/features/auth/authApi";
-import { 
-  useGetMyAcademyProfileQuery, 
+import {
+  useGetMyAcademyProfileQuery,
   useUpdateAcademyProfileMutation,
   useGetAcademyStripeStatusQuery,
   useConnectAcademyStripeMutation,
+  useUpdateAcademyFeeSettingsMutation,
 } from "@/redux/features/academy/academyApi";
+import { Switch } from "@/components/ui/switch";
 import { WarningToast, SuccessToast, ErrorToast } from "@/helpers/ValidationHelper";
 import { cn } from "@/lib/utils";
 
@@ -77,6 +79,12 @@ const AcademySettings = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Fee Settings state
+  const [feeEnabled, setFeeEnabled] = useState(false);
+  const [feeAmount, setFeeAmount] = useState("");
+  const [feeTitle, setFeeTitle] = useState("");
+  const [updateAcademyFeeSettings, { isLoading: isSavingFeeSettings }] = useUpdateAcademyFeeSettingsMutation();
 
   // Academy Stripe Connect Payout API hooks
   const { 
@@ -145,6 +153,16 @@ const AcademySettings = () => {
     },
     mode: "onChange",
   });
+
+  // Populate Fee Settings when profile data arrives
+  useEffect(() => {
+    if (profileData) {
+      const fs = profileData.feeSettings;
+      setFeeEnabled(fs?.monthlyFeeEnabled ?? profileData.monthlyFeeEnabled ?? false);
+      setFeeAmount(String(fs?.monthlyTrainingFee ?? profileData.monthlyTrainingFee ?? ""));
+      setFeeTitle(fs?.monthlyFeeTitle ?? profileData.monthlyFeeTitle ?? "");
+    }
+  }, [profileData]);
 
   // Populate Academy Information form when profile data arrives
   useEffect(() => {
@@ -812,6 +830,85 @@ const AcademySettings = () => {
                 </Button>
               </Link>
            </div>
+        </div>
+      </SettingsSection>
+
+      {/* Fee Settings */}
+      <SettingsSection icon={IconCoins} title="Fee Settings">
+        <div className="flex flex-col gap-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-1">
+              <span className="text-sm font-bold text-white">Auto-generate monthly training fee invoices</span>
+              <span className="text-xs text-white/40 leading-relaxed max-w-sm">
+                When enabled, monthly training fee invoices are automatically generated for enrolled players.
+              </span>
+            </div>
+            <Switch
+              checked={feeEnabled}
+              onCheckedChange={setFeeEnabled}
+              className="shrink-0 mt-0.5"
+            />
+          </div>
+
+          {feeEnabled && (
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <Label className="text-white/70 text-[11px] font-bold uppercase tracking-wider">
+                  Monthly Fee Amount (USD)
+                </Label>
+                <Input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  placeholder="e.g. 150"
+                  value={feeAmount}
+                  onChange={(e) => setFeeAmount(e.target.value)}
+                  className="bg-black/40 border-white/20 h-12 rounded-xl px-4 text-white/90 placeholder:text-white/20 focus:border-red-500/50 transition-all w-full max-w-xs"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label className="text-white/70 text-[11px] font-bold uppercase tracking-wider">
+                  Invoice Title
+                </Label>
+                <Input
+                  type="text"
+                  placeholder="e.g. Monthly Training Fee – January 2026"
+                  value={feeTitle}
+                  onChange={(e) => setFeeTitle(e.target.value)}
+                  className="bg-black/40 border-white/20 h-12 rounded-xl px-4 text-white/90 placeholder:text-white/20 focus:border-red-500/50 transition-all w-full max-w-sm"
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="pt-2">
+            <Button
+              type="button"
+              disabled={isSavingFeeSettings}
+              onClick={async () => {
+                try {
+                  await updateAcademyFeeSettings({
+                    monthlyFeeEnabled: feeEnabled,
+                    ...(feeEnabled && feeAmount ? { monthlyTrainingFee: Number(feeAmount) } : {}),
+                    ...(feeEnabled && feeTitle.trim() ? { monthlyFeeTitle: feeTitle.trim() } : {}),
+                  }).unwrap();
+                } catch {
+                  // Toast handled by API
+                }
+              }}
+              className="bg-[#1A1A1A] border border-white/20 hover:bg-white/10 h-12 px-8 rounded-xl text-white font-bold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              {isSavingFeeSettings ? (
+                <>
+                  <IconLoader2 className="size-4 animate-spin" /> Saving...
+                </>
+              ) : (
+                <>
+                  <IconDeviceFloppy className="size-4" /> Save Fee Settings
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </SettingsSection>
 

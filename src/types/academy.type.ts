@@ -2002,6 +2002,12 @@ export interface INotifyCoachToValidateCvResponse {
   data?: any;
 }
 
+export interface IFeeSettings {
+  monthlyFeeEnabled?: boolean;
+  monthlyTrainingFee?: number;
+  monthlyFeeTitle?: string;
+}
+
 export interface IAcademyProfileData {
   _id?: string;
   name?: string;
@@ -2034,8 +2040,10 @@ export interface IAcademyProfileData {
   currentPlan?: string;
   league?: string;
   clubLeague?: string;
+  monthlyFeeEnabled?: boolean;
   monthlyTrainingFee?: number;
   monthlyFeeTitle?: string;
+  feeSettings?: IFeeSettings;
   userId?: {
     _id?: string;
     email?: string;

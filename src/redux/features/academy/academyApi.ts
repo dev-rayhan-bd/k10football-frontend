@@ -1684,6 +1684,26 @@ export const academyApi = apiSlice.injectEndpoints({
       }),
       providesTags: [TagTypes.ACADEMY],
     }),
+
+    updateAcademyFeeSettings: builder.mutation<any, { monthlyFeeEnabled: boolean; monthlyTrainingFee?: number; monthlyFeeTitle?: string }>({
+      query: (body) => ({
+        url: "/academies/me",
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: [TagTypes.ACADEMY, TagTypes.PROFILE],
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          const { SuccessToast } = await import("@/helpers/ValidationHelper");
+          SuccessToast(data?.message || "Fee settings updated successfully");
+        } catch (err: any) {
+          const { ErrorToast } = await import("@/helpers/ValidationHelper");
+          const message = err?.error?.data?.message || "Failed to update fee settings";
+          ErrorToast(message);
+        }
+      },
+    }),
   }),
 });
 
@@ -1802,6 +1822,7 @@ export const {
   useConnectAcademyStripeMutation,
   useGetMyAcademyHomepageQuery,
   useLazyGetMyAcademyHomepageQuery,
+  useUpdateAcademyFeeSettingsMutation,
 } = academyApi;
 
 

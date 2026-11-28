@@ -234,9 +234,12 @@ export interface IParentFeeInvoice {
   createdAt?: string;
 }
 
+export type ParentFeeType = "MONTHLY_TRAINING_FEE" | "EVENT_ENTRY_FEE";
+
 export interface IGetParentFeesParams {
   status?: "ALL" | "UNPAID" | "PAID" | string;
   childPlayerId?: string;
+  feeType?: ParentFeeType;
 }
 
 export interface IGetParentFeesResponse {

@@ -11,6 +11,9 @@ import {
   ICreateOrderResponse,
   IVerifyOrderResponse,
   IGetMyOrdersResponse,
+  IGetAcademyOrdersParams,
+  IGetAcademyOrdersResponse,
+  IUpdateOrderStatusPayload,
 } from "@/types/shop.type";
 
 import { SuccessToast, ErrorToast } from "@/helpers/ValidationHelper";
@@ -280,12 +283,8 @@ export const shopApi = apiSlice.injectEndpoints({
         method: "POST",
         body: body || { shippingAddress: "Flat 4B, Road 12, London, UK" },
       }),
-      invalidatesTags: (result) => {
-        if (result?.success) {
-          return [TagTypes.CART];
-        }
-        return [];
-      },
+      // Do NOT invalidate CART here — the backend only empties the cart after
+      // Stripe confirms payment. verifyOrder handles the invalidation on success.
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
@@ -308,11 +307,18 @@ export const shopApi = apiSlice.injectEndpoints({
       query: ({ orderId, sessionId }) => ({
         url: `/shop/orders/${orderId}/verify`,
         method: "GET",
-        params: {
-          sessionId,
-        },
+        params: { sessionId },
       }),
-      providesTags: [TagTypes.CART],
+      // On successful payment verification, clear the cart cache so the shop
+      // shows an empty cart when the user returns.
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(apiSlice.util.invalidateTags([TagTypes.CART]));
+        } catch {
+          // Verification failed — leave the cart as-is so the user can retry.
+        }
+      },
     }),
 
     getMyOrders: builder.query<IGetMyOrdersResponse, void>({
@@ -321,6 +327,37 @@ export const shopApi = apiSlice.injectEndpoints({
         method: "GET",
       }),
       providesTags: [TagTypes.CART],
+    }),
+
+    getAcademyOrders: builder.query<IGetAcademyOrdersResponse, IGetAcademyOrdersParams | void>({
+      query: (params) => {
+        const queryParams = new URLSearchParams();
+        if (params?.status) queryParams.append("status", params.status);
+        if (params?.orderStatus) queryParams.append("orderStatus", params.orderStatus);
+        if (params?.page) queryParams.append("page", String(params.page));
+        if (params?.limit) queryParams.append("limit", String(params.limit));
+        const qs = queryParams.toString();
+        return { url: qs ? `/shop/orders/academy?${qs}` : "/shop/orders/academy", method: "GET" };
+      },
+      providesTags: [TagTypes.SHOPS, TagTypes.PRODUCTS],
+    }),
+
+    updateOrderStatus: builder.mutation<any, IUpdateOrderStatusPayload>({
+      query: ({ orderId, orderStatus }) => ({
+        url: `/shop/orders/${orderId}/status`,
+        method: "PATCH",
+        body: { orderStatus },
+      }),
+      invalidatesTags: [TagTypes.SHOPS, TagTypes.PRODUCTS],
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          SuccessToast(data?.message || "Order status updated");
+        } catch (err: any) {
+          const message = err?.error?.data?.message || "Failed to update order status";
+          ErrorToast(message);
+        }
+      },
     }),
   }),
 });
@@ -344,4 +381,7 @@ export const {
   useLazyVerifyOrderQuery,
   useGetMyOrdersQuery,
   useLazyGetMyOrdersQuery,
+  useGetAcademyOrdersQuery,
+  useLazyGetAcademyOrdersQuery,
+  useUpdateOrderStatusMutation,
 } = shopApi;

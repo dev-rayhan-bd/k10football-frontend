@@ -93,9 +93,9 @@ export const Financials = () => {
   const totalPages = meta?.totalPages || 1;
   const totalCount = meta?.total ?? transactions.length;
 
-  // Extract distinct transaction types for filter
+  // Extract distinct transaction types for filter — always include SHOP_SALE even with no data yet
   const distinctTypes = useMemo(() => {
-    const set = new Set<string>();
+    const set = new Set<string>(["SHOP_SALE"]);
     transactions.forEach((t) => {
       const type = t.transactionType || t.type;
       if (type) set.add(type);
@@ -359,7 +359,7 @@ export const Financials = () => {
                   </option>
                   {distinctTypes.map((type) => (
                     <option key={type} value={type} className="bg-[#111111] text-white">
-                      {type}
+                      {type === "SHOP_SALE" ? "Shop Sale" : type}
                     </option>
                   ))}
                 </select>

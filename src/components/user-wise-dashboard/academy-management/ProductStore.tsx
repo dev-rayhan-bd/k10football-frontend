@@ -15,6 +15,7 @@ import {
   IconChevronRight,
   IconTag,
   IconCash,
+  IconShoppingCart,
 } from "@tabler/icons-react";
 import {
   useGetProductsQuery,
@@ -28,8 +29,12 @@ import {
   DeleteProductModal,
   CreateProductModal,
 } from "./product-store/index";
+import OrdersTab from "./product-store/OrdersTab";
+
+type ActiveTab = "products" | "orders";
 
 export const ProductStoreManagement = () => {
+  const [activeTab, setActiveTab] = useState<ActiveTab>("products");
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedProductForView, setSelectedProductForView] = useState<IProductItem | null>(null);
   const [selectedProductForEdit, setSelectedProductForEdit] = useState<IProductItem | null>(null);
@@ -104,17 +109,58 @@ export const ProductStoreManagement = () => {
             Manage store inventory and orders
           </p>
         </div>
+        {activeTab === "products" && (
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="w-full md:w-auto justify-center bg-[#E31B23] hover:bg-[#C2181F] text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 shrink-0 cursor-pointer"
+          >
+            <IconPlus size={20} className="shrink-0" />
+            <span className="text-sm font-bold uppercase tracking-widest truncate">Add Product</span>
+          </button>
+        )}
+      </div>
+
+      {/* Tab Switcher */}
+      <div className="flex items-center gap-1 bg-[#111111] border border-white/10 rounded-2xl p-1 w-fit">
         <button
-          onClick={() => setShowAddModal(true)}
-          className="w-full md:w-auto justify-center bg-[#E31B23] hover:bg-[#C2181F] text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all shadow-lg shadow-[#E31B23]/20 shrink-0 cursor-pointer"
+          type="button"
+          onClick={() => setActiveTab("products")}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
+            activeTab === "products"
+              ? "bg-[#E31B23] text-white shadow-lg shadow-[#E31B23]/20"
+              : "text-white/50 hover:text-white"
+          }`}
         >
-          <IconPlus size={20} className="shrink-0" />
-          <span className="text-sm font-bold uppercase tracking-widest truncate">Add Product</span>
+          <IconBox size={15} />
+          Products
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("orders")}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
+            activeTab === "orders"
+              ? "bg-[#E31B23] text-white shadow-lg shadow-[#E31B23]/20"
+              : "text-white/50 hover:text-white"
+          }`}
+        >
+          <IconShoppingCart size={15} />
+          Orders
         </button>
       </div>
 
-      {/* Stats Summary Bar */}
-      {isLoadingProducts ? (
+      {/* Orders Tab Content */}
+      {activeTab === "orders" && (
+        <div className="bg-[#0A0A0A] rounded-3xl md:rounded-4xl border border-white/5 p-5 md:p-8 flex flex-col gap-5 shadow-2xl min-w-0 w-full">
+          <div>
+            <h2 className="text-xl md:text-2xl font-black uppercase text-white font-orbitron">Order Management</h2>
+            <p className="text-xs text-white/40 uppercase tracking-wider font-bold mt-1">Customer orders from your product store</p>
+          </div>
+          <OrdersTab />
+        </div>
+      )}
+
+      {/* Products Tab Content */}
+      {activeTab === "products" && (isLoadingProducts ? (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-pulse">
           {[1, 2, 3].map((i) => (
             <div
@@ -161,10 +207,10 @@ export const ProductStoreManagement = () => {
             </div>
           </div>
         </div>
-      ) : null}
+      ) : null)}
 
-      {/* Main Container */}
-      <div className="bg-[#0A0A0A] rounded-3xl md:rounded-4xl border border-white/5 p-5 md:p-8 flex flex-col gap-6 md:gap-8 shadow-2xl min-w-0 w-full">
+      {/* Main Container — Products tab only */}
+      {activeTab === "products" && <div className="bg-[#0A0A0A] rounded-3xl md:rounded-4xl border border-white/5 p-5 md:p-8 flex flex-col gap-6 md:gap-8 shadow-2xl min-w-0 w-full">
         {/* Top Controls: Title & Filters */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           <div>
@@ -427,7 +473,7 @@ export const ProductStoreManagement = () => {
             </div>
           </div>
         )}
-      </div>
+      </div>}
 
       {/* Product Details View Modal */}
       <ProductDetailsModal

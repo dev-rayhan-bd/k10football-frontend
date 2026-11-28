@@ -85,6 +85,9 @@ export const parentApi = apiSlice.injectEndpoints({
         if (params?.childPlayerId) {
           queryParams.append("childPlayerId", params.childPlayerId);
         }
+        if (params?.feeType) {
+          queryParams.append("feeType", params.feeType);
+        }
         const qs = queryParams.toString();
         return {
           url: qs ? `/parents/fees?${qs}` : "/parents/fees",

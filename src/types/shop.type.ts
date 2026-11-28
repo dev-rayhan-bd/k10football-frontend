@@ -204,5 +204,66 @@ export interface IGetMyOrdersResponse {
   data: IOrderData[];
 }
 
+// ---------- Academy Order Management ----------
+
+export interface IAcademyOrderUser {
+  name?: string;
+  email?: string;
+  avatar?: string;
+}
+
+export interface IAcademyOrderItem {
+  productId?: {
+    productName?: string;
+    images?: string[];
+    price?: number;
+    [key: string]: any;
+  } | string | any;
+  quantity?: number;
+  size?: string;
+  color?: string;
+  price?: number;
+  _id?: string;
+}
+
+export interface IAcademyOrder {
+  _id: string;
+  orderNumber?: string;
+  paymentStatus?: "PENDING" | "PAID" | "FAILED" | string;
+  orderStatus?: "PROCESSING" | "SHIPPED" | "DELIVERED" | string;
+  totalAmount?: number;
+  createdAt?: string;
+  userId?: IAcademyOrderUser | string;
+  items?: IAcademyOrderItem[];
+  [key: string]: any;
+}
+
+export interface IGetAcademyOrdersParams {
+  status?: "PENDING" | "PAID" | "FAILED" | string;
+  orderStatus?: "PROCESSING" | "SHIPPED" | "DELIVERED" | string;
+  page?: number;
+  limit?: number;
+}
+
+export interface IGetAcademyOrdersMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface IGetAcademyOrdersResponse {
+  statusCode?: number;
+  success?: boolean;
+  message?: string;
+  meta?: IGetAcademyOrdersMeta;
+  data?: IAcademyOrder[];
+}
+
+export interface IUpdateOrderStatusPayload {
+  orderId: string;
+  orderStatus: "PROCESSING" | "SHIPPED" | "DELIVERED";
+}
+
 
 
