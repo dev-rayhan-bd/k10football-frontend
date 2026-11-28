@@ -24,6 +24,7 @@ import {
   ICreateParentReportPayload,
   IRequestParentReportReviewPayload,
 } from "@/types/parent.type";
+import { IAcademyHomepageResponse } from "@/types/academy.type";
 
 export const parentApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -327,6 +328,14 @@ export const parentApi = apiSlice.injectEndpoints({
       },
     }),
 
+    getChildAcademyHomepage: builder.query<IAcademyHomepageResponse, void>({
+      query: () => ({
+        url: "/academies/me/homepage",
+        method: "GET",
+      }),
+      providesTags: [TagTypes.PARENTS, TagTypes.ACADEMY],
+    }),
+
     switchToParent: builder.mutation<ISwitchProfileResponse, void>({
       query: () => ({
         url: "/parents/switch-to-parent",
@@ -378,4 +387,6 @@ export const {
   useRequestParentReportReviewMutation,
   useSwitchProfileToChildMutation,
   useSwitchToParentMutation,
+  useGetChildAcademyHomepageQuery,
+  useLazyGetChildAcademyHomepageQuery,
 } = parentApi;
